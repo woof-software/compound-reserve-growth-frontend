@@ -1,11 +1,7 @@
-import './App.css'
+import React from 'react';
 
 function App() {
-
-  return (
-    <>олрол
-    </>
-  )
+  return <div>Reserve</div>;
 }
 
-export default App
+export { App };
