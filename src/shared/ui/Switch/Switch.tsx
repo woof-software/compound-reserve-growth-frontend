@@ -11,9 +11,17 @@ interface SwitchProps extends ComponentProps<typeof SwitchPrimitive.Root> {
   label?: string;
 
   positionLabel?: 'left' | 'right';
+
+  thumbClassName?: string;
 }
 
-function Switch({ className, label, positionLabel, ...props }: SwitchProps) {
+function Switch({
+  className,
+  label,
+  positionLabel,
+  thumbClassName,
+  ...props
+}: SwitchProps) {
   return (
     <div className='flex items-center gap-3'>
       <View.Condition if={Boolean(label && positionLabel === 'left')}>
@@ -38,7 +46,8 @@ function Switch({ className, label, positionLabel, ...props }: SwitchProps) {
         <SwitchPrimitive.Thumb
           data-slot='switch-thumb'
           className={cn(
-            'bg-white-10 pointer-events-none block size-5 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0'
+            'bg-white-10 pointer-events-none block size-5 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0',
+            thumbClassName
           )}
         />
       </SwitchPrimitive.Root>

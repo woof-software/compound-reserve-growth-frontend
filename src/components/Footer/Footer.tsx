@@ -2,6 +2,7 @@ import { FC } from 'react';
 
 import { commonRoutes } from '@/app/providers/router/config';
 import Link from '@/shared/ui/Link/Link';
+import ThemeSwitcher from '@/shared/ui/ThemeSwitcher/ThemeSwitcher';
 
 import LogoIcon from '@/assets/svg/logo.svg';
 
@@ -24,7 +25,7 @@ const Footer: FC = () => {
   return (
     <footer className='border-t border-gray-200'>
       <div className='mx-auto max-w-[1084px]'>
-        <div className='py-6'>
+        <div className='flex justify-between py-6'>
           <div className='flex items-center gap-6 text-[13px] text-gray-600'>
             {topLinks.map((link) => (
               <Link
@@ -36,6 +37,8 @@ const Footer: FC = () => {
               </Link>
             ))}
           </div>
+
+          <ThemeSwitcher />
         </div>
 
         <div className='py-5'>

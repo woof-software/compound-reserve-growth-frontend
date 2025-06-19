@@ -7,7 +7,7 @@ import {
   useState
 } from 'react';
 
-type Theme = 'dark' | 'light' | 'system';
+export type Theme = 'dark' | 'light' | 'system';
 
 type ThemeProviderProps = {
   children: ReactNode;
@@ -76,7 +76,10 @@ export function ThemeProvider({
 export const withTheme = (Component: ComponentType) => {
   return () => {
     return (
-      <ThemeProvider defaultTheme='system'>
+      <ThemeProvider
+        defaultTheme='system'
+        storageKey='vite-ui-theme'
+      >
         <Component />
       </ThemeProvider>
     );
