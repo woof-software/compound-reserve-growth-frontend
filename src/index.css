@@ -5,6 +5,9 @@
 
 @theme inline {
   /*=======================*/
+  /* Shadows */
+  --shadow-10: 0 0 12px 0 #0000000D;
+
   /* Colors */
   --color-bluish-purple: #6F42EB;
   --color-dodger-blue: #3877FF;
@@ -34,15 +37,23 @@
 
   /* Primary */
   --color-primary-10: var(--primary-10);
+  --color-primary-11: var(--primary-11);
   --color-primary-12: var(--primary-12);
   --color-primary-13: var(--primary-13);
   --color-primary-14: var(--primary-14);
+  --color-primary-15: var(--primary-15);
 
   /* Secondary */
   --color-secondary-10: var(--secondary-10);
 
   /* Success */
   --color-success-10: var(--success-10);
+  --color-success-11: var(--success-11);
+  --color-success-12: var(--success-12);
+
+  /* Red */
+  --color-red-10: var(--red-10);
+  --color-red-11: var(--red-11);
 }
 
 :root {
@@ -52,15 +63,23 @@
 
   /* Primary */
   --primary-10: #F9FAFB;
+  --primary-11: #17212B;
   --primary-12: #0C131A26;
   --primary-13: #7A899A;
   --primary-14: #7A8A99;
+  --primary-15: #FFFFFF;
 
   /* Secondary */
   --secondary-10: #17212B;
 
   /* Success */
   --success-10: #00C088;
+  --success-11: #00C289;
+  --success-12: #00C2891A;
+
+  /* Red */
+  --red-10: #F54E591A;
+  --red-11: #F54E59;
 }
 
 .dark {
@@ -70,15 +89,23 @@
 
   /* Primary */
   --primary-10: #1B2631;
+  --primary-11: #F9FAFB;
   --primary-12: #151E27;
   --primary-13: #7A899A;
   --primary-14: #7A8A99;
+  --primary-15: #1D2833;
 
   /* Secondary */
   --secondary-10: #FFFFFF;
 
   /* Success */
   --success-10: #00C088;
+  --success-11: #00C289;
+  --success-12: #00C2891A;
+
+  /* Red */
+  --red-10: #F54E591A;
+  --red-11: #F54E59;
 }
 
 @layer base {

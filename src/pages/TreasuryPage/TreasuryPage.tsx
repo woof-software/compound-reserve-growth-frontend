@@ -23,7 +23,7 @@ const TreasuryPage = () => {
         tag='h1'
         size='32'
         weight='700'
-        className='mb-4 text-gray-900'
+        className='text-primary-11 mb-4'
       >
         Treasury
       </Text>
