@@ -7,6 +7,7 @@
   /*=======================*/
   /* Shadows */
   --shadow-10: 0 0 12px 0 #0000000D;
+  --shadow-11: 0px 1px 3px 0px #00000040, 0px 1px 1px 0px #00000040, 0px 2px 1px -1px #00000040;
 
   /* Colors */
   --color-bluish-purple: #6F42EB;
@@ -34,6 +35,19 @@
 
   /* White */
   --color-white-10: #FFFFFF;
+  --color-white-11: #D8DFE5;
+
+  /* Black */
+  --color-gray-10: #2B3947;
+
+  /* Success */
+  --color-success-10: var(--success-10);
+  --color-success-11: var(--success-11);
+  --color-success-12: var(--success-12);
+
+  /* Red */
+  --color-red-10: var(--red-10);
+  --color-red-11: var(--red-11);
 
   /* Primary */
   --color-primary-10: var(--primary-10);
@@ -45,15 +59,6 @@
 
   /* Secondary */
   --color-secondary-10: var(--secondary-10);
-
-  /* Success */
-  --color-success-10: var(--success-10);
-  --color-success-11: var(--success-11);
-  --color-success-12: var(--success-12);
-
-  /* Red */
-  --color-red-10: var(--red-10);
-  --color-red-11: var(--red-11);
 }
 
 :root {
