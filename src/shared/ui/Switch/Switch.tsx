@@ -2,7 +2,7 @@ import * as React from 'react';
 import { ComponentProps } from 'react';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 
-import { cn } from '@/shared/lib';
+import { cn } from '@/shared/lib/classNames/classNames';
 
 import Text from '../Text/Text';
 import View from '../View/View';
@@ -18,8 +18,8 @@ function Switch({ className, label, positionLabel, ...props }: SwitchProps) {
     <div className='flex items-center gap-3'>
       <View.Condition if={Boolean(label && positionLabel === 'left')}>
         <Text
-          size='xxs'
-          weight='medium'
+          size='14'
+          weight='500'
           lineHeight='140'
           className='text-primary-14'
         >
@@ -45,8 +45,8 @@ function Switch({ className, label, positionLabel, ...props }: SwitchProps) {
 
       <View.Condition if={Boolean(label && positionLabel === 'right')}>
         <Text
-          size='xxs'
-          weight='medium'
+          size='14'
+          weight='500'
           lineHeight='140'
           className='text-primary-14'
         >

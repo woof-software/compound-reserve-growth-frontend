@@ -1,14 +1,13 @@
 import { memo, PropsWithChildren } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 
-import { HeaderTagType } from './model/types';
+type HeaderTagType = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
 
 const text = cva('', {
   variants: {
     size: {
       '11': 'text-[11px]',
-      '11.5': 'text-[11.5px]',
-      '12.6': 'text-[12.6px]',
+      '12': 'text-[12px]',
       '13': 'text-[13px]',
       '14': 'text-[14px]',
       '15': 'text-[15px]',
@@ -51,7 +50,6 @@ const text = cva('', {
 
 interface TextProps extends PropsWithChildren, VariantProps<typeof text> {
   className?: string;
-
   tag?: HeaderTagType;
 }
 

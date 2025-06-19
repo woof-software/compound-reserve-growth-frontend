@@ -4,7 +4,6 @@ import { cn } from '@/shared/lib/classNames/classNames';
 
 export interface PageWrapperProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
-
   maxWidth?: number;
 }
 
