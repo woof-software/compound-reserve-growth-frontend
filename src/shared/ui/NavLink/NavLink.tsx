@@ -1,7 +1,7 @@
 import { ComponentProps, FC, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
-import { cn } from '@/shared/lib/classNames/classNames';
+import { cn } from '@/shared/lib/ClassNames/ClassNames';
 
 export interface NavLinkProps extends Omit<ComponentProps<typeof Link>, 'to'> {
   to: string;

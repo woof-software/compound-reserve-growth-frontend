@@ -22,7 +22,7 @@ const topLinks = [
 
 const Footer: FC = () => {
   return (
-    <footer className='border-t border-gray-200 bg-white'>
+    <footer className='border-t border-gray-200'>
       <div className='mx-auto max-w-[1084px]'>
         <div className='py-6'>
           <div className='flex items-center gap-6 text-[13px] text-gray-600'>

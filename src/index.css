@@ -39,7 +39,8 @@
 .dark {
   /*=======================*/
   /* Colors */
-  --background: #0D131A;
+  --background: #F0F2F5;
+  /* --background: #0D131A; */
 }
 
 @layer base {

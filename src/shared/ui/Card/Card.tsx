@@ -1,6 +1,6 @@
 import { FC, ReactNode } from 'react';
 
-import { cn } from '@/shared/lib/classNames/classNames';
+import { cn } from '@/shared/lib/ClassNames/ClassNames';
 
 interface CardProps {
   title?: string;
@@ -21,14 +21,17 @@ const Card: FC<CardProps> = ({
 }) => {
   return (
     <div
-      className={cn('overflow-hidden rounded-lg bg-white shadow-md', className)}
+      className={cn(
+        'w-full overflow-hidden rounded-lg bg-white shadow-md',
+        className
+      )}
     >
       {title && (
-        <div className={cn('bg-gray-50 px-6 py-4', headerClassName)}>
+        <div className={cn('bg-gray-50 px-10 py-4', headerClassName)}>
           <h3 className={cn('text-gray-900', titleClassName)}>{title}</h3>
         </div>
       )}
-      <div className={cn('p-6', contentClassName)}>{children}</div>
+      <div className={cn('p-10', contentClassName)}>{children}</div>
     </div>
   );
 };
