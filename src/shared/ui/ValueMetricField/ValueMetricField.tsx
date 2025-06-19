@@ -1,6 +1,6 @@
 import { FC, ReactNode } from 'react';
 
-import { cn } from '@/shared/lib/ClassNames/ClassNames';
+import { cn } from '@/shared/lib/classNames/classNames';
 
 interface ValueMetricFieldProps {
   value: string;

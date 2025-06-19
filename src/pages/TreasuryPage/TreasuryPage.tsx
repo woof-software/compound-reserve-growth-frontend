@@ -1,6 +1,9 @@
 import TreasuryHoldings from '@/components/TreasuryPageTable/TreasuryHoldings';
 import Card from '@/shared/ui/Card/Card';
+import FallbackImage from '@/shared/ui/FallbackImage/FallbackImage';
+import Switch from '@/shared/ui/Switch/Switch';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import Text from '@/shared/ui/Text/Text';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
 
 import WalletIcon from '@/assets/svg/wallet.svg';
@@ -9,7 +12,7 @@ const TreasuryPage = () => {
   return (
     <div className='flex flex-col gap-[70px]'>
       <div>
-        <h1 className='mb-4 text-[32px] font-bold text-gray-900'>Treasury</h1>
+        <h1 className='mb-4 text-[32px]'>Treasury</h1>
         <p>
           Track Compound DAOs treasury portfolio including asset allocation,
           strategic holdings, and investment returns.
@@ -51,7 +54,27 @@ const TreasuryPage = () => {
         <Card title='Treasury Composition'>
           <TabsGroup tabs={['q', 'w', 'e', 'r']} />
         </Card>
-        <Card title='Total Treasury Value'>qwe</Card>
+        <Card title='Total Treasury Value'>
+          {' '}
+          <FallbackImage src='svg/storage.svg' />
+          <Switch />
+          <Switch
+            label='sgdfgdfg'
+            positionLabel='left'
+          />
+          <Switch
+            label='sgdfgdfg'
+            positionLabel='right'
+          />
+          <Text
+            tag='h1'
+            size='32'
+            weight='700'
+            className='text-primary-11 mb-4'
+          >
+            Treasury
+          </Text>
+        </Card>
         <Card title='Treasury Balance by Network'>qwe</Card>
         <Card title='Full Treasury Holdings'>
           <TreasuryHoldings />

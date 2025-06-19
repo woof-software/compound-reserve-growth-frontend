@@ -1,4 +1,4 @@
-import { cn } from '@/shared/lib/ClassNames/ClassNames';
+import { cn } from '@/shared/lib/classNames/classNames';
 
 import { Tabs, TabsList, TabsTrigger } from '../Tabs/Tabs';
 

@@ -12,7 +12,7 @@ import {
 } from '@tanstack/react-table';
 
 import { SortDownArrow, SortUpArrow } from '@/assets/svg/icon';
-import { cn } from '@/shared/lib/ClassNames/ClassNames';
+import { cn } from '@/shared/lib/classNames/classNames';
 
 import Button from '../Button/Button';
 
