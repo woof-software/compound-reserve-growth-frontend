@@ -7,7 +7,7 @@ declare module '*.svg' {
 }
 
 interface ImportMetaEnv {
-  readonly VITE_LOCAL_DOMAIN_NAME: string;
+  readonly VITE_API_URL: string;
 }
 
 interface ImportMeta {

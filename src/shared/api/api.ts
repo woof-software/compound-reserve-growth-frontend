@@ -40,7 +40,7 @@ const httpRequest = async <T, P = unknown, D = unknown>(
   const { params, data, config } = options ?? {};
   const requestConfig: AxiosRequestConfig = {
     ...config,
-    url: `${import.meta.env.VITE_LOCAL_DOMAIN_NAME}${url}`,
+    url: `${import.meta.env.VITE_API_URL}${url}`,
     method,
     params: method === HttpVerbs.Get ? params : undefined,
     data: method !== HttpVerbs.Get ? data : undefined,
