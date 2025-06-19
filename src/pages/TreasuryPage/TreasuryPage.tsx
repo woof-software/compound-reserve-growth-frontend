@@ -1,9 +1,20 @@
 import FallbackImage from '@/shared/ui/FallbackImage/FallbackImage';
+import Switch from '@/shared/ui/Switch/Switch';
 
 const TreasuryPage = () => {
   return (
     <>
       <FallbackImage src='svg/storage.svg' />
+
+      <Switch />
+      <Switch
+        label='sgdfgdfg'
+        positionLabel='left'
+      />
+      <Switch
+        label='sgdfgdfg'
+        positionLabel='right'
+      />
 
       <h1 className='mb-4 text-[32px] font-bold text-gray-900'>Treasury</h1>
       <p className='max-h-[300px] overflow-y-scroll'>

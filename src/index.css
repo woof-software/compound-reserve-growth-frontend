@@ -29,9 +29,16 @@
 
   --color-background: var(--background);
 
+  /* White */
+  --color-white-10: #FFFFFF;
+
   /* Primary */
   --color-primary-10: var(--primary-10);
   --color-primary-12: var(--primary-12);
+  --color-primary-13: var(--primary-13);
+
+  /* Success */
+  --color-success-10: var(--success-10);
 }
 
 :root {
@@ -42,6 +49,10 @@
   /* Primary */
   --primary-10: #F9FAFB;
   --primary-12: #0C131A26;
+  --primary-13: #7A899A;
+
+  /* Success */
+  --success-10: #00C088;
 }
 
 .dark {
@@ -52,6 +63,10 @@
   /* Primary */
   --primary-10: #1B2631;
   --primary-12: #151E27;
+  --primary-13: #7A899A;
+
+  /* Success */
+  --success-10: #00C088;
 }
 
 @layer base {
