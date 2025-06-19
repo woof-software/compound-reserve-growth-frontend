@@ -28,24 +28,36 @@
   --color-grey-teal: #62B1FF;
 
   --color-background: var(--background);
+
+  /* Primary */
+  --color-primary-10: var(--primary-10);
+  --color-primary-12: var(--primary-12);
 }
 
 :root {
   /*=======================*/
   /* Colors */
   --background: #F0F2F5;
+
+  /* Primary */
+  --primary-10: #F9FAFB;
+  --primary-12: #0C131A26;
 }
 
 .dark {
   /*=======================*/
   /* Colors */
   --background: #0D131A;
+
+  /* Primary */
+  --primary-10: #1B2631;
+  --primary-12: #151E27;
 }
 
 @layer base {
   * {
-
     font-size: 1rem;
+
     font-weight: 400;
 
     text-rendering: optimizeLegibility;
@@ -58,4 +70,23 @@
   body {
     @apply bg-background;
   }
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  @apply bg-primary-10;
+
+  border-radius: 18px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  @apply bg-primary-12;
+
+  border-radius: 18px;
 }
