@@ -16,4 +16,4 @@ const View = {
   Condition
 };
 
-export { View };
+export default View;

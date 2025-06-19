@@ -4,7 +4,8 @@ import * as SwitchPrimitive from '@radix-ui/react-switch';
 
 import { cn } from '@/shared/lib';
 
-import { View } from '../View/View';
+import Text from '../Text/Text';
+import View from '../View/View';
 
 interface SwitchProps extends ComponentProps<typeof SwitchPrimitive.Root> {
   label?: string;
@@ -16,7 +17,14 @@ function Switch({ className, label, positionLabel, ...props }: SwitchProps) {
   return (
     <div className='flex items-center gap-3'>
       <View.Condition if={Boolean(label && positionLabel === 'left')}>
-        {label}
+        <Text
+          size='xxs'
+          weight='medium'
+          lineHeight='140'
+          className='text-primary-14'
+        >
+          {label}
+        </Text>
       </View.Condition>
 
       <SwitchPrimitive.Root
@@ -36,7 +44,14 @@ function Switch({ className, label, positionLabel, ...props }: SwitchProps) {
       </SwitchPrimitive.Root>
 
       <View.Condition if={Boolean(label && positionLabel === 'right')}>
-        {label}
+        <Text
+          size='xxs'
+          weight='medium'
+          lineHeight='140'
+          className='text-primary-14'
+        >
+          {label}
+        </Text>
       </View.Condition>
     </div>
   );
