@@ -1,24 +1,7 @@
-import type { AxiosRequestConfig, AxiosResponse } from 'axios';
-import axios from 'axios';
-
-export type SuccessfulResponse<T> = {
+export type ApiResponse<T> = {
   data: T;
-  error?: never;
-  statusCode?: number;
+  statusCode: number;
 };
-export type UnsuccessfulResponse<E> = {
-  data?: never;
-  error: E;
-  statusCode?: number;
-};
-
-export interface IApiError {
-  message: string;
-}
-
-export type ApiResponse<T, E = IApiError> =
-  | SuccessfulResponse<T>
-  | UnsuccessfulResponse<E>;
 
 export enum HttpVerbs {
   Delete = 'DELETE',
@@ -34,62 +17,48 @@ const httpRequest = async <T, P = unknown, D = unknown>(
   options?: {
     params?: P;
     data?: D;
-    config?: AxiosRequestConfig;
+    config?: RequestInit;
   }
-): Promise<ApiResponse<T, IApiError>> => {
+): Promise<ApiResponse<T>> => {
   const { params, data, config } = options ?? {};
-  const requestConfig: AxiosRequestConfig = {
-    ...config,
-    url: `${import.meta.env.VITE_API_URL}${url}`,
-    method,
-    params: method === HttpVerbs.Get ? params : undefined,
-    data: method !== HttpVerbs.Get ? data : undefined,
-    headers: {
-      ...config?.headers,
-      authorization: '',
-      accept: 'application/json'
-    }
-  };
+  let fullUrl = `${import.meta.env.VITE_API_URL}${url}`;
 
-  try {
-    const response: AxiosResponse<T> = await axios(requestConfig);
-    return { data: response.data, statusCode: response.status };
-  } catch (error: any) {
-    if (axios.isAxiosError(error)) {
-      return { error, data: undefined };
-    }
-    return { error: { message: 'Unexpected error occurred' }, data: undefined };
+  if (method === HttpVerbs.Get && params) {
+    const query = new URLSearchParams(params as Record<string, any>).toString();
+    fullUrl += `?${query}`;
   }
+
+  const response = await fetch(fullUrl, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
+    },
+    body: method !== HttpVerbs.Get && data ? JSON.stringify(data) : undefined,
+    ...config
+  });
+
+  const responseData = (await response.json()) as T;
+
+  return {
+    data: responseData,
+    statusCode: response.status
+  };
 };
 
 export const $api = {
-  get: async <T, P = unknown>(
-    url: string,
-    params?: P,
-    config?: AxiosRequestConfig
-  ) => httpRequest<T, P, never>(HttpVerbs.Get, url, { params, config }),
+  get: <T, P = unknown>(url: string, params?: P, config?: RequestInit) =>
+    httpRequest<T, P, never>(HttpVerbs.Get, url, { params, config }),
 
-  post: async <T, D = unknown>(
-    url: string,
-    data?: D,
-    config?: AxiosRequestConfig
-  ) => httpRequest<T, never, D>(HttpVerbs.Post, url, { data, config }),
+  post: <T, D = unknown>(url: string, data?: D, config?: RequestInit) =>
+    httpRequest<T, never, D>(HttpVerbs.Post, url, { data, config }),
 
-  put: async <T, D = unknown>(
-    url: string,
-    data?: D,
-    config?: AxiosRequestConfig
-  ) => httpRequest<T, never, D>(HttpVerbs.Put, url, { data, config }),
+  put: <T, D = unknown>(url: string, data?: D, config?: RequestInit) =>
+    httpRequest<T, never, D>(HttpVerbs.Put, url, { data, config }),
 
-  patch: async <T, D = unknown>(
-    url: string,
-    data?: D,
-    config?: AxiosRequestConfig
-  ) => httpRequest<T, never, D>(HttpVerbs.Patch, url, { data, config }),
+  patch: <T, D = unknown>(url: string, data?: D, config?: RequestInit) =>
+    httpRequest<T, never, D>(HttpVerbs.Patch, url, { data, config }),
 
-  delete: async <T, P = unknown>(
-    url: string,
-    params?: P,
-    config?: AxiosRequestConfig
-  ) => httpRequest<T, P, never>(HttpVerbs.Delete, url, { params, config })
+  delete: <T, P = unknown>(url: string, params?: P, config?: RequestInit) =>
+    httpRequest<T, P, never>(HttpVerbs.Delete, url, { params, config })
 };
