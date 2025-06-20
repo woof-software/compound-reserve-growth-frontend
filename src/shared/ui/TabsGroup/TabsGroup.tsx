@@ -29,8 +29,8 @@ const TabsGroup = ({
     >
       <TabsList
         className={cn(
-          'h-12 w-fit rounded-full bg-[#f1f2f6] p-1',
-          'border border-gray-200',
+          'bg-primary-10 h-12 w-fit rounded-full p-1',
+          'border-primary-12 border',
           listClassName
         )}
       >
@@ -39,12 +39,12 @@ const TabsGroup = ({
             key={tab}
             value={tab}
             className={cn(
-              'rounded-full px-6 py-2 text-base font-medium transition-all duration-200',
-              'text-gray-700',
-              'hover:text-gray-900',
+              'rounded-full px-6 py-2 text-base font-medium',
+              'text-primary-13',
+              'hover:text-primary-11',
               'h-10 min-w-[60px]',
-              'data-[state=active]:bg-white',
-              'data-[state=active]:text-gray-900',
+              'data-[state=active]:bg-primary-15',
+              'data-[state=active]:text-primary-11',
               'data-[state=active]:shadow-sm',
               triggerClassName,
               activeTriggerClassName &&

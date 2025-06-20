@@ -1,4 +1,4 @@
-import { useTheme } from '@/app/providers/ThemeProvider';
+import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import Switch from '@/shared/ui/Switch/Switch';
 
 const ThemeSwitcher = () => {

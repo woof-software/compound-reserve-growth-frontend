@@ -1,4 +1,4 @@
-import { ComponentProps, FC, ReactNode } from 'react';
+import { ComponentProps, ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { cn } from '@/shared/lib/classNames/classNames';
@@ -8,15 +8,31 @@ export interface LinkProps extends ComponentProps<typeof RouterLink> {
   rightIcon?: ReactNode;
 }
 
-const Link: FC<LinkProps> = ({
+const Link = ({
   leftIcon,
   rightIcon,
   children,
   className,
+  to,
   ...props
-}) => {
+}: LinkProps) => {
+  if (typeof to === 'string' && (to.startsWith('#') || to.startsWith('http'))) {
+    return (
+      <a
+        href={to}
+        className={cn('flex items-center no-underline', className)}
+        {...(props as ComponentProps<'a'>)}
+      >
+        {leftIcon}
+        {children}
+        {rightIcon}
+      </a>
+    );
+  }
+
   return (
     <RouterLink
+      to={to}
       className={cn('flex items-center no-underline', className)}
       {...props}
     >

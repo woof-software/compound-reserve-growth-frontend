@@ -1,8 +1,9 @@
 import { AppRouter } from '@/app/providers/router/AppRouter';
-import { withTheme } from '@/app/providers/ThemeProvider';
 import Footer from '@/components/Footer/Footer';
 import Header from '@/components/Header/Header';
 import PageWrapper from '@/shared/ui/PageWrapper/PageWrapper';
+
+import { withTheme } from './app/providers/ThemeProvider/theme-provider';
 
 function App() {
   return (
