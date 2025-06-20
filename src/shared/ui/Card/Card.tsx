@@ -24,12 +24,12 @@ const Card: FC<CardProps> = ({
   return (
     <div
       className={cn(
-        'bg-primary-15 w-full overflow-hidden rounded-lg shadow-md',
+        'bg-card-content w-full overflow-hidden rounded-lg shadow-md',
         className
       )}
     >
       {title && (
-        <div className={cn('bg-primary-10 px-10 py-4', headerClassName)}>
+        <div className={cn('bg-card-header px-10 py-4', headerClassName)}>
           <Text
             tag='h3'
             size='13'
@@ -39,7 +39,9 @@ const Card: FC<CardProps> = ({
           </Text>
         </div>
       )}
-      <div className={cn('p-10', contentClassName)}>{children}</div>
+      <div className={cn('bg-card-content p-10', contentClassName)}>
+        {children}
+      </div>
     </div>
   );
 };

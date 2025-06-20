@@ -2,7 +2,7 @@ import { type ColumnDef } from '@tanstack/react-table';
 
 import DataTable from '@/shared/ui/DataTable/DataTable';
 
-import { treasuryData, TreasuryHolding } from './MOCK_DATA';
+import { TREASURY_DATA, TreasuryHolding } from './MOCK_DATA';
 
 const treasuryColumns: ColumnDef<TreasuryHolding>[] = [
   {
@@ -56,11 +56,15 @@ const treasuryColumns: ColumnDef<TreasuryHolding>[] = [
 const TreasuryHoldings = () => {
   return (
     <DataTable
-      data={treasuryData}
+      data={TREASURY_DATA}
       columns={treasuryColumns}
       enableSorting
       enablePagination
-      pageSize={5}
+      pageSize={10}
+      headerCellClassName='py-[13px] px-[5px]'
+      cellClassName='py-3 px-[5px]'
+      headerTextClassName='text-primary-14 font-medium'
+      paginationClassName='py-[13px] px-[5px]'
     />
   );
 };

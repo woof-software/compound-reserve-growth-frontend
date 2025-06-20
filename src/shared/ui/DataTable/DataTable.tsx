@@ -15,10 +15,15 @@ import { SortDownArrow, SortUpArrow } from '@/assets/svg/icon';
 import { cn } from '@/shared/lib/classNames/classNames';
 
 import Button from '../Button/Button';
+import Text from '../Text/Text';
+
+export type ExtendedColumnDef<T> = ColumnDef<T> & {
+  align?: 'left' | 'center' | 'right';
+};
 
 interface DataTableProps<T> {
   data: T[];
-  columns: ColumnDef<T>[];
+  columns: ExtendedColumnDef<T>[];
   enableSorting?: boolean;
   enableFiltering?: boolean;
   enablePagination?: boolean;
@@ -28,11 +33,18 @@ interface DataTableProps<T> {
   headerClassName?: string;
   rowClassName?: string;
   cellClassName?: string;
+  headerCellClassName?: string;
   headerRowClassName?: string;
+  headerTextClassName?: string;
   bodyClassName?: string;
   onRowClick?: (row: T) => void;
   isLoading?: boolean;
   emptyMessage?: string;
+  // Стилі для пагінації
+  paginationClassName?: string;
+  paginationTextClassName?: string;
+  paginationButtonsClassName?: string;
+  paginationButtonClassName?: string;
 }
 
 const DataTable = <T,>({
@@ -47,11 +59,17 @@ const DataTable = <T,>({
   headerClassName,
   rowClassName,
   cellClassName,
+  headerCellClassName,
   headerRowClassName,
+  headerTextClassName,
   bodyClassName,
   onRowClick,
   isLoading = false,
-  emptyMessage = 'No data available'
+  emptyMessage = 'No data available',
+  paginationClassName,
+  paginationTextClassName,
+  paginationButtonsClassName,
+  paginationButtonClassName
 }: DataTableProps<T>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -82,6 +100,17 @@ const DataTable = <T,>({
     }
   });
 
+  const getAlignmentClass = (align?: 'left' | 'center' | 'right') => {
+    switch (align) {
+      case 'center':
+        return 'text-center';
+      case 'right':
+        return 'text-right';
+      default:
+        return 'text-left';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className={cn('flex items-center justify-center p-2', className)}>
@@ -100,51 +129,68 @@ const DataTable = <T,>({
                 key={headerGroup.id}
                 className={headerRowClassName}
               >
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className={cn(
-                      'text-left',
-                      enableSorting &&
-                        header.column.getCanSort() &&
-                        'cursor-pointer',
-                      cellClassName
-                    )}
-                    style={{ width: header.column.columnDef.size }}
-                    onClick={
-                      enableSorting
-                        ? header.column.getToggleSortingHandler()
-                        : undefined
-                    }
-                  >
-                    <div className='flex items-center gap-2 text-[11px]'>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                      {enableSorting && header.column.getCanSort() && (
-                        <div className='flex flex-col'>
-                          <SortUpArrow
-                            className={`h-1.5 w-1.5 ${
-                              header.column.getIsSorted() === 'asc'
-                                ? 'text-gray-600'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                          <SortDownArrow
-                            className={`h-1.5 w-1.5 ${
-                              header.column.getIsSorted() === 'desc'
-                                ? 'text-gray-600'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        </div>
+                {headerGroup.headers.map((header) => {
+                  const columnAlign = (
+                    header.column.columnDef as ExtendedColumnDef<T>
+                  ).align;
+
+                  return (
+                    <th
+                      key={header.id}
+                      className={cn(
+                        getAlignmentClass(columnAlign),
+                        enableSorting &&
+                          header.column.getCanSort() &&
+                          'cursor-pointer',
+                        headerCellClassName
                       )}
-                    </div>
-                  </th>
-                ))}
+                      style={{ width: header.column.columnDef.size }}
+                      onClick={
+                        enableSorting
+                          ? header.column.getToggleSortingHandler()
+                          : undefined
+                      }
+                    >
+                      <div
+                        className={cn(
+                          'flex items-center gap-2',
+                          columnAlign === 'right' && 'justify-end',
+                          columnAlign === 'center' && 'justify-center'
+                        )}
+                      >
+                        {header.isPlaceholder ? null : (
+                          <Text
+                            size='11'
+                            className={headerTextClassName}
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                          </Text>
+                        )}
+                        {enableSorting && header.column.getCanSort() && (
+                          <div className='flex flex-col'>
+                            <SortUpArrow
+                              className={`h-1.5 w-1.5 ${
+                                header.column.getIsSorted() === 'asc'
+                                  ? 'text-gray-600'
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                            <SortDownArrow
+                              className={`h-1.5 w-1.5 ${
+                                header.column.getIsSorted() === 'desc'
+                                  ? 'text-gray-600'
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </th>
+                  );
+                })}
               </tr>
             ))}
           </thead>
@@ -165,21 +211,28 @@ const DataTable = <T,>({
                   className={cn(onRowClick && 'cursor-pointer', rowClassName)}
                   onClick={() => onRowClick?.(row.original)}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className={cn(
-                        'text-[13px] whitespace-nowrap',
-                        cellClassName
-                      )}
-                      style={{ width: cell.column.columnDef.size }}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    const columnAlign = (
+                      cell.column.columnDef as ExtendedColumnDef<T>
+                    ).align;
+
+                    return (
+                      <td
+                        key={cell.id}
+                        className={cn(
+                          'text-[13px] whitespace-nowrap',
+                          getAlignmentClass(columnAlign),
+                          cellClassName
+                        )}
+                        style={{ width: cell.column.columnDef.size }}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))
             )}
@@ -188,27 +241,46 @@ const DataTable = <T,>({
       </div>
 
       {enablePagination && (
-        <div className='flex items-center justify-between'>
-          <span className='text-[13px]'>
+        <div
+          className={cn(
+            'flex items-center justify-between',
+            paginationClassName
+          )}
+        >
+          <Text
+            size='13'
+            className={cn('text-primary-14', paginationTextClassName)}
+          >
             Showing {table.getState().pagination.pageIndex * pageSize + 1} to{' '}
             {Math.min(
               (table.getState().pagination.pageIndex + 1) * pageSize,
               data.length
-            )}
+            )}{' '}
             of {data.length} results
-          </span>
-          <div className='flex items-center gap-4'>
+          </Text>
+          <div
+            className={cn(
+              'flex items-center gap-4',
+              paginationButtonsClassName
+            )}
+          >
             <Button
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-              className='text-[13px] hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50'
+              className={cn(
+                'text-primary-14 text-[13px] hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                paginationButtonClassName
+              )}
             >
               Previous
             </Button>
             <Button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              className='text-[13px] hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50'
+              className={cn(
+                'text-primary-14 text-[13px] hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                paginationButtonClassName
+              )}
             >
               Next
             </Button>
