@@ -9,17 +9,23 @@ export interface RouteConfig {
   element: JSX.Element;
 }
 
-export const enum routeTitles {
-  TREASURY = 'Treasury',
-  RUNWAY = 'Runway',
-  REVENUE = 'Revenue'
-}
-
-export const enum commonRoutes {
+export enum commonRoutes {
   REVENUE = '/revenue',
   RUNWAY = '/runway',
   TREASURY = '/treasury',
   NOT_FOUND = '*'
+}
+
+export const VALID_NAVIGATION_ROUTES = [
+  commonRoutes.TREASURY,
+  commonRoutes.RUNWAY,
+  commonRoutes.REVENUE
+] as const;
+
+export const enum routeTitles {
+  TREASURY = 'Treasury',
+  RUNWAY = 'Runway',
+  REVENUE = 'Revenue'
 }
 
 export const routesConfig: Record<commonRoutes, RouteConfig> = {
@@ -37,6 +43,6 @@ export const routesConfig: Record<commonRoutes, RouteConfig> = {
   },
   [commonRoutes.NOT_FOUND]: {
     path: commonRoutes.NOT_FOUND,
-    element: <p>Not Found</p>
+    element: <TreasuryPage />
   }
 };

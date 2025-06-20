@@ -1,10 +1,10 @@
 import { FC } from 'react';
 
 import { commonRoutes } from '@/app/providers/router/config';
+import { Logo } from '@/assets/svg/icon';
 import Link from '@/shared/ui/Link/Link';
+import Text from '@/shared/ui/Text/Text';
 import ThemeSwitcher from '@/shared/ui/ThemeSwitcher/ThemeSwitcher';
-
-import LogoIcon from '@/assets/svg/logo.svg';
 
 const navLinks = [
   { label: 'Treasury', to: '#' },
@@ -23,17 +23,23 @@ const topLinks = [
 
 const Footer: FC = () => {
   return (
-    <footer className='border-t border-gray-200'>
+    <footer className='border-primary-17 border-t'>
       <div className='mx-auto max-w-[1084px]'>
         <div className='flex justify-between py-6'>
-          <div className='flex items-center gap-6 text-[13px] text-gray-600'>
+          <div className='text-primary-14 flex items-center gap-6 text-[13px]'>
             {topLinks.map((link) => (
               <Link
                 key={link.label}
                 to={link.to}
-                className='transition-colors hover:text-gray-900'
+                className='transition-colors'
               >
-                {link.label}
+                <Text
+                  size='13'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  {link.label}
+                </Text>
               </Link>
             ))}
           </div>
@@ -45,25 +51,34 @@ const Footer: FC = () => {
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-2'>
               <Link to={commonRoutes.TREASURY}>
-                <LogoIcon className='h-7 w-28' />
+                <Logo />
               </Link>
             </div>
 
-            <nav className='flex items-center gap-5 text-[11px] text-gray-600'>
+            <nav className='text-primary-14 flex items-center gap-5 text-[11px]'>
               {navLinks.map((link) => (
                 <Link
                   key={link.label}
                   to={link.to}
-                  className='transition-colors hover:text-gray-900'
                 >
-                  {link.label}
+                  <Text
+                    size='11'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    {link.label}
+                  </Text>
                 </Link>
               ))}
             </nav>
 
-            <div className='text-[11px] text-gray-500'>
+            <Text
+              size='11'
+              weight='500'
+              className='text-primary-14'
+            >
               ©2025 Compound Finance. All Rights Reserved
-            </div>
+            </Text>
           </div>
         </div>
       </div>

@@ -1,49 +1,53 @@
 import Card from '@/shared/ui/Card/Card';
+import Text from '@/shared/ui/Text/Text';
+import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
 
 const RunwayPage = () => {
   return (
     <div className='flex flex-col gap-[70px]'>
-      <div>
-        <h1 className='mb-4 text-[32px] font-bold text-gray-900'>Treasury</h1>
-        <p>
-          Track Compound DAOs treasury portfolio including asset allocation,
-          strategic holdings, and investment returns.
-        </p>
+      <div className='flex flex-col gap-[15px]'>
+        <Text
+          tag='h1'
+          size='32'
+          weight='500'
+        >
+          Runway
+        </Text>
+        <Text
+          tag='p'
+          size='15'
+          className='text-primary-14'
+        >
+          Track Aave DAO&apos;s financial health through treasury runway,
+          expenses, and service provider commitments.
+        </Text>
       </div>
       <div className='flex flex-col gap-5'>
         <div className='flex flex-row gap-5'>
-          <Card
-            className='flex-1'
-            title='2022 Revenue'
-          >
-            qwe
+          <Card className='flex-1'>
+            <ValueMetricField
+              value='$63.6M'
+              label='Total Annualised Expenses'
+            />
           </Card>
-          <Card
-            className='flex-1'
-            title='2023 Revenue'
-          >
-            qwe
+          <Card className='flex-1'>
+            <ValueMetricField
+              value='$28.3M'
+              label='Service Provider Expenses'
+            />
           </Card>
-          <Card
-            className='flex-1'
-            title='2024 Revenue'
-          >
-            qwe
-          </Card>
-          <Card
-            className='flex-1'
-            title='2025 Revenue'
-          >
-            qwe
+          <Card className='flex-1'>
+            <ValueMetricField
+              value='$35.3M'
+              label='DAO Initiatives Expenses'
+            />
           </Card>
         </div>
 
-        <Card title='Revenue Overview USD'>qwe</Card>
-        <Card title='Compound Cumulative Revenue'>qwe</Card>
-        <Card title='Compound Fee Revenue Recieved'>qwe</Card>
-        <Card title='Compound Fee Revenue by Chain'>qwe</Card>
-        <Card title='Compound Revenue'>qwe</Card>
-        <Card title='Revenue Breakdown'>qwe</Card>
+        <Card title='Annualised Expenses'>qwe</Card>
+        <Card title='Current Service Providers'>qwe</Card>
+        <Card title='Current Initiatives'>qwe</Card>
+        <Card title='Full DAO Commitments'>qwe</Card>
       </div>
     </div>
   );

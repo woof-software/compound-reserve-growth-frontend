@@ -3,7 +3,6 @@ import { FC, ImgHTMLAttributes, useEffect, useState } from 'react';
 interface FallbackImageProps
   extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> {
   src: string;
-
   fallbackSrc?: string;
 }
 
