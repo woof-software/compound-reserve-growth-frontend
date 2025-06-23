@@ -49,6 +49,8 @@ interface SelectTriggerContentProps {
 
   selectedItems: string[];
 
+  maximumItems?: number;
+
   onItemDelete: (index: number) => void;
 }
 
@@ -140,13 +142,14 @@ const SelectItem: FC<SelectItemProps> = ({
 const SelectTriggerContent: FC<SelectTriggerContentProps> = ({
   placeholder,
   selectedItems,
+  maximumItems = 3,
   onItemDelete
 }) => {
   return (
     <div className='flex items-center gap-1.5'>
       <View.Condition if={Boolean(selectedItems.length)}>
         <Each
-          data={selectedItems.slice(0, 3)}
+          data={selectedItems.slice(0, maximumItems)}
           render={(el, index) => (
             <div
               key={index}
@@ -175,7 +178,7 @@ const SelectTriggerContent: FC<SelectTriggerContentProps> = ({
           )}
         />
 
-        <View.Condition if={Boolean(selectedItems.length > 3)}>
+        <View.Condition if={Boolean(selectedItems.length > maximumItems)}>
           <div className='bg-secondary-14 flex min-w-[65px] gap-0.5 rounded-sm px-2 py-1'>
             <Text
               tag='span'
