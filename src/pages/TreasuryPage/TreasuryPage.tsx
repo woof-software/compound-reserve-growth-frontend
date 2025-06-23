@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import PieChart from '@/components/Charts/Pie/Pie';
 import TreasuryBalanceByNetwork from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import TreasuryHoldings from '@/components/TreasuryPageTable/TreasuryHoldings';
@@ -13,6 +14,18 @@ import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
 const TreasuryPage = () => {
   return (
     <div className='flex flex-col gap-[70px]'>
+      <PieChart
+        className='max-h-[400px] max-w-[336.5px]'
+        data={[
+          { name: 'AAVE', y: 70.67, color: '#6fda44' },
+          { name: 'Stablecoin', y: 14.77, color: '#3877ff' },
+          { name: 'ETH Correlated', y: 4.86, color: '#10a674' },
+          { name: 'DeFi', y: 2.63, color: '#bce954' },
+          { name: 'BTC Correlated', y: 2.6, color: '#8fe6fe' },
+          { name: 'Unclassified', y: 2.6, color: '#ffa374' }
+        ]}
+      />
+
       <div className='flex flex-col gap-[15px]'>
         <Text
           tag='h1'

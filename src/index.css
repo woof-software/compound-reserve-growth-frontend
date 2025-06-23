@@ -236,3 +236,7 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+.highcharts-container .highcharts-background {
+  fill: var(--color-background);
+}
