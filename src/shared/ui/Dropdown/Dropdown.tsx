@@ -32,8 +32,6 @@ interface DropdownProps extends PropsWithChildren {
 }
 
 interface DropdownItemProps {
-  id: number;
-
   asset: string;
 
   isSelected?: boolean;
@@ -88,11 +86,19 @@ const Dropdown: FC<DropdownProps> = ({
   useClickOutside(containerRef as RefObject<HTMLDivElement>, onClose);
 
   return (
-    <div ref={containerRef}>
+    <div
+      className='w-fit'
+      ref={containerRef}
+    >
       <Popover open={open}>
-        <PopoverTrigger onClick={onToggle}>{triggerContent}</PopoverTrigger>
+        <PopoverTrigger
+          className='cursor-pointer'
+          onClick={onToggle}
+        >
+          {triggerContent}
+        </PopoverTrigger>
 
-        <PopoverContent className='hide-scrollbar bg-primary-15 max-h-[176px] max-w-[168px] overflow-y-auto border-none p-2'>
+        <PopoverContent className='hide-scrollbar bg-primary-15 grid max-h-[182px] max-w-[168px] gap-0.5 overflow-y-auto border-none p-2'>
           {children}
         </PopoverContent>
       </Popover>
@@ -101,15 +107,18 @@ const Dropdown: FC<DropdownProps> = ({
 };
 
 const DropdownItem: FC<DropdownItemProps> = ({
-  id,
   asset,
   isSelected = false,
   onSelect
 }) => {
   return (
     <div
-      key={id}
-      className='hover:bg-secondary-12 flex h-10 cursor-pointer items-center justify-between rounded-lg p-3'
+      className={cn(
+        'hover:bg-secondary-12 flex h-10 cursor-pointer items-center justify-between rounded-lg p-3',
+        {
+          'bg-secondary-12': isSelected
+        }
+      )}
       onClick={() => onSelect(asset)}
     >
       <Text
@@ -133,12 +142,9 @@ const DropdownItem: FC<DropdownItemProps> = ({
 const TriggerContent: FC<TriggerContentProps> = ({ title, isOpen }) => {
   return (
     <div
-      className={cn(
-        'flex cursor-pointer items-center gap-1.5 rounded-sm px-[17px] py-2',
-        {
-          'bg-secondary-11': isOpen
-        }
-      )}
+      className={cn('flex items-center gap-1.5 rounded-sm px-[17px] py-2', {
+        'bg-secondary-11': isOpen
+      })}
     >
       <Text
         size='11'
@@ -152,8 +158,8 @@ const TriggerContent: FC<TriggerContentProps> = ({ title, isOpen }) => {
         className={cn('transition-transform', {
           'rotate-180': isOpen
         })}
-        width={10}
-        height={6}
+        width={20}
+        height={20}
       />
     </div>
   );

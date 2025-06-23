@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import TreasuryBalanceByNetwork from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import TreasuryHoldings from '@/components/TreasuryPageTable/TreasuryHoldings';
@@ -10,6 +12,12 @@ import {
 } from '@/shared/ui/Dropdown/Dropdown';
 import Each from '@/shared/ui/Each/Each';
 import FallbackImage from '@/shared/ui/FallbackImage/FallbackImage';
+import {
+  Select,
+  SelectItem,
+  SelectTriggerContent,
+  useSelect
+} from '@/shared/ui/Select/Select';
 import Switch from '@/shared/ui/Switch/Switch';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
@@ -35,8 +43,43 @@ const TreasuryPage = () => {
     select: selectMulti
   } = useDropdown('multiple');
 
+  const {
+    open: openSelect,
+    selectedValue: selectedValueMulti,
+    toggle: toggleSelectMulti,
+    close: closeSelectMulti,
+    select: selectValueMulti,
+    deleteItem: deleteItemMulti
+  } = useSelect('multiple');
+
   return (
     <div className='flex flex-col gap-[70px]'>
+      <Select
+        title='Chain'
+        open={openSelect}
+        triggerContent={
+          <SelectTriggerContent
+            placeholder='Add Chain'
+            selectedItems={selectedValueMulti}
+            onItemDelete={deleteItemMulti}
+          />
+        }
+        onClose={closeSelectMulti}
+        onToggle={toggleSelectMulti}
+      >
+        <Each
+          data={['Ethereum', 'Arbitrum', 'Avalance', 'Bitcoin', 'Solana']}
+          render={(asset, idx) => (
+            <SelectItem
+              key={idx}
+              asset={asset}
+              isSelected={selectedValueMulti.includes(asset)}
+              onSelect={selectValueMulti}
+            />
+          )}
+        />
+      </Select>
+
       {/* ===== Single-select ===== */}
       <div>
         <Text
@@ -63,7 +106,6 @@ const TreasuryPage = () => {
             render={(asset, idx) => (
               <DropdownItem
                 key={idx}
-                id={idx}
                 asset={asset}
                 isSelected={selectedSingle?.[0] === asset}
                 onSelect={selectSingle}
@@ -105,7 +147,6 @@ const TreasuryPage = () => {
             render={(asset, idx) => (
               <DropdownItem
                 key={idx}
-                id={idx}
                 asset={asset}
                 isSelected={selectedMulti?.includes(asset) ?? false}
                 onSelect={selectMulti}
