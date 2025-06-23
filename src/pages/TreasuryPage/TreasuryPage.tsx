@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import TreasuryBalanceByNetwork from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import TreasuryHoldings from '@/components/TreasuryPageTable/TreasuryHoldings';

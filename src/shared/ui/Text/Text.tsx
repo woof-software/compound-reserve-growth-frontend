@@ -1,4 +1,4 @@
-import { memo, PropsWithChildren } from 'react';
+import { PropsWithChildren } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 type HeaderTagType = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
@@ -54,22 +54,20 @@ interface TextProps extends PropsWithChildren, VariantProps<typeof text> {
   tag?: HeaderTagType;
 }
 
-const Text = memo(
-  ({
-    className,
-    size,
-    weight,
-    lineHeight,
-    align,
-    tag: Tag = 'p',
-    children
-  }: TextProps) => {
-    return (
-      <Tag className={text({ size, weight, lineHeight, align, className })}>
-        {children}
-      </Tag>
-    );
-  }
-);
+const Text = ({
+  className,
+  size,
+  weight,
+  lineHeight,
+  align,
+  tag: Tag = 'p',
+  children
+}: TextProps) => {
+  return (
+    <Tag className={text({ size, weight, lineHeight, align, className })}>
+      {children}
+    </Tag>
+  );
+};
 
 export default Text;
