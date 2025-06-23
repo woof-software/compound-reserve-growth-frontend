@@ -3,6 +3,33 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: 'Haas Grot Text R';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./shared/fonts/NeueHaasGrotDispRound-55Roman.otf')
+  format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Haas Grot Text R';
+  font-style: normal;
+  font-weight: 500 600;
+  src: url('./shared/fonts/NeueHaasGrotDispRound-65Medium.otf')
+  format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Haas Grot Text R';
+  font-style: normal;
+  font-weight: 700;
+  src: url('./shared/fonts/NeueHaasGrotDispRound-75Bold.otf')
+  format('opentype');
+  font-display: swap;
+}
+
 :root {
   /*=======================*/
   /* Layout */
@@ -23,6 +50,8 @@
   /*=======================*/
   /* Secondary Colors */
   --secondary-10: #17212B;
+  --secondary-11: #E5E7EA;
+  --secondary-12: #E5E7EA;
 
   /*=======================*/
   /* Success Colors */
@@ -56,6 +85,8 @@
   /*=======================*/
   /* Secondary Colors */
   --secondary-10: #FFFFFF;
+  --secondary-11: #181E25;
+  --secondary-12: #151E27;
 
   /*=======================*/
   /* Success Colors */
@@ -94,6 +125,8 @@
   /*=======================*/
   /* Secondary Colors */
   --color-secondary-10: var(--secondary-10);
+  --color-secondary-11: var(--secondary-11);
+  --color-secondary-12: var(--secondary-12);
 
   /*=======================*/
   /* Success Colors */
@@ -147,6 +180,8 @@
 
   body {
     @apply bg-background text-primary-11;
+
+    font-family: 'Haas Grot Text R', sans-serif;
   }
 }
 
@@ -158,10 +193,21 @@
 
 ::-webkit-scrollbar-track {
   @apply bg-primary-10;
+
   border-radius: 18px;
 }
 
 ::-webkit-scrollbar-thumb {
   @apply bg-primary-12;
+
   border-radius: 18px;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
