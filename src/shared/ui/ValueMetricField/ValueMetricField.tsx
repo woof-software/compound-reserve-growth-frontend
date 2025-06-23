@@ -80,6 +80,7 @@ const ValueMetricField = ({
         </div>
         <Text
           size='11'
+          weight='500'
           className={cn('text-primary-13', labelClassName)}
         >
           {label}

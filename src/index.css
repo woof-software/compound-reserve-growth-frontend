@@ -48,6 +48,11 @@
   --primary-18: #F0F2F5;
 
   /*=======================*/
+  /* Card Colors */
+  --card-header: #F9FAFC;
+  --card-content: #FFFFFF;
+
+  /*=======================*/
   /* Secondary Colors */
   --secondary-10: #17212B;
   --secondary-11: #E5E7EA;
@@ -81,6 +86,11 @@
   --primary-16: #2B3946;
   --primary-17: #F9FAFB26;
   --primary-18: #17212B;
+
+  /*=======================*/
+  /* Card Colors */
+  --card-header: #17212B;
+  --card-content: #1E2832;
 
   /*=======================*/
   /* Secondary Colors */
@@ -121,6 +131,11 @@
   --color-primary-16: var(--primary-16);
   --color-primary-17: var(--primary-17);
   --color-primary-18: var(--primary-18);
+
+  /*=======================*/
+  /* Card Colors */
+  --color-card-header: var(--card-header);
+  --color-card-content: var(--card-content);
 
   /*=======================*/
   /* Secondary Colors */

@@ -1,3 +1,5 @@
+import TreasuryBalanceByNetwork from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
+import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import TreasuryHoldings from '@/components/TreasuryPageTable/TreasuryHoldings';
 import Card from '@/shared/ui/Card/Card';
 import {
@@ -128,7 +130,6 @@ const TreasuryPage = () => {
           Treasury
         </Text>
         <Text
-          tag='p'
           size='15'
           className='text-primary-14'
         >
@@ -221,21 +222,42 @@ const TreasuryPage = () => {
           </Card>
         </div>
         <Card title='Treasury Composition'>
-          <TabsGroup tabs={['q', 'w', 'e', 'r']} />
+          <div className='flex flex-row items-center gap-3'>
+            <Text
+              size='11'
+              className='text-primary-14'
+            >
+              Include COMP Holdings
+            </Text>
+
+            <Switch />
+          </div>
+          <TreasuryComposition />
         </Card>
         <Card title='Total Treasury Value'>
-          <FallbackImage src='svg/storage.svg' />
-          <Switch />
-          <Switch
-            label='sgdfgdfg'
-            positionLabel='left'
-          />
-          <Switch
-            label='sgdfgdfg'
-            positionLabel='right'
-          />
+          <div className='flex flex-row items-center gap-3'>
+            <Text
+              size='11'
+              weight='500'
+              className='text-primary-14'
+            >
+              Include COMP Holdings
+            </Text>
+
+            <TabsGroup
+              tabs={['7D', '30D', '90D', '1Y']}
+              defaultTab='7D'
+            />
+
+            <TabsGroup
+              tabs={['H', 'D', 'W']}
+              defaultTab='D'
+            />
+          </div>
         </Card>
-        <Card title='Treasury Balance by Network'>qwe</Card>
+        <Card title='Treasury Balance by Network'>
+          <TreasuryBalanceByNetwork />
+        </Card>
         <Card title='Full Treasury Holdings'>
           <TreasuryHoldings />
         </Card>
