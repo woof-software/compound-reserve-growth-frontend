@@ -36,6 +36,7 @@
     "eslint-plugin-prettier": "^5.5.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-unused-imports": "^4.1.4",
+    "highcharts": "^12.3.0",
     "highcharts-react-official": "^3.2.2",
     "lucide-react": "^0.516.0",
     "react": "^19.1.0",
