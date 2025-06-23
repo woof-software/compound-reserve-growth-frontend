@@ -1,6 +1,8 @@
 import { type ColumnDef } from '@tanstack/react-table';
 
 import DataTable from '@/shared/ui/DataTable/DataTable';
+import Icon from '@/shared/ui/Icon/Icon';
+import Text from '@/shared/ui/Text/Text';
 
 import { TREASURY_DATA, TreasuryHolding } from './MOCK_DATA';
 
@@ -9,7 +11,16 @@ const treasuryColumns: ColumnDef<TreasuryHolding>[] = [
     accessorKey: 'symbol',
     header: 'Symbol',
     enableSorting: true,
-    size: 168
+    size: 168,
+    cell: ({ row }) => (
+      <div className='flex items-center gap-3'>
+        <Icon
+          name='not-found-icon'
+          className='h-5 w-5'
+        />
+        <Text size='13'>{row.original.symbol}</Text>
+      </div>
+    )
   },
   {
     accessorKey: 'chain',

@@ -2,8 +2,7 @@ import TreasuryBalanceByNetwork from '@/components/TreasuryPageTable/TreasuryBal
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import TreasuryHoldings from '@/components/TreasuryPageTable/TreasuryHoldings';
 import Card from '@/shared/ui/Card/Card';
-import FallbackImage from '@/shared/ui/FallbackImage/FallbackImage';
-import Switch from '@/shared/ui/Switch/Switch';
+import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
@@ -36,10 +35,9 @@ const TreasuryPage = () => {
               badge='+57M'
               badgeType='positive'
               icon={
-                <FallbackImage
-                  src='svg/wallet.svg'
-                  width={32}
-                  height={32}
+                <Icon
+                  name='wallet'
+                  className='h-8 w-8'
                 />
               }
             />
@@ -51,10 +49,9 @@ const TreasuryPage = () => {
               badge='+57M'
               badgeType='positive'
               icon={
-                <FallbackImage
-                  src='not-found-icon.svg'
-                  width={32}
-                  height={32}
+                <Icon
+                  name='not-found-icon'
+                  className='h-8 w-8'
                 />
               }
             />
@@ -66,10 +63,9 @@ const TreasuryPage = () => {
               badge='+57M'
               badgeType='positive'
               icon={
-                <FallbackImage
-                  src='not-found-icon.svg'
-                  width={32}
-                  height={32}
+                <Icon
+                  name='not-found-icon'
+                  className='h-8 w-8'
                 />
               }
             />
@@ -85,10 +81,9 @@ const TreasuryPage = () => {
               badgeType='negative'
               iconText='Total Value'
               icon={
-                <FallbackImage
-                  src='not-found-icon.svg'
-                  width={32}
-                  height={32}
+                <Icon
+                  name='not-found-icon'
+                  className='h-8 w-8'
                 />
               }
             />
@@ -102,38 +97,26 @@ const TreasuryPage = () => {
               badgeType='negative'
               iconText='Total Value'
               icon={
-                <FallbackImage
-                  src='not-found-icon.svg'
-                  width={32}
-                  height={32}
+                <Icon
+                  name='not-found-icon'
+                  className='h-8 w-8'
                 />
               }
             />
           </Card>
         </div>
-        <Card title='Treasury Composition'>
-          <div className='flex flex-row items-center gap-3'>
-            <Text
-              size='11'
-              className='text-primary-14'
-            >
-              Include COMP Holdings
-            </Text>
-
-            <Switch />
-          </div>
+        <Card
+          title='Treasury Composition'
+          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+        >
+          <div className='flex gap-3 px-0 py-3'>Asset Type</div>
           <TreasuryComposition />
         </Card>
-        <Card title='Total Treasury Value'>
-          <div className='flex flex-row items-center gap-3'>
-            <Text
-              size='11'
-              weight='500'
-              className='text-primary-14'
-            >
-              Include COMP Holdings
-            </Text>
-
+        <Card
+          title='Total Treasury Value'
+          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+        >
+          <div className='flex gap-3 px-0 py-3'>
             <TabsGroup
               tabs={['7D', '30D', '90D', '1Y']}
               defaultTab='7D'

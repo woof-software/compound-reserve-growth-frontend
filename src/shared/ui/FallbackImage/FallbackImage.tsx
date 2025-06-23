@@ -8,7 +8,7 @@ interface FallbackImageProps
 
 const FallbackImage: FC<FallbackImageProps> = ({
   src: initialSrc,
-  fallbackSrc = 'src/assets/not-found-icon.svg',
+  fallbackSrc = 'not-found-icon.svg',
   width = 24,
   height = 24,
   alt,
@@ -25,7 +25,7 @@ const FallbackImage: FC<FallbackImageProps> = ({
     <img
       width={width}
       height={height}
-      src={`src/assets/${currentSrc}`}
+      src={`src/assets/svg/${currentSrc}`}
       alt={alt || 'Fallback image'}
       onError={() => setCurrentSrc(fallbackSrc)}
       style={{

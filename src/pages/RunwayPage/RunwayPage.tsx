@@ -1,3 +1,7 @@
+import AnnualisedExpenses from '@/components/RunwayPageTable/AnnualisedExpenses';
+import CurrentInitiatives from '@/components/RunwayPageTable/CurrentInitiatives';
+import CurrentServiceProviders from '@/components/RunwayPageTable/CurrentServiceProviders';
+import FullDAOCommitments from '@/components/RunwayPageTable/FullDAOCommitments';
 import Card from '@/shared/ui/Card/Card';
 import Text from '@/shared/ui/Text/Text';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
@@ -44,10 +48,42 @@ const RunwayPage = () => {
           </Card>
         </div>
 
-        <Card title='Annualised Expenses'>qwe</Card>
-        <Card title='Current Service Providers'>qwe</Card>
-        <Card title='Current Initiatives'>qwe</Card>
-        <Card title='Full DAO Commitments'>qwe</Card>
+        <Card title='Annualised Expenses'>
+          <div className='flex flex-col gap-5'>
+            <AnnualisedExpenses />
+            <div>
+              <Text
+                size='11'
+                weight='500'
+                className='text-primary-14'
+                lineHeight='18'
+              >
+                1M USD ImmuneFi Bug Bounty program is excluded from above
+              </Text>
+              <Text
+                size='11'
+                weight='500'
+                className='text-primary-14'
+                lineHeight='18'
+              >
+                Table assumes an Compound price of $150
+              </Text>
+            </div>
+          </div>
+        </Card>
+        <Card title='Current Service Providers'>
+          <CurrentServiceProviders />
+        </Card>
+        <Card title='Current Initiatives'>
+          <CurrentInitiatives />
+        </Card>
+        <Card
+          title='Full DAO Commitments'
+          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+        >
+          <div className='flex gap-3 px-0 py-3'>BTN</div>
+          <FullDAOCommitments />
+        </Card>
       </div>
     </div>
   );
