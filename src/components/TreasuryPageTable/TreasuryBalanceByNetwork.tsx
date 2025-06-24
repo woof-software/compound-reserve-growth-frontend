@@ -50,7 +50,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkProps>[] = [
 
 const TreasuryBalanceByNetwork = () => {
   return (
-    <div className='max-w-[522px]'>
+    <div className='w-full max-w-[522px]'>
       <DataTable
         data={TREASURY_BALANCE_BY_NETWORK}
         columns={treasuryColumns}

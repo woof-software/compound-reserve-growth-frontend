@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import PieChart from '@/components/Charts/Pie/Pie';
+import CryptoChart from '@/components/Charts/Bar/Bar';
 import TreasuryBalanceByNetwork from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import TreasuryHoldings from '@/components/TreasuryPageTable/TreasuryHoldings';
@@ -13,18 +13,6 @@ import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
 const TreasuryPage = () => {
   return (
     <div className='flex flex-col gap-[70px]'>
-      <PieChart
-        className='max-h-[400px] max-w-[336.5px]'
-        data={[
-          { name: 'AAVE', y: 70.67, color: '#6fda44' },
-          { name: 'Stablecoin', y: 14.77, color: '#3877ff' },
-          { name: 'ETH Correlated', y: 4.86, color: '#10a674' },
-          { name: 'DeFi', y: 2.63, color: '#bce954' },
-          { name: 'BTC Correlated', y: 2.6, color: '#8fe6fe' },
-          { name: 'Unclassified', y: 2.6, color: '#ffa374' }
-        ]}
-      />
-
       <div className='flex flex-col gap-[15px]'>
         <Text
           tag='h1'
@@ -143,8 +131,24 @@ const TreasuryPage = () => {
             />
           </div>
         </Card>
-        <Card title='Treasury Balance by Network'>
-          <TreasuryBalanceByNetwork />
+        <Card
+          title='Treasury Balance by Network'
+          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+        >
+          <div className='flex gap-3 px-0 py-3'>BTN</div>
+          <div className='flex justify-between gap-10'>
+            <CryptoChart
+              data={[
+                { name: 'AAVE', value: 150000000, color: '#4F7CFF' },
+                { name: 'Stablecoin', value: 35000000, color: '#00D4AA' },
+                { name: 'ETH Correlated', value: 30000000, color: '#F0E68C' },
+                { name: 'DeFi', value: 8500000, color: '#FF6B6B' },
+                { name: 'BTC Correlated', value: 50000000, color: '#8B5CF6' },
+                { name: 'Unclassified', value: 35000000, color: '#FF8C42' }
+              ]}
+            />
+            <TreasuryBalanceByNetwork />
+          </div>
         </Card>
         <Card title='Full Treasury Holdings'>
           <TreasuryHoldings />
