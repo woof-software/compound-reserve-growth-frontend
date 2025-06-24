@@ -1,5 +1,5 @@
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
-import FallbackImage from '@/shared/ui/FallbackImage/FallbackImage';
+import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
 import {
@@ -14,10 +14,9 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkProps>[] = [
     enableSorting: true,
     cell: ({ row }) => (
       <div className='flex items-center gap-3'>
-        <FallbackImage
-          src='not-found-icon.svg'
-          width={20}
-          height={20}
+        <Icon
+          name='not-found-icon'
+          className='h-5 w-5'
         />
         <Text size='13'>{row.original.symbol}</Text>
       </div>
@@ -51,7 +50,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkProps>[] = [
 
 const TreasuryBalanceByNetwork = () => {
   return (
-    <div className='max-w-[522px]'>
+    <div className='w-full max-w-[522px]'>
       <DataTable
         data={TREASURY_BALANCE_BY_NETWORK}
         columns={treasuryColumns}

@@ -1,7 +1,7 @@
 import { FC } from 'react';
 
 import { commonRoutes } from '@/app/providers/router/config';
-import { Logo } from '@/assets/svg/icon';
+import Icon from '@/shared/ui/Icon/Icon';
 import Link from '@/shared/ui/Link/Link';
 import Text from '@/shared/ui/Text/Text';
 import ThemeSwitcher from '@/shared/ui/ThemeSwitcher/ThemeSwitcher';
@@ -31,12 +31,12 @@ const Footer: FC = () => {
               <Link
                 key={link.label}
                 to={link.to}
-                className='transition-colors'
+                className='group hover:text-primary-11 transition-colors'
               >
                 <Text
                   size='13'
                   weight='500'
-                  className='text-primary-14'
+                  className='text-primary-14 group-hover:text-primary-11 transition-colors'
                 >
                   {link.label}
                 </Text>
@@ -51,7 +51,11 @@ const Footer: FC = () => {
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-2'>
               <Link to={commonRoutes.TREASURY}>
-                <Logo />
+                <Icon
+                  name='logo'
+                  className='h-[28px] w-[121px]'
+                  color='primary-11'
+                />
               </Link>
             </div>
 
@@ -60,11 +64,12 @@ const Footer: FC = () => {
                 <Link
                   key={link.label}
                   to={link.to}
+                  className='group hover:text-primary-11 transition-colors'
                 >
                   <Text
                     size='11'
                     weight='500'
-                    className='text-primary-14'
+                    className='text-primary-14 group-hover:text-primary-11 transition-colors'
                   >
                     {link.label}
                   </Text>

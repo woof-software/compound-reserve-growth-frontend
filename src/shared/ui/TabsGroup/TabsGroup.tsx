@@ -40,7 +40,7 @@ const TabsGroup = ({
             key={tab}
             value={tab}
             className={cn(
-              'rounded-full px-3 py-1 text-[11px] font-medium',
+              'cursor-pointer rounded-full px-3 py-1 text-[11px] font-medium',
               'h-6',
               'text-primary-11',
               'data-[state=active]:bg-card-content',

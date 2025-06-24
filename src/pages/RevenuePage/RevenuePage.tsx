@@ -1,4 +1,8 @@
+import CompoundFeeRevenuebyChain from '@/components/RevenuePageTable/CompoundFeeRevenuebyChain';
+import RevenueBreakdown from '@/components/RevenuePageTable/RevenueBreakdown';
+import RevenueOverviewUSD from '@/components/RevenuePageTable/RevenueOverviewUSD';
 import Card from '@/shared/ui/Card/Card';
+import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
 
@@ -86,12 +90,73 @@ const RevenuePage = () => {
           </Card>
         </div>
 
-        <Card title='Revenue Overview USD'>qwe</Card>
-        <Card title='Compound Cumulative Revenue'>qwe</Card>
-        <Card title='Compound Fee Revenue Recieved'>qwe</Card>
-        <Card title='Compound Fee Revenue by Chain'>qwe</Card>
-        <Card title='Compound Revenue'>qwe</Card>
-        <Card title='Revenue Breakdown'>qwe</Card>
+        <Card
+          title='Revenue Overview USD'
+          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+        >
+          <div className='flex gap-3 px-0 py-3'>
+            <TabsGroup
+              tabs={['7D', '30D', '90D']}
+              defaultTab='7D'
+            />
+            <TabsGroup
+              tabs={['Rolling', 'To Date']}
+              defaultTab='Rolling'
+            />
+          </div>
+          <RevenueOverviewUSD />
+        </Card>
+        <Card
+          title='Compound Cumulative Revenue'
+          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+        >
+          <div className='flex gap-3 px-0 py-3'>
+            <TabsGroup
+              tabs={['7D', '30D', '90D']}
+              defaultTab='7D'
+            />
+          </div>
+          qwe
+        </Card>
+        <Card
+          title='Compound Fee Revenue Recieved'
+          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+        >
+          <div className='flex gap-3 px-0 py-3'>
+            <TabsGroup
+              tabs={['7D', '30D', '90D']}
+              defaultTab='7D'
+            />
+          </div>
+          qwe
+        </Card>
+        <Card
+          title='Compound Fee Revenue by Chain'
+          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+        >
+          <div className='flex gap-3 px-0 py-3'>Interval Year</div>
+          <CompoundFeeRevenuebyChain />
+        </Card>
+        <Card
+          title='Compound Revenue'
+          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+        >
+          {' '}
+          <div className='flex gap-3 px-0 py-3'>
+            <TabsGroup
+              tabs={['7D', '30D', '90D']}
+              defaultTab='7D'
+            />
+          </div>
+          qwe
+        </Card>
+        <Card
+          title='Revenue Breakdown'
+          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+        >
+          <div className='flex gap-3 px-0 py-3'>Year btn</div>
+          <RevenueBreakdown />
+        </Card>
       </div>
     </div>
   );

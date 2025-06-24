@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -11,10 +11,10 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 
-import { SortDownArrow, SortUpArrow } from '@/assets/svg/icon';
 import { cn } from '@/shared/lib/classNames/classNames';
 
 import Button from '../Button/Button';
+import Icon from '../Icon/Icon';
 import Text from '../Text/Text';
 
 export type ExtendedColumnDef<T> = ColumnDef<T> & {
@@ -37,6 +37,8 @@ interface DataTableProps<T> {
   headerRowClassName?: string;
   headerTextClassName?: string;
   bodyClassName?: string;
+  footerClassName?: string;
+  footerCellClassName?: string;
   onRowClick?: (row: T) => void;
   isLoading?: boolean;
   emptyMessage?: string;
@@ -45,6 +47,8 @@ interface DataTableProps<T> {
   paginationTextClassName?: string;
   paginationButtonsClassName?: string;
   paginationButtonClassName?: string;
+  // Footer content
+  footerContent?: ReactNode;
 }
 
 const DataTable = <T,>({
@@ -63,13 +67,15 @@ const DataTable = <T,>({
   headerRowClassName,
   headerTextClassName,
   bodyClassName,
+  footerClassName,
   onRowClick,
   isLoading = false,
   emptyMessage = 'No data available',
   paginationClassName,
   paginationTextClassName,
   paginationButtonsClassName,
-  paginationButtonClassName
+  paginationButtonClassName,
+  footerContent
 }: DataTableProps<T>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -141,7 +147,7 @@ const DataTable = <T,>({
                         getAlignmentClass(columnAlign),
                         enableSorting &&
                           header.column.getCanSort() &&
-                          'cursor-pointer',
+                          'cursor-pointer select-none',
                         headerCellClassName
                       )}
                       style={{ width: header.column.columnDef.size }}
@@ -171,18 +177,20 @@ const DataTable = <T,>({
                         )}
                         {enableSorting && header.column.getCanSort() && (
                           <div className='flex flex-col'>
-                            <SortUpArrow
+                            <Icon
+                              name='sort-up-arrow'
                               className={`h-1.5 w-1.5 ${
                                 header.column.getIsSorted() === 'asc'
-                                  ? 'text-gray-600'
-                                  : 'text-gray-300'
+                                  ? 'text-primary-11'
+                                  : 'text-primary-13'
                               }`}
                             />
-                            <SortDownArrow
+                            <Icon
+                              name='sort-down-arrow'
                               className={`h-1.5 w-1.5 ${
                                 header.column.getIsSorted() === 'desc'
-                                  ? 'text-gray-600'
-                                  : 'text-gray-300'
+                                  ? 'text-primary-11'
+                                  : 'text-primary-13'
                               }`}
                             />
                           </div>
@@ -237,6 +245,12 @@ const DataTable = <T,>({
               ))
             )}
           </tbody>
+
+          {/* Footer section */}
+          {footerContent && (
+            <tfoot className={cn('', footerClassName)}>{footerContent}</tfoot>
+          )}
+          {/* Footer section */}
         </table>
       </div>
 
