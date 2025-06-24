@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import CryptoChart from '@/components/Charts/Bar/Bar';
+import PieChart from '@/components/Charts/Pie/Pie';
 import TreasuryBalanceByNetwork from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import TreasuryHoldings from '@/components/TreasuryPageTable/TreasuryHoldings';
@@ -29,6 +30,7 @@ const TreasuryPage = () => {
           allocation, strategic holdings, and investment returns.
         </Text>
       </div>
+
       <div className='flex flex-col gap-5'>
         <div className='flex flex-row gap-5'>
           <Card className='flex-1'>
@@ -45,6 +47,7 @@ const TreasuryPage = () => {
               }
             />
           </Card>
+
           <Card className='flex-1'>
             <ValueMetricField
               value='$115.6M'
@@ -59,6 +62,7 @@ const TreasuryPage = () => {
               }
             />
           </Card>
+
           <Card className='flex-1'>
             <ValueMetricField
               value='$115.6M'
@@ -74,6 +78,7 @@ const TreasuryPage = () => {
             />
           </Card>
         </div>
+
         <div className='flex flex-row gap-5'>
           <Card className='flex-1'>
             <ValueMetricField
@@ -91,6 +96,7 @@ const TreasuryPage = () => {
               }
             />
           </Card>
+
           <Card className='flex-1'>
             <ValueMetricField
               className='gap-10'
@@ -108,13 +114,42 @@ const TreasuryPage = () => {
             />
           </Card>
         </div>
+
         <Card
           title='Treasury Composition'
           contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
         >
           <div className='flex gap-3 px-0 py-3'>Asset Type</div>
-          <TreasuryComposition />
+
+          <div className='flex justify-between'>
+            <PieChart
+              className='max-h-[400px] max-w-[336.5px]'
+              data={[
+                { name: 'AAVE', percent: 70.67, value: '1.54M' },
+                { name: 'Stablecoin', percent: 14.77, value: '1.54k' },
+                { name: 'ETH Correlated', percent: 4.86, value: '0.54k' },
+                { name: 'DeFi', percent: 2.63, value: '0.23k' },
+                { name: 'BTC Correlated', percent: 2.6, value: '5.54k' },
+                { name: 'Unclassified', percent: 2.6, value: '0.54k' },
+                { name: 'AAVE', percent: 70.67, value: '1.54M' },
+                { name: 'Stablecoin', percent: 14.77, value: '1.54k' },
+                { name: 'ETH Correlated', percent: 4.86, value: '0.54k' },
+                { name: 'DeFi', percent: 2.63, value: '0.23k' },
+                { name: 'BTC Correlated', percent: 2.6, value: '5.54k' },
+                { name: 'Unclassified', percent: 2.6, value: '0.54k' },
+                { name: 'AAVE', percent: 70.67, value: '1.54M' },
+                { name: 'Stablecoin', percent: 14.77, value: '1.54k' },
+                { name: 'ETH Correlated', percent: 4.86, value: '0.54k' },
+                { name: 'DeFi', percent: 2.63, value: '0.23k' },
+                { name: 'BTC Correlated', percent: 2.6, value: '5.54k' },
+                { name: 'Unclassified', percent: 2.6, value: '0.54k' }
+              ]}
+            />
+
+            <TreasuryComposition />
+          </div>
         </Card>
+
         <Card
           title='Total Treasury Value'
           contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
@@ -131,11 +166,13 @@ const TreasuryPage = () => {
             />
           </div>
         </Card>
+
         <Card
           title='Treasury Balance by Network'
           contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
         >
           <div className='flex gap-3 px-0 py-3'>BTN</div>
+
           <div className='flex justify-between gap-10'>
             <CryptoChart
               data={[
@@ -150,6 +187,7 @@ const TreasuryPage = () => {
             <TreasuryBalanceByNetwork />
           </div>
         </Card>
+
         <Card title='Full Treasury Holdings'>
           <TreasuryHoldings />
         </Card>

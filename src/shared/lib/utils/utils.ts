@@ -6,3 +6,30 @@ export const preventEventBubbling = (
   e.preventDefault();
   e.stopPropagation();
 };
+
+export const colorPicker = (index: number): string => {
+  const colors = [
+    '#6F42EB',
+    '#3877FF',
+    '#00D395',
+    '#F54E59',
+    '#FFA374',
+    '#F9FF8E',
+    '#8FE6FE',
+    '#B39AFF',
+    '#FDB0C0',
+    '#BCE954',
+    '#10A674',
+    '#5C8BC4',
+    '#F6C642',
+    '#02CCFE',
+    '#BC8F6F',
+    '#7A89B8',
+    '#FF752E',
+    '#FAB3FF',
+    '#58F0C5',
+    '#62B1FF'
+  ];
+
+  return colors[index];
+};
