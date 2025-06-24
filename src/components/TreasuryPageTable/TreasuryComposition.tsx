@@ -39,7 +39,7 @@ const columns: ExtendedColumnDef<TreasuryCompositionProps>[] = [
 
 const TreasuryComposition = () => {
   return (
-    <div className='max-w-[522px]'>
+    <div className='w-full max-w-[522px]'>
       <DataTable
         data={TREASURY_COMPOSITION_DATA}
         columns={columns}
