@@ -104,25 +104,22 @@ const Filter: FC<FilterProps> = memo(
             Filter
           </Text>
 
-          <Text
-            tag='span'
-            className={cn(
-              'text-primary-14 h-5 min-h-5 w-5 min-w-5 rounded-full p-0.5',
-              {
-                'bg-secondary-17': Boolean(activeFilters)
-              }
-            )}
-            size='11'
-            weight='500'
-            lineHeight='16'
-            align='center'
-          >
-            {activeFilters ? activeFilters : ''}
-          </Text>
+          <View.Condition if={Boolean(activeFilters)}>
+            <Text
+              tag='span'
+              className='bg-secondary-17 text-primary-14 h-5 min-h-5 w-5 min-w-5 rounded-full p-0.5'
+              size='11'
+              weight='500'
+              lineHeight='16'
+              align='center'
+            >
+              {activeFilters}
+            </Text>
+          </View.Condition>
         </div>
 
         <View.Condition if={isOpen}>
-          <div className='bg-primary-15 shadow-12 absolute top-9 right-0 grid min-w-[600px] gap-5 rounded-lg border-none px-8 py-10'>
+          <div className='bg-primary-15 shadow-12 border-secondary-18 absolute top-9 right-0 grid min-w-[600px] gap-5 rounded-lg border border-solid px-8 py-10'>
             <Text
               className='text-secondary-10'
               size='17'
