@@ -1,12 +1,23 @@
 import * as React from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import LineChart from '@/components/Charts/Line/Line';
-import Filter, { SelectedFiltersType } from '@/components/Filter/Filter';
+import Filter from '@/components/Filter/Filter';
+import { useFilter } from '@/components/Filter/useFilter';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
-const TEST_FILTERS_LIST = [
+type FilterItem = {
+  id: string;
+
+  title: string;
+
+  placeholder: string;
+
+  options: string[];
+};
+
+const TEST_FILTERS_LIST: FilterItem[] = [
   {
     id: 'chain',
     title: 'Chain',
@@ -42,78 +53,30 @@ const TEST_FILTERS_LIST = [
   }
 ];
 
-type FilterItem = {
-  id: string;
-
-  title: string;
-
-  placeholder: string;
-
-  options: string[];
-};
+const SERIES_DATA = [
+  ...Array.from({ length: 100 }, (_, i) => ({
+    x: Date.UTC(2000 + i, 0, 1),
+    y: Math.round(Math.random() * 100)
+  }))
+];
 
 const TotalTresuaryValue = () => {
-  const seriesData = [
-    ...Array.from({ length: 100 }, (_, i) => ({
-      x: Date.UTC(2000 + i, 0, 1),
-      y: Math.round(Math.random() * 100)
-    }))
-  ];
+  const { local, selected, toggle, apply, clear, reset } = useFilter();
 
-  const [selectedFilters, setSelectedFilters] = useState<SelectedFiltersType[]>(
-    []
+  const activeCount = selected.length;
+
+  const filterProps = useMemo(
+    () => ({
+      activeFilters: activeCount,
+      selectedItems: local,
+      filtersList: TEST_FILTERS_LIST,
+      onFilterItemSelect: toggle,
+      onApply: apply,
+      onClear: clear,
+      onOutsideClick: reset
+    }),
+    [activeCount, local, toggle, apply, clear, reset]
   );
-
-  const [localSelectedFilters, setLocalSelectedFilters] = useState<
-    SelectedFiltersType[]
-  >([]);
-
-  const filtersList: FilterItem[] = useMemo(() => {
-    return TEST_FILTERS_LIST;
-  }, []);
-
-  const onFilterItemSelect = (filterId: string, item: string) => {
-    const filterItem = localSelectedFilters.find(
-      (filter) => filter.id === filterId
-    );
-
-    if (filterItem) {
-      const updatedSelectedItems = filterItem.selectedItems.includes(item)
-        ? filterItem.selectedItems.filter((i) => i !== item)
-        : [...filterItem.selectedItems, item];
-
-      const updatedFiltersList = localSelectedFilters.map((filter) =>
-        filter.id === filterId
-          ? { ...filter, selectedItems: updatedSelectedItems }
-          : filter
-      );
-
-      setLocalSelectedFilters(updatedFiltersList);
-
-      return;
-    }
-
-    const newFilterItem: SelectedFiltersType = {
-      id: filterId,
-      selectedItems: [item]
-    };
-
-    setLocalSelectedFilters((prev) => [...prev, newFilterItem]);
-  };
-
-  const onClear = () => {
-    setLocalSelectedFilters([]);
-
-    setSelectedFilters([]);
-  };
-
-  const onApply = () => {
-    setSelectedFilters(localSelectedFilters);
-  };
-
-  const onOutsideClick = () => {
-    setLocalSelectedFilters(selectedFilters);
-  };
 
   return (
     <Card
@@ -131,19 +94,11 @@ const TotalTresuaryValue = () => {
           defaultTab='D'
         />
 
-        <Filter
-          activeFilters={Number(selectedFilters.length)}
-          selectedItems={localSelectedFilters}
-          filtersList={filtersList}
-          onApply={onApply}
-          onClear={onClear}
-          onFilterItemSelect={onFilterItemSelect}
-          onOutsideClick={onOutsideClick}
-        />
+        <Filter {...filterProps} />
       </div>
 
       <LineChart
-        data={seriesData}
+        data={SERIES_DATA}
         className='max-h-[400px]'
       />
     </Card>

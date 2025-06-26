@@ -144,9 +144,7 @@ const Filter: FC<FilterProps> = memo(
                     <Select
                       key={index}
                       filterId={filterItem.id}
-                      title={filterItem.title}
-                      placeholder={filterItem.placeholder}
-                      options={filterItem.options}
+                      {...filterItem}
                       selectedItems={selectedFilter?.selectedItems || []}
                       onItemSelect={onFilterItemSelect}
                       onItemDelete={onFilterItemSelect}
