@@ -28,7 +28,7 @@ const TreasuryCompositionBlock = () => {
         <SingleDropdown
           options={options}
           isOpen={openSingle}
-          selectedValue={selectedSingle}
+          selectedValue={selectedSingle?.[0] || ''}
           onToggle={toggleSingle}
           onClose={closeSingle}
           onSelect={selectSingle}

@@ -6,6 +6,7 @@ import Filter from '@/components/Filter/Filter';
 import { useFilter } from '@/components/Filter/useFilter';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import TreasuryBalanceByNetwork from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
+import { FilterItem } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 
@@ -84,7 +85,7 @@ const TreasuryBalanceByNetworkBlock = () => {
         <SingleDropdown
           options={options}
           isOpen={openSingle}
-          selectedValue={selectedSingle}
+          selectedValue={selectedSingle?.[0] || ''}
           onToggle={toggleSingle}
           onClose={closeSingle}
           onSelect={selectSingle}

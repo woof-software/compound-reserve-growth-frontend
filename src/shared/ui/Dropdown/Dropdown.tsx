@@ -43,29 +43,24 @@ interface TriggerContentProps {
 const useDropdown = (type: 'single' | 'multiple') => {
   const [open, setOpen] = useState(false);
 
-  const [selectedValue, setSelectedValue] = useState<string[] | string | null>(
-    null
-  );
+  const [selectedValue, setSelectedValue] = useState<string[] | null>(null);
 
   const toggle = () => setOpen((prev) => !prev);
   const close = () => setOpen(false);
 
   const select = (value: string) => {
     if (type === 'single') {
-      console.log('value=>', value);
-      setSelectedValue(value);
+      setSelectedValue([value]);
 
       setOpen(false);
     } else {
-      setSelectedValue((prev) =>
-        prev?.includes(value)
-          ? prev?.filter((v) => v !== value)
-          : [...(prev || []), value]
-      );
+      const newValues = selectedValue?.includes(value)
+        ? selectedValue?.filter((v) => v !== value)
+        : [...(selectedValue || []), value];
+
+      setSelectedValue(newValues);
     }
   };
-
-  console.log('selectedValue=>', selectedValue);
 
   return {
     open,

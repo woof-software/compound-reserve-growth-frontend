@@ -7,6 +7,8 @@ interface TabsGroupProps {
 
   defaultTab?: string;
 
+  value?: string;
+
   onTabChange?: (value: string) => void;
 
   className?: {
@@ -23,11 +25,13 @@ interface TabsGroupProps {
 const TabsGroup = ({
   tabs,
   defaultTab,
+  value,
   onTabChange,
   className
 }: TabsGroupProps) => {
   return (
     <Tabs
+      value={value}
       defaultValue={defaultTab || tabs[0]}
       onValueChange={onTabChange}
       className={className?.container}
@@ -44,8 +48,8 @@ const TabsGroup = ({
             key={tab}
             value={tab}
             className={cn(
-              'cursor-pointer rounded-full px-3 py-1 text-[11px] font-medium',
-              'h-6',
+              'flex cursor-pointer items-center justify-center rounded-full px-3 py-1 text-[11px]',
+              'h-6 leading-6',
               'text-primary-11',
               'data-[state=active]:bg-card-content',
               'data-[state=active]:text-primary-11',

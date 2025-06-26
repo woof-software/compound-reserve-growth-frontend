@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import Filter from '@/components/Filter/Filter';
 import { useFilter } from '@/components/Filter/useFilter';
 import TreasuryHoldings from '@/components/TreasuryPageTable/TreasuryHoldings';
+import { FilterItem } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 
 const TEST_FILTERS_LIST: FilterItem[] = [
