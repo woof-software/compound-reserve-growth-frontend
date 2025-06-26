@@ -1,25 +1,17 @@
 import * as React from 'react';
 
 import CryptoChart from '@/components/Charts/Bar/Bar';
-import LineChart from '@/components/Charts/Line/Line';
 import PieChart from '@/components/Charts/Pie/Pie';
 import TreasuryBalanceByNetwork from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import TreasuryHoldings from '@/components/TreasuryPageTable/TreasuryHoldings';
+import TotalTresuaryValue from '@/entities/Treasury/TotalTresuaryValue';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
-import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
 
 const TreasuryPage = () => {
-  const seriesData = [
-    ...Array.from({ length: 100 }, (_, i) => ({
-      x: Date.UTC(2000 + i, 0, 1),
-      y: Math.round(Math.random() * 100)
-    }))
-  ];
-
   return (
     <div className='flex flex-col gap-[70px]'>
       <div className='flex flex-col gap-[15px]'>
@@ -146,27 +138,7 @@ const TreasuryPage = () => {
           </div>
         </Card>
 
-        <Card
-          title='Total Treasury Value'
-          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
-        >
-          <LineChart
-            data={seriesData}
-            className='max-h-[400px]'
-          />
-
-          <div className='flex gap-3 px-0 py-3'>
-            <TabsGroup
-              tabs={['7D', '30D', '90D', '1Y']}
-              defaultTab='7D'
-            />
-
-            <TabsGroup
-              tabs={['H', 'D', 'W']}
-              defaultTab='D'
-            />
-          </div>
-        </Card>
+        <TotalTresuaryValue />
 
         <Card
           title='Treasury Balance by Network'
