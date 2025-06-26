@@ -10,6 +10,7 @@ interface TabsGroupProps {
   listClassName?: string;
   triggerClassName?: string;
   activeTriggerClassName?: string;
+  value?: string;
 }
 
 const TabsGroup = ({
@@ -19,10 +20,12 @@ const TabsGroup = ({
   className,
   listClassName,
   triggerClassName,
-  activeTriggerClassName
+  activeTriggerClassName,
+  value
 }: TabsGroupProps) => {
   return (
     <Tabs
+      value={value}
       defaultValue={defaultTab || tabs[0]}
       onValueChange={onTabChange}
       className={className}
@@ -40,8 +43,8 @@ const TabsGroup = ({
             key={tab}
             value={tab}
             className={cn(
-              'cursor-pointer rounded-full px-3 py-1 text-[11px] font-medium',
-              'h-6',
+              'flex cursor-pointer items-center justify-center rounded-full px-3 py-1 text-[11px]',
+              'h-6 leading-6',
               'text-primary-11',
               'data-[state=active]:bg-card-content',
               'data-[state=active]:text-primary-11',

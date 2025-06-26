@@ -67,11 +67,14 @@
   --success-11: #00C289;
   --success-12: #00C2891A;
 
-
   /*=======================*/
   /* Error Colors */
   --red-10: #F54E591A;
   --red-11: #F54E59;
+
+  /*=======================*/
+  /* Custom Colors */
+  --custom-trigger: #f1f2f6;
 }
 
 .dark {
@@ -115,6 +118,10 @@
   /* Error Colors */
   --red-10: #F54E591A;
   --red-11: #F54E59;
+
+  /*=======================*/
+  /* Custom Colors */
+  --custom-trigger: #17212b;
 }
 
 @theme inline {
@@ -165,10 +172,16 @@
   --color-red-11: var(--red-11);
 
   /*=======================*/
+  /* Custom Colors */
+  --color-custom-trigger: var(--custom-trigger);
+
+  /*=======================*/
   /* Static Colors */
   --color-white-10: #FFFFFF;
   --color-white-11: #D8DFE5;
   --color-gray-10: #2B3947;
+  --color-gray-11: #516070;
+  --color-gray-12: #17212B;
 
   /*=======================*/
   /* Decorative Colors */
