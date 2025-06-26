@@ -1,9 +1,9 @@
-import 'highcharts/modules/stock';
-import 'highcharts/modules/mouse-wheel-zoom';
-
 import React, { useEffect, useMemo, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+
+import 'highcharts/modules/stock';
+import 'highcharts/modules/mouse-wheel-zoom';
 
 interface ChartData {
   date: string;

@@ -1,6 +1,3 @@
-import 'highcharts/modules/stock';
-import 'highcharts/modules/mouse-wheel-zoom';
-
 import React, { useEffect, useMemo, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -8,6 +5,9 @@ import HighchartsReact from 'highcharts-react-official';
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 
 import { seriesConfig, StackedChartData, stackedChartData } from '../chartData';
+
+import 'highcharts/modules/stock';
+import 'highcharts/modules/mouse-wheel-zoom';
 
 interface CompoundFeeRecievedProps {
   data?: StackedChartData[];
