@@ -65,12 +65,17 @@ const useDropdown = (type: 'single' | 'multiple') => {
     }
   };
 
+  const clear = () => {
+    setSelectedValue(null);
+  };
+
   return {
     open,
     selectedValue,
     toggle,
     close,
-    select
+    select,
+    clear
   };
 };
 
@@ -98,7 +103,7 @@ const Dropdown: FC<DropdownProps> = ({
           {triggerContent}
         </PopoverTrigger>
 
-        <PopoverContent className='hide-scrollbar bg-primary-15 grid max-h-[182px] max-w-[168px] gap-0.5 overflow-y-auto border-none p-2'>
+        <PopoverContent className='hide-scrollbar bg-primary-15 grid max-h-[182px] max-w-[168px] gap-0.5 overflow-y-auto border-[0.25px] border-[#F9FAFB26] p-0'>
           {children}
         </PopoverContent>
       </Popover>
