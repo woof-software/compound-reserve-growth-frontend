@@ -29,7 +29,7 @@ const RevenuePage = () => {
       <div className='flex flex-col gap-5'>
         <div className='flex flex-row gap-5'>
           <Card
-            className='flex-1'
+            className={{ container: 'flex-1' }}
             title='2022 Revenue'
           >
             <div className='flex flex-col gap-8'>
@@ -43,8 +43,9 @@ const RevenuePage = () => {
               />
             </div>
           </Card>
+
           <Card
-            className='flex-1'
+            className={{ container: 'flex-1' }}
             title='2023 Revenue'
           >
             <div className='flex flex-col gap-8'>
@@ -59,7 +60,7 @@ const RevenuePage = () => {
             </div>
           </Card>
           <Card
-            className='flex-1'
+            className={{ container: 'flex-1' }}
             title='2024 Revenue'
           >
             <div className='flex flex-col gap-8'>
@@ -74,7 +75,7 @@ const RevenuePage = () => {
             </div>
           </Card>
           <Card
-            className='flex-1'
+            className={{ container: 'flex-1' }}
             title='2025 Revenue'
           >
             <div className='flex flex-col gap-8'>
@@ -92,7 +93,7 @@ const RevenuePage = () => {
 
         <Card
           title='Revenue Overview USD'
-          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+          className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
         >
           <div className='flex gap-3 px-0 py-3'>
             <TabsGroup
@@ -108,7 +109,7 @@ const RevenuePage = () => {
         </Card>
         <Card
           title='Compound Cumulative Revenue'
-          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+          className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
         >
           <div className='flex gap-3 px-0 py-3'>
             <TabsGroup
@@ -120,7 +121,7 @@ const RevenuePage = () => {
         </Card>
         <Card
           title='Compound Fee Revenue Recieved'
-          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+          className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
         >
           <div className='flex gap-3 px-0 py-3'>
             <TabsGroup
@@ -132,14 +133,14 @@ const RevenuePage = () => {
         </Card>
         <Card
           title='Compound Fee Revenue by Chain'
-          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+          className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
         >
           <div className='flex gap-3 px-0 py-3'>Interval Year</div>
           <CompoundFeeRevenuebyChain />
         </Card>
         <Card
           title='Compound Revenue'
-          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+          className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
         >
           {' '}
           <div className='flex gap-3 px-0 py-3'>
@@ -152,7 +153,7 @@ const RevenuePage = () => {
         </Card>
         <Card
           title='Revenue Breakdown'
-          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+          className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
         >
           <div className='flex gap-3 px-0 py-3'>Year btn</div>
           <RevenueBreakdown />

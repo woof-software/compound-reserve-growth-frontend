@@ -1,13 +1,10 @@
 import * as React from 'react';
 import { useMemo } from 'react';
 
-import LineChart from '@/components/Charts/Line/Line';
 import Filter from '@/components/Filter/Filter';
 import { useFilter } from '@/components/Filter/useFilter';
-import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
+import TreasuryHoldings from '@/components/TreasuryPageTable/TreasuryHoldings';
 import Card from '@/shared/ui/Card/Card';
-import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
-import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
 const TEST_FILTERS_LIST: FilterItem[] = [
   {
@@ -45,25 +42,8 @@ const TEST_FILTERS_LIST: FilterItem[] = [
   }
 ];
 
-const SERIES_DATA = [
-  ...Array.from({ length: 100 }, (_, i) => ({
-    x: Date.UTC(2000 + i, 0, 1),
-    y: Math.round(Math.random() * 100)
-  }))
-];
-
-const options = ['Asset Type', 'Chain', 'Market', 'Wallet'];
-
-const TotalTresuaryValue = () => {
+const TreasuryHoldingsBlock = () => {
   const { local, selected, toggle, apply, clear, reset } = useFilter();
-
-  const {
-    open: openSingle,
-    selectedValue: selectedSingle,
-    toggle: toggleSingle,
-    close: closeSingle,
-    select: selectSingle
-  } = useDropdown('single');
 
   const activeCount = selected.length;
 
@@ -82,40 +62,19 @@ const TotalTresuaryValue = () => {
 
   return (
     <Card
-      title='Total Treasury Value'
+      title='Full Treasury Holdings'
       className={{
-        content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
+        container: 'overflow-visible',
+        content: 'pt-0'
       }}
     >
-      <div className='flex justify-end gap-3 px-0 py-3'>
-        <TabsGroup
-          tabs={['7D', '30D', '90D', '1Y']}
-          defaultTab='7D'
-        />
-
-        <TabsGroup
-          tabs={['H', 'D', 'W']}
-          defaultTab='D'
-        />
-
-        <SingleDropdown
-          options={options}
-          isOpen={openSingle}
-          selectedValue={selectedSingle}
-          onToggle={toggleSingle}
-          onClose={closeSingle}
-          onSelect={selectSingle}
-        />
-
+      <div className='flex items-center justify-end gap-3 px-0 py-3'>
         <Filter {...filterProps} />
       </div>
 
-      <LineChart
-        data={SERIES_DATA}
-        className='max-h-[400px]'
-      />
+      <TreasuryHoldings />
     </Card>
   );
 };
 
-export default TotalTresuaryValue;
+export default TreasuryHoldingsBlock;

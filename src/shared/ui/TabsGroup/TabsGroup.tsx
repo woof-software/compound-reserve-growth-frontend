@@ -4,35 +4,39 @@ import { Tabs, TabsList, TabsTrigger } from '../Tabs/Tabs';
 
 interface TabsGroupProps {
   tabs: string[];
+
   defaultTab?: string;
+
   onTabChange?: (value: string) => void;
-  className?: string;
-  listClassName?: string;
-  triggerClassName?: string;
-  activeTriggerClassName?: string;
+
+  className?: {
+    container?: string;
+
+    list?: string;
+
+    trigger?: string;
+
+    activeTrigger?: string;
+  };
 }
 
 const TabsGroup = ({
   tabs,
   defaultTab,
   onTabChange,
-  className,
-  listClassName,
-  triggerClassName,
-  activeTriggerClassName
+  className
 }: TabsGroupProps) => {
   return (
     <Tabs
       defaultValue={defaultTab || tabs[0]}
       onValueChange={onTabChange}
-      className={className}
+      className={className?.container}
     >
       <TabsList
         className={cn(
           'h-8 w-fit rounded-full p-1',
-          'border-primary-17 border-[0.25px]',
-          'bg-card-header',
-          listClassName
+          'bg-primary-18 dark:shadow-13 shadow-14 border-none',
+          className?.list
         )}
       >
         {tabs.map((tab) => (
@@ -46,12 +50,12 @@ const TabsGroup = ({
               'data-[state=active]:bg-card-content',
               'data-[state=active]:text-primary-11',
               'data-[state=active]:shadow-sm',
-              'data-[state=active]:border-primary-17',
-              'data-[state=active]:border-[0.25px]',
-              'border-[0.25px] border-transparent',
-              triggerClassName,
-              activeTriggerClassName &&
-                `data-[state=active]:${activeTriggerClassName}`
+              'data-[state=active]:!dark:shadow-13',
+              'data-[state=active]:!shadow-14',
+              'border-none',
+              className?.trigger,
+              className?.activeTrigger &&
+                `data-[state=active]:${className?.activeTrigger}`
             )}
           >
             {tab}

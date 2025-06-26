@@ -3,43 +3,53 @@ import { FC, ReactNode } from 'react';
 import { cn } from '@/shared/lib/classNames/classNames';
 
 import Text from '../Text/Text';
+import View from '../View/View';
 
 interface CardProps {
   title?: string;
+
   children: ReactNode;
-  className?: string;
-  titleClassName?: string;
-  headerClassName?: string;
-  contentClassName?: string;
+
+  className?: {
+    container?: string;
+
+    header?: string;
+
+    content?: string;
+
+    title?: string;
+  };
 }
 
 const Card: FC<CardProps> = ({
   title,
+
   children,
-  className,
-  titleClassName,
-  headerClassName,
-  contentClassName
+
+  className
 }) => {
   return (
     <div
       className={cn(
         'bg-card-content w-full overflow-hidden rounded-lg shadow-md',
-        className
+        className?.container
       )}
     >
-      {title && (
-        <div className={cn('bg-card-header px-10 py-4', headerClassName)}>
+      <View.Condition if={Boolean(title)}>
+        <div className={cn('bg-card-header px-10 py-4', className?.header)}>
           <Text
             tag='h3'
             size='13'
-            className={cn(titleClassName)}
+            weight='500'
+            lineHeight='27'
+            className={cn(className?.title)}
           >
             {title}
           </Text>
         </div>
-      )}
-      <div className={cn('bg-card-content p-10', contentClassName)}>
+      </View.Condition>
+
+      <div className={cn('bg-card-content p-10', className?.content)}>
         {children}
       </div>
     </div>

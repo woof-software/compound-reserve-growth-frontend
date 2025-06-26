@@ -10,11 +10,6 @@ import {
 
 import { useClickOutside } from '@/shared/hooks/useClickOutside';
 import { cn } from '@/shared/lib/classNames/classNames';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/shared/ui/Popover/Popover';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
@@ -47,14 +42,19 @@ interface TriggerContentProps {
 
 const useDropdown = (type: 'single' | 'multiple') => {
   const [open, setOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState<string[] | null>(null);
+
+  const [selectedValue, setSelectedValue] = useState<string[] | string | null>(
+    null
+  );
 
   const toggle = () => setOpen((prev) => !prev);
   const close = () => setOpen(false);
 
   const select = (value: string) => {
     if (type === 'single') {
-      setSelectedValue([value]);
+      console.log('value=>', value);
+      setSelectedValue(value);
+
       setOpen(false);
     } else {
       setSelectedValue((prev) =>
@@ -64,6 +64,8 @@ const useDropdown = (type: 'single' | 'multiple') => {
       );
     }
   };
+
+  console.log('selectedValue=>', selectedValue);
 
   return {
     open,
@@ -87,21 +89,23 @@ const Dropdown: FC<DropdownProps> = ({
 
   return (
     <div
-      className='w-fit'
+      className='relative z-10 w-fit'
       ref={containerRef}
     >
-      <Popover open={open}>
-        <PopoverTrigger
+      <div>
+        <div
           className='cursor-pointer'
           onClick={onToggle}
         >
           {triggerContent}
-        </PopoverTrigger>
+        </div>
 
-        <PopoverContent className='hide-scrollbar bg-primary-15 grid max-h-[182px] max-w-[168px] gap-0.5 overflow-y-auto border-none p-2'>
-          {children}
-        </PopoverContent>
-      </Popover>
+        <View.Condition if={open}>
+          <div className='hide-scrollbar border-secondary-18 bg-primary-15 absolute top-10 right-0 grid max-h-[182px] min-w-[168px] gap-0.5 overflow-y-auto rounded-lg border border-solid p-2'>
+            {children}
+          </div>
+        </View.Condition>
+      </div>
     </div>
   );
 };

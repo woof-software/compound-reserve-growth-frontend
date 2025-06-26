@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { useMemo } from 'react';
 
-import LineChart from '@/components/Charts/Line/Line';
+import CryptoChart from '@/components/Charts/Bar/Bar';
 import Filter from '@/components/Filter/Filter';
 import { useFilter } from '@/components/Filter/useFilter';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
+import TreasuryBalanceByNetwork from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
-import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
 const TEST_FILTERS_LIST: FilterItem[] = [
   {
@@ -45,16 +45,9 @@ const TEST_FILTERS_LIST: FilterItem[] = [
   }
 ];
 
-const SERIES_DATA = [
-  ...Array.from({ length: 100 }, (_, i) => ({
-    x: Date.UTC(2000 + i, 0, 1),
-    y: Math.round(Math.random() * 100)
-  }))
-];
-
 const options = ['Asset Type', 'Chain', 'Market', 'Wallet'];
 
-const TotalTresuaryValue = () => {
+const TreasuryBalanceByNetworkBlock = () => {
   const { local, selected, toggle, apply, clear, reset } = useFilter();
 
   const {
@@ -82,22 +75,12 @@ const TotalTresuaryValue = () => {
 
   return (
     <Card
-      title='Total Treasury Value'
+      title='Treasury Balance by Network'
       className={{
         content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
       }}
     >
-      <div className='flex justify-end gap-3 px-0 py-3'>
-        <TabsGroup
-          tabs={['7D', '30D', '90D', '1Y']}
-          defaultTab='7D'
-        />
-
-        <TabsGroup
-          tabs={['H', 'D', 'W']}
-          defaultTab='D'
-        />
-
+      <div className='flex items-center justify-end gap-3 px-0 py-3'>
         <SingleDropdown
           options={options}
           isOpen={openSingle}
@@ -110,12 +93,22 @@ const TotalTresuaryValue = () => {
         <Filter {...filterProps} />
       </div>
 
-      <LineChart
-        data={SERIES_DATA}
-        className='max-h-[400px]'
-      />
+      <div className='flex justify-between gap-10'>
+        <CryptoChart
+          data={[
+            { name: 'AAVE', value: 150000000, color: '#4F7CFF' },
+            { name: 'Stablecoin', value: 35000000, color: '#00D4AA' },
+            { name: 'ETH Correlated', value: 30000000, color: '#F0E68C' },
+            { name: 'DeFi', value: 8500000, color: '#FF6B6B' },
+            { name: 'BTC Correlated', value: 50000000, color: '#8B5CF6' },
+            { name: 'Unclassified', value: 35000000, color: '#FF8C42' }
+          ]}
+        />
+
+        <TreasuryBalanceByNetwork />
+      </div>
     </Card>
   );
 };
 
-export default TotalTresuaryValue;
+export default TreasuryBalanceByNetworkBlock;
