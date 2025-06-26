@@ -122,7 +122,7 @@ const Filter: FC<FilterProps> = memo(
         </div>
 
         <View.Condition if={isOpen}>
-          <div className='bg-primary-15 shadow-12 absolute top-9 right-0 grid min-w-[600px] gap-5 rounded-lg border-none px-8 py-10'>
+          <div className='bg-primary-15 shadow-12 border-secondary-18 absolute top-9 right-0 grid min-w-[600px] gap-5 rounded-lg border border-solid px-8 py-10'>
             <Text
               className='text-secondary-10'
               size='17'
