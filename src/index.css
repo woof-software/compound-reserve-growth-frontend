@@ -60,6 +60,8 @@
   --secondary-13: #0C131A26;
   --secondary-14: #F0F2F5;
   --secondary-15: #17212B26;
+  --secondary-16: #E5E7EA;
+  --secondary-17: #F9FAFB;
 
   /*=======================*/
   /* Success Colors */
@@ -104,6 +106,8 @@
   --secondary-13: #F9FAFB26;
   --secondary-14: #2B3947;
   --secondary-15: #1D2833;
+  --secondary-16: #2B3947;
+  --secondary-17: #2B3947;
 
   /*=======================*/
   /* Success Colors */
@@ -122,6 +126,7 @@
   /* Shadows */
   --shadow-10: 0 0 12px 0 #0000000D;
   --shadow-11: 0px 1px 3px 0px #00000040, 0px 1px 1px 0px #00000040, 0px 2px 1px -1px #00000040;
+  --shadow-12: 0px 8px 20px 0px #0D131A0A, 0px 2px 12px 0px #0D131A05;
 
   /*=======================*/
   /* Layout */
@@ -152,6 +157,8 @@
   --color-secondary-13: var(--secondary-13);
   --color-secondary-14: var(--secondary-14);
   --color-secondary-15: var(--secondary-15);
+  --color-secondary-16: var(--secondary-16);
+  --color-secondary-17: var(--secondary-17);
 
   /*=======================*/
   /* Success Colors */

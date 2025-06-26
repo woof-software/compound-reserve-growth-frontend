@@ -27,6 +27,7 @@ const text = cva('text-primary-11', {
       '14': 'leading-[14px]',
       '16': 'leading-[16px]',
       '18': 'leading-[18px]',
+      '20': 'leading-[20px]',
       '21': 'leading-[21px]',
       '24': 'leading-[24px]',
       '27': 'leading-[27px]',
