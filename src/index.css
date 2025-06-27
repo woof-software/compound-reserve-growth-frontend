@@ -63,6 +63,7 @@
   --secondary-16: #E5E7EA;
   --secondary-17: #F9FAFB;
   --secondary-18: #F9FAFB26;
+  --secondary-19: #393641;
 
   /*=======================*/
   /* Success Colors */
@@ -96,6 +97,7 @@
   --primary-16: #2B3946;
   --primary-17: #F9FAFB26;
   --primary-18: #17212B;
+  --primary-19: #F9FAFB;
 
   /*=======================*/
   /* Card Colors */
@@ -136,6 +138,9 @@
   --shadow-10: 0 0 12px 0 #0000000D;
   --shadow-11: 0px 1px 3px 0px #00000040, 0px 1px 1px 0px #00000040, 0px 2px 1px -1px #00000040;
   --shadow-12: 0px 8px 20px 0px #0D131A0A, 0px 2px 12px 0px #0D131A05;
+  --shadow-13: inset 0 0 0 0.25px #F9FAFB26;
+  --shadow-14: inset 0 0 0 0.25px #0C131A26
+;
 
   /*=======================*/
   /* Layout */
@@ -152,6 +157,7 @@
   --color-primary-16: var(--primary-16);
   --color-primary-17: var(--primary-17);
   --color-primary-18: var(--primary-18);
+  --color-primary-19: var(--primary-19);
 
   /*=======================*/
   /* Card Colors */

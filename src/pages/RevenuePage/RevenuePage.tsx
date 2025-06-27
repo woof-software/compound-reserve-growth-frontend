@@ -126,7 +126,7 @@ const RevenuePage = () => {
           {['2021', '2022', '2023', '2024'].map((year) => (
             <Card
               key={year}
-              className='flex-1'
+              className={{ container: 'flex-1' }}
               title={`${year} Revenue`}
             >
               <div className='flex flex-col gap-8'>
@@ -145,7 +145,7 @@ const RevenuePage = () => {
 
         <Card
           title='Revenue Overview USD'
-          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+          className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
         >
           <div className='flex gap-3 px-0 py-3'>
             <TabsGroup
@@ -162,7 +162,7 @@ const RevenuePage = () => {
 
         <Card
           title='Compound Cumulative Revenue'
-          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+          className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
         >
           <div className='flex gap-3 px-0 py-3'>
             <TabsGroup
@@ -175,7 +175,7 @@ const RevenuePage = () => {
 
         <Card
           title='Compound Fee Revenue Recieved'
-          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+          className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
         >
           <div className='flex justify-end gap-3 px-0 py-3'>
             <div className='flex gap-2'>
@@ -215,6 +215,7 @@ const RevenuePage = () => {
               }}
             />
           </div>
+
           <CompoundFeeRecieved
             data={stackedChartData}
             barCount={parseInt(feeRecievedTab.replace('B', ''), 10)}
@@ -225,7 +226,7 @@ const RevenuePage = () => {
 
         <Card
           title='Compound Fee Revenue by Chain'
-          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+          className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
         >
           <div className='flex gap-3 px-0 py-3'>Interval Year</div>
           <CompoundFeeRevenuebyChain />
@@ -233,7 +234,7 @@ const RevenuePage = () => {
 
         <Card
           title='Compound Revenue'
-          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+          className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
         >
           <div className='flex justify-end gap-3 px-0 py-3'>
             <div className='flex gap-2'>
@@ -242,22 +243,26 @@ const RevenuePage = () => {
                 onChange={() => {}}
                 placeholder='Chain'
               />
+
               <MultiSelect
                 options={blockchains}
                 onChange={() => {}}
                 placeholder='Market'
               />
+
               <MultiSelect
                 options={blockchains}
                 onChange={() => {}}
                 placeholder='Source'
               />
+
               <MultiSelect
                 options={blockchains}
                 onChange={() => {}}
                 placeholder='Reserve Symbols'
               />
             </div>
+
             <TabsGroup
               tabs={['D', 'W', 'M']}
               value={revenueBarSize}
@@ -282,15 +287,17 @@ const RevenuePage = () => {
               }}
             />
           </div>
+
           <CompoundRevenue
             data={fullFiveYearData}
             barSize={revenueBarSize}
             barCount={Number(compoundRevenueTab.replace('B', ''))}
           />
         </Card>
+
         <Card
           title='Revenue Breakdown'
-          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+          className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
         >
           <div className='flex gap-3 px-0 py-3'>Year btn</div>
           <RevenueBreakdown />
