@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
+
+import { seriesConfig, StackedChartData, stackedChartData } from '../chartData';
 
 import 'highcharts/modules/stock';
 import 'highcharts/modules/mouse-wheel-zoom';
-
-import { seriesConfig, StackedChartData, stackedChartData } from '../chartData';
 
 interface CompoundFeeRecievedProps {
   data?: StackedChartData[];
@@ -113,7 +114,12 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       },
       lineWidth: 0,
       tickLength: 0,
-      tickWidth: 0
+      tickWidth: 0,
+      crosshair: {
+        width: 1,
+        color: theme === 'light' ? '#A1A1AA' : '#52525b',
+        dashStyle: 'ShortDash'
+      }
     },
     yAxis: {
       title: { text: undefined },

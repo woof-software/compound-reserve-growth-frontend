@@ -1,7 +1,9 @@
+import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import AnnualisedExpenses from '@/components/RunwayPageTable/AnnualisedExpenses';
 import CurrentInitiatives from '@/components/RunwayPageTable/CurrentInitiatives';
 import CurrentServiceProviders from '@/components/RunwayPageTable/CurrentServiceProviders';
 import FullDAOCommitments from '@/components/RunwayPageTable/FullDAOCommitments';
+import { FULL_DAO_COMMITMENTS_DATA } from '@/components/RunwayPageTable/MOCK_DATA';
 import Card from '@/shared/ui/Card/Card';
 import Text from '@/shared/ui/Text/Text';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
@@ -81,7 +83,12 @@ const RunwayPage = () => {
           title='Full DAO Commitments'
           contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
         >
-          <div className='flex gap-3 px-0 py-3'>BTN</div>
+          <div className='flex justify-end gap-3 px-0 py-3'>
+            <CSVDownloadButton
+              data={FULL_DAO_COMMITMENTS_DATA}
+              filename='Full DAO Commitments'
+            />
+          </div>
           <FullDAOCommitments />
         </Card>
       </div>

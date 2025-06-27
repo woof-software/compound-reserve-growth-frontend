@@ -1,7 +1,7 @@
-import * as React from 'react';
-
 import CryptoChart from '@/components/Charts/Bar/Bar';
 import PieChart from '@/components/Charts/Pie/Pie';
+import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
+import { TREASURY_DATA } from '@/components/TreasuryPageTable/MOCK_DATA';
 import TreasuryBalanceByNetwork from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import TreasuryHoldings from '@/components/TreasuryPageTable/TreasuryHoldings';
@@ -161,7 +161,16 @@ const TreasuryPage = () => {
           </div>
         </Card>
 
-        <Card title='Full Treasury Holdings'>
+        <Card
+          title='Full Treasury Holdings'
+          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+        >
+          <div className='flex justify-end gap-3 px-0 py-3'>
+            <CSVDownloadButton
+              data={TREASURY_DATA}
+              filename='Full Treasury Holdings'
+            />
+          </div>
           <TreasuryHoldings />
         </Card>
       </div>

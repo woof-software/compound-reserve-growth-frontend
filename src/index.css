@@ -46,6 +46,7 @@
   --primary-16: #D6DFE8;
   --primary-17: #CED1D4;
   --primary-18: #F0F2F5;
+  --primary-19: #e4e5e9;
 
   /*=======================*/
   /* Card Colors */
@@ -96,6 +97,7 @@
   --primary-16: #2B3946;
   --primary-17: #F9FAFB26;
   --primary-18: #17212B;
+  --primary-19: #17212b;
 
   /*=======================*/
   /* Card Colors */
@@ -152,6 +154,7 @@
   --color-primary-16: var(--primary-16);
   --color-primary-17: var(--primary-17);
   --color-primary-18: var(--primary-18);
+  --color-primary-19: var(--primary-19);
 
   /*=======================*/
   /* Card Colors */

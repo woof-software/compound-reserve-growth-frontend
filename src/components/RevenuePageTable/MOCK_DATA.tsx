@@ -138,6 +138,7 @@ export interface RevenueBreakdownProps {
   q4_2024: string;
   q1_2025: string;
   q2_2025: string;
+  [key: string]: string | number | boolean | null | undefined;
 }
 
 export const REVENUE_BREAKDOWN_DATA: RevenueBreakdownProps[] = [
