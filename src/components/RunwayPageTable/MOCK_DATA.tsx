@@ -233,6 +233,7 @@ export interface FullDAOCommitmentProps {
   dailyStreamRate: string;
   startDate: string;
   streamEndDate: string;
+  [key: string]: string | number | boolean | null | undefined;
 }
 
 export const FULL_DAO_COMMITMENTS_DATA: FullDAOCommitmentProps[] = [

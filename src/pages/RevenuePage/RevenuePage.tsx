@@ -3,8 +3,10 @@ import { useMemo, useState } from 'react';
 import { blockchains, stackedChartData } from '@/components/Charts/chartData';
 import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/CompoundFeeRecieved';
 import CompoundRevenue from '@/components/Charts/CompoundRevenue/CompoundRevenue';
+import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import CompoundFeeRevenuebyChain from '@/components/RevenuePageTable/CompoundFeeRevenuebyChain';
+import { REVENUE_BREAKDOWN_DATA } from '@/components/RevenuePageTable/MOCK_DATA';
 import RevenueBreakdown from '@/components/RevenuePageTable/RevenueBreakdown';
 import RevenueOverviewUSD from '@/components/RevenuePageTable/RevenueOverviewUSD';
 import Card from '@/shared/ui/Card/Card';
@@ -299,7 +301,12 @@ const RevenuePage = () => {
           title='Revenue Breakdown'
           className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
         >
-          <div className='flex gap-3 px-0 py-3'>Year btn</div>
+          <div className='flex justify-end gap-3 px-0 py-3'>
+            <CSVDownloadButton
+              data={REVENUE_BREAKDOWN_DATA}
+              filename='Revenue Breakdown'
+            />
+          </div>
           <RevenueBreakdown />
         </Card>
       </div>
