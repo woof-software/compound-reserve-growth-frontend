@@ -49,10 +49,19 @@ export function ThemeProvider({
         : 'light';
 
       root.classList.add(systemTheme);
+
+      localStorage.setItem(storageKey, systemTheme);
+
+      setTheme(systemTheme);
+
       return;
     }
 
     root.classList.add(theme);
+
+    localStorage.setItem(storageKey, theme);
+
+    setTheme(theme);
   }, [theme]);
 
   const value = {

@@ -30,19 +30,19 @@ const RunwayPage = () => {
       </div>
       <div className='flex flex-col gap-5'>
         <div className='flex flex-row gap-5'>
-          <Card className='flex-1'>
+          <Card className={{ container: 'flex-1' }}>
             <ValueMetricField
               value='$63.6M'
               label='Total Annualised Expenses'
             />
           </Card>
-          <Card className='flex-1'>
+          <Card className={{ container: 'flex-1' }}>
             <ValueMetricField
               value='$28.3M'
               label='Service Provider Expenses'
             />
           </Card>
-          <Card className='flex-1'>
+          <Card className={{ container: 'flex-1' }}>
             <ValueMetricField
               value='$35.3M'
               label='DAO Initiatives Expenses'
@@ -81,7 +81,7 @@ const RunwayPage = () => {
         </Card>
         <Card
           title='Full DAO Commitments'
-          contentClassName='pt-0 pb-10 px-10 flex flex-col gap-3'
+          className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
         >
           <div className='flex justify-end gap-3 px-0 py-3'>
             <CSVDownloadButton

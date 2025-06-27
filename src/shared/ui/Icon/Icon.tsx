@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { ComponentType, SVGProps, useEffect, useState } from 'react';
 
 const Icon = ({
   name,
@@ -9,15 +9,21 @@ const Icon = ({
   name: string;
   className?: string;
   color?: string;
-} & React.SVGProps<SVGSVGElement>) => {
-  const [SvgComponent, setSvgComponent] = useState<React.ComponentType<
-    React.SVGProps<SVGSVGElement>
+} & SVGProps<SVGSVGElement>) => {
+  const [SvgComponent, setSvgComponent] = useState<ComponentType<
+    SVGProps<SVGSVGElement>
   > | null>(null);
 
   useEffect(() => {
-    import(`@/assets/svg/${name}.svg`).then((module) => {
-      setSvgComponent(() => module.default);
-    });
+    import(`@/assets/svg/${name}.svg`)
+      .then((module) => {
+        setSvgComponent(() => module.default);
+      })
+      .catch(() => {
+        import('@/assets/svg/not-found-icon.svg').then((module) => {
+          setSvgComponent(() => module.default);
+        });
+      });
   }, [name]);
 
   if (!SvgComponent) return null;
