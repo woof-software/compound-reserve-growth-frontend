@@ -1,8 +1,9 @@
-import * as React from 'react';
 import { useMemo } from 'react';
 
+import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
 import { useFilter } from '@/components/Filter/useFilter';
+import { TREASURY_DATA } from '@/components/TreasuryPageTable/MOCK_DATA';
 import TreasuryHoldings from '@/components/TreasuryPageTable/TreasuryHoldings';
 import { FilterItem } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
@@ -71,6 +72,10 @@ const TreasuryHoldingsBlock = () => {
     >
       <div className='flex items-center justify-end gap-3 px-0 py-3'>
         <Filter {...filterProps} />
+        <CSVDownloadButton
+          data={TREASURY_DATA}
+          filename='Full Treasury Holdings'
+        />
       </div>
 
       <TreasuryHoldings />

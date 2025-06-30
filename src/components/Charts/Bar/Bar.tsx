@@ -169,27 +169,11 @@ const CryptoChart: React.FC<CryptoChartProps> = ({ data }) => {
   }, [data]);
 
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        userSelect: 'none',
-        MozUserSelect: 'none',
-        WebkitUserSelect: 'none'
-      }}
-    >
-      <HighchartsReact
-        ref={chartRef}
-        highcharts={Highcharts}
-        options={chartOptions}
-        containerProps={{
-          style: {
-            width: '100%',
-            height: '100%'
-          }
-        }}
-      />
-    </div>
+    <HighchartsReact
+      ref={chartRef}
+      highcharts={Highcharts}
+      options={chartOptions}
+    />
   );
 };
 

@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
+import { REVENUE_BREAKDOWN_DATA } from '@/components/RevenuePageTable/MOCK_DATA';
 import RevenueBreakdown from '@/components/RevenuePageTable/RevenueBreakdown';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import Card from '@/shared/ui/Card/Card';
@@ -44,6 +46,11 @@ const RevenueBreakDownBlock = () => {
             onSelect={selectYear}
           />
         </div>
+
+        <CSVDownloadButton
+          data={REVENUE_BREAKDOWN_DATA}
+          filename='Revenue Breakdown'
+        />
       </div>
 
       <RevenueBreakdown />

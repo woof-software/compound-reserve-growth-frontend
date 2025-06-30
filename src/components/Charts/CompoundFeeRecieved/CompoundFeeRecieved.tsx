@@ -114,7 +114,12 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       },
       lineWidth: 0,
       tickLength: 0,
-      tickWidth: 0
+      tickWidth: 0,
+      crosshair: {
+        width: 1,
+        color: theme === 'light' ? '#A1A1AA' : '#52525b',
+        dashStyle: 'ShortDash'
+      }
     },
     yAxis: {
       title: { text: undefined },

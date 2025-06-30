@@ -46,6 +46,7 @@
   --primary-16: #D6DFE8;
   --primary-17: #CED1D4;
   --primary-18: #F0F2F5;
+  --primary-20: #e4e5e9;
 
   /*=======================*/
   /* Card Colors */
@@ -63,7 +64,7 @@
   --secondary-16: #E5E7EA;
   --secondary-17: #F9FAFB;
   --secondary-18: #F9FAFB26;
-  --secondary-19: #393641;
+  --secondary-19: #17212B26;
 
   /*=======================*/
   /* Success Colors */
@@ -98,6 +99,7 @@
   --primary-17: #F9FAFB26;
   --primary-18: #17212B;
   --primary-19: #F9FAFB;
+  --primary-20: #17212B;
 
   /*=======================*/
   /* Card Colors */
@@ -115,6 +117,7 @@
   --secondary-16: #2B3947;
   --secondary-17: #2B3947;
   --secondary-18: #F9FAFB26;
+  --secondary-19: #F9FAFB26;
 
   /*=======================*/
   /* Success Colors */
@@ -157,6 +160,7 @@
   --color-primary-17: var(--primary-17);
   --color-primary-18: var(--primary-18);
   --color-primary-19: var(--primary-19);
+  --color-primary-20: var(--primary-20);
 
   /*=======================*/
   /* Card Colors */
@@ -174,6 +178,7 @@
   --color-secondary-16: var(--secondary-16);
   --color-secondary-17: var(--secondary-17);
   --color-secondary-18: var(--secondary-18);
+  --color-secondary-19: var(--secondary-19);
 
   /*=======================*/
   /* Success Colors */

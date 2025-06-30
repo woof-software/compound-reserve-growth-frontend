@@ -9,6 +9,7 @@ export type TreasuryHolding = {
   price: number;
   apr: number;
   source: string;
+  [key: string]: string | number | boolean | null | undefined;
 };
 
 export const TREASURY_DATA: TreasuryHolding[] = [

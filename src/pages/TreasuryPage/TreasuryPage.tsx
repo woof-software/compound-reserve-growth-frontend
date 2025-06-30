@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import MetricBlock from '@/entities/Treasury/MetricBlock';
 import TotalTresuaryValue from '@/entities/Treasury/TotalTresuaryValue';
 import TreasuryBalanceByNetworkBlock from '@/entities/Treasury/TreasuryBalanceByNetwork';
