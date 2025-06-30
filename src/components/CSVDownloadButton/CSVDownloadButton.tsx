@@ -12,7 +12,7 @@ interface CSVDownloadButtonProps {
 const CSVDownloadButton: React.FC<CSVDownloadButtonProps> = ({
   data,
   filename = 'export.csv',
-  className = 'bg-primary-20 text-primary-11 rounded p-1'
+  className = 'bg-primary-20 flex items-center justify-center p-1 rounded-lg w-8 h-8 border border-solid border-secondary-19'
 }) => {
   return (
     <CSVLink

@@ -38,6 +38,8 @@ interface TriggerContentProps {
   title: string;
 
   isOpen: boolean;
+
+  className?: string;
 }
 
 const useDropdown = (type: 'single' | 'multiple') => {
@@ -96,7 +98,7 @@ const Dropdown: FC<DropdownProps> = ({
         </div>
 
         <View.Condition if={open}>
-          <div className='hide-scrollbar border-secondary-18 bg-primary-15 absolute top-10 right-0 grid max-h-[182px] min-w-[168px] gap-0.5 overflow-y-auto rounded-lg border border-solid p-2'>
+          <div className='hide-scrollbar shadow-10 border-secondary-18 bg-primary-15 absolute top-10 right-0 grid max-h-[182px] min-w-[168px] gap-0.5 overflow-y-auto rounded-lg border border-solid p-2'>
             {children}
           </div>
         </View.Condition>
@@ -138,12 +140,20 @@ const DropdownItem: FC<DropdownItemProps> = ({
   );
 };
 
-const TriggerContent: FC<TriggerContentProps> = ({ title, isOpen }) => {
+const TriggerContent: FC<TriggerContentProps> = ({
+  title,
+  isOpen,
+  className
+}) => {
   return (
     <div
-      className={cn('flex items-center gap-1.5 rounded-sm px-[17px] py-2', {
-        'bg-secondary-11': isOpen
-      })}
+      className={cn(
+        'flex items-center gap-1.5 rounded-sm px-[17px] py-2',
+        className,
+        {
+          'bg-secondary-11': isOpen
+        }
+      )}
     >
       <Text
         size='11'

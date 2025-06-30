@@ -33,3 +33,15 @@ export const colorPicker = (index: number): string => {
 
   return colors[index];
 };
+
+export const formatCurrency = (value: number) => {
+  if (value >= 1000000) {
+    return `${(value / 1000000).toFixed(1)}M`;
+  }
+  return `${value.toLocaleString()}`;
+};
+
+export const formatGrowth = (growth: number) => {
+  if (growth === 0) return '-';
+  return `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`;
+};
