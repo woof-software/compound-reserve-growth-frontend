@@ -48,7 +48,7 @@ const TabsGroup = ({
             key={tab}
             value={tab}
             className={cn(
-              'flex cursor-pointer items-center justify-center rounded-full px-3 py-1 text-[11px]',
+              'hover:bg-card-content flex cursor-pointer items-center justify-center rounded-full px-3 py-1 text-[11px] transition-opacity hover:opacity-70',
               'h-6 leading-6',
               'text-primary-11',
               'data-[state=active]:bg-card-content',
