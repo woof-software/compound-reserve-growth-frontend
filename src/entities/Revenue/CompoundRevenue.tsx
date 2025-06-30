@@ -1,15 +1,24 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import { blockchains } from '@/components/Charts/chartData';
 import CompoundRevenue from '@/components/Charts/CompoundRevenue/CompoundRevenue';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
-import { BarSize, TimeRange } from '@/shared/types/types';
+import { useChartControls } from '@/shared/hooks/useChartControls';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
 const CompoundRevenueBlock = () => {
-  const [compoundRevenueTab, setCompoundRevenueTab] = useState<TimeRange>('7B');
-  const [revenueBarSize, setRevenueBarSize] = useState<BarSize>('D');
+  const {
+    activeTab,
+    barSize,
+    barCount,
+    handleTabChange,
+    handleBarSizeChange,
+    handleVisibleBarsChange
+  } = useChartControls({
+    initialTimeRange: '7B',
+    initialBarSize: 'D'
+  });
 
   const fullFiveYearData = useMemo(() => {
     const data = [];
@@ -83,33 +92,21 @@ const CompoundRevenueBlock = () => {
 
         <TabsGroup
           tabs={['D', 'W', 'M']}
-          value={revenueBarSize}
-          onTabChange={(value) => {
-            if (value === 'D' || value === 'W' || value === 'M') {
-              setRevenueBarSize(value);
-            }
-          }}
+          value={barSize}
+          onTabChange={handleBarSizeChange}
         />
         <TabsGroup
           tabs={['7B', '30B', '90B', '180B']}
-          value={compoundRevenueTab}
-          onTabChange={(value) => {
-            if (
-              value === '7B' ||
-              value === '30B' ||
-              value === '90B' ||
-              value === '180B'
-            ) {
-              setCompoundRevenueTab(value);
-            }
-          }}
+          value={activeTab}
+          onTabChange={handleTabChange}
         />
       </div>
 
       <CompoundRevenue
         data={fullFiveYearData}
-        barSize={revenueBarSize}
-        barCount={Number(compoundRevenueTab.replace('B', ''))}
+        barSize={barSize}
+        barCountToSet={barCount}
+        onVisibleBarsChange={handleVisibleBarsChange}
       />
     </Card>
   );

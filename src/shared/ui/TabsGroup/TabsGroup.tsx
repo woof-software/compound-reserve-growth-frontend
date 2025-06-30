@@ -7,7 +7,7 @@ interface TabsGroupProps {
 
   defaultTab?: string;
 
-  value?: string;
+  value?: string | null;
 
   onTabChange?: (value: string) => void;
 
@@ -29,9 +29,11 @@ const TabsGroup = ({
   onTabChange,
   className
 }: TabsGroupProps) => {
+  const internalValue = value === null ? '' : value;
+
   return (
     <Tabs
-      value={value}
+      value={internalValue}
       defaultValue={defaultTab || tabs[0]}
       onValueChange={onTabChange}
       className={className?.container}

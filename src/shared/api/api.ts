@@ -1,3 +1,7 @@
+import { z } from 'zod';
+
+import { createApiResponseSchema } from './schemas';
+
 export type ApiResponse<T> = {
   data: T;
   statusCode: number;
@@ -18,13 +22,16 @@ const httpRequest = async <T, P = unknown, D = unknown>(
     params?: P;
     data?: D;
     config?: RequestInit;
+    schema?: z.ZodSchema<T>;
   }
 ): Promise<ApiResponse<T>> => {
-  const { params, data, config } = options ?? {};
+  const { params, data, config, schema } = options ?? {};
   let fullUrl = `${import.meta.env.VITE_API_URL}${url}`;
 
   if (method === HttpVerbs.Get && params) {
-    const query = new URLSearchParams(params as Record<string, any>).toString();
+    const query = new URLSearchParams(
+      params as Record<string, string>
+    ).toString();
     fullUrl += `?${query}`;
   }
 
@@ -38,27 +45,56 @@ const httpRequest = async <T, P = unknown, D = unknown>(
     ...config
   });
 
-  const responseData = (await response.json()) as T;
+  const responseData = await response.json();
 
-  return {
+  const result: ApiResponse<unknown> = {
     data: responseData,
     statusCode: response.status
   };
+
+  if (schema) {
+    const apiSchema = createApiResponseSchema(schema);
+    const validated = apiSchema.parse(result);
+    return validated as ApiResponse<T>;
+  }
+
+  return result as ApiResponse<T>;
 };
 
 export const $api = {
-  get: <T, P = unknown>(url: string, params?: P, config?: RequestInit) =>
-    httpRequest<T, P, never>(HttpVerbs.Get, url, { params, config }),
+  get: <T, P = unknown>(
+    url: string,
+    params?: P,
+    config?: RequestInit,
+    schema?: z.ZodSchema<T>
+  ) => httpRequest<T, P, never>(HttpVerbs.Get, url, { params, config, schema }),
 
-  post: <T, D = unknown>(url: string, data?: D, config?: RequestInit) =>
-    httpRequest<T, never, D>(HttpVerbs.Post, url, { data, config }),
+  post: <T, D = unknown>(
+    url: string,
+    data?: D,
+    config?: RequestInit,
+    schema?: z.ZodSchema<T>
+  ) => httpRequest<T, never, D>(HttpVerbs.Post, url, { data, config, schema }),
 
-  put: <T, D = unknown>(url: string, data?: D, config?: RequestInit) =>
-    httpRequest<T, never, D>(HttpVerbs.Put, url, { data, config }),
+  put: <T, D = unknown>(
+    url: string,
+    data?: D,
+    config?: RequestInit,
+    schema?: z.ZodSchema<T>
+  ) => httpRequest<T, never, D>(HttpVerbs.Put, url, { data, config, schema }),
 
-  patch: <T, D = unknown>(url: string, data?: D, config?: RequestInit) =>
-    httpRequest<T, never, D>(HttpVerbs.Patch, url, { data, config }),
+  patch: <T, D = unknown>(
+    url: string,
+    data?: D,
+    config?: RequestInit,
+    schema?: z.ZodSchema<T>
+  ) => httpRequest<T, never, D>(HttpVerbs.Patch, url, { data, config, schema }),
 
-  delete: <T, P = unknown>(url: string, params?: P, config?: RequestInit) =>
-    httpRequest<T, P, never>(HttpVerbs.Delete, url, { params, config })
+  delete: <T, P = unknown>(
+    url: string,
+    params?: P,
+    config?: RequestInit,
+    schema?: z.ZodSchema<T>
+  ) =>
+    httpRequest<T, P, never>(HttpVerbs.Delete, url, { params, config, schema })
 };
