@@ -73,9 +73,11 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
             return;
           }
 
-          const visibleCount = fullAggregatedData.filter(
-            (point) => point[0] >= e.min && point[0] <= e.max
-          ).length;
+          const visibleCount = Math.round(
+            fullAggregatedData.filter(
+              (point) => point[0] >= e.min && point[0] <= e.max
+            ).length
+          );
 
           if (visibleCount > MAX_VISIBLE_BARS) {
             onVisibleBarsChange(MAX_VISIBLE_BARS);
@@ -195,14 +197,17 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
     if (!chart || fullAggregatedData.length === 0) return;
 
     chart.series[0].setData(fullAggregatedData, false);
-    const dataLength = fullAggregatedData.length;
-    const startIndex = Math.max(0, dataLength - barCountToSet);
 
-    if (startIndex < dataLength) {
-      const min = fullAggregatedData[startIndex][0];
-      const max = fullAggregatedData[dataLength - 1][0];
-      programmaticChange.current = true;
-      chart.xAxis[0].setExtremes(min, max, true, false);
+    if (barCountToSet > 0) {
+      const dataLength = fullAggregatedData.length;
+      const startIndex = Math.max(0, dataLength - barCountToSet);
+
+      if (startIndex < dataLength) {
+        const min = fullAggregatedData[startIndex][0];
+        const max = fullAggregatedData[dataLength - 1][0];
+        programmaticChange.current = true;
+        chart.xAxis[0].setExtremes(min, max, true, false);
+      }
     } else {
       chart.redraw();
     }

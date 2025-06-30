@@ -15,10 +15,15 @@ export const useChartControls = ({
   initialTimeRange = '7B',
   initialBarSize = 'D'
 }: UseChartControlsProps = {}) => {
-  const [activeTab, setActiveTab] = useState<TimeRange>(initialTimeRange);
+  const [activeTab, setActiveTab] = useState<TimeRange | null>(
+    initialTimeRange
+  );
   const [barSize, setBarSize] = useState<BarSize>(initialBarSize);
 
   const barCount = useMemo(() => {
+    if (!activeTab) {
+      return 0;
+    }
     return parseInt(activeTab.replace('B', ''), 10);
   }, [activeTab]);
 
@@ -35,17 +40,12 @@ export const useChartControls = ({
   }, []);
 
   const handleVisibleBarsChange = useCallback((count: number) => {
-    const tabValues = VALID_TIME_RANGES.map((tab) =>
-      parseInt(tab.replace('B', ''), 10)
-    );
-
-    const closest = tabValues.reduce((prev, curr) =>
-      Math.abs(curr - count) < Math.abs(prev - count) ? curr : prev
-    );
-
-    const newTab = `${closest}B` as TimeRange;
-
-    setActiveTab((prevTab) => (prevTab !== newTab ? newTab : prevTab));
+    const matchingTab = `${count}B` as TimeRange;
+    if (VALID_TIME_RANGES.includes(matchingTab)) {
+      setActiveTab(matchingTab);
+    } else {
+      setActiveTab(null);
+    }
   }, []);
 
   return {

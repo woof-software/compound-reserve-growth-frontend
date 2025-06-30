@@ -83,13 +83,15 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       return;
     }
 
-    const dataLength = aggregatedData.length;
-    const startIndex = Math.max(0, dataLength - barCount);
-    const endIndex = dataLength - 1;
+    if (barCount > 0) {
+      const dataLength = aggregatedData.length;
+      const startIndex = Math.max(0, dataLength - barCount);
+      const endIndex = dataLength - 1;
 
-    if (startIndex <= endIndex) {
-      programmaticChange.current = true;
-      chart.xAxis[0].setExtremes(startIndex, endIndex, true, false);
+      if (startIndex <= endIndex) {
+        programmaticChange.current = true;
+        chart.xAxis[0].setExtremes(startIndex, endIndex, true, false);
+      }
     }
   }, [aggregatedData, barCount]);
 
