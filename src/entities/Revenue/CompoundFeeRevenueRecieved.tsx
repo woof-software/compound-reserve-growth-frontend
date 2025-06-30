@@ -3,17 +3,21 @@ import { useState } from 'react';
 import { blockchains, stackedChartData } from '@/components/Charts/chartData';
 import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/CompoundFeeRecieved';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
+import { useChartControls } from '@/shared/hooks/useChartControls';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-
-type TimeRange = '7B' | '30B' | '90B' | '180B';
-type BarSize = 'D' | 'W' | 'M';
 
 type OptionType = { id: string; label: string };
 
 const CompoundFeeRevenueRecieved = () => {
-  const [feeRecievedTab, setFeeRecievedTab] = useState<TimeRange>('7B');
-  const [feeRecievedBarSize, setFeeRecievedBarSize] = useState<BarSize>('D');
+  const {
+    activeTab,
+    barSize,
+    barCount,
+    handleTabChange,
+    handleBarSizeChange,
+    handleVisibleBarsChange
+  } = useChartControls({ initialTimeRange: '7B', initialBarSize: 'D' });
 
   const [selectedChains, setSelectedChains] = useState<OptionType[]>([]);
 
@@ -44,35 +48,23 @@ const CompoundFeeRevenueRecieved = () => {
 
         <TabsGroup
           tabs={['D', 'W', 'M']}
-          value={feeRecievedBarSize}
-          onTabChange={(value) => {
-            if (value === 'D' || value === 'W' || value === 'M') {
-              setFeeRecievedBarSize(value);
-            }
-          }}
+          value={barSize}
+          onTabChange={handleBarSizeChange}
         />
 
         <TabsGroup
           tabs={['7B', '30B', '90B', '180B']}
-          value={feeRecievedTab}
-          onTabChange={(value) => {
-            if (
-              value === '7B' ||
-              value === '30B' ||
-              value === '90B' ||
-              value === '180B'
-            ) {
-              setFeeRecievedTab(value);
-            }
-          }}
+          value={activeTab}
+          onTabChange={handleTabChange}
         />
       </div>
 
       <CompoundFeeRecieved
         data={stackedChartData}
-        barCount={parseInt(feeRecievedTab.replace('B', ''), 10)}
-        barSize={feeRecievedBarSize}
+        barCount={barCount}
+        barSize={barSize}
         visibleSeriesKeys={selectedChains.map((chain) => chain.id)}
+        onVisibleBarsChange={handleVisibleBarsChange}
       />
     </Card>
   );

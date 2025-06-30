@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
@@ -13,35 +13,32 @@ interface ChartData {
 interface CompoundRevenueProps {
   data: ChartData[];
   barSize: 'D' | 'W' | 'M';
-  barCount: number;
+  barCountToSet: number;
+  onVisibleBarsChange: (count: number) => void;
 }
 
-const CompoundRevenue: FC<CompoundRevenueProps> = ({
+const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
   data,
   barSize,
-  barCount
+  barCountToSet,
+  onVisibleBarsChange
 }) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
+  const programmaticChange = useRef(false);
+
+  const MAX_VISIBLE_BARS = 180;
 
   const fullAggregatedData = useMemo(() => {
-    const daysPerBar = {
-      D: 1,
-      W: 7,
-      M: 30
-    };
-
+    const daysPerBar = { D: 1, W: 7, M: 30 };
     const chunkSize = daysPerBar[barSize];
     const result: [number, number][] = [];
-
     for (let i = 0; i < data.length; i += chunkSize) {
       const chunk = data.slice(i, i + chunkSize);
       if (chunk.length === 0) continue;
-
       const sum = chunk.reduce((acc, item) => acc + item.value, 0);
       const timestamp = new Date(chunk[chunk.length - 1].date).getTime();
       result.push([timestamp, sum]);
     }
-
     return result;
   }, [data, barSize]);
 
@@ -49,10 +46,7 @@ const CompoundRevenue: FC<CompoundRevenueProps> = ({
     chart: {
       type: 'column',
       animation: false,
-      panning: {
-        enabled: true,
-        type: 'x'
-      },
+      panning: { enabled: true, type: 'x' },
       zooming: {
         mouseWheel: {
           enabled: true,
@@ -62,34 +56,33 @@ const CompoundRevenue: FC<CompoundRevenueProps> = ({
         },
         type: undefined,
         pinchType: undefined,
-        resetButton: {
-          theme: {
-            display: 'none'
-          }
-        }
+        resetButton: { theme: { display: 'none' } }
       }
     },
     title: { text: undefined },
     xAxis: {
       type: 'datetime',
-      labels: {
-        style: {
-          fontSize: '11px',
-          color: '#7A8A99'
-        }
-      },
+      labels: { style: { fontSize: '11px', color: '#7A8A99' } },
       lineWidth: 0,
       tickWidth: 0,
-      crosshair: {
-        width: 1,
-        color: '#7A8A99',
-        dashStyle: 'Dash'
-      },
+      crosshair: { width: 1, color: '#7A8A99', dashStyle: 'Dash' },
       events: {
         setExtremes: function (e) {
-          if (e.trigger === 'navigator' || e.trigger === 'rangeSelector') {
+          if (programmaticChange.current) {
+            programmaticChange.current = false;
             return;
           }
+
+          const visibleCount = fullAggregatedData.filter(
+            (point) => point[0] >= e.min && point[0] <= e.max
+          ).length;
+
+          if (visibleCount > MAX_VISIBLE_BARS) {
+            onVisibleBarsChange(MAX_VISIBLE_BARS);
+            return false;
+          }
+
+          onVisibleBarsChange(visibleCount);
         }
       }
     },
@@ -99,10 +92,7 @@ const CompoundRevenue: FC<CompoundRevenueProps> = ({
       gridLineColor: '#7A8A99',
       gridLineWidth: 0.5,
       labels: {
-        style: {
-          fontSize: '11px',
-          color: '#7A8A99'
-        },
+        style: { fontSize: '11px', color: '#7A8A99' },
         formatter: function () {
           const value = this.value as number;
           if (value >= 1000000) return (value / 1000000).toFixed(0) + 'M';
@@ -119,12 +109,7 @@ const CompoundRevenue: FC<CompoundRevenueProps> = ({
         groupPadding: 0.1,
         borderWidth: 0,
         color: '#00D395',
-        states: {
-          hover: {
-            animation: false,
-            color: '#4DEDB5'
-          }
-        }
+        states: { hover: { animation: false, color: '#4DEDB5' } }
       },
       series: {
         stickyTracking: true,
@@ -148,10 +133,7 @@ const CompoundRevenue: FC<CompoundRevenueProps> = ({
       outside: true,
       backgroundColor: 'rgba(18, 24, 47, 0.55)',
       borderColor: 'rgba(186, 187, 203, 0.2)',
-      style: {
-        color: '#FFFFFF',
-        fontSize: '12px'
-      },
+      style: { color: '#FFFFFF', fontSize: '12px' },
       shared: true,
       useHTML: true,
       followPointer: false,
@@ -161,7 +143,6 @@ const CompoundRevenue: FC<CompoundRevenueProps> = ({
         const chart = this.chart;
         const hoverPoint =
           chart.hoverPoint || (chart.hoverPoints && chart.hoverPoints[0]);
-
         if (hoverPoint && hoverPoint.graphic) {
           const barBBox = hoverPoint.graphic.getBBox();
           const x =
@@ -169,7 +150,6 @@ const CompoundRevenue: FC<CompoundRevenueProps> = ({
           const y = chart.plotTop + point.plotY - labelHeight - 10;
           return { x, y };
         }
-
         return {
           x: chart.plotLeft + point.plotX - labelWidth / 2,
           y: chart.plotTop + point.plotY - labelHeight - 10
@@ -178,7 +158,6 @@ const CompoundRevenue: FC<CompoundRevenueProps> = ({
       formatter: function () {
         const point = this.points?.[0];
         if (!point) return '';
-
         let dateFormat;
         switch (barSize) {
           case 'D':
@@ -193,19 +172,9 @@ const CompoundRevenue: FC<CompoundRevenueProps> = ({
           default:
             dateFormat = '%b %d, %Y';
         }
-
         const date = Highcharts.dateFormat(dateFormat, point.x);
         const value = '$' + (point.y as number).toLocaleString();
-        return `
-          <div>
-            <p style="color: #BABBCB; font-weight: 600; font-size: 12px;">${date}</p>
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="display: inline-block; width: 12px; height: 12px; background-color: #00D395; border-radius: 3px;"></span>
-              <span style="font-size: 10px;">Revenue</span>
-              <strong style="font-size: 12px;">${value}</strong>
-            </div>
-          </div>
-        `;
+        return `<div><p style="color: #BABBCB; font-weight: 600; font-size: 12px;">${date}</p><div style="display: flex; align-items: center; gap: 10px;"><span style="display: inline-block; width: 12px; height: 12px; background-color: #00D395; border-radius: 3px;"></span><span style="font-size: 10px;">Revenue</span><strong style="font-size: 12px;">${value}</strong></div></div>`;
       }
     },
     series: [
@@ -216,48 +185,35 @@ const CompoundRevenue: FC<CompoundRevenueProps> = ({
         showInLegend: false
       }
     ],
-    navigator: {
-      enabled: false
-    },
-    scrollbar: {
-      enabled: false
-    },
-    rangeSelector: {
-      enabled: false
-    }
+    navigator: { enabled: false },
+    scrollbar: { enabled: false },
+    rangeSelector: { enabled: false }
   };
 
   useEffect(() => {
     const chart = chartRef.current?.chart;
-    if (!chart || fullAggregatedData.length === 0) {
-      return;
-    }
+    if (!chart || fullAggregatedData.length === 0) return;
 
     chart.series[0].setData(fullAggregatedData, false);
-
     const dataLength = fullAggregatedData.length;
-    const startIndex = Math.max(0, dataLength - barCount);
+    const startIndex = Math.max(0, dataLength - barCountToSet);
 
     if (startIndex < dataLength) {
       const min = fullAggregatedData[startIndex][0];
       const max = fullAggregatedData[dataLength - 1][0];
-
+      programmaticChange.current = true;
       chart.xAxis[0].setExtremes(min, max, true, false);
     } else {
       chart.redraw();
     }
-  }, [fullAggregatedData, barCount]);
+  }, [fullAggregatedData, barCountToSet]);
+
   return (
     <HighchartsReact
       ref={chartRef}
       highcharts={Highcharts}
       options={chartOptions}
-      containerProps={{
-        style: {
-          width: '100%',
-          height: '100%'
-        }
-      }}
+      containerProps={{ style: { width: '100%', height: '100%' } }}
     />
   );
 };
