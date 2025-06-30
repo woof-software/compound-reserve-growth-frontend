@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
@@ -12,7 +12,7 @@ interface CryptoChartProps {
   data: ChartData[];
 }
 
-const CryptoChart: React.FC<CryptoChartProps> = ({ data }) => {
+const CryptoChart: FC<CryptoChartProps> = ({ data }) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
 
   const chartOptions: Highcharts.Options = {

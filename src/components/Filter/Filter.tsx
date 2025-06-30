@@ -86,7 +86,7 @@ const Filter: FC<FilterProps> = memo(
       >
         <div
           className={cn(
-            'flex max-w-[90px] cursor-pointer items-center gap-1.5 rounded-sm px-2 py-1.5',
+            'hover:bg-secondary-11 flex max-w-[90px] cursor-pointer items-center gap-1.5 rounded-sm px-2 py-1.5',
             {
               'bg-secondary-11': isOpen
             }

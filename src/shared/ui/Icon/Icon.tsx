@@ -1,5 +1,7 @@
 import { ComponentType, SVGProps, useEffect, useState } from 'react';
 
+import { cn } from '@/shared/lib/classNames/classNames';
+
 const Icon = ({
   name,
   className,
@@ -26,11 +28,11 @@ const Icon = ({
       });
   }, [name]);
 
-  if (!SvgComponent) return null;
+  if (!SvgComponent) return <div className={cn('h-8 w-8', className)} />;
 
   return (
     <SvgComponent
-      className={`fill-current ${className || ''}`}
+      className={cn('fill-current', className)}
       style={{ color: color ? `var(--${color})` : undefined }}
       {...props}
     />

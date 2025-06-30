@@ -1,11 +1,16 @@
+import { lazy, Suspense } from 'react';
+
 import CompoundCumulativeRevenue from '@/entities/Revenue/CompoundCumulativeRevenue';
 import CompoundFeeRevenueByChain from '@/entities/Revenue/CompoundFeeRevenueByChain';
-import CompoundFeeRevenueRecieved from '@/entities/Revenue/CompoundFeeRevenueRecieved';
 import CompoundRevenueBlock from '@/entities/Revenue/CompoundRevenue';
 import RevenueBreakDownBlock from '@/entities/Revenue/RevenueBreakdown';
 import RevenueMetrics from '@/entities/Revenue/RevenueMetrics';
 import RevenueOverview from '@/entities/Revenue/RevenueOverview';
 import Text from '@/shared/ui/Text/Text';
+
+const CompoundFeeRevenueRecieved = lazy(
+  () => import('@/entities/Revenue/CompoundFeeRevenueRecieved')
+);
 
 const RevenuePage = () => {
   return (
@@ -35,7 +40,15 @@ const RevenuePage = () => {
 
         <CompoundCumulativeRevenue />
 
-        <CompoundFeeRevenueRecieved />
+        <Suspense
+          fallback={
+            <div className='flex h-[300px] items-center justify-center text-sm text-gray-500'>
+              Loading revenue chart…
+            </div>
+          }
+        >
+          <CompoundFeeRevenueRecieved />
+        </Suspense>
 
         <CompoundFeeRevenueByChain />
 

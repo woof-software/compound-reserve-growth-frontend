@@ -8,7 +8,7 @@ const MetricBlock = memo(() => {
   return (
     <div className='flex flex-col gap-5'>
       <div className='flex flex-row gap-5'>
-        <Card className={{ container: 'flex-1' }}>
+        <Card className={{ container: 'h-[200px] flex-1' }}>
           <ValueMetricField
             value='$115.6M'
             label='Total Non-Comp Value'
@@ -23,7 +23,7 @@ const MetricBlock = memo(() => {
           />
         </Card>
 
-        <Card className={{ container: 'flex-1' }}>
+        <Card className={{ container: 'h-[200px] flex-1' }}>
           <ValueMetricField
             value='$115.6M'
             label='Total Non-Comp Value'
@@ -38,7 +38,7 @@ const MetricBlock = memo(() => {
           />
         </Card>
 
-        <Card className={{ container: 'flex-1' }}>
+        <Card className={{ container: 'h-[200px] flex-1' }}>
           <ValueMetricField
             value='$115.6M'
             label='Total Non-Comp Value'
@@ -55,7 +55,7 @@ const MetricBlock = memo(() => {
       </div>
 
       <div className='flex flex-row gap-5'>
-        <Card className={{ container: 'flex-1' }}>
+        <Card className={{ container: 'h-[225px] flex-1' }}>
           <ValueMetricField
             className={{
               container: 'gap-10'
@@ -74,7 +74,7 @@ const MetricBlock = memo(() => {
           />
         </Card>
 
-        <Card className={{ container: 'flex-1' }}>
+        <Card className={{ container: 'h-[225px] flex-1' }}>
           <ValueMetricField
             className={{
               container: 'gap-10'

@@ -37,12 +37,15 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       plotShadow: false,
       type: 'pie'
     },
+
     credits: {
       enabled: false
     },
+
     title: {
       text: ''
     },
+
     tooltip: {
       useHTML: true,
 
@@ -88,14 +91,18 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         </div>
       `
     },
+
     plotOptions: {
       pie: {
         innerSize: '70%',
-        allowPointSelect: true,
-        cursor: 'pointer',
+        allowPointSelect: false,
+        cursor: 'default',
+        enableMouseTracking: true,
+
         borderWidth: 0,
         borderRadius: 0,
         borderColor: null,
+
         states: {
           hover: {
             enabled: true,
@@ -105,10 +112,20 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
             }
           }
         },
+
         dataLabels: {
           enabled: false
         },
-        showInLegend: true
+
+        showInLegend: true,
+
+        point: {
+          events: {
+            click: function () {
+              // no-op
+            }
+          }
+        }
       }
     },
 

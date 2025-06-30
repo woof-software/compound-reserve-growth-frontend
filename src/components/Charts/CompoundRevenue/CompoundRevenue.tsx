@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { FC, useEffect, useMemo, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
@@ -16,7 +16,7 @@ interface CompoundRevenueProps {
   barCount: number;
 }
 
-const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
+const CompoundRevenue: FC<CompoundRevenueProps> = ({
   data,
   barSize,
   barCount

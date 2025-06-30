@@ -62,7 +62,7 @@ const ValueMetricField = ({
             <Text
               size='16'
               weight='500'
-              lineHeight='27'
+              lineHeight='32'
               className={cn(className?.iconText)}
             >
               {iconText}
