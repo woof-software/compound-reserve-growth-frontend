@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { CSVLink } from 'react-csv';
 
 import Icon from '@/shared/ui/Icon/Icon';
@@ -9,7 +9,7 @@ interface CSVDownloadButtonProps {
   className?: string;
 }
 
-const CSVDownloadButton: React.FC<CSVDownloadButtonProps> = ({
+const CSVDownloadButton: FC<CSVDownloadButtonProps> = ({
   data,
   filename = 'export.csv',
   className = 'bg-primary-20 flex items-center justify-center p-1 rounded-lg w-8 h-8 border border-solid border-secondary-19 hover:opacity-80 transition-opacity duration-200'

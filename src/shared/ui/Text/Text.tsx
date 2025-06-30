@@ -32,6 +32,7 @@ const text = cva('text-primary-11', {
       '24': 'leading-[24px]',
       '27': 'leading-[27px]',
       '30': 'leading-[30px]',
+      '32': 'leading-[32px]',
       '38': 'leading-[38px]',
       '100': 'leading-[100%]',
       '140': 'leading-[140%]',
