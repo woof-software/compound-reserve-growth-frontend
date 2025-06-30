@@ -1,30 +1,14 @@
 import React from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
-import RevenueOverviewUSD from '@/components/RevenuePageTable/RevenueOverviewUSD';
+import CurrentInitiatives from '@/components/RunwayPageTable/CurrentInitiatives';
 import Card from '@/shared/ui/Card/Card';
-import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
-const RevenueOverview = () => {
+const CurrentInitiativesBlock = () => {
   return (
-    <Card
-      title='Revenue Overview USD'
-      className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
-    >
-      <div className='flex justify-end gap-3 px-0 py-3'>
-        <TabsGroup
-          tabs={['7D', '30D', '90D']}
-          defaultTab='7D'
-        />
-
-        <TabsGroup
-          tabs={['Rolling', 'To Date']}
-          defaultTab='Rolling'
-        />
-      </div>
-
+    <Card title='Current Initiatives'>
       <div className='flex justify-between'>
-        <RevenueOverviewUSD />
+        <CurrentInitiatives />
 
         <PieChart
           className='max-h-[400px] max-w-[336.5px]'
@@ -42,4 +26,4 @@ const RevenueOverview = () => {
   );
 };
 
-export default RevenueOverview;
+export default CurrentInitiativesBlock;

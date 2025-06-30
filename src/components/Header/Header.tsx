@@ -6,9 +6,30 @@ import {
   routeTitles,
   VALID_NAVIGATION_ROUTES
 } from '@/app/providers/router/config';
+import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import Link from '@/shared/ui/Link/Link';
 import NavLink from '@/shared/ui/NavLink/NavLink';
+
+const navLinks = [
+  {
+    to: commonRoutes.TREASURY,
+    title: routeTitles.TREASURY,
+    icon: 'wallet'
+  },
+
+  {
+    to: commonRoutes.RUNWAY,
+    title: routeTitles.RUNWAY,
+    icon: 'lightning'
+  },
+
+  {
+    to: commonRoutes.REVENUE,
+    title: routeTitles.REVENUE,
+    icon: 'storage'
+  }
+];
 
 const Header: FC = () => {
   const location = useLocation();
@@ -43,48 +64,26 @@ const Header: FC = () => {
         </Link>
 
         <nav className='flex items-center gap-1.5'>
-          <NavLink
-            to={commonRoutes.TREASURY}
-            isActive={isActive(commonRoutes.TREASURY)}
-            className='text-secondary-10 gap-1.5 rounded-[2.25rem] px-3 py-1'
-            activeClassName='bg-primary-16'
-            leftIcon={
-              <Icon
-                name='wallet'
-                className='h-3 w-3'
-              />
-            }
-          >
-            {routeTitles.TREASURY}
-          </NavLink>
-          <NavLink
-            to={commonRoutes.RUNWAY}
-            isActive={isActive(commonRoutes.RUNWAY)}
-            className='text-secondary-10 gap-1.5 rounded-[2.25rem] px-3 py-1'
-            activeClassName='bg-primary-16'
-            leftIcon={
-              <Icon
-                name='lightning'
-                className='h-3 w-3'
-              />
-            }
-          >
-            {routeTitles.RUNWAY}
-          </NavLink>
-          <NavLink
-            to={commonRoutes.REVENUE}
-            isActive={isActive(commonRoutes.REVENUE)}
-            className='text-secondary-10 gap-1.5 rounded-[2.25rem] px-3 py-1'
-            activeClassName='bg-primary-16'
-            leftIcon={
-              <Icon
-                name='storage'
-                className='h-3 w-3'
-              />
-            }
-          >
-            {routeTitles.REVENUE}
-          </NavLink>
+          <Each
+            data={navLinks}
+            render={(link, index) => (
+              <NavLink
+                key={index}
+                to={link.to}
+                isActive={isActive(link.to)}
+                className='text-secondary-10 h-[26px] gap-1.5 rounded-[2.25rem] px-3 py-1 text-[13px] leading-3 font-medium'
+                activeClassName='bg-primary-16'
+                leftIcon={
+                  <Icon
+                    name={link.icon}
+                    className='h-3 w-3'
+                  />
+                }
+              >
+                {link.title}
+              </NavLink>
+            )}
+          />
         </nav>
       </div>
     </header>

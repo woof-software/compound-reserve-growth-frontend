@@ -1,10 +1,9 @@
-import AnnualisedExpenses from '@/components/RunwayPageTable/AnnualisedExpenses';
-import CurrentInitiatives from '@/components/RunwayPageTable/CurrentInitiatives';
-import CurrentServiceProviders from '@/components/RunwayPageTable/CurrentServiceProviders';
-import FullDAOCommitments from '@/components/RunwayPageTable/FullDAOCommitments';
-import Card from '@/shared/ui/Card/Card';
+import AnnualisedExpensesBlock from '@/entities/Runway/AnnualisedExpenses';
+import CurrentInitiativesBlock from '@/entities/Runway/CurrentInitiatives';
+import CurrentServiceProvidersBlock from '@/entities/Runway/CurrentServiceProviders';
+import FullDAOCommitmentsBlock from '@/entities/Runway/FullDAOCommitments';
+import RunwayMetrics from '@/entities/Runway/RunwayMetrics';
 import Text from '@/shared/ui/Text/Text';
-import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
 
 const RunwayPage = () => {
   return (
@@ -17,6 +16,7 @@ const RunwayPage = () => {
         >
           Runway
         </Text>
+
         <Text
           tag='p'
           size='15'
@@ -26,64 +26,17 @@ const RunwayPage = () => {
           expenses, and service provider commitments.
         </Text>
       </div>
-      <div className='flex flex-col gap-5'>
-        <div className='flex flex-row gap-5'>
-          <Card className={{ container: 'flex-1' }}>
-            <ValueMetricField
-              value='$63.6M'
-              label='Total Annualised Expenses'
-            />
-          </Card>
-          <Card className={{ container: 'flex-1' }}>
-            <ValueMetricField
-              value='$28.3M'
-              label='Service Provider Expenses'
-            />
-          </Card>
-          <Card className={{ container: 'flex-1' }}>
-            <ValueMetricField
-              value='$35.3M'
-              label='DAO Initiatives Expenses'
-            />
-          </Card>
-        </div>
 
-        <Card title='Annualised Expenses'>
-          <div className='flex flex-col gap-5'>
-            <AnnualisedExpenses />
-            <div>
-              <Text
-                size='11'
-                weight='500'
-                className='text-primary-14'
-                lineHeight='18'
-              >
-                1M USD ImmuneFi Bug Bounty program is excluded from above
-              </Text>
-              <Text
-                size='11'
-                weight='500'
-                className='text-primary-14'
-                lineHeight='18'
-              >
-                Table assumes an Compound price of $150
-              </Text>
-            </div>
-          </div>
-        </Card>
-        <Card title='Current Service Providers'>
-          <CurrentServiceProviders />
-        </Card>
-        <Card title='Current Initiatives'>
-          <CurrentInitiatives />
-        </Card>
-        <Card
-          title='Full DAO Commitments'
-          className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
-        >
-          <div className='flex gap-3 px-0 py-3'>BTN</div>
-          <FullDAOCommitments />
-        </Card>
+      <div className='flex flex-col gap-5'>
+        <RunwayMetrics />
+
+        <AnnualisedExpensesBlock />
+
+        <CurrentServiceProvidersBlock />
+
+        <CurrentInitiativesBlock />
+
+        <FullDAOCommitmentsBlock />
       </div>
     </div>
   );

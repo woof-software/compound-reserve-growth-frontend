@@ -3,11 +3,9 @@ import { useMemo, useState } from 'react';
 import { blockchains } from '@/components/Charts/chartData';
 import CompoundRevenue from '@/components/Charts/CompoundRevenue/CompoundRevenue';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
+import { BarSize, TimeRange } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-
-type TimeRange = '7B' | '30B' | '90B' | '180B';
-type BarSize = 'D' | 'W' | 'M';
 
 const CompoundRevenueBlock = () => {
   const [compoundRevenueTab, setCompoundRevenueTab] = useState<TimeRange>('7B');

@@ -19,12 +19,15 @@ interface SingleDropdownProps {
   onClose: () => void;
 
   onSelect: (value: string) => void;
+
+  triggerContentClassName?: string;
 }
 
 const SingleDropdown: FC<SingleDropdownProps> = ({
   options,
   selectedValue,
   isOpen,
+  triggerContentClassName,
   onToggle,
   onClose,
   onSelect
@@ -33,6 +36,7 @@ const SingleDropdown: FC<SingleDropdownProps> = ({
     <Dropdown
       triggerContent={
         <TriggerContent
+          className={triggerContentClassName}
           title={selectedValue || options[0]}
           isOpen={isOpen}
         />

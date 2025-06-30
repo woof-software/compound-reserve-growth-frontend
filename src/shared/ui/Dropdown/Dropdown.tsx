@@ -38,6 +38,8 @@ interface TriggerContentProps {
   title: string;
 
   isOpen: boolean;
+
+  className?: string;
 }
 
 const useDropdown = (type: 'single' | 'multiple') => {
@@ -138,12 +140,20 @@ const DropdownItem: FC<DropdownItemProps> = ({
   );
 };
 
-const TriggerContent: FC<TriggerContentProps> = ({ title, isOpen }) => {
+const TriggerContent: FC<TriggerContentProps> = ({
+  title,
+  isOpen,
+  className
+}) => {
   return (
     <div
-      className={cn('flex items-center gap-1.5 rounded-sm px-[17px] py-2', {
-        'bg-secondary-11': isOpen
-      })}
+      className={cn(
+        'flex items-center gap-1.5 rounded-sm px-[17px] py-2',
+        className,
+        {
+          'bg-secondary-11': isOpen
+        }
+      )}
     >
       <Text
         size='11'

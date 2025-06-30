@@ -1,31 +1,13 @@
 import React from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
-import RevenueOverviewUSD from '@/components/RevenuePageTable/RevenueOverviewUSD';
+import CurrentServiceProviders from '@/components/RunwayPageTable/CurrentServiceProviders';
 import Card from '@/shared/ui/Card/Card';
-import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
-const RevenueOverview = () => {
+const CurrentServiceProvidersBlock = () => {
   return (
-    <Card
-      title='Revenue Overview USD'
-      className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
-    >
-      <div className='flex justify-end gap-3 px-0 py-3'>
-        <TabsGroup
-          tabs={['7D', '30D', '90D']}
-          defaultTab='7D'
-        />
-
-        <TabsGroup
-          tabs={['Rolling', 'To Date']}
-          defaultTab='Rolling'
-        />
-      </div>
-
+    <Card title='Current Service Providers'>
       <div className='flex justify-between'>
-        <RevenueOverviewUSD />
-
         <PieChart
           className='max-h-[400px] max-w-[336.5px]'
           data={[
@@ -37,9 +19,11 @@ const RevenueOverview = () => {
             { name: 'Unclassified', percent: 2.6, value: '0.54k' }
           ]}
         />
+
+        <CurrentServiceProviders />
       </div>
     </Card>
   );
 };
 
-export default RevenueOverview;
+export default CurrentServiceProvidersBlock;

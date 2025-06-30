@@ -1,6 +1,7 @@
 import CompoundCumulativeRevenue from '@/entities/Revenue/CompoundCumulativeRevenue';
 import CompoundFeeRevenueByChain from '@/entities/Revenue/CompoundFeeRevenueByChain';
 import CompoundFeeRevenueRecieved from '@/entities/Revenue/CompoundFeeRevenueRecieved';
+import CompoundRevenueBlock from '@/entities/Revenue/CompoundRevenue';
 import RevenueBreakDownBlock from '@/entities/Revenue/RevenueBreakdown';
 import RevenueMetrics from '@/entities/Revenue/RevenueMetrics';
 import RevenueOverview from '@/entities/Revenue/RevenueOverview';
@@ -37,6 +38,8 @@ const RevenuePage = () => {
         <CompoundFeeRevenueRecieved />
 
         <CompoundFeeRevenueByChain />
+
+        <CompoundRevenueBlock />
 
         <RevenueBreakDownBlock />
       </div>
