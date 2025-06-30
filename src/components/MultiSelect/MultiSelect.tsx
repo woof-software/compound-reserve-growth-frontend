@@ -1,5 +1,6 @@
 import { FC } from 'react';
 
+import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
 import { Dropdown, useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -74,7 +75,10 @@ export const MultiSelect: FC<MultiSelectProps> = ({
 
   const customTrigger = (
     <div
-      className={`bg-custom-trigger flex items-center gap-1.5 rounded-full px-3 py-2 ${className}`}
+      className={cn(
+        'bg-custom-trigger flex items-center gap-1.5 rounded-full px-3 py-2',
+        className
+      )}
     >
       {value.length > 0 ? (
         <div className='bg-white-10 text-gray-12 flex h-4 w-4 items-center justify-center rounded-full text-[11px]'>
