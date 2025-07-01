@@ -1,37 +1,51 @@
-import { useState } from 'react';
-import * as React from 'react';
+import { useMemo, useState } from 'react';
 
 import { blockchains } from '@/components/Charts/chartData';
 import LineChart from '@/components/Charts/Line/Line';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
-import { BarSize, OptionType, TimeRange } from '@/shared/types/types';
+import { useChartControls } from '@/shared/hooks/useChartControls';
+import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
-const SERIES_DATA = [
-  ...Array.from({ length: 100 }, (_, i) => ({
-    x: Date.UTC(2000 + i, 0, 1),
-    y: Math.round(Math.random() * 100)
-  }))
-];
-
 const CompoundCumulativeRevenue = () => {
-  const [feeRecievedTab, setFeeRecievedTab] = useState<TimeRange>('7B');
-  const [feeRecievedBarSize, setFeeRecievedBarSize] = useState<BarSize>('D');
-
   const [selectedChains, setSelectedChains] = useState<OptionType[]>([]);
 
   const onChainChange = (selectedOptions: OptionType[]) => {
     setSelectedChains(selectedOptions);
   };
 
-  const onFeeRecievedTabChange = (tab: TimeRange) => {
-    setFeeRecievedTab(tab);
-  };
+  const {
+    activeTab,
+    barSize,
+    barCount,
+    handleTabChange,
+    handleBarSizeChange,
+    handleVisibleBarsChange
+  } = useChartControls({
+    initialTimeRange: '7B',
+    initialBarSize: 'D'
+  });
 
-  const onFeeRecievedBarSizeChange = (barSize: BarSize) => {
-    setFeeRecievedBarSize(barSize);
-  };
+  const fullFiveYearData = useMemo(() => {
+    const data: { x: number; y: number }[] = [];
+    const startDate = new Date('2020-01-01');
+    const endDate = new Date('2025-01-01');
+    let baseValue = 1000000;
+
+    for (
+      let d = new Date(startDate);
+      d <= endDate;
+      d.setDate(d.getDate() + 1)
+    ) {
+      baseValue *= 1 + (Math.random() - 0.45) * 0.01;
+      data.push({
+        x: d.getTime(),
+        y: Math.round(baseValue)
+      });
+    }
+    return data;
+  }, []);
 
   return (
     <Card
@@ -56,33 +70,23 @@ const CompoundCumulativeRevenue = () => {
 
         <TabsGroup
           tabs={['D', 'W', 'M']}
-          value={feeRecievedBarSize}
-          onTabChange={(value) => {
-            if (value === 'D' || value === 'W' || value === 'M') {
-              onFeeRecievedBarSizeChange(value);
-            }
-          }}
+          value={barSize}
+          onTabChange={handleBarSizeChange}
         />
 
         <TabsGroup
           tabs={['7B', '30B', '90B', '180B']}
-          value={feeRecievedTab}
-          onTabChange={(value) => {
-            if (
-              value === '7B' ||
-              value === '30B' ||
-              value === '90B' ||
-              value === '180B'
-            ) {
-              onFeeRecievedTabChange(value);
-            }
-          }}
+          value={activeTab}
+          onTabChange={handleTabChange}
         />
       </div>
 
       <LineChart
-        data={SERIES_DATA}
+        data={fullFiveYearData}
         className='max-h-[400px]'
+        barSize={barSize}
+        barCountToSet={barCount}
+        onVisibleBarsChange={handleVisibleBarsChange}
       />
     </Card>
   );

@@ -9,7 +9,6 @@ import TreasuryBalanceByNetwork from '@/components/TreasuryPageTable/TreasuryBal
 import { FilterItem } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
-import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
 
 const TEST_FILTERS_LIST: FilterItem[] = [
   {
@@ -51,21 +50,6 @@ const options = ['Asset Type', 'Chain', 'Market', 'Wallet'];
 
 const TreasuryBalanceByNetworkBlock = () => {
   const { local, selected, toggle, apply, clear, reset } = useFilter();
-
-  const {
-    data: treasuryApiResponse,
-    isLoading,
-    isError,
-    error
-  } = useTreasuryHistory();
-
-  // will be delete
-  console.log({
-    data: treasuryApiResponse,
-    isLoading,
-    isError,
-    error
-  });
 
   const {
     open: openSingle,
