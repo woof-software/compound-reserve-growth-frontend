@@ -64,37 +64,37 @@ const httpRequest = async <T, P = unknown, D = unknown>(
 export const $api = {
   get: <T, P = unknown>(
     url: string,
+    schema: z.ZodSchema<T>,
     params?: P,
-    config?: RequestInit,
-    schema?: z.ZodSchema<T>
+    config?: RequestInit
   ) => httpRequest<T, P, never>(HttpVerbs.Get, url, { params, config, schema }),
 
   post: <T, D = unknown>(
     url: string,
+    schema: z.ZodSchema<T>,
     data?: D,
-    config?: RequestInit,
-    schema?: z.ZodSchema<T>
+    config?: RequestInit
   ) => httpRequest<T, never, D>(HttpVerbs.Post, url, { data, config, schema }),
 
   put: <T, D = unknown>(
     url: string,
+    schema: z.ZodSchema<T>,
     data?: D,
-    config?: RequestInit,
-    schema?: z.ZodSchema<T>
+    config?: RequestInit
   ) => httpRequest<T, never, D>(HttpVerbs.Put, url, { data, config, schema }),
 
   patch: <T, D = unknown>(
     url: string,
+    schema: z.ZodSchema<T>,
     data?: D,
-    config?: RequestInit,
-    schema?: z.ZodSchema<T>
+    config?: RequestInit
   ) => httpRequest<T, never, D>(HttpVerbs.Patch, url, { data, config, schema }),
 
   delete: <T, P = unknown>(
     url: string,
+    schema: z.ZodSchema<T>,
     params?: P,
-    config?: RequestInit,
-    schema?: z.ZodSchema<T>
+    config?: RequestInit
   ) =>
     httpRequest<T, P, never>(HttpVerbs.Delete, url, { params, config, schema })
 };
