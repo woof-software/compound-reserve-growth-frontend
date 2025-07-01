@@ -82,11 +82,12 @@ const CompoundCumulativeRevenue = () => {
       </div>
 
       <LineChart
-        data={fullFiveYearData}
         className='max-h-[400px]'
         barSize={barSize}
         barCountToSet={barCount}
         onVisibleBarsChange={handleVisibleBarsChange}
+        data={fullFiveYearData as []}
+        groupBy={''}
       />
     </Card>
   );
