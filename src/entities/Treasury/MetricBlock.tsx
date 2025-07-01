@@ -1,19 +1,95 @@
 import { memo } from 'react';
 
+import { formatPrice, groupByTypeLast30Days } from '@/shared/lib/utils/utils';
+import { TreasuryData } from '@/shared/types/Treasury/types';
+import { AssetType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
 
-const MetricBlock = memo(() => {
+interface MetricBlockProps {
+  isLoading?: boolean;
+
+  data: TreasuryData[];
+}
+
+const mapMetricData = (data: TreasuryData[]) => {
+  const treasuryLast30Data = groupByTypeLast30Days(data, true);
+
+  const nonCompItems = Object.entries(treasuryLast30Data)
+    .filter(([type]) => type !== AssetType.COMP)
+    .flatMap(([, items]) => items);
+
+  const allItems = Object.values(treasuryLast30Data).flat();
+
+  const getLast = (arr: TreasuryData[]): number =>
+    arr.length === 0 ? 0 : [...arr].sort((a, b) => b.date - a.date)[0].value;
+
+  const sumValues = (arr: TreasuryData[] = []): number =>
+    arr.reduce((acc, item) => acc + item.value, 0);
+
+  const compItems = treasuryLast30Data[AssetType.COMP] ?? [];
+
+  const compTotalValue = sumValues(compItems);
+  const compLastValue = getLast(compItems);
+
+  const nonCompTotalValue = sumValues(nonCompItems);
+  const nonCompLastValue = getLast(nonCompItems);
+
+  const stablecoinItems = treasuryLast30Data[AssetType.STABLECOIN] ?? [];
+  const stablecoinTotalValue = sumValues(stablecoinItems);
+  const stablecoinLastValue = getLast(stablecoinItems);
+
+  const ethCorrelatedItems = treasuryLast30Data[AssetType.ETH_CORRELATED] ?? [];
+  const ethCorrelatedHoldingTotalValue = sumValues(ethCorrelatedItems);
+  const ethCorrelatedHoldingLastValue = getLast(ethCorrelatedItems);
+
+  const totalValue = sumValues(allItems);
+  const totalLastValue = getLast(allItems);
+
+  return {
+    compTotalValue,
+    compLastValue,
+
+    nonCompTotalValue,
+    nonCompLastValue,
+
+    stablecoinTotalValue,
+    stablecoinLastValue,
+
+    ethCorrelatedHoldingTotalValue,
+    ethCorrelatedHoldingLastValue,
+
+    totalValue,
+    totalLastValue
+  };
+};
+
+const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
+  const {
+    totalValue,
+    totalLastValue,
+    compTotalValue,
+    compLastValue,
+    nonCompTotalValue,
+    nonCompLastValue,
+    stablecoinTotalValue,
+    stablecoinLastValue,
+    ethCorrelatedHoldingTotalValue,
+    ethCorrelatedHoldingLastValue
+  } = mapMetricData(data);
+
+  console.log('isLoading=>', isLoading);
+
   return (
     <div className='flex flex-col gap-5'>
       <div className='flex flex-row gap-5'>
         <Card className={{ container: 'h-[200px] flex-1' }}>
           <ValueMetricField
-            value='$115.6M'
-            label='Total Non-Comp Value'
-            badge='+50.7M'
-            badgeType='positive'
+            label='Total Treasury Value'
+            value={formatPrice(totalValue, 1)}
+            badge={formatPrice(totalLastValue, 1)}
+            badgeType={totalValue > 0 ? 'positive' : 'negative'}
             icon={
               <Icon
                 name='wallet'
@@ -25,13 +101,13 @@ const MetricBlock = memo(() => {
 
         <Card className={{ container: 'h-[200px] flex-1' }}>
           <ValueMetricField
-            value='$115.6M'
-            label='Total Non-Comp Value'
-            badge='+57M'
-            badgeType='positive'
+            label='Total COMP Value'
+            value={formatPrice(compTotalValue, 1)}
+            badge={formatPrice(compLastValue, 1)}
+            badgeType={compLastValue > 0 ? 'positive' : 'negative'}
             icon={
               <Icon
-                name='not-found-icon'
+                name='comp-metric'
                 className='h-8 w-8'
               />
             }
@@ -40,16 +116,11 @@ const MetricBlock = memo(() => {
 
         <Card className={{ container: 'h-[200px] flex-1' }}>
           <ValueMetricField
-            value='$115.6M'
             label='Total Non-Comp Value'
-            badge='+57M'
-            badgeType='positive'
-            icon={
-              <Icon
-                name='not-found-icon'
-                className='h-8 w-8'
-              />
-            }
+            value={formatPrice(nonCompTotalValue)}
+            badge={formatPrice(nonCompLastValue, 1)}
+            badgeType={nonCompLastValue > 0 ? 'positive' : 'negative'}
+            icon={<div className='bg-success-11 h-8 w-8 rounded-full' />}
           />
         </Card>
       </div>
@@ -60,17 +131,12 @@ const MetricBlock = memo(() => {
             className={{
               container: 'gap-10'
             }}
-            value='$115.6M'
-            label='Total Non-Comp Value'
-            badge='-57M'
-            badgeType='negative'
-            iconText='Total Value'
-            icon={
-              <Icon
-                name='not-found-icon'
-                className='h-8 w-8'
-              />
-            }
+            iconText='Stablecoin Holdings'
+            label='Total Stablecoin Holdings'
+            value={formatPrice(stablecoinTotalValue)}
+            badge={formatPrice(stablecoinLastValue, 1)}
+            badgeType={stablecoinLastValue > 0 ? 'positive' : 'negative'}
+            icon={<div className='bg-success-11 h-8 w-8 rounded-full' />}
           />
         </Card>
 
@@ -79,14 +145,16 @@ const MetricBlock = memo(() => {
             className={{
               container: 'gap-10'
             }}
-            value='$115.6M'
-            label='Total Non-Comp Value'
-            badge='-57M'
-            badgeType='negative'
-            iconText='Total Value'
+            iconText='ETH Correlated Holdings'
+            label='Total ETH Correlated Holdings'
+            value={formatPrice(ethCorrelatedHoldingTotalValue)}
+            badge={formatPrice(ethCorrelatedHoldingLastValue, 1)}
+            badgeType={
+              ethCorrelatedHoldingLastValue > 0 ? 'positive' : 'negative'
+            }
             icon={
               <Icon
-                name='not-found-icon'
+                name='eth-metric'
                 className='h-8 w-8'
               />
             }

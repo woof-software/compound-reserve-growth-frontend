@@ -1,5 +1,8 @@
 import { ChangeEvent, MouseEvent as ReactMouseEvent } from 'react';
 
+import { THIRTY_DAYS } from '@/shared/consts/consts';
+import { ResponseDataType } from '@/shared/types/types';
+
 export const preventEventBubbling = (
   e: ReactMouseEvent<HTMLElement> | ChangeEvent<HTMLInputElement>
 ): void => {
@@ -34,6 +37,20 @@ export const colorPicker = (index: number): string => {
   return colors[index];
 };
 
+export const units = [
+  { value: 1e33, symbol: 'D' },
+  { value: 1e30, symbol: 'N' },
+  { value: 1e27, symbol: 'Oc' },
+  { value: 1e24, symbol: 'Sp' },
+  { value: 1e21, symbol: 'Sx' },
+  { value: 1e18, symbol: 'Qi' },
+  { value: 1e15, symbol: 'Q' },
+  { value: 1e12, symbol: 'T' },
+  { value: 1e9, symbol: 'B' },
+  { value: 1e6, symbol: 'M' },
+  { value: 1e3, symbol: 'K' }
+];
+
 export const formatCurrency = (value: number) => {
   if (value >= 1000000) {
     return `${(value / 1000000).toFixed(1)}M`;
@@ -44,4 +61,69 @@ export const formatCurrency = (value: number) => {
 export const formatGrowth = (growth: number) => {
   if (growth === 0) return '-';
   return `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`;
+};
+
+export function formatLargeNumber(num: number, digits: number = 4): string {
+  const threshold = 1 / 10 ** (digits + 1);
+
+  if (num === 0 || isNaN(num)) return threshold.toFixed(digits);
+
+  const sign = num < 0 ? '-' : '';
+  const absNum = Math.abs(num);
+
+  if (absNum < 1_000) {
+    return (
+      sign +
+      absNum.toLocaleString('en-US', {
+        maximumFractionDigits: digits,
+        minimumFractionDigits: digits
+      })
+    );
+  }
+
+  for (const unit of units) {
+    if (absNum >= unit.value) {
+      return (
+        sign +
+        (absNum / unit.value).toLocaleString('en-US', {
+          maximumFractionDigits: digits,
+          minimumFractionDigits: digits
+        }) +
+        unit.symbol
+      );
+    }
+  }
+
+  return (
+    sign + absNum.toLocaleString('en-US', { maximumFractionDigits: digits })
+  );
+}
+
+export const formatPrice = (price: number, decimals = 2): string => {
+  return `$${formatLargeNumber(price, decimals)}`;
+};
+
+export const groupByTypeLast30Days = <T extends ResponseDataType>(
+  data: T[],
+  useLatestDate = false
+): Record<string, T[]> => {
+  if (data.length === 0) return {} as Record<string, T[]>;
+
+  const nowSec = useLatestDate
+    ? Math.max(...data.map((d) => d.date))
+    : Math.floor(Date.now() / 1000);
+
+  const threshold = nowSec - THIRTY_DAYS;
+
+  return data
+    .filter((item) => item.date >= threshold)
+    .reduce<Record<string, T[]>>(
+      (acc, item) => {
+        const type = item.source.asset.type ?? 'Unknown';
+        if (!acc[type]) acc[type] = [];
+        acc[type].push(item);
+        return acc;
+      },
+      {} as Record<string, T[]>
+    );
 };

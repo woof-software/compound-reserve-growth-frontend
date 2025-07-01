@@ -1,29 +1,31 @@
 import { z } from 'zod';
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 
-import { $api, ApiResponse } from '../api/api';
+import { AssetType, SortDirectionType } from '@/shared/types/types';
+
+import { $api, type ApiResponse } from '../api/api';
 
 const assetSchema = z.object({
   id: z.number(),
-  address: z.string().nullable(),
+  address: z.string(),
   decimals: z.number(),
-  symbol: z.string().nullable(),
-  network: z.string().nullable(),
-  type: z.string().nullable()
+  symbol: z.string(),
+  network: z.string(),
+  type: z.nativeEnum(AssetType)
 });
 
 const sourceSchema = z.object({
   id: z.number(),
-  address: z.string().nullable(),
-  network: z.string().nullable(),
-  market: z.string().nullable(),
+  address: z.string(),
+  network: z.string(),
+  market: z.string(),
   asset: assetSchema
 });
 
 const treasuryHistoryItemSchema = z.object({
   id: z.number(),
-  quantity: z.string().nullable(),
-  price: z.number().nullable(),
+  quantity: z.string(),
+  price: z.number(),
   value: z.number(),
   date: z.number(),
   source: sourceSchema
@@ -40,14 +42,17 @@ const treasuryHistoryResponseSchema = z.object({
   meta: metaSchema
 });
 
+export type TreasuryHistoryItem = z.infer<typeof treasuryHistoryItemSchema>;
 export type TreasuryHistoryResponse = z.infer<
   typeof treasuryHistoryResponseSchema
 >;
-export type TreasuryHistoryItem = z.infer<typeof treasuryHistoryItemSchema>;
 
 export type TreasuryHistoryParams = {
   page?: number;
+
   perPage?: number;
+
+  order?: SortDirectionType;
 };
 
 type UseTreasuryHistoryOptions = {
@@ -60,17 +65,17 @@ type UseTreasuryHistoryOptions = {
 
 const TREASURY_HISTORY_URL = '/api/history/treasury';
 
-export const useTreasuryHistory = (hookOptions?: UseTreasuryHistoryOptions) => {
-  const { params, options } = hookOptions ?? {};
-
+export const useTreasuryHistory = ({
+  params,
+  options
+}: UseTreasuryHistoryOptions = {}) => {
   return useQuery({
     queryKey: ['treasuryHistory', params],
     queryFn: () =>
       $api.get<TreasuryHistoryResponse>(
         TREASURY_HISTORY_URL,
         treasuryHistoryResponseSchema,
-        params,
-        undefined
+        params
       ),
     ...options
   });
