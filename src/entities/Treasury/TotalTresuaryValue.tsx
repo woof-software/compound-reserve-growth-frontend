@@ -156,12 +156,14 @@ const TotalTresuaryValue = () => {
           onTabChange={handleBarSizeChange}
           disabled={isLoading}
         />
+
         <TabsGroup
           tabs={['7B', '30B', '90B', '180B']}
           value={activeTab}
           onTabChange={handleTabChange}
           disabled={isLoading}
         />
+
         <SingleDropdown
           options={groupByOptions}
           isOpen={openSingle}
@@ -171,6 +173,7 @@ const TotalTresuaryValue = () => {
           onSelect={selectSingle}
           disabled={isLoading}
         />
+
         <Filter
           {...filterProps}
           disabled={isLoading}
@@ -187,6 +190,7 @@ const TotalTresuaryValue = () => {
           </Text>
         </div>
       )}
+
       {isError && (
         <div className='flex h-[400px] items-center justify-center'>
           <Text
@@ -197,6 +201,7 @@ const TotalTresuaryValue = () => {
           </Text>
         </div>
       )}
+
       {!isLoading && !isError && hasData && (
         <LineChart
           data={chartSeries}
@@ -207,6 +212,7 @@ const TotalTresuaryValue = () => {
           onVisibleBarsChange={handleVisibleBarsChange}
         />
       )}
+
       {!isLoading && !isError && !hasData && (
         <div className='flex h-[400px] items-center justify-center'>
           <Text

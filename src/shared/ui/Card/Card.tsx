@@ -13,6 +13,8 @@ interface CardProps {
   children: ReactNode;
 
   className?: {
+    loading?: string;
+
     container?: string;
 
     header?: string;
@@ -40,7 +42,12 @@ const Card: FC<CardProps> = ({
       )}
     >
       <View.Condition if={Boolean(isLoading)}>
-        <div className='flex h-full items-center justify-center'>
+        <div
+          className={cn(
+            'flex h-full items-center justify-center',
+            className?.loading
+          )}
+        >
           <Text
             size='16'
             weight='500'

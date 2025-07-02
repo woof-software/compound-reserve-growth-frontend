@@ -78,8 +78,15 @@ const TreasuryPage = () => {
           }}
         />
 
-        <TreasuryCompositionBlock />
+        <TreasuryCompositionBlock
+          isLoading={isLoading}
+          data={{
+            uniqDataByCategory,
+            uniqData
+          }}
+        />
 
+        {/*add props*/}
         <TotalTresuaryValue />
 
         <TreasuryBalanceByNetworkBlock />
