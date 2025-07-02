@@ -20,6 +20,7 @@ interface TabsGroupProps {
 
     activeTrigger?: string;
   };
+  disabled?: boolean;
 }
 
 const TabsGroup = ({
@@ -27,7 +28,8 @@ const TabsGroup = ({
   defaultTab,
   value,
   onTabChange,
-  className
+  className,
+  disabled
 }: TabsGroupProps) => {
   const internalValue = value === null ? '' : value;
 
@@ -36,7 +38,7 @@ const TabsGroup = ({
       value={internalValue}
       defaultValue={defaultTab || tabs[0]}
       onValueChange={onTabChange}
-      className={className?.container}
+      className={cn(className?.container, { 'pointer-events-none': disabled })}
     >
       <TabsList
         className={cn(

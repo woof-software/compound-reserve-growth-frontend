@@ -41,6 +41,8 @@ interface FilterProps {
   onApply: () => void;
 
   onOutsideClick: () => void;
+
+  disabled?: boolean;
 }
 
 const Filter: FC<FilterProps> = memo(
@@ -51,7 +53,8 @@ const Filter: FC<FilterProps> = memo(
     onFilterItemSelect,
     onApply,
     onClear,
-    onOutsideClick: onOutside
+    onOutsideClick: onOutside,
+    disabled
   }) => {
     const { isOpen, onCloseModal, onToggleModal } = useModal();
 
@@ -82,7 +85,7 @@ const Filter: FC<FilterProps> = memo(
     return (
       <div
         ref={containerRef}
-        className='relative z-10'
+        className={cn('relative z-10', { 'pointer-events-none': disabled })}
       >
         <div
           className={cn(
