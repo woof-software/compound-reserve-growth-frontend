@@ -1,53 +1,72 @@
 import { memo } from 'react';
 
-import { formatPrice, groupByTypeLast30Days } from '@/shared/lib/utils/utils';
+import { formatPrice, sumValues } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { AssetType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
 
+type MetricData = {
+  uniqDataByCategory: Record<string, TokenData[]>;
+
+  uniqData30DaysOldByCategory: Record<string, TokenData[]>;
+};
+
 interface MetricBlockProps {
   isLoading?: boolean;
 
-  data: TokenData[];
+  data: MetricData;
 }
 
-const mapMetricData = (data: TokenData[]) => {
-  const treasuryLast30Data = groupByTypeLast30Days(data, true);
+const mapMetricData = ({
+  uniqDataByCategory,
+  uniqData30DaysOldByCategory
+}: MetricData) => {
+  // TOTAL VALUES
+  const allItems = Object.values(uniqDataByCategory).flat();
+  const totalValue = sumValues(allItems);
+  const totalLastValue =
+    totalValue - sumValues(Object.values(uniqData30DaysOldByCategory).flat());
 
-  const nonCompItems = Object.entries(treasuryLast30Data)
+  // COMP VALUES
+  const compItems = uniqDataByCategory[AssetType.COMP] ?? [];
+  const compTotalValue = sumValues(compItems);
+  const compLastValue =
+    compTotalValue -
+    sumValues(uniqData30DaysOldByCategory[AssetType.COMP] ?? []);
+
+  // NON-COMP VALUES
+  const nonCompItems = Object.entries(uniqDataByCategory)
     .filter(([type]) => type !== AssetType.COMP)
     .flatMap(([, items]) => items);
 
-  const allItems = Object.values(treasuryLast30Data).flat();
-
-  const getLast = (arr: TokenData[]): number =>
-    arr.length === 0 ? 0 : [...arr].sort((a, b) => b.date - a.date)[0].value;
-
-  const sumValues = (arr: TokenData[] = []): number =>
-    arr.reduce((acc, item) => acc + item.value, 0);
-
-  const compItems = treasuryLast30Data[AssetType.COMP] ?? [];
-
-  const compTotalValue = sumValues(compItems);
-  const compLastValue = getLast(compItems);
+  const nonCompItems30DaysOld = Object.entries(uniqData30DaysOldByCategory)
+    .filter(([type]) => type !== AssetType.COMP)
+    .flatMap(([, items]) => items);
 
   const nonCompTotalValue = sumValues(nonCompItems);
-  const nonCompLastValue = getLast(nonCompItems);
+  const nonCompLastValue =
+    nonCompTotalValue - sumValues(nonCompItems30DaysOld ?? []);
 
-  const stablecoinItems = treasuryLast30Data[AssetType.STABLECOIN] ?? [];
+  //STABLECOIN VALUES
+  const stablecoinItems = uniqDataByCategory[AssetType.STABLECOIN] ?? [];
   const stablecoinTotalValue = sumValues(stablecoinItems);
-  const stablecoinLastValue = getLast(stablecoinItems);
+  const stablecoinLastValue =
+    stablecoinTotalValue -
+    sumValues(uniqData30DaysOldByCategory[AssetType.STABLECOIN] ?? []);
 
-  const ethCorrelatedItems = treasuryLast30Data[AssetType.ETH_CORRELATED] ?? [];
+  // ETH CORRELATED VALUES
+  const ethCorrelatedItems = uniqDataByCategory[AssetType.ETH_CORRELATED] ?? [];
   const ethCorrelatedHoldingTotalValue = sumValues(ethCorrelatedItems);
-  const ethCorrelatedHoldingLastValue = getLast(ethCorrelatedItems);
-
-  const totalValue = sumValues(allItems);
-  const totalLastValue = getLast(allItems);
+  const ethCorrelatedHoldingLastValue =
+    ethCorrelatedHoldingTotalValue -
+    sumValues(uniqData30DaysOldByCategory[AssetType.ETH_CORRELATED] ?? []);
 
   return {
+    totalValue,
+    totalLastValue,
+
     compTotalValue,
     compLastValue,
 
@@ -58,23 +77,24 @@ const mapMetricData = (data: TokenData[]) => {
     stablecoinLastValue,
 
     ethCorrelatedHoldingTotalValue,
-    ethCorrelatedHoldingLastValue,
-
-    totalValue,
-    totalLastValue
+    ethCorrelatedHoldingLastValue
   };
 };
 
-const MetricBlock = memo(({ data }: MetricBlockProps) => {
+const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
   const {
     totalValue,
     totalLastValue,
+
     compTotalValue,
     compLastValue,
+
     nonCompTotalValue,
     nonCompLastValue,
+
     stablecoinTotalValue,
     stablecoinLastValue,
+
     ethCorrelatedHoldingTotalValue,
     ethCorrelatedHoldingLastValue
   } = mapMetricData(data);
@@ -82,7 +102,10 @@ const MetricBlock = memo(({ data }: MetricBlockProps) => {
   return (
     <div className='flex flex-col gap-5'>
       <div className='flex flex-row gap-5'>
-        <Card className={{ container: 'h-[200px] flex-1' }}>
+        <Card
+          isLoading={isLoading}
+          className={{ container: 'h-[200px] flex-1' }}
+        >
           <ValueMetricField
             label='Total Treasury Value'
             value={formatPrice(totalValue, 1)}
@@ -97,7 +120,10 @@ const MetricBlock = memo(({ data }: MetricBlockProps) => {
           />
         </Card>
 
-        <Card className={{ container: 'h-[200px] flex-1' }}>
+        <Card
+          isLoading={isLoading}
+          className={{ container: 'h-[200px] flex-1' }}
+        >
           <ValueMetricField
             label='Total COMP Value'
             value={formatPrice(compTotalValue, 1)}
@@ -112,7 +138,10 @@ const MetricBlock = memo(({ data }: MetricBlockProps) => {
           />
         </Card>
 
-        <Card className={{ container: 'h-[200px] flex-1' }}>
+        <Card
+          isLoading={isLoading}
+          className={{ container: 'h-[200px] flex-1' }}
+        >
           <ValueMetricField
             label='Total Non-Comp Value'
             value={formatPrice(nonCompTotalValue)}
@@ -124,7 +153,10 @@ const MetricBlock = memo(({ data }: MetricBlockProps) => {
       </div>
 
       <div className='flex flex-row gap-5'>
-        <Card className={{ container: 'h-[225px] flex-1' }}>
+        <Card
+          isLoading={isLoading}
+          className={{ container: 'h-[225px] flex-1' }}
+        >
           <ValueMetricField
             className={{
               container: 'gap-10'
@@ -138,7 +170,10 @@ const MetricBlock = memo(({ data }: MetricBlockProps) => {
           />
         </Card>
 
-        <Card className={{ container: 'h-[225px] flex-1' }}>
+        <Card
+          isLoading={isLoading}
+          className={{ container: 'h-[225px] flex-1' }}
+        >
           <ValueMetricField
             className={{
               container: 'gap-10'

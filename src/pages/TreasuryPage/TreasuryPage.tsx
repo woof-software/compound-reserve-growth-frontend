@@ -42,21 +42,6 @@ const TreasuryPage = () => {
     [uniqData30DaysOld]
   );
 
-  // const metricsData = useMemo(() => {
-  //   return {
-  //     ethCorrelatedHolding: {
-  //       totalValue:
-  //         sumValues(uniqDataByCategory[AssetType.ETH_CORRELATED]) || 0,
-  //
-  //       lastValue:
-  //         uniqData30DaysOldByCategory[AssetType.ETH_CORRELATED]?.reduce(
-  //           (acc, item) => acc + item.value,
-  //           0
-  //         ) || 0
-  //     }
-  //   };
-  // }, []);
-
   console.log('treasuryData=>', treasuryData);
   console.log('uniqData=>', uniqData);
   console.log('uniqData30DaysOld=>', uniqData30DaysOld);
@@ -87,7 +72,10 @@ const TreasuryPage = () => {
       <div className='flex flex-col gap-5'>
         <MetricBlock
           isLoading={isLoading}
-          data={treasuryData}
+          data={{
+            uniqDataByCategory,
+            uniqData30DaysOldByCategory
+          }}
         />
 
         <TreasuryCompositionBlock />
