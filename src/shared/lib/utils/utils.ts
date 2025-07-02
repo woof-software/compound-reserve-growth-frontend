@@ -1,6 +1,7 @@
 import { ChangeEvent, MouseEvent as ReactMouseEvent } from 'react';
 
 import { THIRTY_DAYS } from '@/shared/consts/consts';
+import { TokenData } from '@/shared/types/Treasury/types';
 import type { OptionType } from '@/shared/types/types';
 import { ResponseDataType } from '@/shared/types/types';
 
@@ -189,3 +190,67 @@ export const extractFilterOptions = (
   return result;
 };
 // TotalTresuaryValue and CompoundCumulativeRevenue helpers
+
+export function uniqByNestedAddresses<T extends TokenData>(arr: T[]): T[] {
+  const seen = new Set<string>();
+
+  return arr.reduce<T[]>((acc, item) => {
+    const key = `${item.source.address}__${item.source.asset.address}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      acc.push(item);
+    }
+    return acc;
+  }, []);
+}
+
+export function pick30DaysOldRecords<T extends TokenData>(
+  mainData: T[],
+  uniqueData: T[]
+): T[] {
+  const refDateMap = new Map<string, number>();
+
+  uniqueData.forEach((item) => {
+    const key = `${item.source.address}__${item.source.asset.address}`;
+
+    refDateMap.set(key, item.date);
+  });
+
+  const candidates = new Map<string, T>();
+
+  mainData.forEach((item) => {
+    const key = `${item.source.address}__${item.source.asset.address}`;
+    const refDate = refDateMap.get(key);
+    if (refDate === undefined) return;
+
+    const threshold = refDate - THIRTY_DAYS;
+    if (item.date > threshold) return;
+
+    const prev = candidates.get(key);
+    if (!prev || item.date > prev.date) {
+      candidates.set(key, item);
+    }
+  });
+
+  return Array.from(candidates.values());
+}
+
+export const groupByKey = <T>(
+  data: T[],
+  keyFn: (item: T) => string
+): Record<string, T[]> => {
+  return data.reduce<Record<string, T[]>>((acc, item) => {
+    const key = keyFn(item);
+
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+
+    acc[key].push(item);
+
+    return acc;
+  }, {});
+};
+
+export const sumValues = (arr: TokenData[] = []): number =>
+  arr.reduce((acc, item) => acc + item.value, 0);
