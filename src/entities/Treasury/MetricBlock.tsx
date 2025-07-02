@@ -1,7 +1,7 @@
 import { memo } from 'react';
 
 import { formatPrice, groupByTypeLast30Days } from '@/shared/lib/utils/utils';
-import { TreasuryData } from '@/shared/types/Treasury/types';
+import { TokenData } from '@/shared/types/Treasury/types';
 import { AssetType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -10,10 +10,10 @@ import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
 interface MetricBlockProps {
   isLoading?: boolean;
 
-  data: TreasuryData[];
+  data: TokenData[];
 }
 
-const mapMetricData = (data: TreasuryData[]) => {
+const mapMetricData = (data: TokenData[]) => {
   const treasuryLast30Data = groupByTypeLast30Days(data, true);
 
   const nonCompItems = Object.entries(treasuryLast30Data)
@@ -22,10 +22,10 @@ const mapMetricData = (data: TreasuryData[]) => {
 
   const allItems = Object.values(treasuryLast30Data).flat();
 
-  const getLast = (arr: TreasuryData[]): number =>
+  const getLast = (arr: TokenData[]): number =>
     arr.length === 0 ? 0 : [...arr].sort((a, b) => b.date - a.date)[0].value;
 
-  const sumValues = (arr: TreasuryData[] = []): number =>
+  const sumValues = (arr: TokenData[] = []): number =>
     arr.reduce((acc, item) => acc + item.value, 0);
 
   const compItems = treasuryLast30Data[AssetType.COMP] ?? [];
@@ -65,7 +65,7 @@ const mapMetricData = (data: TreasuryData[]) => {
   };
 };
 
-const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
+const MetricBlock = memo(({ data }: MetricBlockProps) => {
   const {
     totalValue,
     totalLastValue,
@@ -78,8 +78,6 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
     ethCorrelatedHoldingTotalValue,
     ethCorrelatedHoldingLastValue
   } = mapMetricData(data);
-
-  console.log('isLoading=>', isLoading);
 
   return (
     <div className='flex flex-col gap-5'>

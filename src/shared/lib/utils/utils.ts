@@ -1,6 +1,7 @@
 import { ChangeEvent, MouseEvent as ReactMouseEvent } from 'react';
 
 import { THIRTY_DAYS } from '@/shared/consts/consts';
+import { TokenData } from '@/shared/types/Treasury/types';
 import { ResponseDataType } from '@/shared/types/types';
 
 export const preventEventBubbling = (
@@ -126,4 +127,77 @@ export const groupByTypeLast30Days = <T extends ResponseDataType>(
       },
       {} as Record<string, T[]>
     );
+};
+
+export function uniqByNestedAddresses<T extends TokenData>(arr: T[]): T[] {
+  const seen = new Set<string>();
+
+  return arr.reduce<T[]>((acc, item) => {
+    const key = `${item.source.address}__${item.source.asset.address}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      acc.push(item);
+    }
+    return acc;
+  }, []);
+}
+
+export function pick30DaysOldRecords<T extends TokenData>(
+  mainData: T[],
+  uniqueData: T[]
+): T[] {
+  const refDateMap = new Map<string, number>();
+
+  uniqueData.forEach((item) => {
+    const key = `${item.source.address}__${item.source.asset.address}`;
+
+    refDateMap.set(key, item.date);
+  });
+
+  const candidates = new Map<string, T>();
+
+  mainData.forEach((item) => {
+    const key = `${item.source.address}__${item.source.asset.address}`;
+    const refDate = refDateMap.get(key);
+    if (refDate === undefined) return;
+
+    const threshold = refDate - THIRTY_DAYS;
+    if (item.date > threshold) return;
+
+    const prev = candidates.get(key);
+    if (!prev || item.date > prev.date) {
+      candidates.set(key, item);
+    }
+  });
+
+  return Array.from(candidates.values());
+}
+
+export const groupByKey = <T extends TokenData>(
+  data: T[],
+  keyPath: string
+): Record<string, T[]> => {
+  const getNested = (obj: any, path: string): any => {
+    return path
+      .split('.')
+      .reduce(
+        (acc, prop) => (acc && acc[prop] != null ? acc[prop] : undefined),
+        obj
+      );
+  };
+
+  return data.reduce<Record<string, T[]>>(
+    (acc, item) => {
+      const raw = getNested(item, keyPath);
+
+      const group = raw != null ? String(raw) : 'Unknown';
+
+      if (!acc[group]) {
+        acc[group] = [];
+      }
+      acc[group].push(item);
+      return acc;
+    },
+    {} as Record<string, T[]>
+  );
 };

@@ -1,6 +1,6 @@
 import { AssetType } from '@/shared/types/types';
 
-export interface TreasuryData {
+export interface TokenData {
   id: number;
   quantity: string;
   price: number;

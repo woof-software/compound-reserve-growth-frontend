@@ -4,19 +4,21 @@ import Text from '@/shared/ui/Text/Text';
 
 import {
   TREASURY_COMPOSITION_DATA,
-  TreasuryCompositionProps
+  TreasuryCompositionType
 } from './MOCK_DATA';
 
-const columns: ExtendedColumnDef<TreasuryCompositionProps>[] = [
+const columns: ExtendedColumnDef<TreasuryCompositionType>[] = [
   {
     accessorKey: 'name',
     header: 'Asset',
     cell: ({ row }) => (
       <div className='flex items-center gap-3'>
         <Icon
+          // name={row.original.icon}
           name='not-found-icon'
           className='h-5 w-5'
         />
+
         <Text size='13'>{row.original.name}</Text>
       </div>
     )
@@ -57,6 +59,7 @@ const TreasuryComposition = () => {
         >
           Total Balance
         </Text>
+
         <Text
           size='11'
           className='text-primary-14'

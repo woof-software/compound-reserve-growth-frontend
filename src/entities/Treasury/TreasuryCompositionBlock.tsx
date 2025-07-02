@@ -6,7 +6,7 @@ import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposit
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 
-const options = ['Asset Type', 'Chain', 'Market', 'Wallet'];
+const options = ['Asset Type', 'Chain', 'Network', 'Market'];
 
 const TreasuryCompositionBlock = () => {
   const {
