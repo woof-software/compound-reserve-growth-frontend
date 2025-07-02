@@ -27,6 +27,11 @@ interface LineChartProps {
   onVisibleBarsChange: (count: number) => void;
 }
 
+const capitalizeFirstLetter = (str: string): string => {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
 const formatValue = (value: number) => {
   if (Math.abs(value) >= 1_000_000) {
     return (value / 1_000_000).toFixed(1) + 'M';
@@ -56,7 +61,7 @@ const LineChart: FC<LineChartProps> = ({
     const chunkSize = pointsPerBar[barSize];
     return data.map((series) => {
       const result: [number, number][] = [];
-      for (let i = 0; i < series.data.length; i += chunkSize) {
+      for (let i = 0; i < series.data?.length; i += chunkSize) {
         const chunk = series.data.slice(i, i + chunkSize);
         if (chunk.length === 0) continue;
         const lastPoint = chunk[chunk.length - 1];
@@ -64,7 +69,7 @@ const LineChart: FC<LineChartProps> = ({
       }
       return {
         type: 'area' as const,
-        name: series.name,
+        name: capitalizeFirstLetter(series.name),
         data: result
       };
     });

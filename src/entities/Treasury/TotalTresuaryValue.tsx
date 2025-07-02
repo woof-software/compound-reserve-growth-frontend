@@ -138,7 +138,9 @@ const TotalTresuaryValue = () => {
             key = item.source.market;
             break;
         }
-        if (!key) key = 'Unknown';
+        if (!key) {
+          key = 'not a Market';
+        }
         if (!aggregatedData.has(key)) {
           aggregatedData.set(key, new Map<number, number>());
         }
@@ -174,6 +176,11 @@ const TotalTresuaryValue = () => {
     [activeCount, local, filtersList, toggle, apply, clear, reset]
   );
 
+  const hasData = useMemo(
+    () => chartSeries?.some((s) => s.data && s.data.length > 0),
+    [chartSeries]
+  );
+
   return (
     <Card
       title='Total Treasury Value'
@@ -186,11 +193,13 @@ const TotalTresuaryValue = () => {
           tabs={['D', 'W', 'M']}
           value={barSize}
           onTabChange={handleBarSizeChange}
+          disabled={isLoading}
         />
         <TabsGroup
           tabs={['7B', '30B', '90B', '180B']}
           value={activeTab}
           onTabChange={handleTabChange}
+          disabled={isLoading}
         />
         <SingleDropdown
           options={groupByOptions}
@@ -199,8 +208,12 @@ const TotalTresuaryValue = () => {
           onToggle={toggleSingle}
           onClose={closeSingle}
           onSelect={selectSingle}
+          disabled={isLoading}
         />
-        <Filter {...filterProps} />
+        <Filter
+          {...filterProps}
+          disabled={isLoading}
+        />
       </div>
 
       {isLoading && (
@@ -213,7 +226,7 @@ const TotalTresuaryValue = () => {
           <Text>Error loading data.</Text>
         </div>
       )}
-      {!isLoading && !isError && chartSeries && chartSeries.length > 0 && (
+      {!isLoading && !isError && hasData && (
         <LineChart
           data={chartSeries}
           groupBy={groupBy}
@@ -223,7 +236,7 @@ const TotalTresuaryValue = () => {
           onVisibleBarsChange={handleVisibleBarsChange}
         />
       )}
-      {!isLoading && !isError && (!chartSeries || chartSeries.length === 0) && (
+      {!isLoading && !isError && !hasData && (
         <div className='flex h-[400px] items-center justify-center'>
           <Text>No data for selected filters.</Text>
         </div>

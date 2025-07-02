@@ -94,3 +94,5 @@ const CompoundCumulativeRevenue = () => {
 };
 
 export default CompoundCumulativeRevenue;
+//  close filter - gtdisabled btn
+// view text after no filter data
