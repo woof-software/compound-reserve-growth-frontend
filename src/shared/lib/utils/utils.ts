@@ -175,18 +175,16 @@ export function pick30DaysOldRecords<T extends TokenData>(
 
 export const groupByKey = <T>(
   data: T[],
-  keyFn: (item: T) => string | undefined | null
+  keyFn: (item: T) => string
 ): Record<string, T[]> => {
   return data.reduce<Record<string, T[]>>((acc, item) => {
-    const rawKey = keyFn(item);
+    const key = keyFn(item);
 
-    const group = rawKey != null && rawKey !== '' ? String(rawKey) : 'Unknown';
-
-    if (!acc[group]) {
-      acc[group] = [];
+    if (!acc[key]) {
+      acc[key] = [];
     }
 
-    acc[group].push(item);
+    acc[key].push(item);
 
     return acc;
   }, {});
