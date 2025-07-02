@@ -41,6 +41,7 @@ export interface MultiSelectProps {
   onChange?: (selectedOptions: Option[]) => void;
   className?: string;
   value?: Option[];
+  disabled?: boolean;
 }
 
 export const MultiSelect: FC<MultiSelectProps> = ({
@@ -48,7 +49,8 @@ export const MultiSelect: FC<MultiSelectProps> = ({
   placeholder = 'Chain',
   onChange,
   className = '',
-  value = []
+  value = [],
+  disabled = false
 }) => {
   const { open, toggle, close } = useDropdown('multiple');
 
@@ -106,38 +108,40 @@ export const MultiSelect: FC<MultiSelectProps> = ({
   );
 
   return (
-    <Dropdown
-      open={open}
-      onToggle={toggle}
-      onClose={close}
-      triggerContent={customTrigger}
-    >
-      <div onClick={(e) => e.stopPropagation()}>
-        <div className='p-1'>
-          {options.map((option) => {
-            const isSelected = value.some((v) => v.id === option.id);
-            return (
-              <CustomDropdownItem
-                key={option.id}
-                label={option.label}
-                isSelected={isSelected}
-                onSelect={() => handleSelect(option)}
-              />
-            );
-          })}
-        </div>
+    <div className={cn({ 'pointer-events-none': disabled })}>
+      <Dropdown
+        open={open}
+        onToggle={toggle}
+        onClose={close}
+        triggerContent={customTrigger}
+      >
+        <div onClick={(e) => e.stopPropagation()}>
+          <div className='p-1'>
+            {options.map((option) => {
+              const isSelected = value.some((v) => v.id === option.id);
+              return (
+                <CustomDropdownItem
+                  key={option.id}
+                  label={option.label}
+                  isSelected={isSelected}
+                  onSelect={() => handleSelect(option)}
+                />
+              );
+            })}
+          </div>
 
-        {value.length > 0 && (
-          <Button
-            className={
-              'bg-secondary-12 text-[--primary-13 sticky bottom-0 w-full cursor-pointer border-t-[0.5px] border-t-[#F9FAFB26] p-1 text-[11px]'
-            }
-            onClick={handleClearFilters}
-          >
-            Clear filters
-          </Button>
-        )}
-      </div>
-    </Dropdown>
+          {value.length > 0 && (
+            <Button
+              className={
+                'bg-secondary-12 text-[--primary-13 sticky bottom-0 w-full cursor-pointer border-t-[0.5px] border-t-[#F9FAFB26] p-1 text-[11px]'
+              }
+              onClick={handleClearFilters}
+            >
+              Clear filters
+            </Button>
+          )}
+        </div>
+      </Dropdown>
+    </div>
   );
 };
