@@ -173,31 +173,24 @@ export function pick30DaysOldRecords<T extends TokenData>(
   return Array.from(candidates.values());
 }
 
-export const groupByKey = <T extends TokenData>(
+export const groupByKey = <T>(
   data: T[],
-  keyPath: string
+  keyFn: (item: T) => string | undefined | null
 ): Record<string, T[]> => {
-  const getNested = (obj: any, path: string): any => {
-    return path
-      .split('.')
-      .reduce(
-        (acc, prop) => (acc && acc[prop] != null ? acc[prop] : undefined),
-        obj
-      );
-  };
+  return data.reduce<Record<string, T[]>>((acc, item) => {
+    const rawKey = keyFn(item);
 
-  return data.reduce<Record<string, T[]>>(
-    (acc, item) => {
-      const raw = getNested(item, keyPath);
+    const group = rawKey != null && rawKey !== '' ? String(rawKey) : 'Unknown';
 
-      const group = raw != null ? String(raw) : 'Unknown';
+    if (!acc[group]) {
+      acc[group] = [];
+    }
 
-      if (!acc[group]) {
-        acc[group] = [];
-      }
-      acc[group].push(item);
-      return acc;
-    },
-    {} as Record<string, T[]>
-  );
+    acc[group].push(item);
+
+    return acc;
+  }, {});
 };
+
+export const sumValues = (arr: TokenData[] = []): number =>
+  arr.reduce((acc, item) => acc + item.value, 0);

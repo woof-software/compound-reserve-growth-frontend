@@ -33,14 +33,29 @@ const TreasuryPage = () => {
   }, [treasuryData, uniqData]);
 
   const uniqDataByCategory = useMemo(
-    () => groupByKey(uniqData, 'source.asset.type'),
+    () => groupByKey(uniqData, (item) => item.source.asset.type),
     [uniqData]
   );
 
   const uniqData30DaysOldByCategory = useMemo(
-    () => groupByKey(uniqData30DaysOld, 'source.asset.type'),
+    () => groupByKey(uniqData30DaysOld, (item) => item.source.asset.type),
     [uniqData30DaysOld]
   );
+
+  // const metricsData = useMemo(() => {
+  //   return {
+  //     ethCorrelatedHolding: {
+  //       totalValue:
+  //         sumValues(uniqDataByCategory[AssetType.ETH_CORRELATED]) || 0,
+  //
+  //       lastValue:
+  //         uniqData30DaysOldByCategory[AssetType.ETH_CORRELATED]?.reduce(
+  //           (acc, item) => acc + item.value,
+  //           0
+  //         ) || 0
+  //     }
+  //   };
+  // }, []);
 
   console.log('treasuryData=>', treasuryData);
   console.log('uniqData=>', uniqData);
