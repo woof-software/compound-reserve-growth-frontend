@@ -1,6 +1,7 @@
 import { ChangeEvent, MouseEvent as ReactMouseEvent } from 'react';
 
 import { THIRTY_DAYS } from '@/shared/consts/consts';
+import type { OptionType } from '@/shared/types/types';
 import { ResponseDataType } from '@/shared/types/types';
 
 export const preventEventBubbling = (
@@ -127,3 +128,64 @@ export const groupByTypeLast30Days = <T extends ResponseDataType>(
       {} as Record<string, T[]>
     );
 };
+
+// TotalTresuaryValue and CompoundCumulativeRevenue helpers
+export interface ChartDataItem {
+  date: number;
+  value: number;
+  source: Record<string, any>;
+}
+
+export interface FilterOptionsConfig {
+  [key: string]: {
+    path: string;
+    labelFormatter?: (value: string) => string;
+  };
+}
+
+export const getValueByPath = (obj: any, path: string): any => {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+};
+
+export const capitalizeFirstLetter = (str: string): string => {
+  if (!str) return 'Unknown';
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+export const extractFilterOptions = (
+  rawData: ChartDataItem[],
+  config: FilterOptionsConfig
+): Record<string, OptionType[]> => {
+  if (!rawData.length) return {};
+
+  const uniqueValues: Record<string, Set<string>> = Object.keys(config).reduce(
+    (acc, key) => {
+      acc[key] = new Set<string>();
+      return acc;
+    },
+    {} as Record<string, Set<string>>
+  );
+
+  rawData.forEach((item) => {
+    for (const key in config) {
+      const value = getValueByPath(item, config[key].path);
+      if (value) {
+        uniqueValues[key].add(value);
+      }
+    }
+  });
+
+  const result: Record<string, OptionType[]> = {};
+  for (const key in uniqueValues) {
+    const formatter = config[key].labelFormatter || capitalizeFirstLetter;
+    result[`${key}Options`] = Array.from(uniqueValues[key])
+      .sort()
+      .map((value) => ({
+        id: value,
+        label: formatter(value)
+      }));
+  }
+
+  return result;
+};
+// TotalTresuaryValue and CompoundCumulativeRevenue helpers
