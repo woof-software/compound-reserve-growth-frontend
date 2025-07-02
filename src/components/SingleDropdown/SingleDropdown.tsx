@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 
+import { cn } from '@/shared/lib/classNames/classNames';
 import {
   Dropdown,
   DropdownItem,
@@ -21,6 +22,8 @@ interface SingleDropdownProps {
   onSelect: (value: string) => void;
 
   triggerContentClassName?: string;
+
+  disabled?: boolean;
 }
 
 const SingleDropdown: FC<SingleDropdownProps> = ({
@@ -30,32 +33,35 @@ const SingleDropdown: FC<SingleDropdownProps> = ({
   triggerContentClassName,
   onToggle,
   onClose,
-  onSelect
+  onSelect,
+  disabled
 }) => {
   return (
-    <Dropdown
-      triggerContent={
-        <TriggerContent
-          className={triggerContentClassName}
-          title={selectedValue || options[0]}
-          isOpen={isOpen}
-        />
-      }
-      open={isOpen}
-      onToggle={onToggle}
-      onClose={onClose}
-    >
-      <Each
-        data={options}
-        render={(el, index) => (
-          <DropdownItem
-            key={index}
-            asset={el}
-            onSelect={onSelect}
+    <div className={cn({ 'pointer-events-none': disabled })}>
+      <Dropdown
+        triggerContent={
+          <TriggerContent
+            className={triggerContentClassName}
+            title={selectedValue || options[0]}
+            isOpen={isOpen}
           />
-        )}
-      />
-    </Dropdown>
+        }
+        open={isOpen}
+        onToggle={onToggle}
+        onClose={onClose}
+      >
+        <Each
+          data={options}
+          render={(el, index) => (
+            <DropdownItem
+              key={index}
+              asset={el}
+              onSelect={onSelect}
+            />
+          )}
+        />
+      </Dropdown>
+    </div>
   );
 };
 
