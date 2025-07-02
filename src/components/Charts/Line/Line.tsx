@@ -25,6 +25,7 @@ interface LineChartProps {
   barSize: 'D' | 'W' | 'M';
   barCountToSet: number;
   onVisibleBarsChange: (count: number) => void;
+  showLegend?: boolean;
 }
 
 const capitalizeFirstLetter = (str: string): string => {
@@ -48,7 +49,8 @@ const LineChart: FC<LineChartProps> = ({
   className,
   barSize,
   barCountToSet,
-  onVisibleBarsChange
+  onVisibleBarsChange,
+  showLegend
 }) => {
   const { theme } = useTheme();
   const chartRef = useRef<HighchartsReact.RefObject>(null);
@@ -126,6 +128,8 @@ const LineChart: FC<LineChartProps> = ({
       xAxisLabelFormat = "{value:%b '%y}";
       break;
   }
+
+  const isLegendEnabled = showLegend ?? groupBy !== 'none';
 
   const options: Highcharts.Options = {
     chart: {
@@ -308,7 +312,7 @@ const LineChart: FC<LineChartProps> = ({
       }
     },
     legend: {
-      enabled: groupBy !== 'none',
+      enabled: isLegendEnabled,
       layout: 'horizontal',
       align: 'center',
       verticalAlign: 'bottom',
@@ -327,9 +331,14 @@ const LineChart: FC<LineChartProps> = ({
       area: {
         lineWidth: 2,
         marker: {
-          symbol: 'square',
-          radius: 4,
-          enabled: false
+          enabled: false,
+          symbol: 'circle',
+          states: {
+            hover: {
+              enabled: true,
+              radius: 3
+            }
+          }
         },
         states: {
           hover: {
