@@ -8,6 +8,8 @@ import View from '../View/View';
 interface CardProps {
   title?: string;
 
+  isLoading?: boolean;
+
   children: ReactNode;
 
   className?: {
@@ -24,6 +26,8 @@ interface CardProps {
 const Card: FC<CardProps> = ({
   title,
 
+  isLoading,
+
   children,
 
   className
@@ -35,23 +39,37 @@ const Card: FC<CardProps> = ({
         className?.container
       )}
     >
-      <View.Condition if={Boolean(title)}>
-        <div className={cn('bg-card-header px-10 py-4', className?.header)}>
+      <View.Condition if={Boolean(isLoading)}>
+        <div className='flex h-full items-center justify-center'>
           <Text
-            tag='h3'
-            size='13'
+            size='16'
             weight='500'
-            lineHeight='27'
-            className={cn(className?.title)}
+            lineHeight='16'
           >
-            {title}
+            Loading...
           </Text>
         </div>
       </View.Condition>
 
-      <div className={cn('bg-card-content p-10', className?.content)}>
-        {children}
-      </div>
+      <View.Condition if={!isLoading}>
+        <View.Condition if={Boolean(title)}>
+          <div className={cn('bg-card-header px-10 py-4', className?.header)}>
+            <Text
+              tag='h3'
+              size='13'
+              weight='500'
+              lineHeight='27'
+              className={cn(className?.title)}
+            >
+              {title}
+            </Text>
+          </div>
+        </View.Condition>
+
+        <div className={cn('bg-card-content p-10', className?.content)}>
+          {children}
+        </div>
+      </View.Condition>
     </div>
   );
 };
