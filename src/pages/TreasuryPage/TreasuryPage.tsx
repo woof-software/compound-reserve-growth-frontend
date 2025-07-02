@@ -6,7 +6,12 @@ import TreasuryBalanceByNetworkBlock from '@/entities/Treasury/TreasuryBalanceBy
 import TreasuryCompositionBlock from '@/entities/Treasury/TreasuryCompositionBlock';
 import TreasuryHoldingsBlock from '@/entities/Treasury/TreasuryHoldingsBlock';
 import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
-import { TreasuryData } from '@/shared/types/Treasury/types';
+import {
+  groupByKey,
+  pick30DaysOldRecords,
+  uniqByNestedAddresses
+} from '@/shared/lib/utils/utils';
+import { TokenData } from '@/shared/types/Treasury/types';
 import Text from '@/shared/ui/Text/Text';
 
 const TreasuryPage = () => {
@@ -14,10 +19,49 @@ const TreasuryPage = () => {
     params: { order: 'DESC' }
   });
 
-  const treasuryData = useMemo<TreasuryData[]>(
+  const treasuryData = useMemo<TokenData[]>(
     () => treasuryApiResponse?.data?.data || [],
     [treasuryApiResponse]
   );
+
+  const uniqData = useMemo(() => {
+    return uniqByNestedAddresses(treasuryData);
+  }, [treasuryData]);
+
+  const uniqData30DaysOld = useMemo(() => {
+    return pick30DaysOldRecords(treasuryData, uniqData);
+  }, [treasuryData, uniqData]);
+
+  const uniqDataByCategory = useMemo(
+    () => groupByKey(uniqData, (item) => item.source.asset.type),
+    [uniqData]
+  );
+
+  const uniqData30DaysOldByCategory = useMemo(
+    () => groupByKey(uniqData30DaysOld, (item) => item.source.asset.type),
+    [uniqData30DaysOld]
+  );
+
+  // const metricsData = useMemo(() => {
+  //   return {
+  //     ethCorrelatedHolding: {
+  //       totalValue:
+  //         sumValues(uniqDataByCategory[AssetType.ETH_CORRELATED]) || 0,
+  //
+  //       lastValue:
+  //         uniqData30DaysOldByCategory[AssetType.ETH_CORRELATED]?.reduce(
+  //           (acc, item) => acc + item.value,
+  //           0
+  //         ) || 0
+  //     }
+  //   };
+  // }, []);
+
+  console.log('treasuryData=>', treasuryData);
+  console.log('uniqData=>', uniqData);
+  console.log('uniqData30DaysOld=>', uniqData30DaysOld);
+  console.log('uniqDataByCategory=>', uniqDataByCategory);
+  console.log('uniqData30DaysOldByCategory=>', uniqData30DaysOldByCategory);
 
   return (
     <div className='flex flex-col gap-[70px]'>
