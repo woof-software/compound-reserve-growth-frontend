@@ -1,11 +1,15 @@
+import { formatPrice } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
-import {
-  TREASURY_COMPOSITION_DATA,
-  TreasuryCompositionType
-} from './MOCK_DATA';
+import { TreasuryCompositionType } from './MOCK_DATA';
+
+interface TreasuryCompositionProps {
+  tableData: TreasuryCompositionType[];
+
+  totalBalance: number;
+}
 
 const columns: ExtendedColumnDef<TreasuryCompositionType>[] = [
   {
@@ -14,8 +18,7 @@ const columns: ExtendedColumnDef<TreasuryCompositionType>[] = [
     cell: ({ row }) => (
       <div className='flex items-center gap-3'>
         <Icon
-          // name={row.original.icon}
-          name='not-found-icon'
+          name={row.original.icon || 'not-found-icon'}
           className='h-5 w-5'
         />
 
@@ -33,17 +36,20 @@ const columns: ExtendedColumnDef<TreasuryCompositionType>[] = [
         weight='400'
         className='text-right'
       >
-        {row.original.balance}
+        {formatPrice(row.original.balance, 1)}
       </Text>
     )
   }
 ];
 
-const TreasuryComposition = () => {
+const TreasuryComposition = ({
+  tableData,
+  totalBalance
+}: TreasuryCompositionProps) => {
   return (
-    <div className='w-full max-w-[522px]'>
+    <div className='max-h-[400px] w-full max-w-[522px] overflow-y-auto'>
       <DataTable
-        data={TREASURY_COMPOSITION_DATA}
+        data={tableData}
         columns={columns}
         pageSize={10}
         enableSorting={true}
@@ -64,7 +70,7 @@ const TreasuryComposition = () => {
           size='11'
           className='text-primary-14'
         >
-          $300,526,146
+          {formatPrice(totalBalance, 1)}
         </Text>
       </div>
     </div>

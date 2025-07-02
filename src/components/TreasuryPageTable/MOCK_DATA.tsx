@@ -75,47 +75,8 @@ export interface TreasuryCompositionType {
   id: number;
   icon: string;
   name: string;
-  balance: string;
+  balance: number;
 }
-
-export const TREASURY_COMPOSITION_DATA: TreasuryCompositionType[] = [
-  {
-    id: 1,
-    icon: 'not-found-icon',
-    name: 'COMP',
-    balance: '$184,964,799'
-  },
-  {
-    id: 2,
-    icon: 'not-found-icon',
-    name: 'Stablecoin',
-    balance: '$61,042,327'
-  },
-  {
-    id: 3,
-    icon: 'not-found-icon',
-    name: 'ETH Correlated',
-    balance: '$36,454,960'
-  },
-  {
-    id: 4,
-    icon: 'not-found-icon',
-    name: 'DeFi',
-    balance: '$12,242,498'
-  },
-  {
-    id: 5,
-    icon: 'not-found-icon',
-    name: 'BTC Correlated',
-    balance: '$5,817,676'
-  },
-  {
-    id: 6,
-    icon: 'not-found-icon',
-    name: 'Unclassified',
-    balance: '$3,886'
-  }
-];
 
 // TreasuryBalanceByNetwork
 export interface TreasuryBalanceByNetworkProps {
