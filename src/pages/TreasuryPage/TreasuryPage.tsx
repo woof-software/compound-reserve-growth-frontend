@@ -1,11 +1,24 @@
+import { useMemo } from 'react';
+
 import MetricBlock from '@/entities/Treasury/MetricBlock';
 import TotalTresuaryValue from '@/entities/Treasury/TotalTresuaryValue';
 import TreasuryBalanceByNetworkBlock from '@/entities/Treasury/TreasuryBalanceByNetwork';
 import TreasuryCompositionBlock from '@/entities/Treasury/TreasuryCompositionBlock';
 import TreasuryHoldingsBlock from '@/entities/Treasury/TreasuryHoldingsBlock';
+import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
+import { TreasuryData } from '@/shared/types/Treasury/types';
 import Text from '@/shared/ui/Text/Text';
 
 const TreasuryPage = () => {
+  const { data: treasuryApiResponse, isLoading } = useTreasuryHistory({
+    params: { order: 'DESC' }
+  });
+
+  const treasuryData = useMemo<TreasuryData[]>(
+    () => treasuryApiResponse?.data?.data || [],
+    [treasuryApiResponse]
+  );
+
   return (
     <div className='flex flex-col gap-[70px]'>
       <div className='flex flex-col gap-[15px]'>
@@ -28,7 +41,10 @@ const TreasuryPage = () => {
       </div>
 
       <div className='flex flex-col gap-5'>
-        <MetricBlock />
+        <MetricBlock
+          isLoading={isLoading}
+          data={treasuryData}
+        />
 
         <TreasuryCompositionBlock />
 
