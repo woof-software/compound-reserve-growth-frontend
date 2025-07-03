@@ -9,7 +9,6 @@ const CurrentInitiativesBlock = () => {
     <Card title='Current Initiatives'>
       <div className='flex justify-between'>
         <CurrentInitiatives />
-
         <PieChart
           className='max-h-[400px] max-w-[336.5px]'
           data={[

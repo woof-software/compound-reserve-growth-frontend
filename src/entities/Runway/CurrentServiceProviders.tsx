@@ -19,7 +19,6 @@ const CurrentServiceProvidersBlock = () => {
             { name: 'Unclassified', percent: 2.6, value: '0.54k' }
           ]}
         />
-
         <CurrentServiceProviders />
       </div>
     </Card>

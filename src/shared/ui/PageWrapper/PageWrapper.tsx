@@ -24,7 +24,6 @@ const PageWrapper: FC<PageWrapperProps> = ({
       <View.Condition if={width < 1280}>
         <BreakPointBlock />
       </View.Condition>
-
       <View.Condition if={width >= 1280}>
         <div
           className={cn(

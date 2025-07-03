@@ -90,10 +90,8 @@ const TreasuryBalanceByNetworkBlock = () => {
           onClose={closeSingle}
           onSelect={selectSingle}
         />
-
         <Filter {...filterProps} />
       </div>
-
       <div className='flex justify-between gap-10'>
         <CryptoChart
           data={[
@@ -105,7 +103,6 @@ const TreasuryBalanceByNetworkBlock = () => {
             { name: 'Unclassified', value: 35000000, color: '#FF8C42' }
           ]}
         />
-
         <TreasuryBalanceByNetwork />
       </div>
     </Card>

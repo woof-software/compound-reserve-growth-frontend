@@ -78,7 +78,6 @@ const RevenueMetrics = () => {
               value={formatCurrency(yearlyTotals[year]?.total || 0)}
               label='Total Revenue'
             />
-
             <ValueMetricField
               value={formatGrowth(yearlyTotals[year]?.growth || 0)}
               label='YoY Growth'

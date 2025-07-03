@@ -56,7 +56,6 @@ const TreasuryPage = () => {
         >
           Treasury
         </Text>
-
         <Text
           size='15'
           weight='400'
@@ -66,7 +65,6 @@ const TreasuryPage = () => {
           allocation, strategic holdings, and investment returns.
         </Text>
       </div>
-
       <div className='flex flex-col gap-5'>
         <MetricBlock
           isLoading={isLoading}
@@ -75,7 +73,6 @@ const TreasuryPage = () => {
             uniqData30DaysOldByCategory
           }}
         />
-
         <TreasuryCompositionBlock
           isLoading={isLoading}
           data={{
@@ -83,15 +80,12 @@ const TreasuryPage = () => {
             uniqData
           }}
         />
-
         <TotalTresuaryValue
           isLoading={isLoading}
           isError={isError}
           data={treasuryData}
         />
-
         <TreasuryBalanceByNetworkBlock />
-
         <TreasuryHoldingsBlock
           data={uniqData}
           isError={isError}

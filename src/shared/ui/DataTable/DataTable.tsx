@@ -245,7 +245,6 @@ const DataTable = <T,>({
               ))
             )}
           </tbody>
-
           {/* Footer section */}
           {footerContent && (
             <tfoot className={cn('', footerClassName)}>{footerContent}</tfoot>
@@ -253,7 +252,6 @@ const DataTable = <T,>({
           {/* Footer section */}
         </table>
       </div>
-
       {enablePagination && (
         <div
           className={cn(

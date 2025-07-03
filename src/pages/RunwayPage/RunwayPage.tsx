@@ -16,7 +16,6 @@ const RunwayPage = () => {
         >
           Runway
         </Text>
-
         <Text
           tag='p'
           size='15'
@@ -26,16 +25,11 @@ const RunwayPage = () => {
           expenses, and service provider commitments.
         </Text>
       </div>
-
       <div className='flex flex-col gap-5'>
         <RunwayMetrics />
-
         <AnnualisedExpensesBlock />
-
         <CurrentServiceProvidersBlock />
-
         <CurrentInitiativesBlock />
-
         <FullDAOCommitmentsBlock />
       </div>
     </div>

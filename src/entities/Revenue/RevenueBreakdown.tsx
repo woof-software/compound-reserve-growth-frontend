@@ -35,7 +35,6 @@ const RevenueBreakDownBlock = () => {
           >
             Year
           </Text>
-
           <SingleDropdown
             triggerContentClassName='pl-0'
             options={yearOptions}
@@ -46,13 +45,11 @@ const RevenueBreakDownBlock = () => {
             onSelect={selectYear}
           />
         </div>
-
         <CSVDownloadButton
           data={REVENUE_BREAKDOWN_DATA}
           filename='Revenue Breakdown'
         />
       </div>
-
       <RevenueBreakdown />
     </Card>
   );

@@ -23,14 +23,12 @@ const BreakPointBlock = () => {
             height='72px'
           />
         </View.Condition>
-
         <View.Condition if={theme === 'light'}>
           <BreakPointLight
             width='100%'
             height='72px'
           />
         </View.Condition>
-
         <Text
           size='13'
           weight='400'

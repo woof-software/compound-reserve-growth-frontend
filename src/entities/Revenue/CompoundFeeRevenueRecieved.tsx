@@ -38,27 +38,23 @@ const CompoundFeeRevenueRecieved = () => {
             onChange={handleChainChange}
             placeholder='Chain'
           />
-
           <MultiSelect
             options={blockchains}
             onChange={() => {}}
             placeholder='Market'
           />
         </div>
-
         <TabsGroup
           tabs={['D', 'W', 'M']}
           value={barSize}
           onTabChange={handleBarSizeChange}
         />
-
         <TabsGroup
           tabs={['7B', '30B', '90B', '180B']}
           value={activeTab}
           onTabChange={handleTabChange}
         />
       </div>
-
       <CompoundFeeRecieved
         data={stackedChartData}
         barCount={barCount}

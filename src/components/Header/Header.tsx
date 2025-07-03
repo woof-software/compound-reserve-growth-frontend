@@ -62,7 +62,6 @@ const Header: FC = () => {
             color='primary-11'
           />
         </Link>
-
         <nav className='flex items-center gap-1.5'>
           <Each
             data={navLinks}

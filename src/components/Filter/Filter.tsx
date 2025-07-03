@@ -99,7 +99,6 @@ const Filter: FC<FilterProps> = memo(
           onClick={onToggleModal}
         >
           <FilterIcon />
-
           <Text
             className='text-primary-14'
             size='11'
@@ -108,7 +107,6 @@ const Filter: FC<FilterProps> = memo(
           >
             Filter
           </Text>
-
           <View.Condition if={Boolean(activeFilters)}>
             <Text
               tag='span'
@@ -122,7 +120,6 @@ const Filter: FC<FilterProps> = memo(
             </Text>
           </View.Condition>
         </div>
-
         <View.Condition if={isOpen}>
           <div className='bg-primary-15 shadow-12 border-secondary-18 absolute top-9 right-0 grid min-w-[600px] gap-5 rounded-lg border border-solid px-8 py-10'>
             <Text
@@ -133,7 +130,6 @@ const Filter: FC<FilterProps> = memo(
             >
               Filter
             </Text>
-
             <div className='grid gap-5'>
               <Each
                 data={filtersList}
@@ -155,7 +151,6 @@ const Filter: FC<FilterProps> = memo(
                 }}
               />
             </div>
-
             <div className='flex w-full justify-end'>
               <div className='flex gap-2'>
                 <Button
@@ -164,7 +159,6 @@ const Filter: FC<FilterProps> = memo(
                 >
                   Clear All
                 </Button>
-
                 <Button
                   className='bg-secondary-16 text-secondary-10 h-8 w-[100px] cursor-pointer rounded-[100px] p-2 text-[11px] leading-4 font-medium'
                   onClick={onApplyClick}
