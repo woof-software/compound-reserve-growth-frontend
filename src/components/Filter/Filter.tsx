@@ -82,6 +82,8 @@ const Filter: FC<FilterProps> = memo(
 
     useClickOutside(containerRef as RefObject<HTMLDivElement>, onOutsideClick);
 
+    console.log('render');
+
     return (
       <div
         ref={containerRef}

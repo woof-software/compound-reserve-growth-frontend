@@ -7,8 +7,8 @@ import { useFilter } from '@/components/Filter/useFilter';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
-import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
 import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
+import { TokenData } from '@/shared/types/Treasury/types';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
@@ -21,7 +21,19 @@ const groupByMapping: Record<string, string> = {
   Market: 'deployment'
 };
 
-const TotalTresuaryValue = () => {
+interface TotalTreasuryValueProps {
+  isLoading?: boolean;
+
+  isError?: boolean;
+
+  data?: TokenData[];
+}
+
+const TotalTresuaryValue = ({
+  isLoading,
+  isError,
+  data: treasuryApiResponse
+}: TotalTreasuryValueProps) => {
   const { local, selected, toggle, apply, clear, reset } = useFilter();
   const {
     open: openSingle,
@@ -43,14 +55,8 @@ const TotalTresuaryValue = () => {
     initialBarSize: 'D'
   });
 
-  const {
-    data: treasuryApiResponse,
-    isLoading,
-    isError
-  } = useTreasuryHistory();
-
   const rawData: ChartDataItem[] = useMemo(
-    () => treasuryApiResponse?.data?.data || [],
+    () => treasuryApiResponse || [],
     [treasuryApiResponse]
   );
 
@@ -144,8 +150,12 @@ const TotalTresuaryValue = () => {
 
   return (
     <Card
+      isLoading={isLoading}
+      isError={isError}
       title='Total Treasury Value'
       className={{
+        loading: 'min-h-[inherit]',
+        container: 'min-h-[571px]',
         content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
       }}
     >
@@ -179,28 +189,6 @@ const TotalTresuaryValue = () => {
           disabled={isLoading}
         />
       </div>
-
-      {isLoading && (
-        <div className='flex h-[400px] items-center justify-center'>
-          <Text
-            size='12'
-            className='text-primary-14'
-          >
-            Loading...
-          </Text>
-        </div>
-      )}
-
-      {isError && (
-        <div className='flex h-[400px] items-center justify-center'>
-          <Text
-            size='12'
-            className='text-primary-14'
-          >
-            Error loading data
-          </Text>
-        </div>
-      )}
 
       {!isLoading && !isError && hasData && (
         <LineChart

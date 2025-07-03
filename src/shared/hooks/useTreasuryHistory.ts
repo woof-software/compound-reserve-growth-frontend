@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 
-import { AssetType, SortDirectionType } from '@/shared/types/types';
+import { AssetType, SortDirectionType, SourceType } from '@/shared/types/types';
 
 import { $api, type ApiResponse } from '../api/api';
 
@@ -19,7 +19,8 @@ const sourceSchema = z.object({
   address: z.string(),
   network: z.string(),
   market: z.string(),
-  asset: assetSchema
+  asset: assetSchema,
+  type: z.nativeEnum(SourceType)
 });
 
 const treasuryHistoryItemSchema = z.object({

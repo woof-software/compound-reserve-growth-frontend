@@ -10,10 +10,14 @@ interface CardProps {
 
   isLoading?: boolean;
 
+  isError?: boolean;
+
   children: ReactNode;
 
   className?: {
     loading?: string;
+
+    error?: string;
 
     container?: string;
 
@@ -29,6 +33,8 @@ const Card: FC<CardProps> = ({
   title,
 
   isLoading,
+
+  isError,
 
   children,
 
@@ -49,16 +55,35 @@ const Card: FC<CardProps> = ({
           )}
         >
           <Text
-            size='16'
+            size='12'
             weight='500'
             lineHeight='16'
+            className='text-primary-14'
           >
             Loading...
           </Text>
         </div>
       </View.Condition>
 
-      <View.Condition if={!isLoading}>
+      <View.Condition if={Boolean(isError)}>
+        <div
+          className={cn(
+            'flex h-full items-center justify-center',
+            className?.error
+          )}
+        >
+          <Text
+            size='12'
+            weight='500'
+            lineHeight='16'
+            className='text-primary-14'
+          >
+            Error loading data
+          </Text>
+        </div>
+      </View.Condition>
+
+      <View.Condition if={!isLoading && !isError}>
         <View.Condition if={Boolean(title)}>
           <div className={cn('bg-card-header px-10 py-4', className?.header)}>
             <Text
