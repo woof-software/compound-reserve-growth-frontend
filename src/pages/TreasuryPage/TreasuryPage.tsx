@@ -15,7 +15,11 @@ import { TokenData } from '@/shared/types/Treasury/types';
 import Text from '@/shared/ui/Text/Text';
 
 const TreasuryPage = () => {
-  const { data: treasuryApiResponse, isLoading } = useTreasuryHistory({
+  const {
+    data: treasuryApiResponse,
+    isLoading,
+    isError
+  } = useTreasuryHistory({
     params: { order: 'DESC' }
   });
 
@@ -41,12 +45,6 @@ const TreasuryPage = () => {
     () => groupByKey(uniqData30DaysOld, (item) => item.source.asset.type),
     [uniqData30DaysOld]
   );
-
-  console.log('treasuryData=>', treasuryData);
-  console.log('uniqData=>', uniqData);
-  console.log('uniqData30DaysOld=>', uniqData30DaysOld);
-  console.log('uniqDataByCategory=>', uniqDataByCategory);
-  console.log('uniqData30DaysOldByCategory=>', uniqData30DaysOldByCategory);
 
   return (
     <div className='flex flex-col gap-[70px]'>
@@ -86,12 +84,19 @@ const TreasuryPage = () => {
           }}
         />
 
-        {/*add props*/}
-        <TotalTresuaryValue />
+        <TotalTresuaryValue
+          isLoading={isLoading}
+          isError={isError}
+          data={treasuryData}
+        />
 
         <TreasuryBalanceByNetworkBlock />
 
-        <TreasuryHoldingsBlock />
+        <TreasuryHoldingsBlock
+          data={uniqData}
+          isError={isError}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );

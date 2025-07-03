@@ -1,4 +1,4 @@
-import { AssetType } from '@/shared/types/types';
+import { AssetType, SourceType } from '@/shared/types/types';
 
 export interface TokenData {
   id: number;
@@ -14,6 +14,7 @@ export interface Source {
   address: string;
   network: string;
   market: string;
+  type: SourceType;
   asset: Asset;
 }
 
