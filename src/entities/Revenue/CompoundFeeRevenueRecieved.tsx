@@ -1,15 +1,29 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
-import { blockchains, stackedChartData } from '@/components/Charts/chartData';
 import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/CompoundFeeRecieved';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenuets';
+import { ChartDataItem } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import Text from '@/shared/ui/Text/Text';
+
+interface StackedChartData {
+  date: string;
+  [key: string]: string | number;
+}
 
 type OptionType = { id: string; label: string };
 
 const CompoundFeeRevenueRecieved = () => {
+  const { data: apiResponse, isLoading, isError } = useCompCumulativeRevenue();
+
+  const rawData: ChartDataItem[] = useMemo(
+    () => apiResponse?.data?.data || [],
+    [apiResponse]
+  );
+
   const {
     activeTab,
     barSize,
@@ -20,28 +34,88 @@ const CompoundFeeRevenueRecieved = () => {
   } = useChartControls({ initialTimeRange: '7B', initialBarSize: 'D' });
 
   const [selectedChains, setSelectedChains] = useState<OptionType[]>([]);
+  const [selectedMarkets, setSelectedMarkets] = useState<OptionType[]>([]);
 
-  const handleChainChange = (selectedOptions: OptionType[]) => {
-    setSelectedChains(selectedOptions);
-  };
+  const { chainOptions, marketOptions } = useMemo(() => {
+    if (!rawData) return { chainOptions: [], marketOptions: [] };
+    const chains = new Set<string>();
+    const markets = new Set<string>();
+    rawData.forEach((item) => {
+      chains.add(item.source.network);
+      markets.add(item.source.market);
+    });
+    const toOption = (value: string) => ({
+      id: value,
+      label: value.charAt(0).toUpperCase() + value.slice(1)
+    });
+    return {
+      chainOptions: Array.from(chains).map(toOption),
+      marketOptions: Array.from(markets).map(toOption)
+    };
+  }, [rawData]);
+
+  const chartData = useMemo(() => {
+    const selectedChainIds = selectedChains.map((c) => c.id);
+    const selectedMarketIds = selectedMarkets.map((m) => m.id);
+
+    const filteredRawData = rawData.filter((item) => {
+      const chainMatch =
+        selectedChainIds.length === 0 ||
+        selectedChainIds.includes(item.source.network);
+      const marketMatch =
+        selectedMarketIds.length === 0 ||
+        selectedMarketIds.includes(item.source.market);
+      return chainMatch && marketMatch;
+    });
+
+    const groupedByDate: { [date: string]: StackedChartData } = {};
+
+    filteredRawData.forEach((item) => {
+      const date = new Date(item.date * 1000).toISOString().split('T')[0];
+      const seriesKey = item.source.network;
+
+      if (!groupedByDate[date]) {
+        groupedByDate[date] = { date };
+      }
+
+      groupedByDate[date][seriesKey] =
+        ((groupedByDate[date][seriesKey] as number) || 0) + item.value;
+    });
+
+    return Object.values(groupedByDate).sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+  }, [rawData, selectedChains, selectedMarkets]);
+
+  const hasData = chartData.length > 0;
+  const noDataMessage =
+    selectedChains.length > 0 || selectedMarkets.length > 0
+      ? 'No data for selected filters'
+      : 'No data available';
 
   return (
     <Card
       title='Compound Fee Revenue Recieved'
-      className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
+      isLoading={isLoading}
+      className={{
+        loading: 'min-h-[inherit]',
+        container: 'min-h-[571px]',
+        content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
+      }}
     >
       <div className='flex justify-end gap-3 px-0 py-3'>
         <div className='flex gap-2'>
           <MultiSelect
-            options={blockchains}
+            options={chainOptions}
             value={selectedChains}
-            onChange={handleChainChange}
+            onChange={setSelectedChains}
             placeholder='Chain'
           />
 
           <MultiSelect
-            options={blockchains}
-            onChange={() => {}}
+            options={marketOptions}
+            value={selectedMarkets}
+            onChange={setSelectedMarkets}
             placeholder='Market'
           />
         </div>
@@ -59,13 +133,46 @@ const CompoundFeeRevenueRecieved = () => {
         />
       </div>
 
-      <CompoundFeeRecieved
-        data={stackedChartData}
-        barCount={barCount}
-        barSize={barSize}
-        visibleSeriesKeys={selectedChains.map((chain) => chain.id)}
-        onVisibleBarsChange={handleVisibleBarsChange}
-      />
+      <div className='h-[400px]'>
+        {isLoading && (
+          <div className='flex h-full items-center justify-center'>
+            <Text
+              size='12'
+              className='text-primary-14'
+            >
+              Loading...
+            </Text>
+          </div>
+        )}
+        {isError && (
+          <div className='flex h-full items-center justify-center'>
+            <Text
+              size='12'
+              className='text-primary-14'
+            >
+              Error loading data.
+            </Text>
+          </div>
+        )}
+        {!isLoading && !isError && hasData && (
+          <CompoundFeeRecieved
+            data={chartData}
+            barCount={barCount}
+            barSize={barSize}
+            onVisibleBarsChange={handleVisibleBarsChange}
+          />
+        )}
+        {!isLoading && !isError && !hasData && (
+          <div className='flex h-full items-center justify-center'>
+            <Text
+              size='12'
+              className='text-primary-14'
+            >
+              {noDataMessage}
+            </Text>
+          </div>
+        )}
+      </div>
     </Card>
   );
 };

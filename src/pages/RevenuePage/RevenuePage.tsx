@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy } from 'react';
 
 import CompoundCumulativeRevenue from '@/entities/Revenue/CompoundCumulativeRevenue';
 import CompoundFeeRevenueByChain from '@/entities/Revenue/CompoundFeeRevenueByChain';
@@ -40,15 +40,7 @@ const RevenuePage = () => {
 
         <CompoundCumulativeRevenue />
 
-        <Suspense
-          fallback={
-            <div className='flex h-[300px] items-center justify-center text-sm text-gray-500'>
-              Loading revenue chart…
-            </div>
-          }
-        >
-          <CompoundFeeRevenueRecieved />
-        </Suspense>
+        <CompoundFeeRevenueRecieved />
 
         <CompoundFeeRevenueByChain />
 

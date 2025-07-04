@@ -7,33 +7,27 @@ import View from '../View/View';
 
 interface CardProps {
   title?: string;
-
   isLoading?: boolean;
-
+  isError?: boolean;
   children: ReactNode;
-
   className?: {
     loading?: string;
-
     container?: string;
-
     header?: string;
-
     content?: string;
-
     title?: string;
   };
 }
 
 const Card: FC<CardProps> = ({
   title,
-
   isLoading,
-
+  isError,
   children,
-
   className
 }) => {
+  const showPlaceholder = isLoading || isError;
+
   return (
     <div
       className={cn(
@@ -41,7 +35,7 @@ const Card: FC<CardProps> = ({
         className?.container
       )}
     >
-      <View.Condition if={Boolean(isLoading)}>
+      <View.Condition if={Boolean(showPlaceholder)}>
         <div
           className={cn(
             'flex h-full items-center justify-center',
@@ -49,16 +43,17 @@ const Card: FC<CardProps> = ({
           )}
         >
           <Text
-            size='16'
+            size='11'
             weight='500'
             lineHeight='16'
+            className={cn('text-primary-14', isError && 'text-red-500')}
           >
-            Loading...
+            {isError ? 'error' : 'Loading...'}
           </Text>
         </div>
       </View.Condition>
 
-      <View.Condition if={!isLoading}>
+      <View.Condition if={!showPlaceholder}>
         <View.Condition if={Boolean(title)}>
           <div className={cn('bg-card-header px-10 py-4', className?.header)}>
             <Text
@@ -72,7 +67,6 @@ const Card: FC<CardProps> = ({
             </Text>
           </div>
         </View.Condition>
-
         <div className={cn('bg-card-content p-10', className?.content)}>
           {children}
         </div>
