@@ -35,7 +35,7 @@ const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
 
     source: el.source.type,
 
-    market: el.source.market
+    market: el.source.market ?? 'no market'
   }));
 };
 
@@ -122,7 +122,7 @@ const TreasuryBalanceByNetworkBlock = ({
             break;
 
           case 'deployment':
-            fieldValue = item.source.market;
+            fieldValue = item.source.market ?? 'no market';
             break;
 
           default:

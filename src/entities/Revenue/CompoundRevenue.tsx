@@ -101,6 +101,7 @@ const CompoundRevenueBlock = () => {
     <Card
       title='Compound Revenue'
       isLoading={isLoading}
+      isError={isError}
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px]',
@@ -152,34 +153,12 @@ const CompoundRevenueBlock = () => {
         />
       </div>
       <div className='h-[400px]'>
-        {isLoading && (
-          <div className='flex h-full items-center justify-center'>
-            <Text
-              size='12'
-              className='text-primary-14'
-            >
-              Loading...
-            </Text>
-          </div>
-        )}
-        {isError && (
-          <div className='flex h-full items-center justify-center'>
-            <Text
-              size='12'
-              className='text-primary-14'
-            >
-              Error loading data.
-            </Text>
-          </div>
-        )}
-        {!isLoading && !isError && hasData && (
-          <CompoundRevenue
-            data={processedChartData}
-            barSize={barSize}
-            barCountToSet={barCount}
-            onVisibleBarsChange={handleVisibleBarsChange}
-          />
-        )}
+        <CompoundRevenue
+          data={processedChartData}
+          barSize={barSize}
+          barCountToSet={barCount}
+          onVisibleBarsChange={handleVisibleBarsChange}
+        />
         {!isLoading && !isError && !hasData && (
           <div className='flex h-full items-center justify-center'>
             <Text

@@ -2,7 +2,7 @@
 export type TreasuryHolding = {
   symbol: string;
   chain: string;
-  market: string;
+  market: string | null;
   qty: number;
   value: number;
   price: number;

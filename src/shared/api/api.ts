@@ -54,8 +54,15 @@ const httpRequest = async <T, P = unknown, D = unknown>(
 
   if (schema) {
     const apiSchema = createApiResponseSchema(schema);
-    const validated = apiSchema.parse(result);
-    return validated as ApiResponse<T>;
+
+    try {
+      const validated = apiSchema.parse(result);
+
+      return validated as ApiResponse<T>;
+    } catch (error) {
+      console.warn(error);
+      throw error;
+    }
   }
 
   return result as ApiResponse<T>;

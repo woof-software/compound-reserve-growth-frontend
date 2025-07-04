@@ -19,7 +19,7 @@ const sourceSchema = z.object({
   address: z.string(),
   network: z.string(),
   type: z.string(),
-  market: z.string(),
+  market: z.string().nullable(),
   asset: assetSchema
 });
 
@@ -38,7 +38,7 @@ const metaSchema = z.object({
 
 const compoundCumulativeRevenueResponseSchema = z.object({
   data: z.array(compoundCumulativeRevenueItemSchema),
-  meta: metaSchema
+  meta: metaSchema.optional()
 });
 
 export type CompoundCumulativeRevenueItem = z.infer<
@@ -50,9 +50,7 @@ export type CompoundCumulativeRevenueResponse = z.infer<
 
 export type CompoundCumulativeRevenueParams = {
   page?: number;
-
   perPage?: number;
-
   order?: SortDirectionType;
 };
 

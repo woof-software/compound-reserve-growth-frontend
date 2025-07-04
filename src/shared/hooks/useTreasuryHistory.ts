@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 
-import { AssetType, SortDirectionType, SourceType } from '@/shared/types/types';
+import { SortDirectionType } from '@/shared/types/types';
 
 import { $api, type ApiResponse } from '../api/api';
 
@@ -11,16 +11,16 @@ const assetSchema = z.object({
   decimals: z.number(),
   symbol: z.string(),
   network: z.string(),
-  type: z.nativeEnum(AssetType)
+  type: z.string()
 });
 
 const sourceSchema = z.object({
   id: z.number(),
   address: z.string(),
   network: z.string(),
-  market: z.string(),
+  market: z.string().nullable(),
   asset: assetSchema,
-  type: z.nativeEnum(SourceType)
+  type: z.string()
 });
 
 const treasuryHistoryItemSchema = z.object({
@@ -50,9 +50,7 @@ export type TreasuryHistoryResponse = z.infer<
 
 export type TreasuryHistoryParams = {
   page?: number;
-
   perPage?: number;
-
   order?: SortDirectionType;
 };
 

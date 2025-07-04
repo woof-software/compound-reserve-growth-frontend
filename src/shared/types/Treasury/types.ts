@@ -1,5 +1,3 @@
-import { AssetType, SourceType } from '@/shared/types/types';
-
 export interface TokenData {
   id: number;
   quantity: string;
@@ -13,8 +11,8 @@ export interface Source {
   id: number;
   address: string;
   network: string;
-  market: string;
-  type: SourceType;
+  market: string | null;
+  type: string;
   asset: Asset;
 }
 
@@ -24,5 +22,5 @@ export interface Asset {
   decimals: number;
   symbol: string;
   network: string;
-  type: AssetType;
+  type: string;
 }
