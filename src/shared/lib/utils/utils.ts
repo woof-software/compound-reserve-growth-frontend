@@ -36,7 +36,24 @@ export const colorPicker = (index: number): string => {
     '#62B1FF'
   ];
 
-  return colors[index];
+  if (index < colors.length) {
+    return colors[index];
+  }
+
+  const base = colors[Math.floor(Math.random() * colors.length)];
+
+  const r = parseInt(base.slice(1, 3), 16);
+  const g = parseInt(base.slice(3, 5), 16);
+  const b = parseInt(base.slice(5, 7), 16);
+
+  const offset = Math.floor(Math.random() * 30) - 15;
+  const nr = Math.min(255, Math.max(0, r + offset));
+  const ng = Math.min(255, Math.max(0, g + offset));
+  const nb = Math.min(255, Math.max(0, b + offset));
+
+  return `#${nr.toString(16).padStart(2, '0')}${ng
+    .toString(16)
+    .padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`;
 };
 
 export const units = [

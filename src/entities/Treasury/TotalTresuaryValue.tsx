@@ -35,6 +35,7 @@ const TotalTresuaryValue = ({
   data: treasuryApiResponse
 }: TotalTreasuryValueProps) => {
   const { local, selected, toggle, apply, clear, reset } = useFilter();
+
   const {
     open: openSingle,
     selectedValue: selectedSingle,
