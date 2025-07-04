@@ -23,9 +23,7 @@ const groupByMapping: Record<string, string> = {
 
 interface TotalTreasuryValueProps {
   isLoading?: boolean;
-
   isError?: boolean;
-
   data?: TokenData[];
 }
 
@@ -56,10 +54,12 @@ const TotalTresuaryValue = ({
     initialBarSize: 'D'
   });
 
-  const rawData: ChartDataItem[] = useMemo(
-    () => treasuryApiResponse || [],
-    [treasuryApiResponse]
-  );
+  const rawData: ChartDataItem[] = useMemo(() => {
+    if (!treasuryApiResponse) {
+      return [];
+    }
+    return [...treasuryApiResponse].sort((a, b) => a.date - b.date);
+  }, [treasuryApiResponse]);
 
   const filterOptionsConfig = useMemo(
     () => ({
@@ -113,7 +113,7 @@ const TotalTresuaryValue = ({
     [selected]
   );
 
-  const { chartSeries, hasData } = useChartDataProcessor({
+  const { chartSeries } = useChartDataProcessor({
     rawData,
     filters: activeFilters,
     filterPaths: {
@@ -130,6 +130,50 @@ const TotalTresuaryValue = ({
           ].path,
     defaultSeriesName: 'Treasury Value'
   });
+
+  const correctedChartSeries = useMemo(() => {
+    if (!chartSeries || chartSeries.length === 0) {
+      return [];
+    }
+
+    return chartSeries.map((series) => {
+      if (!series.data || series.data.length === 0) {
+        return series;
+      }
+
+      const dailyTotals = new Map<number, number>();
+
+      for (const point of series.data) {
+        const date = new Date(point.x);
+        date.setUTCHours(0, 0, 0, 0);
+        const dayStartTimestamp = date.getTime();
+
+        const currentTotal = dailyTotals.get(dayStartTimestamp) || 0;
+        dailyTotals.set(dayStartTimestamp, currentTotal + point.y);
+      }
+
+      const aggregatedData = Array.from(dailyTotals.entries()).map(
+        ([x, y]) => ({
+          x,
+          y
+        })
+      );
+
+      aggregatedData.sort((a, b) => a.x - b.x);
+
+      return {
+        ...series,
+        data: aggregatedData
+      };
+    });
+  }, [chartSeries]);
+
+  const hasData = useMemo(() => {
+    return (
+      correctedChartSeries.length > 0 &&
+      correctedChartSeries.some((s) => s.data.length > 0)
+    );
+  }, [correctedChartSeries]);
 
   const activeCount = selected.reduce(
     (acc, filter) => acc + filter.selectedItems.length,
@@ -189,7 +233,7 @@ const TotalTresuaryValue = ({
       </div>
       {!isLoading && !isError && hasData && (
         <LineChart
-          data={chartSeries}
+          data={correctedChartSeries}
           groupBy={groupBy}
           className='max-h-[400px]'
           barSize={barSize}
