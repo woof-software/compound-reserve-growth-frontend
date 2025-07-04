@@ -68,6 +68,35 @@ const CompoundCumulativeRevenue = () => {
     defaultSeriesName: 'Cumulative Revenue'
   });
 
+  const cumulativeChartSeries = useMemo(() => {
+    if (!chartSeries || chartSeries.length === 0) {
+      return [];
+    }
+
+    return chartSeries.map((series) => {
+      if (!series.data || series.data.length === 0) {
+        return { ...series, data: [] };
+      }
+
+      const sortedData = [...series.data].sort((a, b) => a.x - b.x);
+
+      let cumulativeY = 0;
+
+      const cumulativeData = sortedData.map((dataPoint) => {
+        cumulativeY += dataPoint.y < 0 ? 0 : dataPoint.y;
+        return {
+          x: dataPoint.x,
+          y: cumulativeY
+        };
+      });
+
+      return {
+        ...series,
+        data: cumulativeData
+      };
+    });
+  }, [chartSeries]);
+
   const noDataMessage =
     selectedChains.length > 0 || selectedMarkets.length > 0
       ? 'No data for selected filters'
@@ -83,7 +112,12 @@ const CompoundCumulativeRevenue = () => {
   return (
     <Card
       title='Compound Cumulative Revenue'
-      className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
+      isLoading={isLoading}
+      className={{
+        loading: 'min-h-[inherit]',
+        container: 'min-h-[571px]',
+        content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
+      }}
     >
       <div className='flex justify-end gap-3 px-0 py-3'>
         <div className='flex gap-2'>
@@ -141,7 +175,7 @@ const CompoundCumulativeRevenue = () => {
           barSize={barSize}
           barCountToSet={barCount}
           onVisibleBarsChange={handleVisibleBarsChange}
-          data={chartSeries}
+          data={cumulativeChartSeries}
           groupBy={getGroupByForChart()}
           showLegend={false}
         />

@@ -3,25 +3,32 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
-
-import { seriesConfig, StackedChartData, stackedChartData } from '../chartData';
+import { networkColorMap } from '@/shared/lib/utils/utils';
 
 import 'highcharts/modules/stock';
 import 'highcharts/modules/mouse-wheel-zoom';
 
+interface StackedChartData {
+  date: string;
+  [key: string]: string | number;
+}
+
+interface AggregatedPoint {
+  x: number;
+  [key: string]: number;
+}
+
 interface CompoundFeeRecievedProps {
-  data?: StackedChartData[];
+  data: StackedChartData[];
   barCount?: number;
   barSize?: 'D' | 'W' | 'M';
-  visibleSeriesKeys?: string[];
   onVisibleBarsChange?: (count: number) => void;
 }
 
 const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
-  data = stackedChartData,
+  data = [],
   barCount = 90,
   barSize = 'D',
-  visibleSeriesKeys = [],
   onVisibleBarsChange
 }) => {
   const { theme } = useTheme();
@@ -29,71 +36,90 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   const programmaticChange = useRef(false);
   const MAX_VISIBLE_BARS = 180;
 
-  const aggregatedData = useMemo(() => {
-    if (!data) return [];
+  const dynamicSeriesConfig = useMemo(() => {
+    if (!data || data.length === 0) return [];
 
-    const daysPerBar = { D: 1, W: 7, M: 30 };
-    const chunkSize = daysPerBar[barSize];
-    const result: StackedChartData[] = [];
+    const seriesKeys = new Set<string>();
+    data.forEach((item) => {
+      Object.keys(item).forEach((key) => {
+        if (key !== 'date') {
+          seriesKeys.add(key);
+        }
+      });
+    });
+
+    return Array.from(seriesKeys).map((key) => ({
+      key: key,
+      name: key.charAt(0).toUpperCase() + key.slice(1),
+      color: networkColorMap[key.toLowerCase()] || '#808080'
+    }));
+  }, [data]);
+
+  const aggregatedData = useMemo(() => {
+    if (!data || data.length === 0) return [];
+
+    const pointsPerBar = { D: 1, W: 7, M: 30 };
+    const chunkSize = pointsPerBar[barSize];
+    const result: AggregatedPoint[] = [];
 
     for (let i = 0; i < data.length; i += chunkSize) {
       const chunk = data.slice(i, i + chunkSize);
       if (chunk.length === 0) continue;
 
-      const aggregatedPoint: StackedChartData = {};
-      seriesConfig.forEach((config) => {
+      const lastPointDate = new Date(chunk[chunk.length - 1].date);
+
+      const timestamp =
+        barSize === 'M'
+          ? new Date(
+              lastPointDate.getFullYear(),
+              lastPointDate.getMonth(),
+              1
+            ).getTime()
+          : lastPointDate.getTime();
+
+      const aggregatedPoint: AggregatedPoint = { x: timestamp };
+
+      dynamicSeriesConfig.forEach((config) => {
         aggregatedPoint[config.key] = 0;
       });
 
       chunk.forEach((dailyData) => {
-        seriesConfig.forEach((config) => {
+        dynamicSeriesConfig.forEach((config) => {
           (aggregatedPoint[config.key] as number) +=
             (dailyData[config.key] as number) || 0;
         });
       });
-
-      const lastDate = new Date(chunk[chunk.length - 1].date as string);
-      let periodLabel = '';
-
-      switch (barSize) {
-        case 'D':
-        case 'W':
-          periodLabel = lastDate.toLocaleDateString('en-GB', {
-            month: 'short',
-            day: 'numeric'
-          });
-          break;
-        case 'M':
-          periodLabel = lastDate.toLocaleDateString('en-GB', {
-            year: 'numeric',
-            month: 'short'
-          });
-          break;
-      }
-      aggregatedPoint.period = periodLabel;
-
       result.push(aggregatedPoint);
     }
     return result;
-  }, [data, barSize]);
+  }, [data, barSize, dynamicSeriesConfig]);
 
   useEffect(() => {
     const chart = chartRef.current?.chart;
-    if (!chart || !aggregatedData || aggregatedData.length === 0) {
-      return;
-    }
+    if (!chart || !barCount || aggregatedData.length === 0) return;
 
-    if (barCount > 0) {
-      const dataLength = aggregatedData.length;
-      const startIndex = Math.max(0, dataLength - barCount);
-      const endIndex = dataLength - 1;
+    const dataLength = aggregatedData.length;
+    const startIndex = Math.max(0, dataLength - barCount);
 
-      if (startIndex <= endIndex) {
-        programmaticChange.current = true;
-        chart.xAxis[0].setExtremes(startIndex, endIndex, true, false);
-      }
+    if (startIndex < dataLength) {
+      const min = aggregatedData[startIndex].x;
+      const max = aggregatedData[dataLength - 1].x;
+      programmaticChange.current = true;
+      chart.xAxis[0].setExtremes(min, max, true);
     }
-  }, [aggregatedData, barCount]);
+  }, [barCount, aggregatedData]);
+
+  let xAxisLabelFormat: string;
+  switch (barSize) {
+    case 'D':
+    case 'W':
+      xAxisLabelFormat = '{value:%b %d}';
+      break;
+    case 'M':
+    default:
+      xAxisLabelFormat = "{value:%b '%y}";
+      break;
+  }
 
   const chartOptions: Highcharts.Options = {
     chart: {
@@ -115,8 +141,9 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     },
     title: { text: undefined },
     xAxis: {
-      categories: aggregatedData.map((item) => item.period || ''),
+      type: 'datetime',
       labels: {
+        format: xAxisLabelFormat,
         style: { fontSize: '11px', color: '#7A8A99' }
       },
       lineWidth: 0,
@@ -134,7 +161,12 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
             return;
           }
 
-          const visibleCount = Math.round(e.max - e.min + 1);
+          const visibleCount = Math.round(
+            aggregatedData.filter(
+              (point) =>
+                point.x >= (e.min || 0) && point.x <= (e.max || Infinity)
+            ).length
+          );
 
           if (visibleCount > MAX_VISIBLE_BARS) {
             onVisibleBarsChange?.(MAX_VISIBLE_BARS);
@@ -212,31 +244,13 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       shadow: true,
       followPointer: false,
       padding: 12,
-      positioner: function (labelWidth, labelHeight, point) {
-        const chart = this.chart;
-        const plotLeft = chart.plotLeft,
-          plotWidth = chart.plotWidth;
-        const plotTop = chart.plotTop,
-          plotHeight = chart.plotHeight;
-        const x = Math.max(
-          10,
-          Math.min(
-            plotLeft + point.plotX - labelWidth / 2,
-            plotLeft + plotWidth - labelWidth - 10
-          )
-        );
-        const y = plotTop + plotHeight - labelHeight - 20;
-        return { x, y };
-      },
       formatter: function () {
         const points = this.points;
         if (!points || points.length === 0) return '';
-        const pointIndex = points[0].index;
-        if (typeof pointIndex === 'undefined' || !aggregatedData[pointIndex])
-          return '';
-        const currentPeriod = aggregatedData[pointIndex].period;
-        let tooltip = '<div style="min-width: 200px">';
-        tooltip += `<div style="font-weight: 600; font-size: 12px; margin-bottom: 8px; color: #E5E7EB;">Date: ${currentPeriod}</div>`;
+
+        const header = `<div style="font-weight: 600; font-size: 12px; margin-bottom: 8px; color: #E5E7EB;">${Highcharts.dateFormat('%B %e, %Y', this.x as number)}</div>`;
+
+        let tooltip = `<div style="min-width: 200px">${header}`;
         let total = 0;
         const sortedPoints = [...points].sort(
           (a, b) => Math.abs(b.y as number) - Math.abs(a.y as number)
@@ -253,9 +267,9 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; font-size: 11px;">
               <div style="display: flex; align-items: center; gap: 4px;">
                 <div style="width: 8px; height: 8px; background-color: ${point.color}; border-radius: 50%;"></div>
-                <span style="color: #E5E7EB;">${point.series.name}</span>
+                <span style="color: #E5E7EB; font-size: 11px;">${point.series.name}</span>
               </div>
-              <span style="font-weight: 500; font-size: 12px; color: #FFFFFF;">${value}</span>
+              <span style="font-weight: 500; font-size: 12px; color: #FFFFFF; font-size: 11px;">${value}</span>
             </div>`;
         });
         const totalFormatted =
@@ -265,25 +279,25 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
             maximumFractionDigits: 0
           });
         tooltip += `
-          <div style="margin-top: 6px; padding-top: 4px;">
+          <div style="padding-top: 4px;">
             <div style="display: flex; justify-content: space-between; font-size: 11px;">
-              <span style="color: #E5E7EB; font-weight: 600;">Total</span>
-              <span style="font-weight: 600; color: #FFFFFF;">${totalFormatted}</span>
+              <span style="color: #E5E7EB; font-weight: 600; font-size: 11px;">Total</span>
+              <span style="font-weight: 600; color: #FFFFFF; font-size: 11px;">${totalFormatted}</span>
             </div>
           </div>
         </div>`;
         return tooltip;
       }
     },
-    series: seriesConfig.map(
+    series: dynamicSeriesConfig.map(
       (config): Highcharts.SeriesColumnOptions => ({
         type: 'column',
         name: config.name,
-        data: aggregatedData.map((item) => (item[config.key] as number) || 0),
+        data: aggregatedData.map((item) => [
+          item.x,
+          (item[config.key] as number) || 0
+        ]),
         color: config.color,
-        visible:
-          visibleSeriesKeys.length === 0 ||
-          visibleSeriesKeys.includes(config.key),
         showInLegend: true
       })
     ),

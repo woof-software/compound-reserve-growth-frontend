@@ -7,39 +7,28 @@ import View from '../View/View';
 
 interface CardProps {
   title?: string;
-
   isLoading?: boolean;
-
   isError?: boolean;
-
   children: ReactNode;
-
   className?: {
     loading?: string;
-
     error?: string;
-
     container?: string;
-
     header?: string;
-
     content?: string;
-
     title?: string;
   };
 }
 
 const Card: FC<CardProps> = ({
   title,
-
   isLoading,
-
   isError,
-
   children,
-
   className
 }) => {
+  const showPlaceholder = isLoading || isError;
+
   return (
     <div
       className={cn(
@@ -47,7 +36,7 @@ const Card: FC<CardProps> = ({
         className?.container
       )}
     >
-      <View.Condition if={Boolean(isLoading)}>
+      <View.Condition if={Boolean(showPlaceholder)}>
         <div
           className={cn(
             'flex h-full items-center justify-center',
@@ -55,29 +44,12 @@ const Card: FC<CardProps> = ({
           )}
         >
           <Text
-            size='12'
+            size='11'
             weight='500'
             lineHeight='16'
-            className='text-primary-14'
+            className={cn('text-primary-14', isError && 'text-red-500')}
           >
-            Loading...
-          </Text>
-        </div>
-      </View.Condition>
-      <View.Condition if={Boolean(isError)}>
-        <div
-          className={cn(
-            'flex h-full items-center justify-center',
-            className?.error
-          )}
-        >
-          <Text
-            size='12'
-            weight='500'
-            lineHeight='16'
-            className='text-primary-14'
-          >
-            Error loading data
+            {isError ? 'error loading data' : 'Loading...'}
           </Text>
         </div>
       </View.Condition>

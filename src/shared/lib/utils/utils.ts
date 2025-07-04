@@ -56,6 +56,22 @@ export const colorPicker = (index: number): string => {
     .padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`;
 };
 
+export const networkColorMap: { [key: string]: string } = {
+  ethereum: '#3877FF',
+  mainnet: '#3877FF',
+  arbitrum: '#00D395',
+  avalanche: '#F9FF8E',
+  base: '#F54E59',
+  optimism: '#6F42EB',
+  polygon: '#FFA374',
+  sonic: '#F6C642',
+  linea: '#FF752E',
+  mantle: '#02CCFE',
+  ronin: '#B39AFF',
+  scroll: '#FDB0C0',
+  unichain: '#BCE954'
+};
+
 export const units = [
   { value: 1e33, symbol: 'D' },
   { value: 1e30, symbol: 'N' },
@@ -79,7 +95,7 @@ export const formatCurrency = (value: number) => {
 
 export const formatGrowth = (growth: number) => {
   if (growth === 0) return '-';
-  return `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`;
+  return `${growth > 0 ? '+' : ''}${growth?.toFixed(1)}%`;
 };
 
 export function formatLargeNumber(num: number, digits: number = 4): string {

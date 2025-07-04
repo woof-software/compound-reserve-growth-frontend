@@ -1,90 +1,90 @@
 import { useMemo } from 'react';
 
-import { formatCurrency, formatGrowth } from '@/shared/lib/utils/utils';
+import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenuets';
+import { formatGrowth, formatPrice } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
 
 const RevenueMetrics = () => {
-  const fullFiveYearData = useMemo(() => {
-    const data = [];
-    const startDate = new Date('2020-01-01');
-    const endDate = new Date('2025-06-24');
-    let baseValue = 50000;
-
-    const quarterMultipliers = [1, 1.1, 0.9, 1.2];
-    const dayMultipliers = [1, 1, 1, 1, 1, 0.7, 0.7];
-
-    for (
-      let d = new Date(startDate);
-      d <= endDate;
-      d.setDate(d.getDate() + 1)
-    ) {
-      const quarter = Math.floor(d.getMonth() / 3);
-      const dayOfWeek = d.getDay();
-
-      const value = Math.max(
-        Math.round(
-          baseValue *
-            quarterMultipliers[quarter] *
-            dayMultipliers[dayOfWeek] *
-            (1 + (Math.random() - 0.5) * 0.3)
-        ),
-        10000
-      );
-
-      data.push({
-        date: d.toISOString().split('T')[0],
-        value
-      });
-
-      baseValue *= 1.0003;
-    }
-
-    return data;
-  }, []);
+  const { data: apiResponse, isLoading, isError } = useCompCumulativeRevenue();
 
   const yearlyTotals = useMemo(() => {
-    const totals: Record<string, { total: number; growth: number }> = {};
+    const revenueData = apiResponse?.data?.data;
+    if (!revenueData || revenueData.length === 0) {
+      return {};
+    }
 
-    fullFiveYearData.forEach(({ date, value }) => {
-      const year = date.substring(0, 4);
-      totals[year] = totals[year] || { total: 0, growth: 0 };
-      totals[year].total += value;
+    const totals: Record<string, { total: number; growth: number | null }> = {};
+
+    revenueData.forEach((item) => {
+      const year = new Date(item.date * 1000).getFullYear().toString();
+      totals[year] = totals[year] || { total: 0, growth: null };
+      totals[year].total += item.value;
     });
 
-    Object.keys(totals)
-      .sort()
-      .reduce((prevYear, year) => {
-        if (prevYear && totals[prevYear]) {
-          totals[year].growth =
-            (totals[year].total / totals[prevYear].total - 1) * 100;
-        }
-        return year;
-      }, '');
+    const sortedYears = Object.keys(totals).sort();
+
+    sortedYears.reduce((prevYear, currentYear) => {
+      if (prevYear && totals[prevYear] && totals[prevYear].total !== 0) {
+        totals[currentYear].growth =
+          ((totals[currentYear].total - totals[prevYear].total) /
+            Math.abs(totals[prevYear].total)) *
+          100;
+      }
+      return currentYear;
+    }, '');
+
+    const currentRealWorldYear = new Date().getFullYear().toString();
+    if (totals[currentRealWorldYear]) {
+      totals[currentRealWorldYear].growth = null;
+    }
 
     return totals;
-  }, [fullFiveYearData]);
+  }, [apiResponse]);
+
+  const yearsToDisplay =
+    !isLoading && !isError
+      ? Object.keys(yearlyTotals).sort()
+      : Array.from({ length: 4 });
+
+  if (!isLoading && !isError && yearsToDisplay.length === 0) {
+    return <div>No data available.</div>;
+  }
 
   return (
-    <div className='flex flex-row gap-5'>
-      {['2021', '2022', '2023', '2024'].map((year) => (
-        <Card
-          key={year}
-          className={{ container: 'flex-1' }}
-          title={`${year} Revenue`}
-        >
-          <div className='flex flex-col gap-8'>
-            <ValueMetricField
-              value={formatCurrency(yearlyTotals[year]?.total || 0)}
-              label='Total Revenue'
-            />
-            <ValueMetricField
-              value={formatGrowth(yearlyTotals[year]?.growth || 0)}
-              label='YoY Growth'
-            />
-          </div>
-        </Card>
-      ))}
+    <div className='flex flex-row flex-wrap gap-5'>
+      {yearsToDisplay.map((yearOrIndex, index) => {
+        const isPlaceholder = isLoading || isError;
+        const key = isPlaceholder ? index : (yearOrIndex as string);
+        const year = isPlaceholder ? '' : (yearOrIndex as string);
+        const yearData = yearlyTotals[year];
+
+        return (
+          <Card
+            key={key}
+            isLoading={isLoading}
+            isError={isError}
+            className={{
+              container: 'min-w-64 flex-1 basis-64',
+              loading: 'h-[160px]'
+            }}
+            title={!isPlaceholder ? `${year} Revenue` : undefined}
+          >
+            <div className='flex flex-col gap-8'>
+              <ValueMetricField
+                value={formatPrice(yearData?.total ?? 0, 1)}
+                label='Total Revenue'
+              />
+              <ValueMetricField
+                value={
+                  yearData?.growth != null ? formatGrowth(yearData.growth) : '-'
+                }
+                label='YoY Growth'
+              />
+            </div>
+          </Card>
+        );
+      })}
     </div>
   );
 };
