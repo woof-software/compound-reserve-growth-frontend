@@ -158,7 +158,8 @@ const LineChart: FC<LineChartProps> = ({
       gridLineWidth: 0,
       labels: {
         format: xAxisLabelFormat,
-        style: { color: '#7A8A99', fontSize: '11px' }
+        style: { color: '#7A8A99', fontSize: '11px' },
+        rotation: 0
       },
       lineColor: theme === 'light' ? '#E6E6E6' : '#2A2A2A',
       tickColor: theme === 'light' ? '#E6E6E6' : '#2A2A2A',
@@ -172,7 +173,8 @@ const LineChart: FC<LineChartProps> = ({
           const firstSeriesData = aggregatedSeries[0]?.data || [];
           const visibleCount = Math.round(
             firstSeriesData.filter(
-              (point) => point[0] >= e.min && point[0] <= e.max
+              (point) =>
+                point[0] >= (e.min || 0) && point[0] <= (e.max || Infinity)
             ).length
           );
           if (visibleCount > MAX_VISIBLE_POINTS) {
