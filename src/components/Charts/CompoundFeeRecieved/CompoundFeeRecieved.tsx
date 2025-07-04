@@ -50,7 +50,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
 
     return Array.from(seriesKeys).map((key) => ({
       key: key,
-      name: key.charAt(0).toUpperCase() + key.slice(1),
+      name: key?.charAt(0)?.toUpperCase() + key?.slice(1),
       color: networkColorMap[key.toLowerCase()] || '#808080'
     }));
   }, [data]);

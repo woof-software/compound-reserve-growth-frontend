@@ -46,7 +46,7 @@ const CompoundFeeRevenueRecieved = () => {
     });
     const toOption = (value: string) => ({
       id: value,
-      label: value.charAt(0).toUpperCase() + value.slice(1)
+      label: value?.charAt(0)?.toUpperCase() + value?.slice(1)
     });
     return {
       chainOptions: Array.from(chains).map(toOption),
@@ -97,6 +97,7 @@ const CompoundFeeRevenueRecieved = () => {
     <Card
       title='Compound Fee Revenue Recieved'
       isLoading={isLoading}
+      isError={isError}
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px]',
@@ -129,46 +130,22 @@ const CompoundFeeRevenueRecieved = () => {
           onTabChange={handleTabChange}
         />
       </div>
-      <div className='h-[400px]'>
-        {isLoading && (
-          <div className='flex h-full items-center justify-center'>
-            <Text
-              size='12'
-              className='text-primary-14'
-            >
-              Loading...
-            </Text>
-          </div>
-        )}
-        {isError && (
-          <div className='flex h-full items-center justify-center'>
-            <Text
-              size='12'
-              className='text-primary-14'
-            >
-              Error loading data.
-            </Text>
-          </div>
-        )}
-        {!isLoading && !isError && hasData && (
-          <CompoundFeeRecieved
-            data={chartData}
-            barCount={barCount}
-            barSize={barSize}
-            onVisibleBarsChange={handleVisibleBarsChange}
-          />
-        )}
-        {!isLoading && !isError && !hasData && (
-          <div className='flex h-full items-center justify-center'>
-            <Text
-              size='12'
-              className='text-primary-14'
-            >
-              {noDataMessage}
-            </Text>
-          </div>
-        )}
-      </div>
+      <CompoundFeeRecieved
+        data={chartData}
+        barCount={barCount}
+        barSize={barSize}
+        onVisibleBarsChange={handleVisibleBarsChange}
+      />
+      {!isLoading && !isError && !hasData && (
+        <div className='flex h-full items-center justify-center'>
+          <Text
+            size='12'
+            className='text-primary-14'
+          >
+            {noDataMessage}
+          </Text>
+        </div>
+      )}
     </Card>
   );
 };

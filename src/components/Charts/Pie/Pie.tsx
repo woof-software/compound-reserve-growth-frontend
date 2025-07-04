@@ -8,15 +8,13 @@ import { colorPicker } from '@/shared/lib/utils/utils';
 
 interface PieDataItem {
   name: string;
-
   percent: number;
-
   value: string;
+  color?: string;
 }
 
 interface PieChartProps {
   data: PieDataItem[];
-
   className?: string;
 }
 
@@ -27,7 +25,7 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
     name: el.name,
     y: el.percent,
     value: el.value,
-    color: colorPicker(index)
+    color: el.color || colorPicker(index)
   }));
 
   const options = {
@@ -37,24 +35,17 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       plotShadow: false,
       type: 'pie'
     },
-
     credits: {
       enabled: false
     },
-
     title: {
       text: ''
     },
-
     tooltip: {
       useHTML: true,
-
       padding: 16,
-
       borderRadius: 8,
-
       backgroundColor: '#FFFFFF',
-
       shadow: {
         color: '#0000000A',
         offsetX: 6,
@@ -62,14 +53,12 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         opacity: 1,
         width: 12
       },
-
       style: {
         fontFamily: 'Haas Grot Text R',
         fontSize: '11px',
         lineHeight: '16px',
         letterSpacing: '0'
       },
-
       headerFormat: `
         <div style="
           font-weight: 500;
@@ -78,7 +67,6 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
           {point.name}
         </div>
       `,
-
       pointFormat: `
         <div style="display: flex; gap: 24px; align-items: center; justify-content: space-between;">
           <div style="font-weight: 400;">
@@ -91,18 +79,15 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         </div>
       `
     },
-
     plotOptions: {
       pie: {
         innerSize: '70%',
         allowPointSelect: false,
         cursor: 'default',
         enableMouseTracking: true,
-
         borderWidth: 0,
         borderRadius: 0,
         borderColor: null,
-
         states: {
           hover: {
             enabled: true,
@@ -112,13 +97,10 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
             }
           }
         },
-
         dataLabels: {
           enabled: false
         },
-
         showInLegend: true,
-
         point: {
           events: {
             click: function () {
@@ -128,22 +110,15 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         }
       }
     },
-
     legend: {
       enabled: true,
       layout: 'horizontal',
       align: 'center',
       verticalAlign: 'bottom',
-
-      // width: 336,
-      // x: 30,
-      // y: 0,
-
       symbolHeight: 12,
       symbolWidth: 12,
       symbolRadius: 3,
       symbolPadding: 6,
-
       itemStyle: {
         color: '#7A8A99',
         fontSize: '11px',
@@ -153,19 +128,11 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       itemHoverStyle: {
         color: theme === 'light' ? '#17212B' : '#FFFFFF'
       },
-
       scrollable: true,
       maxHeight: 100,
-
       navigation: {
         animation: true,
         arrowSize: 11,
-
-        // x: 154,
-        // y: 200,
-        //
-        // marginLeft: 200,
-
         activeColor: theme === 'light' ? '#17212B' : '#FFFFFF',
         inactiveColor: '#7A899A',
         style: {
@@ -174,7 +141,6 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         }
       }
     },
-
     series: [
       {
         colorByPoint: true,

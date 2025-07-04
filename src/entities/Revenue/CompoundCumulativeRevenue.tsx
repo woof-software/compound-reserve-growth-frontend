@@ -113,6 +113,7 @@ const CompoundCumulativeRevenue = () => {
     <Card
       title='Compound Cumulative Revenue'
       isLoading={isLoading}
+      isError={isError}
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px]',
@@ -149,37 +150,15 @@ const CompoundCumulativeRevenue = () => {
           disabled={isLoading}
         />
       </div>
-      {isLoading && (
-        <div className='flex h-[400px] items-center justify-center'>
-          <Text
-            size='12'
-            className='text-primary-14'
-          >
-            Loading...
-          </Text>
-        </div>
-      )}
-      {isError && (
-        <div className='flex h-[400px] items-center justify-center'>
-          <Text
-            size='12'
-            className='text-primary-14'
-          >
-            Error loading data.
-          </Text>
-        </div>
-      )}
-      {!isLoading && !isError && hasData && (
-        <LineChart
-          className='max-h-[400px]'
-          barSize={barSize}
-          barCountToSet={barCount}
-          onVisibleBarsChange={handleVisibleBarsChange}
-          data={cumulativeChartSeries}
-          groupBy={getGroupByForChart()}
-          showLegend={false}
-        />
-      )}
+      <LineChart
+        className='max-h-[400px]'
+        barSize={barSize}
+        barCountToSet={barCount}
+        onVisibleBarsChange={handleVisibleBarsChange}
+        data={cumulativeChartSeries}
+        groupBy={getGroupByForChart()}
+        showLegend={false}
+      />
       {!isLoading && !isError && !hasData && (
         <div className='flex h-[400px] items-center justify-center'>
           <Text

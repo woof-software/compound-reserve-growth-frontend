@@ -80,7 +80,10 @@ const TreasuryCompositionBlock = memo(
       }
 
       if (selectedSingle?.[0] === 'Market') {
-        const markets = groupByKey(uniqData, (item) => item.source.market);
+        const markets = groupByKey(
+          uniqData,
+          (item) => item.source.market || 'no market'
+        );
 
         return mapChartData(markets, uniqData);
       }
@@ -96,7 +99,10 @@ const TreasuryCompositionBlock = memo(
       }
 
       if (selectedSingle?.[0] === 'Market') {
-        const markets = groupByKey(uniqData, (item) => item.source.market);
+        const markets = groupByKey(
+          uniqData,
+          (item) => item.source.market || 'no market'
+        );
 
         return mapTableData(markets);
       }
@@ -115,7 +121,10 @@ const TreasuryCompositionBlock = memo(
       }
 
       if (selectedSingle?.[0] === 'Market') {
-        const markets = groupByKey(uniqData, (item) => item.source.market);
+        const markets = groupByKey(
+          uniqData,
+          (item) => item.source.market || 'no market'
+        );
 
         return mapTableData(markets).reduce(
           (acc, item) => acc + item.balance,

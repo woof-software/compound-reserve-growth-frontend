@@ -27,7 +27,7 @@ const mapTableData = (data: TokenData[]): TreasuryHolding[] => {
   return data.map((el) => ({
     symbol: el.source.asset.symbol,
     chain: capitalizeFirstLetter(el.source.network),
-    market: el.source.market,
+    market: el.source.market ?? 'no market',
     qty: Number(el.quantity) || 0,
     value: el.value,
     price: el.price,
@@ -116,7 +116,7 @@ const TreasuryHoldingsBlock = ({
             break;
 
           case 'deployment':
-            fieldValue = item.source.market;
+            fieldValue = item.source.market || 'no market';
             break;
 
           default:
