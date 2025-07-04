@@ -43,10 +43,8 @@ const Footer: FC = () => {
               </Link>
             ))}
           </div>
-
           <ThemeSwitcher />
         </div>
-
         <div className='py-5'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-2'>
@@ -58,7 +56,6 @@ const Footer: FC = () => {
                 />
               </Link>
             </div>
-
             <nav className='text-primary-14 flex items-center gap-5 text-[11px]'>
               {navLinks.map((link) => (
                 <Link
@@ -76,7 +73,6 @@ const Footer: FC = () => {
                 </Link>
               ))}
             </nav>
-
             <Text
               size='11'
               weight='500'

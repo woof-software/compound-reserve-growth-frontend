@@ -111,7 +111,6 @@ const CompoundFeeRevenueRecieved = () => {
             onChange={setSelectedChains}
             placeholder='Chain'
           />
-
           <MultiSelect
             options={marketOptions}
             value={selectedMarkets}
@@ -119,20 +118,17 @@ const CompoundFeeRevenueRecieved = () => {
             placeholder='Market'
           />
         </div>
-
         <TabsGroup
           tabs={['D', 'W', 'M']}
           value={barSize}
           onTabChange={handleBarSizeChange}
         />
-
         <TabsGroup
           tabs={['7B', '30B', '90B', '180B']}
           value={activeTab}
           onTabChange={handleTabChange}
         />
       </div>
-
       <div className='h-[400px]'>
         {isLoading && (
           <div className='flex h-full items-center justify-center'>

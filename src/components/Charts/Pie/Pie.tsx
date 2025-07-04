@@ -135,9 +135,9 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       align: 'center',
       verticalAlign: 'bottom',
 
-      width: 336,
-      x: 70,
-      y: 0,
+      // width: 336,
+      // x: 30,
+      // y: 0,
 
       symbolHeight: 12,
       symbolWidth: 12,
@@ -161,10 +161,10 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         animation: true,
         arrowSize: 11,
 
-        x: 154,
-        y: 200,
-
-        marginLeft: 200,
+        // x: 154,
+        // y: 200,
+        //
+        // marginLeft: 200,
 
         activeColor: theme === 'light' ? '#17212B' : '#FFFFFF',
         inactiveColor: '#7A899A',

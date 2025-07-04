@@ -24,7 +24,6 @@ const CustomDropdownItem: FC<{
       <span className={'text-color-gray-11 rounded-sm text-[12px]'}>
         {label}
       </span>
-
       {isSelected && (
         <Icon
           name='check-stroke'
@@ -129,7 +128,6 @@ export const MultiSelect: FC<MultiSelectProps> = ({
               );
             })}
           </div>
-
           {value.length > 0 && (
             <Button
               className={

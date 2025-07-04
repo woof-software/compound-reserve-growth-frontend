@@ -22,24 +22,22 @@ const RevenueMetrics = () => {
       totals[year].total += item.value;
     });
 
-    const currentRealWorldYear = new Date().getFullYear().toString();
+    const sortedYears = Object.keys(totals).sort();
 
-    Object.keys(totals)
-      .sort()
-      .reduce((prevYear, currentYear) => {
-        if (
-          prevYear &&
-          totals[prevYear] &&
-          totals[prevYear].total !== 0 &&
-          currentYear < currentRealWorldYear
-        ) {
-          totals[currentYear].growth =
-            ((totals[currentYear].total - totals[prevYear].total) /
-              Math.abs(totals[prevYear].total)) *
-            100;
-        }
-        return currentYear;
-      }, '');
+    sortedYears.reduce((prevYear, currentYear) => {
+      if (prevYear && totals[prevYear] && totals[prevYear].total !== 0) {
+        totals[currentYear].growth =
+          ((totals[currentYear].total - totals[prevYear].total) /
+            Math.abs(totals[prevYear].total)) *
+          100;
+      }
+      return currentYear;
+    }, '');
+
+    const currentRealWorldYear = new Date().getFullYear().toString();
+    if (totals[currentRealWorldYear]) {
+      totals[currentRealWorldYear].growth = null;
+    }
 
     return totals;
   }, [apiResponse]);
@@ -61,11 +59,6 @@ const RevenueMetrics = () => {
         const year = isPlaceholder ? '' : (yearOrIndex as string);
         const yearData = yearlyTotals[year];
 
-        const growthValue =
-          !isPlaceholder && yearData?.growth !== null
-            ? formatGrowth(yearData.growth)
-            : null;
-
         return (
           <Card
             key={key}
@@ -82,12 +75,12 @@ const RevenueMetrics = () => {
                 value={formatPrice(yearData?.total ?? 0, 1)}
                 label='Total Revenue'
               />
-              {growthValue && (
-                <ValueMetricField
-                  value={growthValue}
-                  label='YoY Growth'
-                />
-              )}
+              <ValueMetricField
+                value={
+                  yearData?.growth != null ? formatGrowth(yearData.growth) : '-'
+                }
+                label='YoY Growth'
+              />
             </div>
           </Card>
         );

@@ -138,7 +138,6 @@ const CompoundRevenueBlock = () => {
             disabled={isLoading}
           />
         </div>
-
         <TabsGroup
           tabs={['D', 'W', 'M']}
           value={barSize}
@@ -152,7 +151,6 @@ const CompoundRevenueBlock = () => {
           disabled={isLoading}
         />
       </div>
-
       <div className='h-[400px]'>
         {isLoading && (
           <div className='flex h-full items-center justify-center'>

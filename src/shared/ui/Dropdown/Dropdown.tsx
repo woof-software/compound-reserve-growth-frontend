@@ -96,7 +96,6 @@ const Dropdown: FC<DropdownProps> = ({
         >
           {triggerContent}
         </div>
-
         <View.Condition if={open}>
           <div className='hide-scrollbar shadow-10 border-secondary-18 bg-primary-15 absolute top-10 right-0 grid max-h-[182px] min-w-[168px] gap-0.5 overflow-y-auto rounded-lg border border-solid'>
             {children}
@@ -129,7 +128,6 @@ const DropdownItem: FC<DropdownItemProps> = ({
       >
         {asset}
       </Text>
-
       <View.Condition if={isSelected}>
         <CheckStroke
           width={16}
@@ -162,7 +160,6 @@ const TriggerContent: FC<TriggerContentProps> = ({
       >
         {title}
       </Text>
-
       <ArrowDown
         className={cn('transition-transform', {
           'rotate-180': isOpen

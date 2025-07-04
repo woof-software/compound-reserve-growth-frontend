@@ -11,7 +11,6 @@ const AnnualisedExpensesBlock = () => {
       <div className='flex justify-between'>
         <div className='flex w-[650px] flex-col gap-5'>
           <AnnualisedExpenses />
-
           <div>
             <Text
               size='11'
@@ -21,7 +20,6 @@ const AnnualisedExpensesBlock = () => {
             >
               1M USD ImmuneFi Bug Bounty program is excluded from above
             </Text>
-
             <Text
               size='11'
               weight='500'
@@ -32,7 +30,6 @@ const AnnualisedExpensesBlock = () => {
             </Text>
           </div>
         </div>
-
         <PieChart
           className='max-h-[400px] max-w-[336.5px]'
           data={[

@@ -12,6 +12,7 @@ interface CardProps {
   children: ReactNode;
   className?: {
     loading?: string;
+    error?: string;
     container?: string;
     header?: string;
     content?: string;
@@ -48,12 +49,11 @@ const Card: FC<CardProps> = ({
             lineHeight='16'
             className={cn('text-primary-14', isError && 'text-red-500')}
           >
-            {isError ? 'error' : 'Loading...'}
+            {isError ? 'error loading data' : 'Loading...'}
           </Text>
         </div>
       </View.Condition>
-
-      <View.Condition if={!showPlaceholder}>
+      <View.Condition if={!isLoading && !isError}>
         <View.Condition if={Boolean(title)}>
           <div className={cn('bg-card-header px-10 py-4', className?.header)}>
             <Text

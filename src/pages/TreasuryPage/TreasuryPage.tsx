@@ -15,7 +15,11 @@ import { TokenData } from '@/shared/types/Treasury/types';
 import Text from '@/shared/ui/Text/Text';
 
 const TreasuryPage = () => {
-  const { data: treasuryApiResponse, isLoading } = useTreasuryHistory({
+  const {
+    data: treasuryApiResponse,
+    isLoading,
+    isError
+  } = useTreasuryHistory({
     params: { order: 'DESC' }
   });
 
@@ -42,12 +46,6 @@ const TreasuryPage = () => {
     [uniqData30DaysOld]
   );
 
-  console.log('treasuryData=>', treasuryData);
-  console.log('uniqData=>', uniqData);
-  console.log('uniqData30DaysOld=>', uniqData30DaysOld);
-  console.log('uniqDataByCategory=>', uniqDataByCategory);
-  console.log('uniqData30DaysOldByCategory=>', uniqData30DaysOldByCategory);
-
   return (
     <div className='flex flex-col gap-[70px]'>
       <div className='flex flex-col gap-[15px]'>
@@ -58,7 +56,6 @@ const TreasuryPage = () => {
         >
           Treasury
         </Text>
-
         <Text
           size='15'
           weight='400'
@@ -68,7 +65,6 @@ const TreasuryPage = () => {
           allocation, strategic holdings, and investment returns.
         </Text>
       </div>
-
       <div className='flex flex-col gap-5'>
         <MetricBlock
           isLoading={isLoading}
@@ -77,7 +73,6 @@ const TreasuryPage = () => {
             uniqData30DaysOldByCategory
           }}
         />
-
         <TreasuryCompositionBlock
           isLoading={isLoading}
           data={{
@@ -85,13 +80,21 @@ const TreasuryPage = () => {
             uniqData
           }}
         />
-
-        {/*add props*/}
-        <TotalTresuaryValue />
-
-        <TreasuryBalanceByNetworkBlock />
-
-        <TreasuryHoldingsBlock />
+        <TotalTresuaryValue
+          isLoading={isLoading}
+          isError={isError}
+          data={treasuryData}
+        />
+        <TreasuryBalanceByNetworkBlock
+          data={uniqData}
+          isError={isError}
+          isLoading={isLoading}
+        />
+        <TreasuryHoldingsBlock
+          data={uniqData}
+          isError={isError}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );

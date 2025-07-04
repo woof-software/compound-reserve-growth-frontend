@@ -1,10 +1,11 @@
 import { type ColumnDef } from '@tanstack/react-table';
 
+import { formatPrice } from '@/shared/lib/utils/utils';
 import DataTable from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
-import { TREASURY_DATA, TreasuryHolding } from './MOCK_DATA';
+import { TreasuryHolding } from './MOCK_DATA';
 
 const treasuryColumns: ColumnDef<TreasuryHolding>[] = [
   {
@@ -33,29 +34,26 @@ const treasuryColumns: ColumnDef<TreasuryHolding>[] = [
     enableSorting: true
   },
   {
-    accessorKey: 'wallet',
-    header: 'Wallet',
-    enableSorting: true
-  },
-  {
     accessorKey: 'qty',
     header: 'QTY',
-    enableSorting: true
+    enableSorting: true,
+    cell: ({ row }) => <Text size='13'>{formatPrice(row.original.qty, 1)}</Text>
   },
   {
     accessorKey: 'value',
     header: 'Value',
-    enableSorting: true
+    enableSorting: true,
+    cell: ({ row }) => (
+      <Text size='13'>{formatPrice(row.original.value, 1)}</Text>
+    )
   },
   {
     accessorKey: 'price',
     header: 'Price',
-    enableSorting: true
-  },
-  {
-    accessorKey: 'apr',
-    header: 'APR',
-    enableSorting: true
+    enableSorting: true,
+    cell: ({ row }) => (
+      <Text size='13'>{formatPrice(row.original.price, 1)}</Text>
+    )
   },
   {
     accessorKey: 'source',
@@ -64,10 +62,14 @@ const treasuryColumns: ColumnDef<TreasuryHolding>[] = [
   }
 ];
 
-const TreasuryHoldings = () => {
+interface TreasuryHoldingsProps {
+  tableData: TreasuryHolding[];
+}
+
+const TreasuryHoldings = ({ tableData }: TreasuryHoldingsProps) => {
   return (
     <DataTable
-      data={TREASURY_DATA}
+      data={tableData}
       columns={treasuryColumns}
       enableSorting
       enablePagination

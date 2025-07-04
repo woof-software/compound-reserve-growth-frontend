@@ -89,7 +89,6 @@ const Select: FC<SelectProps> = memo(
           >
             {title}
           </Text>
-
           <div className='flex items-center justify-between'>
             <SelectTriggerContent
               filterId={filterId}
@@ -98,7 +97,6 @@ const Select: FC<SelectProps> = memo(
               selectedItems={selectedItems}
               onItemDelete={onItemDelete}
             />
-
             <ArrowDown
               className={cn('transition-transform', {
                 'rotate-180': isOpen
@@ -108,7 +106,6 @@ const Select: FC<SelectProps> = memo(
             />
           </div>
         </div>
-
         <View.Condition if={isOpen}>
           <div className='hide-scrollbar outline-secondary-13 bg-primary-15 absolute top-[52px] right-[-2px] z-10 grid max-h-[182px] w-[540px] gap-0.5 overflow-y-auto rounded-lg border-none p-2 outline outline-solid'>
             <Each
@@ -154,7 +151,6 @@ const SelectItem: FC<SelectItemProps> = memo(
         >
           {asset}
         </Text>
-
         <View.Condition if={isSelected}>
           <CheckStroke
             width={16}
@@ -197,7 +193,6 @@ const SelectTriggerContent: FC<SelectTriggerContentProps> = memo(
                 >
                   {el}
                 </Text>
-
                 <CloseIcon
                   width='8.5px'
                   height='8.5px'
@@ -206,7 +201,6 @@ const SelectTriggerContent: FC<SelectTriggerContentProps> = memo(
               </div>
             )}
           />
-
           <View.Condition if={Boolean(selectedItems.length > maximumItems)}>
             <div className='bg-secondary-14 flex min-w-[65px] gap-0.5 rounded-sm px-2 py-1'>
               <Text
@@ -220,7 +214,6 @@ const SelectTriggerContent: FC<SelectTriggerContentProps> = memo(
             </div>
           </View.Condition>
         </View.Condition>
-
         <Text
           tag='span'
           size='11'

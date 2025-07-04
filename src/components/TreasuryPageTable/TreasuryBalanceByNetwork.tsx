@@ -1,13 +1,9 @@
+import { formatPrice } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
-import {
-  TREASURY_BALANCE_BY_NETWORK,
-  TreasuryBalanceByNetworkProps
-} from './MOCK_DATA';
-
-const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkProps>[] = [
+const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
   {
     accessorKey: 'symbol',
     header: 'Symbol',
@@ -25,34 +21,52 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkProps>[] = [
   {
     accessorKey: 'qty',
     header: 'QTY',
-    align: 'right',
-    enableSorting: true
+    enableSorting: true,
+    cell: ({ row }) => <Text size='13'>{formatPrice(row.original.qty, 1)}</Text>
   },
   {
     accessorKey: 'value',
-    align: 'right',
     header: 'Value',
-    enableSorting: true
+    enableSorting: true,
+    cell: ({ row }) => (
+      <Text size='13'>{formatPrice(row.original.value, 1)}</Text>
+    )
   },
   {
-    accessorKey: 'apr',
-    header: 'APR',
-    align: 'right',
+    accessorKey: 'market',
+    header: 'Market',
     enableSorting: true
   },
   {
     accessorKey: 'source',
     header: 'Source',
-    align: 'right',
     enableSorting: true
   }
 ];
 
-const TreasuryBalanceByNetwork = () => {
+export type TreasuryBalanceByNetworkType = {
+  symbol: string;
+
+  qty: number;
+
+  value: number;
+
+  source: string;
+
+  market: string;
+};
+
+interface TreasuryBalanceByNetworkProps {
+  tableData: TreasuryBalanceByNetworkType[];
+}
+
+const TreasuryBalanceByNetwork = ({
+  tableData
+}: TreasuryBalanceByNetworkProps) => {
   return (
     <div className='w-full max-w-[522px]'>
       <DataTable
-        data={TREASURY_BALANCE_BY_NETWORK}
+        data={tableData}
         columns={treasuryColumns}
         enableSorting
         enablePagination

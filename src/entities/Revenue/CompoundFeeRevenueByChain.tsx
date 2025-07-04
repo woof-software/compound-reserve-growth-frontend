@@ -43,7 +43,6 @@ const CompoundFeeRevenueByChain = () => {
           >
             Interval
           </Text>
-
           <SingleDropdown
             triggerContentClassName='pl-0'
             options={options}
@@ -54,7 +53,6 @@ const CompoundFeeRevenueByChain = () => {
             onSelect={selectInterval}
           />
         </div>
-
         <div className='flex items-center gap-1'>
           <Text
             tag='span'
@@ -65,7 +63,6 @@ const CompoundFeeRevenueByChain = () => {
           >
             Year
           </Text>
-
           <SingleDropdown
             triggerContentClassName='pl-0'
             options={yearOptions}
@@ -77,7 +74,6 @@ const CompoundFeeRevenueByChain = () => {
           />
         </div>
       </div>
-
       <CompoundFeeRevenuebyChain />
     </Card>
   );

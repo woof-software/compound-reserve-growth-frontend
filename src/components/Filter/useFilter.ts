@@ -42,6 +42,7 @@ const reducer = (state: State, action: Action): State => {
 
     case 'APPLY':
       return { applied: state.local, local: state.local };
+
     case 'CLEAR':
       return { local: [], applied: [] };
 

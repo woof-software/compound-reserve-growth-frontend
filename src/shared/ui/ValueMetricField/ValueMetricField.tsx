@@ -57,7 +57,6 @@ const ValueMetricField = ({
           <View.Condition if={Boolean(icon)}>
             <div className={cn(className?.icon)}>{icon}</div>
           </View.Condition>
-
           <View.Condition if={Boolean(iconText)}>
             <Text
               size='16'
@@ -70,7 +69,6 @@ const ValueMetricField = ({
           </View.Condition>
         </div>
       </View.Condition>
-
       <div className={cn('flex flex-col gap-2', className?.content)}>
         <div className='flex items-center gap-3.5'>
           <Text
@@ -81,7 +79,6 @@ const ValueMetricField = ({
           >
             {value}
           </Text>
-
           <View.Condition if={Boolean(badge)}>
             <Tooltip content='Change over last 30 days'>
               <Text
@@ -100,7 +97,6 @@ const ValueMetricField = ({
             </Tooltip>
           </View.Condition>
         </div>
-
         <Text
           size='11'
           weight='500'

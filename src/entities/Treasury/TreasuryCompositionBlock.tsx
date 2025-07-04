@@ -4,7 +4,11 @@ import PieChart from '@/components/Charts/Pie/Pie';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import { TreasuryCompositionType } from '@/components/TreasuryPageTable/MOCK_DATA';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
-import { formatPrice, groupByKey } from '@/shared/lib/utils/utils';
+import {
+  capitalizeFirstLetter,
+  formatPrice,
+  groupByKey
+} from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
@@ -50,7 +54,7 @@ const mapTableData = (data: Record<string, TokenData[]>) => {
     return {
       id: index + 1,
       icon: key.replace(/ /g, '-').toLowerCase(),
-      name: key.at(0)?.toUpperCase() + key.slice(1) || 'Unclassified',
+      name: capitalizeFirstLetter(key) || 'Unclassified',
       balance
     };
   });
@@ -125,9 +129,6 @@ const TreasuryCompositionBlock = memo(
       );
     }, [selectedSingle, uniqData, uniqDataByCategory]);
 
-    console.log('tableData=>', tableData);
-    console.log('totalBalance=>', totalBalance);
-
     return (
       <Card
         isLoading={isLoading}
@@ -148,13 +149,11 @@ const TreasuryCompositionBlock = memo(
             onSelect={selectSingle}
           />
         </div>
-
         <div className='flex justify-between'>
           <PieChart
             className='max-h-[400px] max-w-[336.5px]'
             data={chartData}
           />
-
           <TreasuryComposition
             tableData={tableData}
             totalBalance={totalBalance}

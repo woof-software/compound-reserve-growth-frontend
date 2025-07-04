@@ -119,7 +119,6 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             }
           />
         </Card>
-
         <Card
           isLoading={isLoading}
           className={{ container: 'h-[200px] flex-1' }}
@@ -137,7 +136,6 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             }
           />
         </Card>
-
         <Card
           isLoading={isLoading}
           className={{ container: 'h-[200px] flex-1' }}
@@ -151,7 +149,6 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           />
         </Card>
       </div>
-
       <div className='flex flex-row gap-5'>
         <Card
           isLoading={isLoading}
@@ -169,7 +166,6 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             icon={<div className='bg-success-11 h-8 w-8 rounded-full' />}
           />
         </Card>
-
         <Card
           isLoading={isLoading}
           className={{ container: 'h-[225px] flex-1' }}

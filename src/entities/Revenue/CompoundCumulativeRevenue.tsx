@@ -149,7 +149,6 @@ const CompoundCumulativeRevenue = () => {
           disabled={isLoading}
         />
       </div>
-
       {isLoading && (
         <div className='flex h-[400px] items-center justify-center'>
           <Text
