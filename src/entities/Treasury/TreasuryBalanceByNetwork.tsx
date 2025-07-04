@@ -169,15 +169,12 @@ const TreasuryBalanceByNetworkBlock = ({
       <div className='flex items-center justify-end gap-3 px-0 py-3'>
         <Filter {...filterProps} />
       </div>
-
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <div className='flex justify-between gap-10'>
           <CryptoChart data={chartData} />
-
           <TreasuryBalanceByNetwork tableData={tableData} />
         </div>
       </View.Condition>
-
       <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
         <div className='flex h-[400px] items-center justify-center'>
           <Text
