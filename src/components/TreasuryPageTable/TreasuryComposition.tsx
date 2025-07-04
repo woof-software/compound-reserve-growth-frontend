@@ -21,7 +21,6 @@ const columns: ExtendedColumnDef<TreasuryCompositionType>[] = [
           name={row.original.icon || 'not-found-icon'}
           className='h-5 w-5'
         />
-
         <Text size='13'>{row.original.name}</Text>
       </div>
     )
@@ -57,7 +56,6 @@ const TreasuryComposition = ({
         cellClassName='py-3 px-[5px]'
         headerTextClassName='text-primary-14 font-medium'
       />
-
       <div className='flex items-center justify-between px-[5px] py-3'>
         <Text
           size='11'
@@ -65,7 +63,6 @@ const TreasuryComposition = ({
         >
           Total Balance
         </Text>
-
         <Text
           size='11'
           className='text-primary-14'

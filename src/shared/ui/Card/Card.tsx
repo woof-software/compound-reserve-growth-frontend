@@ -64,7 +64,6 @@ const Card: FC<CardProps> = ({
           </Text>
         </div>
       </View.Condition>
-
       <View.Condition if={Boolean(isError)}>
         <div
           className={cn(
@@ -82,7 +81,6 @@ const Card: FC<CardProps> = ({
           </Text>
         </div>
       </View.Condition>
-
       <View.Condition if={!isLoading && !isError}>
         <View.Condition if={Boolean(title)}>
           <div className={cn('bg-card-header px-10 py-4', className?.header)}>
@@ -97,7 +95,6 @@ const Card: FC<CardProps> = ({
             </Text>
           </div>
         </View.Condition>
-
         <div className={cn('bg-card-content p-10', className?.content)}>
           {children}
         </div>

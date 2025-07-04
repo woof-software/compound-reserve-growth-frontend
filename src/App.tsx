@@ -9,11 +9,9 @@ function App() {
   return (
     <PageWrapper className='gap-[60px]'>
       <Header />
-
       <main className='mx-auto flex w-full max-w-[1084px] flex-grow flex-col'>
         <AppRouter />
       </main>
-
       <Footer />
     </PageWrapper>
   );

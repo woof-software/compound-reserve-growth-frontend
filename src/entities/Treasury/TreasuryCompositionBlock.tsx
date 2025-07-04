@@ -149,13 +149,11 @@ const TreasuryCompositionBlock = memo(
             onSelect={selectSingle}
           />
         </div>
-
         <div className='flex justify-between'>
           <PieChart
             className='max-h-[400px] max-w-[336.5px]'
             data={chartData}
           />
-
           <TreasuryComposition
             tableData={tableData}
             totalBalance={totalBalance}

@@ -144,17 +144,14 @@ const TreasuryHoldingsBlock = ({
     >
       <div className='flex items-center justify-end gap-3 px-0 py-3'>
         <Filter {...filterProps} />
-
         <CSVDownloadButton
           data={tableData}
           filename='Full Treasury Holdings'
         />
       </div>
-
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <TreasuryHoldings tableData={tableData} />
       </View.Condition>
-
       <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
         <div className='flex h-[400px] items-center justify-center'>
           <Text

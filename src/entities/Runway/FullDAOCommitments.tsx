@@ -15,7 +15,6 @@ const FullDAOCommitmentsBlock = () => {
           filename='Full DAO Commitments'
         />
       </div>
-
       <FullDAOCommitments />
     </Card>
   );

@@ -23,7 +23,6 @@ const RevenuePage = () => {
         >
           Revenue
         </Text>
-
         <Text
           tag='p'
           size='15'
@@ -32,14 +31,10 @@ const RevenuePage = () => {
           Track Compound Protocol revenue streams across various networks.
         </Text>
       </div>
-
       <div className='flex flex-col gap-5'>
         <RevenueMetrics />
-
         <RevenueOverview />
-
         <CompoundCumulativeRevenue />
-
         <Suspense
           fallback={
             <div className='flex h-[300px] items-center justify-center text-sm text-gray-500'>
@@ -49,11 +44,8 @@ const RevenuePage = () => {
         >
           <CompoundFeeRevenueRecieved />
         </Suspense>
-
         <CompoundFeeRevenueByChain />
-
         <CompoundRevenueBlock />
-
         <RevenueBreakDownBlock />
       </div>
     </div>

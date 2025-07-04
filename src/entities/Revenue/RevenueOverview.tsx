@@ -16,16 +16,13 @@ const RevenueOverview = () => {
           tabs={['7D', '30D', '90D']}
           defaultTab='7D'
         />
-
         <TabsGroup
           tabs={['Rolling', 'To Date']}
           defaultTab='Rolling'
         />
       </div>
-
       <div className='flex justify-between'>
         <RevenueOverviewUSD />
-
         <PieChart
           className='max-h-[400px] max-w-[336.5px]'
           data={[

@@ -10,14 +10,12 @@ const RunwayMetrics = () => {
           label='Total Annualised Expenses'
         />
       </Card>
-
       <Card className={{ container: 'flex-1' }}>
         <ValueMetricField
           value='$28.3M'
           label='Service Provider Expenses'
         />
       </Card>
-
       <Card className={{ container: 'flex-1' }}>
         <ValueMetricField
           value='$35.3M'

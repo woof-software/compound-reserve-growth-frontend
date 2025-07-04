@@ -34,7 +34,6 @@ function Switch({
           {label}
         </Text>
       </View.Condition>
-
       <SwitchPrimitive.Root
         data-slot='switch'
         className={cn(
@@ -51,7 +50,6 @@ function Switch({
           )}
         />
       </SwitchPrimitive.Root>
-
       <View.Condition if={Boolean(label && positionLabel === 'right')}>
         <Text
           size='14'

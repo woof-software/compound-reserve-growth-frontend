@@ -70,26 +70,22 @@ const CompoundRevenueBlock = () => {
             onChange={() => {}}
             placeholder='Chain'
           />
-
           <MultiSelect
             options={blockchains}
             onChange={() => {}}
             placeholder='Market'
           />
-
           <MultiSelect
             options={blockchains}
             onChange={() => {}}
             placeholder='Source'
           />
-
           <MultiSelect
             options={blockchains}
             onChange={() => {}}
             placeholder='Reserve Symbols'
           />
         </div>
-
         <TabsGroup
           tabs={['D', 'W', 'M']}
           value={barSize}
@@ -101,7 +97,6 @@ const CompoundRevenueBlock = () => {
           onTabChange={handleTabChange}
         />
       </div>
-
       <CompoundRevenue
         data={fullFiveYearData}
         barSize={barSize}
