@@ -68,7 +68,7 @@ const TreasuryHoldingsBlock = ({
         id: 'chain',
         title: 'Chain',
         placeholder: 'Add Chain',
-        options: chainOptions?.map((o) => o.id) || []
+        options: chainOptions?.map((o) => capitalizeFirstLetter(o.id)) || []
       },
       {
         id: 'assetType',
@@ -105,16 +105,20 @@ const TreasuryHoldingsBlock = ({
         if (!selectedItems.length) return true;
 
         let fieldValue: string;
+
         switch (id) {
           case 'chain':
-            fieldValue = item.source.network;
+            fieldValue = capitalizeFirstLetter(item.source.network);
             break;
+
           case 'assetType':
             fieldValue = item.source.asset.type;
             break;
+
           case 'deployment':
             fieldValue = item.source.market;
             break;
+
           default:
             return true;
         }

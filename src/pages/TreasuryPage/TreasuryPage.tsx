@@ -90,7 +90,11 @@ const TreasuryPage = () => {
           data={treasuryData}
         />
 
-        <TreasuryBalanceByNetworkBlock />
+        <TreasuryBalanceByNetworkBlock
+          data={uniqData}
+          isError={isError}
+          isLoading={isLoading}
+        />
 
         <TreasuryHoldingsBlock
           data={uniqData}
