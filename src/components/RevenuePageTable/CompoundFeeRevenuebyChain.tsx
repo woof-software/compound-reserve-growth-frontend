@@ -1,70 +1,54 @@
+import React from 'react';
+
+import { formatNumber } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
-import Icon from '@/shared/ui/Icon/Icon';
 
-import {
-  COMPOUND_FEE_REVENUE_DATA,
-  CompoundFeeRevenueProps
-} from './MOCK_DATA';
+export interface ProcessedRevenueData {
+  chain: string;
+  [key: string]: string | number;
+}
 
-const columns: ExtendedColumnDef<CompoundFeeRevenueProps>[] = [
-  {
-    accessorKey: 'chain',
-    header: 'Chain',
-    cell: ({ getValue }) => (
-      <div className='flex items-center gap-2'>
-        <Icon
-          name='not-found-icon'
-          className='h-5 w-5'
-        />
-        <span>{getValue() as string}</span>
-      </div>
-    )
-  },
-  {
-    accessorKey: 'q3_2024',
-    header: 'Q3 2024'
-  },
-  {
-    accessorKey: 'q4_2024',
-    header: 'Q4 2024'
-  },
-  {
-    accessorKey: 'q1_2025',
-    header: 'Q1 2025'
-  },
-  {
-    accessorKey: 'q2_2025',
-    header: 'Q2 2025'
-  }
-];
+interface CompoundFeeRevenuebyChainProps {
+  data: ProcessedRevenueData[];
+  columns: ExtendedColumnDef<ProcessedRevenueData>[];
+  totals: { [key: string]: number };
+}
 
-const CompoundFeeRevenuebyChain = () => {
+const CompoundFeeRevenuebyChain = ({
+  data,
+  columns,
+  totals
+}: CompoundFeeRevenuebyChainProps) => {
   const footerRow = (
-    <tr>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
+    <tr key='footer-total-row'>
+      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
         Total
       </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
-        123000
-      </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
-        123000
-      </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
-        123000
-      </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
-        123000
-      </td>
+      {columns.slice(1).map((col) => {
+        const columnKey =
+          'accessorKey' in col ? String(col.accessorKey) : col.id;
+        if (!columnKey) {
+          return null;
+        }
+
+        return (
+          <td
+            key={columnKey}
+            className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'
+          >
+            {formatNumber(totals[columnKey])}
+          </td>
+        );
+      })}
     </tr>
   );
 
   return (
     <DataTable
-      data={COMPOUND_FEE_REVENUE_DATA}
+      data={data}
       columns={columns}
       pageSize={10}
-      footerContent={footerRow}
+      footerContent={columns.length > 0 ? footerRow : null}
       headerCellClassName='py-[13px] px-[5px]'
       cellClassName='py-3 px-[5px]'
       headerTextClassName='text-primary-14 font-medium'

@@ -1,36 +1,132 @@
-import * as React from 'react';
+import React, { useEffect, useMemo } from 'react';
 
-import CompoundFeeRevenuebyChain from '@/components/RevenuePageTable/CompoundFeeRevenuebyChain';
+import CompoundFeeRevenuebyChain, {
+  ProcessedRevenueData
+} from '@/components/RevenuePageTable/CompoundFeeRevenuebyChain';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
+import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenuets';
+import { precomputeViews } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
+import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
+import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
-const options = ['Quarterly', 'Week', 'Month', 'Year'];
+export interface View {
+  tableData: ProcessedRevenueData[];
+  totals: { [key: string]: number };
+  columns: ExtendedColumnDef<ProcessedRevenueData>[];
+}
 
-const yearOptions = ['2025', '2024', '2023', '2022'];
+export interface PrecomputedViews {
+  quarterly: Record<string, View>;
+  monthly: Record<string, View>;
+  weekly: Record<string, View>;
+}
+
+const intervalOptions = ['Quarterly', 'Monthly', 'Weekly'];
+
+const generateOptions = (views: PrecomputedViews | null, interval: string) => {
+  if (!views) return { label: 'Year', options: [] };
+  switch (interval) {
+    case 'Quarterly':
+      return {
+        label: 'Year',
+        options: Object.keys(views.quarterly).sort(
+          (a, b) => parseInt(b) - parseInt(a)
+        )
+      };
+    case 'Monthly':
+      return {
+        label: 'Period',
+        options: Object.keys(views.monthly).sort(
+          (a, b) =>
+            new Date(b.split(' ')[1]).getTime() -
+              new Date(a.split(' ')[1]).getTime() ||
+            (b.startsWith('Jul') ? 1 : -1)
+        )
+      };
+    case 'Weekly':
+      return {
+        label: 'Month',
+        options: Object.keys(views.weekly).sort(
+          (a, b) => new Date(b).getTime() - new Date(a).getTime()
+        )
+      };
+    default:
+      return { label: 'Period', options: [] };
+  }
+};
 
 const CompoundFeeRevenueByChain = () => {
-  const {
-    open: intervalOpen,
-    selectedValue: selectedInterval,
-    toggle: toggleInterval,
-    close: closeInterval,
-    select: selectInterval
-  } = useDropdown('single');
+  const { data: apiResponse, isLoading, isError } = useCompCumulativeRevenue();
 
-  const {
-    open: yearOpen,
-    selectedValue: selectedYear,
-    toggle: toggleYear,
-    close: closeYear,
-    select: selectYear
-  } = useDropdown('single');
+  const intervalDropdown = useDropdown('single');
+  const periodDropdown = useDropdown('single');
+
+  const selectedInterval = intervalDropdown.selectedValue?.[0] || 'Quarterly';
+  const selectedPeriod = periodDropdown.selectedValue?.[0];
+
+  const precomputedViews = useMemo(
+    () => precomputeViews(apiResponse?.data?.data || []),
+    [apiResponse]
+  );
+  const dynamicOptions = useMemo(
+    () => generateOptions(precomputedViews, selectedInterval),
+    [precomputedViews, selectedInterval]
+  );
+
+  useEffect(() => {
+    if (dynamicOptions.options.length > 0) {
+      if (
+        !periodDropdown.selectedValue ||
+        !dynamicOptions.options.includes(periodDropdown.selectedValue[0])
+      ) {
+        periodDropdown.select(dynamicOptions.options[0]);
+      }
+    }
+  }, [dynamicOptions]);
+
+  const { tableData, columns, totals } = useMemo(() => {
+    if (!precomputedViews || !selectedPeriod) {
+      return { tableData: [], columns: [], totals: {} };
+    }
+
+    const viewData: View | undefined =
+      precomputedViews[
+        selectedInterval.toLowerCase() as keyof PrecomputedViews
+      ]?.[selectedPeriod];
+    if (!viewData) return { tableData: [], columns: [], totals: {} };
+
+    const finalColumns: ExtendedColumnDef<ProcessedRevenueData>[] = [
+      {
+        accessorKey: 'chain',
+        header: 'Chain',
+        cell: ({ getValue }: { getValue: () => unknown }) => (
+          <div className='flex items-center gap-2'>
+            <Icon
+              name={getValue() as string}
+              className='h-5 w-5'
+            />
+            <span>{getValue() as string}</span>
+          </div>
+        )
+      },
+      ...viewData.columns
+    ];
+
+    return { ...viewData, columns: finalColumns };
+  }, [precomputedViews, selectedInterval, selectedPeriod]);
 
   return (
     <Card
       title='Compound Fee Revenue by Chain'
-      className={{ content: 'flex flex-col gap-3 px-10 pt-0 pb-10' }}
+      isLoading={isLoading}
+      isError={isError}
+      className={{
+        loading: 'min-h-[571px]',
+        content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
+      }}
     >
       <div className='flex justify-end gap-3 px-0 py-3'>
         <div className='flex items-center gap-1'>
@@ -44,13 +140,14 @@ const CompoundFeeRevenueByChain = () => {
             Interval
           </Text>
           <SingleDropdown
-            triggerContentClassName='pl-0'
-            options={options}
-            isOpen={intervalOpen}
-            selectedValue={selectedInterval?.[0] || ''}
-            onToggle={toggleInterval}
-            onClose={closeInterval}
-            onSelect={selectInterval}
+            options={intervalOptions}
+            isOpen={intervalDropdown.open}
+            onToggle={intervalDropdown.toggle}
+            onClose={intervalDropdown.close}
+            onSelect={intervalDropdown.select}
+            selectedValue={selectedInterval}
+            contentClassName='p-[5px]'
+            triggerContentClassName='p-[5px]'
           />
         </div>
         <div className='flex items-center gap-1'>
@@ -61,20 +158,25 @@ const CompoundFeeRevenueByChain = () => {
             lineHeight='16'
             className='text-primary-14'
           >
-            Year
+            {dynamicOptions.label}
           </Text>
           <SingleDropdown
-            triggerContentClassName='pl-0'
-            options={yearOptions}
-            isOpen={yearOpen}
-            selectedValue={selectedYear?.[0] || ''}
-            onToggle={toggleYear}
-            onClose={closeYear}
-            onSelect={selectYear}
+            options={dynamicOptions.options}
+            isOpen={periodDropdown.open}
+            onToggle={periodDropdown.toggle}
+            onClose={periodDropdown.close}
+            onSelect={periodDropdown.select}
+            selectedValue={periodDropdown.selectedValue?.[0]}
+            contentClassName='p-[5px]'
+            triggerContentClassName='p-[5px]'
           />
         </div>
       </div>
-      <CompoundFeeRevenuebyChain />
+      <CompoundFeeRevenuebyChain
+        data={tableData}
+        columns={columns}
+        totals={totals}
+      />
     </Card>
   );
 };
