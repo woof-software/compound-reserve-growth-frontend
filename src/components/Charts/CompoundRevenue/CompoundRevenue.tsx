@@ -63,6 +63,13 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
     return Array.from(aggregated.entries()).sort((a, b) => a[0] - b[0]);
   }, [data, barSize]);
 
+  const dateTimeLabelFormats = {
+    day: '%b %d',
+    week: '%b %d',
+    month: "%b '%y",
+    year: '%Y'
+  };
+
   const chartOptions: Highcharts.Options = {
     chart: {
       type: 'column',
@@ -83,7 +90,11 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
     title: { text: undefined },
     xAxis: {
       type: 'datetime',
-      labels: { style: { fontSize: '11px', color: '#7A8A99' } },
+      tickPixelInterval: 75,
+      dateTimeLabelFormats: dateTimeLabelFormats,
+      labels: {
+        style: { fontSize: '11px', color: '#7A8A99' }
+      },
       lineWidth: 0,
       tickWidth: 0,
       crosshair: { width: 1, color: '#7A8A99', dashStyle: 'Dash' },

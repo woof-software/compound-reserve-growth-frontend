@@ -61,7 +61,16 @@ const LineChart: FC<LineChartProps> = ({
   const aggregatedSeries = useMemo(() => {
     const pointsPerBar = { D: 1, W: 7, M: 30 };
     const chunkSize = pointsPerBar[barSize];
+
     return data.map((series) => {
+      if (chunkSize === 1) {
+        return {
+          type: 'area' as const,
+          name: capitalizeFirstLetter(series.name),
+          data: series.data.map((d) => [d.x, d.y])
+        };
+      }
+
       const result: [number, number][] = [];
       for (let i = 0; i < series.data?.length; i += chunkSize) {
         const chunk = series.data.slice(i, i + chunkSize);
@@ -117,19 +126,14 @@ const LineChart: FC<LineChartProps> = ({
     }
   }, [barCountToSet, aggregatedSeries]);
 
-  let xAxisLabelFormat: string;
-  switch (barSize) {
-    case 'D':
-    case 'W':
-      xAxisLabelFormat = '{value:%b %d}';
-      break;
-    case 'M':
-    default:
-      xAxisLabelFormat = "{value:%b '%y}";
-      break;
-  }
-
   const isLegendEnabled = showLegend ?? groupBy !== 'none';
+
+  const dateTimeLabelFormats = {
+    day: '%b %d',
+    week: '%b %d',
+    month: "%b '%y",
+    year: '%Y'
+  };
 
   const options: Highcharts.Options = {
     chart: {
@@ -156,11 +160,14 @@ const LineChart: FC<LineChartProps> = ({
     xAxis: {
       type: 'datetime',
       gridLineWidth: 0,
+      startOnTick: false,
+      endOnTick: false,
+      tickPixelInterval: 75,
       labels: {
-        format: xAxisLabelFormat,
         style: { color: '#7A8A99', fontSize: '11px' },
         rotation: 0
       },
+      dateTimeLabelFormats: dateTimeLabelFormats,
       lineColor: theme === 'light' ? '#E6E6E6' : '#2A2A2A',
       tickColor: theme === 'light' ? '#E6E6E6' : '#2A2A2A',
       crosshair: { width: 1, color: '#7A8A99', dashStyle: 'Dash' },
