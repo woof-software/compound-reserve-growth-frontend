@@ -18,12 +18,10 @@ import CheckStroke from '@/assets/svg/check-stroke.svg';
 
 interface DropdownProps extends PropsWithChildren {
   triggerContent: ReactNode;
-
   open: boolean;
-
   onToggle: () => void;
-
   onClose: () => void;
+  contentClassName?: string;
 }
 
 interface DropdownItemProps {
@@ -78,7 +76,8 @@ const Dropdown: FC<DropdownProps> = ({
   onToggle,
   onClose,
   triggerContent,
-  children
+  children,
+  contentClassName
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -97,7 +96,12 @@ const Dropdown: FC<DropdownProps> = ({
           {triggerContent}
         </div>
         <View.Condition if={open}>
-          <div className='hide-scrollbar shadow-10 border-secondary-18 bg-primary-15 absolute top-10 right-0 grid max-h-[182px] min-w-[168px] gap-0.5 overflow-y-auto rounded-lg border border-solid'>
+          <div
+            className={cn(
+              'hide-scrollbar shadow-10 border-secondary-18 bg-primary-15 absolute top-10 right-0 grid max-h-[182px] min-w-[168px] gap-0.5 overflow-y-auto rounded-lg border border-solid',
+              contentClassName
+            )}
+          >
             {children}
           </div>
         </View.Condition>

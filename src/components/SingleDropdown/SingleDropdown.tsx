@@ -10,20 +10,14 @@ import Each from '@/shared/ui/Each/Each';
 
 interface SingleDropdownProps {
   options: string[];
-
   selectedValue?: string;
-
   isOpen: boolean;
-
   onToggle: () => void;
-
   onClose: () => void;
-
   onSelect: (value: string) => void;
-
   triggerContentClassName?: string;
-
   disabled?: boolean;
+  contentClassName?: string;
 }
 
 const SingleDropdown: FC<SingleDropdownProps> = ({
@@ -34,7 +28,8 @@ const SingleDropdown: FC<SingleDropdownProps> = ({
   onToggle,
   onClose,
   onSelect,
-  disabled
+  disabled,
+  contentClassName
 }) => {
   return (
     <div className={cn({ 'pointer-events-none': disabled })}>
@@ -49,6 +44,7 @@ const SingleDropdown: FC<SingleDropdownProps> = ({
         open={isOpen}
         onToggle={onToggle}
         onClose={onClose}
+        contentClassName={contentClassName}
       >
         <Each
           data={options}
@@ -57,6 +53,7 @@ const SingleDropdown: FC<SingleDropdownProps> = ({
               key={index}
               asset={el}
               onSelect={onSelect}
+              isSelected={selectedValue === el}
             />
           )}
         />

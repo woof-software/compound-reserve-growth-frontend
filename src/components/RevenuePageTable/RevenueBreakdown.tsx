@@ -1,51 +1,87 @@
+import { useMemo } from 'react';
+
+import { formatNumber } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 
-import { REVENUE_BREAKDOWN_DATA, RevenueBreakdownProps } from './MOCK_DATA';
+export interface FormattedRevenueData {
+  chain: string;
+  market: string;
+  source: string;
+  reserveAsset: string;
+  [key: string]: string | number;
+}
 
-const columns: ExtendedColumnDef<RevenueBreakdownProps>[] = [
-  {
-    accessorKey: 'chain',
-    header: 'Chain'
-  },
-  {
-    accessorKey: 'instance',
-    header: 'Instance'
-  },
-  {
-    accessorKey: 'feeType',
-    header: 'Fee Type'
-  },
-  {
-    accessorKey: 'reserveAsset',
-    header: 'Reserve Asset'
-  },
-  {
-    accessorKey: 'q3_2024',
-    header: 'Q3 2024'
-  },
-  {
-    accessorKey: 'q4_2024',
-    header: 'Q4 2024'
-  },
-  {
-    accessorKey: 'q1_2025',
-    header: 'Q1 2025'
-  },
-  {
-    accessorKey: 'q2_2025',
-    header: 'Q2 2025'
-  }
-];
+interface RevenueBreakdownProps {
+  data: FormattedRevenueData[];
+  columns: ExtendedColumnDef<FormattedRevenueData>[];
+}
 
-const RevenueBreakdown = () => {
+const RevenueBreakdown = ({ data, columns }: RevenueBreakdownProps) => {
+  const totals = useMemo(() => {
+    const columnTotals: Record<string, number> = {};
+
+    columns.forEach((col) => {
+      const key = 'accessorKey' in col ? String(col.accessorKey) : col.id;
+      if (key && key.startsWith('q')) {
+        columnTotals[key] = 0;
+      }
+    });
+
+    data.forEach((row) => {
+      for (const key in columnTotals) {
+        const value = Number(row[key]);
+        if (!isNaN(value)) {
+          columnTotals[key] += value;
+        }
+      }
+    });
+
+    return columnTotals;
+  }, [data, columns]);
+
+  const footerRow = (
+    <tr key='footer-total-row'>
+      {columns.map((col, index) => {
+        const columnKey =
+          'accessorKey' in col ? String(col.accessorKey) : col.id;
+
+        if (index === 0) {
+          return (
+            <td
+              key='footer-total-label'
+              className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'
+            >
+              Total
+            </td>
+          );
+        }
+
+        if (!columnKey || !columnKey.startsWith('q')) {
+          return <td key={columnKey || index}></td>;
+        }
+
+        const totalValue = totals[columnKey];
+        return (
+          <td
+            key={columnKey}
+            className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'
+          >
+            {totalValue === 0 ? '-' : formatNumber(totalValue)}
+          </td>
+        );
+      })}
+    </tr>
+  );
+
   return (
     <DataTable
-      data={REVENUE_BREAKDOWN_DATA}
+      data={data}
       columns={columns}
       pageSize={10}
       headerCellClassName='py-[13px] px-[5px]'
       cellClassName='py-3 px-[5px]'
       headerTextClassName='text-primary-14 font-medium'
+      footerContent={columns.length > 0 && data.length > 0 ? footerRow : null}
     />
   );
 };

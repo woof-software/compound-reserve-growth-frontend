@@ -1,5 +1,10 @@
 import { ChangeEvent, MouseEvent as ReactMouseEvent } from 'react';
 
+import { ProcessedRevenueData } from '@/components/RevenuePageTable/CompoundFeeRevenuebyChain';
+import {
+  PrecomputedViews,
+  View
+} from '@/entities/Revenue/CompoundFeeRevenueByChain';
 import { THIRTY_DAYS } from '@/shared/consts/consts';
 import { TokenData } from '@/shared/types/Treasury/types';
 import type { OptionType } from '@/shared/types/types';
@@ -91,6 +96,11 @@ export const formatCurrency = (value: number) => {
     return `${(value / 1000000).toFixed(1)}M`;
   }
   return `${value.toLocaleString()}`;
+};
+
+export const formatNumber = (num: number | undefined | null) => {
+  if (num === null || num === undefined || num === 0) return '-';
+  return `$${Math.round(num).toLocaleString('en-US')}`;
 };
 
 export const formatGrowth = (growth: number) => {
@@ -186,6 +196,42 @@ export const capitalizeFirstLetter = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
+// export const extractFilterOptions = (
+//   rawData: ChartDataItem[],
+//   config: FilterOptionsConfig
+// ): Record<string, OptionType[]> => {
+//   if (!rawData.length) return {};
+
+//   const uniqueValues: Record<string, Set<string>> = Object.keys(config).reduce(
+//     (acc, key) => {
+//       acc[key] = new Set<string>();
+//       return acc;
+//     },
+//     {} as Record<string, Set<string>>
+//   );
+
+//   rawData.forEach((item) => {
+//     for (const key in config) {
+//       const value = getValueByPath(item, config[key].path);
+//       if (value) {
+//         uniqueValues[key].add(value);
+//       }
+//     }
+//   });
+
+//   const result: Record<string, OptionType[]> = {};
+//   for (const key in uniqueValues) {
+//     const formatter = config[key].labelFormatter || capitalizeFirstLetter;
+//     result[`${key}Options`] = Array.from(uniqueValues[key])
+//       .sort()
+//       .map((value) => ({
+//         id: value,
+//         label: formatter(value)
+//       }));
+//   }
+
+//   return result;
+// };
 export const extractFilterOptions = (
   rawData: ChartDataItem[],
   config: FilterOptionsConfig
@@ -202,8 +248,13 @@ export const extractFilterOptions = (
 
   rawData.forEach((item) => {
     for (const key in config) {
-      const value = getValueByPath(item, config[key].path);
-      if (value) {
+      let value = getValueByPath(item, config[key].path);
+
+      if (key === 'market' && value === null) {
+        value = 'no name';
+      }
+
+      if (value !== null && value !== undefined) {
         uniqueValues[key].add(value);
       }
     }
@@ -213,7 +264,7 @@ export const extractFilterOptions = (
   for (const key in uniqueValues) {
     const formatter = config[key].labelFormatter || capitalizeFirstLetter;
     result[`${key}Options`] = Array.from(uniqueValues[key])
-      .sort()
+      .sort((a, b) => a.localeCompare(b))
       .map((value) => ({
         id: value,
         label: formatter(value)
@@ -287,3 +338,125 @@ export const groupByKey = <T>(
 
 export const sumValues = (arr: TokenData[] = []): number =>
   arr.reduce((acc, item) => acc + item.value, 0);
+
+// CompoundFeeRevenueByChain
+export function precomputeViews(
+  rawData: ChartDataItem[]
+): PrecomputedViews | null {
+  if (!rawData || rawData.length === 0) {
+    return null;
+  }
+
+  const dataByChain = groupByKey(rawData, (item) =>
+    capitalizeFirstLetter(item.source.network)
+  );
+  const precomputed: PrecomputedViews = {
+    quarterly: {},
+    monthly: {},
+    weekly: {}
+  };
+  const allPeriods = {
+    years: new Set<string>(),
+    semiAnnuals: new Set<string>(),
+    months: new Set<string>()
+  };
+
+  const aggregatedData = new Map<string, number>();
+  rawData.forEach((item) => {
+    const chain = capitalizeFirstLetter(item.source.network);
+    const date = new Date(item.date * 1000);
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const shortMonth = date
+      .toLocaleString('en-US', { month: 'short' })
+      .toUpperCase();
+
+    allPeriods.years.add(String(year));
+    allPeriods.semiAnnuals.add(`${month < 6 ? 'Jan-Jun' : 'Jul-Dec'} ${year}`);
+    allPeriods.months.add(
+      date.toLocaleString('en-US', { month: 'long', year: 'numeric' })
+    );
+
+    const quarterKey = `${chain}#Q${Math.floor(month / 3) + 1} ${year}`;
+    const monthlyKey = `${chain}#${shortMonth} ${year}`;
+    const weekStartDate = new Date(
+      date.getFullYear(),
+      month,
+      date.getDate() - (date.getDay() === 0 ? 6 : date.getDay() - 1)
+    );
+    const weeklyKey = `${chain}#${shortMonth} ${weekStartDate.getDate()}-${new Date(weekStartDate.getFullYear(), month, weekStartDate.getDate() + 6).getDate()}`;
+
+    aggregatedData.set(
+      quarterKey,
+      (aggregatedData.get(quarterKey) || 0) + item.value
+    );
+    aggregatedData.set(
+      monthlyKey,
+      (aggregatedData.get(monthlyKey) || 0) + item.value
+    );
+    aggregatedData.set(
+      weeklyKey,
+      (aggregatedData.get(weeklyKey) || 0) + item.value
+    );
+  });
+
+  const createView = (keys: string[], chains: string[]): View => {
+    const tableData: ProcessedRevenueData[] = [];
+    const totals: { [key: string]: number } = {};
+    chains.forEach((chain) => {
+      const row: ProcessedRevenueData = { chain };
+      let hasData = false;
+      keys.forEach((key) => {
+        const value = aggregatedData.get(`${chain}#${key}`) || 0;
+        row[key] = value;
+        totals[key] = (totals[key] || 0) + value;
+        if (value !== 0) hasData = true;
+      });
+      if (hasData) tableData.push(row);
+    });
+    return {
+      tableData,
+      totals,
+      columns: keys.map((k) => ({
+        accessorKey: k,
+        header: k,
+        cell: ({ getValue }) => formatNumber(getValue() as number)
+      }))
+    };
+  };
+
+  const chains = Object.keys(dataByChain);
+  allPeriods.years.forEach((year) => {
+    precomputed.quarterly[year] = createView(
+      [`Q1 ${year}`, `Q2 ${year}`, `Q3 ${year}`, `Q4 ${year}`],
+      chains
+    );
+  });
+  allPeriods.semiAnnuals.forEach((period) => {
+    const [range, yearStr] = period.split(' ');
+    const startMonth = range === 'Jan-Jun' ? 0 : 6;
+    const keys = Array.from(
+      { length: 6 },
+      (_, i) =>
+        `${new Date(parseInt(yearStr), startMonth + i).toLocaleString('en-US', { month: 'short' }).toUpperCase()} ${yearStr}`
+    );
+    precomputed.monthly[period] = createView(keys, chains);
+  });
+  allPeriods.months.forEach((monthPeriod) => {
+    const d = new Date(monthPeriod);
+    const keys: string[] = [];
+    const start = new Date(d.getFullYear(), d.getMonth(), 1);
+    while (start.getMonth() === d.getMonth()) {
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      keys.push(
+        `${start.toLocaleString('en-US', { month: 'short' }).toUpperCase()} ${start.getDate()}-${end.getMonth() === d.getMonth() ? end.getDate() : new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()}`
+      );
+      start.setDate(start.getDate() + 7);
+    }
+    precomputed.weekly[monthPeriod] = createView(keys, chains);
+  });
+
+  return precomputed;
+}
+// CompoundFeeRevenueByChain
