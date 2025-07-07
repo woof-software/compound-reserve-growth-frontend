@@ -29,10 +29,10 @@ const CompoundCumulativeRevenue = () => {
 
   const { data: apiResponse, isLoading, isError } = useCompCumulativeRevenue();
 
-  const rawData: ChartDataItem[] = useMemo(
-    () => apiResponse?.data?.data || [],
-    [apiResponse]
-  );
+  const rawData: ChartDataItem[] = useMemo(() => {
+    const data = apiResponse?.data?.data || [];
+    return [...data].sort((a, b) => a.date - b.date);
+  }, [apiResponse]);
 
   const filterOptionsConfig = useMemo(
     () => ({
@@ -53,7 +53,7 @@ const CompoundCumulativeRevenue = () => {
     return 'none';
   }, [selectedChains, selectedMarkets]);
 
-  const { chartSeries, hasData } = useChartDataProcessor({
+  const { chartSeries } = useChartDataProcessor({
     rawData,
     filters: {
       network: selectedChains.map((opt) => opt.id),
@@ -65,7 +65,7 @@ const CompoundCumulativeRevenue = () => {
     },
     groupBy,
     groupByKeyPath: groupBy === 'none' ? null : `source.${groupBy}`,
-    defaultSeriesName: 'Cumulative Revenue'
+    defaultSeriesName: 'Daily Revenue'
   });
 
   const cumulativeChartSeries = useMemo(() => {
@@ -78,24 +78,56 @@ const CompoundCumulativeRevenue = () => {
         return { ...series, data: [] };
       }
 
-      const sortedData = [...series.data].sort((a, b) => a.x - b.x);
+      const dailyTotals = new Map<number, number>();
+      for (const point of series.data) {
+        const date = new Date(point.x);
+        date.setUTCHours(0, 0, 0, 0);
+        const dayStartTimestamp = date.getTime();
+        const currentTotal = dailyTotals.get(dayStartTimestamp) || 0;
+        dailyTotals.set(dayStartTimestamp, currentTotal + point.y);
+      }
 
-      let cumulativeY = 0;
+      const sortedDailyPoints = Array.from(dailyTotals.entries())
+        .map(([x, y]) => ({ x, y }))
+        .sort((a, b) => a.x - b.x);
 
-      const cumulativeData = sortedData.map((dataPoint) => {
-        cumulativeY += dataPoint.y < 0 ? 0 : dataPoint.y;
-        return {
-          x: dataPoint.x,
-          y: cumulativeY
-        };
-      });
+      if (sortedDailyPoints.length === 0) {
+        return { ...series, data: [] };
+      }
+
+      const cumulativeData: { x: number; y: number }[] = [];
+      const minDate = sortedDailyPoints[0].x;
+      const maxDate = sortedDailyPoints[sortedDailyPoints.length - 1].x;
+      const oneDay = 24 * 60 * 60 * 1000;
+
+      let cumulativeSum = 0;
+      let dataIndex = 0;
+
+      for (let d = minDate; d <= maxDate; d += oneDay) {
+        if (
+          dataIndex < sortedDailyPoints.length &&
+          sortedDailyPoints[dataIndex].x === d
+        ) {
+          cumulativeSum += sortedDailyPoints[dataIndex].y;
+          dataIndex++;
+        }
+        cumulativeData.push({ x: d, y: cumulativeSum });
+      }
 
       return {
         ...series,
+        name: series.name.replace('Daily', 'Cumulative'),
         data: cumulativeData
       };
     });
   }, [chartSeries]);
+
+  const hasData = useMemo(() => {
+    return (
+      cumulativeChartSeries.length > 0 &&
+      cumulativeChartSeries.some((s) => s.data.length > 0)
+    );
+  }, [cumulativeChartSeries]);
 
   const noDataMessage =
     selectedChains.length > 0 || selectedMarkets.length > 0
