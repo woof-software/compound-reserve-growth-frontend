@@ -80,11 +80,13 @@ const CompoundCumulativeRevenue = () => {
 
       const dailyTotals = new Map<number, number>();
       for (const point of series.data) {
-        const date = new Date(point.x);
-        date.setUTCHours(0, 0, 0, 0);
-        const dayStartTimestamp = date.getTime();
-        const currentTotal = dailyTotals.get(dayStartTimestamp) || 0;
-        dailyTotals.set(dayStartTimestamp, currentTotal + point.y);
+        if (point.y > 0) {
+          const date = new Date(point.x);
+          date.setUTCHours(0, 0, 0, 0);
+          const dayStartTimestamp = date.getTime();
+          const currentTotal = dailyTotals.get(dayStartTimestamp) || 0;
+          dailyTotals.set(dayStartTimestamp, currentTotal + point.y);
+        }
       }
 
       const sortedDailyPoints = Array.from(dailyTotals.entries())
@@ -121,7 +123,6 @@ const CompoundCumulativeRevenue = () => {
       };
     });
   }, [chartSeries]);
-
   const hasData = useMemo(() => {
     return (
       cumulativeChartSeries.length > 0 &&
@@ -182,16 +183,7 @@ const CompoundCumulativeRevenue = () => {
           disabled={isLoading}
         />
       </div>
-      <LineChart
-        className='max-h-[400px]'
-        barSize={barSize}
-        barCountToSet={barCount}
-        onVisibleBarsChange={handleVisibleBarsChange}
-        data={cumulativeChartSeries}
-        groupBy={getGroupByForChart()}
-        showLegend={false}
-      />
-      {!isLoading && !isError && !hasData && (
+      {!isLoading && !isError && !hasData ? (
         <div className='flex h-[400px] items-center justify-center'>
           <Text
             size='12'
@@ -200,6 +192,16 @@ const CompoundCumulativeRevenue = () => {
             {noDataMessage}
           </Text>
         </div>
+      ) : (
+        <LineChart
+          className='max-h-[400px]'
+          barSize={barSize}
+          barCountToSet={barCount}
+          onVisibleBarsChange={handleVisibleBarsChange}
+          data={cumulativeChartSeries}
+          groupBy={getGroupByForChart()}
+          showLegend={false}
+        />
       )}
     </Card>
   );

@@ -231,17 +231,7 @@ const TotalTresuaryValue = ({
           disabled={isLoading}
         />
       </div>
-      {!isLoading && !isError && hasData && (
-        <LineChart
-          data={correctedChartSeries}
-          groupBy={groupBy}
-          className='max-h-[400px]'
-          barSize={barSize}
-          barCountToSet={barCount}
-          onVisibleBarsChange={handleVisibleBarsChange}
-        />
-      )}
-      {!isLoading && !isError && !hasData && (
+      {!isLoading && !isError && !hasData ? (
         <div className='flex h-[400px] items-center justify-center'>
           <Text
             size='12'
@@ -250,6 +240,15 @@ const TotalTresuaryValue = ({
             No data for selected filters
           </Text>
         </div>
+      ) : (
+        <LineChart
+          data={correctedChartSeries}
+          groupBy={groupBy}
+          className='max-h-[400px]'
+          barSize={barSize}
+          barCountToSet={barCount}
+          onVisibleBarsChange={handleVisibleBarsChange}
+        />
       )}
     </Card>
   );

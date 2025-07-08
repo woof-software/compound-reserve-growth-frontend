@@ -196,42 +196,6 @@ export const capitalizeFirstLetter = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
-// export const extractFilterOptions = (
-//   rawData: ChartDataItem[],
-//   config: FilterOptionsConfig
-// ): Record<string, OptionType[]> => {
-//   if (!rawData.length) return {};
-
-//   const uniqueValues: Record<string, Set<string>> = Object.keys(config).reduce(
-//     (acc, key) => {
-//       acc[key] = new Set<string>();
-//       return acc;
-//     },
-//     {} as Record<string, Set<string>>
-//   );
-
-//   rawData.forEach((item) => {
-//     for (const key in config) {
-//       const value = getValueByPath(item, config[key].path);
-//       if (value) {
-//         uniqueValues[key].add(value);
-//       }
-//     }
-//   });
-
-//   const result: Record<string, OptionType[]> = {};
-//   for (const key in uniqueValues) {
-//     const formatter = config[key].labelFormatter || capitalizeFirstLetter;
-//     result[`${key}Options`] = Array.from(uniqueValues[key])
-//       .sort()
-//       .map((value) => ({
-//         id: value,
-//         label: formatter(value)
-//       }));
-//   }
-
-//   return result;
-// };
 export const extractFilterOptions = (
   rawData: ChartDataItem[],
   config: FilterOptionsConfig

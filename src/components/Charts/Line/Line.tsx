@@ -57,34 +57,85 @@ const LineChart: FC<LineChartProps> = ({
   const programmaticChange = useRef(false);
 
   const MAX_VISIBLE_POINTS = 180;
+  const MIN_VISIBLE_BARS = 7;
 
   const aggregatedSeries = useMemo(() => {
-    const pointsPerBar = { D: 1, W: 7, M: 30 };
-    const chunkSize = pointsPerBar[barSize];
+    if (barSize === 'D') {
+      return data.map((series) => ({
+        type: 'area' as const,
+        name: capitalizeFirstLetter(series.name),
+        data: series.data.map((d) => [d.x, d.y])
+      }));
+    }
 
     return data.map((series) => {
-      if (chunkSize === 1) {
+      if (!series.data || series.data.length === 0) {
         return {
           type: 'area' as const,
           name: capitalizeFirstLetter(series.name),
-          data: series.data.map((d) => [d.x, d.y])
+          data: []
         };
       }
 
-      const result: [number, number][] = [];
-      for (let i = 0; i < series.data?.length; i += chunkSize) {
-        const chunk = series.data.slice(i, i + chunkSize);
-        if (chunk.length === 0) continue;
-        const lastPoint = chunk[chunk.length - 1];
-        result.push([lastPoint.x, lastPoint.y]);
+      const aggregatedPoints = new Map<number, LineDataItem>();
+
+      for (const point of series.data) {
+        const date = new Date(point.x);
+        date.setUTCHours(0, 0, 0, 0);
+
+        let periodStartTimestamp: number;
+
+        if (barSize === 'W') {
+          const dayOfWeek = date.getUTCDay();
+          const diff =
+            date.getUTCDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+          const startOfWeek = new Date(date);
+          startOfWeek.setUTCDate(diff);
+          periodStartTimestamp = startOfWeek.getTime();
+        } else {
+          periodStartTimestamp = new Date(
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            1
+          ).getTime();
+        }
+
+        aggregatedPoints.set(periodStartTimestamp, point);
       }
+
+      const resultData = Array.from(aggregatedPoints.values()).map((point) => [
+        point.x,
+        point.y
+      ]);
+
+      resultData.sort((a, b) => a[0] - b[0]);
+
       return {
         type: 'area' as const,
         name: capitalizeFirstLetter(series.name),
-        data: result
+        data: resultData
       };
     });
   }, [data, barSize]);
+
+  const minRangeValue = useMemo(() => {
+    const dayInMillis = 24 * 3600 * 1000;
+    let barDurationInMillis = 0;
+
+    switch (barSize) {
+      case 'W':
+        barDurationInMillis = 7 * dayInMillis;
+        break;
+      case 'M':
+        barDurationInMillis = 30.44 * dayInMillis;
+        break;
+      case 'D':
+      default:
+        barDurationInMillis = dayInMillis;
+        break;
+    }
+    return (MIN_VISIBLE_BARS - 1) * barDurationInMillis;
+  }, [barSize]);
 
   useEffect(() => {
     const chart = chartRef.current?.chart;
@@ -162,6 +213,7 @@ const LineChart: FC<LineChartProps> = ({
       gridLineWidth: 0,
       startOnTick: false,
       endOnTick: false,
+      minRange: minRangeValue,
       tickPixelInterval: 75,
       labels: {
         style: { color: '#7A8A99', fontSize: '11px' },
@@ -171,6 +223,25 @@ const LineChart: FC<LineChartProps> = ({
       lineColor: theme === 'light' ? '#E6E6E6' : '#2A2A2A',
       tickColor: theme === 'light' ? '#E6E6E6' : '#2A2A2A',
       crosshair: { width: 1, color: '#7A8A99', dashStyle: 'Dash' },
+      tickPositioner: function () {
+        const seriesData = aggregatedSeries[0]?.data || [];
+        if (!seriesData.length) return [];
+        const { min, max } = this.getExtremes();
+        const visiblePoints = seriesData.filter(
+          (point) => point[0] >= min && point[0] <= max
+        );
+        if (visiblePoints.length === 0) return [];
+        const maxLabels = 12;
+        if (visiblePoints.length <= maxLabels) {
+          return visiblePoints.map((point) => point[0]);
+        }
+        const ticks = [];
+        const step = Math.ceil(visiblePoints.length / maxLabels);
+        for (let i = 0; i < visiblePoints.length; i += step) {
+          ticks.push(visiblePoints[i][0]);
+        }
+        return ticks;
+      },
       events: {
         setExtremes: function (e) {
           if (programmaticChange.current) {
@@ -337,6 +408,9 @@ const LineChart: FC<LineChartProps> = ({
       }
     },
     plotOptions: {
+      series: {
+        animation: false
+      },
       area: {
         lineWidth: 2,
         marker: {
@@ -359,11 +433,7 @@ const LineChart: FC<LineChartProps> = ({
         stacking: 'normal'
       }
     },
-    series: aggregatedSeries.map((series) => ({
-      type: 'area',
-      name: series.name,
-      data: series.data
-    })),
+    series: [],
     navigator: { enabled: false },
     scrollbar: { enabled: false },
     rangeSelector: { enabled: false }
