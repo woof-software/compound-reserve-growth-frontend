@@ -21,7 +21,7 @@ const RunwayPage = () => {
           size='15'
           className='text-primary-14'
         >
-          Track Aave DAO&apos;s financial health through treasury runway,
+          Track Compound DAO&apos;s financial health through treasury runway,
           expenses, and service provider commitments.
         </Text>
       </div>

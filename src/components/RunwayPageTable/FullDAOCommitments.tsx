@@ -1,10 +1,10 @@
 import React from 'react';
 
-import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import {
   formatDateWithOrdinal,
   formatLargeNumber
 } from '@/shared/lib/utils/utils';
+import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 
 export interface FullDAOCommitmentRow {
   recipient: string;
@@ -46,19 +46,25 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
   {
     accessorKey: 'dailyStreamRate',
     header: 'Daily Stream Rate',
+    align: 'center',
     cell: ({ getValue }) => {
       const value = getValue() as number;
-      return value === 0 ? '0' : formatLargeNumber(value, 1);
+      if (value === 0) {
+        return '$0';
+      }
+      return `$${formatLargeNumber(value, 1)}`;
     }
   },
   {
     accessorKey: 'startDate',
     header: 'Start Date',
+    align: 'right',
     cell: ({ getValue }) => formatDateWithOrdinal(getValue() as string)
   },
   {
     accessorKey: 'streamEndDate',
     header: 'Stream End Date',
+    align: 'right',
     cell: ({ getValue }) => formatDateWithOrdinal(getValue() as string)
   }
 ];
@@ -72,6 +78,10 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({ data }) => {
       headerCellClassName='py-[13px] px-[5px]'
       cellClassName='py-3 px-[5px]'
       headerTextClassName='text-primary-14 font-medium'
+      enableSorting
+      enablePagination
+      paginationClassName='py-[13px] px-[5px]'
+      initialSort={{ id: 'value', desc: true }}
     />
   );
 };

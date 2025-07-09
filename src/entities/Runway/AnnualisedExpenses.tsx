@@ -1,3 +1,10 @@
+/*
+Calculation logic for the "Annualised Expenses" block (Table and Pie Chart):
+1. Filtering: Takes only the expenses that are active within the current calendar year (e.g., 2025).
+2. Annualisation: For each filtered expense, its "annualised equivalent" is calculated for both the USD value (`annualisedValue`) and the token quantity (`annualisedAmount`).
+3. Table Aggregation: The data is grouped by "Discipline" and "Token", and their respective annualised values are then summed up.
+4. Pie Chart Aggregation: The data is grouped only by "Discipline", summing the annualised USD value for each segment.
+*/
 import React, { useMemo } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
@@ -12,6 +19,7 @@ const AnnualisedExpensesBlock = () => {
 
   const processedData = useMemo(() => {
     const data = runwayResponse?.data || [];
+    const currentYear = new Date().getFullYear();
 
     const initialResult = {
       tableData: [],
@@ -36,8 +44,26 @@ const AnnualisedExpensesBlock = () => {
     const expensesByDisciplineForPie: Record<string, number> = {};
 
     data.forEach((item: RunwayItem) => {
-      const value = item.value;
-      const amount = item.amount;
+      const startDate = new Date(item.startDate);
+      const endDate = new Date(item.endDate);
+      const startYear = startDate.getFullYear();
+      const endYear = endDate.getFullYear();
+
+      const isActiveInCurrentYear =
+        startYear <= currentYear && endYear >= currentYear;
+      if (!isActiveInCurrentYear) {
+        return;
+      }
+
+      const durationMs = endDate.getTime() - startDate.getTime();
+      const durationDays = durationMs / (1000 * 60 * 60 * 24) + 1;
+
+      if (durationDays <= 0) {
+        return;
+      }
+
+      const annualisedValue = (item.value / durationDays) * 365;
+      const annualisedAmount = (item.amount / durationDays) * 365;
 
       const groupKey = `${item.discipline}__${item.token}`;
       if (!expensesByGroup[groupKey]) {
@@ -48,11 +74,12 @@ const AnnualisedExpensesBlock = () => {
           value: 0
         };
       }
-      expensesByGroup[groupKey].amount += amount;
-      expensesByGroup[groupKey].value += value;
+
+      expensesByGroup[groupKey].amount += annualisedAmount;
+      expensesByGroup[groupKey].value += annualisedValue;
 
       expensesByDisciplineForPie[item.discipline] =
-        (expensesByDisciplineForPie[item.discipline] || 0) + value;
+        (expensesByDisciplineForPie[item.discipline] || 0) + annualisedValue;
     });
 
     const tableData = Object.values(expensesByGroup);
@@ -88,13 +115,11 @@ const AnnualisedExpensesBlock = () => {
         loading: 'min-h-[571px]'
       }}
     >
-      <div className='flex justify-between'>
-        <div className='flex w-[650px] flex-col gap-5'>
-          <AnnualisedExpenses
-            data={processedData.tableData}
-            footerData={processedData.footerData}
-          />
-        </div>
+      <div className='flex justify-between gap-10'>
+        <AnnualisedExpenses
+          data={processedData.tableData}
+          footerData={processedData.footerData}
+        />
         <PieChart
           className='max-h-[400px] max-w-[336.5px]'
           data={processedData.pieData}

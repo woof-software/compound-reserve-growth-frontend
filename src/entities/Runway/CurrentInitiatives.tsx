@@ -1,3 +1,10 @@
+/*
+Calculation logic for the "Current Initiatives" block:
+1. Filtering: Takes only expenses of type 'initiative' that were active within the last year (365 days from today).
+2. Table Data: Each active initiative is displayed as a separate row. There is NO GROUPING OR SUMMATION for the table data.
+3. Pie Chart Data: The total values (`item.value`) are grouped and summed by the initiative's discipline to show the total expense per discipline.
+4. Values Used: The full contract values (`item.value` and `item.amount`) are used, not the annualised equivalents.
+*/
 import React, { useMemo } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
@@ -12,60 +19,59 @@ const CurrentInitiativesBlock = () => {
 
   const processedData = useMemo(() => {
     const data = apiResponse?.data || [];
-
     const initialResult = {
       tableData: [],
       footerData: { totalValue: 0, totalValueWithBounty: 0 },
       pieData: []
     };
 
-    const initiativeData = data.filter(
-      (item: RunwayItem) => item.type === 'initiative'
-    );
+    if (!data.length) {
+      return initialResult;
+    }
+
+    const today = new Date();
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+
+    const initiativeData = data.filter((item: RunwayItem) => {
+      if (item.type !== 'initiative') {
+        return false;
+      }
+      const startDate = new Date(item.startDate);
+      const endDate = new Date(item.endDate);
+
+      const isActiveInLastYear = startDate <= today && endDate >= oneYearAgo;
+      return isActiveInLastYear;
+    });
 
     if (!initiativeData.length) {
       return initialResult;
     }
 
-    const initiativesByGroup: Record<
-      string,
-      {
-        initiative: string;
-        discipline: string;
-        token: string;
-        amount: number;
-        value: number;
-      }
-    > = {};
-    initiativeData.forEach((item) => {
-      const groupKey = `${item.name}__${item.discipline}__${item.token}`;
-      if (!initiativesByGroup[groupKey]) {
-        initiativesByGroup[groupKey] = {
-          initiative: item.name,
-          discipline: item.discipline,
-          token: item.token,
-          amount: 0,
-          value: 0
-        };
-      }
-      initiativesByGroup[groupKey].amount += item.amount;
-      initiativesByGroup[groupKey].value += item.value;
-    });
+    // Table data: each active initiative is a separate row. No grouping.
+    const tableData = initiativeData.map((item) => ({
+      initiative: item.name,
+      discipline: item.discipline,
+      token: item.token,
+      amount: item.amount,
+      value: item.value
+    }));
 
-    const tableData = Object.values(initiativesByGroup);
+    // Footer data: sum of all individual active initiatives shown in the table.
+    const totalValue = initiativeData.reduce(
+      (sum, item) => sum + item.value,
+      0
+    );
+    const footerData = { totalValue, totalValueWithBounty: totalValue };
 
-    const totalValue = tableData.reduce((sum, item) => sum + item.value, 0);
-    const totalValueWithBounty = totalValue;
-    const footerData = { totalValue, totalValueWithBounty };
-
+    // Pie chart data: group and sum by discipline.
     const expensesByDisciplineForPie: Record<string, number> = {};
-    tableData.forEach((item) => {
+    initiativeData.forEach((item) => {
       expensesByDisciplineForPie[item.discipline] =
         (expensesByDisciplineForPie[item.discipline] || 0) + item.value;
     });
 
     const totalValueForPie = footerData.totalValue;
-
     const pieData = Object.entries(expensesByDisciplineForPie).map(
       ([name, value]) => ({
         name,
@@ -86,7 +92,7 @@ const CurrentInitiativesBlock = () => {
         loading: 'min-h-[571px]'
       }}
     >
-      <div className='flex justify-between'>
+      <div className='flex justify-between gap-10'>
         <CurrentInitiatives
           data={processedData.tableData}
           footerData={processedData.footerData}

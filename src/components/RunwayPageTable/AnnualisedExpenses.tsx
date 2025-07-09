@@ -1,4 +1,5 @@
 import React from 'react';
+
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 
 export interface AnnualisedExpensesRow {
@@ -30,6 +31,7 @@ const columns: ExtendedColumnDef<AnnualisedExpensesRow>[] = [
   {
     accessorKey: 'amount',
     header: 'Amount (Qty)',
+    align: 'center',
     cell: ({ getValue }) =>
       (getValue() as number).toLocaleString(undefined, {
         maximumFractionDigits: 0
@@ -38,6 +40,7 @@ const columns: ExtendedColumnDef<AnnualisedExpensesRow>[] = [
   {
     accessorKey: 'value',
     header: 'Value ($)',
+    align: 'right',
     cell: ({ getValue }) =>
       `$${(getValue() as number).toLocaleString(undefined, {
         maximumFractionDigits: 0
@@ -54,13 +57,9 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
       <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
         Total
       </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'></td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
-        {footerData.amount.toLocaleString(undefined, {
-          maximumFractionDigits: 0
-        })}
-      </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
+      <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px]'></td>
+      <td className='text-primary-14 px-[5px] py-[13px] text-center text-[13px]'></td>
+      <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px]'>
         {`$${footerData.value.toLocaleString(undefined, {
           maximumFractionDigits: 0
         })}`}
@@ -70,7 +69,6 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
 
   return (
     <DataTable
-      className='max-w-[627px]'
       data={data}
       columns={columns}
       pageSize={10}
@@ -78,6 +76,10 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
       headerCellClassName='py-[13px] px-[5px]'
       cellClassName='py-3 px-[5px]'
       headerTextClassName='text-primary-14 font-medium'
+      enableSorting
+      enablePagination
+      paginationClassName='py-[13px] px-[5px]'
+      initialSort={{ id: 'value', desc: true }}
     />
   );
 };
