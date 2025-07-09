@@ -1,6 +1,6 @@
 import { type ColumnDef } from '@tanstack/react-table';
 
-import { formatPrice } from '@/shared/lib/utils/utils';
+import { formatLargeNumber } from '@/shared/lib/utils/utils';
 import DataTable from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -37,14 +37,16 @@ const treasuryColumns: ColumnDef<TreasuryHolding>[] = [
     accessorKey: 'qty',
     header: 'QTY',
     enableSorting: true,
-    cell: ({ row }) => <Text size='13'>{formatPrice(row.original.qty, 1)}</Text>
+    cell: ({ row }) => (
+      <Text size='13'>{formatLargeNumber(row.original.qty, 1)}</Text>
+    )
   },
   {
     accessorKey: 'value',
     header: 'Value',
     enableSorting: true,
     cell: ({ row }) => (
-      <Text size='13'>{formatPrice(row.original.value, 1)}</Text>
+      <Text size='13'>{formatLargeNumber(row.original.value, 1)}</Text>
     )
   },
   {
@@ -52,7 +54,7 @@ const treasuryColumns: ColumnDef<TreasuryHolding>[] = [
     header: 'Price',
     enableSorting: true,
     cell: ({ row }) => (
-      <Text size='13'>{formatPrice(row.original.price, 1)}</Text>
+      <Text size='13'>{formatLargeNumber(row.original.price, 1)}</Text>
     )
   },
   {

@@ -17,22 +17,26 @@ import View from '@/shared/ui/View/View';
 
 interface TreasuryHoldingsBlockProps {
   isLoading?: boolean;
-
   isError?: boolean;
-
   data: TokenData[];
 }
 
 const mapTableData = (data: TokenData[]): TreasuryHolding[] => {
-  return data.map((el) => ({
-    symbol: el.source.asset.symbol,
-    chain: capitalizeFirstLetter(el.source.network),
-    market: el.source.market ?? 'no market',
-    qty: Number(el.quantity) || 0,
-    value: el.value,
-    price: el.price,
-    source: el.source.type
-  }));
+  return data.map((el) => {
+    const decimals = el.source.asset.decimals || 0;
+    const rawQuantity = Number(el.quantity) || 0;
+    const humanReadableQuantity = rawQuantity / 10 ** decimals;
+
+    return {
+      symbol: el.source.asset.symbol,
+      chain: capitalizeFirstLetter(el.source.network),
+      market: el.source.market ?? 'no market',
+      qty: humanReadableQuantity,
+      value: el.value,
+      price: el.price,
+      source: el.source.type
+    };
+  });
 };
 
 const TreasuryHoldingsBlock = ({
