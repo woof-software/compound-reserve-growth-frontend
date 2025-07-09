@@ -70,11 +70,10 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       pointFormat: `
         <div style="display: flex; gap: 24px; align-items: center; justify-content: space-between;">
           <div style="font-weight: 400;">
-            {point.value}
+            {point.y:.1f}%
           </div>
-          
           <div style="font-weight: 400;">
-            {point.y}%
+            {point.value}
           </div>
         </div>
       `

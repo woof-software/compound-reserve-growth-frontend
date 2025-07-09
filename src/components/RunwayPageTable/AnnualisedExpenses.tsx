@@ -1,47 +1,69 @@
+import React from 'react';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 
-import { ANNUALISED_EXPENSES_DATA, AnnualisedExpensesProps } from './MOCK_DATA';
+export interface AnnualisedExpensesRow {
+  discipline: string;
+  token: string;
+  amount: number;
+  value: number;
+}
 
-const columns: ExtendedColumnDef<AnnualisedExpensesProps>[] = [
+interface AnnualisedExpensesFooter {
+  amount: number;
+  value: number;
+}
+
+interface AnnualisedExpensesComponentProps {
+  data: AnnualisedExpensesRow[];
+  footerData: AnnualisedExpensesFooter;
+}
+
+const columns: ExtendedColumnDef<AnnualisedExpensesRow>[] = [
   {
     accessorKey: 'discipline',
     header: 'Discipline'
   },
   {
-    accessorKey: 'compound',
-    header: 'Compound'
+    accessorKey: 'token',
+    header: 'Token'
   },
   {
-    accessorKey: 'stablecoins',
-    header: 'Stablecoins'
-  },
-  {
-    accessorKey: 'eth',
-    header: 'ETH'
+    accessorKey: 'amount',
+    header: 'Amount (Qty)',
+    cell: ({ getValue }) =>
+      (getValue() as number).toLocaleString(undefined, {
+        maximumFractionDigits: 0
+      })
   },
   {
     accessorKey: 'value',
-    header: 'Value ($)'
+    header: 'Value ($)',
+    cell: ({ getValue }) =>
+      `$${(getValue() as number).toLocaleString(undefined, {
+        maximumFractionDigits: 0
+      })}`
   }
 ];
 
-const AnnualisedExpenses = () => {
+const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
+  data,
+  footerData
+}) => {
   const footerRow = (
     <tr>
       <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
         Total
       </td>
+      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'></td>
       <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
-        123000
+        {footerData.amount.toLocaleString(undefined, {
+          maximumFractionDigits: 0
+        })}
       </td>
       <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
-        123000
-      </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
-        123000
-      </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
-        123000
+        {`$${footerData.value.toLocaleString(undefined, {
+          maximumFractionDigits: 0
+        })}`}
       </td>
     </tr>
   );
@@ -49,7 +71,7 @@ const AnnualisedExpenses = () => {
   return (
     <DataTable
       className='max-w-[627px]'
-      data={ANNUALISED_EXPENSES_DATA}
+      data={data}
       columns={columns}
       pageSize={10}
       footerContent={footerRow}
