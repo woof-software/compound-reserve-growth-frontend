@@ -215,7 +215,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     plotOptions: {
       column: {
         pointPadding: 0.1,
-        groupPadding: 0.1,
+        groupPadding: 0.05,
         borderWidth: 0,
         states: { hover: { animation: false }, inactive: { opacity: 1 } }
       },

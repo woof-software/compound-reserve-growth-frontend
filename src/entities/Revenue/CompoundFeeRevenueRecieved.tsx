@@ -4,7 +4,11 @@ import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/Compoun
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenuets';
-import { ChartDataItem } from '@/shared/lib/utils/utils';
+import {
+  ChartDataItem,
+  extractFilterOptions,
+  FilterOptionsConfig
+} from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
@@ -37,21 +41,20 @@ const CompoundFeeRevenueRecieved = () => {
   const [selectedMarkets, setSelectedMarkets] = useState<OptionType[]>([]);
 
   const { chainOptions, marketOptions } = useMemo(() => {
-    if (!rawData) return { chainOptions: [], marketOptions: [] };
-    const chains = new Set<string>();
-    const markets = new Set<string>();
-    rawData.forEach((item) => {
-      chains.add(item.source.network);
-      markets.add(item.source.market);
-    });
-    const toOption = (value: string) => ({
-      id: value,
-      label: value?.charAt(0)?.toUpperCase() + value?.slice(1)
-    });
-    return {
-      chainOptions: Array.from(chains).map(toOption),
-      marketOptions: Array.from(markets).map(toOption)
+    if (!rawData || rawData.length === 0) {
+      return { chainOptions: [], marketOptions: [] };
+    }
+
+    const config: FilterOptionsConfig = {
+      chain: {
+        path: 'source.network'
+      },
+      market: {
+        path: 'source.market'
+      }
     };
+
+    return extractFilterOptions(rawData, config);
   }, [rawData]);
 
   const chartData = useMemo(() => {
@@ -62,9 +65,12 @@ const CompoundFeeRevenueRecieved = () => {
       const chainMatch =
         selectedChainIds.length === 0 ||
         selectedChainIds.includes(item.source.network);
+
       const marketMatch =
         selectedMarketIds.length === 0 ||
-        selectedMarketIds.includes(item.source.market);
+        selectedMarketIds.includes(item.source.market) ||
+        (selectedMarketIds.includes('no name') && item.source.market === null);
+
       return chainMatch && marketMatch;
     });
 
@@ -130,14 +136,8 @@ const CompoundFeeRevenueRecieved = () => {
           onTabChange={handleTabChange}
         />
       </div>
-      <CompoundFeeRecieved
-        data={chartData}
-        barCount={barCount}
-        barSize={barSize}
-        onVisibleBarsChange={handleVisibleBarsChange}
-      />
-      {!isLoading && !isError && !hasData && (
-        <div className='flex h-full items-center justify-center'>
+      {!isLoading && !isError && !hasData ? (
+        <div className='flex h-[400px] items-center justify-center'>
           <Text
             size='12'
             className='text-primary-14'
@@ -145,6 +145,13 @@ const CompoundFeeRevenueRecieved = () => {
             {noDataMessage}
           </Text>
         </div>
+      ) : (
+        <CompoundFeeRecieved
+          data={chartData}
+          barCount={barCount}
+          barSize={barSize}
+          onVisibleBarsChange={handleVisibleBarsChange}
+        />
       )}
     </Card>
   );
