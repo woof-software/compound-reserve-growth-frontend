@@ -1,8 +1,27 @@
+import React from 'react';
+
+import { formatNumber, formatQuantity } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 
-import { CURRENT_INITIATIVES_DATA, CurrentInitiativeProps } from './MOCK_DATA';
+export interface CurrentInitiativeRow {
+  initiative: string;
+  discipline: string;
+  token: string;
+  amount: number;
+  value: number;
+}
 
-const columns: ExtendedColumnDef<CurrentInitiativeProps>[] = [
+interface CurrentInitiativesFooter {
+  totalValue: number;
+  totalValueWithBounty: number;
+}
+
+interface CurrentInitiativesProps {
+  data: CurrentInitiativeRow[];
+  footerData: CurrentInitiativesFooter;
+}
+
+const columns: ExtendedColumnDef<CurrentInitiativeRow>[] = [
   {
     accessorKey: 'initiative',
     header: 'Initiative'
@@ -17,15 +36,20 @@ const columns: ExtendedColumnDef<CurrentInitiativeProps>[] = [
   },
   {
     accessorKey: 'amount',
-    header: 'Amount (Qty)'
+    header: 'Amount (Qty)',
+    cell: ({ getValue }) => formatQuantity(getValue() as number)
   },
   {
     accessorKey: 'value',
-    header: 'Value ($)'
+    header: 'Value ($)',
+    cell: ({ getValue }) => formatNumber(getValue() as number)
   }
 ];
 
-const CurrentInitiatives = () => {
+const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
+  data,
+  footerData
+}) => {
   const footerContent = (
     <>
       <tr>
@@ -36,7 +60,7 @@ const CurrentInitiatives = () => {
         <td></td>
         <td></td>
         <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
-          123000
+          {formatNumber(footerData.totalValue)}
         </td>
       </tr>
       <tr>
@@ -47,8 +71,7 @@ const CurrentInitiatives = () => {
         <td></td>
         <td></td>
         <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
-          {' '}
-          123000
+          {formatNumber(footerData.totalValueWithBounty)}
         </td>
       </tr>
     </>
@@ -57,7 +80,7 @@ const CurrentInitiatives = () => {
   return (
     <DataTable
       className='max-w-[627px]'
-      data={CURRENT_INITIATIVES_DATA}
+      data={data}
       columns={columns}
       pageSize={10}
       footerContent={footerContent}

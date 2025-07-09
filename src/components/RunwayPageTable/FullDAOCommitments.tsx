@@ -1,8 +1,27 @@
+import React from 'react';
+
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
+import {
+  formatDateWithOrdinal,
+  formatLargeNumber
+} from '@/shared/lib/utils/utils';
 
-import { FULL_DAO_COMMITMENTS_DATA, FullDAOCommitmentProps } from './MOCK_DATA';
+export interface FullDAOCommitmentRow {
+  recipient: string;
+  discipline: string;
+  token: string;
+  amount: number;
+  paymentType: string;
+  dailyStreamRate: number;
+  startDate: string;
+  streamEndDate: string;
+}
 
-const columns: ExtendedColumnDef<FullDAOCommitmentProps>[] = [
+interface FullDAOCommitmentsProps {
+  data: FullDAOCommitmentRow[];
+}
+
+const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
   {
     accessorKey: 'recipient',
     header: 'Recipient'
@@ -17,7 +36,8 @@ const columns: ExtendedColumnDef<FullDAOCommitmentProps>[] = [
   },
   {
     accessorKey: 'amount',
-    header: 'Amount'
+    header: 'Amount',
+    cell: ({ getValue }) => formatLargeNumber(getValue() as number, 1)
   },
   {
     accessorKey: 'paymentType',
@@ -25,22 +45,28 @@ const columns: ExtendedColumnDef<FullDAOCommitmentProps>[] = [
   },
   {
     accessorKey: 'dailyStreamRate',
-    header: 'Daily Stream Rate'
+    header: 'Daily Stream Rate',
+    cell: ({ getValue }) => {
+      const value = getValue() as number;
+      return value === 0 ? '0' : formatLargeNumber(value, 1);
+    }
   },
   {
     accessorKey: 'startDate',
-    header: 'Start Date'
+    header: 'Start Date',
+    cell: ({ getValue }) => formatDateWithOrdinal(getValue() as string)
   },
   {
     accessorKey: 'streamEndDate',
-    header: 'Stream End Date'
+    header: 'Stream End Date',
+    cell: ({ getValue }) => formatDateWithOrdinal(getValue() as string)
   }
 ];
 
-const FullDAOCommitments = () => {
+const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({ data }) => {
   return (
     <DataTable
-      data={FULL_DAO_COMMITMENTS_DATA}
+      data={data}
       columns={columns}
       pageSize={10}
       headerCellClassName='py-[13px] px-[5px]'

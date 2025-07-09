@@ -1,45 +1,103 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import AnnualisedExpenses from '@/components/RunwayPageTable/AnnualisedExpenses';
+import type { RunwayItem } from '@/shared/hooks/useRunway';
+import { useRunway } from '@/shared/hooks/useRunway';
+import { formatPrice } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
-import Text from '@/shared/ui/Text/Text';
 
 const AnnualisedExpensesBlock = () => {
+  const { data: runwayResponse, isLoading, isError } = useRunway();
+
+  const processedData = useMemo(() => {
+    const data = runwayResponse?.data || [];
+
+    const initialResult = {
+      tableData: [],
+      footerData: { amount: 0, value: 0 },
+      pieData: []
+    };
+
+    if (!data.length) {
+      return initialResult;
+    }
+
+    const expensesByGroup: Record<
+      string,
+      {
+        discipline: string;
+        token: string;
+        amount: number;
+        value: number;
+      }
+    > = {};
+
+    const expensesByDisciplineForPie: Record<string, number> = {};
+
+    data.forEach((item: RunwayItem) => {
+      const value = item.value;
+      const amount = item.amount;
+
+      const groupKey = `${item.discipline}__${item.token}`;
+      if (!expensesByGroup[groupKey]) {
+        expensesByGroup[groupKey] = {
+          discipline: item.discipline,
+          token: item.token,
+          amount: 0,
+          value: 0
+        };
+      }
+      expensesByGroup[groupKey].amount += amount;
+      expensesByGroup[groupKey].value += value;
+
+      expensesByDisciplineForPie[item.discipline] =
+        (expensesByDisciplineForPie[item.discipline] || 0) + value;
+    });
+
+    const tableData = Object.values(expensesByGroup);
+
+    const footerData = tableData.reduce(
+      (acc, item) => {
+        acc.amount += item.amount;
+        acc.value += item.value;
+        return acc;
+      },
+      { amount: 0, value: 0 }
+    );
+
+    const totalValueForPie = footerData.value;
+
+    const pieData = Object.entries(expensesByDisciplineForPie).map(
+      ([name, value]) => ({
+        name,
+        value: formatPrice(value, 1),
+        percent: totalValueForPie > 0 ? (value / totalValueForPie) * 100 : 0
+      })
+    );
+
+    return { tableData, footerData, pieData };
+  }, [runwayResponse]);
+
   return (
-    <Card title='Annualised Expenses'>
+    <Card
+      title='Annualised Expenses'
+      isLoading={isLoading}
+      isError={isError}
+      className={{
+        loading: 'min-h-[571px]'
+      }}
+    >
       <div className='flex justify-between'>
         <div className='flex w-[650px] flex-col gap-5'>
-          <AnnualisedExpenses />
-          <div>
-            <Text
-              size='11'
-              weight='500'
-              className='text-primary-14'
-              lineHeight='18'
-            >
-              1M USD ImmuneFi Bug Bounty program is excluded from above
-            </Text>
-            <Text
-              size='11'
-              weight='500'
-              className='text-primary-14'
-              lineHeight='18'
-            >
-              Table assumes an Compound price of $150
-            </Text>
-          </div>
+          <AnnualisedExpenses
+            data={processedData.tableData}
+            footerData={processedData.footerData}
+          />
         </div>
         <PieChart
           className='max-h-[400px] max-w-[336.5px]'
-          data={[
-            { name: 'AAVE', percent: 70.67, value: '1.54M' },
-            { name: 'Stablecoin', percent: 14.77, value: '1.54k' },
-            { name: 'ETH Correlated', percent: 4.86, value: '0.54k' },
-            { name: 'DeFi', percent: 2.63, value: '0.23k' },
-            { name: 'BTC Correlated', percent: 2.6, value: '5.54k' },
-            { name: 'Unclassified', percent: 2.6, value: '0.54k' }
-          ]}
+          data={processedData.pieData}
         />
       </div>
     </Card>
