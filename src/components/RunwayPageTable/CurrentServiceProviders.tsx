@@ -49,10 +49,12 @@ const columns: ExtendedColumnDef<ProviderRow>[] = [
   {
     accessorKey: 'amount',
     header: 'Amount (Qty)',
+    align: 'center',
     cell: ({ getValue }) => formatQuantity(getValue() as number)
   },
   {
     accessorKey: 'value',
+    align: 'right',
     header: 'Value ($)',
     cell: ({ getValue }) => formatNumber(getValue() as number)
   }
@@ -69,10 +71,8 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
       </td>
       <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'></td>
       <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'></td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
-        {formatQuantity(footerData.amount)}
-      </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
+      <td className='text-primary-14 px-[5px] py-[13px] text-center text-[13px]'></td>
+      <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px]'>
         {formatNumber(footerData.value)}
       </td>
     </tr>
@@ -80,7 +80,6 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
 
   return (
     <DataTable
-      className='max-w-[627px]'
       data={data}
       columns={columns}
       pageSize={10}
@@ -88,6 +87,10 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
       headerCellClassName='py-[13px] px-[5px]'
       cellClassName='py-3 px-[5px]'
       headerTextClassName='text-primary-14 font-medium'
+      enableSorting
+      enablePagination
+      paginationClassName='py-[13px] px-[5px]'
+      initialSort={{ id: 'value', desc: true }}
     />
   );
 };

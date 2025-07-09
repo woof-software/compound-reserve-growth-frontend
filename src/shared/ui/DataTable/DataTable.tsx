@@ -42,13 +42,12 @@ interface DataTableProps<T> {
   onRowClick?: (row: T) => void;
   isLoading?: boolean;
   emptyMessage?: string;
-  // Стилі для пагінації
   paginationClassName?: string;
   paginationTextClassName?: string;
   paginationButtonsClassName?: string;
   paginationButtonClassName?: string;
-  // Footer content
   footerContent?: ReactNode;
+  initialSort?: { id: string; desc: boolean };
 }
 
 const DataTable = <T,>({
@@ -75,9 +74,12 @@ const DataTable = <T,>({
   paginationTextClassName,
   paginationButtonsClassName,
   paginationButtonClassName,
-  footerContent
+  footerContent,
+  initialSort
 }: DataTableProps<T>) => {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>(
+    initialSort ? [{ id: initialSort.id, desc: initialSort.desc }] : []
+  );
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
@@ -245,11 +247,9 @@ const DataTable = <T,>({
               ))
             )}
           </tbody>
-          {/* Footer section */}
           {footerContent && (
             <tfoot className={cn('', footerClassName)}>{footerContent}</tfoot>
           )}
-          {/* Footer section */}
         </table>
       </div>
       {enablePagination && (
@@ -280,21 +280,29 @@ const DataTable = <T,>({
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
               className={cn(
-                'text-primary-14 text-[13px] hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                'text-primary-14 flex cursor-pointer items-center gap-1 text-[13px] hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
                 paginationButtonClassName
               )}
             >
+              <Icon
+                name='arrow-left'
+                className='h-4 w-4'
+              />
               Previous
             </Button>
             <Button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
               className={cn(
-                'text-primary-14 text-[13px] hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                'text-primary-14 flex cursor-pointer items-center gap-1 text-[13px] hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
                 paginationButtonClassName
               )}
             >
               Next
+              <Icon
+                name='arrow-right'
+                className='h-4 w-4'
+              />
             </Button>
           </div>
         </div>
