@@ -34,33 +34,27 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   const { theme } = useTheme();
   const chartRef = useRef<HighchartsReact.RefObject>(null);
   const programmaticChange = useRef(false);
+
   const MAX_VISIBLE_BARS = 180;
+  const MIN_VISIBLE_BARS = 7;
 
-  const dynamicSeriesConfig = useMemo(() => {
-    if (!data || data.length === 0) return [];
-
-    const seriesKeys = new Set<string>();
-    data.forEach((item) => {
-      Object.keys(item).forEach((key) => {
-        if (key !== 'date') {
-          seriesKeys.add(key);
-        }
-      });
-    });
-
-    return Array.from(seriesKeys).map((key) => ({
-      key: key,
-      name: key?.charAt(0)?.toUpperCase() + key?.slice(1),
-      color: networkColorMap[key.toLowerCase()] || '#808080'
-    }));
-  }, [data]);
-
-  const aggregatedData = useMemo(() => {
-    if (!data || data.length === 0) return [];
+  const { seriesData, aggregatedData } = useMemo(() => {
+    if (!data || data.length === 0) {
+      return { seriesData: [], aggregatedData: [] };
+    }
 
     const pointsPerBar = { D: 1, W: 7, M: 30 };
     const chunkSize = pointsPerBar[barSize];
-    const result: AggregatedPoint[] = [];
+    const tempAggregatedData: AggregatedPoint[] = [];
+
+    const allKeys = new Set<string>();
+    data.forEach((item) => {
+      Object.keys(item).forEach((key) => {
+        if (key !== 'date') {
+          allKeys.add(key);
+        }
+      });
+    });
 
     for (let i = 0; i < data.length; i += chunkSize) {
       const chunk = data.slice(i, i + chunkSize);
@@ -79,20 +73,52 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
 
       const aggregatedPoint: AggregatedPoint = { x: timestamp };
 
-      dynamicSeriesConfig.forEach((config) => {
-        aggregatedPoint[config.key] = 0;
+      allKeys.forEach((key) => {
+        aggregatedPoint[key] = chunk.reduce(
+          (sum, dailyData) => sum + ((dailyData[key] as number) || 0),
+          0
+        );
       });
-
-      chunk.forEach((dailyData) => {
-        dynamicSeriesConfig.forEach((config) => {
-          (aggregatedPoint[config.key] as number) +=
-            (dailyData[config.key] as number) || 0;
-        });
-      });
-      result.push(aggregatedPoint);
+      tempAggregatedData.push(aggregatedPoint);
     }
-    return result;
-  }, [data, barSize, dynamicSeriesConfig]);
+
+    const activeSeriesKeys = new Set<string>();
+    tempAggregatedData.forEach((point) => {
+      Object.keys(point).forEach((key) => {
+        if (key !== 'x' && point[key] !== 0) {
+          activeSeriesKeys.add(key);
+        }
+      });
+    });
+
+    const finalSeries = Array.from(activeSeriesKeys).map(
+      (key): Highcharts.SeriesColumnOptions => ({
+        type: 'column',
+        name: key.charAt(0).toUpperCase() + key.slice(1),
+        data: tempAggregatedData.map((item) => [
+          item.x,
+          (item[key] as number) || 0
+        ]),
+        color: networkColorMap[key.toLowerCase()] || '#808080',
+        showInLegend: true
+      })
+    );
+
+    return { seriesData: finalSeries, aggregatedData: tempAggregatedData };
+  }, [data, barSize]);
+
+  const pointRange = useMemo(() => {
+    const dayInMillis = 24 * 3600 * 1000;
+    switch (barSize) {
+      case 'W':
+        return 7 * dayInMillis;
+      case 'M':
+        return 30 * dayInMillis;
+      case 'D':
+      default:
+        return dayInMillis;
+    }
+  }, [barSize]);
 
   useEffect(() => {
     const chart = chartRef.current?.chart;
@@ -168,6 +194,11 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
             ).length
           );
 
+          if (visibleCount < MIN_VISIBLE_BARS) {
+            onVisibleBarsChange?.(MIN_VISIBLE_BARS);
+            return false;
+          }
+
           if (visibleCount > MAX_VISIBLE_BARS) {
             onVisibleBarsChange?.(MAX_VISIBLE_BARS);
             return false;
@@ -214,7 +245,8 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     },
     plotOptions: {
       column: {
-        pointPadding: 0.1,
+        pointRange: pointRange,
+        pointPadding: 0.05,
         groupPadding: 0.05,
         borderWidth: 0,
         states: { hover: { animation: false }, inactive: { opacity: 1 } }
@@ -289,18 +321,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
         return tooltip;
       }
     },
-    series: dynamicSeriesConfig.map(
-      (config): Highcharts.SeriesColumnOptions => ({
-        type: 'column',
-        name: config.name,
-        data: aggregatedData.map((item) => [
-          item.x,
-          (item[config.key] as number) || 0
-        ]),
-        color: config.color,
-        showInLegend: true
-      })
-    ),
+    series: seriesData,
     navigator: { enabled: false },
     scrollbar: { enabled: false },
     rangeSelector: { enabled: false }
