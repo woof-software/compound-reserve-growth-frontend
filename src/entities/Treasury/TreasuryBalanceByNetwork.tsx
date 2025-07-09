@@ -26,17 +26,21 @@ interface TreasuryBalanceByNetworkBlockProps {
 }
 
 const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
-  return data.map((el) => ({
-    symbol: el.source.asset.symbol,
+  return data.map((el) => {
+    const decimals = el.source.asset.decimals || 0;
+    const rawQuantity = Number(el.quantity) || 0;
+    const humanReadableQuantity = rawQuantity / 10 ** decimals;
 
-    qty: Number(el.quantity) || 0,
-
-    value: el.value,
-
-    source: el.source.type,
-
-    market: el.source.market ?? 'no market'
-  }));
+    return {
+      symbol: el.source.asset.symbol,
+      chain: capitalizeFirstLetter(el.source.network),
+      market: el.source.market ?? 'no market',
+      qty: humanReadableQuantity,
+      value: el.value,
+      price: el.price,
+      source: el.source.type
+    };
+  });
 };
 
 const TreasuryBalanceByNetworkBlock = ({
