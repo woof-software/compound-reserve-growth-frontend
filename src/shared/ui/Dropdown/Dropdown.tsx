@@ -150,7 +150,7 @@ const TriggerContent: FC<TriggerContentProps> = ({
   return (
     <div
       className={cn(
-        'hover:bg-secondary-11 flex items-center gap-1.5 rounded-sm px-[17px] py-2',
+        'hover:bg-secondary-11 flex items-center gap-1.5 rounded-sm px-[17px] py-1',
         className,
         {
           'bg-secondary-11': isOpen

@@ -8,30 +8,18 @@ import View from '../View/View';
 
 interface ValueMetricFieldProps {
   value: string;
-
   label: string;
-
   badge?: string;
-
   badgeType?: 'positive' | 'negative';
-
   icon?: ReactNode;
-
   iconText?: string;
-
   className?: {
     container?: string;
-
     value?: string;
-
     label?: string;
-
     badge?: string;
-
     icon?: string;
-
     iconText?: string;
-
     content?: string;
   };
 }
@@ -81,19 +69,15 @@ const ValueMetricField = ({
           </Text>
           <View.Condition if={Boolean(badge)}>
             <Tooltip content='Change over last 30 days'>
-              <Text
-                tag='span'
-                weight='500'
-                size='14'
-                lineHeight='24'
+              <div
                 className={cn(
+                  'cursor-pointer rounded-full px-1.5 py-0.5 text-sm leading-6 font-medium',
                   badgeStyles[badgeType],
-                  'cursor-pointer rounded-full px-1.5 py-0.5',
                   className?.badge
                 )}
               >
                 {badge}
-              </Text>
+              </div>
             </Tooltip>
           </View.Condition>
         </div>
