@@ -6,7 +6,7 @@ import RevenueBreakdown, {
   FormattedRevenueData
 } from '@/components/RevenuePageTable/RevenueBreakdown';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
-import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenuets';
+import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenue';
 import {
   capitalizeFirstLetter,
   ChartDataItem,
@@ -35,7 +35,7 @@ const RevenueBreakDownBlock = () => {
   const { data: apiResponse, isLoading, isError } = useCompCumulativeRevenue();
 
   const rawData: ChartDataItem[] = useMemo(
-    () => apiResponse?.data?.data || [],
+    () => apiResponse || [],
     [apiResponse]
   );
 

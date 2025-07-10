@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/CompoundFeeRecieved';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import { useChartControls } from '@/shared/hooks/useChartControls';
-import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenuets';
+import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenue';
 import {
   ChartDataItem,
   extractFilterOptions,
@@ -24,7 +24,7 @@ const CompoundFeeRevenueRecieved = () => {
   const { data: apiResponse, isLoading, isError } = useCompCumulativeRevenue();
 
   const rawData: ChartDataItem[] = useMemo(
-    () => apiResponse?.data?.data || [],
+    () => apiResponse || [],
     [apiResponse]
   );
 

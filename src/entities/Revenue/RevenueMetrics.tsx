@@ -1,15 +1,14 @@
 import { useMemo } from 'react';
 
-import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenuets';
+import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenue';
 import { formatGrowth, formatPrice } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
 
 const RevenueMetrics = () => {
-  const { data: apiResponse, isLoading, isError } = useCompCumulativeRevenue();
+  const { data: revenueData, isLoading, isError } = useCompCumulativeRevenue();
 
   const yearlyTotals = useMemo(() => {
-    const revenueData = apiResponse?.data?.data;
     if (!revenueData || revenueData.length === 0) {
       return {};
     }
@@ -40,7 +39,7 @@ const RevenueMetrics = () => {
     }
 
     return totals;
-  }, [apiResponse]);
+  }, [revenueData]);
 
   const yearsToDisplay =
     !isLoading && !isError
