@@ -4,12 +4,11 @@ import PieChart from '@/components/Charts/Pie/Pie';
 import RevenueOverviewUSD, {
   TableRowData
 } from '@/components/RevenuePageTable/RevenueOverviewUSD';
-import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenuets';
 import {
-  ChartDataItem,
-  formatPrice,
-  networkColorMap
-} from '@/shared/lib/utils/utils';
+  type CompoundCumulativeRevenueItem,
+  useCompCumulativeRevenue
+} from '@/shared/hooks/useCompCumulativeRevenue';
+import { formatPrice, networkColorMap } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -127,11 +126,11 @@ const RevenueOverview: FC = () => {
   const [dateType, setDateType] = useState<DateType>('Rolling');
   const [period, setPeriod] = useState<Period>('7D');
 
-  const { data: apiResponse, isLoading, isError } = useCompCumulativeRevenue();
+  const { data: revenueData, isLoading, isError } = useCompCumulativeRevenue();
 
-  const rawData: ChartDataItem[] = useMemo(
-    () => apiResponse?.data?.data || [],
-    [apiResponse]
+  const rawData: CompoundCumulativeRevenueItem[] = useMemo(
+    () => revenueData || [],
+    [revenueData]
   );
 
   const primaryTabs = dateType === 'Rolling' ? ROLLING_TABS : TO_DATE_TABS;
@@ -149,7 +148,7 @@ const RevenueOverview: FC = () => {
       return {
         tableData: [],
         pieData: [],
-        tableColumns: [],
+        tableColumns: createTableColumns(primaryTabs, dateType),
         footerContent: null
       };
     }
@@ -244,6 +243,9 @@ const RevenueOverview: FC = () => {
     }
   };
 
+  const hasData = processedData.tableData.length > 0;
+  const noDataMessage = 'No data available';
+
   return (
     <Card
       title='Revenue Overview USD'
@@ -268,18 +270,29 @@ const RevenueOverview: FC = () => {
           onTabChange={handleDateTypeChange}
         />
       </div>
-      <div className='flex items-start justify-between'>
-        <RevenueOverviewUSD
-          isLoading={isLoading}
-          data={processedData.tableData}
-          columns={processedData.tableColumns}
-          footerContent={processedData.footerContent}
-        />
-        <PieChart
-          className='max-h-[400px] max-w-[336.5px]'
-          data={processedData.pieData}
-        />
-      </div>
+      {!isLoading && !isError && !hasData ? (
+        <div className='flex h-[400px] items-center justify-center'>
+          <Text
+            size='12'
+            className='text-primary-14'
+          >
+            {noDataMessage}
+          </Text>
+        </div>
+      ) : (
+        <div className='flex items-start justify-between'>
+          <RevenueOverviewUSD
+            isLoading={isLoading}
+            data={processedData.tableData}
+            columns={processedData.tableColumns}
+            footerContent={processedData.footerContent}
+          />
+          <PieChart
+            className='max-h-[400px] max-w-[336.5px]'
+            data={processedData.pieData}
+          />
+        </div>
+      )}
     </Card>
   );
 };

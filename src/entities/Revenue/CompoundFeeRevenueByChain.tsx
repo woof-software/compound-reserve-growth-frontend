@@ -4,7 +4,7 @@ import CompoundFeeRevenuebyChain, {
   ProcessedRevenueData
 } from '@/components/RevenuePageTable/CompoundFeeRevenuebyChain';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
-import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenuets';
+import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenue';
 import { precomputeViews } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
@@ -59,7 +59,7 @@ const generateOptions = (views: PrecomputedViews | null, interval: string) => {
 };
 
 const CompoundFeeRevenueByChain = () => {
-  const { data: apiResponse, isLoading, isError } = useCompCumulativeRevenue();
+  const { data: revenueData, isLoading, isError } = useCompCumulativeRevenue();
 
   const intervalDropdown = useDropdown('single');
   const periodDropdown = useDropdown('single');
@@ -68,9 +68,10 @@ const CompoundFeeRevenueByChain = () => {
   const selectedPeriod = periodDropdown.selectedValue?.[0];
 
   const precomputedViews = useMemo(
-    () => precomputeViews(apiResponse?.data?.data || []),
-    [apiResponse]
+    () => precomputeViews(revenueData || []),
+    [revenueData]
   );
+
   const dynamicOptions = useMemo(
     () => generateOptions(precomputedViews, selectedInterval),
     [precomputedViews, selectedInterval]
@@ -85,7 +86,7 @@ const CompoundFeeRevenueByChain = () => {
         periodDropdown.select(dynamicOptions.options[0]);
       }
     }
-  }, [dynamicOptions]);
+  }, [dynamicOptions, periodDropdown]);
 
   const { tableData, columns, totals } = useMemo(() => {
     if (!precomputedViews || !selectedPeriod) {
@@ -96,6 +97,7 @@ const CompoundFeeRevenueByChain = () => {
       precomputedViews[
         selectedInterval.toLowerCase() as keyof PrecomputedViews
       ]?.[selectedPeriod];
+
     if (!viewData) return { tableData: [], columns: [], totals: {} };
 
     const finalColumns: ExtendedColumnDef<ProcessedRevenueData>[] = [
@@ -117,6 +119,9 @@ const CompoundFeeRevenueByChain = () => {
 
     return { ...viewData, columns: finalColumns };
   }, [precomputedViews, selectedInterval, selectedPeriod]);
+
+  const hasData = tableData.length > 0;
+  const noDataMessage = 'No data available';
 
   return (
     <Card
@@ -172,11 +177,22 @@ const CompoundFeeRevenueByChain = () => {
           />
         </div>
       </div>
-      <CompoundFeeRevenuebyChain
-        data={tableData}
-        columns={columns}
-        totals={totals}
-      />
+      {!isLoading && !isError && !hasData ? (
+        <div className='flex h-[400px] items-center justify-center'>
+          <Text
+            size='12'
+            className='text-primary-14'
+          >
+            {noDataMessage}
+          </Text>
+        </div>
+      ) : (
+        <CompoundFeeRevenuebyChain
+          data={tableData}
+          columns={columns}
+          totals={totals}
+        />
+      )}
     </Card>
   );
 };

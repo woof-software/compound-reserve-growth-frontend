@@ -4,7 +4,7 @@ import LineChart from '@/components/Charts/Line/Line';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
-import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenuets';
+import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenue';
 import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
@@ -30,7 +30,7 @@ const CompoundCumulativeRevenue = () => {
   const { data: apiResponse, isLoading, isError } = useCompCumulativeRevenue();
 
   const rawData: ChartDataItem[] = useMemo(() => {
-    const data = apiResponse?.data?.data || [];
+    const data = apiResponse || [];
     return [...data].sort((a, b) => a.date - b.date);
   }, [apiResponse]);
 

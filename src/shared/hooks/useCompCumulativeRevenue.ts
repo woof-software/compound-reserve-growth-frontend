@@ -1,15 +1,14 @@
 import { z } from 'zod';
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 
-import { $api } from '../api/api';
-import { SortDirectionType } from '../types/types';
+import { SortDirectionType } from '@/shared/types/types';
 
-const historyApiResponseSchema = z.object({
+import { $api } from '../api/api';
+
+const revenueHistoryApiResponseSchema = z.object({
   data: z.array(
     z.object({
       id: z.number(),
-      q: z.string(),
-      p: z.number(),
       v: z.number(),
       d: z.number(),
       sId: z.number()
@@ -41,53 +40,58 @@ const sourcesAndAssetsApiResponseSchema = z.object({
 });
 
 const finalSourceSchema =
-  sourcesAndAssetsApiResponseSchema.shape.sources.element.extend({
-    asset: assetDetailsSchema
-  });
+  sourcesAndAssetsApiResponseSchema.shape.sources.element
+    .extend({
+      asset: assetDetailsSchema
+    })
+    .omit({ assetId: true });
 
-export const TreasuryHistoryItemSchema = z.object({
+export const CompoundCumulativeRevenueItemSchema = z.object({
   id: z.number(),
-  sId: z.number(),
-  quantity: z.string(),
-  price: z.number(),
   value: z.number(),
   date: z.number(),
   source: finalSourceSchema
 });
 
-export type TreasuryHistoryItem = z.infer<typeof TreasuryHistoryItemSchema>;
+export type CompoundCumulativeRevenueItem = z.infer<
+  typeof CompoundCumulativeRevenueItemSchema
+>;
 
-export type TreasuryHistoryParams = {
+export type CompoundCumulativeRevenueParams = {
   page?: number;
   perPage?: number;
   order?: SortDirectionType;
 };
 
-type UseTreasuryHistoryOptions = {
-  params?: TreasuryHistoryParams;
+type UseCompCumulativeRevenueOptions = {
+  params?: CompoundCumulativeRevenueParams;
   options?: Omit<
-    UseQueryOptions<TreasuryHistoryItem[]>,
+    UseQueryOptions<CompoundCumulativeRevenueItem[]>,
     'queryKey' | 'queryFn'
   >;
 };
 
-const TREASURY_HISTORY_URL = '/api/history/v2/treasury';
+const COMPOUND_REVENUE_HISTORY_URL = '/api/history/v2/revenue';
 const SOURCES_URL = '/api/sources';
 
-export const useTreasuryHistory = ({
+export const useCompCumulativeRevenue = ({
   params,
   options
-}: UseTreasuryHistoryOptions = {}) => {
+}: UseCompCumulativeRevenueOptions = {}) => {
   return useQuery({
-    queryKey: ['treasuryHistory', params],
+    queryKey: ['compoundCumulativeRevenue', params],
     queryFn: async () => {
-      const [historyResponse, sourcesAndAssetsResponse] = await Promise.all([
-        $api.get(TREASURY_HISTORY_URL, historyApiResponseSchema, params),
+      const [revenueResponse, sourcesAndAssetsResponse] = await Promise.all([
+        $api.get(
+          COMPOUND_REVENUE_HISTORY_URL,
+          revenueHistoryApiResponseSchema,
+          params
+        ),
         $api.get(SOURCES_URL, sourcesAndAssetsApiResponseSchema)
       ]);
 
-      if (!historyResponse?.data || !sourcesAndAssetsResponse?.data) {
-        throw new Error('Failed to fetch treasury history or sources');
+      if (!revenueResponse?.data || !sourcesAndAssetsResponse?.data) {
+        throw new Error('Failed to fetch revenue history or sources');
       }
 
       const assetsMap = new Map(
@@ -108,18 +112,18 @@ export const useTreasuryHistory = ({
         })
       );
 
-      const mergedData = historyResponse.data.data.reduce<any[]>(
-        (acc, historyItem) => {
-          const sourceWithAsset = sourcesMap.get(historyItem.sId);
+      const mergedData = revenueResponse.data.data.reduce<any[]>(
+        (acc, revenueItem) => {
+          const sourceWithAsset = sourcesMap.get(revenueItem.sId);
 
           if (sourceWithAsset) {
             acc.push({
-              ...historyItem,
+              ...revenueItem,
               source: sourceWithAsset
             });
           } else {
             console.warn(
-              `Source with id ${historyItem.sId} not found for history item ${historyItem.id}`
+              `Source with id ${revenueItem.sId} not found for revenue item ${revenueItem.id}`
             );
           }
 
@@ -128,19 +132,23 @@ export const useTreasuryHistory = ({
         []
       );
 
-      const finalTransformedData = mergedData.map((item) => {
-        const { q, p, v, d, ...restOfItem } = item;
+      const finalTransformedData = mergedData.map((item) => ({
+        id: item.id,
+        value: item.v,
+        date: item.d,
+        source: {
+          id: item.source.id,
+          address: item.source.address,
+          network: item.source.network,
+          type: item.source.type,
+          market: item.source.market,
+          asset: item.source.asset
+        }
+      }));
 
-        return {
-          ...restOfItem,
-          quantity: q,
-          price: p,
-          value: v,
-          date: d
-        };
-      });
-
-      return TreasuryHistoryItemSchema.array().parse(finalTransformedData);
+      return CompoundCumulativeRevenueItemSchema.array().parse(
+        finalTransformedData
+      );
     },
     ...options
   });

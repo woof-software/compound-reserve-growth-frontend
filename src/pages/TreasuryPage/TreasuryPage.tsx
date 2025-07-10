@@ -24,7 +24,7 @@ const TreasuryPage = () => {
   });
 
   const treasuryData = useMemo<TokenData[]>(
-    () => treasuryApiResponse?.data?.data || [],
+    () => treasuryApiResponse || [],
     [treasuryApiResponse]
   );
 

@@ -3,8 +3,11 @@ import { useMemo, useState } from 'react';
 import CompoundRevenue from '@/components/Charts/CompoundRevenue/CompoundRevenue';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import { useChartControls } from '@/shared/hooks/useChartControls';
-import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenuets';
-import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
+import {
+  type CompoundCumulativeRevenueItem,
+  useCompCumulativeRevenue
+} from '@/shared/hooks/useCompCumulativeRevenue';
+import { extractFilterOptions } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
@@ -28,11 +31,11 @@ const CompoundRevenueBlock = () => {
     initialBarSize: 'D'
   });
 
-  const { data: apiResponse, isLoading, isError } = useCompCumulativeRevenue();
+  const { data: revenueData, isLoading, isError } = useCompCumulativeRevenue();
 
-  const rawData: ChartDataItem[] = useMemo(
-    () => apiResponse?.data?.data || [],
-    [apiResponse]
+  const rawData: CompoundCumulativeRevenueItem[] = useMemo(
+    () => revenueData || [],
+    [revenueData]
   );
 
   const filterOptionsConfig = useMemo(
@@ -62,9 +65,16 @@ const CompoundRevenueBlock = () => {
           selectedChainIds.length === 0 ||
           selectedChainIds.includes(item.source?.network);
 
+        // ОСНОВНА ЗМІНА ТУТ
         const marketMatch =
           selectedMarketIds.length === 0 ||
-          selectedMarketIds.includes(item.source?.market);
+          (() => {
+            let marketValue = item.source?.market;
+            if (marketValue === null) {
+              marketValue = 'no name';
+            }
+            return selectedMarketIds.includes(marketValue);
+          })();
 
         const sourceMatch =
           selectedSourceIds.length === 0 ||
@@ -153,21 +163,26 @@ const CompoundRevenueBlock = () => {
         />
       </div>
       <div className='h-[400px]'>
-        <CompoundRevenue
-          data={processedChartData}
-          barSize={barSize}
-          barCountToSet={barCount}
-          onVisibleBarsChange={handleVisibleBarsChange}
-        />
-        {!isLoading && !isError && !hasData && (
-          <div className='flex h-full items-center justify-center'>
-            <Text
-              size='12'
-              className='text-primary-14'
-            >
-              {noDataMessage}
-            </Text>
-          </div>
+        {hasData ? (
+          <CompoundRevenue
+            data={processedChartData}
+            barSize={barSize}
+            barCountToSet={barCount}
+            onVisibleBarsChange={handleVisibleBarsChange}
+          />
+        ) : (
+          <>
+            {!isLoading && !isError && (
+              <div className='flex h-full items-center justify-center'>
+                <Text
+                  size='12'
+                  className='text-primary-14'
+                >
+                  {noDataMessage}
+                </Text>
+              </div>
+            )}
+          </>
         )}
       </div>
     </Card>
