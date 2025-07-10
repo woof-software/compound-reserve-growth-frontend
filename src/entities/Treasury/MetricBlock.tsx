@@ -110,7 +110,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             label='Total Treasury Value'
             value={formatPrice(totalValue, 1)}
             badge={formatPrice(totalLastValue, 1)}
-            badgeType={totalValue > 0 ? 'positive' : 'negative'}
+            badgeType={totalLastValue > 0 ? 'positive' : 'negative'}
             icon={
               <Icon
                 name='wallet'

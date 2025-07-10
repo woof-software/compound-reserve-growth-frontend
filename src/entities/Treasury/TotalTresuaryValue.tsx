@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useMemo } from 'react';
 
 import LineChart from '@/components/Charts/Line/Line';
@@ -14,7 +13,7 @@ import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 
-const groupByOptions = ['none', 'Asset Type', 'Chain', 'Market'];
+const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
 const groupByMapping: Record<string, string> = {
   'Asset Type': 'assetType',
   Chain: 'chain',
@@ -99,7 +98,7 @@ const TotalTresuaryValue = ({
     [chainOptions, assetTypeOptions, deploymentOptions]
   );
 
-  const groupBy = selectedSingle?.[0] || 'none';
+  const groupBy = selectedSingle?.[0] || 'None';
 
   const activeFilters = useMemo(
     () =>
@@ -123,7 +122,7 @@ const TotalTresuaryValue = ({
     },
     groupBy,
     groupByKeyPath:
-      groupBy === 'none'
+      groupBy === 'None'
         ? null
         : filterOptionsConfig[
             groupByMapping[groupBy] as keyof typeof filterOptionsConfig
@@ -204,7 +203,7 @@ const TotalTresuaryValue = ({
         content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
       }}
     >
-      <div className='flex justify-end gap-3 px-0 py-3'>
+      <div className='flex items-center justify-end gap-3 px-0 py-3'>
         <TabsGroup
           tabs={['D', 'W', 'M']}
           value={barSize}

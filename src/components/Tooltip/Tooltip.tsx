@@ -5,6 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/shared/ui/BaseTooltip/BaseTooltip';
+import Text from '@/shared/ui/Text/Text';
 
 interface TooltipProps {
   children: ReactNode;
@@ -16,7 +17,12 @@ export const Tooltip = ({ children, content }: TooltipProps) => {
     <BaseTooltip>
       <TooltipTrigger asChild>{children}</TooltipTrigger>
       <TooltipContent>
-        <p>{content}</p>
+        <Text
+          size='12'
+          className='text-primary-14'
+        >
+          {content}
+        </Text>
       </TooltipContent>
     </BaseTooltip>
   );
