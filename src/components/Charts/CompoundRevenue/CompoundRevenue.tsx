@@ -27,6 +27,7 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
   const programmaticChange = useRef(false);
 
   const MAX_VISIBLE_BARS = 180;
+  const MIN_VISIBLE_BARS = 7;
 
   const aggregatedData = useMemo(() => {
     if (!data || data.length === 0) {
@@ -112,6 +113,10 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
               (point) => point[0] >= e.min && point[0] <= e.max
             ).length
           );
+
+          if (visibleCount < MIN_VISIBLE_BARS) {
+            return false;
+          }
 
           if (visibleCount > MAX_VISIBLE_BARS) {
             onVisibleBarsChange(MAX_VISIBLE_BARS);

@@ -48,7 +48,8 @@ const CurrentInitiativesBlock = () => {
       return initialResult;
     }
 
-    // Table data: each active initiative is a separate row. No grouping.
+    initiativeData.sort((a, b) => b.value - a.value);
+
     const tableData = initiativeData.map((item) => ({
       initiative: item.name,
       discipline: item.discipline,
@@ -57,14 +58,12 @@ const CurrentInitiativesBlock = () => {
       value: item.value
     }));
 
-    // Footer data: sum of all individual active initiatives shown in the table.
     const totalValue = initiativeData.reduce(
       (sum, item) => sum + item.value,
       0
     );
     const footerData = { totalValue, totalValueWithBounty: totalValue };
 
-    // Pie chart data: group and sum by discipline.
     const expensesByDisciplineForPie: Record<string, number> = {};
     initiativeData.forEach((item) => {
       expensesByDisciplineForPie[item.discipline] =
@@ -72,13 +71,13 @@ const CurrentInitiativesBlock = () => {
     });
 
     const totalValueForPie = footerData.totalValue;
-    const pieData = Object.entries(expensesByDisciplineForPie).map(
-      ([name, value]) => ({
+    const pieData = Object.entries(expensesByDisciplineForPie)
+      .sort(([, aValue], [, bValue]) => bValue - aValue)
+      .map(([name, value]) => ({
         name,
         value: formatPrice(value, 1),
         percent: totalValueForPie > 0 ? (value / totalValueForPie) * 100 : 0
-      })
-    );
+      }));
 
     return { tableData, footerData, pieData };
   }, [apiResponse]);

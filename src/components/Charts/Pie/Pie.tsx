@@ -1,10 +1,11 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { colorPicker } from '@/shared/lib/utils/utils';
+import Text from '@/shared/ui/Text/Text';
 
 interface PieDataItem {
   name: string;
@@ -20,6 +21,11 @@ interface PieChartProps {
 
 const PieChart: FC<PieChartProps> = ({ data, className }) => {
   const { theme } = useTheme();
+  const [areAllSeriesHidden, setAreAllSeriesHidden] = useState(false);
+
+  useEffect(() => {
+    setAreAllSeriesHidden(false);
+  }, [data]);
 
   const dataLegends = data.map((el, index) => ({
     name: el.name,
@@ -28,10 +34,10 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
     color: el.color || colorPicker(index)
   }));
 
-  const options = {
+  const options: Highcharts.Options = {
     chart: {
-      plotBackgroundColor: null,
-      plotBorderWidth: null,
+      plotBackgroundColor: undefined,
+      plotBorderWidth: undefined,
       plotShadow: false,
       type: 'pie'
     },
@@ -86,7 +92,7 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         enableMouseTracking: true,
         borderWidth: 0,
         borderRadius: 0,
-        borderColor: null,
+        borderColor: undefined,
         states: {
           hover: {
             enabled: true,
@@ -102,8 +108,18 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         showInLegend: true,
         point: {
           events: {
-            click: function () {
-              // no-op
+            legendItemClick: function (this: Highcharts.Point): boolean {
+              const otherPointsVisible = this.series.points.some(
+                (p) => p !== this && p.visible
+              );
+
+              if (!this.visible && !otherPointsVisible) {
+                setAreAllSeriesHidden(true);
+              } else {
+                setAreAllSeriesHidden(false);
+              }
+
+              return true;
             }
           }
         }
@@ -127,7 +143,6 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       itemHoverStyle: {
         color: theme === 'light' ? '#17212B' : '#FFFFFF'
       },
-      scrollable: true,
       maxHeight: 100,
       navigation: {
         animation: true,
@@ -142,15 +157,23 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
     },
     series: [
       {
-        colorByPoint: true,
+        type: 'pie',
         borderWidth: 0,
-        data: dataLegends
+        data: dataLegends as unknown as Highcharts.PointOptionsObject[]
       }
     ]
   };
 
   return (
-    <div className={cn('highcharts-container', className)}>
+    <div className={cn('highcharts-container relative', className)}>
+      {areAllSeriesHidden && (
+        <Text
+          size='11'
+          className='text-primary-14 absolute inset-0 flex -translate-y-10 items-center justify-center'
+        >
+          All series are hidden
+        </Text>
+      )}
       <HighchartsReact
         highcharts={Highcharts}
         options={options}

@@ -1,9 +1,10 @@
-import React, { FC, useEffect, useMemo, useRef } from 'react';
+import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { cn } from '@/shared/lib/classNames/classNames';
+import Text from '@/shared/ui/Text/Text';
 
 import 'highcharts/modules/stock';
 import 'highcharts/modules/mouse-wheel-zoom';
@@ -55,9 +56,14 @@ const LineChart: FC<LineChartProps> = ({
   const { theme } = useTheme();
   const chartRef = useRef<HighchartsReact.RefObject>(null);
   const programmaticChange = useRef(false);
+  const [areAllSeriesHidden, setAreAllSeriesHidden] = useState(false);
 
   const MAX_VISIBLE_POINTS = 180;
   const MIN_VISIBLE_BARS = 7;
+
+  useEffect(() => {
+    setAreAllSeriesHidden(false);
+  }, [data]);
 
   const aggregatedSeries = useMemo(() => {
     if (barSize === 'D') {
@@ -136,29 +142,6 @@ const LineChart: FC<LineChartProps> = ({
     }
     return (MIN_VISIBLE_BARS - 1) * barDurationInMillis;
   }, [barSize]);
-
-  useEffect(() => {
-    const chart = chartRef.current?.chart;
-    if (!chart) return;
-
-    const currentSeriesCount = chart.series.length;
-    const newSeriesCount = aggregatedSeries.length;
-
-    if (currentSeriesCount !== newSeriesCount) {
-      while (chart.series.length > 0) {
-        chart.series[0].remove(false);
-      }
-      aggregatedSeries.forEach((s) => chart.addSeries(s, false));
-    } else {
-      aggregatedSeries.forEach((s, i) => {
-        if (chart.series[i]) {
-          chart.series[i].update(s, false);
-        }
-      });
-    }
-
-    chart.redraw();
-  }, [aggregatedSeries, groupBy]);
 
   useEffect(() => {
     const chart = chartRef.current?.chart;
@@ -409,7 +392,19 @@ const LineChart: FC<LineChartProps> = ({
     },
     plotOptions: {
       series: {
-        animation: false
+        animation: false,
+        events: {
+          legendItemClick: function (this: Highcharts.Series): boolean {
+            setTimeout(() => {
+              if (!this.chart.series.some((s) => s.visible)) {
+                setAreAllSeriesHidden(true);
+              } else {
+                setAreAllSeriesHidden(false);
+              }
+            }, 0);
+            return true;
+          }
+        }
       },
       area: {
         lineWidth: 2,
@@ -433,14 +428,22 @@ const LineChart: FC<LineChartProps> = ({
         stacking: 'normal'
       }
     },
-    series: [],
+    series: aggregatedSeries,
     navigator: { enabled: false },
     scrollbar: { enabled: false },
     rangeSelector: { enabled: false }
   };
 
   return (
-    <div className={cn('highcharts-container', className)}>
+    <div className={cn('highcharts-container relative', className)}>
+      {areAllSeriesHidden && (
+        <Text
+          size='11'
+          className='text-primary-14 absolute inset-0 flex -translate-y-10 transform items-center justify-center'
+        >
+          All series are hidden
+        </Text>
+      )}
       <HighchartsReact
         ref={chartRef}
         highcharts={Highcharts}

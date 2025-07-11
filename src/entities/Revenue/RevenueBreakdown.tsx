@@ -108,7 +108,14 @@ const RevenueBreakDownBlock = () => {
       { accessorKey: 'chain', header: 'Chain' }
     ];
     if (selectedMarkets.length > 0 || selectedSources.length > 0) {
-      columns.push({ accessorKey: 'market', header: 'Market' });
+      columns.push({
+        accessorKey: 'market',
+        header: 'Market',
+        cell: ({ getValue }) => {
+          const market = getValue<string>();
+          return market === 'no name' ? ' - ' : market;
+        }
+      });
     }
     if (selectedSources.length > 0) {
       columns.push({ accessorKey: 'source', header: 'Source' });

@@ -1,9 +1,12 @@
+import * as React from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
 
 import { formatLargeNumber } from '@/shared/lib/utils/utils';
 import DataTable from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
+
+import { Tooltip } from '../Tooltip/Tooltip';
 
 import { TreasuryHolding } from './MOCK_DATA';
 
@@ -31,7 +34,12 @@ const treasuryColumns: ColumnDef<TreasuryHolding>[] = [
   {
     accessorKey: 'market',
     header: 'Market',
-    enableSorting: true
+    enableSorting: true,
+    cell: ({ row }) => (
+      <Text size='13'>
+        {row.original.market === 'no market' ? ' - ' : row.original.market}
+      </Text>
+    )
   },
   {
     accessorKey: 'qty',
@@ -60,7 +68,29 @@ const treasuryColumns: ColumnDef<TreasuryHolding>[] = [
   {
     accessorKey: 'source',
     header: 'Source',
-    enableSorting: true
+    enableSorting: true,
+    size: 120,
+    cell: ({ row }) => {
+      const sourceText = row.original.source;
+      const TRUNCATE_LIMIT = 20;
+
+      const content = (
+        <div className='max-w-[120px] overflow-hidden'>
+          <Text
+            size='13'
+            className='truncate whitespace-nowrap'
+          >
+            {sourceText}
+          </Text>
+        </div>
+      );
+
+      if (sourceText.length > TRUNCATE_LIMIT) {
+        return <Tooltip content={sourceText}>{content}</Tooltip>;
+      }
+
+      return content;
+    }
   }
 ];
 

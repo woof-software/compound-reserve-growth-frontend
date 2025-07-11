@@ -1,9 +1,11 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
+import { cn } from '@/shared/lib/classNames/classNames';
 import { networkColorMap } from '@/shared/lib/utils/utils';
+import Text from '@/shared/ui/Text/Text';
 
 import 'highcharts/modules/stock';
 import 'highcharts/modules/mouse-wheel-zoom';
@@ -23,17 +25,24 @@ interface CompoundFeeRecievedProps {
   barCount?: number;
   barSize?: 'D' | 'W' | 'M';
   onVisibleBarsChange?: (count: number) => void;
+  className?: string;
 }
 
 const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   data = [],
   barCount = 90,
   barSize = 'D',
-  onVisibleBarsChange
+  onVisibleBarsChange,
+  className
 }) => {
   const { theme } = useTheme();
   const chartRef = useRef<HighchartsReact.RefObject>(null);
   const programmaticChange = useRef(false);
+  const [areAllSeriesHidden, setAreAllSeriesHidden] = useState(false);
+
+  useEffect(() => {
+    setAreAllSeriesHidden(false);
+  }, [data]);
 
   const MAX_VISIBLE_BARS = 180;
   const MIN_VISIBLE_BARS = 7;
@@ -261,6 +270,18 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
           inactive: {
             opacity: 1
           }
+        },
+        events: {
+          legendItemClick: function (this: Highcharts.Series): boolean {
+            setTimeout(() => {
+              if (!this.chart.series.some((s) => s.visible)) {
+                setAreAllSeriesHidden(true);
+              } else {
+                setAreAllSeriesHidden(false);
+              }
+            }, 0);
+            return true;
+          }
         }
       }
     },
@@ -280,6 +301,14 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
         const points = this.points;
         if (!points || points.length === 0) return '';
 
+        const formatCurrency = (num: number) => {
+          const formatted = num.toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+          });
+          return '$' + (formatted === '-0' ? '0' : formatted);
+        };
+
         const header = `<div style="font-weight: 600; font-size: 12px; margin-bottom: 8px; color: #E5E7EB;">${Highcharts.dateFormat('%B %e, %Y', this.x as number)}</div>`;
 
         let tooltip = `<div style="min-width: 200px">${header}`;
@@ -289,12 +318,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
         );
         sortedPoints.forEach((point) => {
           total += point.y as number;
-          const value =
-            '$' +
-            (point.y as number).toLocaleString(undefined, {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0
-            });
+          const value = formatCurrency(point.y as number);
           tooltip += `
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; font-size: 11px;">
               <div style="display: flex; align-items: center; gap: 4px;">
@@ -304,12 +328,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
               <span style="font-weight: 500; font-size: 12px; color: #FFFFFF; font-size: 11px;">${value}</span>
             </div>`;
         });
-        const totalFormatted =
-          '$' +
-          total.toLocaleString(undefined, {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-          });
+        const totalFormatted = formatCurrency(total);
         tooltip += `
           <div style="padding-top: 4px;">
             <div style="display: flex; justify-content: space-between; font-size: 11px;">
@@ -328,12 +347,22 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   };
 
   return (
-    <HighchartsReact
-      ref={chartRef}
-      highcharts={Highcharts}
-      options={chartOptions}
-      containerProps={{ style: { width: '100%', height: '100%' } }}
-    />
+    <div className={cn('highcharts-container relative', className)}>
+      {areAllSeriesHidden && (
+        <Text
+          size='11'
+          className='text-primary-14 absolute inset-0 flex -translate-y-10 transform items-center justify-center'
+        >
+          All series are hidden
+        </Text>
+      )}
+      <HighchartsReact
+        ref={chartRef}
+        highcharts={Highcharts}
+        options={chartOptions}
+        containerProps={{ style: { width: '100%', height: '100%' } }}
+      />
+    </div>
   );
 };
 

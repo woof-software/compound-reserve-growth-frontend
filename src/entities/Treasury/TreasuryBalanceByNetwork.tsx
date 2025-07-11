@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useEffect, useMemo } from 'react';
 
 import CryptoChart from '@/components/Charts/Bar/Bar';
@@ -137,7 +136,7 @@ const TreasuryBalanceByNetworkBlock = ({
       })
     );
 
-    return mapTableData(selectedData);
+    return mapTableData(selectedData).sort((a, b) => b.value - a.value);
   }, [data, selected]);
 
   const chartData = useMemo(() => {
@@ -151,9 +150,13 @@ const TreasuryBalanceByNetworkBlock = ({
   }, [tableData]);
 
   useEffect(() => {
-    if (filtersList[0].options.length > 0) {
-      toggle(filtersList[0].id, filtersList[0].options[0]);
+    if (filtersList[0]?.options.length > 0) {
+      const defaultChain = filtersList[0].options.find(
+        (opt) => opt === 'Mainnet'
+      );
+      const chainToSelect = defaultChain || filtersList[0].options[0];
 
+      toggle(filtersList[0].id, chainToSelect);
       apply();
     }
   }, [filtersList]);

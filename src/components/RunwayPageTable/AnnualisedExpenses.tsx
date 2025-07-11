@@ -79,7 +79,6 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
       enableSorting
       enablePagination
       paginationClassName='py-[13px] px-[5px]'
-      initialSort={{ id: 'value', desc: true }}
     />
   );
 };

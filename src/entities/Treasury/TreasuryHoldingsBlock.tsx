@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import * as React from 'react';
 
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
@@ -131,7 +130,7 @@ const TreasuryHoldingsBlock = ({
       })
     );
 
-    return mapTableData(selectedData);
+    return mapTableData(selectedData).sort((a, b) => b.value - a.value);
   }, [data, selected]);
 
   return (

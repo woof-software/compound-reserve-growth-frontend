@@ -13,35 +13,24 @@ import FilterIcon from '@/assets/svg/filter-icon.svg';
 
 export type SelectedFiltersType = {
   id: string;
-
   selectedItems: string[];
 };
 
 type FilterListItem = {
   id: string;
-
   title: string;
-
   placeholder: string;
-
   options: string[];
 };
 
 interface FilterProps {
   activeFilters: number;
-
   filtersList: FilterListItem[];
-
   selectedItems: SelectedFiltersType[];
-
   onFilterItemSelect: (filterId: string, item: string) => void;
-
   onClear: () => void;
-
   onApply: () => void;
-
   onOutsideClick: () => void;
-
   disabled?: boolean;
 }
 
