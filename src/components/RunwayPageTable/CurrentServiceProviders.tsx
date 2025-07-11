@@ -90,7 +90,6 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
       enableSorting
       enablePagination
       paginationClassName='py-[13px] px-[5px]'
-      initialSort={{ id: 'value', desc: true }}
     />
   );
 };

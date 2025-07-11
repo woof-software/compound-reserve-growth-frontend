@@ -9,14 +9,14 @@ import View from '../View/View';
 
 interface SwitchProps extends ComponentProps<typeof SwitchPrimitive.Root> {
   label?: string;
-
+  classNameTitle?: string;
   positionLabel?: 'left' | 'right';
-
   thumbClassName?: string;
 }
 
 function Switch({
   className,
+  classNameTitle,
   label,
   positionLabel,
   thumbClassName,
@@ -29,7 +29,7 @@ function Switch({
           size='14'
           weight='500'
           lineHeight='140'
-          className='text-primary-14'
+          className={cn('text-primary-14', classNameTitle)}
         >
           {label}
         </Text>

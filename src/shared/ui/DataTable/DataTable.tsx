@@ -205,7 +205,7 @@ const DataTable = <T,>({
             ))}
           </thead>
           <tbody className={cn('', bodyClassName)}>
-            {table.getRowModel().rows.length === 0 ? (
+            {table?.getRowModel().rows.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length}

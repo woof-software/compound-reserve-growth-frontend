@@ -6,48 +6,30 @@ import Link from '@/shared/ui/Link/Link';
 import Text from '@/shared/ui/Text/Text';
 import ThemeSwitcher from '@/shared/ui/ThemeSwitcher/ThemeSwitcher';
 
-const navLinks = [
-  { label: 'Treasury', to: '#' },
-  { label: 'Runway', to: '#' },
-  { label: 'Revenue', to: '#' },
-  { label: 'Support', to: '#' },
-  { label: 'About', to: '#' },
-  { label: 'Terms of Service', to: '#' },
-  { label: 'Privacy Policy', to: '#' }
-];
-
-const topLinks = [
-  { label: 'Governance', to: '#' },
-  { label: 'Terms', to: '#' }
-];
-
 const Footer: FC = () => {
   return (
     <footer className='border-primary-17 border-t'>
       <div className='mx-auto max-w-[1084px]'>
         <div className='flex justify-between py-6'>
           <div className='text-primary-14 flex items-center gap-6 text-[13px]'>
-            {topLinks.map((link) => (
-              <Link
-                key={link.label}
-                to={link.to}
-                className='group hover:text-primary-11 transition-colors'
+            <Link
+              to='https://www.tally.xyz/gov/compound'
+              className='group hover:text-primary-11 transition-colors'
+            >
+              <Text
+                size='13'
+                weight='500'
+                className='text-primary-14 group-hover:text-primary-11 transition-colors'
               >
-                <Text
-                  size='13'
-                  weight='500'
-                  className='text-primary-14 group-hover:text-primary-11 transition-colors'
-                >
-                  {link.label}
-                </Text>
-              </Link>
-            ))}
+                Governance
+              </Text>
+            </Link>
           </div>
           <ThemeSwitcher />
         </div>
         <div className='py-5'>
           <div className='flex items-center justify-between'>
-            <div className='flex items-center gap-2'>
+            <div className='flex items-center gap-10'>
               <Link to={commonRoutes.TREASURY}>
                 <Icon
                   name='logo'
@@ -55,12 +37,9 @@ const Footer: FC = () => {
                   color='primary-11'
                 />
               </Link>
-            </div>
-            <nav className='text-primary-14 flex items-center gap-5 text-[11px]'>
-              {navLinks.map((link) => (
+              <nav className='text-primary-14 flex items-center gap-5 text-[11px]'>
                 <Link
-                  key={link.label}
-                  to={link.to}
+                  to='https://t.me/dmitriywoof'
                   className='group hover:text-primary-11 transition-colors'
                 >
                   <Text
@@ -68,11 +47,11 @@ const Footer: FC = () => {
                     weight='500'
                     className='text-primary-14 group-hover:text-primary-11 transition-colors'
                   >
-                    {link.label}
+                    Support
                   </Text>
                 </Link>
-              ))}
-            </nav>
+              </nav>
+            </div>
             <Text
               size='11'
               weight='500'

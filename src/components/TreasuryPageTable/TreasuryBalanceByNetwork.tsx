@@ -3,6 +3,8 @@ import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
+import { Tooltip } from '../Tooltip/Tooltip';
+
 const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
   {
     accessorKey: 'symbol',
@@ -35,24 +37,47 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
   {
     accessorKey: 'market',
     header: 'Market',
-    enableSorting: true
+    enableSorting: true,
+    cell: ({ row }) => (
+      <Text size='13'>
+        {row.original.market === 'no market' ? ' - ' : row.original.market}
+      </Text>
+    )
   },
   {
     accessorKey: 'source',
     header: 'Source',
-    enableSorting: true
+    enableSorting: true,
+    size: 120,
+    cell: ({ row }) => {
+      const sourceText = row.original.source;
+      const TRUNCATE_LIMIT = 20;
+
+      const content = (
+        <div className='max-w-[120px] overflow-hidden'>
+          <Text
+            size='13'
+            className='truncate whitespace-nowrap'
+          >
+            {sourceText}
+          </Text>
+        </div>
+      );
+
+      if (sourceText.length > TRUNCATE_LIMIT) {
+        return <Tooltip content={sourceText}>{content}</Tooltip>;
+      }
+
+      return content;
+    }
   }
 ];
 
 export type TreasuryBalanceByNetworkType = {
   symbol: string;
-
   qty: number;
-
   value: number;
-
   source: string;
-
   market: string;
 };
 

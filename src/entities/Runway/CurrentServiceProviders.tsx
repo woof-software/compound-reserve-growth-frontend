@@ -48,7 +48,8 @@ const CurrentServiceProvidersBlock = () => {
       return initialResult;
     }
 
-    // Table data: each active contract is a separate row. No grouping.
+    providerData.sort((a, b) => b.value - a.value);
+
     const tableData = providerData.map((item) => ({
       provider: item.name,
       iconKey: item.iconKey,
@@ -58,7 +59,6 @@ const CurrentServiceProvidersBlock = () => {
       value: item.value
     }));
 
-    // Footer data: sum of all individual active contracts shown in the table.
     const footerData = providerData.reduce(
       (acc, item) => {
         acc.amount += item.amount;
@@ -68,7 +68,6 @@ const CurrentServiceProvidersBlock = () => {
       { amount: 0, value: 0 }
     );
 
-    // Pie chart data: group and sum by provider name.
     const expensesByProviderForPie: Record<string, number> = {};
     providerData.forEach((item) => {
       expensesByProviderForPie[item.name] =
@@ -76,13 +75,13 @@ const CurrentServiceProvidersBlock = () => {
     });
 
     const totalValueForPie = footerData.value;
-    const pieData = Object.entries(expensesByProviderForPie).map(
-      ([name, value]) => ({
+    const pieData = Object.entries(expensesByProviderForPie)
+      .sort(([, aValue], [, bValue]) => bValue - aValue)
+      .map(([name, value]) => ({
         name,
         value: formatPrice(value, 1),
         percent: totalValueForPie > 0 ? (value / totalValueForPie) * 100 : 0
-      })
-    );
+      }));
 
     return { tableData, footerData, pieData };
   }, [runwayResponse]);

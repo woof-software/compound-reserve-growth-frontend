@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
@@ -12,18 +12,17 @@ import {
 import { TokenData } from '@/shared/types/Treasury/types';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
+import Switch from '@/shared/ui/Switch/Switch';
 
 const options = ['Asset Type', 'Chain', 'Market'];
 
 type CompositionData = {
   uniqData: TokenData[];
-
   uniqDataByCategory: Record<string, TokenData[]>;
 };
 
 interface TreasuryCompositionBlockProps {
   isLoading?: boolean;
-
   data: CompositionData;
 }
 
@@ -31,33 +30,38 @@ const mapChartData = (
   data: Record<string, TokenData[]>,
   uniqData: TokenData[]
 ) => {
-  return Object.entries(data).map(([key, value]) => {
-    const totalValue = value.reduce((acc, item) => acc + item.value, 0);
+  const totalSum = uniqData.reduce((acc, item) => acc + item.value, 0);
+  if (totalSum === 0) {
+    return [];
+  }
 
-    const percent = (
-      (totalValue / uniqData.reduce((acc, item) => acc + item.value, 0)) *
-      100
-    ).toFixed(2);
+  return Object.entries(data)
+    .map(([key, value]) => {
+      const totalValue = value.reduce((acc, item) => acc + item.value, 0);
+      const percent = (totalValue / totalSum) * 100;
 
-    return {
-      name: key,
-      percent: parseFloat(percent),
-      value: formatPrice(totalValue, 1)
-    };
-  });
+      return {
+        name: key,
+        percent: parseFloat(percent.toFixed(2)),
+        value: formatPrice(totalValue, 1)
+      };
+    })
+    .sort((a, b) => b.percent - a.percent);
 };
 
 const mapTableData = (data: Record<string, TokenData[]>) => {
-  return Object.entries(data).map(([key, value], index) => {
-    const balance = value.reduce((acc, item) => acc + item.value, 0);
+  return Object.entries(data)
+    .map(([key, value], index) => {
+      const balance = value.reduce((acc, item) => acc + item.value, 0);
 
-    return {
-      id: index + 1,
-      icon: key.replace(/ /g, '-').toLowerCase(),
-      name: capitalizeFirstLetter(key) || 'Unclassified',
-      balance
-    };
-  });
+      return {
+        id: index + 1,
+        icon: key.replace(/ /g, '-').toLowerCase(),
+        name: capitalizeFirstLetter(key) || 'Unclassified',
+        balance
+      };
+    })
+    .sort((a, b) => b.balance - a.balance);
 };
 
 const TreasuryCompositionBlock = memo(
@@ -70,12 +74,33 @@ const TreasuryCompositionBlock = memo(
       select: selectSingle
     } = useDropdown('single');
 
-    const { uniqData, uniqDataByCategory } = data;
+    const [includeComp, setIncludeComp] = useState(true);
+
+    const filteredData = useMemo(() => {
+      if (includeComp || !data.uniqDataByCategory.COMP) {
+        return data;
+      }
+
+      const compTokens = new Set(data.uniqDataByCategory.COMP);
+
+      const filteredUniqData = data.uniqData.filter(
+        (token) => !compTokens.has(token)
+      );
+
+      const filteredUniqDataByCategory = { ...data.uniqDataByCategory };
+      delete filteredUniqDataByCategory.COMP;
+
+      return {
+        uniqData: filteredUniqData,
+        uniqDataByCategory: filteredUniqDataByCategory
+      };
+    }, [data, includeComp]);
+
+    const { uniqData, uniqDataByCategory } = filteredData;
 
     const chartData = useMemo(() => {
       if (selectedSingle?.[0] === 'Chain') {
         const chains = groupByKey(uniqData, (item) => item.source.network);
-
         return mapChartData(chains, uniqData);
       }
 
@@ -84,7 +109,6 @@ const TreasuryCompositionBlock = memo(
           uniqData,
           (item) => item.source.market || 'no market'
         );
-
         return mapChartData(markets, uniqData);
       }
 
@@ -94,7 +118,6 @@ const TreasuryCompositionBlock = memo(
     const tableData = useMemo<TreasuryCompositionType[]>(() => {
       if (selectedSingle?.[0] === 'Chain') {
         const chains = groupByKey(uniqData, (item) => item.source.network);
-
         return mapTableData(chains);
       }
 
@@ -103,40 +126,16 @@ const TreasuryCompositionBlock = memo(
           uniqData,
           (item) => item.source.market || 'no market'
         );
-
         return mapTableData(markets);
       }
 
       return mapTableData(uniqDataByCategory);
     }, [selectedSingle, uniqData, uniqDataByCategory]);
 
-    const totalBalance = useMemo(() => {
-      if (selectedSingle?.[0] === 'Chain') {
-        const chains = groupByKey(uniqData, (item) => item.source.network);
-
-        return mapTableData(chains).reduce(
-          (acc, item) => acc + item.balance,
-          0
-        );
-      }
-
-      if (selectedSingle?.[0] === 'Market') {
-        const markets = groupByKey(
-          uniqData,
-          (item) => item.source.market || 'no market'
-        );
-
-        return mapTableData(markets).reduce(
-          (acc, item) => acc + item.balance,
-          0
-        );
-      }
-
-      return mapTableData(uniqDataByCategory).reduce(
-        (acc, item) => acc + item.balance,
-        0
-      );
-    }, [selectedSingle, uniqData, uniqDataByCategory]);
+    const totalBalance = useMemo(
+      () => tableData.reduce((acc, item) => acc + item.balance, 0),
+      [tableData]
+    );
 
     return (
       <Card
@@ -148,11 +147,18 @@ const TreasuryCompositionBlock = memo(
           content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
         }}
       >
-        <div className='flex justify-end py-3'>
+        <div className='flex items-center justify-end gap-4 py-3'>
+          <Switch
+            label='Include COMP Holdings'
+            positionLabel='left'
+            checked={includeComp}
+            onCheckedChange={setIncludeComp}
+            classNameTitle='!text-[12px]'
+          />
           <SingleDropdown
             options={options}
             isOpen={openSingle}
-            selectedValue={selectedSingle?.[0] || ''}
+            selectedValue={selectedSingle?.[0] || 'Asset Type'}
             onToggle={toggleSingle}
             onClose={closeSingle}
             onSelect={selectSingle}

@@ -76,6 +76,7 @@ const Header: FC = () => {
                   <Icon
                     name={link.icon}
                     className='h-3 w-3'
+                    color={isActive(link.to) ? 'color-white' : 'color-gray-11'}
                   />
                 }
               >
