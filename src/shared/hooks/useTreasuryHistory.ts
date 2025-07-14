@@ -40,22 +40,23 @@ const sourcesAndAssetsApiResponseSchema = z.object({
   assets: z.array(assetDetailsSchema)
 });
 
-const finalSourceSchema =
-  sourcesAndAssetsApiResponseSchema.shape.sources.element.extend({
-    asset: assetDetailsSchema
-  });
-
-export const TreasuryHistoryItemSchema = z.object({
-  id: z.number(),
-  sId: z.number(),
-  quantity: z.string(),
-  price: z.number(),
-  value: z.number(),
-  date: z.number(),
-  source: finalSourceSchema
-});
-
-export type TreasuryHistoryItem = z.infer<typeof TreasuryHistoryItemSchema>;
+export type TreasuryHistoryItem = {
+  id: number;
+  sId: number;
+  quantity: string;
+  price: number;
+  value: number;
+  date: number;
+  source: {
+    id: number;
+    address: string;
+    network: string;
+    type: string;
+    market: string | null;
+    assetId: number;
+    asset: z.infer<typeof assetDetailsSchema>;
+  };
+};
 
 export type TreasuryHistoryParams = {
   page?: number;
@@ -80,15 +81,11 @@ export const useTreasuryHistory = ({
 }: UseTreasuryHistoryOptions = {}) => {
   return useQuery({
     queryKey: ['treasuryHistory', params],
-    queryFn: async () => {
+    queryFn: async (): Promise<TreasuryHistoryItem[]> => {
       const [historyResponse, sourcesAndAssetsResponse] = await Promise.all([
         $api.get(TREASURY_HISTORY_URL, historyApiResponseSchema, params),
         $api.get(SOURCES_URL, sourcesAndAssetsApiResponseSchema)
       ]);
-
-      if (!historyResponse?.data || !sourcesAndAssetsResponse?.data) {
-        throw new Error('Failed to fetch treasury history or sources');
-      }
 
       const assetsMap = new Map(
         sourcesAndAssetsResponse.data.assets.map((asset) => [asset.id, asset])
@@ -108,39 +105,23 @@ export const useTreasuryHistory = ({
         })
       );
 
-      const mergedData = historyResponse.data.data.reduce<any[]>(
-        (acc, historyItem) => {
-          const sourceWithAsset = sourcesMap.get(historyItem.sId);
+      const finalData: TreasuryHistoryItem[] = [];
+      for (const historyItem of historyResponse.data.data) {
+        const sourceWithAsset = sourcesMap.get(historyItem.sId);
+        if (sourceWithAsset) {
+          finalData.push({
+            id: historyItem.id,
+            sId: historyItem.sId,
+            quantity: historyItem.q,
+            price: historyItem.p,
+            value: historyItem.v,
+            date: historyItem.d,
+            source: sourceWithAsset
+          });
+        }
+      }
 
-          if (sourceWithAsset) {
-            acc.push({
-              ...historyItem,
-              source: sourceWithAsset
-            });
-          } else {
-            console.warn(
-              `Source with id ${historyItem.sId} not found for history item ${historyItem.id}`
-            );
-          }
-
-          return acc;
-        },
-        []
-      );
-
-      const finalTransformedData = mergedData.map((item) => {
-        const { q, p, v, d, ...restOfItem } = item;
-
-        return {
-          ...restOfItem,
-          quantity: q,
-          price: p,
-          value: v,
-          date: d
-        };
-      });
-
-      return TreasuryHistoryItemSchema.array().parse(finalTransformedData);
+      return finalData;
     },
     ...options
   });

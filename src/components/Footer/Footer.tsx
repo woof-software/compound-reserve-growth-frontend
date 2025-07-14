@@ -24,6 +24,18 @@ const Footer: FC = () => {
                 Governance
               </Text>
             </Link>
+            <Link
+              to='https://t.me/dmitriywoof'
+              className='group hover:text-primary-11 transition-colors'
+            >
+              <Text
+                size='11'
+                weight='500'
+                className='text-primary-14 group-hover:text-primary-11 transition-colors'
+              >
+                Support
+              </Text>
+            </Link>
           </div>
           <ThemeSwitcher />
         </div>
@@ -37,20 +49,6 @@ const Footer: FC = () => {
                   color='primary-11'
                 />
               </Link>
-              <nav className='text-primary-14 flex items-center gap-5 text-[11px]'>
-                <Link
-                  to='https://t.me/dmitriywoof'
-                  className='group hover:text-primary-11 transition-colors'
-                >
-                  <Text
-                    size='11'
-                    weight='500'
-                    className='text-primary-14 group-hover:text-primary-11 transition-colors'
-                  >
-                    Support
-                  </Text>
-                </Link>
-              </nav>
             </div>
             <Text
               size='11'

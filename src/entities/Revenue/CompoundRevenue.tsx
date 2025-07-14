@@ -1,19 +1,21 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import CompoundRevenue from '@/components/Charts/CompoundRevenue/CompoundRevenue';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
+import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
-import {
-  type CompoundCumulativeRevenueItem,
-  useCompCumulativeRevenue
-} from '@/shared/hooks/useCompCumulativeRevenue';
+import { type RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { extractFilterOptions } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
-const CompoundRevenueBlock = () => {
+const CompoundRevenueBlock = ({
+  revenueData: data,
+  isLoading,
+  isError
+}: RevenuePageProps) => {
   const [selectedChains, setSelectedChains] = useState<OptionType[]>([]);
   const [selectedMarkets, setSelectedMarkets] = useState<OptionType[]>([]);
   const [selectedSources, setSelectedSources] = useState<OptionType[]>([]);
@@ -31,12 +33,12 @@ const CompoundRevenueBlock = () => {
     initialBarSize: 'D'
   });
 
-  const { data: revenueData, isLoading, isError } = useCompCumulativeRevenue();
-
-  const rawData: CompoundCumulativeRevenueItem[] = useMemo(
-    () => revenueData || [],
-    [revenueData]
-  );
+  const handleResetFilters = useCallback(() => {
+    setSelectedChains([]);
+    setSelectedMarkets([]);
+    setSelectedSources([]);
+    setSelectedSymbols([]);
+  }, []);
 
   const filterOptionsConfig = useMemo(
     () => ({
@@ -49,8 +51,8 @@ const CompoundRevenueBlock = () => {
   );
 
   const { chainOptions, marketOptions, sourceOptions, symbolOptions } = useMemo(
-    () => extractFilterOptions(rawData, filterOptionsConfig),
-    [rawData, filterOptionsConfig]
+    () => extractFilterOptions(data, filterOptionsConfig),
+    [data, filterOptionsConfig]
   );
 
   const processedChartData = useMemo(() => {
@@ -59,13 +61,12 @@ const CompoundRevenueBlock = () => {
     const selectedSourceIds = selectedSources.map((opt) => opt.id);
     const selectedSymbolIds = selectedSymbols.map((opt) => opt.id);
 
-    return rawData
+    return data
       .filter((item) => {
         const chainMatch =
           selectedChainIds.length === 0 ||
           selectedChainIds.includes(item.source?.network);
 
-        // ОСНОВНА ЗМІНА ТУТ
         const marketMatch =
           selectedMarketIds.length === 0 ||
           (() => {
@@ -90,13 +91,7 @@ const CompoundRevenueBlock = () => {
         date: new Date(item.date * 1000).toISOString().split('T')[0],
         value: item.value
       }));
-  }, [
-    rawData,
-    selectedChains,
-    selectedMarkets,
-    selectedSources,
-    selectedSymbols
-  ]);
+  }, [data, selectedChains, selectedMarkets, selectedSources, selectedSymbols]);
 
   const hasData = processedChartData.length > 0;
   const noDataMessage =
@@ -162,29 +157,22 @@ const CompoundRevenueBlock = () => {
           disabled={isLoading}
         />
       </div>
-      <div className='h-[400px]'>
-        {hasData ? (
+      <View.Condition if={!isLoading && !isError && hasData}>
+        <div className='h-[400px]'>
           <CompoundRevenue
             data={processedChartData}
             barSize={barSize}
             barCountToSet={barCount}
             onVisibleBarsChange={handleVisibleBarsChange}
           />
-        ) : (
-          <>
-            {!isLoading && !isError && (
-              <div className='flex h-full items-center justify-center'>
-                <Text
-                  size='12'
-                  className='text-primary-14'
-                >
-                  {noDataMessage}
-                </Text>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+        </div>
+      </View.Condition>
+      <View.Condition if={!isLoading && !isError && !hasData}>
+        <NoDataPlaceholder
+          onButtonClick={handleResetFilters}
+          text={noDataMessage}
+        />
+      </View.Condition>
     </Card>
   );
 };

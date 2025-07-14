@@ -3,6 +3,7 @@ import { useEffect, useMemo } from 'react';
 import CryptoChart from '@/components/Charts/Bar/Bar';
 import Filter from '@/components/Filter/Filter';
 import { useFilter } from '@/components/Filter/useFilter';
+import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import TreasuryBalanceByNetwork, {
   TreasuryBalanceByNetworkType
 } from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
@@ -13,14 +14,11 @@ import {
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Card from '@/shared/ui/Card/Card';
-import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
 interface TreasuryBalanceByNetworkBlockProps {
   isLoading?: boolean;
-
   isError?: boolean;
-
   data: TokenData[];
 }
 
@@ -44,9 +42,7 @@ const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
 
 const TreasuryBalanceByNetworkBlock = ({
   isLoading,
-
   isError,
-
   data
 }: TreasuryBalanceByNetworkBlockProps) => {
   const filterOptionsConfig = useMemo(
@@ -79,8 +75,8 @@ const TreasuryBalanceByNetworkBlock = ({
       },
       {
         id: 'deployment',
-        title: 'Deployment',
-        placeholder: 'Add Deployment',
+        title: 'Market',
+        placeholder: 'Add Market',
         options: deploymentOptions?.map((o) => o.id) || []
       }
     ],
@@ -142,24 +138,22 @@ const TreasuryBalanceByNetworkBlock = ({
   const chartData = useMemo(() => {
     return tableData.map((item, index) => ({
       name: item.symbol,
-
       value: item.value,
-
       color: colorPicker(index)
     }));
   }, [tableData]);
 
   useEffect(() => {
-    if (filtersList[0]?.options.length > 0) {
+    if (selected.length === 0 && filtersList[0]?.options.length > 0) {
       const defaultChain = filtersList[0].options.find(
         (opt) => opt === 'Mainnet'
       );
-      const chainToSelect = defaultChain || filtersList[0].options[0];
-
-      toggle(filtersList[0].id, chainToSelect);
-      apply();
+      if (defaultChain) {
+        toggle(filtersList[0].id, defaultChain);
+        apply();
+      }
     }
-  }, [filtersList]);
+  }, [filtersList, selected, toggle, apply]);
 
   return (
     <Card
@@ -183,14 +177,7 @@ const TreasuryBalanceByNetworkBlock = ({
         </div>
       </View.Condition>
       <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
-        <div className='flex h-[400px] items-center justify-center'>
-          <Text
-            size='12'
-            className='text-primary-14'
-          >
-            No data for selected filters
-          </Text>
-        </div>
+        <NoDataPlaceholder onButtonClick={clear} />
       </View.Condition>
     </Card>
   );

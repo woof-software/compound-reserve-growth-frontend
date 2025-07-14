@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
@@ -21,18 +21,50 @@ interface PieChartProps {
 
 const PieChart: FC<PieChartProps> = ({ data, className }) => {
   const { theme } = useTheme();
-  const [areAllSeriesHidden, setAreAllSeriesHidden] = useState(false);
+  const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    setAreAllSeriesHidden(false);
-  }, [data]);
+  const chartData = useMemo(() => {
+    const visibleItems = data.filter((item) => !hiddenItems.has(item.name));
+    const totalVisiblePercent = visibleItems.reduce(
+      (sum, item) => sum + item.percent,
+      0
+    );
 
-  const dataLegends = data.map((el, index) => ({
-    name: el.name,
-    y: el.percent,
-    value: el.value,
-    color: el.color || colorPicker(index)
-  }));
+    return data.map((el, index) => {
+      const isVisible = !hiddenItems.has(el.name);
+      const newPercent =
+        isVisible && totalVisiblePercent > 0
+          ? (el.percent / totalVisiblePercent) * 100
+          : 0;
+
+      return {
+        name: el.name,
+        y: newPercent,
+        value: el.value,
+        color: el.color || colorPicker(index),
+        visible: isVisible
+      };
+    });
+  }, [data, hiddenItems]);
+
+  const areAllSeriesHidden = useMemo(() => {
+    if (!data || data.length === 0) {
+      return false;
+    }
+    return hiddenItems.size === data.length;
+  }, [data, hiddenItems]);
+
+  const handleLegendItemClick = (itemName: string) => {
+    setHiddenItems((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemName)) {
+        newSet.delete(itemName);
+      } else {
+        newSet.add(itemName);
+      }
+      return newSet;
+    });
+  };
 
   const options: Highcharts.Options = {
     chart: {
@@ -109,17 +141,8 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         point: {
           events: {
             legendItemClick: function (this: Highcharts.Point): boolean {
-              const otherPointsVisible = this.series.points.some(
-                (p) => p !== this && p.visible
-              );
-
-              if (!this.visible && !otherPointsVisible) {
-                setAreAllSeriesHidden(true);
-              } else {
-                setAreAllSeriesHidden(false);
-              }
-
-              return true;
+              handleLegendItemClick(this.name);
+              return false;
             }
           }
         }
@@ -159,7 +182,7 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       {
         type: 'pie',
         borderWidth: 0,
-        data: dataLegends as unknown as Highcharts.PointOptionsObject[]
+        data: chartData as unknown as Highcharts.PointOptionsObject[]
       }
     ]
   };

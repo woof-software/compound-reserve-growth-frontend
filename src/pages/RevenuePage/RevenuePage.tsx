@@ -1,18 +1,23 @@
-import { lazy } from 'react';
+import { useMemo } from 'react';
 
 import CompoundCumulativeRevenue from '@/entities/Revenue/CompoundCumulativeRevenue';
 import CompoundFeeRevenueByChain from '@/entities/Revenue/CompoundFeeRevenueByChain';
+import CompoundFeeRevenueRecieved from '@/entities/Revenue/CompoundFeeRevenueRecieved';
 import CompoundRevenueBlock from '@/entities/Revenue/CompoundRevenue';
 import RevenueBreakDownBlock from '@/entities/Revenue/RevenueBreakdown';
 import RevenueMetrics from '@/entities/Revenue/RevenueMetrics';
 import RevenueOverview from '@/entities/Revenue/RevenueOverview';
+import { RevenueItem, useRevenue } from '@/shared/hooks/useRevenue';
 import Text from '@/shared/ui/Text/Text';
 
-const CompoundFeeRevenueRecieved = lazy(
-  () => import('@/entities/Revenue/CompoundFeeRevenueRecieved')
-);
-
 const RevenuePage = () => {
+  const { data: revenueData, isLoading, isError } = useRevenue();
+
+  const pageData: RevenueItem[] = useMemo(
+    () => revenueData || [],
+    [revenueData]
+  );
+
   return (
     <div className='flex flex-col gap-[70px]'>
       <div className='flex flex-col gap-[15px]'>
@@ -32,13 +37,43 @@ const RevenuePage = () => {
         </Text>
       </div>
       <div className='flex flex-col gap-5'>
-        <RevenueMetrics />
-        <RevenueOverview />
-        <CompoundCumulativeRevenue />
-        <CompoundFeeRevenueRecieved />
-        <CompoundFeeRevenueByChain />
-        <CompoundRevenueBlock />
-        <RevenueBreakDownBlock />
+        <RevenueMetrics
+          revenueData={pageData}
+          isLoading={isLoading}
+          isError={isError}
+        />
+        <RevenueOverview
+          revenueData={pageData}
+          isLoading={isLoading}
+          isError={isError}
+        />
+        <CompoundCumulativeRevenue
+          revenueData={pageData}
+          isLoading={isLoading}
+          isError={isError}
+        />
+        {/* TODO Refactor */}
+        <CompoundFeeRevenueRecieved
+          revenueData={pageData}
+          isLoading={isLoading}
+          isError={isError}
+        />
+        <CompoundFeeRevenueByChain
+          revenueData={pageData}
+          isLoading={isLoading}
+          isError={isError}
+        />
+        {/* TODO Refactor */}
+        <CompoundRevenueBlock
+          revenueData={pageData}
+          isLoading={isLoading}
+          isError={isError}
+        />
+        <RevenueBreakDownBlock
+          revenueData={pageData}
+          isLoading={isLoading}
+          isError={isError}
+        />
       </div>
     </div>
   );
