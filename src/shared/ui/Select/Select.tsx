@@ -68,6 +68,7 @@ const Select: FC<SelectProps> = memo(
 
     const onSelectItemClick = (filterId: string, item: string) => {
       onItemSelect(filterId, item);
+      onCloseModal();
     };
 
     useClickOutside(containerRef as RefObject<HTMLDivElement>, onCloseModal);

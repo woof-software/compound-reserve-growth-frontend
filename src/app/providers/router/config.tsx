@@ -13,19 +13,25 @@ export enum commonRoutes {
   REVENUE = '/revenue',
   RUNWAY = '/runway',
   TREASURY = '/treasury',
+  INCENTIVES = '/incentives',
+  OEV = '/oev',
   NOT_FOUND = '*'
 }
 
 export const VALID_NAVIGATION_ROUTES = [
   commonRoutes.TREASURY,
   commonRoutes.RUNWAY,
-  commonRoutes.REVENUE
+  commonRoutes.REVENUE,
+  commonRoutes.INCENTIVES,
+  commonRoutes.OEV
 ] as const;
 
 export const enum routeTitles {
   TREASURY = 'Treasury',
   RUNWAY = 'Runway',
-  REVENUE = 'Revenue'
+  REVENUE = 'Revenue',
+  INCENTIVES = 'Incentives',
+  OEV = 'OEV'
 }
 
 export const routesConfig: Record<commonRoutes, RouteConfig> = {
@@ -40,6 +46,14 @@ export const routesConfig: Record<commonRoutes, RouteConfig> = {
   [commonRoutes.RUNWAY]: {
     path: commonRoutes.RUNWAY,
     element: <RunwayPage />
+  },
+  [commonRoutes.INCENTIVES]: {
+    path: commonRoutes.INCENTIVES,
+    element: <div>Incentives</div>
+  },
+  [commonRoutes.OEV]: {
+    path: commonRoutes.OEV,
+    element: <div>OEV</div>
   },
   [commonRoutes.NOT_FOUND]: {
     path: commonRoutes.NOT_FOUND,

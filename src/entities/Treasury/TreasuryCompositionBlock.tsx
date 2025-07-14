@@ -43,7 +43,8 @@ const mapChartData = (
       return {
         name: key,
         percent: parseFloat(percent.toFixed(2)),
-        value: formatPrice(totalValue, 1)
+        value: formatPrice(totalValue, 1),
+        rawValue: totalValue
       };
     })
     .sort((a, b) => b.percent - a.percent);

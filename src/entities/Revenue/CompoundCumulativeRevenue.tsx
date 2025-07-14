@@ -1,17 +1,21 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import LineChart from '@/components/Charts/Line/Line';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
+import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
-import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenue';
+import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import Text from '@/shared/ui/Text/Text';
 
-const CompoundCumulativeRevenue = () => {
+const CompoundCumulativeRevenue = ({
+  revenueData,
+  isLoading,
+  isError
+}: RevenuePageProps) => {
   const [selectedChains, setSelectedChains] = useState<OptionType[]>([]);
   const [selectedMarkets, setSelectedMarkets] = useState<OptionType[]>([]);
 
@@ -27,12 +31,14 @@ const CompoundCumulativeRevenue = () => {
     initialBarSize: 'D'
   });
 
-  const { data: apiResponse, isLoading, isError } = useCompCumulativeRevenue();
+  const handleResetFilters = useCallback(() => {
+    setSelectedChains([]);
+    setSelectedMarkets([]);
+  }, []);
 
   const rawData: ChartDataItem[] = useMemo(() => {
-    const data = apiResponse || [];
-    return [...data].sort((a, b) => a.date - b.date);
-  }, [apiResponse]);
+    return [...revenueData].sort((a, b) => a.date - b.date);
+  }, [revenueData]);
 
   const filterOptionsConfig = useMemo(
     () => ({
@@ -123,6 +129,7 @@ const CompoundCumulativeRevenue = () => {
       };
     });
   }, [chartSeries]);
+
   const hasData = useMemo(() => {
     return (
       cumulativeChartSeries.length > 0 &&
@@ -184,14 +191,10 @@ const CompoundCumulativeRevenue = () => {
         />
       </div>
       {!isLoading && !isError && !hasData ? (
-        <div className='flex h-[400px] items-center justify-center'>
-          <Text
-            size='12'
-            className='text-primary-14'
-          >
-            {noDataMessage}
-          </Text>
-        </div>
+        <NoDataPlaceholder
+          onButtonClick={handleResetFilters}
+          text={noDataMessage}
+        />
       ) : (
         <LineChart
           className='max-h-[400px]'

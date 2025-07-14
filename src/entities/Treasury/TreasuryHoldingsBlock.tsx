@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
 import { useFilter } from '@/components/Filter/useFilter';
+import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { TreasuryHolding } from '@/components/TreasuryPageTable/MOCK_DATA';
 import TreasuryHoldings from '@/components/TreasuryPageTable/TreasuryHoldings';
 import {
@@ -11,7 +12,6 @@ import {
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Card from '@/shared/ui/Card/Card';
-import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
 interface TreasuryHoldingsBlockProps {
@@ -81,8 +81,8 @@ const TreasuryHoldingsBlock = ({
       },
       {
         id: 'deployment',
-        title: 'Deployment',
-        placeholder: 'Add Deployment',
+        title: 'Market',
+        placeholder: 'Add Market',
         options: deploymentOptions?.map((o) => o.id) || []
       }
     ],
@@ -156,14 +156,7 @@ const TreasuryHoldingsBlock = ({
         <TreasuryHoldings tableData={tableData} />
       </View.Condition>
       <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
-        <div className='flex h-[400px] items-center justify-center'>
-          <Text
-            size='12'
-            className='text-primary-14'
-          >
-            No data for selected filters
-          </Text>
-        </div>
+        <NoDataPlaceholder onButtonClick={clear} />
       </View.Condition>
     </Card>
   );

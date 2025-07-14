@@ -38,6 +38,9 @@ const ValueMetricField = ({
     negative: 'text-red-11 bg-red-10'
   };
 
+  const formattedBadge =
+    badge && badge.startsWith('$-') ? `-${badge.replace('-', '')}` : badge;
+
   return (
     <div className={cn('flex flex-col gap-3.5', className?.container)}>
       <View.Condition if={Boolean(icon || iconText)}>
@@ -76,7 +79,7 @@ const ValueMetricField = ({
                   className?.badge
                 )}
               >
-                {badge}
+                {formattedBadge}
               </div>
             </Tooltip>
           </View.Condition>

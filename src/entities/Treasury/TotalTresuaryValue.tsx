@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import LineChart from '@/components/Charts/Line/Line';
 import Filter from '@/components/Filter/Filter';
 import { useFilter } from '@/components/Filter/useFilter';
+import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
@@ -11,7 +12,6 @@ import { TokenData } from '@/shared/types/Treasury/types';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import Text from '@/shared/ui/Text/Text';
 
 const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
 const groupByMapping: Record<string, string> = {
@@ -40,6 +40,11 @@ const TotalTresuaryValue = ({
     close: closeSingle,
     select: selectSingle
   } = useDropdown('single');
+
+  const handleClearAll = useCallback(() => {
+    clear();
+    selectSingle('None');
+  }, [clear, selectSingle]);
 
   const {
     activeTab,
@@ -90,8 +95,8 @@ const TotalTresuaryValue = ({
       },
       {
         id: 'deployment',
-        title: 'Deployment',
-        placeholder: 'Add Deployment',
+        title: 'Market',
+        placeholder: 'Add Market',
         options: deploymentOptions?.map((o) => o.id) || []
       }
     ],
@@ -186,10 +191,10 @@ const TotalTresuaryValue = ({
       filtersList,
       onFilterItemSelect: toggle,
       onApply: apply,
-      onClear: clear,
+      onClear: handleClearAll,
       onOutsideClick: reset
     }),
-    [activeCount, local, filtersList, toggle, apply, clear, reset]
+    [activeCount, local, filtersList, toggle, apply, handleClearAll, reset]
   );
 
   return (
@@ -231,14 +236,7 @@ const TotalTresuaryValue = ({
         />
       </div>
       {!isLoading && !isError && !hasData ? (
-        <div className='flex h-[400px] items-center justify-center'>
-          <Text
-            size='12'
-            className='text-primary-14'
-          >
-            No data for selected filters
-          </Text>
-        </div>
+        <NoDataPlaceholder onButtonClick={handleClearAll} />
       ) : (
         <LineChart
           data={correctedChartSeries}

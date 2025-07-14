@@ -1,30 +1,28 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import RevenueOverviewUSD, {
   TableRowData
 } from '@/components/RevenuePageTable/RevenueOverviewUSD';
+import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
-  type CompoundCumulativeRevenueItem,
-  useCompCumulativeRevenue
-} from '@/shared/hooks/useCompCumulativeRevenue';
-import { formatPrice, networkColorMap } from '@/shared/lib/utils/utils';
+  capitalizeFirstLetter,
+  formatPrice,
+  networkColorMap
+} from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 
-const formatNumber = (num: number): string => {
+const formatUSD = (num: number): string => {
   return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(num);
-};
-
-const capitalize = (s: string): string => {
-  if (!s) return '';
-  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 };
 
 const getStartDateForPeriod = (
@@ -88,7 +86,7 @@ const createTableColumns = (
         dateType === 'Rolling'
           ? `Rolling ${period.toLowerCase()}`
           : toDateHeaderMap[period as ToDateTab] || period,
-      cell: ({ getValue }) => `$${formatNumber(getValue() as number)}`
+      cell: ({ getValue }) => formatUSD(getValue() as number)
     })
   );
 
@@ -104,7 +102,7 @@ const createTableColumns = (
               name={chainName}
               className='h-5 w-5'
             />
-            <Text size='13'>{capitalize(chainName)}</Text>
+            <Text size='13'>{capitalizeFirstLetter(chainName)}</Text>
           </div>
         );
       }
@@ -122,16 +120,13 @@ function isPeriod(value: string): value is Period {
   return allPeriods.includes(value);
 }
 
-const RevenueOverview: FC = () => {
+const RevenueOverview = ({
+  revenueData: rawData,
+  isLoading,
+  isError
+}: RevenuePageProps) => {
   const [dateType, setDateType] = useState<DateType>('Rolling');
   const [period, setPeriod] = useState<Period>('7D');
-
-  const { data: revenueData, isLoading, isError } = useCompCumulativeRevenue();
-
-  const rawData: CompoundCumulativeRevenueItem[] = useMemo(
-    () => revenueData || [],
-    [revenueData]
-  );
 
   const primaryTabs = dateType === 'Rolling' ? ROLLING_TABS : TO_DATE_TABS;
 
@@ -200,7 +195,7 @@ const RevenueOverview: FC = () => {
             key={p}
             className='text-primary-14 px-[5px] py-[13px] text-left text-[11px]'
           >
-            ${formatNumber(totals[p] || 0)}
+            {formatUSD(totals[p] || 0)}
           </td>
         ))}
       </tr>
@@ -221,7 +216,7 @@ const RevenueOverview: FC = () => {
     const pieData = positivePieData.map(({ name, value }) => {
       const rawPercent = totalPieValue > 0 ? (value / totalPieValue) * 100 : 0;
       return {
-        name,
+        name: capitalizeFirstLetter(name),
         value: formatPrice(value, 1),
         percent: Number(rawPercent.toFixed(1)),
         color: networkColorMap[name.toLowerCase()] || '#808080'

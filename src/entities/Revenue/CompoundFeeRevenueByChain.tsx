@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo } from 'react';
+import type { CellContext } from '@tanstack/react-table';
 
 import CompoundFeeRevenuebyChain, {
   ProcessedRevenueData
 } from '@/components/RevenuePageTable/CompoundFeeRevenuebyChain';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
-import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenue';
+import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { precomputeViews } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
@@ -58,9 +59,11 @@ const generateOptions = (views: PrecomputedViews | null, interval: string) => {
   }
 };
 
-const CompoundFeeRevenueByChain = () => {
-  const { data: revenueData, isLoading, isError } = useCompCumulativeRevenue();
-
+const CompoundFeeRevenueByChain = ({
+  revenueData,
+  isLoading,
+  isError
+}: RevenuePageProps) => {
   const intervalDropdown = useDropdown('single');
   const periodDropdown = useDropdown('single');
 
@@ -100,6 +103,31 @@ const CompoundFeeRevenueByChain = () => {
 
     if (!viewData) return { tableData: [], columns: [], totals: {} };
 
+    const remappedDataColumns = viewData.columns.map((col) => {
+      const originalCell = col.cell;
+      if (!originalCell) {
+        return col;
+      }
+
+      return {
+        ...col,
+        cell: (props: CellContext<ProcessedRevenueData, unknown>) => {
+          const renderedValue =
+            typeof originalCell === 'function'
+              ? originalCell(props)
+              : originalCell;
+
+          if (
+            typeof renderedValue === 'string' &&
+            renderedValue.startsWith('$-')
+          ) {
+            return `-${renderedValue.replace('-', '')}`;
+          }
+          return renderedValue;
+        }
+      };
+    });
+
     const finalColumns: ExtendedColumnDef<ProcessedRevenueData>[] = [
       {
         accessorKey: 'chain',
@@ -114,7 +142,7 @@ const CompoundFeeRevenueByChain = () => {
           </div>
         )
       },
-      ...viewData.columns
+      ...remappedDataColumns
     ];
 
     return { ...viewData, columns: finalColumns };

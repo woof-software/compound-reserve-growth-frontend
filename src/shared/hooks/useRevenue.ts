@@ -39,23 +39,20 @@ const sourcesAndAssetsApiResponseSchema = z.object({
   assets: z.array(assetDetailsSchema)
 });
 
-const finalSourceSchema =
-  sourcesAndAssetsApiResponseSchema.shape.sources.element
-    .extend({
-      asset: assetDetailsSchema
-    })
-    .omit({ assetId: true });
-
-export const CompoundCumulativeRevenueItemSchema = z.object({
-  id: z.number(),
-  value: z.number(),
-  date: z.number(),
-  source: finalSourceSchema
-});
-
-export type CompoundCumulativeRevenueItem = z.infer<
-  typeof CompoundCumulativeRevenueItemSchema
->;
+export type RevenueItem = {
+  id: number;
+  value: number;
+  date: number;
+  source: {
+    id: number;
+    address: string;
+    network: string;
+    type: string;
+    market: string | null;
+    assetId: number;
+    asset: z.infer<typeof assetDetailsSchema>;
+  };
+};
 
 export type CompoundCumulativeRevenueParams = {
   page?: number;
@@ -63,24 +60,27 @@ export type CompoundCumulativeRevenueParams = {
   order?: SortDirectionType;
 };
 
+export type RevenuePageProps = {
+  revenueData: RevenueItem[];
+  isLoading: boolean;
+  isError: boolean;
+};
+
 type UseCompCumulativeRevenueOptions = {
   params?: CompoundCumulativeRevenueParams;
-  options?: Omit<
-    UseQueryOptions<CompoundCumulativeRevenueItem[]>,
-    'queryKey' | 'queryFn'
-  >;
+  options?: Omit<UseQueryOptions<RevenueItem[]>, 'queryKey' | 'queryFn'>;
 };
 
 const COMPOUND_REVENUE_HISTORY_URL = '/api/history/v2/revenue';
 const SOURCES_URL = '/api/sources';
 
-export const useCompCumulativeRevenue = ({
+export const useRevenue = ({
   params,
   options
 }: UseCompCumulativeRevenueOptions = {}) => {
   return useQuery({
     queryKey: ['compoundCumulativeRevenue', params],
-    queryFn: async () => {
+    queryFn: async (): Promise<RevenueItem[]> => {
       const [revenueResponse, sourcesAndAssetsResponse] = await Promise.all([
         $api.get(
           COMPOUND_REVENUE_HISTORY_URL,
@@ -89,10 +89,6 @@ export const useCompCumulativeRevenue = ({
         ),
         $api.get(SOURCES_URL, sourcesAndAssetsApiResponseSchema)
       ]);
-
-      if (!revenueResponse?.data || !sourcesAndAssetsResponse?.data) {
-        throw new Error('Failed to fetch revenue history or sources');
-      }
 
       const assetsMap = new Map(
         sourcesAndAssetsResponse.data.assets.map((asset) => [asset.id, asset])
@@ -112,43 +108,20 @@ export const useCompCumulativeRevenue = ({
         })
       );
 
-      const mergedData = revenueResponse.data.data.reduce<any[]>(
-        (acc, revenueItem) => {
-          const sourceWithAsset = sourcesMap.get(revenueItem.sId);
-
-          if (sourceWithAsset) {
-            acc.push({
-              ...revenueItem,
-              source: sourceWithAsset
-            });
-          } else {
-            console.warn(
-              `Source with id ${revenueItem.sId} not found for revenue item ${revenueItem.id}`
-            );
-          }
-
-          return acc;
-        },
-        []
-      );
-
-      const finalTransformedData = mergedData.map((item) => ({
-        id: item.id,
-        value: item.v,
-        date: item.d,
-        source: {
-          id: item.source.id,
-          address: item.source.address,
-          network: item.source.network,
-          type: item.source.type,
-          market: item.source.market,
-          asset: item.source.asset
+      const finalData: RevenueItem[] = [];
+      for (const revenueItem of revenueResponse.data.data) {
+        const sourceWithAsset = sourcesMap.get(revenueItem.sId);
+        if (sourceWithAsset) {
+          finalData.push({
+            id: revenueItem.id,
+            value: revenueItem.v,
+            date: revenueItem.d,
+            source: sourceWithAsset
+          });
         }
-      }));
+      }
 
-      return CompoundCumulativeRevenueItemSchema.array().parse(
-        finalTransformedData
-      );
+      return finalData;
     },
     ...options
   });

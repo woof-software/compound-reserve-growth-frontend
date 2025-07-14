@@ -1,17 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/CompoundFeeRecieved';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
+import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
-import { useCompCumulativeRevenue } from '@/shared/hooks/useCompCumulativeRevenue';
+import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
-  ChartDataItem,
   extractFilterOptions,
   FilterOptionsConfig
 } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import Text from '@/shared/ui/Text/Text';
 
 interface StackedChartData {
   date: string;
@@ -20,14 +19,11 @@ interface StackedChartData {
 
 type OptionType = { id: string; label: string };
 
-const CompoundFeeRevenueRecieved = () => {
-  const { data: apiResponse, isLoading, isError } = useCompCumulativeRevenue();
-
-  const rawData: ChartDataItem[] = useMemo(
-    () => apiResponse || [],
-    [apiResponse]
-  );
-
+const CompoundFeeRevenueRecieved = ({
+  revenueData: rawData,
+  isLoading,
+  isError
+}: RevenuePageProps) => {
   const {
     activeTab,
     barSize,
@@ -39,6 +35,11 @@ const CompoundFeeRevenueRecieved = () => {
 
   const [selectedChains, setSelectedChains] = useState<OptionType[]>([]);
   const [selectedMarkets, setSelectedMarkets] = useState<OptionType[]>([]);
+
+  const handleResetFilters = useCallback(() => {
+    setSelectedChains([]);
+    setSelectedMarkets([]);
+  }, []);
 
   const { chainOptions, marketOptions } = useMemo(() => {
     if (!rawData || rawData.length === 0) {
@@ -57,7 +58,7 @@ const CompoundFeeRevenueRecieved = () => {
     return extractFilterOptions(rawData, config);
   }, [rawData]);
 
-  const chartData = useMemo(() => {
+  const chartData = (() => {
     const selectedChainIds = selectedChains.map((c) => c.id);
     const selectedMarketIds = selectedMarkets.map((m) => m.id);
 
@@ -68,8 +69,7 @@ const CompoundFeeRevenueRecieved = () => {
 
       const marketMatch =
         selectedMarketIds.length === 0 ||
-        selectedMarketIds.includes(item.source.market) ||
-        (selectedMarketIds.includes('no name') && item.source.market === null);
+        selectedMarketIds.includes(item.source.market ?? 'no name');
 
       return chainMatch && marketMatch;
     });
@@ -91,7 +91,7 @@ const CompoundFeeRevenueRecieved = () => {
     return Object.values(groupedByDate).sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
-  }, [rawData, selectedChains, selectedMarkets]);
+  })();
 
   const hasData = chartData.length > 0;
   const noDataMessage =
@@ -137,14 +137,10 @@ const CompoundFeeRevenueRecieved = () => {
         />
       </div>
       {!isLoading && !isError && !hasData ? (
-        <div className='flex h-[400px] items-center justify-center'>
-          <Text
-            size='12'
-            className='text-primary-14'
-          >
-            {noDataMessage}
-          </Text>
-        </div>
+        <NoDataPlaceholder
+          onButtonClick={handleResetFilters}
+          text={noDataMessage}
+        />
       ) : (
         <CompoundFeeRecieved
           data={chartData}
