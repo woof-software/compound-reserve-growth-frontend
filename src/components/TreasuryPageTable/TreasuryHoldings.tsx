@@ -6,11 +6,24 @@ import DataTable from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
-import { Tooltip } from '../Tooltip/Tooltip';
+import { AddressTooltip } from '../AddressTooltip/AddressTooltip';
 
-import { TreasuryHolding } from './MOCK_DATA';
+export type TreasuryBalanceByNetworkType = {
+  symbol: string;
+  chain: string;
+  market: string | null;
+  qty: number;
+  value: number;
+  price: number;
+  source: string;
+  address: string;
+};
 
-const treasuryColumns: ColumnDef<TreasuryHolding>[] = [
+export interface TreasuryHoldingsProps {
+  tableData: TreasuryBalanceByNetworkType[];
+}
+
+const treasuryColumns: ColumnDef<TreasuryBalanceByNetworkType>[] = [
   {
     accessorKey: 'symbol',
     header: 'Symbol',
@@ -71,32 +84,18 @@ const treasuryColumns: ColumnDef<TreasuryHolding>[] = [
     enableSorting: true,
     size: 120,
     cell: ({ row }) => {
-      const sourceText = row.original.source;
-      const TRUNCATE_LIMIT = 20;
+      const { source, address, chain } = row.original;
 
-      const content = (
-        <div className='max-w-[120px] overflow-hidden'>
-          <Text
-            size='13'
-            className='truncate whitespace-nowrap'
-          >
-            {sourceText}
-          </Text>
-        </div>
+      return (
+        <AddressTooltip
+          text={source}
+          address={address}
+          chain={chain}
+        />
       );
-
-      if (sourceText.length > TRUNCATE_LIMIT) {
-        return <Tooltip content={sourceText}>{content}</Tooltip>;
-      }
-
-      return content;
     }
   }
 ];
-
-interface TreasuryHoldingsProps {
-  tableData: TreasuryHolding[];
-}
 
 const TreasuryHoldings = ({ tableData }: TreasuryHoldingsProps) => {
   return (

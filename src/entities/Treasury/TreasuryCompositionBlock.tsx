@@ -2,7 +2,6 @@ import React, { memo, useMemo, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
-import { TreasuryCompositionType } from '@/components/TreasuryPageTable/MOCK_DATA';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import {
   capitalizeFirstLetter,
@@ -15,6 +14,13 @@ import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Switch from '@/shared/ui/Switch/Switch';
 
 const options = ['Asset Type', 'Chain', 'Market'];
+
+export interface TreasuryCompositionType {
+  id: number;
+  icon: string;
+  name: string;
+  balance: number;
+}
 
 type CompositionData = {
   uniqData: TokenData[];
@@ -141,6 +147,7 @@ const TreasuryCompositionBlock = memo(
     return (
       <Card
         isLoading={isLoading}
+        id={'treasury-composition'}
         title='Treasury Composition'
         className={{
           loading: 'min-h-[inherit]',

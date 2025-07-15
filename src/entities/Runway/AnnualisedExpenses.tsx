@@ -112,6 +112,7 @@ const AnnualisedExpensesBlock = () => {
   return (
     <Card
       title='Annualised Expenses'
+      id='annualised-expenses'
       isLoading={isLoading}
       isError={isError}
       className={{

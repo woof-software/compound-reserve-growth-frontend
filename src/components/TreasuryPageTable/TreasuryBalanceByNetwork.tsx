@@ -3,7 +3,21 @@ import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
-import { Tooltip } from '../Tooltip/Tooltip';
+import { AddressTooltip } from '../AddressTooltip/AddressTooltip';
+
+export type TreasuryBalanceByNetworkType = {
+  symbol: string;
+  qty: number;
+  value: number;
+  source: string;
+  market: string;
+  address: string;
+  chain: string;
+};
+
+interface TreasuryBalanceByNetworkProps {
+  tableData: TreasuryBalanceByNetworkType[];
+}
 
 const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
   {
@@ -50,40 +64,18 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     enableSorting: true,
     size: 120,
     cell: ({ row }) => {
-      const sourceText = row.original.source;
-      const TRUNCATE_LIMIT = 20;
+      const { source, address, chain } = row.original;
 
-      const content = (
-        <div className='max-w-[120px] overflow-hidden'>
-          <Text
-            size='13'
-            className='truncate whitespace-nowrap'
-          >
-            {sourceText}
-          </Text>
-        </div>
+      return (
+        <AddressTooltip
+          text={source}
+          address={address}
+          chain={chain}
+        />
       );
-
-      if (sourceText.length > TRUNCATE_LIMIT) {
-        return <Tooltip content={sourceText}>{content}</Tooltip>;
-      }
-
-      return content;
     }
   }
 ];
-
-export type TreasuryBalanceByNetworkType = {
-  symbol: string;
-  qty: number;
-  value: number;
-  source: string;
-  market: string;
-};
-
-interface TreasuryBalanceByNetworkProps {
-  tableData: TreasuryBalanceByNetworkType[];
-}
 
 const TreasuryBalanceByNetwork = ({
   tableData

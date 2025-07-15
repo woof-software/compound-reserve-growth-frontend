@@ -5,6 +5,7 @@ import TotalTresuaryValue from '@/entities/Treasury/TotalTresuaryValue';
 import TreasuryBalanceByNetworkBlock from '@/entities/Treasury/TreasuryBalanceByNetwork';
 import TreasuryCompositionBlock from '@/entities/Treasury/TreasuryCompositionBlock';
 import TreasuryHoldingsBlock from '@/entities/Treasury/TreasuryHoldingsBlock';
+import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
 import {
   groupByKey,
@@ -22,6 +23,8 @@ const TreasuryPage = () => {
   } = useTreasuryHistory({
     params: { order: 'DESC' }
   });
+
+  useScrollToHash(!isLoading);
 
   const treasuryData = useMemo<TokenData[]>(
     () => treasuryApiResponse || [],

@@ -85,6 +85,7 @@ const CurrentInitiativesBlock = () => {
   return (
     <Card
       title='Current Initiatives'
+      id='current-initiatives'
       isLoading={isLoading}
       isError={isError}
       className={{

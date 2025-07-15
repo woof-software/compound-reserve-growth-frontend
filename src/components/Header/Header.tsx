@@ -87,7 +87,7 @@ const Header: FC = () => {
                   key={index}
                   content='Coming Soon'
                 >
-                  <div className='flex cursor-not-allowed items-center gap-1.5 px-3 py-1 text-[13px] leading-3 opacity-60'>
+                  <div className='flex cursor-not-allowed items-center gap-1.5 px-3 py-1 text-[13px] leading-3 opacity-30'>
                     <Icon
                       name={link.icon}
                       className='h-3 w-3'

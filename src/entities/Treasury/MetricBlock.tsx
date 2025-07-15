@@ -15,7 +15,6 @@ type MetricData = {
 
 interface MetricBlockProps {
   isLoading?: boolean;
-
   data: MetricData;
 }
 

@@ -4,7 +4,6 @@ import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton'
 import Filter from '@/components/Filter/Filter';
 import { useFilter } from '@/components/Filter/useFilter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import { TreasuryHolding } from '@/components/TreasuryPageTable/MOCK_DATA';
 import TreasuryHoldings from '@/components/TreasuryPageTable/TreasuryHoldings';
 import {
   capitalizeFirstLetter,
@@ -20,7 +19,7 @@ interface TreasuryHoldingsBlockProps {
   data: TokenData[];
 }
 
-const mapTableData = (data: TokenData[]): TreasuryHolding[] => {
+const mapTableData = (data: TokenData[]) => {
   return data.map((el) => {
     const decimals = el.source.asset.decimals || 0;
     const rawQuantity = Number(el.quantity) || 0;
@@ -33,7 +32,8 @@ const mapTableData = (data: TokenData[]): TreasuryHolding[] => {
       qty: humanReadableQuantity,
       value: el.value,
       price: el.price,
-      source: el.source.type
+      source: el.source.type,
+      address: el.source.address
     };
   });
 };
@@ -102,7 +102,7 @@ const TreasuryHoldingsBlock = ({
     [activeCount, local, toggle, apply, clear, reset, filtersList]
   );
 
-  const tableData = useMemo<TreasuryHolding[]>(() => {
+  const tableData = useMemo(() => {
     const selectedData = data.filter((item) =>
       selected.every(({ id, selectedItems }) => {
         if (!selectedItems.length) return true;
@@ -138,6 +138,7 @@ const TreasuryHoldingsBlock = ({
       isError={isError}
       isLoading={isLoading}
       title='Full Treasury Holdings'
+      id='full-treasury-holdings'
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[458.5px] overflow-visible',

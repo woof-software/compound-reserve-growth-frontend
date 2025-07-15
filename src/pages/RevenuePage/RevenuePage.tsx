@@ -8,6 +8,7 @@ import RevenueBreakDownBlock from '@/entities/Revenue/RevenueBreakdown';
 import RevenueMetrics from '@/entities/Revenue/RevenueMetrics';
 import RevenueOverview from '@/entities/Revenue/RevenueOverview';
 import { RevenueItem, useRevenue } from '@/shared/hooks/useRevenue';
+import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import Text from '@/shared/ui/Text/Text';
 
 const RevenuePage = () => {
@@ -17,6 +18,8 @@ const RevenuePage = () => {
     () => revenueData || [],
     [revenueData]
   );
+
+  useScrollToHash(!isLoading);
 
   return (
     <div className='flex flex-col gap-[70px]'>

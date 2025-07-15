@@ -3,9 +3,13 @@ import CurrentInitiativesBlock from '@/entities/Runway/CurrentInitiatives';
 import CurrentServiceProvidersBlock from '@/entities/Runway/CurrentServiceProviders';
 import FullDAOCommitmentsBlock from '@/entities/Runway/FullDAOCommitments';
 import RunwayMetrics from '@/entities/Runway/RunwayMetrics';
+import { useRunway } from '@/shared/hooks/useRunway';
+import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import Text from '@/shared/ui/Text/Text';
 
 const RunwayPage = () => {
+  const { isLoading } = useRunway();
+  useScrollToHash(!isLoading);
   return (
     <div className='flex flex-col gap-[70px]'>
       <div className='flex flex-col gap-[15px]'>

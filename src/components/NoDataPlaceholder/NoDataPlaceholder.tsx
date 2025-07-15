@@ -32,7 +32,7 @@ const NoDataPlaceholder: FC<NoDataPlaceholderProps> = ({
       </Text>
       <Button
         onClick={onButtonClick}
-        className='cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600'
+        className='cursor-pointer rounded-md bg-[#00D395] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#00C48A] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[#00D395]'
       >
         {buttonText}
       </Button>
