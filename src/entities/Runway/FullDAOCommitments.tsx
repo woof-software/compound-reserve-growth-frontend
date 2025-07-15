@@ -51,6 +51,7 @@ const FullDAOCommitmentsBlock = () => {
   return (
     <Card
       title='Full DAO Commitments'
+      id='full-dao-commitments'
       isLoading={isLoading}
       isError={isError}
       className={{

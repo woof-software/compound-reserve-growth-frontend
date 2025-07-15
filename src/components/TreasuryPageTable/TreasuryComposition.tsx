@@ -3,11 +3,15 @@ import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
-import { TreasuryCompositionType } from './MOCK_DATA';
+export interface TreasuryCompositionType {
+  id: number;
+  icon: string;
+  name: string;
+  balance: number;
+}
 
 interface TreasuryCompositionProps {
   tableData: TreasuryCompositionType[];
-
   totalBalance: number;
 }
 

@@ -35,7 +35,8 @@ const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
       qty: humanReadableQuantity,
       value: el.value,
       price: el.price,
-      source: el.source.type
+      source: el.source.type,
+      address: el.source.address
     };
   });
 };
@@ -160,6 +161,7 @@ const TreasuryBalanceByNetworkBlock = ({
       isLoading={isLoading}
       isError={isError}
       title='Treasury Balance by Network'
+      id='treasury-balance-by-network'
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[458.5px] overflow-visible',

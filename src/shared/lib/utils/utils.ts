@@ -77,6 +77,25 @@ export const networkColorMap: { [key: string]: string } = {
   unichain: '#BCE954'
 };
 
+export const explorers: { [key: string]: string } = {
+  ethereum: 'https://etherscan.io/address/',
+  mainnet: 'https://etherscan.io/address/',
+  arbitrum: 'https://arbiscan.io/address/',
+  avalanche: 'https://snowtrace.io/address/',
+  base: 'https://basescan.org/address/',
+  optimism: 'https://optimistic.etherscan.io/address/',
+  polygon: 'https://polygonscan.com/address/',
+  sonic: 'https://explorer.sonic.game/address/',
+  linea: 'https://lineascan.build/address/',
+  mantle: 'https://explorer.mantle.xyz/address/',
+  ronin: 'https://app.roninchain.com/address/',
+  scroll: 'https://scrollscan.com/address/',
+  unichain: 'https://www.blockscout.com/search?q='
+  // defaul Etherscan
+};
+
+export const defaultExplorer = 'https://etherscan.io/address/';
+
 export const units = [
   { value: 1e33, symbol: 'D' },
   { value: 1e30, symbol: 'N' },
@@ -119,6 +138,14 @@ export const formatDateWithOrdinal = (dateString: string) => {
   } catch {
     return dateString;
   }
+};
+
+export const sliceAddress = (
+  address?: string,
+  before: number = 4,
+  after: number = 4
+) => {
+  return address && `${address.slice(0, before)}...${address.slice(-after)}`;
 };
 
 export const formatCurrency = (value: number) => {

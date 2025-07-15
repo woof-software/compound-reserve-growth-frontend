@@ -24,10 +24,12 @@ interface TotalTreasuryValueProps {
   isLoading?: boolean;
   isError?: boolean;
   data?: TokenData[];
+  onCopyLink?: (id: string) => void;
 }
 
 const TotalTresuaryValue = ({
   isLoading,
+
   isError,
   data: treasuryApiResponse
 }: TotalTreasuryValueProps) => {
@@ -202,6 +204,7 @@ const TotalTresuaryValue = ({
       isLoading={isLoading}
       isError={isError}
       title='Total Treasury Value'
+      id='total-treasury-value'
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px]',

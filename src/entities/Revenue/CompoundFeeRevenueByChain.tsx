@@ -154,6 +154,7 @@ const CompoundFeeRevenueByChain = ({
   return (
     <Card
       title='Compound Fee Revenue by Chain'
+      id='compound-fee-revenue-by-chain'
       isLoading={isLoading}
       isError={isError}
       className={{

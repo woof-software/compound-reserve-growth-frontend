@@ -82,10 +82,14 @@ export const MultiSelect: FC<MultiSelectProps> = ({
       )}
     >
       {value.length > 0 ? (
-        <div className='bg-white-10 text-gray-12 flex h-4 w-4 items-center justify-center rounded-full leading-none'>
-          <span className='relative top-[0.5px] text-[11px]'>
+        <div className='bg-white-10 flex h-4 w-4 items-center justify-center rounded-full'>
+          <Text
+            size='11'
+            weight='500'
+            className='leading-none !text-[color:var(--color-gray-12)] tabular-nums'
+          >
             {value.length}
-          </span>
+          </Text>
         </div>
       ) : (
         <Icon

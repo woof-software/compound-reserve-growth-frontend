@@ -1,12 +1,15 @@
 import { FC, ReactNode } from 'react';
 
+import { useClipboard } from '@/shared/hooks/useClipboard';
 import { cn } from '@/shared/lib/classNames/classNames';
 
+import Icon from '../Icon/Icon';
 import Text from '../Text/Text';
 import View from '../View/View';
 
 interface CardProps {
   title?: string;
+  id?: string;
   isLoading?: boolean;
   isError?: boolean;
   children: ReactNode;
@@ -25,12 +28,21 @@ const Card: FC<CardProps> = ({
   isLoading,
   isError,
   children,
-  className
+  className,
+  id
 }) => {
+  const [isCopied, copy] = useClipboard();
   const showPlaceholder = isLoading || isError;
+
+  const handleCopyLink = (id: string) => {
+    if (!id) return;
+    const link = `${window.location.origin}${window.location.pathname}#${id}`;
+    copy(link);
+  };
 
   return (
     <div
+      id={id}
       className={cn(
         'bg-card-content w-full overflow-hidden rounded-lg shadow-md',
         className?.container
@@ -55,7 +67,12 @@ const Card: FC<CardProps> = ({
       </View.Condition>
       <View.Condition if={!isLoading && !isError}>
         <View.Condition if={Boolean(title)}>
-          <div className={cn('bg-card-header px-10 py-4', className?.header)}>
+          <div
+            className={cn(
+              'bg-card-header flex items-center gap-3 px-10 py-4',
+              className?.header
+            )}
+          >
             <Text
               tag='h3'
               size='13'
@@ -65,6 +82,21 @@ const Card: FC<CardProps> = ({
             >
               {title}
             </Text>
+            <div className='flex cursor-pointer items-center justify-center'>
+              {id &&
+                (isCopied ? (
+                  <Icon
+                    name='сheck-сopy-icon'
+                    className='text-green-500'
+                  />
+                ) : (
+                  <Icon
+                    name='link'
+                    color='color-primary-14'
+                    onClick={() => handleCopyLink?.(id)}
+                  />
+                ))}
+            </div>
           </div>
         </View.Condition>
         <div className={cn('bg-card-content p-10', className?.content)}>

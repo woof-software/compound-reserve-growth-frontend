@@ -89,6 +89,7 @@ const CurrentServiceProvidersBlock = () => {
   return (
     <Card
       title='Current Service Providers'
+      id='current-service-providers'
       isLoading={isLoading}
       isError={isError}
       className={{

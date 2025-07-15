@@ -152,6 +152,7 @@ const CompoundCumulativeRevenue = ({
   return (
     <Card
       title='Compound Cumulative Revenue'
+      id='compound-cumulative-revenue'
       isLoading={isLoading}
       isError={isError}
       className={{

@@ -105,6 +105,7 @@ const CompoundRevenueBlock = ({
   return (
     <Card
       title='Compound Revenue'
+      id='compound-revenue'
       isLoading={isLoading}
       isError={isError}
       className={{
