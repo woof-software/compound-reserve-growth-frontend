@@ -98,7 +98,7 @@ const createTableColumns = (
         <div className='flex items-center gap-3'>
           <Icon
             name={row.original.chain || 'not-found-icon'}
-            className='h-5 w-5'
+            className='h-6 w-6'
             folder='network'
           />
           <Text size='13'>{capitalizeFirstLetter(row.original.chain)}</Text>

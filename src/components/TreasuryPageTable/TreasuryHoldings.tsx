@@ -33,7 +33,7 @@ const treasuryColumns: ColumnDef<TreasuryBalanceByNetworkType>[] = [
       <div className='flex items-center gap-3'>
         <Icon
           name={row.original.symbol || 'not-found-icon'}
-          className='h-5 w-5'
+          className='h-6 w-6'
           folder='collaterals'
         />
         <Text size='13'>{row.original.symbol}</Text>

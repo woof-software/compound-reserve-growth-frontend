@@ -114,6 +114,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
               <Icon
                 name='wallet'
                 className='h-8 w-8'
+                isRound={false}
               />
             }
           />

@@ -9,9 +9,17 @@ interface IconProps extends SVGProps<SVGSVGElement> {
   className?: string;
   color?: string;
   folder?: IconFolder;
+  isRound?: boolean;
 }
 
-const Icon = ({ name, className, color, folder, ...props }: IconProps) => {
+const Icon = ({
+  name,
+  className,
+  color,
+  folder,
+  isRound = true,
+  ...props
+}: IconProps) => {
   const [SvgComponent, setSvgComponent] = useState<ComponentType<
     SVGProps<SVGSVGElement>
   > | null>(null);
@@ -49,7 +57,7 @@ const Icon = ({ name, className, color, folder, ...props }: IconProps) => {
   if (!SvgComponent) {
     return (
       <div
-        className={cn('h-8 w-8 rounded-full', className)}
+        className={cn('h-8 w-8', { 'rounded-full': isRound }, className)}
         style={{ opacity: 0 }}
       />
     );
@@ -57,7 +65,7 @@ const Icon = ({ name, className, color, folder, ...props }: IconProps) => {
 
   return (
     <SvgComponent
-      className={cn('rounded-full fill-current', className)}
+      className={cn('fill-current', { 'rounded-full': isRound }, className)}
       style={{ color: color ? `var(--${color})` : undefined }}
       {...props}
     />

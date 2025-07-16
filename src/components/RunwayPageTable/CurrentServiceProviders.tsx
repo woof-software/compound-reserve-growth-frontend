@@ -40,7 +40,7 @@ const columns: ExtendedColumnDef<ProviderRow>[] = [
         <div className='flex items-center gap-3'>
           <Icon
             name={iconName}
-            className='h-5 w-5'
+            className='h-6 w-6'
             folder='token'
           />
           <Text size='13'>{row.original.provider}</Text>
