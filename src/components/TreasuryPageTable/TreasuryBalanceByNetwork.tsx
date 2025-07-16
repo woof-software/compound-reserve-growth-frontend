@@ -27,8 +27,9 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     cell: ({ row }) => (
       <div className='flex items-center gap-3'>
         <Icon
-          name='not-found-icon'
+          name={row.original.symbol || 'not-found-icon'}
           className='h-5 w-5'
+          folder='collaterals'
         />
         <Text size='13'>{row.original.symbol}</Text>
       </div>

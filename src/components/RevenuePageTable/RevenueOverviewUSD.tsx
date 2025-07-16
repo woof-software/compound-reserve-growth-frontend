@@ -11,19 +11,13 @@ interface RevenueOverviewUSDProps {
   data: TableRowData[];
   columns: ExtendedColumnDef<TableRowData>[];
   footerContent: React.ReactNode;
-  isLoading: boolean;
 }
 
 const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
   data,
   columns,
-  footerContent,
-  isLoading
+  footerContent
 }) => {
-  if (isLoading) {
-    return <div>Loading table data...</div>;
-  }
-
   return (
     <DataTable
       className='max-w-[800px]'

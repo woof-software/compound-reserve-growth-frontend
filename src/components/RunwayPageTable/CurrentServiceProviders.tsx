@@ -28,15 +28,25 @@ const columns: ExtendedColumnDef<ProviderRow>[] = [
   {
     accessorKey: 'provider',
     header: 'Provider',
-    cell: ({ row }) => (
-      <div className='flex items-center gap-3'>
-        <Icon
-          name={row.original.iconKey}
-          className='h-5 w-5'
-        />
-        <Text size='13'>{row.original.provider}</Text>
-      </div>
-    )
+    cell: ({ row }) => {
+      let iconName: string;
+
+      if (row.original.provider === 'WOOF! Software') {
+        iconName = 'Woof-Software';
+      } else {
+        iconName = row.original.provider || 'not-found-icon';
+      }
+      return (
+        <div className='flex items-center gap-3'>
+          <Icon
+            name={iconName}
+            className='h-5 w-5'
+            folder='token'
+          />
+          <Text size='13'>{row.original.provider}</Text>
+        </div>
+      );
+    }
   },
   {
     accessorKey: 'discipline',
