@@ -6,11 +6,68 @@ import type { RunwayItem } from '@/shared/hooks/useRunway';
 import { useRunway } from '@/shared/hooks/useRunway';
 import Card from '@/shared/ui/Card/Card';
 
-/*
-1. Takes all commitments (providers and initiatives) without any filtering by date or type.
-2. For each row, calculates the "Daily Stream Rate" in USD equivalent.
-3. Formula: The total value in USD (`item.value`) is divided by the full duration of the period in days (`startDate` - `endDate`).
-*/
+export function getStatus(
+  startDate: Date,
+  endDate: Date,
+  now: Date = new Date()
+): string {
+  const nowUTC = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  );
+  const startUTC = new Date(
+    Date.UTC(
+      startDate.getUTCFullYear(),
+      startDate.getUTCMonth(),
+      startDate.getUTCDate()
+    )
+  );
+  const endUTC = new Date(
+    Date.UTC(
+      endDate.getUTCFullYear(),
+      endDate.getUTCMonth(),
+      endDate.getUTCDate()
+    )
+  );
+
+  return nowUTC >= startUTC && nowUTC <= endUTC ? 'active' : 'finished';
+}
+
+export function getPaidAmount(
+  paymentType: string,
+  startDate: Date,
+  endDate: Date,
+  dailyAmount: number,
+  totalAmount: number,
+  now: Date = new Date()
+): number {
+  if (paymentType !== 'Streaming Payment') {
+    return totalAmount;
+  }
+
+  if (now < startDate) {
+    return 0;
+  }
+
+  if (now > endDate) {
+    return totalAmount;
+  }
+
+  const daysElapsed =
+    (now.getTime() - startDate.getTime()) / (1000 * 3600 * 24);
+  const calculatedAmount = daysElapsed * dailyAmount;
+
+  return Math.min(calculatedAmount, totalAmount);
+}
+
+export function getPercentagePaid(
+  paidAmount: number,
+  totalAmount: number
+): number {
+  if (totalAmount <= 0) {
+    return 0;
+  }
+  return paidAmount / totalAmount;
+}
 
 const FullDAOCommitmentsBlock = () => {
   const { data: runwayResponse, isLoading, isError } = useRunway();
@@ -24,14 +81,24 @@ const FullDAOCommitmentsBlock = () => {
     const tableData = allData.map((item: RunwayItem) => {
       const startDate = new Date(item.startDate);
       const endDate = new Date(item.endDate);
+      const now = new Date();
 
       const durationMs = endDate.getTime() - startDate.getTime();
-      const durationDays = durationMs / (1000 * 60 * 60 * 24) + 1;
+      const durationDays =
+        durationMs > 0 ? durationMs / (1000 * 60 * 60 * 24) : 0;
+      const dailyAmount =
+        durationDays > 0 ? item.amount / durationDays : item.amount;
 
-      let dailyStreamRate = 0;
-      if (durationDays > 0) {
-        dailyStreamRate = item.value / durationDays;
-      }
+      const status = getStatus(startDate, endDate, now);
+      const paidAmount = getPaidAmount(
+        item.paymentType,
+        startDate,
+        endDate,
+        dailyAmount,
+        item.amount,
+        now
+      );
+      const percentagePaid = getPercentagePaid(paidAmount, item.amount);
 
       return {
         recipient: item.name,
@@ -39,9 +106,12 @@ const FullDAOCommitmentsBlock = () => {
         token: item.token,
         amount: item.amount,
         paymentType: item.paymentType,
-        dailyStreamRate: dailyStreamRate,
+        dailyStreamRate: dailyAmount,
         startDate: item.startDate,
-        streamEndDate: item.endDate
+        streamEndDate: item.endDate,
+        status,
+        paidAmount,
+        percentagePaid
       };
     });
 
