@@ -49,7 +49,7 @@ const Icon = ({ name, className, color, folder, ...props }: IconProps) => {
   if (!SvgComponent) {
     return (
       <div
-        className={cn('h-8 w-8', className)}
+        className={cn('h-8 w-8 rounded-full', className)}
         style={{ opacity: 0 }}
       />
     );
@@ -57,7 +57,7 @@ const Icon = ({ name, className, color, folder, ...props }: IconProps) => {
 
   return (
     <SvgComponent
-      className={cn('fill-current', className)}
+      className={cn('rounded-full fill-current', className)}
       style={{ color: color ? `var(--${color})` : undefined }}
       {...props}
     />
