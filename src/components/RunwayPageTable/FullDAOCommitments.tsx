@@ -15,6 +15,9 @@ export interface FullDAOCommitmentRow {
   dailyStreamRate: number;
   startDate: string;
   streamEndDate: string;
+  status: string;
+  paidAmount: number;
+  percentagePaid: number;
 }
 
 interface FullDAOCommitmentsProps {
@@ -24,48 +27,80 @@ interface FullDAOCommitmentsProps {
 const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
   {
     accessorKey: 'recipient',
-    header: 'Recipient'
+    header: 'Recipient',
+    cell: ({ getValue }) => (getValue() as string) || '-'
   },
   {
     accessorKey: 'discipline',
-    header: 'Discipline'
+    header: 'Discipline',
+    cell: ({ getValue }) => (getValue() as string) || '-'
   },
   {
-    accessorKey: 'token',
-    header: 'Token'
+    accessorKey: 'status',
+    header: 'Status',
+    align: 'center',
+    cell: ({ getValue }) => {
+      const status = getValue() as string;
+      if (!status) return '-';
+      return status.charAt(0).toUpperCase() + status.slice(1);
+    }
   },
   {
     accessorKey: 'amount',
-    header: 'Amount',
-    cell: ({ getValue }) => formatLargeNumber(getValue() as number, 1)
-  },
-  {
-    accessorKey: 'paymentType',
-    header: 'Payment Type'
-  },
-  {
-    accessorKey: 'dailyStreamRate',
-    header: 'Daily Stream Rate',
+    header: 'Total Amount',
     align: 'center',
     cell: ({ getValue }) => {
       const value = getValue() as number;
-      if (value === 0) {
-        return '$0';
-      }
-      return `$${formatLargeNumber(value, 1)}`;
+      return value === null || value === undefined
+        ? '-'
+        : `$${formatLargeNumber(value, 2)}`;
     }
+  },
+  {
+    accessorKey: 'paidAmount',
+    header: 'Paid Amount',
+    align: 'center',
+    cell: ({ getValue }) => {
+      const value = getValue() as number;
+      return value === null || value === undefined
+        ? '-'
+        : `$${formatLargeNumber(value, 2)}`;
+    }
+  },
+  {
+    accessorKey: 'percentagePaid',
+    header: '% Paid',
+    align: 'center',
+    cell: ({ getValue }) => {
+      const value = getValue() as number;
+      if (value === null || value === undefined) return '-';
+      const percentage = value * 100;
+      return `${percentage.toFixed(2)}%`;
+    }
+  },
+  {
+    accessorKey: 'paymentType',
+    header: 'Payment Type',
+    align: 'center',
+    cell: ({ getValue }) => (getValue() as string) || '-'
   },
   {
     accessorKey: 'startDate',
     header: 'Start Date',
     align: 'right',
-    cell: ({ getValue }) => formatDateWithOrdinal(getValue() as string)
+    cell: ({ getValue }) => {
+      const value = getValue() as string;
+      return value ? formatDateWithOrdinal(value) : '-';
+    }
   },
   {
     accessorKey: 'streamEndDate',
-    header: 'Stream End Date',
+    header: 'End Date',
     align: 'right',
-    cell: ({ getValue }) => formatDateWithOrdinal(getValue() as string)
+    cell: ({ getValue }) => {
+      const value = getValue() as string;
+      return value ? formatDateWithOrdinal(value) : '-';
+    }
   }
 ];
 
@@ -81,7 +116,7 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({ data }) => {
       enableSorting
       enablePagination
       paginationClassName='py-[13px] px-[5px]'
-      initialSort={{ id: 'value', desc: true }}
+      initialSort={{ id: 'amount', desc: true }}
     />
   );
 };
