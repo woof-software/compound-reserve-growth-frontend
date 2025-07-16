@@ -175,6 +175,58 @@ const LineChart: FC<LineChartProps> = ({
     });
   }, [data, barSize]);
 
+  const interpolatedEventPoints = useMemo(() => {
+    if (
+      !showEvents ||
+      !eventsData.length ||
+      !aggregatedSeries[0]?.data.length
+    ) {
+      return [];
+    }
+
+    const seriesData = aggregatedSeries[0].data as [number, number][];
+
+    return eventsData
+      .map((event) => {
+        const eventX = event.x;
+        let p1: [number, number] | undefined;
+        let p2: [number, number] | undefined;
+
+        for (const point of seriesData) {
+          if (point[0] <= eventX) {
+            p1 = point;
+          }
+          if (point[0] >= eventX) {
+            p2 = point;
+            break;
+          }
+        }
+
+        let interpolatedY: number | null = null;
+        if (p1 && p2) {
+          if (p1[0] === p2[0]) {
+            interpolatedY = p1[1];
+          } else {
+            const xDiff = p2[0] - p1[0];
+            const yDiff = p2[1] - p1[1];
+            const ratio = (eventX - p1[0]) / xDiff;
+            interpolatedY = p1[1] + ratio * yDiff;
+          }
+        } else if (p1) {
+          interpolatedY = p1[1];
+        } else if (p2) {
+          interpolatedY = p2[1];
+        }
+
+        if (interpolatedY === null) {
+          return null;
+        }
+
+        return [event.x, interpolatedY];
+      })
+      .filter((p): p is [number, number] => p !== null);
+  }, [aggregatedSeries, eventsData, showEvents]);
+
   const minRangeValue = useMemo(() => {
     const dayInMillis = 24 * 3600 * 1000;
     let barDurationInMillis = 0;
@@ -246,10 +298,10 @@ const LineChart: FC<LineChartProps> = ({
           label: {
             text: event.title,
             rotation: 0,
-            align: 'left' as const,
+            align: 'right' as const,
             verticalAlign: 'top' as const,
             y: yPositions[index % yPositions.length],
-            x: 5,
+            x: -5,
             style: {
               color: 'var(--color-primary-11)',
               fontSize: '11px'
@@ -257,6 +309,20 @@ const LineChart: FC<LineChartProps> = ({
           }
         }))
       : [];
+
+    const eventMarkerSeries: Highcharts.SeriesScatterOptions = {
+      type: 'scatter',
+      name: 'Event Markers',
+      data: interpolatedEventPoints,
+      marker: {
+        symbol: 'circle',
+        radius: 5,
+        fillColor: '#007aff'
+      },
+      showInLegend: false,
+      enableMouseTracking: false,
+      zIndex: 10
+    };
 
     return {
       chart: {
@@ -386,7 +452,7 @@ const LineChart: FC<LineChartProps> = ({
           )}</div>`;
 
           if (groupBy === 'none') {
-            const point = this.points?.[0];
+            const point = this.points?.find((p) => p.series.type === 'area');
             if (!point) return '';
             return `
               ${header}
@@ -406,7 +472,9 @@ const LineChart: FC<LineChartProps> = ({
               </div>`;
           }
 
-          const dataPoints = this.points || [];
+          const dataPoints = (this.points || []).filter(
+            (p) => p.series.type !== 'scatter'
+          );
 
           const sortedPoints = [...dataPoints].sort(
             (a, b) => (b.y ?? 0) - (a.y ?? 0)
@@ -554,7 +622,9 @@ const LineChart: FC<LineChartProps> = ({
           stacking: 'normal'
         }
       },
-      series: aggregatedSeries,
+      series: showEvents
+        ? [...aggregatedSeries, eventMarkerSeries]
+        : aggregatedSeries,
       navigator: { enabled: false },
       scrollbar: { enabled: false },
       rangeSelector: { enabled: false }
@@ -566,7 +636,8 @@ const LineChart: FC<LineChartProps> = ({
     minRangeValue,
     onVisibleBarsChange,
     eventsData,
-    showEvents
+    showEvents,
+    interpolatedEventPoints
   ]);
 
   return (
