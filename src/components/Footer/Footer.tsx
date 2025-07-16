@@ -47,6 +47,7 @@ const Footer: FC = () => {
                   name='logo'
                   className='h-[28px] w-[121px]'
                   color='primary-11'
+                  isRound={false}
                 />
               </Link>
             </div>

@@ -76,6 +76,7 @@ const Header: FC = () => {
             name='logo'
             className='h-[28px] w-[121px]'
             color='primary-11'
+            isRound={false}
           />
         </Link>
         <nav className='flex items-center gap-1.5'>
@@ -113,6 +114,7 @@ const Header: FC = () => {
                     <Icon
                       name={link.icon}
                       className='h-3 w-3'
+                      isRound={false}
                       color={
                         isActive(link.to) ? 'color-white' : 'color-gray-11'
                       }
