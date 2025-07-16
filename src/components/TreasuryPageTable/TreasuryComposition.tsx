@@ -24,6 +24,7 @@ const columns: ExtendedColumnDef<TreasuryCompositionType>[] = [
         <Icon
           name={row.original.icon || 'not-found-icon'}
           className='h-5 w-5'
+          folder='token'
         />
         <Text size='13'>{row.original.name}</Text>
       </div>

@@ -68,6 +68,7 @@ const LineChart: FC<LineChartProps> = ({
 }) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
   const programmaticChange = useRef(false);
+  const isUserZooming = useRef(false);
   const [areAllSeriesHidden, setAreAllSeriesHidden] = useState(false);
   const [eventsData, setEventsData] = useState<EventDataItem[]>([]);
   const [showEvents, setShowEvents] = useState(true);
@@ -227,24 +228,26 @@ const LineChart: FC<LineChartProps> = ({
       .filter((p): p is [number, number] => p !== null);
   }, [aggregatedSeries, eventsData, showEvents]);
 
-  const minRangeValue = useMemo(() => {
+  const barDurationInMillis = useMemo(() => {
     const dayInMillis = 24 * 3600 * 1000;
-    let barDurationInMillis = 0;
-
     switch (barSize) {
       case 'W':
-        barDurationInMillis = 7 * dayInMillis;
-        break;
+        return 7 * dayInMillis;
       case 'M':
-        barDurationInMillis = 30.44 * dayInMillis;
-        break;
+        return 30.44 * dayInMillis;
       case 'D':
       default:
-        barDurationInMillis = dayInMillis;
-        break;
+        return dayInMillis;
     }
-    return (MIN_VISIBLE_BARS - 1) * barDurationInMillis;
   }, [barSize]);
+
+  const minRangeValue = useMemo(() => {
+    return (MIN_VISIBLE_BARS - 1) * barDurationInMillis;
+  }, [barDurationInMillis]);
+
+  const maxRangeValue = useMemo(() => {
+    return MAX_VISIBLE_POINTS * barDurationInMillis;
+  }, [barDurationInMillis]);
 
   useEffect(() => {
     const chart = chartRef.current?.chart;
@@ -342,6 +345,12 @@ const LineChart: FC<LineChartProps> = ({
           type: undefined,
           pinchType: undefined,
           resetButton: { theme: { display: 'none' } }
+        },
+        events: {
+          selection: function () {
+            isUserZooming.current = true;
+            return true;
+          }
         }
       },
       credits: { enabled: false },
@@ -352,6 +361,7 @@ const LineChart: FC<LineChartProps> = ({
         startOnTick: false,
         endOnTick: false,
         minRange: minRangeValue,
+        maxRange: maxRangeValue,
         tickPixelInterval: 75,
         plotLines: eventPlotLines,
         labels: {
@@ -374,43 +384,42 @@ const LineChart: FC<LineChartProps> = ({
           color: 'var(--color-primary-14)',
           dashStyle: 'Dash'
         },
-        tickPositioner: function () {
-          const seriesData = aggregatedSeries[0]?.data || [];
-          if (!seriesData.length) return [];
-          const { min, max } = this.getExtremes();
-          const visiblePoints = seriesData.filter(
-            (point) => point[0] >= min && point[0] <= max
-          );
-          if (visiblePoints.length === 0) return [];
-          const maxLabels = 12;
-          if (visiblePoints.length <= maxLabels) {
-            return visiblePoints.map((point) => point[0]);
-          }
-          const ticks = [];
-          const step = Math.ceil(visiblePoints.length / maxLabels);
-          for (let i = 0; i < visiblePoints.length; i += step) {
-            ticks.push(visiblePoints[i][0]);
-          }
-          return ticks;
-        },
         events: {
           setExtremes: function (e) {
             if (programmaticChange.current) {
               programmaticChange.current = false;
               return;
             }
-            const firstSeriesData = aggregatedSeries[0]?.data || [];
-            const visibleCount = Math.round(
-              firstSeriesData.filter(
-                (point) =>
-                  point[0] >= (e.min || 0) && point[0] <= (e.max || Infinity)
-              ).length
-            );
-            if (visibleCount > MAX_VISIBLE_POINTS) {
-              onVisibleBarsChange(MAX_VISIBLE_POINTS);
-              return false;
+
+            // Додаємо перевірку чи це дійсно зум від користувача
+            if (
+              e.trigger === 'zoom' ||
+              e.trigger === 'pan' ||
+              isUserZooming.current
+            ) {
+              isUserZooming.current = false;
+
+              const firstSeriesData = aggregatedSeries[0]?.data || [];
+              if (firstSeriesData.length === 0) return;
+
+              const min = e.min ?? firstSeriesData[0][0];
+              const max =
+                e.max ?? firstSeriesData[firstSeriesData.length - 1][0];
+
+              // Більш точний розрахунок видимих точок
+              const visiblePoints = firstSeriesData.filter(
+                (point) => point[0] >= min && point[0] <= max
+              );
+
+              const visibleCount = Math.max(1, visiblePoints.length);
+              onVisibleBarsChange(visibleCount);
             }
-            onVisibleBarsChange(visibleCount);
+          },
+          afterSetExtremes: function () {
+            // Скидаємо флаг після завершення зуму
+            setTimeout(() => {
+              isUserZooming.current = false;
+            }, 100);
           }
         }
       },
@@ -634,6 +643,7 @@ const LineChart: FC<LineChartProps> = ({
     groupBy,
     isLegendEnabled,
     minRangeValue,
+    maxRangeValue,
     onVisibleBarsChange,
     eventsData,
     showEvents,

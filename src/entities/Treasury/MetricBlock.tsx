@@ -162,7 +162,13 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             value={formatPrice(stablecoinTotalValue)}
             badge={formatPrice(stablecoinLastValue, 1)}
             badgeType={stablecoinLastValue > 0 ? 'positive' : 'negative'}
-            icon={<div className='bg-success-11 h-8 w-8 rounded-full' />}
+            icon={
+              <Icon
+                name='stablecoin'
+                className='h-8 w-8'
+                folder='token'
+              />
+            }
           />
         </Card>
         <Card

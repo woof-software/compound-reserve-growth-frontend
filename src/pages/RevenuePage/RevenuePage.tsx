@@ -12,7 +12,7 @@ import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import Text from '@/shared/ui/Text/Text';
 
 const RevenuePage = () => {
-  const { data: revenueData, isLoading, isError } = useRevenue();
+  const { data: revenueData, isPending: isLoading, isError } = useRevenue();
 
   const pageData: RevenueItem[] = useMemo(
     () => revenueData || [],
@@ -55,7 +55,7 @@ const RevenuePage = () => {
           isLoading={isLoading}
           isError={isError}
         />
-        {/* TODO Refactor */}
+        {/* TODO Refactor Performance*/}
         <CompoundFeeRevenueRecieved
           revenueData={pageData}
           isLoading={isLoading}
@@ -66,7 +66,6 @@ const RevenuePage = () => {
           isLoading={isLoading}
           isError={isError}
         />
-        {/* TODO Refactor */}
         <CompoundRevenueBlock
           revenueData={pageData}
           isLoading={isLoading}
@@ -77,6 +76,7 @@ const RevenuePage = () => {
           isLoading={isLoading}
           isError={isError}
         />
+        {/* TODO Refactor Performance*/}
       </div>
     </div>
   );

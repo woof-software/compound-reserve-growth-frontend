@@ -31,12 +31,30 @@ const CompoundFeeRevenuebyChain = ({
           return null;
         }
 
+        const totalValue = totals[columnKey];
+
+        if (typeof totalValue !== 'number' || isNaN(totalValue)) {
+          return (
+            <td
+              key={columnKey}
+              className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'
+            >
+              -
+            </td>
+          );
+        }
+
+        const formattedValue =
+          totalValue < 0
+            ? `-${formatNumber(Math.abs(totalValue))}`
+            : formatNumber(totalValue);
+
         return (
           <td
             key={columnKey}
             className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'
           >
-            {formatNumber(totals[columnKey])}
+            {formattedValue}
           </td>
         );
       })}

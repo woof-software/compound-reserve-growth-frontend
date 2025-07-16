@@ -94,18 +94,16 @@ const createTableColumns = (
     {
       accessorKey: 'chain',
       header: 'Chain',
-      cell: ({ getValue }) => {
-        const chainName = getValue() as string;
-        return (
-          <div className='flex items-center gap-2'>
-            <Icon
-              name={chainName}
-              className='h-5 w-5'
-            />
-            <Text size='13'>{capitalizeFirstLetter(chainName)}</Text>
-          </div>
-        );
-      }
+      cell: ({ row }) => (
+        <div className='flex items-center gap-3'>
+          <Icon
+            name={row.original.chain || 'not-found-icon'}
+            className='h-5 w-5'
+            folder='network'
+          />
+          <Text size='13'>{capitalizeFirstLetter(row.original.chain)}</Text>
+        </div>
+      )
     },
     ...periodColumns
   ];
@@ -278,7 +276,6 @@ const RevenueOverview = ({
       ) : (
         <div className='flex items-start justify-between'>
           <RevenueOverviewUSD
-            isLoading={isLoading}
             data={processedData.tableData}
             columns={processedData.tableColumns}
             footerContent={processedData.footerContent}

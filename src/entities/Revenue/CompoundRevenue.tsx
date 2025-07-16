@@ -1,15 +1,116 @@
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import CompoundRevenue from '@/components/Charts/CompoundRevenue/CompoundRevenue';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { type RevenuePageProps } from '@/shared/hooks/useRevenue';
-import { extractFilterOptions } from '@/shared/lib/utils/utils';
+import { capitalizeFirstLetter, ChartDataItem } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import View from '@/shared/ui/View/View';
+
+interface PreprocessedItem {
+  date: string;
+  value: number;
+  chain: string;
+  market: string;
+  source: string;
+  symbol: string;
+}
+
+interface FilterOptions {
+  chainOptions: OptionType[];
+  marketOptions: OptionType[];
+  sourceOptions: OptionType[];
+  symbolOptions: OptionType[];
+}
+
+interface PreprocessedResult {
+  filterOptions: FilterOptions;
+  processedItems: PreprocessedItem[];
+  initialAggregatedData: { date: string; value: number }[];
+  sortedDates: string[];
+}
+
+function preprocessData(rawData: ChartDataItem[]): PreprocessedResult {
+  const emptyResult: PreprocessedResult = {
+    filterOptions: {
+      chainOptions: [],
+      marketOptions: [],
+      sourceOptions: [],
+      symbolOptions: []
+    },
+    processedItems: [],
+    initialAggregatedData: [],
+    sortedDates: []
+  };
+
+  if (!rawData || rawData.length === 0) {
+    return emptyResult;
+  }
+
+  const uniqueValues = {
+    chain: new Set<string>(),
+    market: new Set<string>(),
+    source: new Set<string>(),
+    symbol: new Set<string>()
+  };
+
+  const processedItems: PreprocessedItem[] = [];
+  const dailyTotals: Record<string, number> = {};
+
+  for (const item of rawData) {
+    const chain = item.source?.network || 'N/A';
+    const market =
+      item.source?.market === null ? 'no name' : item.source?.market || 'N/A';
+    const source = item.source?.type || 'N/A';
+    const symbol = item.source?.asset?.symbol || 'N/A';
+    const date = new Date(item.date * 1000).toISOString().split('T')[0];
+
+    uniqueValues.chain.add(chain);
+    uniqueValues.market.add(market);
+    uniqueValues.source.add(source);
+    uniqueValues.symbol.add(symbol);
+
+    processedItems.push({
+      date,
+      value: item.value,
+      chain,
+      market,
+      source,
+      symbol
+    });
+    dailyTotals[date] = (dailyTotals[date] || 0) + item.value;
+  }
+
+  const filterOptions: Partial<FilterOptions> = {};
+  for (const key in uniqueValues) {
+    const optionsKey = `${key}Options` as keyof FilterOptions;
+    filterOptions[optionsKey] = Array.from(
+      uniqueValues[key as keyof typeof uniqueValues]
+    )
+      .sort((a, b) => a.localeCompare(b))
+      .map((value) => ({ id: value, label: capitalizeFirstLetter(value) }));
+  }
+
+  const sortedDates = Object.keys(dailyTotals).sort();
+  const initialAggregatedData = sortedDates.map((date) => ({
+    date,
+    value: dailyTotals[date]
+  }));
+
+  return {
+    filterOptions: filterOptions as FilterOptions,
+    processedItems,
+    initialAggregatedData,
+    sortedDates // <-- Повертаємо їх
+  };
+}
+
+const createIdSet = (options: OptionType[]): Set<string> =>
+  new Set(options.map((opt) => opt.id));
 
 const CompoundRevenueBlock = ({
   revenueData: data,
@@ -33,65 +134,80 @@ const CompoundRevenueBlock = ({
     initialBarSize: 'D'
   });
 
+  const { filterOptions, processedItems, initialAggregatedData, sortedDates } =
+    useMemo(() => preprocessData(data || []), [data]);
+
+  const { chainOptions, marketOptions, sourceOptions, symbolOptions } =
+    filterOptions;
+
+  const processedChartData = useMemo(() => {
+    const hasActiveFilters =
+      selectedChains.length > 0 ||
+      selectedMarkets.length > 0 ||
+      selectedSources.length > 0 ||
+      selectedSymbols.length > 0;
+
+    if (!hasActiveFilters) {
+      return initialAggregatedData;
+    }
+
+    const activeFiltersById = {
+      chain: createIdSet(selectedChains),
+      market: createIdSet(selectedMarkets),
+      source: createIdSet(selectedSources),
+      symbol: createIdSet(selectedSymbols)
+    };
+
+    const dailyTotals: Record<string, number> = {};
+
+    for (const item of processedItems) {
+      if (
+        activeFiltersById.chain.size > 0 &&
+        !activeFiltersById.chain.has(item.chain)
+      )
+        continue;
+      if (
+        activeFiltersById.market.size > 0 &&
+        !activeFiltersById.market.has(item.market)
+      )
+        continue;
+      if (
+        activeFiltersById.source.size > 0 &&
+        !activeFiltersById.source.has(item.source)
+      )
+        continue;
+      if (
+        activeFiltersById.symbol.size > 0 &&
+        !activeFiltersById.symbol.has(item.symbol)
+      )
+        continue;
+
+      dailyTotals[item.date] = (dailyTotals[item.date] || 0) + item.value;
+    }
+
+    const result: { date: string; value: number }[] = [];
+    for (const date of sortedDates) {
+      if (dailyTotals[date] !== undefined) {
+        result.push({ date, value: dailyTotals[date] });
+      }
+    }
+    return result;
+  }, [
+    processedItems,
+    initialAggregatedData,
+    sortedDates,
+    selectedChains,
+    selectedMarkets,
+    selectedSources,
+    selectedSymbols
+  ]);
+
   const handleResetFilters = useCallback(() => {
     setSelectedChains([]);
     setSelectedMarkets([]);
     setSelectedSources([]);
     setSelectedSymbols([]);
   }, []);
-
-  const filterOptionsConfig = useMemo(
-    () => ({
-      chain: { path: 'source.network' },
-      market: { path: 'source.market' },
-      source: { path: 'source.type' },
-      symbol: { path: 'source.asset.symbol' }
-    }),
-    []
-  );
-
-  const { chainOptions, marketOptions, sourceOptions, symbolOptions } = useMemo(
-    () => extractFilterOptions(data, filterOptionsConfig),
-    [data, filterOptionsConfig]
-  );
-
-  const processedChartData = useMemo(() => {
-    const selectedChainIds = selectedChains.map((opt) => opt.id);
-    const selectedMarketIds = selectedMarkets.map((opt) => opt.id);
-    const selectedSourceIds = selectedSources.map((opt) => opt.id);
-    const selectedSymbolIds = selectedSymbols.map((opt) => opt.id);
-
-    return data
-      .filter((item) => {
-        const chainMatch =
-          selectedChainIds.length === 0 ||
-          selectedChainIds.includes(item.source?.network);
-
-        const marketMatch =
-          selectedMarketIds.length === 0 ||
-          (() => {
-            let marketValue = item.source?.market;
-            if (marketValue === null) {
-              marketValue = 'no name';
-            }
-            return selectedMarketIds.includes(marketValue);
-          })();
-
-        const sourceMatch =
-          selectedSourceIds.length === 0 ||
-          selectedSourceIds.includes(item.source?.type);
-
-        const symbolMatch =
-          selectedSymbolIds.length === 0 ||
-          selectedSymbolIds.includes(item.source?.asset?.symbol);
-
-        return chainMatch && marketMatch && sourceMatch && symbolMatch;
-      })
-      .map((item) => ({
-        date: new Date(item.date * 1000).toISOString().split('T')[0],
-        value: item.value
-      }));
-  }, [data, selectedChains, selectedMarkets, selectedSources, selectedSymbols]);
 
   const hasData = processedChartData.length > 0;
   const noDataMessage =

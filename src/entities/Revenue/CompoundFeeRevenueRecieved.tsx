@@ -1,14 +1,11 @@
-import { useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 
 import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/CompoundFeeRecieved';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
-import {
-  extractFilterOptions,
-  FilterOptionsConfig
-} from '@/shared/lib/utils/utils';
+import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
@@ -41,44 +38,40 @@ const CompoundFeeRevenueRecieved = ({
     setSelectedMarkets([]);
   }, []);
 
-  const { chainOptions, marketOptions } = useMemo(() => {
+  const { chainOptions, marketOptions, chartData } = useMemo(() => {
     if (!rawData || rawData.length === 0) {
-      return { chainOptions: [], marketOptions: [] };
+      return {
+        chainOptions: [],
+        marketOptions: [],
+        chartData: []
+      };
     }
 
-    const config: FilterOptionsConfig = {
-      chain: {
-        path: 'source.network'
-      },
-      market: {
-        path: 'source.market'
-      }
-    };
+    const selectedChainSet = new Set(selectedChains.map((c) => c.id));
+    const selectedMarketSet = new Set(selectedMarkets.map((m) => m.id));
+    const isChainFilterActive = selectedChainSet.size > 0;
+    const isMarketFilterActive = selectedMarketSet.size > 0;
 
-    return extractFilterOptions(rawData, config);
-  }, [rawData]);
-
-  const chartData = (() => {
-    const selectedChainIds = selectedChains.map((c) => c.id);
-    const selectedMarketIds = selectedMarkets.map((m) => m.id);
-
-    const filteredRawData = rawData.filter((item) => {
-      const chainMatch =
-        selectedChainIds.length === 0 ||
-        selectedChainIds.includes(item.source.network);
-
-      const marketMatch =
-        selectedMarketIds.length === 0 ||
-        selectedMarketIds.includes(item.source.market ?? 'no name');
-
-      return chainMatch && marketMatch;
-    });
-
+    const uniqueChains = new Set<string>();
+    const uniqueMarkets = new Set<string>();
     const groupedByDate: { [date: string]: StackedChartData } = {};
 
-    filteredRawData.forEach((item) => {
+    for (const item of rawData) {
+      const network = item.source.network;
+      const marketName = item.source.market ?? 'no name';
+
+      uniqueChains.add(network);
+      uniqueMarkets.add(marketName);
+
+      const chainMatch = !isChainFilterActive || selectedChainSet.has(network);
+      if (!chainMatch) continue;
+
+      const marketMatch =
+        !isMarketFilterActive || selectedMarketSet.has(marketName);
+      if (!marketMatch) continue;
+
       const date = new Date(item.date * 1000).toISOString().split('T')[0];
-      const seriesKey = item.source.network;
+      const seriesKey = network;
 
       if (!groupedByDate[date]) {
         groupedByDate[date] = { date };
@@ -86,12 +79,27 @@ const CompoundFeeRevenueRecieved = ({
 
       groupedByDate[date][seriesKey] =
         ((groupedByDate[date][seriesKey] as number) || 0) + item.value;
-    });
+    }
 
-    return Object.values(groupedByDate).sort(
+    const createOptions = (uniqueValues: Set<string>): OptionType[] => {
+      return Array.from(uniqueValues)
+        .sort((a, b) => a.localeCompare(b))
+        .map((value) => ({
+          id: value,
+          label: capitalizeFirstLetter(value)
+        }));
+    };
+
+    const finalChartData = Object.values(groupedByDate).sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
-  })();
+
+    return {
+      chainOptions: createOptions(uniqueChains),
+      marketOptions: createOptions(uniqueMarkets),
+      chartData: finalChartData
+    };
+  }, [rawData, selectedChains, selectedMarkets]);
 
   const hasData = chartData.length > 0;
   const noDataMessage =
@@ -154,4 +162,4 @@ const CompoundFeeRevenueRecieved = ({
   );
 };
 
-export default CompoundFeeRevenueRecieved;
+export default memo(CompoundFeeRevenueRecieved);
