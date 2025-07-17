@@ -28,7 +28,7 @@ This project is built on a modern stack to ensure high performance and reliabili
 • **Styling:** Tailwind CSS  
 • **Routing:** React Router  
 • **Data Fetching:** TanStack Query (React Query)  
-• **UI Components:** Radix UI & Lucide React (icons)  
+• **UI Components:** Radix UI  
 • **Data Visualization:** Highcharts  
 • **Code Quality:** ESLint, Prettier, Stylelint, Husky
 
@@ -38,12 +38,6 @@ This project is built on a modern stack to ensure high performance and reliabili
 
    ```bash
    npm install
-   ```
-
-   Using yarn:
-
-   ```bash
-   yarn install
    ```
 
 2. **Set up environment variables:**
@@ -60,12 +54,6 @@ This project is built on a modern stack to ensure high performance and reliabili
 
    ```bash
    npm run dev
-   ```
-
-   Using yarn:
-
-   ```bash
-   yarn dev
    ```
 
 The application will be available at `http://localhost:5173`.
@@ -88,17 +76,11 @@ Using npm:
 npm run build
 ```
 
-Using yarn:
-
-```bash
-yarn build
-```
-
 This command will type-check the code and then bundle the final project files into the `dist/` directory.
 
 ## 🛠️ Available Scripts
 
-You can run these scripts with either `npm run <script-name>` or `yarn <script-name>`.
+You can run these scripts with either `npm run <script-name>`.
 
 • `dev` — Starts the development server with HMR.  
 • `build` — Builds the project for production.  
