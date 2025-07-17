@@ -145,7 +145,12 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             value={formatPrice(nonCompTotalValue)}
             badge={formatPrice(nonCompLastValue, 1)}
             badgeType={nonCompLastValue > 0 ? 'positive' : 'negative'}
-            icon={<div className='bg-success-11 h-8 w-8 rounded-full' />}
+            icon={
+              <Icon
+                name='total-non-comp-value'
+                className='h-8 w-8'
+              />
+            }
           />
         </Card>
       </div>
