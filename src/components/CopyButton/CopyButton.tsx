@@ -32,7 +32,7 @@ export const ClipboardButton = ({
       onMouseDown={handleMouseEvent}
       onMouseUp={handleMouseEvent}
       className={cn(
-        'z-10 flex h-5 w-5 cursor-pointer items-center justify-center',
+        'z-10 flex h-4 w-4 cursor-pointer items-center justify-center',
         className
       )}
       aria-label={isCopied ? 'Copied' : 'Copy'}
