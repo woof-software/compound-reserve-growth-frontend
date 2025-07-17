@@ -9,6 +9,7 @@ import Text from '@/shared/ui/Text/Text';
 
 import { ClipboardButton } from '../CopyButton/CopyButton';
 import HoverCard from '../HoverCard/HoverCard';
+import Icon from '@/shared/ui/Icon/Icon';
 
 interface AddressTooltipProps {
   text: string;
@@ -45,16 +46,16 @@ export const AddressTooltip: React.FC<AddressTooltipProps> = ({
     </div>
   );
   const tooltipContent = (
-    <div className='flex w-48 flex-col items-start gap-2 p-1'>
+    <div className='flex w-50 flex-col items-start gap-2'>
       <Text
-        size='13'
+        size='12'
         className='text-primary-11'
       >
         {text}
       </Text>
       <div className='flex w-full items-center justify-between'>
         <Text
-          size='13'
+          size='12'
           className='text-primary-11'
         >
           {sliceAddress(address, 7)}
@@ -62,20 +63,23 @@ export const AddressTooltip: React.FC<AddressTooltipProps> = ({
         <ClipboardButton textToCopy={address} />
       </div>
       <div className='flex w-full items-center justify-between'>
+        <Text
+          size='12'
+          className='text-primary-11'
+        >
+          View on Explorer
+        </Text>
         <a
           href={fullExplorerLink}
           target='_blank'
           rel='noopener noreferrer'
-          className='text-primary-11 flex w-full items-center justify-between text-sm transition-colors hover:text-white'
+          className='text-primary-11 flex h-4 w-4 items-center justify-center'
         >
-          <Text
-            size='13'
-            className='inline-block max-w-full truncate border-b border-dotted border-gray-500 leading-none'
-          >
-            View on Explorer
-          </Text>
+          <Icon
+            name={'arrow-link'}
+            className='h-4.5 w-3 text-[#7A8A99]'
+          />
         </a>
-        <ClipboardButton textToCopy={fullExplorerLink} />
       </div>
     </div>
   );
