@@ -1,0 +1,109 @@
+/*
+Calculation logic for the "Current Initiatives" block:
+1. Filtering: Takes only expenses of type 'initiative' that were active within the last year (365 days from today).
+2. Table Data: Each active initiative is displayed as a separate row. There is NO GROUPING OR SUMMATION for the table data.
+3. Pie Chart Data: The total values (`item.value`) are grouped and summed by the initiative's discipline to show the total expense per discipline.
+4. Values Used: The full contract values (`item.value` and `item.amount`) are used, not the annualised equivalents.
+*/
+import React, { useMemo } from 'react';
+
+import PieChart from '@/components/Charts/Pie/Pie';
+import CurrentInitiatives from '@/components/RunwayPageTable/CurrentInitiatives';
+import type { RunwayItem } from '@/shared/hooks/useRunway';
+import { useRunway } from '@/shared/hooks/useRunway';
+import { formatPrice } from '@/shared/lib/utils/utils';
+import Card from '@/shared/ui/Card/Card';
+
+const CurrentInitiativesBlock = () => {
+  const { data: apiResponse, isLoading, isError } = useRunway();
+
+  const processedData = useMemo(() => {
+    const data = apiResponse?.data || [];
+    const initialResult = {
+      tableData: [],
+      footerData: { totalValue: 0, totalValueWithBounty: 0 },
+      pieData: []
+    };
+
+    if (!data.length) {
+      return initialResult;
+    }
+
+    const today = new Date();
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+
+    const initiativeData = data.filter((item: RunwayItem) => {
+      if (item.type !== 'initiative') {
+        return false;
+      }
+      const startDate = new Date(item.startDate);
+      const endDate = new Date(item.endDate);
+
+      const isActiveInLastYear = startDate <= today && endDate >= oneYearAgo;
+      return isActiveInLastYear;
+    });
+
+    if (!initiativeData.length) {
+      return initialResult;
+    }
+
+    initiativeData.sort((a, b) => b.value - a.value);
+
+    const tableData = initiativeData.map((item) => ({
+      initiative: item.name,
+      discipline: item.discipline,
+      token: item.token,
+      amount: item.amount,
+      value: item.value
+    }));
+
+    const totalValue = initiativeData.reduce(
+      (sum, item) => sum + item.value,
+      0
+    );
+    const footerData = { totalValue, totalValueWithBounty: totalValue };
+
+    const expensesByDisciplineForPie: Record<string, number> = {};
+    initiativeData.forEach((item) => {
+      expensesByDisciplineForPie[item.discipline] =
+        (expensesByDisciplineForPie[item.discipline] || 0) + item.value;
+    });
+
+    const totalValueForPie = footerData.totalValue;
+    const pieData = Object.entries(expensesByDisciplineForPie)
+      .sort(([, aValue], [, bValue]) => bValue - aValue)
+      .map(([name, value]) => ({
+        name,
+        value: formatPrice(value, 1),
+        percent: totalValueForPie > 0 ? (value / totalValueForPie) * 100 : 0
+      }));
+
+    return { tableData, footerData, pieData };
+  }, [apiResponse]);
+
+  return (
+    <Card
+      title='Current Initiatives'
+      id='current-initiatives'
+      isLoading={isLoading}
+      isError={isError}
+      className={{
+        loading: 'min-h-[571px]'
+      }}
+    >
+      <div className='flex justify-between gap-10'>
+        <CurrentInitiatives
+          data={processedData.tableData}
+          footerData={processedData.footerData}
+        />
+        <PieChart
+          className='max-h-[400px] max-w-[336.5px]'
+          data={processedData.pieData}
+        />
+      </div>
+    </Card>
+  );
+};
+
+export default CurrentInitiativesBlock;

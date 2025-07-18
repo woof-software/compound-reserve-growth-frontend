@@ -3,7 +3,7 @@
     "outDir": "./dist/",
     "noImplicitAny": true,
     "module": "ESNext",
-    "target": "es5",
+    "target": "ES2023",
     "jsx": "react-jsx",
     "allowJs": true,
     "strict": true,
@@ -17,5 +17,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx"]
+  "include": ["./src/**/*.ts", "./src/**/*.tsx", "src/components/HoverCard/HoverCard.tsx"]
 }
