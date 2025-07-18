@@ -51,13 +51,22 @@ const Footer: FC = () => {
                 />
               </Link>
             </div>
-            <Text
-              size='11'
-              weight='500'
-              className='text-primary-14'
-            >
-              ©2025 Compound Finance. All Rights Reserved
-            </Text>
+            <div className='flex flex-col items-end gap-1'>
+              <Text
+                size='11'
+                weight='500'
+                className='text-primary-14'
+              >
+                ©2025 Compound Finance. All Rights Reserved
+              </Text>
+              <Text
+                size='11'
+                weight='500'
+                className='!text-[#00D395]'
+              >
+                The dashboards should not be the basis for investing, etc.
+              </Text>
+            </div>
           </div>
         </div>
       </div>
