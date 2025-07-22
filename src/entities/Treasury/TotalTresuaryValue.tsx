@@ -256,3 +256,41 @@ const TotalTresuaryValue = ({
 };
 
 export default TotalTresuaryValue;
+
+{
+  /* <div className='flex justify-end gap-3 px-0 py-3'>
+  <div className='flex gap-2'>
+    <MultiSelect
+      options={chainOptions}
+      value={selectedChains}
+      onChange={setSelectedChains}
+      placeholder='Chain'
+    />
+    <MultiSelect
+      options={marketOptions}
+      value={selectedMarkets}
+      onChange={setSelectedMarkets}
+      placeholder='Market'
+    />
+  </div>
+  <TabsGroup
+    tabs={['D', 'W', 'M']}
+    value={barSize}
+    onTabChange={handleBarSizeChange}
+  />
+  <TabsGroup
+    tabs={['7B', '30B', '90B', '180B']}
+    value={activeTab}
+    onTabChange={handleTabChange}
+  />
+  <SingleDropdown
+    options={groupByOptions}
+    isOpen={isGroupByOpen}
+    selectedValue={groupBy}
+    onToggle={toggleGroupBy}
+    onClose={closeGroupBy}
+    onSelect={handleSelectGroupBy}
+    disabled={isLoading}
+  />
+</div> */
+}
