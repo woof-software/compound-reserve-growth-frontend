@@ -1,15 +1,16 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 
 import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/CompoundFeeRecieved';
+import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
+import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 
 const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
 
@@ -139,106 +140,18 @@ const CompoundFeeRevenueRecieved = ({
     };
   }, [rawData, selectedChains, selectedMarkets, groupBy]);
 
-  const csvData = useMemo(() => {
-    if (!chartData || chartData.length === 0 || !rawData) return [];
-
-    if (barSize === 'D') {
-      return chartData.map((row) => {
-        const csvRow: Record<string, string | number> = { Date: row.date };
-        Object.keys(row).forEach((key) => {
-          if (key !== 'date') {
-            csvRow[key] = row[key];
-          }
-        });
-        return csvRow;
-      });
-    }
-
-    const selectedChainSet = new Set(selectedChains.map((c) => c.id));
-    const selectedMarketSet = new Set(selectedMarkets.map((m) => m.id));
-    const isChainFilterActive = selectedChainSet.size > 0;
-    const isMarketFilterActive = selectedMarketSet.size > 0;
-
-    const filteredData = rawData
-      .filter((item) => {
-        const network = item.source.network;
-        const marketName = item.source.market ?? 'no name';
-        const chainMatch =
-          !isChainFilterActive || selectedChainSet.has(network);
-        const marketMatch =
-          !isMarketFilterActive || selectedMarketSet.has(marketName);
-        return chainMatch && marketMatch;
-      })
-      .sort((a, b) => a.date - b.date);
-
-    const pointsPerBar = { D: 1, W: 7, M: 30 };
-    const chunkSize = pointsPerBar[barSize];
-    const groupedByDate: { [date: string]: StackedChartData } = {};
-    const groupByKeyPath = groupByPathMapping[groupBy];
-
-    for (let i = 0; i < filteredData.length; i += chunkSize) {
-      const chunk = filteredData.slice(i, i + chunkSize);
-      if (chunk.length === 0) continue;
-
-      const firstPointDate = new Date(chunk[0].date * 1000);
-
-      const date =
-        barSize === 'M'
-          ? new Date(firstPointDate.getFullYear(), firstPointDate.getMonth(), 1)
-              .toISOString()
-              .split('T')[0]
-          : barSize === 'W'
-            ? (() => {
-                const dayOfWeek = firstPointDate.getUTCDay();
-                const diff =
-                  firstPointDate.getUTCDate() -
-                  dayOfWeek +
-                  (dayOfWeek === 0 ? -6 : 1);
-                const startOfWeek = new Date(firstPointDate);
-                startOfWeek.setUTCDate(diff);
-                return startOfWeek.toISOString().split('T')[0];
-              })()
-            : firstPointDate.toISOString().split('T')[0];
-
-      if (!groupedByDate[date]) {
-        groupedByDate[date] = { date };
-      }
-
-      for (const item of chunk) {
-        let seriesKey: string;
-        if (groupBy === 'None') {
-          seriesKey = 'Total';
-        } else {
-          seriesKey = getValueByPath(item, groupByKeyPath) || 'Unknown';
-        }
-
-        groupedByDate[date][seriesKey] =
-          ((groupedByDate[date][seriesKey] as number) || 0) + item.value;
-      }
-    }
-
-    const aggregatedData = Object.values(groupedByDate).sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
-
-    return aggregatedData.map((row) => {
-      const csvRow: Record<string, string | number> = { Date: row.date };
-      Object.keys(row).forEach((key) => {
-        if (key !== 'date') {
-          csvRow[key] = row[key];
-        }
-      });
-      return csvRow;
-    });
-  }, [chartData, rawData, barSize, selectedChains, selectedMarkets, groupBy]);
-
-  const csvFilename = useMemo(() => {
-    const timeframe =
-      barSize === 'D' ? 'Daily' : barSize === 'W' ? 'Weekly' : 'Monthly';
-    const groupByText =
-      groupBy === 'None' ? 'Total' : groupBy.replace(' ', '_');
-    return `Compound_Fee_Revenue_${timeframe}_${groupByText}.csv`;
-  }, [barSize, groupBy]);
+  const { csvData, csvFilename } = useCSVExport({
+    stackedData: chartData,
+    barSize,
+    groupBy,
+    filePrefix: 'Compound_Fee_Revenue',
+    aggregationType: 'sum',
+    rawData,
+    selectedChains,
+    selectedMarkets,
+    groupByPathMapping,
+    getValueByPath
+  });
 
   const hasData = chartData.length > 0;
   const noDataMessage =

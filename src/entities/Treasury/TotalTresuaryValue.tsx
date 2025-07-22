@@ -1,12 +1,14 @@
 import { useCallback, useMemo } from 'react';
 
 import LineChart from '@/components/Charts/Line/Line';
+import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
 import { useFilter } from '@/components/Filter/useFilter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
+import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Card from '@/shared/ui/Card/Card';
@@ -29,7 +31,6 @@ interface TotalTreasuryValueProps {
 
 const TotalTresuaryValue = ({
   isLoading,
-
   isError,
   data: treasuryApiResponse
 }: TotalTreasuryValueProps) => {
@@ -174,6 +175,14 @@ const TotalTresuaryValue = ({
     });
   }, [chartSeries]);
 
+  const { csvData, csvFilename } = useCSVExport({
+    chartSeries: correctedChartSeries,
+    barSize,
+    groupBy,
+    filePrefix: 'Total_Treasury_Value',
+    aggregationType: 'sum'
+  });
+
   const hasData = useMemo(() => {
     return (
       correctedChartSeries.length > 0 &&
@@ -237,6 +246,10 @@ const TotalTresuaryValue = ({
           {...filterProps}
           disabled={isLoading}
         />
+        <CSVDownloadButton
+          data={csvData}
+          filename={csvFilename}
+        />
       </div>
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder onButtonClick={handleClearAll} />
@@ -256,41 +269,3 @@ const TotalTresuaryValue = ({
 };
 
 export default TotalTresuaryValue;
-
-{
-  /* <div className='flex justify-end gap-3 px-0 py-3'>
-  <div className='flex gap-2'>
-    <MultiSelect
-      options={chainOptions}
-      value={selectedChains}
-      onChange={setSelectedChains}
-      placeholder='Chain'
-    />
-    <MultiSelect
-      options={marketOptions}
-      value={selectedMarkets}
-      onChange={setSelectedMarkets}
-      placeholder='Market'
-    />
-  </div>
-  <TabsGroup
-    tabs={['D', 'W', 'M']}
-    value={barSize}
-    onTabChange={handleBarSizeChange}
-  />
-  <TabsGroup
-    tabs={['7B', '30B', '90B', '180B']}
-    value={activeTab}
-    onTabChange={handleTabChange}
-  />
-  <SingleDropdown
-    options={groupByOptions}
-    isOpen={isGroupByOpen}
-    selectedValue={groupBy}
-    onToggle={toggleGroupBy}
-    onClose={closeGroupBy}
-    onSelect={handleSelectGroupBy}
-    disabled={isLoading}
-  />
-</div> */
-}

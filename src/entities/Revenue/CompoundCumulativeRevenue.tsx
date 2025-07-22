@@ -1,10 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import LineChart from '@/components/Charts/Line/Line';
+import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
+import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
@@ -130,6 +132,14 @@ const CompoundCumulativeRevenue = ({
     });
   }, [chartSeries]);
 
+  const { csvData, csvFilename } = useCSVExport({
+    chartSeries: cumulativeChartSeries,
+    barSize,
+    groupBy,
+    filePrefix: 'Compound_Cumulative_Revenue',
+    aggregationType: 'last'
+  });
+
   const hasData = useMemo(() => {
     return (
       cumulativeChartSeries.length > 0 &&
@@ -189,6 +199,10 @@ const CompoundCumulativeRevenue = ({
           value={activeTab}
           onTabChange={handleTabChange}
           disabled={isLoading}
+        />
+        <CSVDownloadButton
+          data={csvData}
+          filename={csvFilename}
         />
       </div>
       {!isLoading && !isError && !hasData ? (

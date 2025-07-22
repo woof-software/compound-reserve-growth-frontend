@@ -1,9 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
 import CompoundRevenue from '@/components/Charts/CompoundRevenue/CompoundRevenue';
+import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { type RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { capitalizeFirstLetter, ChartDataItem } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
@@ -105,7 +107,7 @@ function preprocessData(rawData: ChartDataItem[]): PreprocessedResult {
     filterOptions: filterOptions as FilterOptions,
     processedItems,
     initialAggregatedData,
-    sortedDates // <-- Повертаємо їх
+    sortedDates
   };
 }
 
@@ -202,6 +204,37 @@ const CompoundRevenueBlock = ({
     selectedSymbols
   ]);
 
+  const chartSeriesForCSV = useMemo(() => {
+    if (!processedChartData || processedChartData.length === 0) return [];
+
+    return [
+      {
+        name: 'Revenue',
+        data: processedChartData.map((item) => ({
+          x: new Date(item.date).getTime(),
+          y: item.value
+        }))
+      }
+    ];
+  }, [processedChartData]);
+
+  const groupBy = useMemo(() => {
+    const hasFilters =
+      selectedChains.length > 0 ||
+      selectedMarkets.length > 0 ||
+      selectedSources.length > 0 ||
+      selectedSymbols.length > 0;
+    return hasFilters ? 'Filtered' : 'Total';
+  }, [selectedChains, selectedMarkets, selectedSources, selectedSymbols]);
+
+  const { csvData, csvFilename } = useCSVExport({
+    chartSeries: chartSeriesForCSV,
+    barSize,
+    groupBy,
+    filePrefix: 'Compound_Revenue',
+    aggregationType: 'sum'
+  });
+
   const handleResetFilters = useCallback(() => {
     setSelectedChains([]);
     setSelectedMarkets([]);
@@ -272,6 +305,10 @@ const CompoundRevenueBlock = ({
           value={activeTab}
           onTabChange={handleTabChange}
           disabled={isLoading}
+        />
+        <CSVDownloadButton
+          data={csvData}
+          filename={csvFilename}
         />
       </div>
       <View.Condition if={!isLoading && !isError && hasData}>
