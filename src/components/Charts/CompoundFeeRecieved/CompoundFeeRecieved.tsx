@@ -69,16 +69,16 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       const chunk = data.slice(i, i + chunkSize);
       if (chunk.length === 0) continue;
 
-      const lastPointDate = new Date(chunk[chunk.length - 1].date);
+      const firstPointDate = new Date(chunk[0].date);
 
       const timestamp =
         barSize === 'M'
           ? new Date(
-              lastPointDate.getFullYear(),
-              lastPointDate.getMonth(),
+              firstPointDate.getFullYear(),
+              firstPointDate.getMonth(),
               1
             ).getTime()
-          : lastPointDate.getTime();
+          : firstPointDate.getTime();
 
       const aggregatedPoint: AggregatedPoint = { x: timestamp };
 
