@@ -137,11 +137,13 @@ const TreasuryBalanceByNetworkBlock = ({
   }, [data, selected]);
 
   const chartData = useMemo(() => {
-    return tableData.map((item, index) => ({
-      name: item.symbol,
-      value: item.value,
-      color: colorPicker(index)
-    }));
+    return tableData
+      .map((item, index) => ({
+        name: item.symbol,
+        value: item.value,
+        color: colorPicker(index)
+      }))
+      .filter((el) => el.value > 0);
   }, [tableData]);
 
   useEffect(() => {
@@ -155,6 +157,8 @@ const TreasuryBalanceByNetworkBlock = ({
       }
     }
   }, [filtersList, selected, toggle, apply]);
+
+  console.log('tableData=>', tableData);
 
   return (
     <Card

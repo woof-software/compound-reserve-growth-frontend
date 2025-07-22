@@ -20,7 +20,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
 }) => {
   return (
     <DataTable
-      className='max-w-[800px]'
+      className='flex min-h-[565px] max-w-[800px] flex-col justify-between'
       enableSorting={true}
       data={data}
       columns={columns}

@@ -78,6 +78,7 @@ const RevenueBreakdown = ({ data, columns }: RevenueBreakdownProps) => {
       data={data}
       columns={columns}
       pageSize={10}
+      className='flex min-h-[565px] flex-col justify-between'
       headerCellClassName='py-[13px] px-[5px]'
       cellClassName='py-3 px-[5px]'
       headerTextClassName='text-primary-14 font-medium'

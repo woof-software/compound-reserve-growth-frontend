@@ -115,9 +115,7 @@ const Header: FC = () => {
                       name={link.icon}
                       className='h-3 w-3'
                       isRound={false}
-                      color={
-                        isActive(link.to) ? 'color-white' : 'color-gray-11'
-                      }
+                      color='color-gray-11'
                     />
                   }
                 >

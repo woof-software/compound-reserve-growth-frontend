@@ -79,6 +79,7 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
       enableSorting
       enablePagination
       paginationClassName='py-[13px] px-[5px]'
+      className='flex min-h-[400px] flex-col justify-between'
     />
   );
 };
