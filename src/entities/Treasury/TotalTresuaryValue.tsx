@@ -7,11 +7,7 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
-import {
-  capitalizeFirstLetter,
-  ChartDataItem,
-  extractFilterOptions
-} from '@/shared/lib/utils/utils';
+import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
@@ -91,7 +87,7 @@ const TotalTresuaryValue = ({
         id: 'chain',
         title: 'Chain',
         placeholder: 'Add Chain',
-        options: chainOptions?.map((o) => capitalizeFirstLetter(o.id)) || []
+        options: chainOptions?.map((o) => o.id) || []
       },
       {
         id: 'assetType',
@@ -246,6 +242,7 @@ const TotalTresuaryValue = ({
         <NoDataPlaceholder onButtonClick={handleClearAll} />
       ) : (
         <LineChart
+          key={groupBy}
           data={correctedChartSeries}
           groupBy={groupBy}
           className='max-h-[400px]'

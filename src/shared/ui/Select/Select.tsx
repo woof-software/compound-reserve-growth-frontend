@@ -4,7 +4,10 @@ import * as React from 'react';
 import { useClickOutside } from '@/shared/hooks/useClickOutside';
 import { useModal } from '@/shared/hooks/useModal';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { preventEventBubbling } from '@/shared/lib/utils/utils';
+import {
+  capitalizeFirstLetter,
+  preventEventBubbling
+} from '@/shared/lib/utils/utils';
 import Each from '@/shared/ui/Each/Each';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
@@ -150,7 +153,7 @@ const SelectItem: FC<SelectItemProps> = memo(
           weight='500'
           lineHeight='16'
         >
-          {asset}
+          {capitalizeFirstLetter(asset)}
         </Text>
         <View.Condition if={isSelected}>
           <CheckStroke
