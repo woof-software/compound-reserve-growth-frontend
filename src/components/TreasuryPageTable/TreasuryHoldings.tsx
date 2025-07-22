@@ -2,7 +2,7 @@ import * as React from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
 
 import { cn } from '@/shared/lib/classNames/classNames';
-import { formatLargeNumber } from '@/shared/lib/utils/utils';
+import { formatLargeNumber, formatPrice } from '@/shared/lib/utils/utils';
 import DataTable from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -69,7 +69,7 @@ const treasuryColumns: ColumnDef<TreasuryBalanceByNetworkType>[] = [
     header: 'Value',
     enableSorting: true,
     cell: ({ row }) => (
-      <Text size='13'>{formatLargeNumber(row.original.value, 1)}</Text>
+      <Text size='13'>{formatPrice(row.original.value, 1)}</Text>
     )
   },
   {
@@ -77,7 +77,7 @@ const treasuryColumns: ColumnDef<TreasuryBalanceByNetworkType>[] = [
     header: 'Price',
     enableSorting: true,
     cell: ({ row }) => (
-      <Text size='13'>{formatLargeNumber(row.original.price, 1)}</Text>
+      <Text size='13'>{formatPrice(row.original.price, 1)}</Text>
     )
   },
   {
