@@ -67,6 +67,7 @@ const CompoundFeeRevenuebyChain = ({
       columns={columns}
       pageSize={10}
       footerContent={columns.length > 0 ? footerRow : null}
+      className='flex min-h-[565px] flex-col justify-between'
       headerCellClassName='py-[13px] px-[5px]'
       cellClassName='py-3 px-[5px]'
       headerTextClassName='text-primary-14 font-medium'

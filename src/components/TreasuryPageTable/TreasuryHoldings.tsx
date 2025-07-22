@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
 
+import { cn } from '@/shared/lib/classNames/classNames';
 import { formatLargeNumber } from '@/shared/lib/utils/utils';
 import DataTable from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -106,6 +107,9 @@ const TreasuryHoldings = ({ tableData }: TreasuryHoldingsProps) => {
       enableSorting
       enablePagination
       pageSize={10}
+      className={cn('flex flex-col justify-between', {
+        'min-h-[565px]': tableData.length > 10
+      })}
       headerCellClassName='py-[13px] px-[5px]'
       cellClassName='py-3 px-[5px]'
       headerTextClassName='text-primary-14 font-medium'
