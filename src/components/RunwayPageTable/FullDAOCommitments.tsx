@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { cn } from '@/shared/lib/classNames/classNames';
 import {
   formatDateWithOrdinal,
   formatLargeNumber
@@ -110,6 +111,9 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({ data }) => {
       data={data}
       columns={columns}
       pageSize={10}
+      className={cn('flex flex-col justify-between', {
+        'min-h-[565px]': data.length > 10
+      })}
       headerCellClassName='py-[13px] px-[5px]'
       cellClassName='py-3 px-[5px]'
       headerTextClassName='text-primary-14 font-medium'

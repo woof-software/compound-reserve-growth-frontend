@@ -74,6 +74,7 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
       columns={columns}
       pageSize={10}
       footerContent={footerContent}
+      className='flex min-h-[400px] flex-col justify-between'
       headerCellClassName='py-[13px] px-[5px]'
       cellClassName='py-3 px-[5px]'
       headerTextClassName='text-primary-14 font-medium'
