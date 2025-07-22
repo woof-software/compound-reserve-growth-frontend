@@ -4,16 +4,8 @@ import PieChart from '@/components/Charts/Pie/Pie';
 import AnnualisedExpenses from '@/components/RunwayPageTable/AnnualisedExpenses';
 import type { RunwayItem } from '@/shared/hooks/useRunway';
 import { useRunway } from '@/shared/hooks/useRunway';
-import { formatPrice } from '@/shared/lib/utils/utils';
+import { formatLargeNumber } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
-
-/*
-Calculation logic for the "Annualised Expenses" block (Table and Pie Chart):
-1. Filtering: Takes only the expenses that are active within the current calendar year (e.g., 2025).
-2. Annualisation: For each filtered expense, its "annualised equivalent" is calculated for both the USD value (`annualisedValue`) and the token quantity (`annualisedAmount`).
-3. Table Aggregation: The data is grouped by "Discipline" and "Token", and their respective annualised values are then summed up.
-4. Pie Chart Aggregation: The data is grouped only by "Discipline", summing the annualised USD value for each segment.
-*/
 
 const AnnualisedExpensesBlock = () => {
   const { data: runwayResponse, isLoading, isError } = useRunway();
@@ -45,6 +37,10 @@ const AnnualisedExpensesBlock = () => {
     const expensesByDisciplineForPie: Record<string, number> = {};
 
     data.forEach((item: RunwayItem) => {
+      if (!item.startDate || !item.endDate) {
+        return;
+      }
+
       const startDate = new Date(item.startDate);
       const endDate = new Date(item.endDate);
       const startYear = startDate.getFullYear();
@@ -57,7 +53,8 @@ const AnnualisedExpensesBlock = () => {
       }
 
       const durationMs = endDate.getTime() - startDate.getTime();
-      const durationDays = durationMs / (1000 * 60 * 60 * 24) + 1;
+
+      const durationDays = durationMs / (1000 * 60 * 60 * 24);
 
       if (durationDays <= 0) {
         return;
@@ -102,7 +99,7 @@ const AnnualisedExpensesBlock = () => {
       .sort(([, valueA], [, valueB]) => valueB - valueA)
       .map(([name, value]) => ({
         name,
-        value: formatPrice(value, 1),
+        value: formatLargeNumber(value, 2),
         percent: totalValueForPie > 0 ? (value / totalValueForPie) * 100 : 0
       }));
 
