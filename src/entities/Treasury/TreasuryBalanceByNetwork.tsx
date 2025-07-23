@@ -1,8 +1,7 @@
-import { useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 
 import CryptoChart from '@/components/Charts/Bar/Bar';
-import Filter from '@/components/Filter/Filter';
-import { useFilter } from '@/components/Filter/useFilter';
+import { MultiSelect, Option } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import TreasuryBalanceByNetwork, {
   TreasuryBalanceByNetworkType
@@ -13,6 +12,7 @@ import {
   extractFilterOptions
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
+import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import View from '@/shared/ui/View/View';
 
@@ -46,6 +46,18 @@ const TreasuryBalanceByNetworkBlock = ({
   isError,
   data
 }: TreasuryBalanceByNetworkBlockProps) => {
+  const [selectedOptions, setSelectedOptions] = useReducer(
+    (prev, next) => ({
+      ...prev,
+      ...next
+    }),
+    {
+      chain: [{ id: 'mainnet', label: 'Mainnet' }],
+      assetType: [],
+      deployment: []
+    }
+  );
+
   const filterOptionsConfig = useMemo(
     () => ({
       chain: { path: 'source.network' },
@@ -60,81 +72,34 @@ const TreasuryBalanceByNetworkBlock = ({
     [data, filterOptionsConfig]
   );
 
-  const filtersList = useMemo(
-    () => [
-      {
-        id: 'chain',
-        title: 'Chain',
-        placeholder: 'Add Chain',
-        options: chainOptions?.map((o) => capitalizeFirstLetter(o.id)) || []
-      },
-      {
-        id: 'assetType',
-        title: 'Asset Type',
-        placeholder: 'Add Asset Type',
-        options: assetTypeOptions?.map((o) => o.id) || []
-      },
-      {
-        id: 'deployment',
-        title: 'Market',
-        placeholder: 'Add Market',
-        options: deploymentOptions?.map((o) => o.id) || []
-      }
-    ],
-    [chainOptions, assetTypeOptions, deploymentOptions]
-  );
-
-  const { local, selected, toggle, apply, clear, reset } = useFilter();
-
-  const activeCount = useMemo(
-    () =>
-      selected.reduce((acc, filter) => acc + filter.selectedItems.length, 0),
-    [selected]
-  );
-
-  const filterProps = useMemo(
-    () => ({
-      activeFilters: activeCount,
-      selectedItems: local,
-      filtersList,
-      onFilterItemSelect: toggle,
-      onApply: apply,
-      onClear: clear,
-      onOutsideClick: reset
-    }),
-    [activeCount, local, toggle, apply, clear, reset, filtersList]
-  );
-
   const tableData = useMemo<TreasuryBalanceByNetworkType[]>(() => {
-    const selectedData = data.filter((item) =>
-      selected.every(({ id, selectedItems }) => {
-        if (!selectedItems.length) return true;
+    const filtered = data.filter((item) => {
+      if (
+        selectedOptions.chain.length > 0 &&
+        !selectedOptions.chain.some((o) => o.id === item.source.network)
+      ) {
+        return false;
+      }
 
-        let fieldValue: string;
+      if (
+        selectedOptions.assetType.length > 0 &&
+        !selectedOptions.assetType.some(
+          (o: OptionType) => o.id === item.source.asset.type
+        )
+      ) {
+        return false;
+      }
 
-        switch (id) {
-          case 'chain':
-            fieldValue = capitalizeFirstLetter(item.source.network);
-            break;
+      const market = item.source.market ?? 'no market';
 
-          case 'assetType':
-            fieldValue = item.source.asset.type;
-            break;
+      return !(
+        selectedOptions.deployment.length > 0 &&
+        !selectedOptions.deployment.some((o: OptionType) => o.id === market)
+      );
+    });
 
-          case 'deployment':
-            fieldValue = item.source.market ?? 'no market';
-            break;
-
-          default:
-            return true;
-        }
-
-        return selectedItems.includes(fieldValue);
-      })
-    );
-
-    return mapTableData(selectedData).sort((a, b) => b.value - a.value);
-  }, [data, selected]);
+    return mapTableData(filtered).sort((a, b) => b.value - a.value);
+  }, [data, selectedOptions]);
 
   const chartData = useMemo(() => {
     return tableData
@@ -146,19 +111,35 @@ const TreasuryBalanceByNetworkBlock = ({
       .filter((el) => el.value > 0);
   }, [tableData]);
 
-  useEffect(() => {
-    if (selected.length === 0 && filtersList[0]?.options.length > 0) {
-      const defaultChain = filtersList[0].options.find(
-        (opt) => opt === 'Mainnet'
-      );
-      if (defaultChain) {
-        toggle(filtersList[0].id, defaultChain);
-        apply();
-      }
-    }
-  }, [filtersList, selected, toggle, apply]);
+  const onSelectChain = useCallback((selectedOptions: Option[]) => {
+    setSelectedOptions({
+      chain: selectedOptions
+    });
+  }, []);
 
-  console.log('tableData=>', tableData);
+  const onSelectAssetType = useCallback((selectedOptions: Option[]) => {
+    setSelectedOptions({
+      assetType: selectedOptions
+    });
+  }, []);
+
+  const onSelectMarket = useCallback((selectedOptions: Option[]) => {
+    setSelectedOptions({
+      deployment: selectedOptions
+    });
+  }, []);
+
+  const onClearSelectedOptions = useCallback(() => {
+    setSelectedOptions({
+      chain: [],
+      assetType: [],
+      deployment: []
+    });
+  }, []);
+
+  const onClearAll = useCallback(() => {
+    onClearSelectedOptions();
+  }, [onClearSelectedOptions]);
 
   return (
     <Card
@@ -174,7 +155,31 @@ const TreasuryBalanceByNetworkBlock = ({
       }}
     >
       <div className='flex items-center justify-end gap-3 px-0 py-3'>
-        <Filter {...filterProps} />
+        <MultiSelect
+          options={chainOptions || []}
+          value={selectedOptions.chain}
+          onChange={onSelectChain}
+          placeholder='Chain'
+          disabled={isLoading}
+        />
+        <MultiSelect
+          options={assetTypeOptions || []}
+          value={selectedOptions.assetType}
+          onChange={onSelectAssetType}
+          placeholder='Asset Type'
+          disabled={isLoading}
+        />
+        <MultiSelect
+          options={
+            deploymentOptions?.sort((a: OptionType, b: OptionType) =>
+              a.label.localeCompare(b.label)
+            ) || []
+          }
+          value={selectedOptions.deployment}
+          onChange={onSelectMarket}
+          placeholder='Market'
+          disabled={isLoading}
+        />
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <div className='flex justify-between gap-10'>
@@ -183,7 +188,7 @@ const TreasuryBalanceByNetworkBlock = ({
         </div>
       </View.Condition>
       <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
-        <NoDataPlaceholder onButtonClick={clear} />
+        <NoDataPlaceholder onButtonClick={onClearAll} />
       </View.Condition>
     </Card>
   );

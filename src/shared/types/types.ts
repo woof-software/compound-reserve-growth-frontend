@@ -13,7 +13,7 @@ export type FilterItem = {
 export type TimeRange = '7B' | '30B' | '90B' | '180B';
 export type BarSize = 'D' | 'W' | 'M';
 
-export type OptionType = { id: string; label: string };
+export type OptionType = { id: string; label: string; marketType?: string };
 
 export type SortDirectionType = 'ASC' | 'DESC';
 

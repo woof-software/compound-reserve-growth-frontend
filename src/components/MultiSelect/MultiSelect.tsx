@@ -5,25 +5,37 @@ import Button from '@/shared/ui/Button/Button';
 import { Dropdown, useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 export interface Option {
   id: string;
+
   label: string;
+
+  marketType?: string;
 }
 
 const CustomDropdownItem: FC<{
   label: string;
+  marketType?: string;
   isSelected: boolean;
   onSelect: () => void;
-}> = ({ label, isSelected, onSelect }) => {
+}> = ({ label, marketType, isSelected, onSelect }) => {
   return (
     <div
       className='hover:bg-secondary-12 flex cursor-pointer items-center justify-between rounded-lg px-3 py-2'
       onClick={onSelect}
     >
-      <span className={'text-color-gray-11 rounded-sm text-[12px]'}>
-        {label}
-      </span>
+      <div className='flex items-center gap-1'>
+        <span className='text-color-gray-11 rounded-sm text-[12px]'>
+          {label}
+        </span>
+        <View.Condition if={Boolean(marketType)}>
+          <span className='text-primary-14 rounded-sm text-[12px]'>
+            ({marketType})
+          </span>
+        </View.Condition>
+      </div>
       {isSelected && (
         <Icon
           name='check-stroke'
@@ -128,6 +140,7 @@ export const MultiSelect: FC<MultiSelectProps> = ({
                 <CustomDropdownItem
                   key={option.id}
                   label={option.label}
+                  marketType={option.marketType}
                   isSelected={isSelected}
                   onSelect={() => handleSelect(option)}
                 />
