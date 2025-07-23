@@ -68,10 +68,11 @@ const LineChart: FC<LineChartProps> = ({
 }) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
   const programmaticChange = useRef(false);
-  const isUserZooming = useRef(false);
   const [areAllSeriesHidden, setAreAllSeriesHidden] = useState(false);
   const [eventsData, setEventsData] = useState<EventDataItem[]>([]);
   const [showEvents, setShowEvents] = useState(true);
+
+  const currentZoom = useRef<{ min: number; max: number } | null>(null);
 
   const MAX_VISIBLE_POINTS = 180;
   const MIN_VISIBLE_BARS = 7;
@@ -79,7 +80,6 @@ const LineChart: FC<LineChartProps> = ({
   useEffect(() => {
     const eventsApiUrl =
       'https://compound-reserve-growth-backend-dev.woof.software/api/events';
-
     const fetchEvents = async () => {
       try {
         const response = await fetch(eventsApiUrl);
@@ -91,7 +91,6 @@ const LineChart: FC<LineChartProps> = ({
           name: string;
           description: string;
         }[] = await response.json();
-
         const formattedEvents = rawEvents
           .filter((e) => e.date)
           .map((event) => ({
@@ -99,14 +98,12 @@ const LineChart: FC<LineChartProps> = ({
             title: event.name,
             text: event.description || event.name
           }));
-
         setEventsData(formattedEvents);
       } catch (error) {
         console.error('Failed to fetch chart events:', error);
         setEventsData([]);
       }
     };
-
     fetchEvents();
   }, []);
 
@@ -134,12 +131,11 @@ const LineChart: FC<LineChartProps> = ({
         };
       }
 
-      const aggregatedPoints = new Map<number, LineDataItem>();
+      const aggregatedPoints = new Map<number, number>();
 
       for (const point of series.data) {
         const date = new Date(point.x);
         date.setUTCHours(0, 0, 0, 0);
-
         let periodStartTimestamp: number;
 
         if (barSize === 'W') {
@@ -156,14 +152,12 @@ const LineChart: FC<LineChartProps> = ({
             1
           ).getTime();
         }
-
-        aggregatedPoints.set(periodStartTimestamp, point);
+        aggregatedPoints.set(periodStartTimestamp, point.y);
       }
 
-      const resultData = Array.from(aggregatedPoints.values()).map((point) => [
-        point.x,
-        point.y
-      ]);
+      const resultData = Array.from(aggregatedPoints.entries()).map(
+        ([timestamp, yValue]) => [timestamp, yValue]
+      );
 
       resultData.sort((a, b) => a[0] - b[0]);
 
@@ -175,58 +169,6 @@ const LineChart: FC<LineChartProps> = ({
       };
     });
   }, [data, barSize]);
-
-  const interpolatedEventPoints = useMemo(() => {
-    if (
-      !showEvents ||
-      !eventsData.length ||
-      !aggregatedSeries[0]?.data.length
-    ) {
-      return [];
-    }
-
-    const seriesData = aggregatedSeries[0].data as [number, number][];
-
-    return eventsData
-      .map((event) => {
-        const eventX = event.x;
-        let p1: [number, number] | undefined;
-        let p2: [number, number] | undefined;
-
-        for (const point of seriesData) {
-          if (point[0] <= eventX) {
-            p1 = point;
-          }
-          if (point[0] >= eventX) {
-            p2 = point;
-            break;
-          }
-        }
-
-        let interpolatedY: number | null = null;
-        if (p1 && p2) {
-          if (p1[0] === p2[0]) {
-            interpolatedY = p1[1];
-          } else {
-            const xDiff = p2[0] - p1[0];
-            const yDiff = p2[1] - p1[1];
-            const ratio = (eventX - p1[0]) / xDiff;
-            interpolatedY = p1[1] + ratio * yDiff;
-          }
-        } else if (p1) {
-          interpolatedY = p1[1];
-        } else if (p2) {
-          interpolatedY = p2[1];
-        }
-
-        if (interpolatedY === null) {
-          return null;
-        }
-
-        return [event.x, interpolatedY];
-      })
-      .filter((p): p is [number, number] => p !== null);
-  }, [aggregatedSeries, eventsData, showEvents]);
 
   const barDurationInMillis = useMemo(() => {
     const dayInMillis = 24 * 3600 * 1000;
@@ -246,23 +188,21 @@ const LineChart: FC<LineChartProps> = ({
   }, [barDurationInMillis]);
 
   const maxRangeValue = useMemo(() => {
-    return MAX_VISIBLE_POINTS * barDurationInMillis;
+    return (MAX_VISIBLE_POINTS + 1) * barDurationInMillis;
   }, [barDurationInMillis]);
 
   useEffect(() => {
     const chart = chartRef.current?.chart;
-    if (!chart || !barCountToSet) return;
+    if (!chart || !barCountToSet || !aggregatedSeries[0]?.data.length) return;
 
-    if (aggregatedSeries[0]?.data.length > 0) {
-      const dataLength = aggregatedSeries[0].data.length;
-      const startIndex = Math.max(0, dataLength - barCountToSet);
+    const dataLength = aggregatedSeries[0].data.length;
+    const startIndex = Math.max(0, dataLength - barCountToSet);
 
-      if (startIndex < dataLength) {
-        const min = aggregatedSeries[0].data[startIndex][0];
-        const max = aggregatedSeries[0].data[dataLength - 1][0];
-        programmaticChange.current = true;
-        chart.xAxis[0].setExtremes(min, max, true);
-      }
+    if (startIndex < dataLength) {
+      const min = aggregatedSeries[0].data[startIndex][0];
+      const max = aggregatedSeries[0].data[dataLength - 1][0];
+      programmaticChange.current = true;
+      chart.xAxis[0].setExtremes(min, max, true);
     }
   }, [barCountToSet, aggregatedSeries]);
 
@@ -290,7 +230,6 @@ const LineChart: FC<LineChartProps> = ({
 
   const options: Highcharts.Options = useMemo(() => {
     const yPositions = [40, 60, 80, 100, 120, 140, 160, 180];
-
     const eventPlotLines = showEvents
       ? eventsData.map((event, index) => ({
           color: 'var(--color-primary-14)',
@@ -305,27 +244,10 @@ const LineChart: FC<LineChartProps> = ({
             verticalAlign: 'top' as const,
             y: yPositions[index % yPositions.length],
             x: -5,
-            style: {
-              color: 'var(--color-primary-11)',
-              fontSize: '11px'
-            }
+            style: { color: 'var(--color-primary-11)', fontSize: '11px' }
           }
         }))
       : [];
-
-    const eventMarkerSeries: Highcharts.SeriesScatterOptions = {
-      type: 'scatter',
-      name: 'Event Markers',
-      data: interpolatedEventPoints,
-      marker: {
-        symbol: 'circle',
-        radius: 5,
-        fillColor: '#007aff'
-      },
-      showInLegend: false,
-      enableMouseTracking: false,
-      zIndex: 10
-    };
 
     return {
       chart: {
@@ -339,7 +261,6 @@ const LineChart: FC<LineChartProps> = ({
           mouseWheel: {
             enabled: true,
             type: 'x',
-            sensitivity: 1.1,
             preventDefault: true
           },
           type: undefined,
@@ -347,9 +268,14 @@ const LineChart: FC<LineChartProps> = ({
           resetButton: { theme: { display: 'none' } }
         },
         events: {
-          selection: function () {
-            isUserZooming.current = true;
-            return true;
+          load: function () {
+            if (currentZoom.current) {
+              this.xAxis[0].setExtremes(
+                currentZoom.current.min,
+                currentZoom.current.max,
+                false
+              );
+            }
           }
         }
       },
@@ -360,15 +286,14 @@ const LineChart: FC<LineChartProps> = ({
         gridLineWidth: 0,
         startOnTick: false,
         endOnTick: false,
+        minPadding: 0,
+        maxPadding: 0,
         minRange: minRangeValue,
         maxRange: maxRangeValue,
         tickPixelInterval: 75,
         plotLines: eventPlotLines,
         labels: {
-          style: {
-            color: 'var(--color-primary-14)',
-            fontSize: '11px'
-          },
+          style: { color: 'var(--color-primary-14)', fontSize: '11px' },
           rotation: 0
         },
         dateTimeLabelFormats: {
@@ -386,40 +311,35 @@ const LineChart: FC<LineChartProps> = ({
         },
         events: {
           setExtremes: function (e) {
+            if (e.min !== undefined && e.max !== undefined) {
+              currentZoom.current = { min: e.min, max: e.max };
+            }
+
             if (programmaticChange.current) {
               programmaticChange.current = false;
               return;
             }
 
-            // Додаємо перевірку чи це дійсно зум від користувача
-            if (
-              e.trigger === 'zoom' ||
-              e.trigger === 'pan' ||
-              isUserZooming.current
-            ) {
-              isUserZooming.current = false;
+            if (e.min === undefined || e.max === undefined) {
+              return;
+            }
 
+            requestAnimationFrame(() => {
               const firstSeriesData = aggregatedSeries[0]?.data || [];
               if (firstSeriesData.length === 0) return;
 
-              const min = e.min ?? firstSeriesData[0][0];
-              const max =
-                e.max ?? firstSeriesData[firstSeriesData.length - 1][0];
-
-              // Більш точний розрахунок видимих точок
               const visiblePoints = firstSeriesData.filter(
-                (point) => point[0] >= min && point[0] <= max
+                (point) => point[0] >= e.min! && point[0] <= e.max!
               );
 
               const visibleCount = Math.max(1, visiblePoints.length);
               onVisibleBarsChange(visibleCount);
-            }
+            });
           },
-          afterSetExtremes: function () {
-            // Скидаємо флаг після завершення зуму
-            setTimeout(() => {
-              isUserZooming.current = false;
-            }, 100);
+          afterSetExtremes: function (e) {
+            if (e.min !== undefined && e.max !== undefined) {
+              currentZoom.current = { min: e.min, max: e.max };
+            }
           }
         }
       },
@@ -427,10 +347,7 @@ const LineChart: FC<LineChartProps> = ({
         title: { text: '' },
         gridLineWidth: 0,
         labels: {
-          style: {
-            color: 'var(--color-primary-14)',
-            fontSize: '11px'
-          },
+          style: { color: 'var(--color-primary-14)', fontSize: '11px' },
           formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
             const val = Number(this.value);
             if (isNaN(val)) return this.value.toString();
@@ -455,105 +372,44 @@ const LineChart: FC<LineChartProps> = ({
         },
         shared: true,
         formatter: function () {
-          const header = `<div style="font-weight: 500; margin-bottom: 8px; font-size: 12px;">${Highcharts.dateFormat(
-            '%B %e, %Y',
-            this.x as number
-          )}</div>`;
-
+          const header = `<div style="font-weight: 500; margin-bottom: 8px; font-size: 12px;">${Highcharts.dateFormat('%B %e, %Y', this.x as number)}</div>`;
           if (groupBy === 'none') {
             const point = this.points?.find((p) => p.series.type === 'area');
             if (!point) return '';
-            return `
-              ${header}
-              <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="background-color:${
-                    point.series.color
-                  }; width: 8px; height: 8px; display: inline-block; border-radius: 2px;"></span>
-                  <span style="font-size: 11px;">${point.series.name}</span>
-                </div>
-                <span style="font-weight: 500; font-size: 11px;">$${Highcharts.numberFormat(
-                  point.y ?? 0,
-                  0,
-                  '.',
-                  ','
-                )}</span>
-              </div>`;
+            return `${header}<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 8px; height: 8px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px;">${point.series.name}</span></div><span style="font-weight: 500; font-size: 11px;">$${Highcharts.numberFormat(point.y ?? 0, 0, '.', ',')}</span></div>`;
           }
-
           const dataPoints = (this.points || []).filter(
             (p) => p.series.type !== 'scatter'
           );
-
           const sortedPoints = [...dataPoints].sort(
             (a, b) => (b.y ?? 0) - (a.y ?? 0)
           );
-
           let total = 0;
           sortedPoints.forEach((point) => {
             total += point.y ?? 0;
           });
-
           let body = '';
           if (groupBy === 'Market') {
             const midPoint = Math.ceil(sortedPoints.length / 2);
             const col1Points = sortedPoints.slice(0, midPoint);
             const col2Points = sortedPoints.slice(midPoint);
-
             const renderColumn = (points: Highcharts.Point[]) =>
               points
                 .map(
-                  (point) => `
-                  <div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-bottom: 4px;">
-                    <span style="background-color:${
-                      point.series.color
-                    }; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span>
-                    <span style="white-space: nowrap; font-size: 11px;">${
-                      point.series.name
-                    }</span>
-                    <span style="font-weight: 500; text-align: right; font-size: 11px;">${formatValue(
-                      point.y ?? 0
-                    )}</span>
-                  </div>`
+                  (point) =>
+                    `<div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-bottom: 4px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="white-space: nowrap; font-size: 11px;">${point.series.name}</span><span style="font-weight: 500; text-align: right; font-size: 11px;">${formatValue(point.y ?? 0)}</span></div>`
                 )
                 .join('');
-
-            body = `
-              <div style="display: flex; gap: 24px;">
-                <div style="display: flex; flex-direction: column;">
-                  ${renderColumn(col1Points)}
-                </div>
-                <div style="display: flex; flex-direction: column;">
-                  ${renderColumn(col2Points)}
-                </div>
-              </div>`;
+            body = `<div style="display: flex; gap: 24px;"><div style="display: flex; flex-direction: column;">${renderColumn(col1Points)}</div><div style="display: flex; flex-direction: column;">${renderColumn(col2Points)}</div></div>`;
           } else {
             body = sortedPoints
               .map(
-                (point) => `
-                <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 4px;">
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="background-color:${
-                      point.series.color
-                    }; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span>
-                    <span style="font-size: 11px;">${point.series.name}</span>
-                  </div>
-                  <span style="font-weight: 500; font-size: 11px;">${formatValue(
-                    point.y ?? 0
-                  )}</span>
-                </div>`
+                (point) =>
+                  `<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 4px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px;">${point.series.name}</span></div><span style="font-weight: 500; font-size: 11px;">${formatValue(point.y ?? 0)}</span></div>`
               )
               .join('');
           }
-
-          const footer = `
-            <div style=" padding-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 16px;">
-              <span style="font-weight: 500; font-size: 12px;">Total</span>
-              <span style="font-weight: 500; font-size: 11px;">${formatValue(
-                total
-              )}</span>
-            </div>`;
-
+          const footer = `<div style=" padding-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 16px;"><span style="font-weight: 500; font-size: 12px;">Total</span><span style="font-weight: 500; font-size: 11px;">${formatValue(total)}</span></div>`;
           return header + body + footer;
         }
       },
@@ -565,46 +421,34 @@ const LineChart: FC<LineChartProps> = ({
         symbolRadius: 0,
         symbolWidth: 10,
         symbolHeight: 10,
-        itemStyle: {
-          color: 'var(--color-primary-11)',
-          fontWeight: 'normal'
-        },
-        itemHoverStyle: {
-          color: 'var(--color-primary-11)'
-        }
+        itemStyle: { color: 'var(--color-primary-11)', fontWeight: 'normal' },
+        itemHoverStyle: { color: 'var(--color-primary-11)' }
       },
       plotOptions: {
         series: {
           animation: false,
+          turboThreshold: 0,
           events: {
             legendItemClick: function (this: Highcharts.Series): boolean {
-              if (this.type === 'flags') {
-                return false;
-              }
-
+              if (this.type === 'flags') return false;
               const chart = this.chart;
               const isAnyOtherSeriesVisible = chart.series.some(
                 (s) => s !== this && s.visible && s.type !== 'flags'
               );
-
               if (!this.visible && !isAnyOtherSeriesVisible) {
                 chart.series.forEach((s) => {
-                  if (s.type !== 'flags') {
-                    s.setVisible(s === this, false);
-                  }
+                  if (s.type !== 'flags') s.setVisible(s === this, false);
                 });
                 chart.redraw();
                 setAreAllSeriesHidden(false);
                 return false;
               }
-
               setTimeout(() => {
                 const isAnySeriesVisibleAfterClick = chart.series.some(
                   (s) => s.visible && s.type !== 'flags'
                 );
                 setAreAllSeriesHidden(!isAnySeriesVisibleAfterClick);
               }, 0);
-
               return true;
             }
           }
@@ -614,26 +458,16 @@ const LineChart: FC<LineChartProps> = ({
           marker: {
             enabled: false,
             symbol: 'circle',
-            states: {
-              hover: {
-                enabled: true,
-                radius: 3
-              }
-            }
+            states: { hover: { enabled: true, radius: 3 } }
           },
-          states: {
-            hover: {
-              lineWidthPlus: 0
-            }
-          },
+          states: { hover: { lineWidthPlus: 0 } },
           threshold: null,
           fillOpacity: 0.1,
-          stacking: 'normal'
+          stacking: 'normal',
+          findNearestPointBy: 'x'
         }
       },
-      series: showEvents
-        ? [...aggregatedSeries, eventMarkerSeries]
-        : aggregatedSeries,
+      series: aggregatedSeries,
       navigator: { enabled: false },
       scrollbar: { enabled: false },
       rangeSelector: { enabled: false }
@@ -646,8 +480,7 @@ const LineChart: FC<LineChartProps> = ({
     maxRangeValue,
     onVisibleBarsChange,
     eventsData,
-    showEvents,
-    interpolatedEventPoints
+    showEvents
   ]);
 
   return (

@@ -6,69 +6,6 @@ import type { RunwayItem } from '@/shared/hooks/useRunway';
 import { useRunway } from '@/shared/hooks/useRunway';
 import Card from '@/shared/ui/Card/Card';
 
-export function getStatus(
-  startDate: Date,
-  endDate: Date,
-  now: Date = new Date()
-): string {
-  const nowUTC = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-  );
-  const startUTC = new Date(
-    Date.UTC(
-      startDate.getUTCFullYear(),
-      startDate.getUTCMonth(),
-      startDate.getUTCDate()
-    )
-  );
-  const endUTC = new Date(
-    Date.UTC(
-      endDate.getUTCFullYear(),
-      endDate.getUTCMonth(),
-      endDate.getUTCDate()
-    )
-  );
-
-  return nowUTC >= startUTC && nowUTC <= endUTC ? 'active' : 'finished';
-}
-
-export function getPaidAmount(
-  paymentType: string,
-  startDate: Date,
-  endDate: Date,
-  dailyAmount: number,
-  totalAmount: number,
-  now: Date = new Date()
-): number {
-  if (paymentType !== 'Streaming Payment') {
-    return totalAmount;
-  }
-
-  if (now < startDate) {
-    return 0;
-  }
-
-  if (now > endDate) {
-    return totalAmount;
-  }
-
-  const daysElapsed =
-    (now.getTime() - startDate.getTime()) / (1000 * 3600 * 24);
-  const calculatedAmount = daysElapsed * dailyAmount;
-
-  return Math.min(calculatedAmount, totalAmount);
-}
-
-export function getPercentagePaid(
-  paidAmount: number,
-  totalAmount: number
-): number {
-  if (totalAmount <= 0) {
-    return 0;
-  }
-  return paidAmount / totalAmount;
-}
-
 const FullDAOCommitmentsBlock = () => {
   const { data: runwayResponse, isLoading, isError } = useRunway();
 
@@ -78,37 +15,84 @@ const FullDAOCommitmentsBlock = () => {
       return [];
     }
 
+    const now = new Date();
+
     const tableData = allData.map((item: RunwayItem) => {
-      const startDate = new Date(item.startDate);
-      const endDate = new Date(item.endDate);
-      const now = new Date();
+      const {
+        name,
+        discipline,
+        token,
+        amount,
+        paymentType,
+        startDate: startStr,
+        endDate: endStr
+      } = item;
 
-      const durationMs = endDate.getTime() - startDate.getTime();
-      const durationDays =
-        durationMs > 0 ? durationMs / (1000 * 60 * 60 * 24) : 0;
-      const dailyAmount =
-        durationDays > 0 ? item.amount / durationDays : item.amount;
+      if (!startStr || !endStr) {
+        const isPaidUpfront = paymentType === 'Upfront Payment';
+        return {
+          recipient: name,
+          discipline: discipline,
+          token: token,
+          amount: amount,
+          paymentType: paymentType,
+          dailyStreamRate: 0,
+          startDate: startStr,
+          streamEndDate: endStr,
+          status: 'Finished',
+          paidAmount: isPaidUpfront ? amount : 0,
+          percentagePaid: isPaidUpfront && amount > 0 ? 1 : 0
+        };
+      }
 
-      const status = getStatus(startDate, endDate, now);
-      const paidAmount = getPaidAmount(
-        item.paymentType,
-        startDate,
-        endDate,
-        dailyAmount,
-        item.amount,
-        now
-      );
-      const percentagePaid = getPercentagePaid(paidAmount, item.amount);
+      const startDate = new Date(startStr);
+      const endDate = new Date(endStr);
+      const totalAmount = amount;
+
+      const status = now >= startDate && now <= endDate ? 'Active' : 'Finished';
+
+      let paidAmount = 0;
+
+      if (now < startDate) {
+        paidAmount = 0;
+      } else if (now > endDate) {
+        paidAmount = totalAmount;
+      } else {
+        const durationMs = endDate.getTime() - startDate.getTime();
+        const durationDays =
+          durationMs > 0 ? durationMs / (1000 * 60 * 60 * 24) : 0;
+        const dailyRate = durationDays > 0 ? totalAmount / durationDays : 0;
+
+        const startOfDayNow = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
+        );
+        const startOfDayStart = new Date(
+          startDate.getFullYear(),
+          startDate.getMonth(),
+          startDate.getDate()
+        );
+
+        const elapsedMs = startOfDayNow.getTime() - startOfDayStart.getTime();
+        const daysElapsed = elapsedMs / (1000 * 60 * 60 * 24);
+
+        const calculatedAmount = daysElapsed * dailyRate;
+
+        paidAmount = Math.min(calculatedAmount, totalAmount);
+      }
+
+      const percentagePaid = totalAmount > 0 ? paidAmount / totalAmount : 0;
 
       return {
-        recipient: item.name,
-        discipline: item.discipline,
-        token: item.token,
-        amount: item.amount,
-        paymentType: item.paymentType,
-        dailyStreamRate: dailyAmount,
-        startDate: item.startDate,
-        streamEndDate: item.endDate,
+        recipient: name,
+        discipline: discipline,
+        token: token,
+        amount: totalAmount,
+        paymentType: paymentType,
+        dailyStreamRate: 0,
+        startDate: startStr,
+        streamEndDate: endStr,
         status,
         paidAmount,
         percentagePaid

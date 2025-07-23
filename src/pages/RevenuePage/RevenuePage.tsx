@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import CompoundCumulativeRevenue from '@/entities/Revenue/CompoundCumulativeRevenue';
-import CompoundFeeRevenueByChain from '@/entities/Revenue/CompoundFeeRevenueByChain';
+// import CompoundFeeRevenueByChain from '@/entities/Revenue/CompoundFeeRevenueByChain';
 import CompoundFeeRevenueRecieved from '@/entities/Revenue/CompoundFeeRevenueRecieved';
 import CompoundRevenueBlock from '@/entities/Revenue/CompoundRevenue';
 import RevenueBreakDownBlock from '@/entities/Revenue/RevenueBreakdown';
@@ -61,11 +61,11 @@ const RevenuePage = () => {
           isLoading={isLoading}
           isError={isError}
         />
-        <CompoundFeeRevenueByChain
+        {/* <CompoundFeeRevenueByChain
           revenueData={pageData}
           isLoading={isLoading}
           isError={isError}
-        />
+        /> */}
         <CompoundRevenueBlock
           revenueData={pageData}
           isLoading={isLoading}

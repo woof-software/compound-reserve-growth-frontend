@@ -1,13 +1,28 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 
 import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/CompoundFeeRecieved';
+import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
+import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+
+const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
+
+const groupByPathMapping: Record<string, string> = {
+  'Asset Type': 'source.asset.type',
+  Chain: 'source.network',
+  Market: 'source.market'
+};
+
+const getValueByPath = (obj: any, path: string): any => {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+};
 
 interface StackedChartData {
   date: string;
@@ -33,9 +48,26 @@ const CompoundFeeRevenueRecieved = ({
   const [selectedChains, setSelectedChains] = useState<OptionType[]>([]);
   const [selectedMarkets, setSelectedMarkets] = useState<OptionType[]>([]);
 
+  const [groupBy, setGroupBy] = useState<string>('Chain');
+  const [isGroupByOpen, setIsGroupByOpen] = useState(false);
+
+  const toggleGroupBy = useCallback(
+    () => setIsGroupByOpen((prev) => !prev),
+    []
+  );
+  const closeGroupBy = useCallback(() => setIsGroupByOpen(false), []);
+  const handleSelectGroupBy = useCallback(
+    (value: string) => {
+      setGroupBy(value);
+      closeGroupBy();
+    },
+    [closeGroupBy]
+  );
+
   const handleResetFilters = useCallback(() => {
     setSelectedChains([]);
     setSelectedMarkets([]);
+    setGroupBy('Chain');
   }, []);
 
   const { chainOptions, marketOptions, chartData } = useMemo(() => {
@@ -55,6 +87,7 @@ const CompoundFeeRevenueRecieved = ({
     const uniqueChains = new Set<string>();
     const uniqueMarkets = new Set<string>();
     const groupedByDate: { [date: string]: StackedChartData } = {};
+    const groupByKeyPath = groupByPathMapping[groupBy];
 
     for (const item of rawData) {
       const network = item.source.network;
@@ -71,7 +104,13 @@ const CompoundFeeRevenueRecieved = ({
       if (!marketMatch) continue;
 
       const date = new Date(item.date * 1000).toISOString().split('T')[0];
-      const seriesKey = network;
+
+      let seriesKey: string;
+      if (groupBy === 'None') {
+        seriesKey = 'Total';
+      } else {
+        seriesKey = getValueByPath(item, groupByKeyPath) || 'Unknown';
+      }
 
       if (!groupedByDate[date]) {
         groupedByDate[date] = { date };
@@ -99,7 +138,20 @@ const CompoundFeeRevenueRecieved = ({
       marketOptions: createOptions(uniqueMarkets),
       chartData: finalChartData
     };
-  }, [rawData, selectedChains, selectedMarkets]);
+  }, [rawData, selectedChains, selectedMarkets, groupBy]);
+
+  const { csvData, csvFilename } = useCSVExport({
+    stackedData: chartData,
+    barSize,
+    groupBy,
+    filePrefix: 'Compound_Fee_Revenue',
+    aggregationType: 'sum',
+    rawData,
+    selectedChains,
+    selectedMarkets,
+    groupByPathMapping,
+    getValueByPath
+  });
 
   const hasData = chartData.length > 0;
   const noDataMessage =
@@ -144,6 +196,19 @@ const CompoundFeeRevenueRecieved = ({
           value={activeTab}
           onTabChange={handleTabChange}
         />
+        <SingleDropdown
+          options={groupByOptions}
+          isOpen={isGroupByOpen}
+          selectedValue={groupBy}
+          onToggle={toggleGroupBy}
+          onClose={closeGroupBy}
+          onSelect={handleSelectGroupBy}
+          disabled={isLoading}
+        />
+        <CSVDownloadButton
+          data={csvData}
+          filename={csvFilename}
+        />
       </div>
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder
@@ -153,6 +218,7 @@ const CompoundFeeRevenueRecieved = ({
       ) : (
         <CompoundFeeRecieved
           data={chartData}
+          groupBy={groupBy}
           barCount={barCount}
           barSize={barSize}
           onVisibleBarsChange={handleVisibleBarsChange}

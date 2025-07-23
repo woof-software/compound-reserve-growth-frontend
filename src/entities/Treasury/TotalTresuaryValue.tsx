@@ -1,17 +1,15 @@
 import { useCallback, useMemo } from 'react';
 
 import LineChart from '@/components/Charts/Line/Line';
+import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
 import { useFilter } from '@/components/Filter/useFilter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
-import {
-  capitalizeFirstLetter,
-  ChartDataItem,
-  extractFilterOptions
-} from '@/shared/lib/utils/utils';
+import { useCSVExport } from '@/shared/hooks/useCSVExport';
+import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
@@ -33,7 +31,6 @@ interface TotalTreasuryValueProps {
 
 const TotalTresuaryValue = ({
   isLoading,
-
   isError,
   data: treasuryApiResponse
 }: TotalTreasuryValueProps) => {
@@ -91,7 +88,7 @@ const TotalTresuaryValue = ({
         id: 'chain',
         title: 'Chain',
         placeholder: 'Add Chain',
-        options: chainOptions?.map((o) => capitalizeFirstLetter(o.id)) || []
+        options: chainOptions?.map((o) => o.id) || []
       },
       {
         id: 'assetType',
@@ -178,6 +175,14 @@ const TotalTresuaryValue = ({
     });
   }, [chartSeries]);
 
+  const { csvData, csvFilename } = useCSVExport({
+    chartSeries: correctedChartSeries,
+    barSize,
+    groupBy,
+    filePrefix: 'Total_Treasury_Value',
+    aggregationType: 'sum'
+  });
+
   const hasData = useMemo(() => {
     return (
       correctedChartSeries.length > 0 &&
@@ -241,11 +246,16 @@ const TotalTresuaryValue = ({
           {...filterProps}
           disabled={isLoading}
         />
+        <CSVDownloadButton
+          data={csvData}
+          filename={csvFilename}
+        />
       </div>
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder onButtonClick={handleClearAll} />
       ) : (
         <LineChart
+          key={groupBy}
           data={correctedChartSeries}
           groupBy={groupBy}
           className='max-h-[400px]'

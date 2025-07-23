@@ -47,7 +47,7 @@ const mapChartData = (
       const percent = (totalValue / totalSum) * 100;
 
       return {
-        name: key,
+        name: capitalizeFirstLetter(key) || 'Unclassified',
         percent: parseFloat(percent.toFixed(2)),
         value: formatPrice(totalValue, 1),
         rawValue: totalValue
@@ -60,12 +60,14 @@ const mapTableData = (data: Record<string, TokenData[]>) => {
   return Object.entries(data)
     .map(([key, value], index) => {
       const balance = value.reduce((acc, item) => acc + item.value, 0);
+      const symbol = value[0]?.source.asset.symbol || key;
 
       return {
         id: index + 1,
         icon: key.replace(/ /g, '-').toLowerCase(),
         name: capitalizeFirstLetter(key) || 'Unclassified',
-        balance
+        balance,
+        symbol: symbol
       };
     })
     .sort((a, b) => b.balance - a.balance);
@@ -105,13 +107,15 @@ const TreasuryCompositionBlock = memo(
 
     const { uniqData, uniqDataByCategory } = filteredData;
 
+    const selectedGroup = selectedSingle?.[0] || 'Asset Type';
+
     const chartData = useMemo(() => {
-      if (selectedSingle?.[0] === 'Chain') {
+      if (selectedGroup === 'Chain') {
         const chains = groupByKey(uniqData, (item) => item.source.network);
         return mapChartData(chains, uniqData);
       }
 
-      if (selectedSingle?.[0] === 'Market') {
+      if (selectedGroup === 'Market') {
         const markets = groupByKey(
           uniqData,
           (item) => item.source.market || 'no market'
@@ -120,15 +124,31 @@ const TreasuryCompositionBlock = memo(
       }
 
       return mapChartData(uniqDataByCategory, uniqData);
-    }, [selectedSingle, uniqData, uniqDataByCategory]);
+    }, [selectedGroup, uniqData, uniqDataByCategory]);
 
     const tableData = useMemo<TreasuryCompositionType[]>(() => {
-      if (selectedSingle?.[0] === 'Chain') {
+      if (selectedGroup === 'Chain') {
         const chains = groupByKey(uniqData, (item) => item.source.network);
-        return mapTableData(chains);
+        return Object.entries(chains)
+          .map(([key, value], index) => {
+            const balance = value.reduce((acc, item) => acc + item.value, 0);
+
+            let iconName = capitalizeFirstLetter(key);
+            if (key.toLowerCase() === 'mainnet') {
+              iconName = 'Ethereum';
+            }
+
+            return {
+              id: index + 1,
+              icon: iconName,
+              name: capitalizeFirstLetter(key) || 'Unclassified',
+              balance
+            };
+          })
+          .sort((a, b) => b.balance - a.balance);
       }
 
-      if (selectedSingle?.[0] === 'Market') {
+      if (selectedGroup === 'Market') {
         const markets = groupByKey(
           uniqData,
           (item) => item.source.market || 'no market'
@@ -137,7 +157,7 @@ const TreasuryCompositionBlock = memo(
       }
 
       return mapTableData(uniqDataByCategory);
-    }, [selectedSingle, uniqData, uniqDataByCategory]);
+    }, [selectedGroup, uniqData, uniqDataByCategory]);
 
     const totalBalance = useMemo(
       () => tableData.reduce((acc, item) => acc + item.balance, 0),
@@ -166,7 +186,7 @@ const TreasuryCompositionBlock = memo(
           <SingleDropdown
             options={options}
             isOpen={openSingle}
-            selectedValue={selectedSingle?.[0] || 'Asset Type'}
+            selectedValue={selectedGroup}
             onToggle={toggleSingle}
             onClose={closeSingle}
             onSelect={selectSingle}
@@ -180,6 +200,7 @@ const TreasuryCompositionBlock = memo(
           <TreasuryComposition
             tableData={tableData}
             totalBalance={totalBalance}
+            activeFilter={selectedGroup as 'Chain' | 'Asset Type' | 'Market'}
           />
         </div>
       </Card>

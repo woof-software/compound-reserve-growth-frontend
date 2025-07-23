@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { formatLargeNumber } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 
 export interface AnnualisedExpensesRow {
@@ -32,19 +33,13 @@ const columns: ExtendedColumnDef<AnnualisedExpensesRow>[] = [
     accessorKey: 'amount',
     header: 'Amount (Qty)',
     align: 'center',
-    cell: ({ getValue }) =>
-      (getValue() as number).toLocaleString(undefined, {
-        maximumFractionDigits: 0
-      })
+    cell: ({ getValue }) => formatLargeNumber(getValue() as number, 2)
   },
   {
     accessorKey: 'value',
     header: 'Value ($)',
     align: 'right',
-    cell: ({ getValue }) =>
-      `$${(getValue() as number).toLocaleString(undefined, {
-        maximumFractionDigits: 0
-      })}`
+    cell: ({ getValue }) => `$${formatLargeNumber(getValue() as number, 2)}`
   }
 ];
 
@@ -58,11 +53,11 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
         Total
       </td>
       <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px]'></td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-center text-[13px]'></td>
+      <td className='text-primary-14 px-[5px] py-[13px] text-center text-[13px]'>
+        {formatLargeNumber(footerData.amount, 2)}
+      </td>
       <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px]'>
-        {`$${footerData.value.toLocaleString(undefined, {
-          maximumFractionDigits: 0
-        })}`}
+        {`$${formatLargeNumber(footerData.value, 2)}`}
       </td>
     </tr>
   );
