@@ -280,7 +280,7 @@ const DataTable = <T,>({
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
               className={cn(
-                'text-primary-14 h-8 w-8 p-2 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                'text-primary-14 size-4 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
                 paginationButtonClassName
               )}
             >
@@ -293,7 +293,7 @@ const DataTable = <T,>({
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
               className={cn(
-                'text-primary-14 flex h-8 cursor-pointer items-center gap-5 p-2 text-[11px] font-medium hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                'text-primary-14 flex h-8 cursor-pointer items-center gap-2 p-2 text-[11px] font-medium hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
                 paginationButtonClassName
               )}
             >
@@ -301,17 +301,17 @@ const DataTable = <T,>({
                 name='arrow-left'
                 className='h-4 w-4'
               />
-              Previous
+              <span className='text-[11px]'>Previous</span>
             </Button>
             <Button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
               className={cn(
-                'text-primary-14 flex h-8 cursor-pointer items-center gap-5 p-2 text-[11px] font-medium hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                'text-primary-14 flex h-8 cursor-pointer items-center gap-2 p-2 text-[11px] font-medium hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
                 paginationButtonClassName
               )}
             >
-              Next
+              <span className='text-[11px]'>Next</span>
               <Icon
                 name='arrow-right'
                 className='h-4 w-4'
@@ -321,7 +321,7 @@ const DataTable = <T,>({
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
               className={cn(
-                'text-primary-14 h-8 w-8 rotate-180 p-2 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                'text-primary-14 size-4 rotate-180 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
                 paginationButtonClassName
               )}
             >
