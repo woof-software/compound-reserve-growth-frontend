@@ -315,10 +315,21 @@ export const extractFilterOptions = (
     const formatter = config[key].labelFormatter || capitalizeFirstLetter;
     result[`${key}Options`] = Array.from(uniqueValues[key])
       .sort((a, b) => a.localeCompare(b))
-      .map((value) => ({
-        id: value,
-        label: formatter(value)
-      }));
+      .map((value) => {
+        const option: OptionType & { marketType?: string } = {
+          id: value,
+          label: formatter(value)
+        };
+
+        if (key === 'deployment') {
+          const match = rawData.find(
+            (item) => getValueByPath(item, config[key].path) === value
+          );
+          option.marketType = match?.source.type.split(' ')[1] ?? '';
+        }
+
+        return option;
+      });
   }
 
   return result;

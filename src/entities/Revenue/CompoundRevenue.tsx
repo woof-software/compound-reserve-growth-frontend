@@ -243,6 +243,7 @@ const CompoundRevenueBlock = ({
   }, []);
 
   const hasData = processedChartData.length > 0;
+
   const noDataMessage =
     selectedChains.length > 0 ||
     selectedMarkets.length > 0 ||
