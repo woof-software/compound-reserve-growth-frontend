@@ -7,17 +7,22 @@ import { useRunway } from '@/shared/hooks/useRunway';
 import { formatLargeNumber } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 
+const useCurrentYear = () => {
+  return useMemo(() => new Date().getFullYear(), []);
+};
+
 const AnnualisedExpensesBlock = () => {
   const { data: runwayResponse, isLoading, isError } = useRunway();
+  const currentYear = useCurrentYear();
 
   const processedData = useMemo(() => {
     const data = runwayResponse?.data || [];
-    const currentYear = new Date().getFullYear();
 
     const initialResult = {
       tableData: [],
       footerData: { amount: 0, value: 0 },
-      pieData: []
+      pieData: [],
+      calculationYear: currentYear
     };
 
     if (!data.length) {
@@ -48,20 +53,38 @@ const AnnualisedExpensesBlock = () => {
 
       const isActiveInCurrentYear =
         startYear <= currentYear && endYear >= currentYear;
+
       if (!isActiveInCurrentYear) {
         return;
       }
 
-      const durationMs = endDate.getTime() - startDate.getTime();
+      const currentYearStart = new Date(currentYear, 0, 1);
+      const currentYearEnd = new Date(currentYear, 11, 31);
 
-      const durationDays = durationMs / (1000 * 60 * 60 * 24);
+      const effectiveStart = new Date(
+        Math.max(startDate.getTime(), currentYearStart.getTime())
+      );
+      const effectiveEnd = new Date(
+        Math.min(endDate.getTime(), currentYearEnd.getTime())
+      );
 
-      if (durationDays <= 0) {
+      const currentYearDurationMs =
+        effectiveEnd.getTime() - effectiveStart.getTime();
+      const currentYearDurationDays =
+        currentYearDurationMs / (1000 * 60 * 60 * 24);
+
+      if (currentYearDurationDays <= 0) {
         return;
       }
 
-      const annualisedValue = (item.value / durationDays) * 365;
-      const annualisedAmount = (item.amount / durationDays) * 365;
+      const totalDurationMs = endDate.getTime() - startDate.getTime();
+      const totalDurationDays = totalDurationMs / (1000 * 60 * 60 * 24);
+
+      const dailyValue = item.value / totalDurationDays;
+      const dailyAmount = item.amount / totalDurationDays;
+
+      const currentYearValue = dailyValue * currentYearDurationDays;
+      const currentYearAmount = dailyAmount * currentYearDurationDays;
 
       const groupKey = `${item.discipline}__${item.token}`;
       if (!expensesByGroup[groupKey]) {
@@ -73,15 +96,14 @@ const AnnualisedExpensesBlock = () => {
         };
       }
 
-      expensesByGroup[groupKey].amount += annualisedAmount;
-      expensesByGroup[groupKey].value += annualisedValue;
+      expensesByGroup[groupKey].amount += currentYearAmount;
+      expensesByGroup[groupKey].value += currentYearValue;
 
       expensesByDisciplineForPie[item.discipline] =
-        (expensesByDisciplineForPie[item.discipline] || 0) + annualisedValue;
+        (expensesByDisciplineForPie[item.discipline] || 0) + currentYearValue;
     });
 
     const tableData = Object.values(expensesByGroup);
-
     tableData.sort((a, b) => b.value - a.value);
 
     const footerData = tableData.reduce(
@@ -103,8 +125,13 @@ const AnnualisedExpensesBlock = () => {
         percent: totalValueForPie > 0 ? (value / totalValueForPie) * 100 : 0
       }));
 
-    return { tableData, footerData, pieData };
-  }, [runwayResponse]);
+    return {
+      tableData,
+      footerData,
+      pieData,
+      calculationYear: currentYear
+    };
+  }, [runwayResponse, currentYear]);
 
   return (
     <Card

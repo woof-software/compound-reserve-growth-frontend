@@ -194,13 +194,34 @@ export const formatGrowth = (growth: number) => {
   return `${growth > 0 ? '+' : ''}${growth?.toFixed(1)}%`;
 };
 
-export function formatLargeNumber(num: number, digits: number = 4): string {
+export function formatLargeNumber(
+  num: number,
+  digits: number = 4,
+  exact: boolean = false
+): string {
   const threshold = 1 / 10 ** (digits + 1);
 
-  if (num === 0 || isNaN(num)) return threshold.toFixed(digits);
+  if (num === 0 || isNaN(num)) {
+    return exact ? '0' : threshold.toFixed(digits);
+  }
 
   const sign = num < 0 ? '-' : '';
   const absNum = Math.abs(num);
+
+  if (exact) {
+    if (absNum < 1_000) {
+      return sign + absNum.toString();
+    }
+
+    for (const unit of units) {
+      if (absNum >= unit.value) {
+        const exactValue = absNum / unit.value;
+        return sign + exactValue.toString() + unit.symbol;
+      }
+    }
+
+    return sign + absNum.toString();
+  }
 
   if (absNum < 1_000) {
     return (
