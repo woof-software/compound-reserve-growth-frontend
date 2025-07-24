@@ -17,6 +17,7 @@ interface SelectedOptionsState {
   chain: OptionType[];
   market: OptionType[];
   symbol: OptionType[];
+  assetType: OptionType[];
 }
 
 interface StackedChartData {
@@ -53,7 +54,8 @@ const CompoundFeeRevenueRecieved = ({
   const initialState: SelectedOptionsState = {
     chain: [],
     market: [],
-    symbol: []
+    symbol: [],
+    assetType: []
   };
 
   const [selectedOptions, setSelectedOptions] = useReducer(
@@ -95,98 +97,115 @@ const CompoundFeeRevenueRecieved = ({
     setSelectedOptions({ symbol: options });
   }, []);
 
+  const onSelectAssetType = useCallback((options: OptionType[]) => {
+    setSelectedOptions({ assetType: options });
+  }, []);
+
   const handleResetFilters = useCallback(() => {
     setSelectedOptions(initialState);
     setGroupBy('Chain');
   }, []);
 
-  const { chainOptions, marketOptions, symbolOptions, chartData } =
-    useMemo(() => {
-      if (!rawData || rawData.length === 0) {
-        return {
-          chainOptions: [],
-          marketOptions: [],
-          symbolOptions: [],
-          chartData: []
-        };
-      }
-
-      const selectedChainSet = new Set(selectedOptions.chain.map((c) => c.id));
-      const selectedMarketSet = new Set(
-        selectedOptions.market.map((m) => m.id)
-      );
-      const selectedSymbolSet = new Set(
-        selectedOptions.symbol.map((s) => s.id)
-      );
-
-      const isChainFilterActive = selectedChainSet.size > 0;
-      const isMarketFilterActive = selectedMarketSet.size > 0;
-      const isSymbolFilterActive = selectedSymbolSet.size > 0;
-
-      const uniqueChains = new Set<string>();
-      const uniqueMarkets = new Set<string>();
-      const uniqueSymbols = new Set<string>();
-      const groupedByDate: { [date: string]: StackedChartData } = {};
-      const groupByKeyPath = groupByPathMapping[groupBy];
-
-      for (const item of rawData) {
-        const network = item.source.network;
-        const marketName = item.source.market ?? 'no name';
-        const symbolName = item.source.asset.symbol;
-
-        uniqueChains.add(network);
-        uniqueMarkets.add(marketName);
-        uniqueSymbols.add(symbolName);
-
-        const chainMatch =
-          !isChainFilterActive || selectedChainSet.has(network);
-        if (!chainMatch) continue;
-
-        const marketMatch =
-          !isMarketFilterActive || selectedMarketSet.has(marketName);
-        if (!marketMatch) continue;
-
-        const symbolMatch =
-          !isSymbolFilterActive || selectedSymbolSet.has(symbolName);
-        if (!symbolMatch) continue;
-
-        const date = new Date(item.date * 1000).toISOString().split('T')[0];
-
-        let seriesKey: string;
-        if (groupBy === 'None') {
-          seriesKey = 'Total';
-        } else {
-          seriesKey = getValueByPath(item, groupByKeyPath) || 'Unknown';
-        }
-
-        if (!groupedByDate[date]) {
-          groupedByDate[date] = { date };
-        }
-
-        groupedByDate[date][seriesKey] =
-          ((groupedByDate[date][seriesKey] as number) || 0) + item.value;
-      }
-
-      const createOptions = (uniqueValues: Set<string>): OptionType[] => {
-        return Array.from(uniqueValues)
-          .sort((a, b) => a.localeCompare(b))
-          .map((value) => ({
-            id: value,
-            label: capitalizeFirstLetter(value)
-          }));
-      };
-
-      const finalChartData = Object.values(groupedByDate).sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
-
+  const {
+    chainOptions,
+    marketOptions,
+    symbolOptions,
+    assetTypeOptions,
+    chartData
+  } = useMemo(() => {
+    if (!rawData || rawData.length === 0) {
       return {
-        chainOptions: createOptions(uniqueChains),
-        marketOptions: createOptions(uniqueMarkets),
-        symbolOptions: createOptions(uniqueSymbols),
-        chartData: finalChartData
+        chainOptions: [],
+        marketOptions: [],
+        symbolOptions: [],
+        assetTypeOptions: [],
+        chartData: []
       };
-    }, [rawData, selectedOptions, groupBy]);
+    }
+
+    const selectedChainSet = new Set(selectedOptions.chain.map((c) => c.id));
+    const selectedMarketSet = new Set(selectedOptions.market.map((m) => m.id));
+    const selectedSymbolSet = new Set(selectedOptions.symbol.map((s) => s.id));
+    const selectedAssetTypeSet = new Set(
+      selectedOptions.assetType.map((a) => a.id)
+    );
+
+    const isChainFilterActive = selectedChainSet.size > 0;
+    const isMarketFilterActive = selectedMarketSet.size > 0;
+    const isSymbolFilterActive = selectedSymbolSet.size > 0;
+    const isAssetTypeFilterActive = selectedAssetTypeSet.size > 0;
+
+    const uniqueChains = new Set<string>();
+    const uniqueMarkets = new Set<string>();
+    const uniqueSymbols = new Set<string>();
+    const uniqueAssetTypes = new Set<string>();
+    const groupedByDate: { [date: string]: StackedChartData } = {};
+    const groupByKeyPath = groupByPathMapping[groupBy];
+
+    for (const item of rawData) {
+      const network = item.source.network;
+      const marketName = item.source.market ?? 'no name';
+      const symbolName = item.source.asset.symbol;
+      const assetTypeName = item.source.asset.type;
+
+      uniqueChains.add(network);
+      uniqueMarkets.add(marketName);
+      uniqueSymbols.add(symbolName);
+      uniqueAssetTypes.add(assetTypeName);
+
+      const chainMatch = !isChainFilterActive || selectedChainSet.has(network);
+      if (!chainMatch) continue;
+
+      const marketMatch =
+        !isMarketFilterActive || selectedMarketSet.has(marketName);
+      if (!marketMatch) continue;
+
+      const symbolMatch =
+        !isSymbolFilterActive || selectedSymbolSet.has(symbolName);
+      if (!symbolMatch) continue;
+
+      const assetTypeMatch =
+        !isAssetTypeFilterActive || selectedAssetTypeSet.has(assetTypeName);
+      if (!assetTypeMatch) continue;
+
+      const date = new Date(item.date * 1000).toISOString().split('T')[0];
+
+      let seriesKey: string;
+      if (groupBy === 'None') {
+        seriesKey = 'Total';
+      } else {
+        seriesKey = getValueByPath(item, groupByKeyPath) || 'Unknown';
+      }
+
+      if (!groupedByDate[date]) {
+        groupedByDate[date] = { date };
+      }
+
+      groupedByDate[date][seriesKey] =
+        ((groupedByDate[date][seriesKey] as number) || 0) + item.value;
+    }
+
+    const createOptions = (uniqueValues: Set<string>): OptionType[] => {
+      return Array.from(uniqueValues)
+        .sort((a, b) => a.localeCompare(b))
+        .map((value) => ({
+          id: value,
+          label: capitalizeFirstLetter(value)
+        }));
+    };
+
+    const finalChartData = Object.values(groupedByDate).sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+
+    return {
+      chainOptions: createOptions(uniqueChains),
+      marketOptions: createOptions(uniqueMarkets),
+      symbolOptions: createOptions(uniqueSymbols),
+      assetTypeOptions: createOptions(uniqueAssetTypes),
+      chartData: finalChartData
+    };
+  }, [rawData, selectedOptions, groupBy]);
 
   const { csvData, csvFilename } = useCSVExport({
     stackedData: chartData,
@@ -205,7 +224,8 @@ const CompoundFeeRevenueRecieved = ({
   const noDataMessage =
     selectedOptions.chain.length > 0 ||
     selectedOptions.market.length > 0 ||
-    selectedOptions.symbol.length > 0
+    selectedOptions.symbol.length > 0 ||
+    selectedOptions.assetType.length > 0
       ? 'No data for selected filters'
       : 'No data available';
 
@@ -228,6 +248,13 @@ const CompoundFeeRevenueRecieved = ({
             value={selectedOptions.chain}
             onChange={onSelectChain}
             placeholder='Chain'
+            disabled={isLoading}
+          />
+          <MultiSelect
+            options={assetTypeOptions}
+            value={selectedOptions.assetType}
+            onChange={onSelectAssetType}
+            placeholder='Asset Type'
             disabled={isLoading}
           />
           <MultiSelect

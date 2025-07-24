@@ -17,6 +17,7 @@ interface SelectedOptionsState {
   chain: OptionType[];
   market: OptionType[];
   symbol: OptionType[];
+  assetType: OptionType[];
 }
 
 const CompoundCumulativeRevenue = ({
@@ -27,7 +28,8 @@ const CompoundCumulativeRevenue = ({
   const initialState: SelectedOptionsState = {
     chain: [],
     market: [],
-    symbol: []
+    symbol: [],
+    assetType: []
   };
 
   const [selectedOptions, setSelectedOptions] = useReducer(
@@ -65,15 +67,17 @@ const CompoundCumulativeRevenue = ({
     () => ({
       chain: { path: 'source.network' },
       market: { path: 'source.market' },
-      symbol: { path: 'source.asset.symbol' }
+      symbol: { path: 'source.asset.symbol' },
+      assetType: { path: 'source.asset.type' }
     }),
     []
   );
 
-  const { chainOptions, marketOptions, symbolOptions } = useMemo(
-    () => extractFilterOptions(rawData, filterOptionsConfig),
-    [rawData, filterOptionsConfig]
-  );
+  const { chainOptions, marketOptions, symbolOptions, assetTypeOptions } =
+    useMemo(
+      () => extractFilterOptions(rawData, filterOptionsConfig),
+      [rawData, filterOptionsConfig]
+    );
 
   const onSelectChain = useCallback((options: OptionType[]) => {
     setSelectedOptions({ chain: options });
@@ -87,6 +91,10 @@ const CompoundCumulativeRevenue = ({
     setSelectedOptions({ symbol: options });
   }, []);
 
+  const onSelectAssetType = useCallback((options: OptionType[]) => {
+    setSelectedOptions({ assetType: options });
+  }, []);
+
   const groupBy = useMemo(() => {
     if (selectedOptions.market.length > 0) return 'market';
     if (selectedOptions.chain.length > 0) return 'network';
@@ -98,12 +106,14 @@ const CompoundCumulativeRevenue = ({
     filters: {
       network: selectedOptions.chain.map((opt) => opt.id),
       market: selectedOptions.market.map((opt) => opt.id),
-      symbol: selectedOptions.symbol.map((opt) => opt.id)
+      symbol: selectedOptions.symbol.map((opt) => opt.id),
+      assetType: selectedOptions.assetType.map((opt) => opt.id)
     },
     filterPaths: {
       network: 'source.network',
       market: 'source.market',
-      symbol: 'source.asset.symbol'
+      symbol: 'source.asset.symbol',
+      assetType: 'source.asset.type'
     },
     groupBy,
     groupByKeyPath: groupBy === 'none' ? null : `source.${groupBy}`,
@@ -184,7 +194,8 @@ const CompoundCumulativeRevenue = ({
   const noDataMessage =
     selectedOptions.chain.length > 0 ||
     selectedOptions.market.length > 0 ||
-    selectedOptions.symbol.length > 0
+    selectedOptions.symbol.length > 0 ||
+    selectedOptions.assetType.length > 0
       ? 'No data for selected filters'
       : 'No data available';
 
@@ -214,6 +225,13 @@ const CompoundCumulativeRevenue = ({
             value={selectedOptions.chain}
             onChange={onSelectChain}
             placeholder='Chain'
+            disabled={isLoading}
+          />
+          <MultiSelect
+            options={assetTypeOptions || []}
+            value={selectedOptions.assetType}
+            onChange={onSelectAssetType}
+            placeholder='Asset Type'
             disabled={isLoading}
           />
           <MultiSelect
