@@ -29,6 +29,7 @@ interface DataTableProps<T> {
   enablePagination?: boolean;
   pageSize?: number;
   className?: string;
+  containerTableClassName?: string;
   tableClassName?: string;
   headerClassName?: string;
   rowClassName?: string;
@@ -62,6 +63,7 @@ const DataTable = <T,>({
   headerClassName,
   rowClassName,
   cellClassName,
+  containerTableClassName,
   headerCellClassName,
   headerRowClassName,
   headerTextClassName,
@@ -129,7 +131,7 @@ const DataTable = <T,>({
 
   return (
     <div className={cn('w-full', className)}>
-      <div className='overflow-x-auto'>
+      <div className={cn('overflow-x-auto', containerTableClassName)}>
         <table className={cn('min-w-full', tableClassName)}>
           <thead className={cn('bg-transparent', headerClassName)}>
             {table.getHeaderGroups().map((headerGroup) => (

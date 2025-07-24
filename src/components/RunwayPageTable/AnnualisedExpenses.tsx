@@ -68,6 +68,7 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
       columns={columns}
       pageSize={10}
       footerContent={footerRow}
+      containerTableClassName='min-h-[345px]'
       headerCellClassName='py-[13px] px-[5px]'
       cellClassName='py-3 px-[5px]'
       headerTextClassName='text-primary-14 font-medium'
