@@ -54,7 +54,8 @@ const TreasuryBalanceByNetworkBlock = ({
     {
       chain: [{ id: 'mainnet', label: 'Mainnet' }],
       assetType: [],
-      deployment: []
+      deployment: [],
+      symbol: []
     }
   );
 
@@ -62,15 +63,17 @@ const TreasuryBalanceByNetworkBlock = ({
     () => ({
       chain: { path: 'source.network' },
       assetType: { path: 'source.asset.type' },
-      deployment: { path: 'source.market' }
+      deployment: { path: 'source.market' },
+      symbol: { path: 'source.asset.symbol' }
     }),
     []
   );
 
-  const { chainOptions, assetTypeOptions, deploymentOptions } = useMemo(
-    () => extractFilterOptions(data, filterOptionsConfig),
-    [data, filterOptionsConfig]
-  );
+  const { chainOptions, assetTypeOptions, deploymentOptions, symbolOptions } =
+    useMemo(
+      () => extractFilterOptions(data, filterOptionsConfig),
+      [data, filterOptionsConfig]
+    );
 
   const deploymentOptionsFilter = useMemo(() => {
     const marketV2 =
@@ -110,10 +113,23 @@ const TreasuryBalanceByNetworkBlock = ({
 
       const market = item.source.market ?? 'no market';
 
-      return !(
+      if (
         selectedOptions.deployment.length > 0 &&
         !selectedOptions.deployment.some((o: OptionType) => o.id === market)
-      );
+      ) {
+        return false;
+      }
+
+      if (
+        selectedOptions.symbol.length > 0 &&
+        !selectedOptions.symbol.some(
+          (o: OptionType) => o.id === item.source.asset.symbol
+        )
+      ) {
+        return false;
+      }
+
+      return true;
     });
 
     return mapTableData(filtered).sort((a, b) => b.value - a.value);
@@ -147,11 +163,18 @@ const TreasuryBalanceByNetworkBlock = ({
     });
   }, []);
 
+  const onSelectSymbol = useCallback((selectedOptions: Option[]) => {
+    setSelectedOptions({
+      symbol: selectedOptions
+    });
+  }, []);
+
   const onClearSelectedOptions = useCallback(() => {
     setSelectedOptions({
       chain: [],
       assetType: [],
-      deployment: []
+      deployment: [],
+      symbol: []
     });
   }, []);
 
@@ -192,6 +215,13 @@ const TreasuryBalanceByNetworkBlock = ({
           value={selectedOptions.deployment}
           onChange={onSelectMarket}
           placeholder='Market'
+          disabled={isLoading}
+        />
+        <MultiSelect
+          options={symbolOptions || []}
+          value={selectedOptions.symbol}
+          onChange={onSelectSymbol}
+          placeholder='Reserve Symbols'
           disabled={isLoading}
         />
       </div>

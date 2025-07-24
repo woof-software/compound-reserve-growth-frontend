@@ -43,7 +43,8 @@ const TotalTresuaryValue = ({
     {
       chain: [],
       assetType: [],
-      deployment: []
+      deployment: [],
+      symbol: []
     }
   );
 
@@ -78,15 +79,17 @@ const TotalTresuaryValue = ({
     () => ({
       chain: { path: 'source.network' },
       assetType: { path: 'source.asset.type' },
-      deployment: { path: 'source.market' }
+      deployment: { path: 'source.market' },
+      symbol: { path: 'source.asset.symbol' }
     }),
     []
   );
 
-  const { chainOptions, assetTypeOptions, deploymentOptions } = useMemo(
-    () => extractFilterOptions(rawData, filterOptionsConfig),
-    [rawData, filterOptionsConfig]
-  );
+  const { chainOptions, assetTypeOptions, symbolOptions, deploymentOptions } =
+    useMemo(
+      () => extractFilterOptions(rawData, filterOptionsConfig),
+      [rawData, filterOptionsConfig]
+    );
 
   const deploymentOptionsFilter = useMemo(() => {
     const marketV2 =
@@ -126,7 +129,8 @@ const TotalTresuaryValue = ({
     filterPaths: {
       chain: 'source.network',
       assetType: 'source.asset.type',
-      deployment: 'source.market'
+      deployment: 'source.market',
+      symbol: 'source.asset.symbol'
     },
     groupBy,
     groupByKeyPath:
@@ -208,11 +212,18 @@ const TotalTresuaryValue = ({
     });
   }, []);
 
+  const onSelectSymbol = useCallback((selectedOptions: Option[]) => {
+    setSelectedOptions({
+      symbol: selectedOptions
+    });
+  }, []);
+
   const onClearSelectedOptions = useCallback(() => {
     setSelectedOptions({
       chain: [],
       assetType: [],
-      deployment: []
+      deployment: [],
+      symbol: []
     });
   }, []);
 
@@ -275,6 +286,13 @@ const TotalTresuaryValue = ({
           value={selectedOptions.deployment}
           onChange={onSelectMarket}
           placeholder='Market'
+          disabled={isLoading}
+        />
+        <MultiSelect
+          options={symbolOptions || []}
+          value={selectedOptions.symbol}
+          onChange={onSelectSymbol}
+          placeholder='Reserve Symbols'
           disabled={isLoading}
         />
         <CSVDownloadButton

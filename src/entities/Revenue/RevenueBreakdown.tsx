@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useReducer } from 'react';
 
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
@@ -20,15 +20,35 @@ import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
+interface SelectedFiltersState {
+  chain: OptionType[];
+  market: OptionType[];
+  source: OptionType[];
+  symbol: OptionType[];
+}
+
 const RevenueBreakDownBlock = ({
   revenueData: rawData,
   isLoading,
   isError
 }: RevenuePageProps) => {
-  const [selectedChains, setSelectedChains] = useState<OptionType[]>([]);
-  const [selectedMarkets, setSelectedMarkets] = useState<OptionType[]>([]);
-  const [selectedSources, setSelectedSources] = useState<OptionType[]>([]);
-  const [selectedSymbols, setSelectedSymbols] = useState<OptionType[]>([]);
+  const initialState: SelectedFiltersState = {
+    chain: [],
+    market: [],
+    source: [],
+    symbol: []
+  };
+
+  const [selectedOptions, setSelectedOptions] = useReducer(
+    (
+      prev: SelectedFiltersState,
+      next: Partial<SelectedFiltersState>
+    ): SelectedFiltersState => ({
+      ...prev,
+      ...next
+    }),
+    initialState
+  );
 
   const {
     open: yearOpen,
@@ -37,6 +57,22 @@ const RevenueBreakDownBlock = ({
     close: closeYear,
     select: selectYear
   } = useDropdown('single');
+
+  const onSelectChain = useCallback((options: OptionType[]) => {
+    setSelectedOptions({ chain: options });
+  }, []);
+
+  const onSelectMarket = useCallback((options: OptionType[]) => {
+    setSelectedOptions({ market: options });
+  }, []);
+
+  const onSelectSource = useCallback((options: OptionType[]) => {
+    setSelectedOptions({ source: options });
+  }, []);
+
+  const onSelectSymbol = useCallback((options: OptionType[]) => {
+    setSelectedOptions({ symbol: options });
+  }, []);
 
   const yearOptions = useMemo(() => {
     if (!rawData || rawData.length === 0) {
@@ -66,8 +102,8 @@ const RevenueBreakDownBlock = ({
   const filteredData = useMemo(() => {
     let data = rawData;
 
-    if (selectedChains.length > 0) {
-      const selectedValues = selectedChains.map((option) => option.id);
+    if (selectedOptions.chain.length > 0) {
+      const selectedValues = selectedOptions.chain.map((option) => option.id);
       data = data.filter((item) =>
         item.source.network
           ? selectedValues.includes(item.source.network)
@@ -75,23 +111,23 @@ const RevenueBreakDownBlock = ({
       );
     }
 
-    if (selectedMarkets.length > 0) {
-      const selectedValues = selectedMarkets.map((option) => option.id);
+    if (selectedOptions.market.length > 0) {
+      const selectedValues = selectedOptions.market.map((option) => option.id);
       data = data.filter((item) => {
         const marketValue = item.source.market || 'no name';
         return selectedValues.includes(marketValue);
       });
     }
 
-    if (selectedSources.length > 0) {
-      const selectedValues = selectedSources.map((option) => option.id);
+    if (selectedOptions.source.length > 0) {
+      const selectedValues = selectedOptions.source.map((option) => option.id);
       data = data.filter((item) =>
         item.source.type ? selectedValues.includes(item.source.type) : false
       );
     }
 
-    if (selectedSymbols.length > 0) {
-      const selectedValues = selectedSymbols.map((option) => option.id);
+    if (selectedOptions.symbol.length > 0) {
+      const selectedValues = selectedOptions.symbol.map((option) => option.id);
       data = data.filter((item) =>
         item.source.asset?.symbol
           ? selectedValues.includes(item.source.asset.symbol)
@@ -100,13 +136,7 @@ const RevenueBreakDownBlock = ({
     }
 
     return data;
-  }, [
-    rawData,
-    selectedChains,
-    selectedMarkets,
-    selectedSources,
-    selectedSymbols
-  ]);
+  }, [rawData, selectedOptions]);
 
   const { tableData, dynamicColumns } = useMemo(() => {
     const yearToDisplay = selectedYear?.[0] || yearOptions[0];
@@ -122,13 +152,19 @@ const RevenueBreakDownBlock = ({
     const columns: ExtendedColumnDef<FormattedRevenueData>[] = [
       { accessorKey: 'chain', header: 'Chain' }
     ];
-    if (selectedMarkets.length > 0 || selectedSources.length > 0) {
+    if (
+      selectedOptions.market.length > 0 ||
+      selectedOptions.source.length > 0
+    ) {
       columns.push({ accessorKey: 'market', header: 'Market' });
     }
-    if (selectedSources.length > 0) {
+    if (selectedOptions.source.length > 0) {
       columns.push({ accessorKey: 'source', header: 'Source' });
     }
-    if (selectedSources.length > 0 || selectedSymbols.length > 0) {
+    if (
+      selectedOptions.source.length > 0 ||
+      selectedOptions.symbol.length > 0
+    ) {
       columns.push({ accessorKey: 'reserveAsset', header: 'Reserve Asset' });
     }
 
@@ -168,13 +204,19 @@ const RevenueBreakDownBlock = ({
       const marketValue = item.source.market || 'no name';
 
       const keyParts = [item.source.network];
-      if (selectedMarkets.length > 0 || selectedSources.length > 0) {
+      if (
+        selectedOptions.market.length > 0 ||
+        selectedOptions.source.length > 0
+      ) {
         keyParts.push(marketValue);
       }
-      if (selectedSources.length > 0) {
+      if (selectedOptions.source.length > 0) {
         keyParts.push(item.source.type);
       }
-      if (selectedSources.length > 0 || selectedSymbols.length > 0) {
+      if (
+        selectedOptions.source.length > 0 ||
+        selectedOptions.symbol.length > 0
+      ) {
         keyParts.push(item.source.asset.symbol);
       }
       const groupKey = keyParts.join('-');
@@ -201,28 +243,19 @@ const RevenueBreakDownBlock = ({
     const finalData = Object.values(groupedData);
 
     return { tableData: finalData, dynamicColumns: columns };
-  }, [
-    filteredData,
-    selectedYear,
-    yearOptions,
-    selectedMarkets,
-    selectedSources
-  ]);
+  }, [filteredData, selectedYear, yearOptions, selectedOptions]);
 
   const handleResetFilters = useCallback(() => {
-    setSelectedChains([]);
-    setSelectedMarkets([]);
-    setSelectedSources([]);
-    setSelectedSymbols([]);
+    setSelectedOptions(initialState);
   }, []);
 
   const hasData = tableData.length > 0;
 
   const noDataMessage =
-    selectedChains.length > 0 ||
-    selectedMarkets.length > 0 ||
-    selectedSources.length > 0 ||
-    selectedSymbols.length > 0
+    selectedOptions.chain.length > 0 ||
+    selectedOptions.market.length > 0 ||
+    selectedOptions.source.length > 0 ||
+    selectedOptions.symbol.length > 0
       ? 'No data for selected filters'
       : 'No data available';
 
@@ -242,29 +275,29 @@ const RevenueBreakDownBlock = ({
           <div className='flex items-center gap-1'>
             <MultiSelect
               options={chainOptions || []}
-              value={selectedChains}
-              onChange={setSelectedChains}
+              value={selectedOptions.chain}
+              onChange={onSelectChain}
               placeholder='Chain'
               disabled={isLoading}
             />
             <MultiSelect
               options={marketOptions || []}
-              value={selectedMarkets}
-              onChange={setSelectedMarkets}
+              value={selectedOptions.market}
+              onChange={onSelectMarket}
               placeholder='Market'
               disabled={isLoading}
             />
             <MultiSelect
               options={sourceOptions || []}
-              value={selectedSources}
-              onChange={setSelectedSources}
+              value={selectedOptions.source}
+              onChange={onSelectSource}
               placeholder='Source'
               disabled={isLoading}
             />
             <MultiSelect
               options={symbolOptions || []}
-              value={selectedSymbols}
-              onChange={setSelectedSymbols}
+              value={selectedOptions.symbol}
+              onChange={onSelectSymbol}
               placeholder='Reserve Symbols'
               disabled={isLoading}
             />

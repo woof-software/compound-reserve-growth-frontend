@@ -10,6 +10,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import { cn } from '@/shared/lib/classNames/classNames';
+import { getStableColorForSeries } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Text from '@/shared/ui/Text/Text';
 
@@ -112,12 +113,15 @@ const LineChart: FC<LineChartProps> = ({
   }, [data]);
 
   const aggregatedSeries = useMemo(() => {
+    const allSeriesNames = data.map((series) => series.name);
+
     if (barSize === 'D') {
       return data.map((series) => ({
         id: series.name,
         type: 'area' as const,
         name: capitalizeFirstLetter(series.name),
-        data: series.data.map((d) => [d.x, d.y])
+        data: series.data.map((d) => [d.x, d.y]),
+        color: getStableColorForSeries(series.name, allSeriesNames)
       }));
     }
 
@@ -127,7 +131,8 @@ const LineChart: FC<LineChartProps> = ({
           id: series.name,
           type: 'area' as const,
           name: capitalizeFirstLetter(series.name),
-          data: []
+          data: [],
+          color: getStableColorForSeries(series.name, allSeriesNames)
         };
       }
 
@@ -165,7 +170,8 @@ const LineChart: FC<LineChartProps> = ({
         id: series.name,
         type: 'area' as const,
         name: capitalizeFirstLetter(series.name),
-        data: resultData
+        data: resultData,
+        color: getStableColorForSeries(series.name, allSeriesNames)
       };
     });
   }, [data, barSize]);
