@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
-import type { CellContext } from '@tanstack/react-table';
+import { useEffect, useMemo, useState } from 'react';
 
 import CompoundFeeRevenuebyChainComponent, {
   ProcessedRevenueData as TableData
@@ -9,7 +8,6 @@ import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
   capitalizeFirstLetter,
   ChartDataItem,
-  formatNumber,
   longMonthNames,
   shortMonthNames
 } from '@/shared/lib/utils/utils';
@@ -37,6 +35,28 @@ export interface PrecomputedViews {
 }
 
 const intervalOptions = ['Quarterly', 'Monthly', 'Weekly'];
+
+const formatCurrencyValue = (value: unknown): string => {
+  const num = Number(value);
+
+  if (
+    value === null ||
+    typeof value === 'undefined' ||
+    isNaN(num) ||
+    num === 0
+  ) {
+    return '-';
+  }
+
+  const isNegative = num < 0;
+  const absValue = Math.abs(num);
+
+  const formattedNumber = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 0
+  }).format(absValue);
+
+  return isNegative ? `-$${formattedNumber}` : `$${formattedNumber}`;
+};
 
 export function precomputeViews(
   rawData: ChartDataItem[]
@@ -132,7 +152,7 @@ export function precomputeViews(
       columns: allKeys.map((k) => ({
         accessorKey: k,
         header: k,
-        cell: ({ getValue }) => formatNumber(getValue() as number)
+        cell: ({ getValue }) => formatCurrencyValue(getValue() as number)
       }))
     };
   };
@@ -216,8 +236,8 @@ const CompoundFeeRevenueByChain = ({
   const intervalDropdown = useDropdown('single');
   const periodDropdown = useDropdown('single');
 
-  const selectedInterval = intervalDropdown.selectedValue?.[0] || 'Quarterly';
-  const selectedPeriod = periodDropdown.selectedValue?.[0];
+  const [selectedInterval, setSelectedInterval] = useState(intervalOptions[0]);
+  const [selectedPeriod, setSelectedPeriod] = useState<string | undefined>();
 
   const precomputedViews = useMemo(
     () => precomputeViews(revenueData || []),
@@ -230,17 +250,18 @@ const CompoundFeeRevenueByChain = ({
   );
 
   useEffect(() => {
-    if (dynamicOptions.options.length > 0) {
-      if (
-        !periodDropdown.selectedValue ||
-        !dynamicOptions.options.includes(periodDropdown.selectedValue[0])
-      ) {
-        periodDropdown.select(dynamicOptions.options[0]);
+    if (precomputedViews && !selectedPeriod) {
+      const initialOptions = generateOptions(
+        precomputedViews,
+        selectedInterval
+      );
+      if (initialOptions.options.length > 0) {
+        setSelectedPeriod(initialOptions.options[0]);
       }
     }
-  }, [dynamicOptions, periodDropdown]);
+  }, [precomputedViews, selectedPeriod, selectedInterval]);
 
-  const { tableData, columns, totals } = useMemo(() => {
+  const currentView = useMemo(() => {
     if (!precomputedViews || !selectedPeriod) {
       return { tableData: [], columns: [], totals: {} };
     }
@@ -250,32 +271,9 @@ const CompoundFeeRevenueByChain = ({
         selectedInterval.toLowerCase() as keyof PrecomputedViews
       ]?.[selectedPeriod];
 
-    if (!viewData) return { tableData: [], columns: [], totals: {} };
-
-    const remappedDataColumns = viewData.columns.map((col) => {
-      const originalCell = col.cell;
-      if (!originalCell) {
-        return col;
-      }
-
-      return {
-        ...col,
-        cell: (props: CellContext<TableData, unknown>) => {
-          const renderedValue =
-            typeof originalCell === 'function'
-              ? originalCell(props)
-              : originalCell;
-
-          if (
-            typeof renderedValue === 'string' &&
-            renderedValue.startsWith('$-')
-          ) {
-            return `-${renderedValue.replace('-', '')}`;
-          }
-          return renderedValue;
-        }
-      };
-    });
+    if (!viewData) {
+      return { tableData: [], columns: [], totals: {} };
+    }
 
     const finalColumns: ExtendedColumnDef<TableData>[] = [
       {
@@ -292,13 +290,28 @@ const CompoundFeeRevenueByChain = ({
           </div>
         )
       },
-      ...remappedDataColumns
+      ...viewData.columns
     ];
 
     return { ...viewData, columns: finalColumns };
   }, [precomputedViews, selectedInterval, selectedPeriod]);
 
-  const hasData = tableData.length > 0;
+  const handleIntervalSelect = (newInterval: string) => {
+    const newOptions = generateOptions(precomputedViews, newInterval);
+    const newDefaultPeriod =
+      newOptions.options.length > 0 ? newOptions.options[0] : undefined;
+
+    setSelectedInterval(newInterval);
+    setSelectedPeriod(newDefaultPeriod);
+    intervalDropdown.close();
+  };
+
+  const handlePeriodSelect = (period: string) => {
+    setSelectedPeriod(period);
+    periodDropdown.close();
+  };
+
+  const hasData = currentView.tableData.length > 0;
   const noDataMessage = 'No data available';
 
   return (
@@ -328,7 +341,7 @@ const CompoundFeeRevenueByChain = ({
             isOpen={intervalDropdown.open}
             onToggle={intervalDropdown.toggle}
             onClose={intervalDropdown.close}
-            onSelect={intervalDropdown.select}
+            onSelect={handleIntervalSelect}
             selectedValue={selectedInterval}
             contentClassName='p-[5px]'
             triggerContentClassName='p-[5px]'
@@ -349,8 +362,8 @@ const CompoundFeeRevenueByChain = ({
             isOpen={periodDropdown.open}
             onToggle={periodDropdown.toggle}
             onClose={periodDropdown.close}
-            onSelect={periodDropdown.select}
-            selectedValue={periodDropdown.selectedValue?.[0]}
+            onSelect={handlePeriodSelect}
+            selectedValue={selectedPeriod}
             contentClassName='p-[5px]'
             triggerContentClassName='p-[5px]'
           />
@@ -367,9 +380,9 @@ const CompoundFeeRevenueByChain = ({
         </div>
       ) : (
         <CompoundFeeRevenuebyChainComponent
-          data={tableData}
-          columns={columns}
-          totals={totals}
+          data={currentView.tableData}
+          columns={currentView.columns}
+          totals={currentView.totals}
         />
       )}
     </Card>
