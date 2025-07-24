@@ -70,10 +70,6 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       return { seriesData: [], aggregatedData: [] };
     }
 
-    const pointsPerBar = { D: 1, W: 7, M: 30 };
-    const chunkSize = pointsPerBar[barSize];
-    const tempAggregatedData: AggregatedPoint[] = [];
-
     const allKeys = new Set<string>();
     data.forEach((item) => {
       Object.keys(item).forEach((key) => {
@@ -83,34 +79,61 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       });
     });
 
-    for (let i = 0; i < data.length; i += chunkSize) {
-      const chunk = data.slice(i, i + chunkSize);
-      if (chunk.length === 0) continue;
+    const aggregated = new Map<number, AggregatedPoint>();
 
-      const firstPointDate = new Date(chunk[0].date);
+    data.forEach((item) => {
+      const date = new Date(item.date);
+      let keyDate: Date;
 
-      const timestamp =
-        barSize === 'M'
-          ? new Date(
-              firstPointDate.getFullYear(),
-              firstPointDate.getMonth(),
-              1
-            ).getTime()
-          : firstPointDate.getTime();
+      switch (barSize) {
+        case 'D': {
+          keyDate = new Date(
+            Date.UTC(
+              date.getUTCFullYear(),
+              date.getUTCMonth(),
+              date.getUTCDate()
+            )
+          );
+          break;
+        }
+        case 'W': {
+          const day = date.getUTCDay();
+          const diff = date.getUTCDate() - day + (day === 0 ? -6 : 1);
+          keyDate = new Date(
+            Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), diff)
+          );
+          break;
+        }
+        case 'M': {
+          keyDate = new Date(
+            Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)
+          );
+          break;
+        }
+        default:
+          keyDate = date;
+      }
 
-      const aggregatedPoint: AggregatedPoint = { x: timestamp };
+      const keyTimestamp = keyDate.getTime();
+
+      if (!aggregated.has(keyTimestamp)) {
+        aggregated.set(keyTimestamp, { x: keyTimestamp });
+      }
+
+      const aggregatedPoint = aggregated.get(keyTimestamp)!;
 
       allKeys.forEach((key) => {
-        aggregatedPoint[key] = chunk.reduce(
-          (sum, dailyData) => sum + ((dailyData[key] as number) || 0),
-          0
-        );
+        const value = (item[key] as number) || 0;
+        aggregatedPoint[key] = (aggregatedPoint[key] || 0) + value;
       });
-      tempAggregatedData.push(aggregatedPoint);
-    }
+    });
+
+    const sortedAggregated = Array.from(aggregated.values()).sort(
+      (a, b) => a.x - b.x
+    );
 
     const activeSeriesKeys = new Set<string>();
-    tempAggregatedData.forEach((point) => {
+    sortedAggregated.forEach((point) => {
       Object.keys(point).forEach((key) => {
         if (key !== 'x' && point[key] !== 0) {
           activeSeriesKeys.add(key);
@@ -122,7 +145,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       (key): Highcharts.SeriesColumnOptions => ({
         type: 'column',
         name: key.charAt(0).toUpperCase() + key.slice(1),
-        data: tempAggregatedData.map((item) => [
+        data: sortedAggregated.map((item) => [
           item.x,
           (item[key] as number) || 0
         ]),
@@ -130,21 +153,8 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       })
     );
 
-    return { seriesData: finalSeries, aggregatedData: tempAggregatedData };
+    return { seriesData: finalSeries, aggregatedData: sortedAggregated };
   }, [data, barSize]);
-
-  // const pointRange = useMemo(() => {
-  //   const dayInMillis = 24 * 3600 * 1000;
-  //   switch (barSize) {
-  //     case 'W':
-  //       return 7 * dayInMillis;
-  //     case 'M':
-  //       return 30 * dayInMillis;
-  //     case 'D':
-  //     default:
-  //       return dayInMillis;
-  //   }
-  // }, [barSize]);
 
   useEffect(() => {
     const chart = chartRef.current?.chart;
