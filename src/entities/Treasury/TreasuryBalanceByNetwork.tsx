@@ -90,8 +90,6 @@ const TreasuryBalanceByNetworkBlock = ({
     return [...marketV3, ...marketV2];
   }, [deploymentOptions]);
 
-  console.log('deploymentOptionsFilter=>', deploymentOptionsFilter);
-
   const tableData = useMemo<TreasuryBalanceByNetworkType[]>(() => {
     const filtered = data.filter((item) => {
       if (
