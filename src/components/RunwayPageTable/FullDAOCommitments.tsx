@@ -114,6 +114,7 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({ data }) => {
       className={cn('flex flex-col justify-between', {
         'min-h-[565px]': data.length > 10
       })}
+      containerTableClassName='min-h-[473px]'
       headerCellClassName='py-[13px] px-[5px]'
       cellClassName='py-3 px-[5px]'
       headerTextClassName='text-primary-14 font-medium'

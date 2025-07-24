@@ -71,6 +71,24 @@ const TreasuryHoldingsBlock = ({
     [data, filterOptionsConfig]
   );
 
+  const deploymentOptionsFilter = useMemo(() => {
+    const marketV2 =
+      deploymentOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const marketV3 =
+      deploymentOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    return [...marketV3, ...marketV2];
+  }, [deploymentOptions]);
+
   const tableData = useMemo<TreasuryBalanceByNetworkType[]>(() => {
     const filtered = data.filter((item) => {
       if (
@@ -161,11 +179,7 @@ const TreasuryHoldingsBlock = ({
           disabled={isLoading}
         />
         <MultiSelect
-          options={
-            deploymentOptions?.sort((a: OptionType, b: OptionType) =>
-              a.label.localeCompare(b.label)
-            ) || []
-          }
+          options={deploymentOptionsFilter}
           value={selectedOptions.deployment}
           onChange={onSelectMarket}
           placeholder='Market'

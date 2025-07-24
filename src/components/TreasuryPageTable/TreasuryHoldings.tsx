@@ -107,6 +107,7 @@ const TreasuryHoldings = ({ tableData }: TreasuryHoldingsProps) => {
       enableSorting
       enablePagination
       pageSize={10}
+      containerTableClassName='min-h-[518px]'
       className={cn('flex flex-col justify-between', {
         'min-h-[565px]': tableData.length > 10
       })}
