@@ -111,7 +111,7 @@ const Select: FC<SelectProps> = memo(
           </div>
         </div>
         <View.Condition if={isOpen}>
-          <div className='hide-scrollbar outline-secondary-13 bg-primary-15 absolute top-[52px] right-[-2px] z-10 grid max-h-[182px] w-[540px] gap-0.5 overflow-y-auto rounded-lg border-none p-2 outline outline-solid'>
+          <div className='hide-scrollbar outline-secondary-13 bg-primary-15 absolute top-[52px] right-[-2px] z-10 grid max-h-[227px] w-[540px] gap-0.5 overflow-y-auto rounded-lg border-none p-2 outline outline-solid'>
             <Each
               data={options}
               render={(el, index) => {
