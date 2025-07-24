@@ -1,4 +1,13 @@
-import { ChangeEvent, FC, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  FC,
+  KeyboardEvent,
+  Ref,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
@@ -19,7 +28,7 @@ const CustomDropdownItem: FC<{
   isSelected: boolean;
   isHighlighted: boolean;
   onSelect: () => void;
-  itemRef?: React.Ref<HTMLDivElement>;
+  itemRef?: Ref<HTMLDivElement>;
 }> = ({ label, marketType, isSelected, isHighlighted, onSelect, itemRef }) => {
   return (
     <div
@@ -127,7 +136,7 @@ export const MultiSelect: FC<MultiSelectProps> = ({
     close();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (!open) return;
 
     switch (e.key) {
