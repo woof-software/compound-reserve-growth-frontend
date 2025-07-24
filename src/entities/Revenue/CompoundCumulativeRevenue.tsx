@@ -45,15 +45,33 @@ const CompoundCumulativeRevenue = ({
   const filterOptionsConfig = useMemo(
     () => ({
       chain: { path: 'source.network' },
-      market: { path: 'source.market' }
+      deployment: { path: 'source.market' }
     }),
     []
   );
 
-  const { chainOptions, marketOptions } = useMemo(
+  const { chainOptions, deploymentOptions } = useMemo(
     () => extractFilterOptions(rawData, filterOptionsConfig),
     [rawData, filterOptionsConfig]
   );
+
+  const deploymentOptionsFilter = useMemo(() => {
+    const marketV2 =
+      deploymentOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const marketV3 =
+      deploymentOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    return [...marketV3, ...marketV2];
+  }, [deploymentOptions]);
 
   const groupBy = useMemo(() => {
     if (selectedMarkets.length > 0) return 'market';
@@ -181,7 +199,7 @@ const CompoundCumulativeRevenue = ({
             disabled={isLoading}
           />
           <MultiSelect
-            options={marketOptions || []}
+            options={deploymentOptionsFilter || []}
             value={selectedMarkets}
             onChange={setSelectedMarkets}
             placeholder='Market'

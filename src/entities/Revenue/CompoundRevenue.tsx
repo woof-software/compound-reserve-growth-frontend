@@ -7,7 +7,11 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { type RevenuePageProps } from '@/shared/hooks/useRevenue';
-import { capitalizeFirstLetter, ChartDataItem } from '@/shared/lib/utils/utils';
+import {
+  capitalizeFirstLetter,
+  ChartDataItem,
+  getValueByPath
+} from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
@@ -94,7 +98,22 @@ function preprocessData(rawData: ChartDataItem[]): PreprocessedResult {
       uniqueValues[key as keyof typeof uniqueValues]
     )
       .sort((a, b) => a.localeCompare(b))
-      .map((value) => ({ id: value, label: capitalizeFirstLetter(value) }));
+      .map((value) => {
+        const option: OptionType & { marketType?: string } = {
+          id: value,
+          label: capitalizeFirstLetter(value)
+        };
+
+        if (key === 'market') {
+          const match = rawData.find(
+            (item) => getValueByPath(item, 'source.market') === value
+          );
+
+          option.marketType = match?.source.type.split(' ')[1] ?? '';
+        }
+
+        return option;
+      });
   }
 
   const sortedDates = Object.keys(dailyTotals).sort();
