@@ -43,7 +43,7 @@ const CustomDropdownItem: FC<{
         <span className='text-color-gray-11 rounded-sm text-[12px]'>
           {label}
         </span>
-        <View.Condition if={Boolean(marketType)}>
+        <View.Condition if={Boolean(marketType && !isSelected)}>
           <span className='text-primary-14 rounded-sm text-[10px]'>
             ({marketType?.toLowerCase()})
           </span>
