@@ -59,16 +59,19 @@ const Footer: FC = () => {
               >
                 ©2025 Compound Finance. All Rights Reserved
               </Text>
-              <Text
-                size='11'
-                weight='500'
-                className='!text-[#00D395]'
-              >
-                The dashboards should not be the basis for investing, etc.
-              </Text>
             </div>
           </div>
         </div>
+        <Text
+          size='11'
+          className='text-primary-14 mx-auto flex w-[70%] pb-6 !text-center'
+        >
+          The information displayed on this platform is for informational
+          purposes only. The dashboards are based solely on publicly available
+          on-chain data and are not intended to constitute investment advice or
+          recommendations. Users should not rely on the data presented here as a
+          basis for making investment decisions.
+        </Text>
       </div>
     </footer>
   );
