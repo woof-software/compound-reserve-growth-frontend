@@ -72,7 +72,7 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
     <DataTable
       data={data}
       columns={columns}
-      pageSize={10}
+      pageSize={5}
       footerContent={footerContent}
       containerTableClassName='min-h-[345px]'
       className='flex min-h-[400px] flex-col justify-between'

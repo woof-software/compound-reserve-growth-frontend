@@ -92,7 +92,7 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
     <DataTable
       data={data}
       columns={columns}
-      pageSize={10}
+      pageSize={5}
       footerContent={footerRow}
       containerTableClassName='min-h-[372px]'
       className='flex min-h-[400px] flex-col justify-between'
