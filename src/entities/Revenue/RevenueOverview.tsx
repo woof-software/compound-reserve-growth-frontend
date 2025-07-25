@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import RevenueOverviewUSD, {
@@ -136,12 +136,15 @@ const RevenueOverview = ({
     }
   }, [dateType]);
 
+  const stableTableColumns = useMemo(() => {
+    return createTableColumns(primaryTabs, dateType);
+  }, [primaryTabs, dateType]);
+
   const processedData = useMemo(() => {
     if (!rawData.length) {
       return {
         tableData: [],
         pieData: [],
-        tableColumns: createTableColumns(primaryTabs, dateType),
         footerContent: null
       };
     }
@@ -181,7 +184,6 @@ const RevenueOverview = ({
     }
 
     const tableData: TableRowData[] = Array.from(tableDataMap.values());
-    const tableColumns = createTableColumns(primaryTabs, dateType);
 
     const footerContent = (
       <tr>
@@ -221,23 +223,28 @@ const RevenueOverview = ({
       };
     });
 
-    return { tableData, pieData, tableColumns, footerContent };
+    return { tableData, pieData, footerContent };
   }, [rawData, dateType, period, primaryTabs]);
 
-  const handleDateTypeChange = (newType: string) => {
-    if (isDateType(newType) && newType !== dateType) {
-      setDateType(newType);
-    }
-  };
+  const handleDateTypeChange = useCallback(
+    (newType: string) => {
+      if (isDateType(newType) && newType !== dateType) {
+        setDateType(newType);
+      }
+    },
+    [dateType]
+  );
 
-  const handlePeriodChange = (newPeriod: string) => {
+  const handlePeriodChange = useCallback((newPeriod: string) => {
     if (isPeriod(newPeriod)) {
       setPeriod(newPeriod);
     }
-  };
+  }, []);
 
   const hasData = processedData.tableData.length > 0;
   const noDataMessage = 'No data available';
+
+  const tableKey = `${dateType}-${primaryTabs.join('-')}`;
 
   return (
     <Card
@@ -276,8 +283,9 @@ const RevenueOverview = ({
       ) : (
         <div className='flex items-start justify-between'>
           <RevenueOverviewUSD
+            key={tableKey}
             data={processedData.tableData}
-            columns={processedData.tableColumns}
+            columns={stableTableColumns}
             footerContent={processedData.footerContent}
           />
           <PieChart
