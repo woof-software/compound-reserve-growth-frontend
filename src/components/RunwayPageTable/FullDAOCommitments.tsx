@@ -6,7 +6,9 @@ import {
   formatLargeNumber
 } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
+import Text from '@/shared/ui/Text/Text';
 
+import { TextTooltip } from '../TextTooltip/TextTooltip';
 import { UrlTooltip } from '../UrlTooltip/UrlTooltip';
 
 export interface FullDAOCommitmentRow {
@@ -32,7 +34,23 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
   {
     accessorKey: 'recipient',
     header: 'Recipient',
-    cell: ({ getValue }) => (getValue() as string) || '-'
+    // cell: ({ getValue }) => (getValue() as string) || '-'
+    size: 150,
+    cell: ({ getValue }) => {
+      const initiative = (getValue() as string) || '-';
+      const maxLength = 20;
+
+      if (initiative.length > maxLength) {
+        return (
+          <TextTooltip
+            text={initiative}
+            triggerWidth={120}
+          />
+        );
+      }
+
+      return <Text size='13'>{initiative}</Text>;
+    }
   },
   {
     accessorKey: 'discipline',

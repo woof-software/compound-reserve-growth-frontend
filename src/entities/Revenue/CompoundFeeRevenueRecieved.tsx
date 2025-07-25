@@ -20,11 +20,6 @@ interface SelectedOptionsState {
   assetType: OptionType[];
 }
 
-interface StackedChartData {
-  date: string;
-  [key: string]: string | number;
-}
-
 const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
 
 const groupByPathMapping: Record<string, string> = {
