@@ -4,24 +4,20 @@ import Text from '@/shared/ui/Text/Text';
 
 import HoverCard from '../HoverCard/HoverCard';
 
-interface AddressTooltipProps {
+interface TextTooltipProps {
   text: string;
   side?: 'top' | 'bottom' | 'left' | 'right';
   triggerWidth?: number;
   className?: string;
-  url?: string;
   tooltipClassName?: string;
-  contentWidth?: string;
 }
 
-export const UrlTooltip: React.FC<AddressTooltipProps> = ({
+export const TextTooltip: React.FC<TextTooltipProps> = ({
   text,
   side = 'top',
   triggerWidth = 120,
   className = '',
-  url,
-  tooltipClassName = '',
-  contentWidth = 'w-40'
+  tooltipClassName = ''
 }) => {
   const triggerContent = (
     <div
@@ -30,7 +26,7 @@ export const UrlTooltip: React.FC<AddressTooltipProps> = ({
     >
       <Text
         size='13'
-        className='text-primary-11 inline-block max-w-full cursor-pointer truncate border-b border-dotted border-gray-500 leading-none'
+        className='text-primary-11 inline-block max-w-full cursor-pointer truncate leading-none'
       >
         {text}
       </Text>
@@ -38,23 +34,13 @@ export const UrlTooltip: React.FC<AddressTooltipProps> = ({
   );
 
   const tooltipContent = (
-    <div className={`flex ${contentWidth} flex-col items-start gap-2`}>
+    <div className='max-w-xs'>
       <Text
         size='12'
         className='text-primary-11'
       >
         {text}
       </Text>
-      {url && (
-        <a
-          href={url}
-          target='_blank'
-          rel='noopener noreferrer'
-          className='text-[14px] text-blue-500 underline hover:text-blue-700'
-        >
-          View Details
-        </a>
-      )}
     </div>
   );
 

@@ -241,7 +241,7 @@ const TotalTresuaryValue = ({
     });
   }, []);
 
-  const onSelectSymbol = useCallback((selectedOptions: Option[]) => {
+  const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
       symbol: selectedOptions
     });
