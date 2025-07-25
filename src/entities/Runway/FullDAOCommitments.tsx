@@ -22,10 +22,11 @@ const FullDAOCommitmentsBlock = () => {
         name,
         discipline,
         token,
-        amount,
+        value,
         paymentType,
         startDate: startStr,
-        endDate: endStr
+        endDate: endStr,
+        proposalLink: proposalLink
       } = item;
 
       if (!startStr || !endStr) {
@@ -34,20 +35,21 @@ const FullDAOCommitmentsBlock = () => {
           recipient: name,
           discipline: discipline,
           token: token,
-          amount: amount,
+          amount: value,
           paymentType: paymentType,
+          proposalLink: proposalLink,
           dailyStreamRate: 0,
           startDate: startStr,
           streamEndDate: endStr,
           status: 'Finished',
-          paidAmount: isPaidUpfront ? amount : 0,
-          percentagePaid: isPaidUpfront && amount > 0 ? 1 : 0
+          paidAmount: isPaidUpfront ? value : 0,
+          percentagePaid: isPaidUpfront && value > 0 ? 1 : 0
         };
       }
 
       const startDate = new Date(startStr);
       const endDate = new Date(endStr);
-      const totalAmount = amount;
+      const totalAmount = value;
 
       const status = now >= startDate && now <= endDate ? 'Active' : 'Finished';
 
@@ -90,6 +92,7 @@ const FullDAOCommitmentsBlock = () => {
         token: token,
         amount: totalAmount,
         paymentType: paymentType,
+        proposalLink: proposalLink,
         dailyStreamRate: 0,
         startDate: startStr,
         streamEndDate: endStr,
