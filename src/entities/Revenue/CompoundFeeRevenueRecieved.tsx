@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useReducer, useState } from 'react';
 
 import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/CompoundFeeRecieved';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
@@ -9,8 +9,21 @@ import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
+import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+
+interface SelectedOptionsState {
+  chain: OptionType[];
+  market: OptionType[];
+  symbol: OptionType[];
+  assetType: OptionType[];
+}
+
+interface StackedChartData {
+  date: string;
+  [key: string]: string | number;
+}
 
 const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
 
@@ -23,13 +36,6 @@ const groupByPathMapping: Record<string, string> = {
 const getValueByPath = (obj: any, path: string): any => {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 };
-
-interface StackedChartData {
-  date: string;
-  [key: string]: string | number;
-}
-
-type OptionType = { id: string; label: string };
 
 const CompoundFeeRevenueRecieved = ({
   revenueData: rawData,
@@ -45,8 +51,23 @@ const CompoundFeeRevenueRecieved = ({
     handleVisibleBarsChange
   } = useChartControls({ initialTimeRange: '7B', initialBarSize: 'D' });
 
-  const [selectedChains, setSelectedChains] = useState<OptionType[]>([]);
-  const [selectedMarkets, setSelectedMarkets] = useState<OptionType[]>([]);
+  const initialState: SelectedOptionsState = {
+    chain: [],
+    market: [],
+    symbol: [],
+    assetType: []
+  };
+
+  const [selectedOptions, setSelectedOptions] = useReducer(
+    (
+      prev: SelectedOptionsState,
+      next: Partial<SelectedOptionsState>
+    ): SelectedOptionsState => ({
+      ...prev,
+      ...next
+    }),
+    initialState
+  );
 
   const [groupBy, setGroupBy] = useState<string>('Chain');
   const [isGroupByOpen, setIsGroupByOpen] = useState(false);
@@ -64,37 +85,73 @@ const CompoundFeeRevenueRecieved = ({
     [closeGroupBy]
   );
 
+  const onSelectChain = useCallback((options: OptionType[]) => {
+    setSelectedOptions({ chain: options });
+  }, []);
+
+  const onSelectMarket = useCallback((options: OptionType[]) => {
+    setSelectedOptions({ market: options });
+  }, []);
+
+  const onSelectSymbol = useCallback((options: OptionType[]) => {
+    setSelectedOptions({ symbol: options });
+  }, []);
+
+  const onSelectAssetType = useCallback((options: OptionType[]) => {
+    setSelectedOptions({ assetType: options });
+  }, []);
+
   const handleResetFilters = useCallback(() => {
-    setSelectedChains([]);
-    setSelectedMarkets([]);
+    setSelectedOptions(initialState);
     setGroupBy('Chain');
   }, []);
 
-  const { chainOptions, marketOptions, chartData } = useMemo(() => {
+  const {
+    chainOptions,
+    marketOptions,
+    symbolOptions,
+    assetTypeOptions,
+    chartData
+  } = useMemo(() => {
     if (!rawData || rawData.length === 0) {
       return {
         chainOptions: [],
         marketOptions: [],
+        symbolOptions: [],
+        assetTypeOptions: [],
         chartData: []
       };
     }
 
-    const selectedChainSet = new Set(selectedChains.map((c) => c.id));
-    const selectedMarketSet = new Set(selectedMarkets.map((m) => m.id));
+    const selectedChainSet = new Set(selectedOptions.chain.map((c) => c.id));
+    const selectedMarketSet = new Set(selectedOptions.market.map((m) => m.id));
+    const selectedSymbolSet = new Set(selectedOptions.symbol.map((s) => s.id));
+    const selectedAssetTypeSet = new Set(
+      selectedOptions.assetType.map((a) => a.id)
+    );
+
     const isChainFilterActive = selectedChainSet.size > 0;
     const isMarketFilterActive = selectedMarketSet.size > 0;
+    const isSymbolFilterActive = selectedSymbolSet.size > 0;
+    const isAssetTypeFilterActive = selectedAssetTypeSet.size > 0;
 
     const uniqueChains = new Set<string>();
     const uniqueMarkets = new Set<string>();
+    const uniqueSymbols = new Set<string>();
+    const uniqueAssetTypes = new Set<string>();
     const groupedByDate: { [date: string]: StackedChartData } = {};
     const groupByKeyPath = groupByPathMapping[groupBy];
 
     for (const item of rawData) {
       const network = item.source.network;
       const marketName = item.source.market ?? 'no name';
+      const symbolName = item.source.asset.symbol;
+      const assetTypeName = item.source.asset.type;
 
       uniqueChains.add(network);
       uniqueMarkets.add(marketName);
+      uniqueSymbols.add(symbolName);
+      uniqueAssetTypes.add(assetTypeName);
 
       const chainMatch = !isChainFilterActive || selectedChainSet.has(network);
       if (!chainMatch) continue;
@@ -102,6 +159,14 @@ const CompoundFeeRevenueRecieved = ({
       const marketMatch =
         !isMarketFilterActive || selectedMarketSet.has(marketName);
       if (!marketMatch) continue;
+
+      const symbolMatch =
+        !isSymbolFilterActive || selectedSymbolSet.has(symbolName);
+      if (!symbolMatch) continue;
+
+      const assetTypeMatch =
+        !isAssetTypeFilterActive || selectedAssetTypeSet.has(assetTypeName);
+      if (!assetTypeMatch) continue;
 
       const date = new Date(item.date * 1000).toISOString().split('T')[0];
 
@@ -136,9 +201,11 @@ const CompoundFeeRevenueRecieved = ({
     return {
       chainOptions: createOptions(uniqueChains),
       marketOptions: createOptions(uniqueMarkets),
+      symbolOptions: createOptions(uniqueSymbols),
+      assetTypeOptions: createOptions(uniqueAssetTypes),
       chartData: finalChartData
     };
-  }, [rawData, selectedChains, selectedMarkets, groupBy]);
+  }, [rawData, selectedOptions, groupBy]);
 
   const { csvData, csvFilename } = useCSVExport({
     stackedData: chartData,
@@ -147,15 +214,18 @@ const CompoundFeeRevenueRecieved = ({
     filePrefix: 'Compound_Fee_Revenue',
     aggregationType: 'sum',
     rawData,
-    selectedChains,
-    selectedMarkets,
+    selectedChains: selectedOptions.chain,
+    selectedMarkets: selectedOptions.market,
     groupByPathMapping,
     getValueByPath
   });
 
   const hasData = chartData.length > 0;
   const noDataMessage =
-    selectedChains.length > 0 || selectedMarkets.length > 0
+    selectedOptions.chain.length > 0 ||
+    selectedOptions.market.length > 0 ||
+    selectedOptions.symbol.length > 0 ||
+    selectedOptions.assetType.length > 0
       ? 'No data for selected filters'
       : 'No data available';
 
@@ -175,26 +245,44 @@ const CompoundFeeRevenueRecieved = ({
         <div className='flex gap-2'>
           <MultiSelect
             options={chainOptions}
-            value={selectedChains}
-            onChange={setSelectedChains}
+            value={selectedOptions.chain}
+            onChange={onSelectChain}
             placeholder='Chain'
+            disabled={isLoading}
+          />
+          <MultiSelect
+            options={assetTypeOptions}
+            value={selectedOptions.assetType}
+            onChange={onSelectAssetType}
+            placeholder='Asset Type'
+            disabled={isLoading}
           />
           <MultiSelect
             options={marketOptions}
-            value={selectedMarkets}
-            onChange={setSelectedMarkets}
+            value={selectedOptions.market}
+            onChange={onSelectMarket}
             placeholder='Market'
+            disabled={isLoading}
+          />
+          <MultiSelect
+            options={symbolOptions}
+            value={selectedOptions.symbol}
+            onChange={onSelectSymbol}
+            placeholder='Reserve Symbols'
+            disabled={isLoading}
           />
         </div>
         <TabsGroup
           tabs={['D', 'W', 'M']}
           value={barSize}
           onTabChange={handleBarSizeChange}
+          disabled={isLoading}
         />
         <TabsGroup
           tabs={['7B', '30B', '90B', '180B']}
           value={activeTab}
           onTabChange={handleTabChange}
+          disabled={isLoading}
         />
         <SingleDropdown
           options={groupByOptions}
