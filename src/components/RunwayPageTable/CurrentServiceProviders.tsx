@@ -2,8 +2,6 @@ import React from 'react';
 
 import { formatNumber, formatQuantity } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
-import Icon from '@/shared/ui/Icon/Icon';
-import Text from '@/shared/ui/Text/Text';
 
 export interface ProviderRow {
   provider: string;
@@ -27,26 +25,7 @@ interface CurrentServiceProvidersProps {
 const columns: ExtendedColumnDef<ProviderRow>[] = [
   {
     accessorKey: 'provider',
-    header: 'Provider',
-    cell: ({ row }) => {
-      let iconName: string;
-
-      if (row.original.provider === 'WOOF! Software') {
-        iconName = 'Woof-Software';
-      } else {
-        iconName = row.original.provider || 'not-found-icon';
-      }
-      return (
-        <div className='flex items-center gap-3'>
-          <Icon
-            name={iconName}
-            className='h-6 w-6'
-            folder='token'
-          />
-          <Text size='13'>{row.original.provider}</Text>
-        </div>
-      );
-    }
+    header: 'Provider'
   },
   {
     accessorKey: 'discipline',
