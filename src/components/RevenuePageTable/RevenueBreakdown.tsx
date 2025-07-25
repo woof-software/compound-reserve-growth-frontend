@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 
-import { formatNumber } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 
 export interface FormattedRevenueData {
@@ -15,6 +14,27 @@ interface RevenueBreakdownProps {
   data: FormattedRevenueData[];
   columns: ExtendedColumnDef<FormattedRevenueData>[];
 }
+
+const formatCurrencyValue = (value: unknown): string => {
+  const num = Number(value);
+
+  if (value === null || typeof value === 'undefined' || isNaN(num)) {
+    return '-';
+  }
+
+  if (num === 0) {
+    return '-';
+  }
+
+  const isNegative = num < 0;
+  const absValue = Math.abs(num);
+
+  const formattedNumber = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 0
+  }).format(absValue);
+
+  return isNegative ? `-$${formattedNumber}` : `$${formattedNumber}`;
+};
 
 const RevenueBreakdown = ({ data, columns }: RevenueBreakdownProps) => {
   const totals = useMemo(() => {
@@ -38,6 +58,21 @@ const RevenueBreakdown = ({ data, columns }: RevenueBreakdownProps) => {
 
     return columnTotals;
   }, [data, columns]);
+
+  const displayColumns = useMemo(() => {
+    return columns.map((col) => {
+      const key = 'accessorKey' in col ? String(col.accessorKey) : col.id;
+
+      if (key && key.startsWith('q')) {
+        return {
+          ...col,
+          cell: ({ getValue }: { getValue: () => unknown }) =>
+            formatCurrencyValue(getValue())
+        };
+      }
+      return col;
+    });
+  }, [columns]);
 
   const footerRow = (
     <tr key='footer-total-row'>
@@ -66,7 +101,7 @@ const RevenueBreakdown = ({ data, columns }: RevenueBreakdownProps) => {
             key={columnKey}
             className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'
           >
-            {totalValue === 0 ? '-' : formatNumber(totalValue)}
+            {formatCurrencyValue(totalValue)}
           </td>
         );
       })}
@@ -76,7 +111,7 @@ const RevenueBreakdown = ({ data, columns }: RevenueBreakdownProps) => {
   return (
     <DataTable
       data={data}
-      columns={columns}
+      columns={displayColumns}
       pageSize={10}
       className='flex min-h-[565px] flex-col justify-between'
       headerCellClassName='py-[13px] px-[5px]'

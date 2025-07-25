@@ -20,6 +20,10 @@ const CompoundCumulativeRevenue = ({
 }: RevenuePageProps) => {
   const [selectedChains, setSelectedChains] = useState<OptionType[]>([]);
   const [selectedMarkets, setSelectedMarkets] = useState<OptionType[]>([]);
+  const [selectedSymbols, setSelectedSymbols] = useState<OptionType[]>([]);
+  const [selectedAssetTypes, setSelectedAssetTypes] = useState<OptionType[]>(
+    []
+  );
 
   const {
     activeTab,
@@ -36,6 +40,8 @@ const CompoundCumulativeRevenue = ({
   const handleResetFilters = useCallback(() => {
     setSelectedChains([]);
     setSelectedMarkets([]);
+    setSelectedSymbols([]);
+    setSelectedAssetTypes([]);
   }, []);
 
   const rawData: ChartDataItem[] = useMemo(() => {
@@ -45,15 +51,18 @@ const CompoundCumulativeRevenue = ({
   const filterOptionsConfig = useMemo(
     () => ({
       chain: { path: 'source.network' },
-      deployment: { path: 'source.market' }
+      deployment: { path: 'source.market' },
+      symbol: { path: 'source.asset.symbol' },
+      assetType: { path: 'source.asset.type' }
     }),
     []
   );
 
-  const { chainOptions, deploymentOptions } = useMemo(
-    () => extractFilterOptions(rawData, filterOptionsConfig),
-    [rawData, filterOptionsConfig]
-  );
+  const { chainOptions, deploymentOptions, symbolOptions, assetTypeOptions } =
+    useMemo(
+      () => extractFilterOptions(rawData, filterOptionsConfig),
+      [rawData, filterOptionsConfig]
+    );
 
   const deploymentOptionsFilter = useMemo(() => {
     const marketV2 =
@@ -108,11 +117,15 @@ const CompoundCumulativeRevenue = ({
     rawData,
     filters: {
       network: selectedChains.map((opt) => opt.id),
-      market: selectedMarkets.map((opt) => opt.id)
+      market: selectedMarkets.map((opt) => opt.id),
+      symbol: selectedSymbols.map((opt) => opt.id),
+      assetType: selectedAssetTypes.map((opt) => opt.id)
     },
     filterPaths: {
       network: 'source.network',
-      market: 'source.market'
+      market: 'source.market',
+      symbol: 'source.asset.symbol',
+      assetType: 'source.asset.type'
     },
     groupBy,
     groupByKeyPath: groupBy === 'none' ? null : `source.${groupBy}`,
@@ -191,7 +204,10 @@ const CompoundCumulativeRevenue = ({
   }, [cumulativeChartSeries]);
 
   const noDataMessage =
-    selectedChains.length > 0 || selectedMarkets.length > 0
+    selectedChains.length > 0 ||
+    selectedMarkets.length > 0 ||
+    selectedSymbols.length > 0 ||
+    selectedAssetTypes.length > 0
       ? 'No data for selected filters'
       : 'No data available';
 
@@ -230,10 +246,24 @@ const CompoundCumulativeRevenue = ({
             disabled={isLoading}
           />
           <MultiSelect
+            options={assetTypeOptions || []}
+            value={selectedAssetTypes}
+            onChange={setSelectedAssetTypes}
+            placeholder='Asset Type'
+            disabled={isLoading}
+          />
+          <MultiSelect
             options={deploymentOptionsFilter || []}
             value={selectedMarkets}
             onChange={setSelectedMarkets}
             placeholder='Market'
+            disabled={isLoading}
+          />
+          <MultiSelect
+            options={symbolOptions || []}
+            value={selectedSymbols}
+            onChange={setSelectedSymbols}
+            placeholder='Reserve Symbols'
             disabled={isLoading}
           />
         </div>

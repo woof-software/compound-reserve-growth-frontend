@@ -7,12 +7,15 @@ import {
 } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 
+import { UrlTooltip } from '../UrlTooltip/UrlTooltip';
+
 export interface FullDAOCommitmentRow {
   recipient: string;
   discipline: string;
   token: string;
   amount: number;
   paymentType: string;
+  proposalLink: string;
   dailyStreamRate: number;
   startDate: string;
   streamEndDate: string;
@@ -83,7 +86,18 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
     accessorKey: 'paymentType',
     header: 'Payment Type',
     align: 'center',
-    cell: ({ getValue }) => (getValue() as string) || '-'
+    size: 120,
+    cell: ({ row }) => {
+      const { paymentType, proposalLink } = row.original;
+
+      return (
+        <UrlTooltip
+          text={paymentType}
+          url={proposalLink}
+          tooltipClassName='pt-[13px] pb-[8px] pl-[10px] pr-[10px]'
+        />
+      );
+    }
   },
   {
     accessorKey: 'startDate',
@@ -92,6 +106,19 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
     cell: ({ getValue }) => {
       const value = getValue() as string;
       return value ? formatDateWithOrdinal(value) : '-';
+    },
+    sortingFn: (rowA, rowB) => {
+      const dateA = rowA.original.startDate;
+      const dateB = rowB.original.startDate;
+
+      if (!dateA && !dateB) return 0;
+      if (!dateA) return 1;
+      if (!dateB) return -1;
+
+      const timeA = new Date(dateA).getTime();
+      const timeB = new Date(dateB).getTime();
+
+      return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
     }
   },
   {
@@ -101,6 +128,19 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
     cell: ({ getValue }) => {
       const value = getValue() as string;
       return value ? formatDateWithOrdinal(value) : '-';
+    },
+    sortingFn: (rowA, rowB) => {
+      const dateA = rowA.original.streamEndDate;
+      const dateB = rowB.original.streamEndDate;
+
+      if (!dateA && !dateB) return 0;
+      if (!dateA) return 1;
+      if (!dateB) return -1;
+
+      const timeA = new Date(dateA).getTime();
+      const timeB = new Date(dateB).getTime();
+
+      return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
     }
   }
 ];
@@ -121,7 +161,7 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({ data }) => {
       enableSorting
       enablePagination
       paginationClassName='py-[13px] px-[5px]'
-      initialSort={{ id: 'amount', desc: true }}
+      initialSort={{ id: 'startDate', desc: true }}
     />
   );
 };

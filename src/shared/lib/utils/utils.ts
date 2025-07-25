@@ -101,6 +101,44 @@ export const networkColorMap: { [key: string]: string } = {
   unichain: '#BCE954'
 };
 
+// Function to get stable color based on series name
+export const getStableColorForSeries = (
+  seriesName: string,
+  allSeriesNames: string[]
+): string => {
+  const lowerName = seriesName.toLowerCase();
+
+  // First check networkColorMap
+  if (networkColorMap[lowerName]) {
+    return networkColorMap[lowerName];
+  }
+
+  // For networks check partial matches
+  for (const [network, color] of Object.entries(networkColorMap)) {
+    if (lowerName.includes(network)) {
+      return color;
+    }
+  }
+
+  // Create stable index based on series name
+  // Sort all series names for stable ordering
+  const sortedNames = [...allSeriesNames].sort();
+  const stableIndex = sortedNames.indexOf(seriesName);
+
+  // If series not found in sorted list, use name hash
+  if (stableIndex === -1) {
+    let hash = 0;
+    for (let i = 0; i < seriesName.length; i++) {
+      const char = seriesName.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return colorPicker((Math.abs(hash) % 20) + 1);
+  }
+
+  return colorPicker(stableIndex + 1);
+};
+
 export const explorers: { [key: string]: string } = {
   ethereum: 'https://etherscan.io/address/',
   mainnet: 'https://etherscan.io/address/',

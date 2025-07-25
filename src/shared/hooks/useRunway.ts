@@ -15,7 +15,8 @@ const runwayItemSchema = z.object({
   value: z.number(),
   paymentType: z.string(),
   startDate: z.string(),
-  endDate: z.string()
+  endDate: z.string(),
+  proposalLink: z.string()
 });
 
 const runwayResponseSchema = z.array(runwayItemSchema);
