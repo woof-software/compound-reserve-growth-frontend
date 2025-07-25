@@ -70,6 +70,14 @@ const CompoundCumulativeRevenue = ({
           a.label.localeCompare(b.label)
         ) || [];
 
+    const noMarkets = deploymentOptions?.find(
+      (el) => el?.id?.toLowerCase() === 'no name'
+    );
+
+    if (noMarkets) {
+      return [...marketV3, ...marketV2, noMarkets];
+    }
+
     return [...marketV3, ...marketV2];
   }, [deploymentOptions]);
 

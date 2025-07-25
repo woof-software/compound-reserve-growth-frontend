@@ -29,7 +29,7 @@ interface StackedChartData {
   [key: string]: string | number;
 }
 
-type OptionType = { id: string; label: string };
+type OptionType = { id: string; label: string; marketType?: string };
 
 const CompoundFeeRevenueRecieved = ({
   revenueData: rawData,
@@ -120,13 +120,28 @@ const CompoundFeeRevenueRecieved = ({
         ((groupedByDate[date][seriesKey] as number) || 0) + item.value;
     }
 
-    const createOptions = (uniqueValues: Set<string>): OptionType[] => {
+    const createOptions = (
+      uniqueValues: Set<string>,
+      key?: string
+    ): OptionType[] => {
       return Array.from(uniqueValues)
         .sort((a, b) => a.localeCompare(b))
-        .map((value) => ({
-          id: value,
-          label: capitalizeFirstLetter(value)
-        }));
+        .map((value) => {
+          const option: OptionType & { marketType?: string } = {
+            id: value,
+            label: capitalizeFirstLetter(value)
+          };
+
+          if (key === 'market') {
+            const match = rawData.find(
+              (item) => getValueByPath(item, 'source.market') === value
+            );
+
+            option.marketType = match?.source.type.split(' ')[1] ?? '';
+          }
+
+          return option;
+        });
     };
 
     const finalChartData = Object.values(groupedByDate).sort(
@@ -135,7 +150,7 @@ const CompoundFeeRevenueRecieved = ({
 
     return {
       chainOptions: createOptions(uniqueChains),
-      marketOptions: createOptions(uniqueMarkets),
+      marketOptions: createOptions(uniqueMarkets, 'market'),
       chartData: finalChartData
     };
   }, [rawData, selectedChains, selectedMarkets, groupBy]);
@@ -152,6 +167,32 @@ const CompoundFeeRevenueRecieved = ({
     groupByPathMapping,
     getValueByPath
   });
+
+  const deploymentOptionsFilter = useMemo(() => {
+    const marketV2 =
+      marketOptions
+        ?.filter((el) => el?.marketType?.toLowerCase() === 'v2')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const marketV3 =
+      marketOptions
+        ?.filter((el) => el?.marketType?.toLowerCase() === 'v3')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const noMarkets = marketOptions?.find(
+      (el) => el?.id?.toLowerCase() === 'no name'
+    );
+
+    if (noMarkets) {
+      return [...marketV3, ...marketV2, noMarkets];
+    }
+
+    return [...marketV3, ...marketV2];
+  }, [marketOptions]);
 
   const hasData = chartData.length > 0;
   const noDataMessage =
@@ -180,7 +221,7 @@ const CompoundFeeRevenueRecieved = ({
             placeholder='Chain'
           />
           <MultiSelect
-            options={marketOptions}
+            options={deploymentOptionsFilter || []}
             value={selectedMarkets}
             onChange={setSelectedMarkets}
             placeholder='Market'

@@ -161,6 +161,32 @@ const CompoundRevenueBlock = ({
   const { chainOptions, marketOptions, sourceOptions, symbolOptions } =
     filterOptions;
 
+  const deploymentOptionsFilter = useMemo(() => {
+    const marketV2 =
+      marketOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const marketV3 =
+      marketOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const noMarkets = marketOptions?.find(
+      (el) => el?.id?.toLowerCase() === 'no name'
+    );
+
+    if (noMarkets) {
+      return [...marketV3, ...marketV2, noMarkets];
+    }
+
+    return [...marketV3, ...marketV2];
+  }, [marketOptions]);
+
   const processedChartData = useMemo(() => {
     const hasActiveFilters =
       selectedChains.length > 0 ||
@@ -293,7 +319,7 @@ const CompoundRevenueBlock = ({
             disabled={isLoading}
           />
           <MultiSelect
-            options={marketOptions || []}
+            options={deploymentOptionsFilter || []}
             value={selectedMarkets}
             onChange={setSelectedMarkets}
             placeholder='Market'
