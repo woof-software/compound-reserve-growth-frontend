@@ -34,7 +34,7 @@ const CustomDropdownItem: FC<{
     <div
       ref={itemRef}
       className={cn(
-        'flex cursor-pointer items-center justify-between rounded-lg p-3',
+        'flex cursor-pointer items-center justify-between p-3',
         isHighlighted ? 'bg-secondary-12' : 'hover:bg-secondary-12'
       )}
       onClick={onSelect}
@@ -43,7 +43,7 @@ const CustomDropdownItem: FC<{
         <span className='text-color-gray-11 rounded-sm text-[12px]'>
           {label}
         </span>
-        <View.Condition if={Boolean(marketType)}>
+        <View.Condition if={Boolean(marketType && !isSelected)}>
           <span className='text-primary-14 rounded-sm text-[10px]'>
             ({marketType?.toLowerCase()})
           </span>
@@ -123,10 +123,13 @@ export const MultiSelect: FC<MultiSelectProps> = ({
 
   const onSelect = (optionToToggle: Option) => {
     if (!onChange) return;
+
     const isSelected = value.some((v) => v.id === optionToToggle.id);
+
     const newSelectedValue = isSelected
       ? value.filter((v) => v.id !== optionToToggle.id)
       : [...value, optionToToggle];
+
     onChange(newSelectedValue);
   };
 
@@ -221,10 +224,9 @@ export const MultiSelect: FC<MultiSelectProps> = ({
           tabIndex={0}
           onKeyDown={handleKeyDown}
           onClick={(e) => e.stopPropagation()}
-          className='p-2'
         >
           <View.Condition if={options.length > 5}>
-            <div className='outline-secondary-19 mb-1 rounded-lg py-2 pr-5 pl-3 outline'>
+            <div className='outline-secondary-19 py-2 pr-5 pl-3 outline'>
               <input
                 ref={inputRef}
                 className='placeholder:text-secondary-21 h-[19px] w-full focus-visible:outline-none'

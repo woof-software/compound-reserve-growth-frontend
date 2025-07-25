@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useReducer } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import LineChart from '@/components/Charts/Line/Line';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
@@ -13,34 +13,16 @@ import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
-interface SelectedOptionsState {
-  chain: OptionType[];
-  market: OptionType[];
-  symbol: OptionType[];
-  assetType: OptionType[];
-}
-
 const CompoundCumulativeRevenue = ({
   revenueData,
   isLoading,
   isError
 }: RevenuePageProps) => {
-  const initialState: SelectedOptionsState = {
-    chain: [],
-    market: [],
-    symbol: [],
-    assetType: []
-  };
-
-  const [selectedOptions, setSelectedOptions] = useReducer(
-    (
-      prev: SelectedOptionsState,
-      next: Partial<SelectedOptionsState>
-    ): SelectedOptionsState => ({
-      ...prev,
-      ...next
-    }),
-    initialState
+  const [selectedChains, setSelectedChains] = useState<OptionType[]>([]);
+  const [selectedMarkets, setSelectedMarkets] = useState<OptionType[]>([]);
+  const [selectedSymbols, setSelectedSymbols] = useState<OptionType[]>([]);
+  const [selectedAssetTypes, setSelectedAssetTypes] = useState<OptionType[]>(
+    []
   );
 
   const {
@@ -56,7 +38,10 @@ const CompoundCumulativeRevenue = ({
   });
 
   const handleResetFilters = useCallback(() => {
-    setSelectedOptions(initialState);
+    setSelectedChains([]);
+    setSelectedMarkets([]);
+    setSelectedSymbols([]);
+    setSelectedAssetTypes([]);
   }, []);
 
   const rawData: ChartDataItem[] = useMemo(() => {
@@ -66,48 +51,50 @@ const CompoundCumulativeRevenue = ({
   const filterOptionsConfig = useMemo(
     () => ({
       chain: { path: 'source.network' },
-      market: { path: 'source.market' },
+      deployment: { path: 'source.market' },
       symbol: { path: 'source.asset.symbol' },
       assetType: { path: 'source.asset.type' }
     }),
     []
   );
 
-  const { chainOptions, marketOptions, symbolOptions, assetTypeOptions } =
+  const { chainOptions, deploymentOptions, symbolOptions, assetTypeOptions } =
     useMemo(
       () => extractFilterOptions(rawData, filterOptionsConfig),
       [rawData, filterOptionsConfig]
     );
 
-  const onSelectChain = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ chain: options });
-  }, []);
+  const deploymentOptionsFilter = useMemo(() => {
+    const marketV2 =
+      deploymentOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
 
-  const onSelectMarket = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ market: options });
-  }, []);
+    const marketV3 =
+      deploymentOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
 
-  const onSelectSymbol = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ symbol: options });
-  }, []);
-
-  const onSelectAssetType = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ assetType: options });
-  }, []);
+    return [...marketV3, ...marketV2];
+  }, [deploymentOptions]);
 
   const groupBy = useMemo(() => {
-    if (selectedOptions.market.length > 0) return 'market';
-    if (selectedOptions.chain.length > 0) return 'network';
+    if (selectedMarkets.length > 0) return 'market';
+    if (selectedChains.length > 0) return 'network';
     return 'none';
-  }, [selectedOptions.chain, selectedOptions.market]);
+  }, [selectedChains, selectedMarkets]);
 
   const { chartSeries } = useChartDataProcessor({
     rawData,
     filters: {
-      network: selectedOptions.chain.map((opt) => opt.id),
-      market: selectedOptions.market.map((opt) => opt.id),
-      symbol: selectedOptions.symbol.map((opt) => opt.id),
-      assetType: selectedOptions.assetType.map((opt) => opt.id)
+      network: selectedChains.map((opt) => opt.id),
+      market: selectedMarkets.map((opt) => opt.id),
+      symbol: selectedSymbols.map((opt) => opt.id),
+      assetType: selectedAssetTypes.map((opt) => opt.id)
     },
     filterPaths: {
       network: 'source.network',
@@ -192,10 +179,10 @@ const CompoundCumulativeRevenue = ({
   }, [cumulativeChartSeries]);
 
   const noDataMessage =
-    selectedOptions.chain.length > 0 ||
-    selectedOptions.market.length > 0 ||
-    selectedOptions.symbol.length > 0 ||
-    selectedOptions.assetType.length > 0
+    selectedChains.length > 0 ||
+    selectedMarkets.length > 0 ||
+    selectedSymbols.length > 0 ||
+    selectedAssetTypes.length > 0
       ? 'No data for selected filters'
       : 'No data available';
 
@@ -222,29 +209,29 @@ const CompoundCumulativeRevenue = ({
         <div className='flex gap-2'>
           <MultiSelect
             options={chainOptions || []}
-            value={selectedOptions.chain}
-            onChange={onSelectChain}
+            value={selectedChains}
+            onChange={setSelectedChains}
             placeholder='Chain'
             disabled={isLoading}
           />
           <MultiSelect
             options={assetTypeOptions || []}
-            value={selectedOptions.assetType}
-            onChange={onSelectAssetType}
+            value={selectedAssetTypes}
+            onChange={setSelectedAssetTypes}
             placeholder='Asset Type'
             disabled={isLoading}
           />
           <MultiSelect
-            options={marketOptions || []}
-            value={selectedOptions.market}
-            onChange={onSelectMarket}
+            options={deploymentOptionsFilter || []}
+            value={selectedMarkets}
+            onChange={setSelectedMarkets}
             placeholder='Market'
             disabled={isLoading}
           />
           <MultiSelect
             options={symbolOptions || []}
-            value={selectedOptions.symbol}
-            onChange={onSelectSymbol}
+            value={selectedSymbols}
+            onChange={setSelectedSymbols}
             placeholder='Reserve Symbols'
             disabled={isLoading}
           />
