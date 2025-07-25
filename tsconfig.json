@@ -17,5 +17,9 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx", "src/components/HoverCard/HoverCard.tsx"]
+  "include": [
+    "./src/**/*.ts",
+    "./src/**/*.tsx",
+    "src/components/HoverCard/HoverCard.tsx"
+  ]
 }

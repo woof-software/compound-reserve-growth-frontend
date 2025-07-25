@@ -9,6 +9,7 @@ import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
+import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
@@ -28,8 +29,6 @@ interface StackedChartData {
   date: string;
   [key: string]: string | number;
 }
-
-type OptionType = { id: string; label: string; marketType?: string };
 
 const CompoundFeeRevenueRecieved = ({
   revenueData: rawData,
@@ -127,16 +126,17 @@ const CompoundFeeRevenueRecieved = ({
       return Array.from(uniqueValues)
         .sort((a, b) => a.localeCompare(b))
         .map((value) => {
-          const option: OptionType & { marketType?: string } = {
+          const match = rawData.find(
+            (item) => getValueByPath(item, 'source.market') === value
+          );
+
+          const option: OptionType = {
             id: value,
-            label: capitalizeFirstLetter(value)
+            label: capitalizeFirstLetter(value),
+            chain: match?.source.network || 'Unknown'
           };
 
           if (key === 'market') {
-            const match = rawData.find(
-              (item) => getValueByPath(item, 'source.market') === value
-            );
-
             option.marketType = match?.source.type.split(' ')[1] ?? '';
           }
 
@@ -171,14 +171,14 @@ const CompoundFeeRevenueRecieved = ({
   const deploymentOptionsFilter = useMemo(() => {
     const marketV2 =
       marketOptions
-        ?.filter((el) => el?.marketType?.toLowerCase() === 'v2')
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
         .sort((a: OptionType, b: OptionType) =>
           a.label.localeCompare(b.label)
         ) || [];
 
     const marketV3 =
       marketOptions
-        ?.filter((el) => el?.marketType?.toLowerCase() === 'v3')
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
         .sort((a: OptionType, b: OptionType) =>
           a.label.localeCompare(b.label)
         ) || [];
@@ -187,18 +187,41 @@ const CompoundFeeRevenueRecieved = ({
       (el) => el?.id?.toLowerCase() === 'no name'
     );
 
+    // Filter markets based on selected chain
+    if (selectedChains.length) {
+      const selectedChain = selectedChains.map(
+        (option: OptionType) => option.id
+      );
+
+      if (noMarkets) {
+        return [...marketV3, ...marketV2, noMarkets].filter((el) =>
+          selectedChain.includes(el?.chain || '')
+        );
+      }
+
+      return [...marketV3, ...marketV2].filter((el) =>
+        selectedChain.includes(el?.chain || '')
+      );
+    }
+
     if (noMarkets) {
       return [...marketV3, ...marketV2, noMarkets];
     }
 
     return [...marketV3, ...marketV2];
-  }, [marketOptions]);
+  }, [marketOptions, selectedChains]);
 
   const hasData = chartData.length > 0;
   const noDataMessage =
     selectedChains.length > 0 || selectedMarkets.length > 0
       ? 'No data for selected filters'
       : 'No data available';
+
+  const onSelectChain = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedChains(selectedOptions);
+
+    setSelectedMarkets([]);
+  }, []);
 
   return (
     <Card
@@ -217,7 +240,7 @@ const CompoundFeeRevenueRecieved = ({
           <MultiSelect
             options={chainOptions}
             value={selectedChains}
-            onChange={setSelectedChains}
+            onChange={onSelectChain}
             placeholder='Chain'
           />
           <MultiSelect

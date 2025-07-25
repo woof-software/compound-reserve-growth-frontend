@@ -74,12 +74,29 @@ const CompoundCumulativeRevenue = ({
       (el) => el?.id?.toLowerCase() === 'no name'
     );
 
+    // Filter markets based on selected chain
+    if (selectedChains.length) {
+      const selectedChain = selectedChains.map(
+        (option: OptionType) => option.id
+      );
+
+      if (noMarkets) {
+        return [...marketV3, ...marketV2, noMarkets].filter((el) =>
+          selectedChain.includes(el?.chain || '')
+        );
+      }
+
+      return [...marketV3, ...marketV2].filter((el) =>
+        selectedChain.includes(el?.chain || '')
+      );
+    }
+
     if (noMarkets) {
       return [...marketV3, ...marketV2, noMarkets];
     }
 
     return [...marketV3, ...marketV2];
-  }, [deploymentOptions]);
+  }, [deploymentOptions, selectedChains]);
 
   const groupBy = useMemo(() => {
     if (selectedMarkets.length > 0) return 'market';
@@ -185,6 +202,12 @@ const CompoundCumulativeRevenue = ({
     return groupBy === 'market' ? 'Market' : 'Chain';
   };
 
+  const onSelectChain = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedChains(selectedOptions);
+
+    setSelectedMarkets([]);
+  }, []);
+
   return (
     <Card
       title='Compound Cumulative Revenue'
@@ -202,7 +225,7 @@ const CompoundCumulativeRevenue = ({
           <MultiSelect
             options={chainOptions || []}
             value={selectedChains}
-            onChange={setSelectedChains}
+            onChange={onSelectChain}
             placeholder='Chain'
             disabled={isLoading}
           />

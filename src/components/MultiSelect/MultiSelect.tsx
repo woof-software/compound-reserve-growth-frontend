@@ -10,17 +10,12 @@ import {
 } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
+import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import { Dropdown, useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
-
-export interface Option {
-  id: string;
-  label: string;
-  marketType?: string;
-}
 
 const CustomDropdownItem: FC<{
   label: string;
@@ -29,7 +24,7 @@ const CustomDropdownItem: FC<{
   isHighlighted: boolean;
   onSelect: () => void;
   itemRef?: Ref<HTMLDivElement>;
-}> = ({ label, marketType, isSelected, isHighlighted, onSelect, itemRef }) => {
+}> = ({ label, isSelected, isHighlighted, onSelect, itemRef }) => {
   return (
     <div
       ref={itemRef}
@@ -43,11 +38,6 @@ const CustomDropdownItem: FC<{
         <span className='text-color-gray-11 rounded-sm text-[12px]'>
           {label}
         </span>
-        <View.Condition if={Boolean(marketType && !isSelected)}>
-          <span className='text-primary-14 rounded-sm text-[10px]'>
-            ({marketType?.toLowerCase()})
-          </span>
-        </View.Condition>
       </div>
       {isSelected && (
         <Icon
@@ -60,11 +50,11 @@ const CustomDropdownItem: FC<{
 };
 
 export interface MultiSelectProps {
-  options: Option[];
+  options: OptionType[];
   placeholder?: string;
-  onChange?: (selectedOptions: Option[]) => void;
+  onChange?: (selectedOptions: OptionType[]) => void;
   className?: string;
-  value?: Option[];
+  value?: OptionType[];
   disabled?: boolean;
 }
 
@@ -121,7 +111,7 @@ export const MultiSelect: FC<MultiSelectProps> = ({
     setHighlightedIndex(-1);
   };
 
-  const onSelect = (optionToToggle: Option) => {
+  const onSelect = (optionToToggle: OptionType) => {
     if (!onChange) return;
 
     const isSelected = value.some((v) => v.id === optionToToggle.id);
