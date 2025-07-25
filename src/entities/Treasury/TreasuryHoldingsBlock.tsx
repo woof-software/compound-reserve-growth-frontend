@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useReducer } from 'react';
 
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
-import { MultiSelect, Option } from '@/components/MultiSelect/MultiSelect';
+import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import TreasuryHoldings, {
   TreasuryBalanceByNetworkType
@@ -89,8 +89,33 @@ const TreasuryHoldingsBlock = ({
           a.label.localeCompare(b.label)
         ) || [];
 
+    const noMarkets = deploymentOptions?.find(
+      (el) => el?.id?.toLowerCase() === 'no name'
+    );
+
+    // Filter markets based on selected chain
+    if (selectedOptions.chain.length) {
+      const selectedChain = selectedOptions.chain.map(
+        (option: OptionType) => option.id
+      );
+
+      if (noMarkets) {
+        return [...marketV3, ...marketV2, noMarkets].filter((el) =>
+          selectedChain.includes(el?.chain || '')
+        );
+      }
+
+      return [...marketV3, ...marketV2].filter((el) =>
+        selectedChain.includes(el?.chain || '')
+      );
+    }
+
+    if (noMarkets) {
+      return [...marketV3, ...marketV2, noMarkets];
+    }
+
     return [...marketV3, ...marketV2];
-  }, [deploymentOptions]);
+  }, [deploymentOptions, selectedOptions]);
 
   const tableData = useMemo<TreasuryBalanceByNetworkType[]>(() => {
     const filtered = data.filter((item) => {
@@ -136,19 +161,23 @@ const TreasuryHoldingsBlock = ({
     return mapTableData(filtered).sort((a, b) => b.value - a.value);
   }, [data, selectedOptions]);
 
-  const onSelectChain = useCallback((selectedOptions: Option[]) => {
+  const onSelectChain = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
       chain: selectedOptions
     });
+
+    setSelectedOptions({
+      deployment: []
+    });
   }, []);
 
-  const onSelectAssetType = useCallback((selectedOptions: Option[]) => {
+  const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
       assetType: selectedOptions
     });
   }, []);
 
-  const onSelectMarket = useCallback((selectedOptions: Option[]) => {
+  const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
       deployment: selectedOptions
     });
@@ -195,17 +224,17 @@ const TreasuryHoldingsBlock = ({
           disabled={isLoading}
         />
         <MultiSelect
+          options={deploymentOptionsFilter || []}
+          value={selectedOptions.deployment}
+          onChange={onSelectMarket}
+          placeholder='Market'
+          disabled={isLoading}
+        />
+        <MultiSelect
           options={assetTypeOptions || []}
           value={selectedOptions.assetType}
           onChange={onSelectAssetType}
           placeholder='Asset Type'
-          disabled={isLoading}
-        />
-        <MultiSelect
-          options={deploymentOptionsFilter}
-          value={selectedOptions.deployment}
-          onChange={onSelectMarket}
-          placeholder='Market'
           disabled={isLoading}
         />
         <MultiSelect

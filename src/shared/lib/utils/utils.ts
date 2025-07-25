@@ -384,7 +384,10 @@ export const extractFilterOptions = (
           const match = rawData.find(
             (item) => getValueByPath(item, config[key].path) === value
           );
+
           option.marketType = match?.source.type.split(' ')[1] ?? '';
+
+          option.chain = match?.source.network || 'Unknown';
         }
 
         return option;

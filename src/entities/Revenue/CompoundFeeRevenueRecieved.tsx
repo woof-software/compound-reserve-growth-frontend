@@ -37,6 +37,11 @@ const getValueByPath = (obj: any, path: string): any => {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 };
 
+interface StackedChartData {
+  date: string;
+  [key: string]: string | number;
+}
+
 const CompoundFeeRevenueRecieved = ({
   revenueData: rawData,
   isLoading,
@@ -84,27 +89,6 @@ const CompoundFeeRevenueRecieved = ({
     },
     [closeGroupBy]
   );
-
-  const onSelectChain = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ chain: options });
-  }, []);
-
-  const onSelectMarket = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ market: options });
-  }, []);
-
-  const onSelectSymbol = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ symbol: options });
-  }, []);
-
-  const onSelectAssetType = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ assetType: options });
-  }, []);
-
-  const handleResetFilters = useCallback(() => {
-    setSelectedOptions(initialState);
-    setGroupBy('Chain');
-  }, []);
 
   const {
     chainOptions,
@@ -185,13 +169,29 @@ const CompoundFeeRevenueRecieved = ({
         ((groupedByDate[date][seriesKey] as number) || 0) + item.value;
     }
 
-    const createOptions = (uniqueValues: Set<string>): OptionType[] => {
+    const createOptions = (
+      uniqueValues: Set<string>,
+      key?: string
+    ): OptionType[] => {
       return Array.from(uniqueValues)
         .sort((a, b) => a.localeCompare(b))
-        .map((value) => ({
-          id: value,
-          label: capitalizeFirstLetter(value)
-        }));
+        .map((value) => {
+          const match = rawData.find(
+            (item) => getValueByPath(item, 'source.market') === value
+          );
+
+          const option: OptionType = {
+            id: value,
+            label: capitalizeFirstLetter(value),
+            chain: match?.source.network || 'Unknown'
+          };
+
+          if (key === 'market') {
+            option.marketType = match?.source.type.split(' ')[1] ?? '';
+          }
+
+          return option;
+        });
     };
 
     const finalChartData = Object.values(groupedByDate).sort(
@@ -200,9 +200,9 @@ const CompoundFeeRevenueRecieved = ({
 
     return {
       chainOptions: createOptions(uniqueChains),
-      marketOptions: createOptions(uniqueMarkets),
       symbolOptions: createOptions(uniqueSymbols),
       assetTypeOptions: createOptions(uniqueAssetTypes),
+      marketOptions: createOptions(uniqueMarkets, 'market'),
       chartData: finalChartData
     };
   }, [rawData, selectedOptions, groupBy]);
@@ -220,6 +220,49 @@ const CompoundFeeRevenueRecieved = ({
     getValueByPath
   });
 
+  const deploymentOptionsFilter = useMemo(() => {
+    const marketV2 =
+      marketOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const marketV3 =
+      marketOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const noMarkets = marketOptions?.find(
+      (el) => el?.id?.toLowerCase() === 'no name'
+    );
+
+    // Filter markets based on selected chain
+    if (selectedOptions.chain.length) {
+      const selectedChain = selectedOptions.chain.map(
+        (option: OptionType) => option.id
+      );
+
+      if (noMarkets) {
+        return [...marketV3, ...marketV2, noMarkets].filter((el) =>
+          selectedChain.includes(el?.chain || '')
+        );
+      }
+
+      return [...marketV3, ...marketV2].filter((el) =>
+        selectedChain.includes(el?.chain || '')
+      );
+    }
+
+    if (noMarkets) {
+      return [...marketV3, ...marketV2, noMarkets];
+    }
+
+    return [...marketV3, ...marketV2];
+  }, [marketOptions, selectedOptions]);
+
   const hasData = chartData.length > 0;
   const noDataMessage =
     selectedOptions.chain.length > 0 ||
@@ -228,6 +271,30 @@ const CompoundFeeRevenueRecieved = ({
     selectedOptions.assetType.length > 0
       ? 'No data for selected filters'
       : 'No data available';
+
+  const onSelectChain = useCallback((options: OptionType[]) => {
+    setSelectedOptions({ chain: options });
+
+    setSelectedOptions({ market: [] });
+  }, []);
+
+  const onSelectMarket = useCallback((options: OptionType[]) => {
+    setSelectedOptions({ market: options });
+  }, []);
+
+  const onSelectSymbol = useCallback((options: OptionType[]) => {
+    setSelectedOptions({ symbol: options });
+  }, []);
+
+  const onSelectAssetType = useCallback((options: OptionType[]) => {
+    setSelectedOptions({ assetType: options });
+  }, []);
+
+  const handleResetFilters = useCallback(() => {
+    setSelectedOptions(initialState);
+
+    setGroupBy('Chain');
+  }, [initialState]);
 
   return (
     <Card
@@ -251,17 +318,17 @@ const CompoundFeeRevenueRecieved = ({
             disabled={isLoading}
           />
           <MultiSelect
+            options={deploymentOptionsFilter || []}
+            value={selectedOptions.market}
+            onChange={onSelectMarket}
+            placeholder='Market'
+            disabled={isLoading}
+          />
+          <MultiSelect
             options={assetTypeOptions}
             value={selectedOptions.assetType}
             onChange={onSelectAssetType}
             placeholder='Asset Type'
-            disabled={isLoading}
-          />
-          <MultiSelect
-            options={marketOptions}
-            value={selectedOptions.market}
-            onChange={onSelectMarket}
-            placeholder='Market'
             disabled={isLoading}
           />
           <MultiSelect

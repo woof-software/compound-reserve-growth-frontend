@@ -99,16 +99,17 @@ function preprocessData(rawData: ChartDataItem[]): PreprocessedResult {
     )
       .sort((a, b) => a.localeCompare(b))
       .map((value) => {
-        const option: OptionType & { marketType?: string } = {
+        const match = rawData.find(
+          (item) => getValueByPath(item, 'source.market') === value
+        );
+
+        const option: OptionType = {
           id: value,
-          label: capitalizeFirstLetter(value)
+          label: capitalizeFirstLetter(value),
+          chain: match?.source.network || 'Unknown'
         };
 
         if (key === 'market') {
-          const match = rawData.find(
-            (item) => getValueByPath(item, 'source.market') === value
-          );
-
           option.marketType = match?.source.type.split(' ')[1] ?? '';
         }
 
@@ -160,6 +161,49 @@ const CompoundRevenueBlock = ({
 
   const { chainOptions, marketOptions, sourceOptions, symbolOptions } =
     filterOptions;
+
+  const deploymentOptionsFilter = useMemo(() => {
+    const marketV2 =
+      marketOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const marketV3 =
+      marketOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const noMarkets = marketOptions?.find(
+      (el) => el?.id?.toLowerCase() === 'no name'
+    );
+
+    // Filter markets based on selected chain
+    if (selectedChains.length) {
+      const selectedChain = selectedChains.map(
+        (option: OptionType) => option.id
+      );
+
+      if (noMarkets) {
+        return [...marketV3, ...marketV2, noMarkets].filter((el) =>
+          selectedChain.includes(el?.chain || '')
+        );
+      }
+
+      return [...marketV3, ...marketV2].filter((el) =>
+        selectedChain.includes(el?.chain || '')
+      );
+    }
+
+    if (noMarkets) {
+      return [...marketV3, ...marketV2, noMarkets];
+    }
+
+    return [...marketV3, ...marketV2];
+  }, [marketOptions, selectedChains]);
 
   const processedChartData = useMemo(() => {
     const hasActiveFilters =
@@ -293,7 +337,7 @@ const CompoundRevenueBlock = ({
             disabled={isLoading}
           />
           <MultiSelect
-            options={marketOptions || []}
+            options={deploymentOptionsFilter || []}
             value={selectedMarkets}
             onChange={setSelectedMarkets}
             placeholder='Market'
