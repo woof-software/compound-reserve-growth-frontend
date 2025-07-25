@@ -94,7 +94,7 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
         <UrlTooltip
           text={paymentType}
           url={proposalLink}
-          tooltipClassName='p-2'
+          tooltipClassName='pt-[13px] pb-[8px] pl-[10px] pr-[10px]'
         />
       );
     }

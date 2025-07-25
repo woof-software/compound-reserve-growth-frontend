@@ -116,7 +116,7 @@ export const UrlTooltip: React.FC<AddressTooltipProps> = ({
           href={url}
           target='_blank'
           rel='noopener noreferrer'
-          className='max-w-full truncate text-[14px] text-blue-500 underline hover:text-blue-700'
+          className='text-[14px] text-blue-500 underline hover:text-blue-700'
         >
           View Details
         </a>
