@@ -2,8 +2,9 @@ import React from 'react';
 
 import { formatNumber, formatQuantity } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
-import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
+
+import { TextTooltip } from '../TextTooltip/TextTooltip';
 
 export interface ProviderRow {
   provider: string;
@@ -28,24 +29,21 @@ const columns: ExtendedColumnDef<ProviderRow>[] = [
   {
     accessorKey: 'provider',
     header: 'Provider',
-    cell: ({ row }) => {
-      let iconName: string;
+    size: 150,
+    cell: ({ getValue }) => {
+      const initiative = getValue() as string;
+      const maxLength = 20;
 
-      if (row.original.provider === 'WOOF! Software') {
-        iconName = 'Woof-Software';
-      } else {
-        iconName = row.original.provider || 'not-found-icon';
-      }
-      return (
-        <div className='flex items-center gap-3'>
-          <Icon
-            name={iconName}
-            className='h-6 w-6'
-            folder='token'
+      if (initiative.length > maxLength) {
+        return (
+          <TextTooltip
+            text={initiative}
+            triggerWidth={120}
           />
-          <Text size='13'>{row.original.provider}</Text>
-        </div>
-      );
+        );
+      }
+
+      return <Text size='13'>{initiative}</Text>;
     }
   },
   {
@@ -92,8 +90,10 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
     <DataTable
       data={data}
       columns={columns}
-      pageSize={10}
+      pageSize={5}
       footerContent={footerRow}
+      containerTableClassName='min-h-[372px]'
+      className='flex min-h-[400px] flex-col justify-between'
       headerCellClassName='py-[13px] px-[5px]'
       cellClassName='py-3 px-[5px]'
       headerTextClassName='text-primary-14 font-medium'

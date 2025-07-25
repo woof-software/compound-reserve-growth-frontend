@@ -1,11 +1,17 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
 import CompoundRevenue from '@/components/Charts/CompoundRevenue/CompoundRevenue';
+import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { type RevenuePageProps } from '@/shared/hooks/useRevenue';
-import { capitalizeFirstLetter, ChartDataItem } from '@/shared/lib/utils/utils';
+import {
+  capitalizeFirstLetter,
+  ChartDataItem,
+  getValueByPath
+} from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
@@ -92,7 +98,23 @@ function preprocessData(rawData: ChartDataItem[]): PreprocessedResult {
       uniqueValues[key as keyof typeof uniqueValues]
     )
       .sort((a, b) => a.localeCompare(b))
-      .map((value) => ({ id: value, label: capitalizeFirstLetter(value) }));
+      .map((value) => {
+        const match = rawData.find(
+          (item) => getValueByPath(item, 'source.market') === value
+        );
+
+        const option: OptionType = {
+          id: value,
+          label: capitalizeFirstLetter(value),
+          chain: match?.source.network || 'Unknown'
+        };
+
+        if (key === 'market') {
+          option.marketType = match?.source.type.split(' ')[1] ?? '';
+        }
+
+        return option;
+      });
   }
 
   const sortedDates = Object.keys(dailyTotals).sort();
@@ -105,7 +127,7 @@ function preprocessData(rawData: ChartDataItem[]): PreprocessedResult {
     filterOptions: filterOptions as FilterOptions,
     processedItems,
     initialAggregatedData,
-    sortedDates // <-- Повертаємо їх
+    sortedDates
   };
 }
 
@@ -139,6 +161,49 @@ const CompoundRevenueBlock = ({
 
   const { chainOptions, marketOptions, sourceOptions, symbolOptions } =
     filterOptions;
+
+  const deploymentOptionsFilter = useMemo(() => {
+    const marketV2 =
+      marketOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const marketV3 =
+      marketOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const noMarkets = marketOptions?.find(
+      (el) => el?.id?.toLowerCase() === 'no name'
+    );
+
+    // Filter markets based on selected chain
+    if (selectedChains.length) {
+      const selectedChain = selectedChains.map(
+        (option: OptionType) => option.id
+      );
+
+      if (noMarkets) {
+        return [...marketV3, ...marketV2, noMarkets].filter((el) =>
+          selectedChain.includes(el?.chain || '')
+        );
+      }
+
+      return [...marketV3, ...marketV2].filter((el) =>
+        selectedChain.includes(el?.chain || '')
+      );
+    }
+
+    if (noMarkets) {
+      return [...marketV3, ...marketV2, noMarkets];
+    }
+
+    return [...marketV3, ...marketV2];
+  }, [marketOptions, selectedChains]);
 
   const processedChartData = useMemo(() => {
     const hasActiveFilters =
@@ -202,6 +267,37 @@ const CompoundRevenueBlock = ({
     selectedSymbols
   ]);
 
+  const chartSeriesForCSV = useMemo(() => {
+    if (!processedChartData || processedChartData.length === 0) return [];
+
+    return [
+      {
+        name: 'Revenue',
+        data: processedChartData.map((item) => ({
+          x: new Date(item.date).getTime(),
+          y: item.value
+        }))
+      }
+    ];
+  }, [processedChartData]);
+
+  const groupBy = useMemo(() => {
+    const hasFilters =
+      selectedChains.length > 0 ||
+      selectedMarkets.length > 0 ||
+      selectedSources.length > 0 ||
+      selectedSymbols.length > 0;
+    return hasFilters ? 'Filtered' : 'Total';
+  }, [selectedChains, selectedMarkets, selectedSources, selectedSymbols]);
+
+  const { csvData, csvFilename } = useCSVExport({
+    chartSeries: chartSeriesForCSV,
+    barSize,
+    groupBy,
+    filePrefix: 'Compound_Revenue',
+    aggregationType: 'sum'
+  });
+
   const handleResetFilters = useCallback(() => {
     setSelectedChains([]);
     setSelectedMarkets([]);
@@ -210,6 +306,7 @@ const CompoundRevenueBlock = ({
   }, []);
 
   const hasData = processedChartData.length > 0;
+
   const noDataMessage =
     selectedChains.length > 0 ||
     selectedMarkets.length > 0 ||
@@ -240,7 +337,7 @@ const CompoundRevenueBlock = ({
             disabled={isLoading}
           />
           <MultiSelect
-            options={marketOptions || []}
+            options={deploymentOptionsFilter || []}
             value={selectedMarkets}
             onChange={setSelectedMarkets}
             placeholder='Market'
@@ -272,6 +369,10 @@ const CompoundRevenueBlock = ({
           value={activeTab}
           onTabChange={handleTabChange}
           disabled={isLoading}
+        />
+        <CSVDownloadButton
+          data={csvData}
+          filename={csvFilename}
         />
       </div>
       <View.Condition if={!isLoading && !isError && hasData}>

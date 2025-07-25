@@ -4,7 +4,10 @@ import * as React from 'react';
 import { useClickOutside } from '@/shared/hooks/useClickOutside';
 import { useModal } from '@/shared/hooks/useModal';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { preventEventBubbling } from '@/shared/lib/utils/utils';
+import {
+  capitalizeFirstLetter,
+  preventEventBubbling
+} from '@/shared/lib/utils/utils';
 import Each from '@/shared/ui/Each/Each';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
@@ -108,7 +111,7 @@ const Select: FC<SelectProps> = memo(
           </div>
         </div>
         <View.Condition if={isOpen}>
-          <div className='hide-scrollbar outline-secondary-13 bg-primary-15 absolute top-[52px] right-[-2px] z-10 grid max-h-[182px] w-[540px] gap-0.5 overflow-y-auto rounded-lg border-none p-2 outline outline-solid'>
+          <div className='hide-scrollbar outline-secondary-13 bg-primary-15 absolute top-[52px] right-[-2px] z-10 grid max-h-[234px] w-[540px] gap-0.5 overflow-y-auto rounded-lg border-none p-2 outline outline-solid'>
             <Each
               data={options}
               render={(el, index) => {
@@ -150,7 +153,7 @@ const SelectItem: FC<SelectItemProps> = memo(
           weight='500'
           lineHeight='16'
         >
-          {asset}
+          {capitalizeFirstLetter(asset)}
         </Text>
         <View.Condition if={isSelected}>
           <CheckStroke

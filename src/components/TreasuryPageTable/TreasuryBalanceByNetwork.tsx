@@ -1,4 +1,4 @@
-import { formatPrice } from '@/shared/lib/utils/utils';
+import { formatLargeNumber, formatPrice } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -39,7 +39,9 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     accessorKey: 'qty',
     header: 'QTY',
     enableSorting: true,
-    cell: ({ row }) => <Text size='13'>{formatPrice(row.original.qty, 1)}</Text>
+    cell: ({ row }) => (
+      <Text size='13'>{formatLargeNumber(row.original.qty, 1)}</Text>
+    )
   },
   {
     accessorKey: 'value',
@@ -89,6 +91,8 @@ const TreasuryBalanceByNetwork = ({
         enableSorting
         enablePagination
         pageSize={10}
+        containerTableClassName='min-h-[518px]'
+        className='flex min-h-[565px] flex-col justify-between'
         headerCellClassName='py-[13px] px-[5px]'
         cellClassName='py-3 px-[5px]'
         headerTextClassName='text-primary-14 font-medium'

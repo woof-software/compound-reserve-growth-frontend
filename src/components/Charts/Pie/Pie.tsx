@@ -23,6 +23,10 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
   const { theme } = useTheme();
   const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
 
+  useMemo(() => {
+    setHiddenItems(new Set());
+  }, [data]);
+
   const chartData = useMemo(() => {
     const visibleItems = data.filter((item) => !hiddenItems.has(item.name));
     const totalVisiblePercent = visibleItems.reduce(
@@ -52,6 +56,19 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       return false;
     }
     return hiddenItems.size === data.length;
+  }, [data, hiddenItems]);
+
+  const shouldShowNoDataMessage = useMemo(() => {
+    if (!data || data.length === 0) {
+      return true;
+    }
+
+    const visibleItems = data.filter((item) => !hiddenItems.has(item.name));
+
+    return (
+      visibleItems.length === 0 ||
+      visibleItems.every((item) => item.percent === 0)
+    );
   }, [data, hiddenItems]);
 
   const handleLegendItemClick = (itemName: string) => {
@@ -195,6 +212,14 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
           className='text-primary-14 absolute inset-0 flex -translate-y-10 items-center justify-center'
         >
           All series are hidden
+        </Text>
+      )}
+      {!areAllSeriesHidden && shouldShowNoDataMessage && (
+        <Text
+          size='11'
+          className='text-primary-14 absolute inset-0 flex -translate-y-10 items-center justify-center'
+        >
+          All visible values are zero
         </Text>
       )}
       <HighchartsReact

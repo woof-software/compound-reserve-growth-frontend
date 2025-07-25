@@ -2,6 +2,9 @@ import React from 'react';
 
 import { formatNumber, formatQuantity } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
+import Text from '@/shared/ui/Text/Text';
+
+import { TextTooltip } from '../TextTooltip/TextTooltip';
 
 export interface CurrentInitiativeRow {
   initiative: string;
@@ -24,7 +27,23 @@ interface CurrentInitiativesProps {
 const columns: ExtendedColumnDef<CurrentInitiativeRow>[] = [
   {
     accessorKey: 'initiative',
-    header: 'Initiative'
+    header: 'Initiative',
+    size: 150,
+    cell: ({ getValue }) => {
+      const initiative = getValue() as string;
+      const maxLength = 20;
+
+      if (initiative.length > maxLength) {
+        return (
+          <TextTooltip
+            text={initiative}
+            triggerWidth={120}
+          />
+        );
+      }
+
+      return <Text size='13'>{initiative}</Text>;
+    }
   },
   {
     accessorKey: 'discipline',
@@ -72,8 +91,10 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
     <DataTable
       data={data}
       columns={columns}
-      pageSize={10}
+      pageSize={5}
       footerContent={footerContent}
+      containerTableClassName='min-h-[345px]'
+      className='flex min-h-[400px] flex-col justify-between'
       headerCellClassName='py-[13px] px-[5px]'
       cellClassName='py-3 px-[5px]'
       headerTextClassName='text-primary-14 font-medium'

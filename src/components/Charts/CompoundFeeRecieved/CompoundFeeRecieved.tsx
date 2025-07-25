@@ -1,14 +1,30 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { networkColorMap } from '@/shared/lib/utils/utils';
+import Button from '@/shared/ui/Button/Button';
 import Text from '@/shared/ui/Text/Text';
 
 import 'highcharts/modules/stock';
 import 'highcharts/modules/mouse-wheel-zoom';
+
+const formatValue = (value: number) => {
+  if (Math.abs(value) >= 1_000_000) {
+    return (value / 1_000_000).toFixed(1) + 'M';
+  }
+  if (Math.abs(value) >= 1_000) {
+    return (value / 1_000).toFixed(1) + 'K';
+  }
+  return value.toFixed(0);
+};
 
 interface StackedChartData {
   date: string;
@@ -22,6 +38,7 @@ interface AggregatedPoint {
 
 interface CompoundFeeRecievedProps {
   data: StackedChartData[];
+  groupBy: string;
   barCount?: number;
   barSize?: 'D' | 'W' | 'M';
   onVisibleBarsChange?: (count: number) => void;
@@ -30,6 +47,7 @@ interface CompoundFeeRecievedProps {
 
 const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   data = [],
+  groupBy,
   barCount = 90,
   barSize = 'D',
   onVisibleBarsChange,
@@ -52,10 +70,6 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       return { seriesData: [], aggregatedData: [] };
     }
 
-    const pointsPerBar = { D: 1, W: 7, M: 30 };
-    const chunkSize = pointsPerBar[barSize];
-    const tempAggregatedData: AggregatedPoint[] = [];
-
     const allKeys = new Set<string>();
     data.forEach((item) => {
       Object.keys(item).forEach((key) => {
@@ -65,34 +79,61 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       });
     });
 
-    for (let i = 0; i < data.length; i += chunkSize) {
-      const chunk = data.slice(i, i + chunkSize);
-      if (chunk.length === 0) continue;
+    const aggregated = new Map<number, AggregatedPoint>();
 
-      const lastPointDate = new Date(chunk[chunk.length - 1].date);
+    data.forEach((item) => {
+      const date = new Date(item.date);
+      let keyDate: Date;
 
-      const timestamp =
-        barSize === 'M'
-          ? new Date(
-              lastPointDate.getFullYear(),
-              lastPointDate.getMonth(),
-              1
-            ).getTime()
-          : lastPointDate.getTime();
+      switch (barSize) {
+        case 'D': {
+          keyDate = new Date(
+            Date.UTC(
+              date.getUTCFullYear(),
+              date.getUTCMonth(),
+              date.getUTCDate()
+            )
+          );
+          break;
+        }
+        case 'W': {
+          const day = date.getUTCDay();
+          const diff = date.getUTCDate() - day + (day === 0 ? -6 : 1);
+          keyDate = new Date(
+            Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), diff)
+          );
+          break;
+        }
+        case 'M': {
+          keyDate = new Date(
+            Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)
+          );
+          break;
+        }
+        default:
+          keyDate = date;
+      }
 
-      const aggregatedPoint: AggregatedPoint = { x: timestamp };
+      const keyTimestamp = keyDate.getTime();
+
+      if (!aggregated.has(keyTimestamp)) {
+        aggregated.set(keyTimestamp, { x: keyTimestamp });
+      }
+
+      const aggregatedPoint = aggregated.get(keyTimestamp)!;
 
       allKeys.forEach((key) => {
-        aggregatedPoint[key] = chunk.reduce(
-          (sum, dailyData) => sum + ((dailyData[key] as number) || 0),
-          0
-        );
+        const value = (item[key] as number) || 0;
+        aggregatedPoint[key] = (aggregatedPoint[key] || 0) + value;
       });
-      tempAggregatedData.push(aggregatedPoint);
-    }
+    });
+
+    const sortedAggregated = Array.from(aggregated.values()).sort(
+      (a, b) => a.x - b.x
+    );
 
     const activeSeriesKeys = new Set<string>();
-    tempAggregatedData.forEach((point) => {
+    sortedAggregated.forEach((point) => {
       Object.keys(point).forEach((key) => {
         if (key !== 'x' && point[key] !== 0) {
           activeSeriesKeys.add(key);
@@ -104,30 +145,16 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       (key): Highcharts.SeriesColumnOptions => ({
         type: 'column',
         name: key.charAt(0).toUpperCase() + key.slice(1),
-        data: tempAggregatedData.map((item) => [
+        data: sortedAggregated.map((item) => [
           item.x,
           (item[key] as number) || 0
         ]),
-        color: networkColorMap[key.toLowerCase()] || '#808080',
         showInLegend: true
       })
     );
 
-    return { seriesData: finalSeries, aggregatedData: tempAggregatedData };
+    return { seriesData: finalSeries, aggregatedData: sortedAggregated };
   }, [data, barSize]);
-
-  const pointRange = useMemo(() => {
-    const dayInMillis = 24 * 3600 * 1000;
-    switch (barSize) {
-      case 'W':
-        return 7 * dayInMillis;
-      case 'M':
-        return 30 * dayInMillis;
-      case 'D':
-      default:
-        return dayInMillis;
-    }
-  }, [barSize]);
 
   useEffect(() => {
     const chart = chartRef.current?.chart;
@@ -143,6 +170,22 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       chart.xAxis[0].setExtremes(min, max, true);
     }
   }, [barCount, aggregatedData]);
+
+  const handleSelectAll = useCallback(() => {
+    const chart = chartRef.current?.chart;
+    if (!chart) return;
+    chart.series.forEach((s) => s.setVisible(true, false));
+    chart.redraw();
+    setAreAllSeriesHidden(false);
+  }, []);
+
+  const handleDeselectAll = useCallback(() => {
+    const chart = chartRef.current?.chart;
+    if (!chart) return;
+    chart.series.forEach((s) => s.setVisible(false, false));
+    chart.redraw();
+    setAreAllSeriesHidden(true);
+  }, []);
 
   let xAxisLabelFormat: string;
   switch (barSize) {
@@ -236,25 +279,38 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       enabled: true,
       align: 'center',
       verticalAlign: 'bottom',
+      layout: 'horizontal',
+      useHTML: true,
       itemStyle: {
-        color: '#7A8A99',
-        fontSize: '11px',
-        fontWeight: '400',
-        lineHeight: '100%'
+        color: 'var(--color-primary-11)',
+        fontWeight: 'normal',
+        textDecoration: 'none'
+      },
+      itemHoverStyle: {
+        color: 'var(--color-primary-11)',
+        textDecoration: 'none'
       },
       itemHiddenStyle: {
-        color: '#4B5563'
+        color: '#4B5563',
+        textDecoration: 'line-through'
       },
-      symbolRadius: 6,
-      symbolHeight: 12,
-      symbolWidth: 12,
-      itemHoverStyle: {
-        color: theme === 'light' ? '#17212B' : '#FFFFFF'
+      symbolWidth: 0,
+      symbolHeight: 0,
+      itemDistance: 20,
+      labelFormatter: function () {
+        const series = this as Highcharts.Series;
+        const textDecoration = series.visible ? 'none' : 'line-through';
+        const textColor = series.visible
+          ? 'var(--color-primary-11)'
+          : '#4B5563';
+        return `<span style="display: inline-flex; align-items: center; gap: 8px;">
+      <span style="width: 12px; height: 2px; background-color: ${series.color}; display: inline-block; border-radius: 1px; opacity: ${series.visible ? '1' : '0.5'};"></span>
+      <span style="font-size: 12px; text-decoration: ${textDecoration}; color: ${textColor};">${series.name}</span>
+    </span>`;
       }
     },
     plotOptions: {
       column: {
-        pointRange: pointRange,
         pointPadding: 0.05,
         groupPadding: 0.05,
         borderWidth: 0,
@@ -273,12 +329,21 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
         },
         events: {
           legendItemClick: function (this: Highcharts.Series): boolean {
+            const chart = this.chart;
+            const isAnyOtherSeriesVisible = chart.series.some(
+              (s) => s !== this && s.visible
+            );
+            if (!this.visible && !isAnyOtherSeriesVisible) {
+              chart.series.forEach((s) => s.setVisible(s === this, false));
+              chart.redraw();
+              setAreAllSeriesHidden(false);
+              return false;
+            }
             setTimeout(() => {
-              if (!this.chart.series.some((s) => s.visible)) {
-                setAreAllSeriesHidden(true);
-              } else {
-                setAreAllSeriesHidden(false);
-              }
+              const isAnySeriesVisibleAfterClick = chart.series.some(
+                (s) => s.visible
+              );
+              setAreAllSeriesHidden(!isAnySeriesVisibleAfterClick);
             }, 0);
             return true;
           }
@@ -287,57 +352,57 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     },
     credits: { enabled: false },
     tooltip: {
-      backgroundColor: 'rgba(18, 24, 47, 0.55)',
-      borderColor: 'rgba(75, 85, 99, 0.5)',
-      borderRadius: 8,
-      borderWidth: 1,
-      style: { color: '#FFFFFF', fontSize: '12px' },
-      shared: true,
       useHTML: true,
-      shadow: true,
-      followPointer: false,
+      backgroundColor: 'rgba(18, 24, 47, 0.55)',
+      borderWidth: 0,
+      shadow: false,
+      borderRadius: 8,
       padding: 12,
+      style: {
+        color: 'var(--color-white-10)',
+        fontFamily: 'Haas Grot Text R'
+      },
+      shared: true,
       formatter: function () {
-        const points = this.points;
-        if (!points || points.length === 0) return '';
-
-        const formatCurrency = (num: number) => {
-          const formatted = num.toLocaleString(undefined, {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-          });
-          return '$' + (formatted === '-0' ? '0' : formatted);
-        };
-
-        const header = `<div style="font-weight: 600; font-size: 12px; margin-bottom: 8px; color: #E5E7EB;">${Highcharts.dateFormat('%B %e, %Y', this.x as number)}</div>`;
-
-        let tooltip = `<div style="min-width: 200px">${header}`;
-        let total = 0;
-        const sortedPoints = [...points].sort(
-          (a, b) => Math.abs(b.y as number) - Math.abs(a.y as number)
+        const header = `<div style="font-weight: 500; margin-bottom: 8px; font-size: 12px;">${Highcharts.dateFormat('%B %e, %Y', this.x as number)}</div>`;
+        if (groupBy === 'none') {
+          const point = this.points?.find((p) => p.series.type === 'area');
+          if (!point) return '';
+          return `${header}<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 8px; height: 8px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px;">${point.series.name}</span></div><span style="font-weight: 500; font-size: 11px;">$${Highcharts.numberFormat(point.y ?? 0, 0, '.', ',')}</span></div>`;
+        }
+        const dataPoints = (this.points || []).filter(
+          (p) => p.series.type !== 'scatter'
         );
+        const sortedPoints = [...dataPoints].sort(
+          (a, b) => (b.y ?? 0) - (a.y ?? 0)
+        );
+        let total = 0;
         sortedPoints.forEach((point) => {
-          total += point.y as number;
-          const value = formatCurrency(point.y as number);
-          tooltip += `
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; font-size: 11px;">
-              <div style="display: flex; align-items: center; gap: 4px;">
-                <div style="width: 8px; height: 8px; background-color: ${point.color}; border-radius: 50%;"></div>
-                <span style="color: #E5E7EB; font-size: 11px;">${point.series.name}</span>
-              </div>
-              <span style="font-weight: 500; font-size: 12px; color: #FFFFFF; font-size: 11px;">${value}</span>
-            </div>`;
+          total += point.y ?? 0;
         });
-        const totalFormatted = formatCurrency(total);
-        tooltip += `
-          <div style="padding-top: 4px;">
-            <div style="display: flex; justify-content: space-between; font-size: 11px;">
-              <span style="color: #E5E7EB; font-weight: 600; font-size: 11px;">Total</span>
-              <span style="font-weight: 600; color: #FFFFFF; font-size: 11px;">${totalFormatted}</span>
-            </div>
-          </div>
-        </div>`;
-        return tooltip;
+        let body = '';
+        if (groupBy === 'Market') {
+          const midPoint = Math.ceil(sortedPoints.length / 2);
+          const col1Points = sortedPoints.slice(0, midPoint);
+          const col2Points = sortedPoints.slice(midPoint);
+          const renderColumn = (points: Highcharts.Point[]) =>
+            points
+              .map(
+                (point) =>
+                  `<div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-bottom: 4px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="white-space: nowrap; font-size: 11px;">${point.series.name}</span><span style="font-weight: 500; text-align: right; font-size: 11px;">${formatValue(point.y ?? 0)}</span></div>`
+              )
+              .join('');
+          body = `<div style="display: flex; gap: 24px;"><div style="display: flex; flex-direction: column;">${renderColumn(col1Points)}</div><div style="display: flex; flex-direction: column;">${renderColumn(col2Points)}</div></div>`;
+        } else {
+          body = sortedPoints
+            .map(
+              (point) =>
+                `<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 4px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px;">${point.series.name}</span></div><span style="font-weight: 500; font-size: 11px;">${formatValue(point.y ?? 0)}</span></div>`
+            )
+            .join('');
+        }
+        const footer = `<div style=" padding-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 16px;"><span style="font-weight: 500; font-size: 12px;">Total</span><span style="font-weight: 500; font-size: 11px;">${formatValue(total)}</span></div>`;
+        return header + body + footer;
       }
     },
     series: seriesData,
@@ -347,21 +412,33 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   };
 
   return (
-    <div className={cn('highcharts-container relative', className)}>
-      {areAllSeriesHidden && (
-        <Text
-          size='11'
-          className='text-primary-14 absolute inset-0 flex -translate-y-10 transform items-center justify-center'
-        >
-          All series are hidden
-        </Text>
-      )}
-      <HighchartsReact
-        ref={chartRef}
-        highcharts={Highcharts}
-        options={chartOptions}
-        containerProps={{ style: { width: '100%', height: '100%' } }}
-      />
+    <div className={cn('highcharts-container flex h-full flex-col', className)}>
+      <div className='relative flex-grow'>
+        {areAllSeriesHidden && (
+          <Text
+            size='11'
+            className='text-primary-14 absolute inset-0 flex -translate-y-10 transform items-center justify-center'
+          >
+            All series are hidden
+          </Text>
+        )}
+        <HighchartsReact
+          ref={chartRef}
+          highcharts={Highcharts}
+          options={chartOptions}
+          containerProps={{ style: { width: '100%', height: '100%' } }}
+        />
+      </div>
+      <div className='flex shrink-0 items-center justify-center gap-4 py-2'>
+        {seriesData.length > 1 && (
+          <Button
+            onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
+            className='text-primary-14 cursor-pointer rounded-md border border-[color:var(--color-primary-16)] px-2 py-1 text-[12px] hover:border-[color:var(--color-primary-14)]'
+          >
+            {areAllSeriesHidden ? 'Select All' : 'Unselect All'}
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

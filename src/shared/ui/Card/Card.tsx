@@ -82,7 +82,7 @@ const Card: FC<CardProps> = ({
             >
               {title}
             </Text>
-            <div className='flex cursor-pointer items-center justify-center'>
+            <div className='flex h-6 w-6 cursor-pointer items-center justify-center'>
               {id &&
                 (isCopied ? (
                   <Icon

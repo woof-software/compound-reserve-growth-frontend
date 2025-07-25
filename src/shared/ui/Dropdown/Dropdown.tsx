@@ -98,7 +98,7 @@ const Dropdown: FC<DropdownProps> = ({
         <View.Condition if={open}>
           <div
             className={cn(
-              'hide-scrollbar shadow-10 border-secondary-18 bg-primary-15 absolute top-10 right-0 grid max-h-[182px] min-w-[168px] gap-0.5 overflow-y-auto rounded-lg border border-solid',
+              'hide-scrollbar shadow-10 border-secondary-18 bg-primary-15 absolute top-10 right-0 grid max-h-[234px] min-w-[168px] gap-0.5 overflow-y-auto rounded-lg border border-solid',
               contentClassName
             )}
           >

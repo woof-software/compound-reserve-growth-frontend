@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { formatPrice } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -8,48 +10,73 @@ export interface TreasuryCompositionType {
   icon: string;
   name: string;
   balance: number;
+  symbol?: string;
 }
 
 interface TreasuryCompositionProps {
   tableData: TreasuryCompositionType[];
   totalBalance: number;
+  activeFilter: 'Chain' | 'Asset Type' | 'Market';
 }
 
-const columns: ExtendedColumnDef<TreasuryCompositionType>[] = [
-  {
-    accessorKey: 'name',
-    header: 'Asset',
-    cell: ({ row }) => (
-      <div className='flex items-center gap-3'>
-        <Icon
-          name={row.original.icon || 'not-found-icon'}
-          className='h-6 w-6'
-          folder='token'
-        />
-        <Text size='13'>{row.original.name}</Text>
-      </div>
-    )
+const filterConfig = {
+  Market: {
+    folder: 'collaterals' as const,
+    getIconName: (row: TreasuryCompositionType) =>
+      row.symbol || 'not-found-icon'
   },
-  {
-    accessorKey: 'balance',
-    header: 'Total Balance USD',
-    align: 'right',
-    cell: ({ row }) => (
-      <Text
-        size='13'
-        weight='400'
-        className='text-right'
-      >
-        {formatPrice(row.original.balance, 1)}
-      </Text>
-    )
+  Chain: {
+    folder: 'network' as const,
+    getIconName: (row: TreasuryCompositionType) =>
+      (row.icon || 'not-found-icon').toLowerCase()
+  },
+  'Asset Type': {
+    folder: 'token' as const,
+    getIconName: (row: TreasuryCompositionType) =>
+      (row.icon || 'not-found-icon').toLowerCase()
   }
-];
+};
 
 const TreasuryComposition = ({
   tableData,
-  totalBalance
+  totalBalance,
+  activeFilter
 }: TreasuryCompositionProps) => {
+  const columns = useMemo<ExtendedColumnDef<TreasuryCompositionType>[]>(() => {
+    const config = filterConfig[activeFilter];
+
+    return [
+      {
+        accessorKey: 'name',
+        header: 'Asset',
+        cell: ({ row }) => (
+          <div className='flex items-center gap-3'>
+            <Icon
+              name={config.getIconName(row.original)}
+              className='h-6 w-6'
+              folder={config.folder}
+            />
+            <Text size='13'>{row.original.name}</Text>
+          </div>
+        )
+      },
+      {
+        accessorKey: 'balance',
+        header: 'Total Balance USD',
+        align: 'right',
+        cell: ({ row }) => (
+          <Text
+            size='13'
+            weight='400'
+            className='text-right'
+          >
+            {formatPrice(row.original.balance, 1)}
+          </Text>
+        )
+      }
+    ];
+  }, [activeFilter]);
+
   return (
     <div className='max-h-[400px] w-full max-w-[522px] overflow-y-auto'>
       <DataTable

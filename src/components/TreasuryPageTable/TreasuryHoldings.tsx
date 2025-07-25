@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
 
-import { formatLargeNumber } from '@/shared/lib/utils/utils';
+import { cn } from '@/shared/lib/classNames/classNames';
+import { formatLargeNumber, formatPrice } from '@/shared/lib/utils/utils';
 import DataTable from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -68,7 +69,7 @@ const treasuryColumns: ColumnDef<TreasuryBalanceByNetworkType>[] = [
     header: 'Value',
     enableSorting: true,
     cell: ({ row }) => (
-      <Text size='13'>{formatLargeNumber(row.original.value, 1)}</Text>
+      <Text size='13'>{formatPrice(row.original.value, 1)}</Text>
     )
   },
   {
@@ -76,7 +77,7 @@ const treasuryColumns: ColumnDef<TreasuryBalanceByNetworkType>[] = [
     header: 'Price',
     enableSorting: true,
     cell: ({ row }) => (
-      <Text size='13'>{formatLargeNumber(row.original.price, 1)}</Text>
+      <Text size='13'>{formatPrice(row.original.price, 1)}</Text>
     )
   },
   {
@@ -106,6 +107,10 @@ const TreasuryHoldings = ({ tableData }: TreasuryHoldingsProps) => {
       enableSorting
       enablePagination
       pageSize={10}
+      containerTableClassName='min-h-[518px]'
+      className={cn('flex flex-col justify-between', {
+        'min-h-[565px]': tableData.length > 10
+      })}
       headerCellClassName='py-[13px] px-[5px]'
       cellClassName='py-3 px-[5px]'
       headerTextClassName='text-primary-14 font-medium'

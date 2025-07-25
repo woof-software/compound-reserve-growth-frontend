@@ -5,11 +5,11 @@ import {
   explorers,
   sliceAddress
 } from '@/shared/lib/utils/utils';
+import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
 import { ClipboardButton } from '../CopyButton/CopyButton';
 import HoverCard from '../HoverCard/HoverCard';
-import Icon from '@/shared/ui/Icon/Icon';
 
 interface AddressTooltipProps {
   text: string;

@@ -29,6 +29,7 @@ interface DataTableProps<T> {
   enablePagination?: boolean;
   pageSize?: number;
   className?: string;
+  containerTableClassName?: string;
   tableClassName?: string;
   headerClassName?: string;
   rowClassName?: string;
@@ -62,6 +63,7 @@ const DataTable = <T,>({
   headerClassName,
   rowClassName,
   cellClassName,
+  containerTableClassName,
   headerCellClassName,
   headerRowClassName,
   headerTextClassName,
@@ -129,7 +131,7 @@ const DataTable = <T,>({
 
   return (
     <div className={cn('w-full', className)}>
-      <div className='overflow-x-auto'>
+      <div className={cn('overflow-x-auto', containerTableClassName)}>
         <table className={cn('min-w-full', tableClassName)}>
           <thead className={cn('bg-transparent', headerClassName)}>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -272,15 +274,28 @@ const DataTable = <T,>({
           </Text>
           <div
             className={cn(
-              'flex items-center gap-4',
+              'flex items-center gap-1',
               paginationButtonsClassName
             )}
           >
             <Button
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+              className={cn(
+                'text-primary-14 size-4 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                paginationButtonClassName
+              )}
+            >
+              <Icon
+                name='double-arrow'
+                className='h-full w-full'
+              />
+            </Button>
+            <Button
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
               className={cn(
-                'text-primary-14 flex cursor-pointer items-center gap-1 text-[13px] hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                'text-primary-14 flex h-8 cursor-pointer items-center gap-2 p-2 text-[11px] font-medium hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
                 paginationButtonClassName
               )}
             >
@@ -288,20 +303,33 @@ const DataTable = <T,>({
                 name='arrow-left'
                 className='h-4 w-4'
               />
-              Previous
+              <span className='text-[11px]'>Previous</span>
             </Button>
             <Button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
               className={cn(
-                'text-primary-14 flex cursor-pointer items-center gap-1 text-[13px] hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                'text-primary-14 flex h-8 cursor-pointer items-center gap-2 p-2 text-[11px] font-medium hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
                 paginationButtonClassName
               )}
             >
-              Next
+              <span className='text-[11px]'>Next</span>
               <Icon
                 name='arrow-right'
                 className='h-4 w-4'
+              />
+            </Button>
+            <Button
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+              className={cn(
+                'text-primary-14 size-4 rotate-180 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                paginationButtonClassName
+              )}
+            >
+              <Icon
+                name='double-arrow'
+                className='h-full w-full'
               />
             </Button>
           </div>

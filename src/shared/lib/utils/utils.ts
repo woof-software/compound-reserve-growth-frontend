@@ -101,6 +101,44 @@ export const networkColorMap: { [key: string]: string } = {
   unichain: '#BCE954'
 };
 
+// Function to get stable color based on series name
+export const getStableColorForSeries = (
+  seriesName: string,
+  allSeriesNames: string[]
+): string => {
+  const lowerName = seriesName.toLowerCase();
+
+  // First check networkColorMap
+  if (networkColorMap[lowerName]) {
+    return networkColorMap[lowerName];
+  }
+
+  // For networks check partial matches
+  for (const [network, color] of Object.entries(networkColorMap)) {
+    if (lowerName.includes(network)) {
+      return color;
+    }
+  }
+
+  // Create stable index based on series name
+  // Sort all series names for stable ordering
+  const sortedNames = [...allSeriesNames].sort();
+  const stableIndex = sortedNames.indexOf(seriesName);
+
+  // If series not found in sorted list, use name hash
+  if (stableIndex === -1) {
+    let hash = 0;
+    for (let i = 0; i < seriesName.length; i++) {
+      const char = seriesName.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return colorPicker((Math.abs(hash) % 20) + 1);
+  }
+
+  return colorPicker(stableIndex + 1);
+};
+
 export const explorers: { [key: string]: string } = {
   ethereum: 'https://etherscan.io/address/',
   mainnet: 'https://etherscan.io/address/',
@@ -194,13 +232,34 @@ export const formatGrowth = (growth: number) => {
   return `${growth > 0 ? '+' : ''}${growth?.toFixed(1)}%`;
 };
 
-export function formatLargeNumber(num: number, digits: number = 4): string {
+export function formatLargeNumber(
+  num: number,
+  digits: number = 4,
+  exact: boolean = false
+): string {
   const threshold = 1 / 10 ** (digits + 1);
 
-  if (num === 0 || isNaN(num)) return threshold.toFixed(digits);
+  if (num === 0 || isNaN(num)) {
+    return exact ? '0' : threshold.toFixed(digits);
+  }
 
   const sign = num < 0 ? '-' : '';
   const absNum = Math.abs(num);
+
+  if (exact) {
+    if (absNum < 1_000) {
+      return sign + absNum.toString();
+    }
+
+    for (const unit of units) {
+      if (absNum >= unit.value) {
+        const exactValue = absNum / unit.value;
+        return sign + exactValue.toString() + unit.symbol;
+      }
+    }
+
+    return sign + absNum.toString();
+  }
 
   if (absNum < 1_000) {
     return (
@@ -315,10 +374,24 @@ export const extractFilterOptions = (
     const formatter = config[key].labelFormatter || capitalizeFirstLetter;
     result[`${key}Options`] = Array.from(uniqueValues[key])
       .sort((a, b) => a.localeCompare(b))
-      .map((value) => ({
-        id: value,
-        label: formatter(value)
-      }));
+      .map((value) => {
+        const option: OptionType & { marketType?: string } = {
+          id: value,
+          label: formatter(value)
+        };
+
+        if (key === 'deployment') {
+          const match = rawData.find(
+            (item) => getValueByPath(item, config[key].path) === value
+          );
+
+          option.marketType = match?.source.type.split(' ')[1] ?? '';
+
+          option.chain = match?.source.network || 'Unknown';
+        }
+
+        return option;
+      });
   }
 
   return result;

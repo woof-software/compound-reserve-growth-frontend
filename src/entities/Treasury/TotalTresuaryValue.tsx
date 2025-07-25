@@ -1,23 +1,22 @@
-import { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 
 import LineChart from '@/components/Charts/Line/Line';
-import Filter from '@/components/Filter/Filter';
-import { useFilter } from '@/components/Filter/useFilter';
+import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
+import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
-import {
-  capitalizeFirstLetter,
-  ChartDataItem,
-  extractFilterOptions
-} from '@/shared/lib/utils/utils';
+import { useCSVExport } from '@/shared/hooks/useCSVExport';
+import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
+import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
 const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
+
 const groupByMapping: Record<string, string> = {
   'Asset Type': 'assetType',
   Chain: 'chain',
@@ -33,11 +32,21 @@ interface TotalTreasuryValueProps {
 
 const TotalTresuaryValue = ({
   isLoading,
-
   isError,
   data: treasuryApiResponse
 }: TotalTreasuryValueProps) => {
-  const { local, selected, toggle, apply, clear, reset } = useFilter();
+  const [selectedOptions, setSelectedOptions] = useReducer(
+    (prev, next) => ({
+      ...prev,
+      ...next
+    }),
+    {
+      chain: [],
+      assetType: [],
+      deployment: [],
+      symbol: []
+    }
+  );
 
   const {
     open: openSingle,
@@ -46,11 +55,6 @@ const TotalTresuaryValue = ({
     close: closeSingle,
     select: selectSingle
   } = useDropdown('single');
-
-  const handleClearAll = useCallback(() => {
-    clear();
-    selectSingle('None');
-  }, [clear, selectSingle]);
 
   const {
     activeTab,
@@ -75,52 +79,73 @@ const TotalTresuaryValue = ({
     () => ({
       chain: { path: 'source.network' },
       assetType: { path: 'source.asset.type' },
-      deployment: { path: 'source.market' }
+      deployment: { path: 'source.market' },
+      symbol: { path: 'source.asset.symbol' }
     }),
     []
   );
 
-  const { chainOptions, assetTypeOptions, deploymentOptions } = useMemo(
-    () => extractFilterOptions(rawData, filterOptionsConfig),
-    [rawData, filterOptionsConfig]
-  );
+  const { chainOptions, assetTypeOptions, symbolOptions, deploymentOptions } =
+    useMemo(
+      () => extractFilterOptions(rawData, filterOptionsConfig),
+      [rawData, filterOptionsConfig]
+    );
 
-  const filtersList = useMemo(
-    () => [
-      {
-        id: 'chain',
-        title: 'Chain',
-        placeholder: 'Add Chain',
-        options: chainOptions?.map((o) => capitalizeFirstLetter(o.id)) || []
-      },
-      {
-        id: 'assetType',
-        title: 'Asset Type',
-        placeholder: 'Add Asset Type',
-        options: assetTypeOptions?.map((o) => o.id) || []
-      },
-      {
-        id: 'deployment',
-        title: 'Market',
-        placeholder: 'Add Market',
-        options: deploymentOptions?.map((o) => o.id) || []
+  const deploymentOptionsFilter = useMemo(() => {
+    const marketV2 =
+      deploymentOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const marketV3 =
+      deploymentOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const noMarkets = deploymentOptions?.find(
+      (el) => el?.id?.toLowerCase() === 'no name'
+    );
+
+    // Filter markets based on selected chain
+    if (selectedOptions.chain.length) {
+      const selectedChain = selectedOptions.chain.map(
+        (option: OptionType) => option.id
+      );
+
+      if (noMarkets) {
+        return [...marketV3, ...marketV2, noMarkets].filter((el) =>
+          selectedChain.includes(el?.chain || '')
+        );
       }
-    ],
-    [chainOptions, assetTypeOptions, deploymentOptions]
-  );
+
+      return [...marketV3, ...marketV2].filter((el) =>
+        selectedChain.includes(el?.chain || '')
+      );
+    }
+
+    if (noMarkets) {
+      return [...marketV3, ...marketV2, noMarkets];
+    }
+
+    return [...marketV3, ...marketV2];
+  }, [deploymentOptions, selectedOptions]);
 
   const groupBy = selectedSingle?.[0] || 'None';
 
   const activeFilters = useMemo(
     () =>
-      selected.reduce(
-        (acc, filter) => {
-          acc[filter.id] = filter.selectedItems;
+      Object.entries(selectedOptions).reduce(
+        (acc, [key, options]) => {
+          acc[key] = options.map((option: OptionType) => option.id);
           return acc;
         },
         {} as Record<string, string[]>
       ),
-    [selected]
+    [selectedOptions]
   );
 
   const { chartSeries } = useChartDataProcessor({
@@ -129,7 +154,8 @@ const TotalTresuaryValue = ({
     filterPaths: {
       chain: 'source.network',
       assetType: 'source.asset.type',
-      deployment: 'source.market'
+      deployment: 'source.market',
+      symbol: 'source.asset.symbol'
     },
     groupBy,
     groupByKeyPath:
@@ -178,6 +204,14 @@ const TotalTresuaryValue = ({
     });
   }, [chartSeries]);
 
+  const { csvData, csvFilename } = useCSVExport({
+    chartSeries: correctedChartSeries,
+    barSize,
+    groupBy,
+    filePrefix: 'Total_Treasury_Value',
+    aggregationType: 'sum'
+  });
+
   const hasData = useMemo(() => {
     return (
       correctedChartSeries.length > 0 &&
@@ -185,23 +219,48 @@ const TotalTresuaryValue = ({
     );
   }, [correctedChartSeries]);
 
-  const activeCount = selected.reduce(
-    (acc, filter) => acc + filter.selectedItems.length,
-    0
-  );
+  const onSelectChain = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedOptions({
+      chain: selectedOptions
+    });
 
-  const filterProps = useMemo(
-    () => ({
-      activeFilters: activeCount,
-      selectedItems: local,
-      filtersList,
-      onFilterItemSelect: toggle,
-      onApply: apply,
-      onClear: handleClearAll,
-      onOutsideClick: reset
-    }),
-    [activeCount, local, filtersList, toggle, apply, handleClearAll, reset]
-  );
+    setSelectedOptions({
+      deployment: []
+    });
+  }, []);
+
+  const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedOptions({
+      assetType: selectedOptions
+    });
+  }, []);
+
+  const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedOptions({
+      deployment: selectedOptions
+    });
+  }, []);
+
+  const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedOptions({
+      symbol: selectedOptions
+    });
+  }, []);
+
+  const onClearSelectedOptions = useCallback(() => {
+    setSelectedOptions({
+      chain: [],
+      assetType: [],
+      deployment: [],
+      symbol: []
+    });
+  }, []);
+
+  const onClearAll = useCallback(() => {
+    onClearSelectedOptions();
+
+    selectSingle('None');
+  }, [onClearSelectedOptions, selectSingle]);
 
   return (
     <Card
@@ -237,15 +296,44 @@ const TotalTresuaryValue = ({
           onSelect={selectSingle}
           disabled={isLoading}
         />
-        <Filter
-          {...filterProps}
+        <MultiSelect
+          options={chainOptions || []}
+          value={selectedOptions.chain}
+          onChange={onSelectChain}
+          placeholder='Chain'
           disabled={isLoading}
+        />
+        <MultiSelect
+          options={deploymentOptionsFilter}
+          value={selectedOptions.deployment}
+          onChange={onSelectMarket}
+          placeholder='Market'
+          disabled={isLoading}
+        />
+        <MultiSelect
+          options={assetTypeOptions || []}
+          value={selectedOptions.assetType}
+          onChange={onSelectAssetType}
+          placeholder='Asset Type'
+          disabled={isLoading}
+        />
+        <MultiSelect
+          options={symbolOptions || []}
+          value={selectedOptions.symbol}
+          onChange={onSelectSymbol}
+          placeholder='Reserve Symbols'
+          disabled={isLoading}
+        />
+        <CSVDownloadButton
+          data={csvData}
+          filename={csvFilename}
         />
       </div>
       {!isLoading && !isError && !hasData ? (
-        <NoDataPlaceholder onButtonClick={handleClearAll} />
+        <NoDataPlaceholder onButtonClick={onClearAll} />
       ) : (
         <LineChart
+          key={groupBy}
           data={correctedChartSeries}
           groupBy={groupBy}
           className='max-h-[400px]'

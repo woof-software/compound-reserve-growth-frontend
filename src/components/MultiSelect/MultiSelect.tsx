@@ -1,29 +1,44 @@
-import { FC } from 'react';
+import {
+  ChangeEvent,
+  FC,
+  KeyboardEvent,
+  Ref,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
+import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import { Dropdown, useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
-
-export interface Option {
-  id: string;
-  label: string;
-}
+import View from '@/shared/ui/View/View';
 
 const CustomDropdownItem: FC<{
   label: string;
+  marketType?: string;
   isSelected: boolean;
+  isHighlighted: boolean;
   onSelect: () => void;
-}> = ({ label, isSelected, onSelect }) => {
+  itemRef?: Ref<HTMLDivElement>;
+}> = ({ label, isSelected, isHighlighted, onSelect, itemRef }) => {
   return (
     <div
-      className='hover:bg-secondary-12 flex cursor-pointer items-center justify-between rounded-lg px-3 py-2'
+      ref={itemRef}
+      className={cn(
+        'flex cursor-pointer items-center justify-between p-3',
+        isHighlighted ? 'bg-secondary-12' : 'hover:bg-secondary-12'
+      )}
       onClick={onSelect}
     >
-      <span className={'text-color-gray-11 rounded-sm text-[12px]'}>
-        {label}
-      </span>
+      <div className='flex items-end gap-1'>
+        <span className='text-color-gray-11 rounded-sm text-[12px]'>
+          {label}
+        </span>
+      </div>
       {isSelected && (
         <Icon
           name='check-stroke'
@@ -35,11 +50,11 @@ const CustomDropdownItem: FC<{
 };
 
 export interface MultiSelectProps {
-  options: Option[];
+  options: OptionType[];
   placeholder?: string;
-  onChange?: (selectedOptions: Option[]) => void;
+  onChange?: (selectedOptions: OptionType[]) => void;
   className?: string;
-  value?: Option[];
+  value?: OptionType[];
   disabled?: boolean;
 }
 
@@ -53,25 +68,99 @@ export const MultiSelect: FC<MultiSelectProps> = ({
 }) => {
   const { open, toggle, close } = useDropdown('multiple');
 
-  const handleSelect = (optionToToggle: Option) => {
+  const [searchValue, setSearchValue] = useState('');
+
+  const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const itemRefs = useRef<Array<HTMLDivElement | null>>([]);
+
+  const filteredOptions = useMemo(
+    () =>
+      options.filter((option) =>
+        option.label.toLowerCase().includes(searchValue.toLowerCase())
+      ),
+    [options, searchValue]
+  );
+
+  useEffect(() => {
+    if (open) {
+      setHighlightedIndex(-1);
+
+      inputRef.current?.focus();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (highlightedIndex >= 0 && containerRef.current) {
+      if (highlightedIndex === 0) {
+        containerRef.current.scrollTo({ top: 0 });
+      } else {
+        const ref = itemRefs.current[highlightedIndex];
+
+        ref?.scrollIntoView({ block: 'nearest' });
+      }
+    }
+  }, [highlightedIndex]);
+
+  const onChangeSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(e.target.value);
+    setHighlightedIndex(-1);
+  };
+
+  const onSelect = (optionToToggle: OptionType) => {
     if (!onChange) return;
 
     const isSelected = value.some((v) => v.id === optionToToggle.id);
-    let newSelectedValue: Option[];
 
-    if (isSelected) {
-      newSelectedValue = value.filter((v) => v.id !== optionToToggle.id);
-    } else {
-      newSelectedValue = [...value, optionToToggle];
-    }
+    const newSelectedValue = isSelected
+      ? value.filter((v) => v.id !== optionToToggle.id)
+      : [...value, optionToToggle];
+
     onChange(newSelectedValue);
   };
 
-  const handleClearFilters = () => {
-    if (onChange) {
-      onChange([]);
-    }
+  const onClearFilters = () => {
+    if (onChange) onChange([]);
+
     close();
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (!open) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setHighlightedIndex((prev) =>
+          prev < filteredOptions.length - 1 ? prev + 1 : prev
+        );
+        break;
+
+      case 'ArrowUp':
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : prev));
+        break;
+
+      case 'Enter':
+        e.preventDefault();
+        if (highlightedIndex >= 0) {
+          const option = filteredOptions[highlightedIndex];
+          onSelect(option);
+          setSearchValue('');
+          close();
+        }
+        break;
+
+      case 'Escape':
+        e.preventDefault();
+        setSearchValue('');
+        close();
+        break;
+    }
   };
 
   const customTrigger = (
@@ -120,31 +209,51 @@ export const MultiSelect: FC<MultiSelectProps> = ({
         onClose={close}
         triggerContent={customTrigger}
       >
-        <div onClick={(e) => e.stopPropagation()}>
-          <div className='p-1'>
-            {options.map((option) => {
+        <div
+          ref={containerRef}
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <View.Condition if={options.length > 5}>
+            <div className='outline-secondary-19 py-2 pr-5 pl-3 outline'>
+              <input
+                ref={inputRef}
+                className='placeholder:text-secondary-21 h-[19px] w-full focus-visible:outline-none'
+                placeholder='Search'
+                value={searchValue}
+                onChange={onChangeSearch}
+              />
+            </div>
+          </View.Condition>
+          <div className='max-h-[165px] overflow-auto'>
+            {filteredOptions.map((option, index) => {
               const isSelected = value.some((v) => v.id === option.id);
+              const isHighlighted = index === highlightedIndex;
               return (
                 <CustomDropdownItem
                   key={option.id}
                   label={option.label}
+                  marketType={option.marketType}
                   isSelected={isSelected}
-                  onSelect={() => handleSelect(option)}
+                  isHighlighted={isHighlighted}
+                  onSelect={() => onSelect(option)}
+                  itemRef={(el) => {
+                    itemRefs.current[index] = el!;
+                  }}
                 />
               );
             })}
           </div>
-          {value.length > 0 && (
-            <Button
-              className={
-                'bg-secondary-12 text-[--primary-13 sticky bottom-0 w-full cursor-pointer border-t-[0.5px] border-t-[#F9FAFB26] p-1 text-[11px]'
-              }
-              onClick={handleClearFilters}
-            >
-              Clear filters
-            </Button>
-          )}
         </div>
+        {value.length > 0 && (
+          <Button
+            className='bg-secondary-12 sticky bottom-[-1px] w-full cursor-pointer border-t border-t-[#F9FAFB26] p-1 text-[11px] text-[--primary-13]'
+            onClick={onClearFilters}
+          >
+            Clear filters
+          </Button>
+        )}
       </Dropdown>
     </div>
   );

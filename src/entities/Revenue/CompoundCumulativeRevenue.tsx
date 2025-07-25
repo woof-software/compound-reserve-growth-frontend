@@ -1,10 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import LineChart from '@/components/Charts/Line/Line';
+import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
+import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
@@ -18,6 +20,10 @@ const CompoundCumulativeRevenue = ({
 }: RevenuePageProps) => {
   const [selectedChains, setSelectedChains] = useState<OptionType[]>([]);
   const [selectedMarkets, setSelectedMarkets] = useState<OptionType[]>([]);
+  const [selectedSymbols, setSelectedSymbols] = useState<OptionType[]>([]);
+  const [selectedAssetTypes, setSelectedAssetTypes] = useState<OptionType[]>(
+    []
+  );
 
   const {
     activeTab,
@@ -34,6 +40,8 @@ const CompoundCumulativeRevenue = ({
   const handleResetFilters = useCallback(() => {
     setSelectedChains([]);
     setSelectedMarkets([]);
+    setSelectedSymbols([]);
+    setSelectedAssetTypes([]);
   }, []);
 
   const rawData: ChartDataItem[] = useMemo(() => {
@@ -43,15 +51,61 @@ const CompoundCumulativeRevenue = ({
   const filterOptionsConfig = useMemo(
     () => ({
       chain: { path: 'source.network' },
-      market: { path: 'source.market' }
+      deployment: { path: 'source.market' },
+      symbol: { path: 'source.asset.symbol' },
+      assetType: { path: 'source.asset.type' }
     }),
     []
   );
 
-  const { chainOptions, marketOptions } = useMemo(
-    () => extractFilterOptions(rawData, filterOptionsConfig),
-    [rawData, filterOptionsConfig]
-  );
+  const { chainOptions, deploymentOptions, symbolOptions, assetTypeOptions } =
+    useMemo(
+      () => extractFilterOptions(rawData, filterOptionsConfig),
+      [rawData, filterOptionsConfig]
+    );
+
+  const deploymentOptionsFilter = useMemo(() => {
+    const marketV2 =
+      deploymentOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const marketV3 =
+      deploymentOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
+        .sort((a: OptionType, b: OptionType) =>
+          a.label.localeCompare(b.label)
+        ) || [];
+
+    const noMarkets = deploymentOptions?.find(
+      (el) => el?.id?.toLowerCase() === 'no name'
+    );
+
+    // Filter markets based on selected chain
+    if (selectedChains.length) {
+      const selectedChain = selectedChains.map(
+        (option: OptionType) => option.id
+      );
+
+      if (noMarkets) {
+        return [...marketV3, ...marketV2, noMarkets].filter((el) =>
+          selectedChain.includes(el?.chain || '')
+        );
+      }
+
+      return [...marketV3, ...marketV2].filter((el) =>
+        selectedChain.includes(el?.chain || '')
+      );
+    }
+
+    if (noMarkets) {
+      return [...marketV3, ...marketV2, noMarkets];
+    }
+
+    return [...marketV3, ...marketV2];
+  }, [deploymentOptions, selectedChains]);
 
   const groupBy = useMemo(() => {
     if (selectedMarkets.length > 0) return 'market';
@@ -63,11 +117,15 @@ const CompoundCumulativeRevenue = ({
     rawData,
     filters: {
       network: selectedChains.map((opt) => opt.id),
-      market: selectedMarkets.map((opt) => opt.id)
+      market: selectedMarkets.map((opt) => opt.id),
+      symbol: selectedSymbols.map((opt) => opt.id),
+      assetType: selectedAssetTypes.map((opt) => opt.id)
     },
     filterPaths: {
       network: 'source.network',
-      market: 'source.market'
+      market: 'source.market',
+      symbol: 'source.asset.symbol',
+      assetType: 'source.asset.type'
     },
     groupBy,
     groupByKeyPath: groupBy === 'none' ? null : `source.${groupBy}`,
@@ -130,6 +188,14 @@ const CompoundCumulativeRevenue = ({
     });
   }, [chartSeries]);
 
+  const { csvData, csvFilename } = useCSVExport({
+    chartSeries: cumulativeChartSeries,
+    barSize,
+    groupBy,
+    filePrefix: 'Compound_Cumulative_Revenue',
+    aggregationType: 'last'
+  });
+
   const hasData = useMemo(() => {
     return (
       cumulativeChartSeries.length > 0 &&
@@ -138,7 +204,10 @@ const CompoundCumulativeRevenue = ({
   }, [cumulativeChartSeries]);
 
   const noDataMessage =
-    selectedChains.length > 0 || selectedMarkets.length > 0
+    selectedChains.length > 0 ||
+    selectedMarkets.length > 0 ||
+    selectedSymbols.length > 0 ||
+    selectedAssetTypes.length > 0
       ? 'No data for selected filters'
       : 'No data available';
 
@@ -148,6 +217,12 @@ const CompoundCumulativeRevenue = ({
     }
     return groupBy === 'market' ? 'Market' : 'Chain';
   };
+
+  const onSelectChain = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedChains(selectedOptions);
+
+    setSelectedMarkets([]);
+  }, []);
 
   return (
     <Card
@@ -166,15 +241,29 @@ const CompoundCumulativeRevenue = ({
           <MultiSelect
             options={chainOptions || []}
             value={selectedChains}
-            onChange={setSelectedChains}
+            onChange={onSelectChain}
             placeholder='Chain'
             disabled={isLoading}
           />
           <MultiSelect
-            options={marketOptions || []}
+            options={assetTypeOptions || []}
+            value={selectedAssetTypes}
+            onChange={setSelectedAssetTypes}
+            placeholder='Asset Type'
+            disabled={isLoading}
+          />
+          <MultiSelect
+            options={deploymentOptionsFilter || []}
             value={selectedMarkets}
             onChange={setSelectedMarkets}
             placeholder='Market'
+            disabled={isLoading}
+          />
+          <MultiSelect
+            options={symbolOptions || []}
+            value={selectedSymbols}
+            onChange={setSelectedSymbols}
+            placeholder='Reserve Symbols'
             disabled={isLoading}
           />
         </div>
@@ -189,6 +278,10 @@ const CompoundCumulativeRevenue = ({
           value={activeTab}
           onTabChange={handleTabChange}
           disabled={isLoading}
+        />
+        <CSVDownloadButton
+          data={csvData}
+          filename={csvFilename}
         />
       </div>
       {!isLoading && !isError && !hasData ? (

@@ -4,28 +4,25 @@ import PieChart from '@/components/Charts/Pie/Pie';
 import AnnualisedExpenses from '@/components/RunwayPageTable/AnnualisedExpenses';
 import type { RunwayItem } from '@/shared/hooks/useRunway';
 import { useRunway } from '@/shared/hooks/useRunway';
-import { formatPrice } from '@/shared/lib/utils/utils';
+import { formatLargeNumber } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 
-/*
-Calculation logic for the "Annualised Expenses" block (Table and Pie Chart):
-1. Filtering: Takes only the expenses that are active within the current calendar year (e.g., 2025).
-2. Annualisation: For each filtered expense, its "annualised equivalent" is calculated for both the USD value (`annualisedValue`) and the token quantity (`annualisedAmount`).
-3. Table Aggregation: The data is grouped by "Discipline" and "Token", and their respective annualised values are then summed up.
-4. Pie Chart Aggregation: The data is grouped only by "Discipline", summing the annualised USD value for each segment.
-*/
+const useCurrentYear = () => {
+  return useMemo(() => new Date().getFullYear(), []);
+};
 
 const AnnualisedExpensesBlock = () => {
   const { data: runwayResponse, isLoading, isError } = useRunway();
+  const currentYear = useCurrentYear();
 
   const processedData = useMemo(() => {
     const data = runwayResponse?.data || [];
-    const currentYear = new Date().getFullYear();
 
     const initialResult = {
       tableData: [],
       footerData: { amount: 0, value: 0 },
-      pieData: []
+      pieData: [],
+      calculationYear: currentYear
     };
 
     if (!data.length) {
@@ -45,6 +42,10 @@ const AnnualisedExpensesBlock = () => {
     const expensesByDisciplineForPie: Record<string, number> = {};
 
     data.forEach((item: RunwayItem) => {
+      if (!item.startDate || !item.endDate) {
+        return;
+      }
+
       const startDate = new Date(item.startDate);
       const endDate = new Date(item.endDate);
       const startYear = startDate.getFullYear();
@@ -52,19 +53,38 @@ const AnnualisedExpensesBlock = () => {
 
       const isActiveInCurrentYear =
         startYear <= currentYear && endYear >= currentYear;
+
       if (!isActiveInCurrentYear) {
         return;
       }
 
-      const durationMs = endDate.getTime() - startDate.getTime();
-      const durationDays = durationMs / (1000 * 60 * 60 * 24) + 1;
+      const currentYearStart = new Date(currentYear, 0, 1);
+      const currentYearEnd = new Date(currentYear, 11, 31);
 
-      if (durationDays <= 0) {
+      const effectiveStart = new Date(
+        Math.max(startDate.getTime(), currentYearStart.getTime())
+      );
+      const effectiveEnd = new Date(
+        Math.min(endDate.getTime(), currentYearEnd.getTime())
+      );
+
+      const currentYearDurationMs =
+        effectiveEnd.getTime() - effectiveStart.getTime();
+      const currentYearDurationDays =
+        currentYearDurationMs / (1000 * 60 * 60 * 24);
+
+      if (currentYearDurationDays <= 0) {
         return;
       }
 
-      const annualisedValue = (item.value / durationDays) * 365;
-      const annualisedAmount = (item.amount / durationDays) * 365;
+      const totalDurationMs = endDate.getTime() - startDate.getTime();
+      const totalDurationDays = totalDurationMs / (1000 * 60 * 60 * 24);
+
+      const dailyValue = item.value / totalDurationDays;
+      const dailyAmount = item.amount / totalDurationDays;
+
+      const currentYearValue = dailyValue * currentYearDurationDays;
+      const currentYearAmount = dailyAmount * currentYearDurationDays;
 
       const groupKey = `${item.discipline}__${item.token}`;
       if (!expensesByGroup[groupKey]) {
@@ -76,15 +96,14 @@ const AnnualisedExpensesBlock = () => {
         };
       }
 
-      expensesByGroup[groupKey].amount += annualisedAmount;
-      expensesByGroup[groupKey].value += annualisedValue;
+      expensesByGroup[groupKey].amount += currentYearAmount;
+      expensesByGroup[groupKey].value += currentYearValue;
 
       expensesByDisciplineForPie[item.discipline] =
-        (expensesByDisciplineForPie[item.discipline] || 0) + annualisedValue;
+        (expensesByDisciplineForPie[item.discipline] || 0) + currentYearValue;
     });
 
     const tableData = Object.values(expensesByGroup);
-
     tableData.sort((a, b) => b.value - a.value);
 
     const footerData = tableData.reduce(
@@ -102,12 +121,17 @@ const AnnualisedExpensesBlock = () => {
       .sort(([, valueA], [, valueB]) => valueB - valueA)
       .map(([name, value]) => ({
         name,
-        value: formatPrice(value, 1),
+        value: formatLargeNumber(value, 2),
         percent: totalValueForPie > 0 ? (value / totalValueForPie) * 100 : 0
       }));
 
-    return { tableData, footerData, pieData };
-  }, [runwayResponse]);
+    return {
+      tableData,
+      footerData,
+      pieData,
+      calculationYear: currentYear
+    };
+  }, [runwayResponse, currentYear]);
 
   return (
     <Card

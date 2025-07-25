@@ -1,6 +1,6 @@
 /*
 Calculation logic for the "Current Initiatives" block:
-1. Filtering: Takes only expenses of type 'initiative' that were active within the last year (365 days from today).
+1. Filtering: Takes only expenses of type 'initiative' that are currently active (endDate >= today).
 2. Table Data: Each active initiative is displayed as a separate row. There is NO GROUPING OR SUMMATION for the table data.
 3. Pie Chart Data: The total values (`item.value`) are grouped and summed by the initiative's discipline to show the total expense per discipline.
 4. Values Used: The full contract values (`item.value` and `item.amount`) are used, not the annualised equivalents.
@@ -30,8 +30,6 @@ const CurrentInitiativesBlock = () => {
     }
 
     const today = new Date();
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(today.getFullYear() - 1);
 
     const initiativeData = data.filter((item: RunwayItem) => {
       if (item.type !== 'initiative') {
@@ -40,8 +38,8 @@ const CurrentInitiativesBlock = () => {
       const startDate = new Date(item.startDate);
       const endDate = new Date(item.endDate);
 
-      const isActiveInLastYear = startDate <= today && endDate >= oneYearAgo;
-      return isActiveInLastYear;
+      const isCurrentlyActive = startDate <= today && endDate >= today;
+      return isCurrentlyActive;
     });
 
     if (!initiativeData.length) {
