@@ -1,6 +1,7 @@
 import React, { memo, useMemo, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
+import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import {
@@ -12,6 +13,7 @@ import { TokenData } from '@/shared/types/Treasury/types';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Switch from '@/shared/ui/Switch/Switch';
+import View from '@/shared/ui/View/View';
 
 const options = ['Asset Type', 'Chain', 'Market'];
 
@@ -164,6 +166,16 @@ const TreasuryCompositionBlock = memo(
       [tableData]
     );
 
+    const hasData = useMemo(() => {
+      return tableData.length > 0 && chartData.length > 0;
+    }, [tableData, chartData]);
+
+    const onClearAll = () => {
+      selectSingle('Asset Type');
+
+      setIncludeComp(true);
+    };
+
     return (
       <Card
         isLoading={isLoading}
@@ -193,15 +205,20 @@ const TreasuryCompositionBlock = memo(
           />
         </div>
         <div className='flex justify-between'>
-          <PieChart
-            className='max-h-[400px] max-w-[336.5px]'
-            data={chartData}
-          />
-          <TreasuryComposition
-            tableData={tableData}
-            totalBalance={totalBalance}
-            activeFilter={selectedGroup as 'Chain' | 'Asset Type' | 'Market'}
-          />
+          <View.Condition if={!hasData}>
+            <NoDataPlaceholder onButtonClick={onClearAll} />
+          </View.Condition>
+          <View.Condition if={hasData}>
+            <PieChart
+              className='max-h-[400px] max-w-[336.5px]'
+              data={chartData}
+            />
+            <TreasuryComposition
+              tableData={tableData}
+              totalBalance={totalBalance}
+              activeFilter={selectedGroup as 'Chain' | 'Asset Type' | 'Market'}
+            />
+          </View.Condition>
         </div>
       </Card>
     );

@@ -181,23 +181,6 @@ const CompoundRevenueBlock = ({
       (el) => el?.id?.toLowerCase() === 'no name'
     );
 
-    // Filter markets based on selected chain
-    if (selectedChains.length) {
-      const selectedChain = selectedChains.map(
-        (option: OptionType) => option.id
-      );
-
-      if (noMarkets) {
-        return [...marketV3, ...marketV2, noMarkets].filter((el) =>
-          selectedChain.includes(el?.chain || '')
-        );
-      }
-
-      return [...marketV3, ...marketV2].filter((el) =>
-        selectedChain.includes(el?.chain || '')
-      );
-    }
-
     if (noMarkets) {
       return [...marketV3, ...marketV2, noMarkets];
     }

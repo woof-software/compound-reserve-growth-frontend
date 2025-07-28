@@ -86,26 +86,6 @@ export const MultiSelect: FC<MultiSelectProps> = ({
     [options, searchValue]
   );
 
-  useEffect(() => {
-    if (open) {
-      setHighlightedIndex(-1);
-
-      inputRef.current?.focus();
-    }
-  }, [open]);
-
-  useEffect(() => {
-    if (highlightedIndex >= 0 && containerRef.current) {
-      if (highlightedIndex === 0) {
-        containerRef.current.scrollTo({ top: 0 });
-      } else {
-        const ref = itemRefs.current[highlightedIndex];
-
-        ref?.scrollIntoView({ block: 'nearest' });
-      }
-    }
-  }, [highlightedIndex]);
-
   const onChangeSearch = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
     setHighlightedIndex(-1);
@@ -163,6 +143,12 @@ export const MultiSelect: FC<MultiSelectProps> = ({
     }
   };
 
+  const onCloseDropdown = () => {
+    close();
+
+    setSearchValue('');
+  };
+
   const customTrigger = (
     <div
       className={cn(
@@ -201,12 +187,32 @@ export const MultiSelect: FC<MultiSelectProps> = ({
     </div>
   );
 
+  useEffect(() => {
+    if (open) {
+      setHighlightedIndex(-1);
+
+      inputRef.current?.focus();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (highlightedIndex >= 0 && containerRef.current) {
+      if (highlightedIndex === 0) {
+        containerRef.current.scrollTo({ top: 0 });
+      } else {
+        const ref = itemRefs.current[highlightedIndex];
+
+        ref?.scrollIntoView({ block: 'nearest' });
+      }
+    }
+  }, [highlightedIndex]);
+
   return (
     <div className={cn({ 'pointer-events-none': disabled })}>
       <Dropdown
         open={open}
         onToggle={toggle}
-        onClose={close}
+        onClose={onCloseDropdown}
         triggerContent={customTrigger}
       >
         <div
