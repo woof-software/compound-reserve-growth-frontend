@@ -93,23 +93,6 @@ const TreasuryHoldingsBlock = ({
       (el) => el?.id?.toLowerCase() === 'no name'
     );
 
-    // Filter markets based on selected chain
-    if (selectedOptions.chain.length) {
-      const selectedChain = selectedOptions.chain.map(
-        (option: OptionType) => option.id
-      );
-
-      if (noMarkets) {
-        return [...marketV3, ...marketV2, noMarkets].filter((el) =>
-          selectedChain.includes(el?.chain || '')
-        );
-      }
-
-      return [...marketV3, ...marketV2].filter((el) =>
-        selectedChain.includes(el?.chain || '')
-      );
-    }
-
     if (noMarkets) {
       return [...marketV3, ...marketV2, noMarkets];
     }
@@ -164,10 +147,6 @@ const TreasuryHoldingsBlock = ({
   const onSelectChain = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
       chain: selectedOptions
-    });
-
-    setSelectedOptions({
-      deployment: []
     });
   }, []);
 
@@ -228,7 +207,7 @@ const TreasuryHoldingsBlock = ({
           value={selectedOptions.deployment}
           onChange={onSelectMarket}
           placeholder='Market'
-          disabled={isLoading}
+          disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
         />
         <MultiSelect
           options={assetTypeOptions || []}

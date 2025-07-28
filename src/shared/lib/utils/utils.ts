@@ -375,7 +375,7 @@ export const extractFilterOptions = (
     result[`${key}Options`] = Array.from(uniqueValues[key])
       .sort((a, b) => a.localeCompare(b))
       .map((value) => {
-        const option: OptionType & { marketType?: string } = {
+        const option: OptionType = {
           id: value,
           label: formatter(value)
         };
