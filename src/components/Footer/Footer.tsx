@@ -29,7 +29,7 @@ const Footer: FC = () => {
               className='group hover:text-primary-11 transition-colors'
             >
               <Text
-                size='11'
+                size='13'
                 weight='500'
                 className='text-primary-14 group-hover:text-primary-11 transition-colors'
               >

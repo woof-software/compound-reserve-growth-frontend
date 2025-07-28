@@ -1,5 +1,6 @@
 import React from 'react';
 
+import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
 import HoverCard from '../HoverCard/HoverCard';
@@ -46,14 +47,25 @@ export const UrlTooltip: React.FC<AddressTooltipProps> = ({
         {text}
       </Text>
       {url && (
-        <a
-          href={url}
-          target='_blank'
-          rel='noopener noreferrer'
-          className='text-[14px] text-blue-500 underline hover:text-blue-700'
-        >
-          View Details
-        </a>
+        <div className='flex w-full items-center justify-between'>
+          <Text
+            size='12'
+            className='text-primary-11'
+          >
+            View Proposal
+          </Text>
+          <a
+            href={url}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='text-primary-11 flex h-4 w-4 items-center justify-center'
+          >
+            <Icon
+              name={'arrow-link'}
+              className='h-4.5 w-3 text-[#7A8A99]'
+            />
+          </a>
+        </div>
       )}
     </div>
   );

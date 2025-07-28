@@ -246,14 +246,16 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
             ).length
           );
 
-          if (visibleCount < MIN_VISIBLE_BARS) {
-            onVisibleBarsChange?.(MIN_VISIBLE_BARS);
-            return false;
-          }
+          if (e.trigger === 'zoom') {
+            if (visibleCount < MIN_VISIBLE_BARS) {
+              onVisibleBarsChange?.(MIN_VISIBLE_BARS);
+              return false;
+            }
 
-          if (visibleCount > MAX_VISIBLE_BARS) {
-            onVisibleBarsChange?.(MAX_VISIBLE_BARS);
-            return false;
+            if (visibleCount > MAX_VISIBLE_BARS) {
+              onVisibleBarsChange?.(MAX_VISIBLE_BARS);
+              return false;
+            }
           }
 
           onVisibleBarsChange?.(visibleCount);
