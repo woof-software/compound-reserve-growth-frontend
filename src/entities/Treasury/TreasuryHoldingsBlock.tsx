@@ -68,6 +68,8 @@ const TreasuryHoldingsBlock = ({
     []
   );
 
+  console.log('Full Treasury Holdings');
+
   const { chainOptions, assetTypeOptions, deploymentOptions, symbolOptions } =
     useMemo(
       () => extractFilterOptions(data, filterOptionsConfig),
@@ -165,10 +167,6 @@ const TreasuryHoldingsBlock = ({
     setSelectedOptions({
       chain: selectedOptions
     });
-
-    setSelectedOptions({
-      deployment: []
-    });
   }, []);
 
   const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
@@ -202,6 +200,31 @@ const TreasuryHoldingsBlock = ({
     onClearSelectedOptions();
   }, [onClearSelectedOptions]);
 
+  const chainOptionsFilter = useMemo(() => {
+    if (selectedOptions.deployment.length) {
+      const selectedMarkets = new Set(
+        selectedOptions.deployment.map((o: OptionType) => o?.id)
+      );
+
+      const networks = new Set<string>();
+
+      data.forEach((item) => {
+        if (selectedMarkets.has(item?.source?.market || '')) {
+          networks.add(item.source.network);
+        }
+      });
+
+      return chainOptions.filter((opt) => networks.has(opt.id));
+    }
+
+    return chainOptions;
+  }, [chainOptions, data, selectedOptions.deployment]);
+
+  console.log('selectedOptions=>', selectedOptions);
+  console.log('chainOptionsFilter=>', chainOptionsFilter);
+  console.log('deploymentOptionsFilter=>', deploymentOptionsFilter);
+  console.log('tableData=>', tableData);
+
   return (
     <Card
       isError={isError}
@@ -217,7 +240,7 @@ const TreasuryHoldingsBlock = ({
     >
       <div className='flex items-center justify-end gap-3 px-0 py-3'>
         <MultiSelect
-          options={chainOptions || []}
+          options={chainOptionsFilter || []}
           value={selectedOptions.chain}
           onChange={onSelectChain}
           placeholder='Chain'
@@ -228,7 +251,7 @@ const TreasuryHoldingsBlock = ({
           value={selectedOptions.deployment}
           onChange={onSelectMarket}
           placeholder='Market'
-          disabled={isLoading}
+          disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
         />
         <MultiSelect
           options={assetTypeOptions || []}
