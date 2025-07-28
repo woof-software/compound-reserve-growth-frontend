@@ -369,9 +369,6 @@ export const extractFilterOptions = (
     }
   });
 
-  console.log('------');
-  console.log('uniqueValues=>', uniqueValues);
-
   const result: Record<string, OptionType[]> = {};
   for (const key in uniqueValues) {
     const formatter = config[key].labelFormatter || capitalizeFirstLetter;
@@ -388,9 +385,6 @@ export const extractFilterOptions = (
             (item) => getValueByPath(item, config[key].path) === value
           );
 
-          console.log('option=>', option);
-          console.log('match=>', match);
-
           option.marketType = match?.source.type.split(' ')[1] ?? '';
 
           option.chain = match?.source.network || 'Unknown';
@@ -399,7 +393,6 @@ export const extractFilterOptions = (
         return option;
       });
   }
-  console.log('result=>', result);
 
   return result;
 };

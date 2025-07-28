@@ -68,8 +68,6 @@ const TreasuryHoldingsBlock = ({
     []
   );
 
-  console.log('Full Treasury Holdings');
-
   const { chainOptions, assetTypeOptions, deploymentOptions, symbolOptions } =
     useMemo(
       () => extractFilterOptions(data, filterOptionsConfig),
@@ -94,23 +92,6 @@ const TreasuryHoldingsBlock = ({
     const noMarkets = deploymentOptions?.find(
       (el) => el?.id?.toLowerCase() === 'no name'
     );
-
-    // Filter markets based on selected chain
-    if (selectedOptions.chain.length) {
-      const selectedChain = selectedOptions.chain.map(
-        (option: OptionType) => option.id
-      );
-
-      if (noMarkets) {
-        return [...marketV3, ...marketV2, noMarkets].filter((el) =>
-          selectedChain.includes(el?.chain || '')
-        );
-      }
-
-      return [...marketV3, ...marketV2].filter((el) =>
-        selectedChain.includes(el?.chain || '')
-      );
-    }
 
     if (noMarkets) {
       return [...marketV3, ...marketV2, noMarkets];
@@ -200,31 +181,6 @@ const TreasuryHoldingsBlock = ({
     onClearSelectedOptions();
   }, [onClearSelectedOptions]);
 
-  const chainOptionsFilter = useMemo(() => {
-    if (selectedOptions.deployment.length) {
-      const selectedMarkets = new Set(
-        selectedOptions.deployment.map((o: OptionType) => o?.id)
-      );
-
-      const networks = new Set<string>();
-
-      data.forEach((item) => {
-        if (selectedMarkets.has(item?.source?.market || '')) {
-          networks.add(item.source.network);
-        }
-      });
-
-      return chainOptions.filter((opt) => networks.has(opt.id));
-    }
-
-    return chainOptions;
-  }, [chainOptions, data, selectedOptions.deployment]);
-
-  console.log('selectedOptions=>', selectedOptions);
-  console.log('chainOptionsFilter=>', chainOptionsFilter);
-  console.log('deploymentOptionsFilter=>', deploymentOptionsFilter);
-  console.log('tableData=>', tableData);
-
   return (
     <Card
       isError={isError}
@@ -240,7 +196,7 @@ const TreasuryHoldingsBlock = ({
     >
       <div className='flex items-center justify-end gap-3 px-0 py-3'>
         <MultiSelect
-          options={chainOptionsFilter || []}
+          options={chainOptions || []}
           value={selectedOptions.chain}
           onChange={onSelectChain}
           placeholder='Chain'
