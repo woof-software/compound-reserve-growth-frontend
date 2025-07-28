@@ -209,7 +209,7 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       {areAllSeriesHidden && (
         <Text
           size='11'
-          className='text-primary-14 absolute inset-0 flex -translate-y-10 items-center justify-center'
+          className='text-primary-14 pointer-events-none absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2'
         >
           All series are hidden
         </Text>
@@ -217,7 +217,7 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       {!areAllSeriesHidden && shouldShowNoDataMessage && (
         <Text
           size='11'
-          className='text-primary-14 absolute inset-0 flex -translate-y-10 items-center justify-center'
+          className='text-primary-14 pointer-events-none absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2'
         >
           All visible values are zero
         </Text>

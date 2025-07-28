@@ -303,7 +303,7 @@ const DataTable = <T,>({
                 name='arrow-left'
                 className='h-4 w-4'
               />
-              <span className='text-[11px]'>Previous</span>
+              <span className='text-[11px] leading-none'>Previous</span>
             </Button>
             <Button
               onClick={() => table.nextPage()}
@@ -313,7 +313,7 @@ const DataTable = <T,>({
                 paginationButtonClassName
               )}
             >
-              <span className='text-[11px]'>Next</span>
+              <span className='text-[11px] leading-none'>Next</span>
               <Icon
                 name='arrow-right'
                 className='h-4 w-4'
