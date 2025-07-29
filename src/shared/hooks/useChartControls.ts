@@ -48,11 +48,16 @@ export const useChartControls = ({
     }
   }, []);
 
+  const handleResetActiveTab = useCallback(() => {
+    setActiveTab(null);
+  }, [setActiveTab]);
+
   return {
     activeTab,
     barSize,
     barCount,
     handleTabChange,
+    handleResetActiveTab,
     handleBarSizeChange,
     handleVisibleBarsChange
   };
