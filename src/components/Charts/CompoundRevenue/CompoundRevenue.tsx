@@ -14,20 +14,15 @@ interface CompoundRevenueProps {
   data: ChartData[];
   barSize: 'D' | 'W' | 'M';
   barCountToSet: number;
-  onVisibleBarsChange: (count: number) => void;
 }
 
 const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
   data,
   barSize,
-  barCountToSet,
-  onVisibleBarsChange
+  barCountToSet
 }) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
   const programmaticChange = useRef(false);
-
-  const MAX_VISIBLE_BARS = 180;
-  const MIN_VISIBLE_BARS = 7;
 
   const aggregatedData = useMemo(() => {
     if (!data || data.length === 0) {
@@ -106,24 +101,11 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
             return;
           }
 
+          if (e.trigger === 'zoom') {
+            return;
+          }
+
           if (e.min === undefined || e.max === undefined) return;
-
-          const visibleCount = Math.round(
-            aggregatedData.filter(
-              (point) => point[0] >= e.min && point[0] <= e.max
-            ).length
-          );
-
-          if (visibleCount < MIN_VISIBLE_BARS) {
-            return false;
-          }
-
-          if (visibleCount > MAX_VISIBLE_BARS) {
-            onVisibleBarsChange(MAX_VISIBLE_BARS);
-            return false;
-          }
-
-          onVisibleBarsChange(visibleCount);
         }
       }
     },
