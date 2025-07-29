@@ -343,7 +343,6 @@ const CompoundFeeRevenueByChain = ({
             onClose={intervalDropdown.close}
             onSelect={handleIntervalSelect}
             selectedValue={selectedInterval}
-            contentClassName='p-[5px]'
             triggerContentClassName='p-[5px]'
           />
         </div>
@@ -364,7 +363,6 @@ const CompoundFeeRevenueByChain = ({
             onClose={periodDropdown.close}
             onSelect={handlePeriodSelect}
             selectedValue={selectedPeriod}
-            contentClassName='p-[5px]'
             triggerContentClassName='p-[5px]'
           />
         </div>

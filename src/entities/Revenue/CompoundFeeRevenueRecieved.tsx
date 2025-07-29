@@ -12,6 +12,7 @@ import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import Text from '@/shared/ui/Text/Text';
 
 interface SelectedOptionsState {
   chain: OptionType[];
@@ -348,15 +349,27 @@ const CompoundFeeRevenueRecieved = ({
           onTabChange={handleTabChange}
           disabled={isLoading}
         />
-        <SingleDropdown
-          options={groupByOptions}
-          isOpen={isGroupByOpen}
-          selectedValue={groupBy}
-          onToggle={toggleGroupBy}
-          onClose={closeGroupBy}
-          onSelect={handleSelectGroupBy}
-          disabled={isLoading}
-        />
+        <div className='flex items-center gap-1'>
+          <Text
+            tag='span'
+            size='11'
+            weight='600'
+            lineHeight='16'
+            className='text-primary-14'
+          >
+            Group by
+          </Text>
+          <SingleDropdown
+            options={groupByOptions}
+            isOpen={isGroupByOpen}
+            selectedValue={groupBy}
+            onToggle={toggleGroupBy}
+            onClose={closeGroupBy}
+            onSelect={handleSelectGroupBy}
+            disabled={isLoading}
+            triggerContentClassName='p-[5px]'
+          />
+        </div>
         <CSVDownloadButton
           data={csvData}
           filename={csvFilename}

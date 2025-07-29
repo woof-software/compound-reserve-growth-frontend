@@ -14,6 +14,7 @@ import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import Text from '@/shared/ui/Text/Text';
 
 const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
 
@@ -313,15 +314,27 @@ const TotalTresuaryValue = ({
           onTabChange={handleTabChange}
           disabled={isLoading}
         />
-        <SingleDropdown
-          options={groupByOptions}
-          isOpen={openSingle}
-          selectedValue={groupBy}
-          onToggle={toggleSingle}
-          onClose={closeSingle}
-          onSelect={selectSingle}
-          disabled={isLoading}
-        />
+        <div className='flex items-center gap-1'>
+          <Text
+            tag='span'
+            size='11'
+            weight='600'
+            lineHeight='16'
+            className='text-primary-14'
+          >
+            Group by
+          </Text>
+          <SingleDropdown
+            options={groupByOptions}
+            isOpen={openSingle}
+            selectedValue={groupBy}
+            onToggle={toggleSingle}
+            onClose={closeSingle}
+            onSelect={selectSingle}
+            disabled={isLoading}
+            triggerContentClassName='p-[5px]'
+          />
+        </div>
         <CSVDownloadButton
           data={csvData}
           filename={csvFilename}
