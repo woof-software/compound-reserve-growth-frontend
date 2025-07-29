@@ -16,7 +16,7 @@ export type BarSize = 'D' | 'W' | 'M';
 export type OptionType = {
   id: string;
   label: string;
-  chain?: string;
+  chain?: string[];
   marketType?: string;
 };
 

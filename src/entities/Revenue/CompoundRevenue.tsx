@@ -7,11 +7,7 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { type RevenuePageProps } from '@/shared/hooks/useRevenue';
-import {
-  capitalizeFirstLetter,
-  ChartDataItem,
-  getValueByPath
-} from '@/shared/lib/utils/utils';
+import { capitalizeFirstLetter, ChartDataItem } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
@@ -99,18 +95,22 @@ function preprocessData(rawData: ChartDataItem[]): PreprocessedResult {
     )
       .sort((a, b) => a.localeCompare(b))
       .map((value) => {
-        const match = rawData.find(
-          (item) => getValueByPath(item, 'source.market') === value
-        );
-
         const option: OptionType = {
           id: value,
-          label: capitalizeFirstLetter(value),
-          chain: match?.source.network || 'Unknown'
+          label: capitalizeFirstLetter(value)
         };
 
         if (key === 'market') {
-          option.marketType = match?.source.type.split(' ')[1] ?? '';
+          const matches =
+            value === 'no name'
+              ? rawData.filter((item) => item.source?.market == null)
+              : rawData.filter((item) => item.source?.market === value);
+
+          option.marketType = matches[0]?.source.type.split(' ')[1] ?? '';
+
+          option.chain = Array.from(
+            new Set(matches.map((item) => item.source.network))
+          );
         }
 
         return option;
@@ -160,26 +160,34 @@ const CompoundRevenueBlock = ({
     const marketV2 =
       marketOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
-        .sort((a: OptionType, b: OptionType) =>
-          a.label.localeCompare(b.label)
-        ) || [];
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const marketV3 =
       marketOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
-        .sort((a: OptionType, b: OptionType) =>
-          a.label.localeCompare(b.label)
-        ) || [];
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const noMarkets = marketOptions?.find(
-      (el) => el?.id?.toLowerCase() === 'no name'
+      (el) => el.id.toLowerCase() === 'no name'
     );
 
+    const selectedChainIds = selectedChains.map((o) => o.id);
+
+    let allMarkets = [...marketV3, ...marketV2];
+
     if (noMarkets) {
-      return [...marketV3, ...marketV2, noMarkets];
+      allMarkets = [...allMarkets, noMarkets];
     }
 
-    return [...marketV3, ...marketV2];
+    if (selectedChainIds.length) {
+      return allMarkets.filter((el) =>
+        Array.isArray(el.chain)
+          ? el.chain.some((c) => selectedChainIds.includes(c))
+          : false
+      );
+    }
+
+    return allMarkets;
   }, [marketOptions, selectedChains]);
 
   const processedChartData = useMemo(() => {
@@ -292,6 +300,23 @@ const CompoundRevenueBlock = ({
       ? 'No data for selected filters'
       : 'No data available';
 
+  const onSelectChain = useCallback(
+    (chain: OptionType[]) => {
+      const selectedChainIds = chain.map((o) => o.id);
+
+      const filteredDeployment = selectedMarkets.filter((el) =>
+        selectedChainIds.length === 0
+          ? true
+          : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
+      );
+
+      setSelectedChains(chain);
+
+      setSelectedMarkets(filteredDeployment);
+    },
+    [selectedMarkets]
+  );
+
   return (
     <Card
       title='Compound Revenue'
@@ -309,7 +334,7 @@ const CompoundRevenueBlock = ({
           <MultiSelect
             options={chainOptions || []}
             value={selectedChains}
-            onChange={setSelectedChains}
+            onChange={onSelectChain}
             placeholder='Chain'
             disabled={isLoading}
           />
@@ -318,17 +343,23 @@ const CompoundRevenueBlock = ({
             value={selectedMarkets}
             onChange={setSelectedMarkets}
             placeholder='Market'
-            disabled={isLoading}
+            disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
           />
           <MultiSelect
-            options={sourceOptions || []}
+            options={
+              sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+              []
+            }
             value={selectedSources}
             onChange={setSelectedSources}
             placeholder='Source'
             disabled={isLoading}
           />
           <MultiSelect
-            options={symbolOptions || []}
+            options={
+              symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+              []
+            }
             value={selectedSymbols}
             onChange={setSelectedSymbols}
             placeholder='Reserve Symbols'
