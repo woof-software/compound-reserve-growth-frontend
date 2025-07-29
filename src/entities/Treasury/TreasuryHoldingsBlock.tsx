@@ -51,10 +51,10 @@ const TreasuryHoldingsBlock = ({
       ...next
     }),
     {
-      chain: [],
-      assetType: [],
-      deployment: [],
-      symbol: []
+      chain: [] as OptionType[],
+      assetType: [] as OptionType[],
+      deployment: [] as OptionType[],
+      symbol: [] as OptionType[]
     }
   );
 
@@ -78,28 +78,31 @@ const TreasuryHoldingsBlock = ({
     const marketV2 =
       deploymentOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
-        .sort((a: OptionType, b: OptionType) =>
-          a.label.localeCompare(b.label)
-        ) || [];
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const marketV3 =
       deploymentOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
-        .sort((a: OptionType, b: OptionType) =>
-          a.label.localeCompare(b.label)
-        ) || [];
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const noMarkets = deploymentOptions?.find(
-      (el) => el?.id?.toLowerCase() === 'no name'
+      (el) => el.id.toLowerCase() === 'no name'
     );
 
+    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
+    let allMarkets = [...marketV3, ...marketV2];
     if (noMarkets) {
-      return [...marketV3, ...marketV2, noMarkets];
+      allMarkets = [...allMarkets, noMarkets];
     }
 
-    return [...marketV3, ...marketV2];
-  }, [deploymentOptions, selectedOptions]);
+    if (selectedChainIds.length) {
+      return allMarkets.filter(
+        (el) => el.chain?.some((c) => selectedChainIds.includes(c)) ?? false
+      );
+    }
 
+    return allMarkets;
+  }, [deploymentOptions, selectedOptions]);
   const tableData = useMemo<TreasuryBalanceByNetworkType[]>(() => {
     const filtered = data.filter((item) => {
       if (
@@ -180,6 +183,14 @@ const TreasuryHoldingsBlock = ({
   const onClearAll = useCallback(() => {
     onClearSelectedOptions();
   }, [onClearSelectedOptions]);
+
+  console.log('selectedOptions=>', selectedOptions);
+  console.log('tableData=>', tableData);
+  // console.log(
+  //   'tableData filter=>',
+  //   tableData.filter((el) => el.market === 'WETH (v3)')
+  // );
+  console.log('deploymentOptionsFilter=>', deploymentOptionsFilter);
 
   return (
     <Card

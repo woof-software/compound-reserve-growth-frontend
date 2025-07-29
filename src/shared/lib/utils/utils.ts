@@ -359,7 +359,7 @@ export const extractFilterOptions = (
     for (const key in config) {
       let value = getValueByPath(item, config[key].path);
 
-      if (key === 'market' && value === null) {
+      if (key === 'deployment' && value === null) {
         value = 'no name';
       }
 
@@ -368,6 +368,12 @@ export const extractFilterOptions = (
       }
     }
   });
+
+  console.log('uniqueValues=>', uniqueValues);
+  console.log(
+    'rawData=>',
+    rawData.filter((el) => el.source.network === 'scroll')
+  );
 
   const result: Record<string, OptionType[]> = {};
   for (const key in uniqueValues) {
@@ -381,13 +387,21 @@ export const extractFilterOptions = (
         };
 
         if (key === 'deployment') {
-          const match = rawData.find(
+          const matches = rawData.filter(
             (item) => getValueByPath(item, config[key].path) === value
           );
 
-          option.marketType = match?.source.type.split(' ')[1] ?? '';
+          if (value === 'no name') {
+            console.log('=====');
+            console.log('value=>', value);
+            console.log('matches=>', matches);
+          }
 
-          option.chain = match?.source.network || 'Unknown';
+          option.marketType = matches[0]?.source.type.split(' ')[1] ?? '';
+
+          option.chain = Array.from(
+            new Set(matches.map((item) => item.source.network))
+          );
         }
 
         return option;
