@@ -334,7 +334,7 @@ const CompoundFeeRevenueByChain = ({
             lineHeight='16'
             className='text-primary-14'
           >
-            Group by
+            Interval
           </Text>
           <SingleDropdown
             options={intervalOptions}
@@ -343,7 +343,6 @@ const CompoundFeeRevenueByChain = ({
             onClose={intervalDropdown.close}
             onSelect={handleIntervalSelect}
             selectedValue={selectedInterval}
-            contentClassName='p-[5px]'
             triggerContentClassName='p-[5px]'
           />
         </div>
@@ -355,7 +354,7 @@ const CompoundFeeRevenueByChain = ({
             lineHeight='16'
             className='text-primary-14'
           >
-            Group by
+            {dynamicOptions.label}
           </Text>
           <SingleDropdown
             options={dynamicOptions.options}
@@ -364,7 +363,6 @@ const CompoundFeeRevenueByChain = ({
             onClose={periodDropdown.close}
             onSelect={handlePeriodSelect}
             selectedValue={selectedPeriod}
-            contentClassName='p-[5px]'
             triggerContentClassName='p-[5px]'
           />
         </div>
