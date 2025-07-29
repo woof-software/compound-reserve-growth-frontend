@@ -51,10 +51,10 @@ const TreasuryHoldingsBlock = ({
       ...next
     }),
     {
-      chain: [],
-      assetType: [],
-      deployment: [],
-      symbol: []
+      chain: [] as OptionType[],
+      assetType: [] as OptionType[],
+      deployment: [] as OptionType[],
+      symbol: [] as OptionType[]
     }
   );
 
@@ -78,26 +78,32 @@ const TreasuryHoldingsBlock = ({
     const marketV2 =
       deploymentOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
-        .sort((a: OptionType, b: OptionType) =>
-          a.label.localeCompare(b.label)
-        ) || [];
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const marketV3 =
       deploymentOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
-        .sort((a: OptionType, b: OptionType) =>
-          a.label.localeCompare(b.label)
-        ) || [];
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const noMarkets = deploymentOptions?.find(
-      (el) => el?.id?.toLowerCase() === 'no name'
+      (el) => el.id.toLowerCase() === 'no name'
     );
 
+    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
+
+    let allMarkets = [...marketV3, ...marketV2];
+
     if (noMarkets) {
-      return [...marketV3, ...marketV2, noMarkets];
+      allMarkets = [...allMarkets, noMarkets];
     }
 
-    return [...marketV3, ...marketV2];
+    if (selectedChainIds.length) {
+      return allMarkets.filter(
+        (el) => el.chain?.some((c) => selectedChainIds.includes(c)) ?? false
+      );
+    }
+
+    return allMarkets;
   }, [deploymentOptions, selectedOptions]);
 
   const tableData = useMemo<TreasuryBalanceByNetworkType[]>(() => {
@@ -124,7 +130,9 @@ const TreasuryHoldingsBlock = ({
 
       if (
         selectedOptions.deployment.length > 0 &&
-        !selectedOptions.deployment.some((o: OptionType) => o.id === market)
+        !selectedOptions.deployment.some((o: OptionType) =>
+          o.id === 'no name' ? market === 'no market' : o.id === market
+        )
       ) {
         return false;
       }
@@ -144,11 +152,19 @@ const TreasuryHoldingsBlock = ({
     return mapTableData(filtered).sort((a, b) => b.value - a.value);
   }, [data, selectedOptions]);
 
-  const onSelectChain = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      chain: selectedOptions
-    });
-  }, []);
+  const onSelectChain = useCallback(
+    (chain: OptionType[]) => {
+      const selectedChainIds = chain.map((o) => o.id);
+
+      const filteredDeployment = selectedOptions.deployment.filter((el) =>
+        selectedChainIds.length === 0
+          ? true
+          : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
+      );
+      setSelectedOptions({ chain, deployment: filteredDeployment });
+    },
+    [selectedOptions.deployment]
+  );
 
   const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
@@ -210,14 +226,19 @@ const TreasuryHoldingsBlock = ({
           disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
         />
         <MultiSelect
-          options={assetTypeOptions || []}
+          options={
+            assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+            []
+          }
           value={selectedOptions.assetType}
           onChange={onSelectAssetType}
           placeholder='Asset Type'
           disabled={isLoading}
         />
         <MultiSelect
-          options={symbolOptions || []}
+          options={
+            symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || []
+          }
           value={selectedOptions.symbol}
           onChange={onSelectSymbol}
           placeholder='Reserve Symbols'

@@ -39,8 +39,8 @@ interface LineChartProps {
   className?: string;
   barSize: 'D' | 'W' | 'M';
   barCountToSet: number;
-  onVisibleBarsChange: (count: number) => void;
   showLegend?: boolean;
+  onZoom?: () => void;
 }
 
 const capitalizeFirstLetter = (str: string): string => {
@@ -64,8 +64,8 @@ const LineChart: FC<LineChartProps> = ({
   className,
   barSize,
   barCountToSet,
-  onVisibleBarsChange,
-  showLegend
+  showLegend,
+  onZoom
 }) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
   const programmaticChange = useRef(false);
@@ -74,9 +74,6 @@ const LineChart: FC<LineChartProps> = ({
   const [showEvents, setShowEvents] = useState(true);
 
   const currentZoom = useRef<{ min: number; max: number } | null>(null);
-
-  const MAX_VISIBLE_POINTS = 180;
-  const MIN_VISIBLE_BARS = 7;
 
   useEffect(() => {
     const eventsApiUrl =
@@ -176,27 +173,6 @@ const LineChart: FC<LineChartProps> = ({
     });
   }, [data, barSize]);
 
-  const barDurationInMillis = useMemo(() => {
-    const dayInMillis = 24 * 3600 * 1000;
-    switch (barSize) {
-      case 'W':
-        return 7 * dayInMillis;
-      case 'M':
-        return 30.44 * dayInMillis;
-      case 'D':
-      default:
-        return dayInMillis;
-    }
-  }, [barSize]);
-
-  const minRangeValue = useMemo(() => {
-    return (MIN_VISIBLE_BARS - 1) * barDurationInMillis;
-  }, [barDurationInMillis]);
-
-  const maxRangeValue = useMemo(() => {
-    return (MAX_VISIBLE_POINTS + 1) * barDurationInMillis;
-  }, [barDurationInMillis]);
-
   useEffect(() => {
     const chart = chartRef.current?.chart;
     if (!chart || !barCountToSet || !aggregatedSeries[0]?.data.length) return;
@@ -250,7 +226,11 @@ const LineChart: FC<LineChartProps> = ({
             verticalAlign: 'top' as const,
             y: yPositions[index % yPositions.length],
             x: -5,
-            style: { color: 'var(--color-primary-11)', fontSize: '11px' }
+            style: {
+              color: 'var(--color-primary-11)',
+              fontSize: '11px',
+              fontFamily: 'Haas Grot Text R, sans-serif'
+            }
           }
         }))
       : [];
@@ -294,12 +274,14 @@ const LineChart: FC<LineChartProps> = ({
         endOnTick: false,
         minPadding: 0,
         maxPadding: 0,
-        minRange: minRangeValue,
-        maxRange: maxRangeValue,
         tickPixelInterval: 75,
         plotLines: eventPlotLines,
         labels: {
-          style: { color: 'var(--color-primary-14)', fontSize: '11px' },
+          style: {
+            color: 'var(--color-primary-14)',
+            fontSize: '11px',
+            fontFamily: 'Haas Grot Text R, sans-serif'
+          },
           rotation: 0
         },
         dateTimeLabelFormats: {
@@ -317,30 +299,18 @@ const LineChart: FC<LineChartProps> = ({
         },
         events: {
           setExtremes: function (e) {
-            if (e.min !== undefined && e.max !== undefined) {
-              currentZoom.current = { min: e.min, max: e.max };
-            }
-
             if (programmaticChange.current) {
               programmaticChange.current = false;
               return;
             }
 
-            if (e.min === undefined || e.max === undefined) {
-              return;
+            if (
+              e.trigger &&
+              e.trigger !== 'navigator' &&
+              e.trigger !== 'rangeSelector'
+            ) {
+              onZoom?.();
             }
-
-            requestAnimationFrame(() => {
-              const firstSeriesData = aggregatedSeries[0]?.data || [];
-              if (firstSeriesData.length === 0) return;
-
-              const visiblePoints = firstSeriesData.filter(
-                (point) => point[0] >= e.min! && point[0] <= e.max!
-              );
-
-              const visibleCount = Math.max(1, visiblePoints.length);
-              onVisibleBarsChange(visibleCount);
-            });
           },
           afterSetExtremes: function (e) {
             if (e.min !== undefined && e.max !== undefined) {
@@ -353,7 +323,11 @@ const LineChart: FC<LineChartProps> = ({
         title: { text: '' },
         gridLineWidth: 0,
         labels: {
-          style: { color: 'var(--color-primary-14)', fontSize: '11px' },
+          style: {
+            color: 'var(--color-primary-14)',
+            fontSize: '11px',
+            fontFamily: 'Haas Grot Text R, sans-serif'
+          },
           formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
             const val = Number(this.value);
             if (isNaN(val)) return this.value.toString();
@@ -374,15 +348,15 @@ const LineChart: FC<LineChartProps> = ({
         padding: 12,
         style: {
           color: 'var(--color-white-10)',
-          fontFamily: 'Haas Grot Text R'
+          fontFamily: 'Haas Grot Text R, sans-serif'
         },
         shared: true,
         formatter: function () {
-          const header = `<div style="font-weight: 500; margin-bottom: 8px; font-size: 12px;">${Highcharts.dateFormat('%B %e, %Y', this.x as number)}</div>`;
+          const header = `<div style="font-weight: 500; margin-bottom: 8px; font-size: 12px; font-family: 'Haas Grot Text R', sans-serif;">${Highcharts.dateFormat('%B %e, %Y', this.x as number)}</div>`;
           if (groupBy === 'none') {
             const point = this.points?.find((p) => p.series.type === 'area');
             if (!point) return '';
-            return `${header}<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 8px; height: 8px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px;">${point.series.name}</span></div><span style="font-weight: 500; font-size: 11px;">$${Highcharts.numberFormat(point.y ?? 0, 0, '.', ',')}</span></div>`;
+            return `${header}<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 8px; height: 8px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${Highcharts.numberFormat(point.y ?? 0, 0, '.', ',')}</span></div>`;
           }
           const dataPoints = (this.points || []).filter(
             (p) => p.series.type !== 'scatter'
@@ -403,7 +377,7 @@ const LineChart: FC<LineChartProps> = ({
               points
                 .map(
                   (point) =>
-                    `<div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-bottom: 4px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="white-space: nowrap; font-size: 11px;">${point.series.name}</span><span style="font-weight: 500; text-align: right; font-size: 11px;">${formatValue(point.y ?? 0)}</span></div>`
+                    `<div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-bottom: 4px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="white-space: nowrap; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span><span style="font-weight: 500; text-align: right; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(point.y ?? 0)}</span></div>`
                 )
                 .join('');
             body = `<div style="display: flex; gap: 24px;"><div style="display: flex; flex-direction: column;">${renderColumn(col1Points)}</div><div style="display: flex; flex-direction: column;">${renderColumn(col2Points)}</div></div>`;
@@ -411,11 +385,11 @@ const LineChart: FC<LineChartProps> = ({
             body = sortedPoints
               .map(
                 (point) =>
-                  `<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 4px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px;">${point.series.name}</span></div><span style="font-weight: 500; font-size: 11px;">${formatValue(point.y ?? 0)}</span></div>`
+                  `<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 4px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(point.y ?? 0)}</span></div>`
               )
               .join('');
           }
-          const footer = `<div style=" padding-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 16px;"><span style="font-weight: 500; font-size: 12px;">Total</span><span style="font-weight: 500; font-size: 11px;">${formatValue(total)}</span></div>`;
+          const footer = `<div style=" padding-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 16px;"><span style="font-weight: 500; font-size: 12px; font-family: 'Haas Grot Text R', sans-serif;">Total</span><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(total)}</span></div>`;
           return header + body + footer;
         }
       },
@@ -427,8 +401,15 @@ const LineChart: FC<LineChartProps> = ({
         symbolRadius: 0,
         symbolWidth: 10,
         symbolHeight: 10,
-        itemStyle: { color: 'var(--color-primary-11)', fontWeight: 'normal' },
-        itemHoverStyle: { color: 'var(--color-primary-11)' }
+        itemStyle: {
+          color: 'var(--color-primary-11)',
+          fontWeight: 'normal',
+          fontFamily: 'Haas Grot Text R, sans-serif'
+        },
+        itemHoverStyle: {
+          color: 'var(--color-primary-11)',
+          fontFamily: 'Haas Grot Text R, sans-serif'
+        }
       },
       plotOptions: {
         series: {
@@ -482,11 +463,9 @@ const LineChart: FC<LineChartProps> = ({
     aggregatedSeries,
     groupBy,
     isLegendEnabled,
-    minRangeValue,
-    maxRangeValue,
-    onVisibleBarsChange,
     eventsData,
-    showEvents
+    showEvents,
+    onZoom
   ]);
 
   return (

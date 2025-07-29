@@ -62,9 +62,6 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     setAreAllSeriesHidden(false);
   }, [data]);
 
-  const MAX_VISIBLE_BARS = 180;
-  const MIN_VISIBLE_BARS = 7;
-
   const { seriesData, aggregatedData } = useMemo(() => {
     if (!data || data.length === 0) {
       return { seriesData: [], aggregatedData: [] };
@@ -222,7 +219,11 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       type: 'datetime',
       labels: {
         format: xAxisLabelFormat,
-        style: { fontSize: '11px', color: '#7A8A99' }
+        style: {
+          fontSize: '11px',
+          color: '#7A8A99',
+          fontFamily: 'Haas Grot Text R, sans-serif'
+        }
       },
       lineWidth: 0,
       tickLength: 0,
@@ -239,24 +240,16 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
             return;
           }
 
+          if (e.trigger === 'zoom') {
+            return;
+          }
+
           const visibleCount = Math.round(
             aggregatedData.filter(
               (point) =>
                 point.x >= (e.min || 0) && point.x <= (e.max || Infinity)
             ).length
           );
-
-          if (e.trigger === 'zoom') {
-            if (visibleCount < MIN_VISIBLE_BARS) {
-              onVisibleBarsChange?.(MIN_VISIBLE_BARS);
-              return false;
-            }
-
-            if (visibleCount > MAX_VISIBLE_BARS) {
-              onVisibleBarsChange?.(MAX_VISIBLE_BARS);
-              return false;
-            }
-          }
 
           onVisibleBarsChange?.(visibleCount);
         }
@@ -266,7 +259,11 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       title: { text: undefined },
       gridLineWidth: 0,
       labels: {
-        style: { fontSize: '11px', color: '#7A8A99' },
+        style: {
+          fontSize: '11px',
+          color: '#7A8A99',
+          fontFamily: 'Haas Grot Text R, sans-serif'
+        },
         formatter: function () {
           const value = this.value as number;
           if (Math.abs(value) >= 1000000)
@@ -286,15 +283,18 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       itemStyle: {
         color: 'var(--color-primary-11)',
         fontWeight: 'normal',
-        textDecoration: 'none'
+        textDecoration: 'none',
+        fontFamily: 'Haas Grot Text R, sans-serif'
       },
       itemHoverStyle: {
         color: 'var(--color-primary-11)',
-        textDecoration: 'none'
+        textDecoration: 'none',
+        fontFamily: 'Haas Grot Text R, sans-serif'
       },
       itemHiddenStyle: {
         color: '#4B5563',
-        textDecoration: 'line-through'
+        textDecoration: 'line-through',
+        fontFamily: 'Haas Grot Text R, sans-serif'
       },
       symbolWidth: 0,
       symbolHeight: 0,
@@ -307,7 +307,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
           : '#4B5563';
         return `<span style="display: inline-flex; align-items: center; gap: 8px;">
       <span style="width: 12px; height: 2px; background-color: ${series.color}; display: inline-block; border-radius: 1px; opacity: ${series.visible ? '1' : '0.5'};"></span>
-      <span style="font-size: 12px; text-decoration: ${textDecoration}; color: ${textColor};">${series.name}</span>
+      <span style="font-size: 11px; text-decoration: ${textDecoration}; color: ${textColor}; font-family: 'Haas Grot Text R', sans-serif;">${series.name}</span>
     </span>`;
       }
     },
@@ -362,15 +362,15 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       padding: 12,
       style: {
         color: 'var(--color-white-10)',
-        fontFamily: 'Haas Grot Text R'
+        fontFamily: 'Haas Grot Text R, sans-serif'
       },
       shared: true,
       formatter: function () {
-        const header = `<div style="font-weight: 500; margin-bottom: 8px; font-size: 12px;">${Highcharts.dateFormat('%B %e, %Y', this.x as number)}</div>`;
+        const header = `<div style="font-weight: 500; margin-bottom: 8px; font-size: 12px; font-family: 'Haas Grot Text R', sans-serif;">${Highcharts.dateFormat('%B %e, %Y', this.x as number)}</div>`;
         if (groupBy === 'none') {
           const point = this.points?.find((p) => p.series.type === 'area');
           if (!point) return '';
-          return `${header}<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 8px; height: 8px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px;">${point.series.name}</span></div><span style="font-weight: 500; font-size: 11px;">$${Highcharts.numberFormat(point.y ?? 0, 0, '.', ',')}</span></div>`;
+          return `${header}<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 8px; height: 8px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">$${Highcharts.numberFormat(point.y ?? 0, 0, '.', ',')}</span></div>`;
         }
         const dataPoints = (this.points || []).filter(
           (p) => p.series.type !== 'scatter'
@@ -391,7 +391,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
             points
               .map(
                 (point) =>
-                  `<div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-bottom: 4px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="white-space: nowrap; font-size: 11px;">${point.series.name}</span><span style="font-weight: 500; text-align: right; font-size: 11px;">${formatValue(point.y ?? 0)}</span></div>`
+                  `<div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-bottom: 4px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="white-space: nowrap; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span><span style="font-weight: 500; text-align: right; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(point.y ?? 0)}</span></div>`
               )
               .join('');
           body = `<div style="display: flex; gap: 24px;"><div style="display: flex; flex-direction: column;">${renderColumn(col1Points)}</div><div style="display: flex; flex-direction: column;">${renderColumn(col2Points)}</div></div>`;
@@ -399,11 +399,11 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
           body = sortedPoints
             .map(
               (point) =>
-                `<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 4px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px;">${point.series.name}</span></div><span style="font-weight: 500; font-size: 11px;">${formatValue(point.y ?? 0)}</span></div>`
+                `<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 4px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(point.y ?? 0)}</span></div>`
             )
             .join('');
         }
-        const footer = `<div style=" padding-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 16px;"><span style="font-weight: 500; font-size: 12px;">Total</span><span style="font-weight: 500; font-size: 11px;">${formatValue(total)}</span></div>`;
+        const footer = `<div style=" padding-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 16px;"><span style="font-weight: 500; font-size: 12px; font-family: 'Haas Grot Text R', sans-serif;">Total</span><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(total)}</span></div>`;
         return header + body + footer;
       }
     },

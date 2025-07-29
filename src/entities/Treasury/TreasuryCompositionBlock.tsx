@@ -13,6 +13,7 @@ import { TokenData } from '@/shared/types/Treasury/types';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Switch from '@/shared/ui/Switch/Switch';
+import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
 const options = ['Asset Type', 'Chain', 'Market'];
@@ -195,14 +196,26 @@ const TreasuryCompositionBlock = memo(
             onCheckedChange={setIncludeComp}
             classNameTitle='!text-[12px]'
           />
-          <SingleDropdown
-            options={options}
-            isOpen={openSingle}
-            selectedValue={selectedGroup}
-            onToggle={toggleSingle}
-            onClose={closeSingle}
-            onSelect={selectSingle}
-          />
+          <div className='flex items-center gap-1'>
+            <Text
+              tag='span'
+              size='11'
+              weight='600'
+              lineHeight='16'
+              className='text-primary-14'
+            >
+              Group by
+            </Text>
+            <SingleDropdown
+              options={options}
+              isOpen={openSingle}
+              selectedValue={selectedGroup}
+              onToggle={toggleSingle}
+              onClose={closeSingle}
+              onSelect={selectSingle}
+              triggerContentClassName='p-[5px]'
+            />
+          </div>
         </div>
         <div className='flex justify-between'>
           <View.Condition if={!hasData}>

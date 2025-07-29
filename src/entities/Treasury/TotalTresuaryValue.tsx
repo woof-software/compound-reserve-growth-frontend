@@ -14,6 +14,7 @@ import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import Text from '@/shared/ui/Text/Text';
 
 const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
 
@@ -41,10 +42,10 @@ const TotalTresuaryValue = ({
       ...next
     }),
     {
-      chain: [],
-      assetType: [],
-      deployment: [],
-      symbol: []
+      chain: [] as OptionType[],
+      assetType: [] as OptionType[],
+      deployment: [] as OptionType[],
+      symbol: [] as OptionType[]
     }
   );
 
@@ -61,8 +62,8 @@ const TotalTresuaryValue = ({
     barSize,
     barCount,
     handleTabChange,
-    handleBarSizeChange,
-    handleVisibleBarsChange
+    handleResetActiveTab,
+    handleBarSizeChange
   } = useChartControls({
     initialTimeRange: '7B',
     initialBarSize: 'D'
@@ -95,26 +96,32 @@ const TotalTresuaryValue = ({
     const marketV2 =
       deploymentOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
-        .sort((a: OptionType, b: OptionType) =>
-          a.label.localeCompare(b.label)
-        ) || [];
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const marketV3 =
       deploymentOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
-        .sort((a: OptionType, b: OptionType) =>
-          a.label.localeCompare(b.label)
-        ) || [];
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const noMarkets = deploymentOptions?.find(
-      (el) => el?.id?.toLowerCase() === 'no name'
+      (el) => el.id.toLowerCase() === 'no name'
     );
 
+    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
+
+    let allMarkets = [...marketV3, ...marketV2];
+
     if (noMarkets) {
-      return [...marketV3, ...marketV2, noMarkets];
+      allMarkets = [...allMarkets, noMarkets];
     }
 
-    return [...marketV3, ...marketV2];
+    if (selectedChainIds.length) {
+      return allMarkets.filter(
+        (el) => el.chain?.some((c) => selectedChainIds.includes(c)) ?? false
+      );
+    }
+
+    return allMarkets;
   }, [deploymentOptions, selectedOptions]);
 
   const groupBy = selectedSingle?.[0] || 'None';
@@ -202,15 +209,19 @@ const TotalTresuaryValue = ({
     );
   }, [correctedChartSeries]);
 
-  const onSelectChain = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      chain: selectedOptions
-    });
+  const onSelectChain = useCallback(
+    (chain: OptionType[]) => {
+      const selectedChainIds = chain.map((o) => o.id);
 
-    setSelectedOptions({
-      deployment: []
-    });
-  }, []);
+      const filteredDeployment = selectedOptions.deployment.filter((el) =>
+        selectedChainIds.length === 0
+          ? true
+          : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
+      );
+      setSelectedOptions({ chain, deployment: filteredDeployment });
+    },
+    [selectedOptions.deployment]
+  );
 
   const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
@@ -258,27 +269,6 @@ const TotalTresuaryValue = ({
       }}
     >
       <div className='flex items-center justify-end gap-3 px-0 py-3'>
-        <TabsGroup
-          tabs={['D', 'W', 'M']}
-          value={barSize}
-          onTabChange={handleBarSizeChange}
-          disabled={isLoading}
-        />
-        <TabsGroup
-          tabs={['7B', '30B', '90B', '180B']}
-          value={activeTab}
-          onTabChange={handleTabChange}
-          disabled={isLoading}
-        />
-        <SingleDropdown
-          options={groupByOptions}
-          isOpen={openSingle}
-          selectedValue={groupBy}
-          onToggle={toggleSingle}
-          onClose={closeSingle}
-          onSelect={selectSingle}
-          disabled={isLoading}
-        />
         <MultiSelect
           options={chainOptions || []}
           value={selectedOptions.chain}
@@ -291,22 +281,60 @@ const TotalTresuaryValue = ({
           value={selectedOptions.deployment}
           onChange={onSelectMarket}
           placeholder='Market'
-          disabled={isLoading}
+          disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
         />
         <MultiSelect
-          options={assetTypeOptions || []}
+          options={
+            assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+            []
+          }
           value={selectedOptions.assetType}
           onChange={onSelectAssetType}
           placeholder='Asset Type'
           disabled={isLoading}
         />
         <MultiSelect
-          options={symbolOptions || []}
+          options={
+            symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || []
+          }
           value={selectedOptions.symbol}
           onChange={onSelectSymbol}
           placeholder='Reserve Symbols'
           disabled={isLoading}
         />
+        <TabsGroup
+          tabs={['D', 'W', 'M']}
+          value={barSize}
+          onTabChange={handleBarSizeChange}
+          disabled={isLoading}
+        />
+        <TabsGroup
+          tabs={['7B', '30B', '90B', '180B']}
+          value={activeTab}
+          onTabChange={handleTabChange}
+          disabled={isLoading}
+        />
+        <div className='flex items-center gap-1'>
+          <Text
+            tag='span'
+            size='11'
+            weight='600'
+            lineHeight='16'
+            className='text-primary-14'
+          >
+            Group by
+          </Text>
+          <SingleDropdown
+            options={groupByOptions}
+            isOpen={openSingle}
+            selectedValue={groupBy}
+            onToggle={toggleSingle}
+            onClose={closeSingle}
+            onSelect={selectSingle}
+            disabled={isLoading}
+            triggerContentClassName='p-[5px]'
+          />
+        </div>
         <CSVDownloadButton
           data={csvData}
           filename={csvFilename}
@@ -322,7 +350,7 @@ const TotalTresuaryValue = ({
           className='max-h-[400px]'
           barSize={barSize}
           barCountToSet={barCount}
-          onVisibleBarsChange={handleVisibleBarsChange}
+          onZoom={handleResetActiveTab}
         />
       )}
     </Card>

@@ -12,6 +12,7 @@ import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import Text from '@/shared/ui/Text/Text';
 
 interface SelectedOptionsState {
   chain: OptionType[];
@@ -171,18 +172,21 @@ const CompoundFeeRevenueRecieved = ({
       return Array.from(uniqueValues)
         .sort((a, b) => a.localeCompare(b))
         .map((value) => {
-          const match = rawData.find(
-            (item) => getValueByPath(item, 'source.market') === value
-          );
-
           const option: OptionType = {
             id: value,
-            label: capitalizeFirstLetter(value),
-            chain: match?.source.network || 'Unknown'
+            label: capitalizeFirstLetter(value)
           };
 
           if (key === 'market') {
-            option.marketType = match?.source.type.split(' ')[1] ?? '';
+            const matches =
+              value === 'no name'
+                ? rawData.filter((item) => item.source?.market == null)
+                : rawData.filter((item) => item.source?.market === value);
+
+            option.marketType = matches[0]?.source.type.split(' ')[1] ?? '';
+            option.chain = Array.from(
+              new Set(matches.map((item) => item.source.network))
+            );
           }
 
           return option;
@@ -219,26 +223,32 @@ const CompoundFeeRevenueRecieved = ({
     const marketV2 =
       marketOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
-        .sort((a: OptionType, b: OptionType) =>
-          a.label.localeCompare(b.label)
-        ) || [];
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const marketV3 =
       marketOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
-        .sort((a: OptionType, b: OptionType) =>
-          a.label.localeCompare(b.label)
-        ) || [];
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const noMarkets = marketOptions?.find(
-      (el) => el?.id?.toLowerCase() === 'no name'
+      (el) => el.id.toLowerCase() === 'no name'
     );
 
+    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
+
+    let allMarkets = [...marketV3, ...marketV2];
+
     if (noMarkets) {
-      return [...marketV3, ...marketV2, noMarkets];
+      allMarkets = [...allMarkets, noMarkets];
     }
 
-    return [...marketV3, ...marketV2];
+    if (selectedChainIds.length) {
+      return allMarkets.filter(
+        (el) => el.chain?.some((c) => selectedChainIds.includes(c)) ?? false
+      );
+    }
+
+    return allMarkets;
   }, [marketOptions, selectedOptions]);
 
   const hasData = chartData.length > 0;
@@ -250,11 +260,19 @@ const CompoundFeeRevenueRecieved = ({
       ? 'No data for selected filters'
       : 'No data available';
 
-  const onSelectChain = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ chain: options });
+  const onSelectChain = useCallback(
+    (chain: OptionType[]) => {
+      const selectedChainIds = chain.map((o) => o.id);
 
-    setSelectedOptions({ market: [] });
-  }, []);
+      const filteredDeployment = selectedOptions.market.filter((el) =>
+        selectedChainIds.length === 0
+          ? true
+          : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
+      );
+      setSelectedOptions({ chain, market: filteredDeployment });
+    },
+    [selectedOptions.market]
+  );
 
   const onSelectMarket = useCallback((options: OptionType[]) => {
     setSelectedOptions({ market: options });
@@ -300,10 +318,12 @@ const CompoundFeeRevenueRecieved = ({
             value={selectedOptions.market}
             onChange={onSelectMarket}
             placeholder='Market'
-            disabled={isLoading}
+            disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
           />
           <MultiSelect
-            options={assetTypeOptions}
+            options={assetTypeOptions.sort((a, b) =>
+              a.label.localeCompare(b.label)
+            )}
             value={selectedOptions.assetType}
             onChange={onSelectAssetType}
             placeholder='Asset Type'
@@ -329,15 +349,27 @@ const CompoundFeeRevenueRecieved = ({
           onTabChange={handleTabChange}
           disabled={isLoading}
         />
-        <SingleDropdown
-          options={groupByOptions}
-          isOpen={isGroupByOpen}
-          selectedValue={groupBy}
-          onToggle={toggleGroupBy}
-          onClose={closeGroupBy}
-          onSelect={handleSelectGroupBy}
-          disabled={isLoading}
-        />
+        <div className='flex items-center gap-1'>
+          <Text
+            tag='span'
+            size='11'
+            weight='600'
+            lineHeight='16'
+            className='text-primary-14'
+          >
+            Group by
+          </Text>
+          <SingleDropdown
+            options={groupByOptions}
+            isOpen={isGroupByOpen}
+            selectedValue={groupBy}
+            onToggle={toggleGroupBy}
+            onClose={closeGroupBy}
+            onSelect={handleSelectGroupBy}
+            disabled={isLoading}
+            triggerContentClassName='p-[5px]'
+          />
+        </div>
         <CSVDownloadButton
           data={csvData}
           filename={csvFilename}

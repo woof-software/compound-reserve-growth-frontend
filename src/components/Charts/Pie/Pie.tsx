@@ -109,7 +109,7 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         width: 12
       },
       style: {
-        fontFamily: 'Haas Grot Text R',
+        fontFamily: 'Haas Grot Text R, sans-serif',
         fontSize: '11px',
         lineHeight: '16px',
         letterSpacing: '0'
@@ -118,12 +118,13 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         <div style="
           font-weight: 500;
           margin-bottom: 16px;
+          font-family: 'Haas Grot Text R', sans-serif;
         ">
           {point.name}
         </div>
       `,
       pointFormat: `
-        <div style="display: flex; gap: 24px; align-items: center; justify-content: space-between;">
+        <div style="display: flex; gap: 24px; align-items: center; justify-content: space-between; font-family: 'Haas Grot Text R', sans-serif;">
           <div style="font-weight: 400;">
             {point.y:.1f}%
           </div>
@@ -178,10 +179,12 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         color: '#7A8A99',
         fontSize: '11px',
         fontWeight: '400',
-        lineHeight: '100%'
+        lineHeight: '100%',
+        fontFamily: 'Haas Grot Text R, sans-serif'
       },
       itemHoverStyle: {
-        color: theme === 'light' ? '#17212B' : '#FFFFFF'
+        color: theme === 'light' ? '#17212B' : '#FFFFFF',
+        fontFamily: 'Haas Grot Text R, sans-serif'
       },
       maxHeight: 100,
       navigation: {
@@ -191,7 +194,8 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         inactiveColor: '#7A899A',
         style: {
           cursor: 'pointer',
-          color: theme === 'light' ? '#17212B' : '#FFFFFF'
+          color: theme === 'light' ? '#17212B' : '#FFFFFF',
+          fontFamily: 'Haas Grot Text R, sans-serif'
         }
       }
     },
