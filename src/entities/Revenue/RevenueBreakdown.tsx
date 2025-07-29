@@ -58,9 +58,19 @@ const RevenueBreakDownBlock = ({
     select: selectYear
   } = useDropdown('single');
 
-  const onSelectChain = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ chain: options });
-  }, []);
+  const onSelectChain = useCallback(
+    (chain: OptionType[]) => {
+      const selectedChainIds = chain.map((o) => o.id);
+
+      const filteredDeployment = selectedOptions.market.filter((el) =>
+        selectedChainIds.length === 0
+          ? true
+          : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
+      );
+      setSelectedOptions({ chain, market: filteredDeployment });
+    },
+    [selectedOptions.market]
+  );
 
   const onSelectMarket = useCallback((options: OptionType[]) => {
     setSelectedOptions({ market: options });
@@ -285,7 +295,7 @@ const RevenueBreakDownBlock = ({
               value={selectedOptions.market}
               onChange={onSelectMarket}
               placeholder='Market'
-              disabled={isLoading}
+              disabled={isLoading || !Boolean(marketOptions.length)}
             />
             <MultiSelect
               options={

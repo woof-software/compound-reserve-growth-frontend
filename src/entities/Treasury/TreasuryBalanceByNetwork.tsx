@@ -234,7 +234,7 @@ const TreasuryBalanceByNetworkBlock = ({
           value={selectedOptions.deployment}
           onChange={onSelectMarket}
           placeholder='Market'
-          disabled={isLoading}
+          disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
         />
         <MultiSelect
           options={
