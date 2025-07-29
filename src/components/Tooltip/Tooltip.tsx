@@ -19,7 +19,7 @@ export const Tooltip = ({ children, content }: TooltipProps) => {
       <TooltipContent>
         <Text
           size='12'
-          className='text-primary-14'
+          className='text-primary-14 px-5 py-4 text-[11px] leading-4 font-normal'
         >
           {content}
         </Text>

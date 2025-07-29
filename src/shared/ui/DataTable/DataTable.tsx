@@ -262,15 +262,27 @@ const DataTable = <T,>({
           )}
         >
           <Text
-            size='13'
-            className={cn('text-primary-14', paginationTextClassName)}
+            className={cn(
+              'text-primary-14 !text-[12.6px]',
+              paginationTextClassName
+            )}
           >
-            Showing {table.getState().pagination.pageIndex * pageSize + 1} to{' '}
-            {Math.min(
-              (table.getState().pagination.pageIndex + 1) * pageSize,
-              data.length
-            )}{' '}
-            of {data.length} results
+            Showing
+            <span className='mx-1 text-[11.5px] leading-[21px] font-bold'>
+              {table.getState().pagination.pageIndex * pageSize + 1}
+            </span>
+            to
+            <span className='mx-1 text-[11.5px] leading-[21px] font-bold'>
+              {Math.min(
+                (table.getState().pagination.pageIndex + 1) * pageSize,
+                data.length
+              )}
+            </span>
+            of
+            <span className='mx-1 text-[11.5px] leading-[21px] font-bold'>
+              {data.length}
+            </span>
+            results
           </Text>
           <div
             className={cn(
@@ -282,20 +294,20 @@ const DataTable = <T,>({
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
               className={cn(
-                'text-primary-14 size-4 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                'text-primary-14 hover:bg-secondary-22 size-8 cursor-pointer rounded-lg disabled:cursor-not-allowed disabled:opacity-50',
                 paginationButtonClassName
               )}
             >
               <Icon
                 name='double-arrow'
-                className='h-full w-full'
+                className='h-4 w-4'
               />
             </Button>
             <Button
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
               className={cn(
-                'text-primary-14 flex h-8 cursor-pointer items-center gap-2 p-2 text-[11px] font-medium hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                'text-primary-14 hover:bg-secondary-22 flex h-8 cursor-pointer items-center gap-2 rounded-lg pt-2 pr-2.5 pb-2 pl-2 text-[11px] font-medium disabled:cursor-not-allowed disabled:opacity-50',
                 paginationButtonClassName
               )}
             >
@@ -309,7 +321,7 @@ const DataTable = <T,>({
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
               className={cn(
-                'text-primary-14 flex h-8 cursor-pointer items-center gap-2 p-2 text-[11px] font-medium hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                'text-primary-14 hover:bg-secondary-22 flex h-8 cursor-pointer items-center gap-2 rounded-lg pt-2 pr-2 pb-2 pl-2.5 text-[11px] font-medium disabled:cursor-not-allowed disabled:opacity-50',
                 paginationButtonClassName
               )}
             >
@@ -323,13 +335,13 @@ const DataTable = <T,>({
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
               className={cn(
-                'text-primary-14 size-4 rotate-180 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50',
+                'text-primary-14 hover:bg-secondary-22 size-8 rotate-180 cursor-pointer rounded-lg disabled:cursor-not-allowed disabled:opacity-50',
                 paginationButtonClassName
               )}
             >
               <Icon
                 name='double-arrow'
-                className='h-full w-full'
+                className='h-4 w-4'
               />
             </Button>
           </div>
