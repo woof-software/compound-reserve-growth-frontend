@@ -68,26 +68,32 @@ const CompoundCumulativeRevenue = ({
     const marketV2 =
       deploymentOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
-        .sort((a: OptionType, b: OptionType) =>
-          a.label.localeCompare(b.label)
-        ) || [];
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const marketV3 =
       deploymentOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
-        .sort((a: OptionType, b: OptionType) =>
-          a.label.localeCompare(b.label)
-        ) || [];
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const noMarkets = deploymentOptions?.find(
-      (el) => el?.id?.toLowerCase() === 'no name'
+      (el) => el.id.toLowerCase() === 'no name'
     );
 
+    const selectedChainIds = selectedChains.map((o) => o.id);
+
+    let allMarkets = [...marketV3, ...marketV2];
+
     if (noMarkets) {
-      return [...marketV3, ...marketV2, noMarkets];
+      allMarkets = [...allMarkets, noMarkets];
     }
 
-    return [...marketV3, ...marketV2];
+    if (selectedChainIds.length) {
+      return allMarkets.filter(
+        (el) => el.chain?.some((c) => selectedChainIds.includes(c)) ?? false
+      );
+    }
+
+    return allMarkets;
   }, [deploymentOptions, selectedChains]);
 
   const groupBy = useMemo(() => {
@@ -201,11 +207,22 @@ const CompoundCumulativeRevenue = ({
     return groupBy === 'market' ? 'Market' : 'Chain';
   };
 
-  const onSelectChain = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedChains(selectedOptions);
+  const onSelectChain = useCallback(
+    (chain: OptionType[]) => {
+      const selectedChainIds = chain.map((o) => o.id);
 
-    setSelectedMarkets([]);
-  }, []);
+      const filteredDeployment = selectedMarkets.filter((el) =>
+        selectedChainIds.length === 0
+          ? true
+          : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
+      );
+
+      setSelectedChains(chain);
+
+      setSelectedMarkets(filteredDeployment);
+    },
+    [selectedMarkets]
+  );
 
   return (
     <Card
@@ -229,21 +246,28 @@ const CompoundCumulativeRevenue = ({
             disabled={isLoading}
           />
           <MultiSelect
-            options={assetTypeOptions || []}
+            options={deploymentOptionsFilter || []}
+            value={selectedMarkets}
+            onChange={setSelectedMarkets}
+            placeholder='Market'
+            disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
+          />
+          <MultiSelect
+            options={
+              assetTypeOptions?.sort((a, b) =>
+                a.label.localeCompare(b.label)
+              ) || []
+            }
             value={selectedAssetTypes}
             onChange={setSelectedAssetTypes}
             placeholder='Asset Type'
             disabled={isLoading}
           />
           <MultiSelect
-            options={deploymentOptionsFilter || []}
-            value={selectedMarkets}
-            onChange={setSelectedMarkets}
-            placeholder='Market'
-            disabled={isLoading}
-          />
-          <MultiSelect
-            options={symbolOptions || []}
+            options={
+              symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+              []
+            }
             value={selectedSymbols}
             onChange={setSelectedSymbols}
             placeholder='Reserve Symbols'
