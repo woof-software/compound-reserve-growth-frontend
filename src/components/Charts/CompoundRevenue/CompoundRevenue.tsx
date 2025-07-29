@@ -14,12 +14,14 @@ interface CompoundRevenueProps {
   data: ChartData[];
   barSize: 'D' | 'W' | 'M';
   barCountToSet: number;
+  onZoom?: () => void;
 }
 
 const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
   data,
   barSize,
-  barCountToSet
+  barCountToSet,
+  onZoom
 }) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
   const programmaticChange = useRef(false);
@@ -101,8 +103,12 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
             return;
           }
 
-          if (e.trigger === 'zoom') {
-            return;
+          if (
+            e.trigger &&
+            e.trigger !== 'navigator' &&
+            e.trigger !== 'rangeSelector'
+          ) {
+            onZoom?.();
           }
 
           if (e.min === undefined || e.max === undefined) return;

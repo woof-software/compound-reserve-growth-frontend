@@ -56,11 +56,17 @@ const TotalTresuaryValue = ({
     select: selectSingle
   } = useDropdown('single');
 
-  const { activeTab, barSize, barCount, handleTabChange, handleBarSizeChange } =
-    useChartControls({
-      initialTimeRange: '7B',
-      initialBarSize: 'D'
-    });
+  const {
+    activeTab,
+    barSize,
+    barCount,
+    handleTabChange,
+    handleResetActiveTab,
+    handleBarSizeChange
+  } = useChartControls({
+    initialTimeRange: '7B',
+    initialBarSize: 'D'
+  });
 
   const rawData: ChartDataItem[] = useMemo(() => {
     if (!treasuryApiResponse) {
@@ -331,6 +337,7 @@ const TotalTresuaryValue = ({
           className='max-h-[400px]'
           barSize={barSize}
           barCountToSet={barCount}
+          onZoom={handleResetActiveTab}
         />
       )}
     </Card>

@@ -25,11 +25,17 @@ const CompoundCumulativeRevenue = ({
     []
   );
 
-  const { activeTab, barSize, barCount, handleTabChange, handleBarSizeChange } =
-    useChartControls({
-      initialTimeRange: '7B',
-      initialBarSize: 'D'
-    });
+  const {
+    activeTab,
+    barSize,
+    barCount,
+    handleTabChange,
+    handleResetActiveTab,
+    handleBarSizeChange
+  } = useChartControls({
+    initialTimeRange: '7B',
+    initialBarSize: 'D'
+  });
 
   const handleResetFilters = useCallback(() => {
     setSelectedChains([]);
@@ -298,6 +304,7 @@ const CompoundCumulativeRevenue = ({
           data={cumulativeChartSeries}
           groupBy={getGroupByForChart()}
           showLegend={false}
+          onZoom={handleResetActiveTab}
         />
       )}
     </Card>

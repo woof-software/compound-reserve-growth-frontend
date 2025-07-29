@@ -144,11 +144,17 @@ const CompoundRevenueBlock = ({
   const [selectedSources, setSelectedSources] = useState<OptionType[]>([]);
   const [selectedSymbols, setSelectedSymbols] = useState<OptionType[]>([]);
 
-  const { activeTab, barSize, barCount, handleTabChange, handleBarSizeChange } =
-    useChartControls({
-      initialTimeRange: '7B',
-      initialBarSize: 'D'
-    });
+  const {
+    activeTab,
+    barSize,
+    barCount,
+    handleTabChange,
+    handleResetActiveTab,
+    handleBarSizeChange
+  } = useChartControls({
+    initialTimeRange: '7B',
+    initialBarSize: 'D'
+  });
 
   const { filterOptions, processedItems, initialAggregatedData, sortedDates } =
     useMemo(() => preprocessData(data || []), [data]);
@@ -389,6 +395,7 @@ const CompoundRevenueBlock = ({
             data={processedChartData}
             barSize={barSize}
             barCountToSet={barCount}
+            onZoom={handleResetActiveTab}
           />
         </div>
       </View.Condition>
