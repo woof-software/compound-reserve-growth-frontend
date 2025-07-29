@@ -51,37 +51,47 @@ const FullDAOCommitmentsBlock = () => {
       const endDate = new Date(endStr);
       const totalAmount = value;
 
-      const status = now >= startDate && now <= endDate ? 'Active' : 'Finished';
+      let status: string;
+      if (now < startDate) {
+        status = 'Pending';
+      } else if (now > endDate) {
+        status = 'Finished';
+      } else {
+        status = 'Active';
+      }
 
       let paidAmount = 0;
 
-      if (now < startDate) {
-        paidAmount = 0;
-      } else if (now > endDate) {
-        paidAmount = totalAmount;
+      if (paymentType === 'Upfront Payment') {
+        paidAmount = now >= startDate ? totalAmount : 0;
       } else {
-        const durationMs = endDate.getTime() - startDate.getTime();
-        const durationDays =
-          durationMs > 0 ? durationMs / (1000 * 60 * 60 * 24) : 0;
-        const dailyRate = durationDays > 0 ? totalAmount / durationDays : 0;
+        if (now < startDate) {
+          paidAmount = 0;
+        } else if (now > endDate) {
+          paidAmount = totalAmount;
+        } else {
+          const durationMs = endDate.getTime() - startDate.getTime();
+          const durationDays =
+            durationMs > 0 ? durationMs / (1000 * 60 * 60 * 24) : 0;
+          const dailyRate = durationDays > 0 ? totalAmount / durationDays : 0;
 
-        const startOfDayNow = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate()
-        );
-        const startOfDayStart = new Date(
-          startDate.getFullYear(),
-          startDate.getMonth(),
-          startDate.getDate()
-        );
+          const startOfDayNow = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate()
+          );
+          const startOfDayStart = new Date(
+            startDate.getFullYear(),
+            startDate.getMonth(),
+            startDate.getDate()
+          );
 
-        const elapsedMs = startOfDayNow.getTime() - startOfDayStart.getTime();
-        const daysElapsed = elapsedMs / (1000 * 60 * 60 * 24);
+          const elapsedMs = startOfDayNow.getTime() - startOfDayStart.getTime();
+          const daysElapsed = elapsedMs / (1000 * 60 * 60 * 24);
 
-        const calculatedAmount = daysElapsed * dailyRate;
-
-        paidAmount = Math.min(calculatedAmount, totalAmount);
+          const calculatedAmount = daysElapsed * dailyRate;
+          paidAmount = Math.min(calculatedAmount, totalAmount);
+        }
       }
 
       const percentagePaid = totalAmount > 0 ? paidAmount / totalAmount : 0;
