@@ -214,6 +214,7 @@ export const MultiSelect: FC<MultiSelectProps> = ({
         onToggle={toggle}
         onClose={onCloseDropdown}
         triggerContent={customTrigger}
+        contentClassName='p-0'
       >
         <div
           ref={containerRef}
