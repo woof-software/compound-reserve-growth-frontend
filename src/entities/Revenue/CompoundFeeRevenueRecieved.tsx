@@ -303,7 +303,9 @@ const CompoundFeeRevenueRecieved = ({
             disabled={isLoading}
           />
           <MultiSelect
-            options={assetTypeOptions}
+            options={assetTypeOptions.sort((a, b) =>
+              a.label.localeCompare(b.label)
+            )}
             value={selectedOptions.assetType}
             onChange={onSelectAssetType}
             placeholder='Asset Type'

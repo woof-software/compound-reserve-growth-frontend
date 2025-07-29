@@ -327,14 +327,20 @@ const CompoundRevenueBlock = ({
             disabled={isLoading}
           />
           <MultiSelect
-            options={sourceOptions || []}
+            options={
+              sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+              []
+            }
             value={selectedSources}
             onChange={setSelectedSources}
             placeholder='Source'
             disabled={isLoading}
           />
           <MultiSelect
-            options={symbolOptions || []}
+            options={
+              symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+              []
+            }
             value={selectedSymbols}
             onChange={setSelectedSymbols}
             placeholder='Reserve Symbols'

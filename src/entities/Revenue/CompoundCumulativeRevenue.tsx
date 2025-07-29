@@ -229,7 +229,11 @@ const CompoundCumulativeRevenue = ({
             disabled={isLoading}
           />
           <MultiSelect
-            options={assetTypeOptions || []}
+            options={
+              assetTypeOptions?.sort((a, b) =>
+                a.label.localeCompare(b.label)
+              ) || []
+            }
             value={selectedAssetTypes}
             onChange={setSelectedAssetTypes}
             placeholder='Asset Type'
@@ -243,7 +247,10 @@ const CompoundCumulativeRevenue = ({
             disabled={isLoading}
           />
           <MultiSelect
-            options={symbolOptions || []}
+            options={
+              symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+              []
+            }
             value={selectedSymbols}
             onChange={setSelectedSymbols}
             placeholder='Reserve Symbols'

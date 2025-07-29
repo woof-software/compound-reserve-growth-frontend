@@ -90,7 +90,9 @@ const TreasuryHoldingsBlock = ({
     );
 
     const selectedChainIds = selectedOptions.chain.map((o) => o.id);
+
     let allMarkets = [...marketV3, ...marketV2];
+
     if (noMarkets) {
       allMarkets = [...allMarkets, noMarkets];
     }
@@ -103,6 +105,7 @@ const TreasuryHoldingsBlock = ({
 
     return allMarkets;
   }, [deploymentOptions, selectedOptions]);
+
   const tableData = useMemo<TreasuryBalanceByNetworkType[]>(() => {
     const filtered = data.filter((item) => {
       if (
@@ -127,7 +130,9 @@ const TreasuryHoldingsBlock = ({
 
       if (
         selectedOptions.deployment.length > 0 &&
-        !selectedOptions.deployment.some((o: OptionType) => o.id === market)
+        !selectedOptions.deployment.some((o: OptionType) =>
+          o.id === 'no name' ? market === 'no market' : o.id === market
+        )
       ) {
         return false;
       }
@@ -147,11 +152,19 @@ const TreasuryHoldingsBlock = ({
     return mapTableData(filtered).sort((a, b) => b.value - a.value);
   }, [data, selectedOptions]);
 
-  const onSelectChain = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      chain: selectedOptions
-    });
-  }, []);
+  const onSelectChain = useCallback(
+    (chain: OptionType[]) => {
+      const selectedChainIds = chain.map((o) => o.id);
+
+      const filteredDeployment = selectedOptions.deployment.filter((el) =>
+        selectedChainIds.length === 0
+          ? true
+          : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
+      );
+      setSelectedOptions({ chain, deployment: filteredDeployment });
+    },
+    [selectedOptions.deployment]
+  );
 
   const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
@@ -184,14 +197,6 @@ const TreasuryHoldingsBlock = ({
     onClearSelectedOptions();
   }, [onClearSelectedOptions]);
 
-  console.log('selectedOptions=>', selectedOptions);
-  console.log('tableData=>', tableData);
-  // console.log(
-  //   'tableData filter=>',
-  //   tableData.filter((el) => el.market === 'WETH (v3)')
-  // );
-  console.log('deploymentOptionsFilter=>', deploymentOptionsFilter);
-
   return (
     <Card
       isError={isError}
@@ -221,14 +226,19 @@ const TreasuryHoldingsBlock = ({
           disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
         />
         <MultiSelect
-          options={assetTypeOptions || []}
+          options={
+            assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+            []
+          }
           value={selectedOptions.assetType}
           onChange={onSelectAssetType}
           placeholder='Asset Type'
           disabled={isLoading}
         />
         <MultiSelect
-          options={symbolOptions || []}
+          options={
+            symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || []
+          }
           value={selectedOptions.symbol}
           onChange={onSelectSymbol}
           placeholder='Reserve Symbols'

@@ -288,14 +288,20 @@ const RevenueBreakDownBlock = ({
               disabled={isLoading}
             />
             <MultiSelect
-              options={sourceOptions || []}
+              options={
+                sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+                []
+              }
               value={selectedOptions.source}
               onChange={onSelectSource}
               placeholder='Source'
               disabled={isLoading}
             />
             <MultiSelect
-              options={symbolOptions || []}
+              options={
+                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+                []
+              }
               value={selectedOptions.symbol}
               onChange={onSelectSymbol}
               placeholder='Reserve Symbols'
