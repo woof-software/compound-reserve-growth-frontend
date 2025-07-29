@@ -56,17 +56,11 @@ const TotalTresuaryValue = ({
     select: selectSingle
   } = useDropdown('single');
 
-  const {
-    activeTab,
-    barSize,
-    barCount,
-    handleTabChange,
-    handleBarSizeChange,
-    handleVisibleBarsChange
-  } = useChartControls({
-    initialTimeRange: '7B',
-    initialBarSize: 'D'
-  });
+  const { activeTab, barSize, barCount, handleTabChange, handleBarSizeChange } =
+    useChartControls({
+      initialTimeRange: '7B',
+      initialBarSize: 'D'
+    });
 
   const rawData: ChartDataItem[] = useMemo(() => {
     if (!treasuryApiResponse) {
@@ -258,27 +252,6 @@ const TotalTresuaryValue = ({
       }}
     >
       <div className='flex items-center justify-end gap-3 px-0 py-3'>
-        <TabsGroup
-          tabs={['D', 'W', 'M']}
-          value={barSize}
-          onTabChange={handleBarSizeChange}
-          disabled={isLoading}
-        />
-        <TabsGroup
-          tabs={['7B', '30B', '90B', '180B']}
-          value={activeTab}
-          onTabChange={handleTabChange}
-          disabled={isLoading}
-        />
-        <SingleDropdown
-          options={groupByOptions}
-          isOpen={openSingle}
-          selectedValue={groupBy}
-          onToggle={toggleSingle}
-          onClose={closeSingle}
-          onSelect={selectSingle}
-          disabled={isLoading}
-        />
         <MultiSelect
           options={chainOptions || []}
           value={selectedOptions.chain}
@@ -307,6 +280,27 @@ const TotalTresuaryValue = ({
           placeholder='Reserve Symbols'
           disabled={isLoading}
         />
+        <TabsGroup
+          tabs={['D', 'W', 'M']}
+          value={barSize}
+          onTabChange={handleBarSizeChange}
+          disabled={isLoading}
+        />
+        <TabsGroup
+          tabs={['7B', '30B', '90B', '180B']}
+          value={activeTab}
+          onTabChange={handleTabChange}
+          disabled={isLoading}
+        />
+        <SingleDropdown
+          options={groupByOptions}
+          isOpen={openSingle}
+          selectedValue={groupBy}
+          onToggle={toggleSingle}
+          onClose={closeSingle}
+          onSelect={selectSingle}
+          disabled={isLoading}
+        />
         <CSVDownloadButton
           data={csvData}
           filename={csvFilename}
@@ -322,7 +316,6 @@ const TotalTresuaryValue = ({
           className='max-h-[400px]'
           barSize={barSize}
           barCountToSet={barCount}
-          onVisibleBarsChange={handleVisibleBarsChange}
         />
       )}
     </Card>

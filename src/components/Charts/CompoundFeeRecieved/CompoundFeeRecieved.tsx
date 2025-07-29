@@ -62,9 +62,6 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     setAreAllSeriesHidden(false);
   }, [data]);
 
-  const MAX_VISIBLE_BARS = 180;
-  const MIN_VISIBLE_BARS = 7;
-
   const { seriesData, aggregatedData } = useMemo(() => {
     if (!data || data.length === 0) {
       return { seriesData: [], aggregatedData: [] };
@@ -239,24 +236,16 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
             return;
           }
 
+          if (e.trigger === 'zoom') {
+            return;
+          }
+
           const visibleCount = Math.round(
             aggregatedData.filter(
               (point) =>
                 point.x >= (e.min || 0) && point.x <= (e.max || Infinity)
             ).length
           );
-
-          if (e.trigger === 'zoom') {
-            if (visibleCount < MIN_VISIBLE_BARS) {
-              onVisibleBarsChange?.(MIN_VISIBLE_BARS);
-              return false;
-            }
-
-            if (visibleCount > MAX_VISIBLE_BARS) {
-              onVisibleBarsChange?.(MAX_VISIBLE_BARS);
-              return false;
-            }
-          }
 
           onVisibleBarsChange?.(visibleCount);
         }

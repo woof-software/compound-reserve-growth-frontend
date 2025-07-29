@@ -39,7 +39,6 @@ interface LineChartProps {
   className?: string;
   barSize: 'D' | 'W' | 'M';
   barCountToSet: number;
-  onVisibleBarsChange: (count: number) => void;
   showLegend?: boolean;
 }
 
@@ -64,7 +63,6 @@ const LineChart: FC<LineChartProps> = ({
   className,
   barSize,
   barCountToSet,
-  onVisibleBarsChange,
   showLegend
 }) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
@@ -74,9 +72,6 @@ const LineChart: FC<LineChartProps> = ({
   const [showEvents, setShowEvents] = useState(true);
 
   const currentZoom = useRef<{ min: number; max: number } | null>(null);
-
-  const MAX_VISIBLE_POINTS = 180;
-  const MIN_VISIBLE_BARS = 7;
 
   useEffect(() => {
     const eventsApiUrl =
@@ -176,27 +171,6 @@ const LineChart: FC<LineChartProps> = ({
     });
   }, [data, barSize]);
 
-  const barDurationInMillis = useMemo(() => {
-    const dayInMillis = 24 * 3600 * 1000;
-    switch (barSize) {
-      case 'W':
-        return 7 * dayInMillis;
-      case 'M':
-        return 30.44 * dayInMillis;
-      case 'D':
-      default:
-        return dayInMillis;
-    }
-  }, [barSize]);
-
-  const minRangeValue = useMemo(() => {
-    return (MIN_VISIBLE_BARS - 1) * barDurationInMillis;
-  }, [barDurationInMillis]);
-
-  const maxRangeValue = useMemo(() => {
-    return (MAX_VISIBLE_POINTS + 1) * barDurationInMillis;
-  }, [barDurationInMillis]);
-
   useEffect(() => {
     const chart = chartRef.current?.chart;
     if (!chart || !barCountToSet || !aggregatedSeries[0]?.data.length) return;
@@ -294,8 +268,6 @@ const LineChart: FC<LineChartProps> = ({
         endOnTick: false,
         minPadding: 0,
         maxPadding: 0,
-        minRange: minRangeValue,
-        maxRange: maxRangeValue,
         tickPixelInterval: 75,
         plotLines: eventPlotLines,
         labels: {
@@ -316,31 +288,11 @@ const LineChart: FC<LineChartProps> = ({
           dashStyle: 'Dash'
         },
         events: {
-          setExtremes: function (e) {
-            if (e.min !== undefined && e.max !== undefined) {
-              currentZoom.current = { min: e.min, max: e.max };
-            }
-
+          setExtremes: function () {
             if (programmaticChange.current) {
               programmaticChange.current = false;
               return;
             }
-
-            if (e.min === undefined || e.max === undefined) {
-              return;
-            }
-
-            requestAnimationFrame(() => {
-              const firstSeriesData = aggregatedSeries[0]?.data || [];
-              if (firstSeriesData.length === 0) return;
-
-              const visiblePoints = firstSeriesData.filter(
-                (point) => point[0] >= e.min! && point[0] <= e.max!
-              );
-
-              const visibleCount = Math.max(1, visiblePoints.length);
-              onVisibleBarsChange(visibleCount);
-            });
           },
           afterSetExtremes: function (e) {
             if (e.min !== undefined && e.max !== undefined) {
@@ -478,16 +430,7 @@ const LineChart: FC<LineChartProps> = ({
       scrollbar: { enabled: false },
       rangeSelector: { enabled: false }
     };
-  }, [
-    aggregatedSeries,
-    groupBy,
-    isLegendEnabled,
-    minRangeValue,
-    maxRangeValue,
-    onVisibleBarsChange,
-    eventsData,
-    showEvents
-  ]);
+  }, [aggregatedSeries, groupBy, isLegendEnabled, eventsData, showEvents]);
 
   return (
     <div className={cn('highcharts-container flex h-full flex-col', className)}>

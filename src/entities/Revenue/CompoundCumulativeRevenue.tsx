@@ -25,17 +25,11 @@ const CompoundCumulativeRevenue = ({
     []
   );
 
-  const {
-    activeTab,
-    barSize,
-    barCount,
-    handleTabChange,
-    handleBarSizeChange,
-    handleVisibleBarsChange
-  } = useChartControls({
-    initialTimeRange: '7B',
-    initialBarSize: 'D'
-  });
+  const { activeTab, barSize, barCount, handleTabChange, handleBarSizeChange } =
+    useChartControls({
+      initialTimeRange: '7B',
+      initialBarSize: 'D'
+    });
 
   const handleResetFilters = useCallback(() => {
     setSelectedChains([]);
@@ -277,7 +271,6 @@ const CompoundCumulativeRevenue = ({
           className='max-h-[400px]'
           barSize={barSize}
           barCountToSet={barCount}
-          onVisibleBarsChange={handleVisibleBarsChange}
           data={cumulativeChartSeries}
           groupBy={getGroupByForChart()}
           showLegend={false}
