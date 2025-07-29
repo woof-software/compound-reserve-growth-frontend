@@ -326,7 +326,7 @@ const RevenueBreakDownBlock = ({
               lineHeight='16'
               className='text-primary-14'
             >
-              Year
+              Group by
             </Text>
             <SingleDropdown
               options={yearOptions}
