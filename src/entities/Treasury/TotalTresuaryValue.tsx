@@ -10,7 +10,7 @@ import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
-import { OptionType } from '@/shared/types/types';
+import { BarSize, OptionType, TimeRange } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
@@ -29,6 +29,58 @@ interface TotalTreasuryValueProps {
   isError?: boolean;
   data?: TokenData[];
   onCopyLink?: (id: string) => void;
+}
+
+interface FiltersProps {
+  chainOptions: OptionType[];
+
+  deploymentOptionsFilter: OptionType[];
+
+  assetTypeOptions: OptionType[];
+
+  symbolOptions: OptionType[];
+
+  barSize: BarSize;
+
+  activeTab: TimeRange | null;
+
+  isLoading: boolean;
+
+  openSingle: boolean;
+
+  groupBy: string;
+
+  csvFilename: string;
+
+  csvData: Record<string, string | number>[];
+
+  selectedOptions: {
+    chain: OptionType[];
+
+    assetType: OptionType[];
+
+    deployment: OptionType[];
+
+    symbol: OptionType[];
+  };
+
+  onSelectChain: (chain: OptionType[]) => void;
+
+  onSelectAssetType: (assetType: OptionType[]) => void;
+
+  onSelectMarket: (deployment: OptionType[]) => void;
+
+  onSelectSymbol: (symbol: OptionType[]) => void;
+
+  handleBarSizeChange: (value: string) => void;
+
+  handleTabChange: (value: string) => void;
+
+  toggleSingle: () => void;
+
+  closeSingle: () => void;
+
+  selectSingle: (value: string) => void;
 }
 
 const TotalTresuaryValue = ({
@@ -265,10 +317,75 @@ const TotalTresuaryValue = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px]',
-        content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
+        content: 'tablet:pb-10 flex flex-col gap-3 px-10 pt-0 pb-[60px]'
       }}
     >
-      <div className='flex items-center justify-end gap-3 px-0 py-3'>
+      <Filters
+        groupBy={groupBy}
+        assetTypeOptions={assetTypeOptions}
+        selectedOptions={selectedOptions}
+        chainOptions={chainOptions}
+        symbolOptions={symbolOptions}
+        deploymentOptionsFilter={deploymentOptionsFilter}
+        isLoading={isLoading || false}
+        barSize={barSize}
+        activeTab={activeTab}
+        csvData={csvData}
+        csvFilename={csvFilename}
+        openSingle={openSingle}
+        onSelectChain={onSelectChain}
+        onSelectAssetType={onSelectAssetType}
+        onSelectMarket={onSelectMarket}
+        onSelectSymbol={onSelectSymbol}
+        handleBarSizeChange={handleBarSizeChange}
+        handleTabChange={handleTabChange}
+        toggleSingle={toggleSingle}
+        closeSingle={closeSingle}
+        selectSingle={selectSingle}
+      />
+      {!isLoading && !isError && !hasData ? (
+        <NoDataPlaceholder onButtonClick={onClearAll} />
+      ) : (
+        <LineChart
+          key={groupBy}
+          data={correctedChartSeries}
+          groupBy={groupBy}
+          className='max-h-[400px]'
+          barSize={barSize}
+          barCountToSet={barCount}
+          onZoom={handleResetActiveTab}
+        />
+      )}
+    </Card>
+  );
+};
+
+const Filters = ({
+  barSize,
+  activeTab,
+  openSingle,
+  groupBy,
+  csvData,
+  csvFilename,
+  chainOptions,
+  selectedOptions,
+  deploymentOptionsFilter,
+  assetTypeOptions,
+  symbolOptions,
+  isLoading,
+  onSelectChain,
+  onSelectAssetType,
+  onSelectMarket,
+  onSelectSymbol,
+  handleBarSizeChange,
+  handleTabChange,
+  toggleSingle,
+  closeSingle,
+  selectSingle
+}: FiltersProps) => {
+  return (
+    <>
+      <div className='tablet:flex hidden items-center justify-end gap-3 px-0 py-3'>
         <MultiSelect
           options={chainOptions || []}
           value={selectedOptions.chain}
@@ -340,20 +457,85 @@ const TotalTresuaryValue = ({
           filename={csvFilename}
         />
       </div>
-      {!isLoading && !isError && !hasData ? (
-        <NoDataPlaceholder onButtonClick={onClearAll} />
-      ) : (
-        <LineChart
-          key={groupBy}
-          data={correctedChartSeries}
-          groupBy={groupBy}
-          className='max-h-[400px]'
-          barSize={barSize}
-          barCountToSet={barCount}
-          onZoom={handleResetActiveTab}
-        />
-      )}
-    </Card>
+      <div className='tablet:hidden flex flex-col items-end justify-end gap-3 px-0 py-3'>
+        <div className='flex items-center gap-3'>
+          <TabsGroup
+            tabs={['D', 'W', 'M']}
+            value={barSize}
+            onTabChange={handleBarSizeChange}
+            disabled={isLoading}
+          />
+          <TabsGroup
+            tabs={['7B', '30B', '90B', '180B']}
+            value={activeTab}
+            onTabChange={handleTabChange}
+            disabled={isLoading}
+          />
+          <div className='flex items-center gap-1'>
+            <Text
+              tag='span'
+              size='11'
+              weight='600'
+              lineHeight='16'
+              className='text-primary-14'
+            >
+              Group by
+            </Text>
+            <SingleDropdown
+              options={groupByOptions}
+              isOpen={openSingle}
+              selectedValue={groupBy}
+              onToggle={toggleSingle}
+              onClose={closeSingle}
+              onSelect={selectSingle}
+              disabled={isLoading}
+              triggerContentClassName='p-[5px]'
+            />
+          </div>
+        </div>
+        <div className='z-[1] flex items-center gap-3'>
+          <MultiSelect
+            options={chainOptions || []}
+            value={selectedOptions.chain}
+            onChange={onSelectChain}
+            placeholder='Chain'
+            disabled={isLoading}
+          />
+          <MultiSelect
+            options={deploymentOptionsFilter}
+            value={selectedOptions.deployment}
+            onChange={onSelectMarket}
+            placeholder='Market'
+            disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
+          />
+          <MultiSelect
+            options={
+              assetTypeOptions?.sort((a, b) =>
+                a.label.localeCompare(b.label)
+              ) || []
+            }
+            value={selectedOptions.assetType}
+            onChange={onSelectAssetType}
+            placeholder='Asset Type'
+            disabled={isLoading}
+          />
+          <MultiSelect
+            options={
+              symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+              []
+            }
+            value={selectedOptions.symbol}
+            onChange={onSelectSymbol}
+            placeholder='Reserve Symbols'
+            disabled={isLoading}
+          />
+          <CSVDownloadButton
+            data={csvData}
+            filename={csvFilename}
+          />
+        </div>
+      </div>
+    </>
   );
 };
 
