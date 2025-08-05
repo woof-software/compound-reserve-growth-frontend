@@ -205,7 +205,29 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         borderWidth: 0,
         data: chartData as unknown as Highcharts.PointOptionsObject[]
       }
-    ]
+    ],
+    responsive: {
+      rules: [
+        {
+          condition: { maxWidth: 1116 },
+          chartOptions: {
+            chart: {
+              spacingRight: 100
+            },
+            plotOptions: {
+              pie: {
+                center: ['40%', '50%']
+              }
+            },
+            legend: {
+              layout: 'vertical',
+              align: 'right',
+              verticalAlign: 'middle'
+            }
+          }
+        }
+      ]
+    }
   };
 
   return (
