@@ -103,9 +103,12 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
       <div className='flex flex-row gap-5'>
         <Card
           isLoading={isLoading}
-          className={{ container: 'h-[200px] flex-1' }}
+          className={{ container: 'tablet:h-[200px] h-[230px] flex-1' }}
         >
           <ValueMetricField
+            className={{
+              container: 'flex-wrap'
+            }}
             label='Total Treasury Value'
             value={formatPrice(totalValue, 1)}
             badge={formatPrice(totalLastValue, 1)}
@@ -121,7 +124,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
         </Card>
         <Card
           isLoading={isLoading}
-          className={{ container: 'h-[200px] flex-1' }}
+          className={{ container: 'tablet:h-[200px] h-[230px] flex-1' }}
         >
           <ValueMetricField
             label='Total COMP Value'
@@ -138,7 +141,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
         </Card>
         <Card
           isLoading={isLoading}
-          className={{ container: 'h-[200px] flex-1' }}
+          className={{ container: 'tablet:h-[200px] h-[230px] flex-1' }}
         >
           <ValueMetricField
             label='Total Non-Comp Value'

@@ -21,13 +21,13 @@ const PageWrapper: FC<PageWrapperProps> = ({
 
   return (
     <>
-      <View.Condition if={width < 1090}>
+      <View.Condition if={width < 768}>
         <BreakPointBlock />
       </View.Condition>
-      <View.Condition if={width >= 1090}>
+      <View.Condition if={width >= 768}>
         <div
           className={cn(
-            `max-w-[${maxWidth}px] mx-auto flex min-h-screen flex-col`,
+            `tablet:mx-auto tablet:px-0 tablet:max-w-[${maxWidth}px] flex min-h-screen max-w-full flex-col px-4`,
             className
           )}
           {...props}
