@@ -25,12 +25,7 @@ interface PieChartProps {
   className?: string;
 }
 
-const PieChart: FC<PieChartProps> = ({
-  data,
-  isResponse = true,
-  className,
-  responseOptions
-}) => {
+const PieChart: FC<PieChartProps> = ({ data, className }) => {
   const { theme } = useTheme();
 
   const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
@@ -41,13 +36,11 @@ const PieChart: FC<PieChartProps> = ({
     setHiddenItems(new Set());
   }, [data]);
 
-  const legendItemWidth =
-    width <= 1116 ? Math.floor((width - 40) / 3) : undefined;
-
   const legendNavigation = useMemo<Highcharts.LegendNavigationOptions>(() => {
     if (width <= 1116) {
       return { enabled: false };
     }
+
     return {
       animation: true,
       arrowSize: 11,
@@ -116,29 +109,29 @@ const PieChart: FC<PieChartProps> = ({
     });
   };
 
-  const response: Highcharts.ResponsiveOptions = {
-    rules: [
-      {
-        condition: { maxWidth: 1116 },
-        chartOptions: {
-          chart: {
-            spacingRight: 100
-          },
-          plotOptions: {
-            pie: {
-              center: ['42%', '50%']
-            }
-          },
-          legend: {
-            layout: 'vertical',
-            align: 'right',
-            verticalAlign: 'middle'
-          }
-        }
-      }
-    ],
-    ...responseOptions
-  };
+  // const response: Highcharts.ResponsiveOptions = {
+  //   rules: [
+  //     {
+  //       condition: { maxWidth: 1116 },
+  //       chartOptions: {
+  //         chart: {
+  //           spacingRight: 100
+  //         },
+  //         plotOptions: {
+  //           pie: {
+  //             center: ['42%', '50%']
+  //           }
+  //         },
+  //         legend: {
+  //           layout: 'vertical',
+  //           align: 'right',
+  //           verticalAlign: 'middle'
+  //         }
+  //       }
+  //     }
+  //   ],
+  //   ...responseOptions
+  // };
 
   const options: Highcharts.Options = {
     chart: {
@@ -232,7 +225,6 @@ const PieChart: FC<PieChartProps> = ({
       symbolWidth: 12,
       symbolRadius: 3,
       symbolPadding: 6,
-      itemWidth: legendItemWidth,
       itemStyle: {
         color: '#7A8A99',
         fontSize: '11px',
@@ -253,8 +245,8 @@ const PieChart: FC<PieChartProps> = ({
         borderWidth: 0,
         data: chartData as unknown as Highcharts.PointOptionsObject[]
       }
-    ],
-    responsive: isResponse ? { ...response } : undefined
+    ]
+    // responsive: isResponse ? { ...response } : undefined
   };
 
   return (

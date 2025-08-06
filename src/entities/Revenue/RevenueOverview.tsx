@@ -289,7 +289,7 @@ const RevenueOverview = ({
             footerContent={processedData.footerContent}
           />
           <PieChart
-            className='tablet:max-w-[336.5px] max-h-[400px] max-w-full'
+            className='tablet:max-w-[336.5px] max-h-[400px] w-full max-w-full'
             data={processedData.pieData}
           />
         </div>
