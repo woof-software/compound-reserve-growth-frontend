@@ -109,30 +109,6 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
     });
   };
 
-  // const response: Highcharts.ResponsiveOptions = {
-  //   rules: [
-  //     {
-  //       condition: { maxWidth: 1116 },
-  //       chartOptions: {
-  //         chart: {
-  //           spacingRight: 100
-  //         },
-  //         plotOptions: {
-  //           pie: {
-  //             center: ['42%', '50%']
-  //           }
-  //         },
-  //         legend: {
-  //           layout: 'vertical',
-  //           align: 'right',
-  //           verticalAlign: 'middle'
-  //         }
-  //       }
-  //     }
-  //   ],
-  //   ...responseOptions
-  // };
-
   const options: Highcharts.Options = {
     chart: {
       plotBackgroundColor: undefined,
@@ -246,7 +222,6 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         data: chartData as unknown as Highcharts.PointOptionsObject[]
       }
     ]
-    // responsive: isResponse ? { ...response } : undefined
   };
 
   return (
