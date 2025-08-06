@@ -3,6 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
+import { useMediaWidth } from '@/shared/hooks/useMediaWidth';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { colorPicker } from '@/shared/lib/utils/utils';
 import Text from '@/shared/ui/Text/Text';
@@ -16,16 +17,48 @@ interface PieDataItem {
 
 interface PieChartProps {
   data: PieDataItem[];
+
+  isResponse?: boolean;
+
+  responseOptions?: Highcharts.ResponsiveOptions;
+
   className?: string;
 }
 
-const PieChart: FC<PieChartProps> = ({ data, className }) => {
+const PieChart: FC<PieChartProps> = ({
+  data,
+  isResponse = true,
+  className,
+  responseOptions
+}) => {
   const { theme } = useTheme();
+
   const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
+
+  const { width } = useMediaWidth();
 
   useMemo(() => {
     setHiddenItems(new Set());
   }, [data]);
+
+  const legendItemWidth =
+    width <= 1116 ? Math.floor((width - 40) / 3) : undefined;
+
+  const legendNavigation = useMemo<Highcharts.LegendNavigationOptions>(() => {
+    if (width <= 1116) {
+      return { enabled: false };
+    }
+    return {
+      animation: true,
+      arrowSize: 11,
+      activeColor: theme === 'light' ? '#17212B' : '#FFFFFF',
+      inactiveColor: '#7A899A',
+      style: {
+        cursor: 'pointer',
+        color: theme === 'light' ? '#17212B' : '#FFFFFF'
+      }
+    };
+  }, [width, theme]);
 
   const chartData = useMemo(() => {
     const visibleItems = data.filter((item) => !hiddenItems.has(item.name));
@@ -81,6 +114,30 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       }
       return newSet;
     });
+  };
+
+  const response: Highcharts.ResponsiveOptions = {
+    rules: [
+      {
+        condition: { maxWidth: 1116 },
+        chartOptions: {
+          chart: {
+            spacingRight: 100
+          },
+          plotOptions: {
+            pie: {
+              center: ['42%', '50%']
+            }
+          },
+          legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+          }
+        }
+      }
+    ],
+    ...responseOptions
   };
 
   const options: Highcharts.Options = {
@@ -175,6 +232,7 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       symbolWidth: 12,
       symbolRadius: 3,
       symbolPadding: 6,
+      itemWidth: legendItemWidth,
       itemStyle: {
         color: '#7A8A99',
         fontSize: '11px',
@@ -187,17 +245,7 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         fontFamily: 'Haas Grot Text R, sans-serif'
       },
       maxHeight: 100,
-      navigation: {
-        animation: true,
-        arrowSize: 11,
-        activeColor: theme === 'light' ? '#17212B' : '#FFFFFF',
-        inactiveColor: '#7A899A',
-        style: {
-          cursor: 'pointer',
-          color: theme === 'light' ? '#17212B' : '#FFFFFF',
-          fontFamily: 'Haas Grot Text R, sans-serif'
-        }
-      }
+      navigation: legendNavigation
     },
     series: [
       {
@@ -206,28 +254,7 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         data: chartData as unknown as Highcharts.PointOptionsObject[]
       }
     ],
-    responsive: {
-      rules: [
-        {
-          condition: { maxWidth: 1116 },
-          chartOptions: {
-            chart: {
-              spacingRight: 100
-            },
-            plotOptions: {
-              pie: {
-                center: ['40%', '50%']
-              }
-            },
-            legend: {
-              layout: 'vertical',
-              align: 'right',
-              verticalAlign: 'middle'
-            }
-          }
-        }
-      ]
-    }
+    responsive: isResponse ? { ...response } : undefined
   };
 
   return (

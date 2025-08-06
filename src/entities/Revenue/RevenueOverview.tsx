@@ -281,7 +281,7 @@ const RevenueOverview = ({
           </Text>
         </div>
       ) : (
-        <div className='flex items-start justify-between'>
+        <div className='tablet:flex-row flex flex-col-reverse items-start justify-between'>
           <RevenueOverviewUSD
             key={tableKey}
             data={processedData.tableData}
@@ -289,7 +289,7 @@ const RevenueOverview = ({
             footerContent={processedData.footerContent}
           />
           <PieChart
-            className='max-h-[400px] max-w-[336.5px]'
+            className='tablet:max-w-[336.5px] max-h-[400px] max-w-full'
             data={processedData.pieData}
           />
         </div>
