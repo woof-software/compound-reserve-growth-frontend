@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 
 import CompoundRevenue from '@/components/Charts/CompoundRevenue/CompoundRevenue';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
@@ -8,7 +8,7 @@ import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { type RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { capitalizeFirstLetter, ChartDataItem } from '@/shared/lib/utils/utils';
-import { OptionType } from '@/shared/types/types';
+import { BarSize, OptionType, TimeRange } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import View from '@/shared/ui/View/View';
@@ -34,6 +34,48 @@ interface PreprocessedResult {
   processedItems: PreprocessedItem[];
   initialAggregatedData: { date: string; value: number }[];
   sortedDates: string[];
+}
+
+interface FiltersProps {
+  chainOptions: OptionType[];
+
+  deploymentOptionsFilter: OptionType[];
+
+  sourceOptions: OptionType[];
+
+  symbolOptions: OptionType[];
+
+  barSize: BarSize;
+
+  activeTab: TimeRange | null;
+
+  isLoading: boolean;
+
+  csvFilename: string;
+
+  csvData: Record<string, string | number>[];
+
+  selectedOptions: {
+    chain: OptionType[];
+
+    source: OptionType[];
+
+    deployment: OptionType[];
+
+    symbol: OptionType[];
+  };
+
+  onSelectChain: (chain: OptionType[]) => void;
+
+  onSelectSource: (source: OptionType[]) => void;
+
+  onSelectMarket: (deployment: OptionType[]) => void;
+
+  onSelectSymbol: (symbol: OptionType[]) => void;
+
+  handleBarSizeChange: (value: string) => void;
+
+  handleTabChange: (value: string) => void;
 }
 
 function preprocessData(rawData: ChartDataItem[]): PreprocessedResult {
@@ -139,10 +181,18 @@ const CompoundRevenueBlock = ({
   isLoading,
   isError
 }: RevenuePageProps) => {
-  const [selectedChains, setSelectedChains] = useState<OptionType[]>([]);
-  const [selectedMarkets, setSelectedMarkets] = useState<OptionType[]>([]);
-  const [selectedSources, setSelectedSources] = useState<OptionType[]>([]);
-  const [selectedSymbols, setSelectedSymbols] = useState<OptionType[]>([]);
+  const [selectedOptions, setSelectedOptions] = useReducer(
+    (prev, next) => ({
+      ...prev,
+      ...next
+    }),
+    {
+      chain: [] as OptionType[],
+      source: [] as OptionType[],
+      deployment: [] as OptionType[],
+      symbol: [] as OptionType[]
+    }
+  );
 
   const {
     activeTab,
@@ -177,7 +227,7 @@ const CompoundRevenueBlock = ({
       (el) => el.id.toLowerCase() === 'no name'
     );
 
-    const selectedChainIds = selectedChains.map((o) => o.id);
+    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
 
     let allMarkets = [...marketV3, ...marketV2];
 
@@ -194,24 +244,24 @@ const CompoundRevenueBlock = ({
     }
 
     return allMarkets;
-  }, [marketOptions, selectedChains]);
+  }, [marketOptions, selectedOptions]);
 
   const processedChartData = useMemo(() => {
     const hasActiveFilters =
-      selectedChains.length > 0 ||
-      selectedMarkets.length > 0 ||
-      selectedSources.length > 0 ||
-      selectedSymbols.length > 0;
+      selectedOptions.chain.length > 0 ||
+      selectedOptions.deployment.length > 0 ||
+      selectedOptions.source.length > 0 ||
+      selectedOptions.symbol.length > 0;
 
     if (!hasActiveFilters) {
       return initialAggregatedData;
     }
 
     const activeFiltersById = {
-      chain: createIdSet(selectedChains),
-      market: createIdSet(selectedMarkets),
-      source: createIdSet(selectedSources),
-      symbol: createIdSet(selectedSymbols)
+      chain: createIdSet(selectedOptions.chain),
+      market: createIdSet(selectedOptions.deployment),
+      source: createIdSet(selectedOptions.source),
+      symbol: createIdSet(selectedOptions.symbol)
     };
 
     const dailyTotals: Record<string, number> = {};
@@ -248,15 +298,7 @@ const CompoundRevenueBlock = ({
       }
     }
     return result;
-  }, [
-    processedItems,
-    initialAggregatedData,
-    sortedDates,
-    selectedChains,
-    selectedMarkets,
-    selectedSources,
-    selectedSymbols
-  ]);
+  }, [processedItems, initialAggregatedData, sortedDates, selectedOptions]);
 
   const chartSeriesForCSV = useMemo(() => {
     if (!processedChartData || processedChartData.length === 0) return [];
@@ -274,12 +316,12 @@ const CompoundRevenueBlock = ({
 
   const groupBy = useMemo(() => {
     const hasFilters =
-      selectedChains.length > 0 ||
-      selectedMarkets.length > 0 ||
-      selectedSources.length > 0 ||
-      selectedSymbols.length > 0;
+      selectedOptions.chain.length > 0 ||
+      selectedOptions.deployment.length > 0 ||
+      selectedOptions.source.length > 0 ||
+      selectedOptions.symbol.length > 0;
     return hasFilters ? 'Filtered' : 'Total';
-  }, [selectedChains, selectedMarkets, selectedSources, selectedSymbols]);
+  }, [selectedOptions]);
 
   const { csvData, csvFilename } = useCSVExport({
     chartSeries: chartSeriesForCSV,
@@ -289,20 +331,13 @@ const CompoundRevenueBlock = ({
     aggregationType: 'sum'
   });
 
-  const handleResetFilters = useCallback(() => {
-    setSelectedChains([]);
-    setSelectedMarkets([]);
-    setSelectedSources([]);
-    setSelectedSymbols([]);
-  }, []);
-
   const hasData = processedChartData.length > 0;
 
   const noDataMessage =
-    selectedChains.length > 0 ||
-    selectedMarkets.length > 0 ||
-    selectedSources.length > 0 ||
-    selectedSymbols.length > 0
+    selectedOptions.chain.length > 0 ||
+    selectedOptions.deployment.length > 0 ||
+    selectedOptions.source.length > 0 ||
+    selectedOptions.symbol.length > 0
       ? 'No data for selected filters'
       : 'No data available';
 
@@ -310,18 +345,46 @@ const CompoundRevenueBlock = ({
     (chain: OptionType[]) => {
       const selectedChainIds = chain.map((o) => o.id);
 
-      const filteredDeployment = selectedMarkets.filter((el) =>
+      const filteredDeployment = selectedOptions.deployment.filter((el) =>
         selectedChainIds.length === 0
           ? true
           : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
       );
 
-      setSelectedChains(chain);
-
-      setSelectedMarkets(filteredDeployment);
+      setSelectedOptions({
+        chain,
+        deployment: filteredDeployment
+      });
     },
-    [selectedMarkets]
+    [selectedOptions]
   );
+
+  const onSelectSource = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedOptions({
+      source: selectedOptions
+    });
+  }, []);
+
+  const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedOptions({
+      deployment: selectedOptions
+    });
+  }, []);
+
+  const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedOptions({
+      symbol: selectedOptions
+    });
+  }, []);
+
+  const onClearSelectedOptions = useCallback(() => {
+    setSelectedOptions({
+      chain: [],
+      assetType: [],
+      deployment: [],
+      symbol: []
+    });
+  }, []);
 
   return (
     <Card
@@ -335,19 +398,77 @@ const CompoundRevenueBlock = ({
         content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
       }}
     >
-      <div className='flex justify-end gap-3 px-0 py-3'>
+      <Filters
+        barSize={barSize}
+        activeTab={activeTab}
+        csvData={csvData}
+        csvFilename={csvFilename}
+        chainOptions={chainOptions}
+        selectedOptions={selectedOptions}
+        deploymentOptionsFilter={deploymentOptionsFilter}
+        sourceOptions={sourceOptions}
+        symbolOptions={symbolOptions}
+        isLoading={isLoading}
+        onSelectChain={onSelectChain}
+        onSelectSource={onSelectSource}
+        onSelectMarket={onSelectMarket}
+        onSelectSymbol={onSelectSymbol}
+        handleBarSizeChange={handleBarSizeChange}
+        handleTabChange={handleTabChange}
+      />
+      <View.Condition if={!isLoading && !isError && hasData}>
+        <div className='h-[400px]'>
+          <CompoundRevenue
+            data={processedChartData}
+            barSize={barSize}
+            barCountToSet={barCount}
+            onZoom={handleResetActiveTab}
+          />
+        </div>
+      </View.Condition>
+      <View.Condition if={!isLoading && !isError && !hasData}>
+        <NoDataPlaceholder
+          onButtonClick={onClearSelectedOptions}
+          text={noDataMessage}
+        />
+      </View.Condition>
+    </Card>
+  );
+};
+
+const Filters = ({
+  barSize,
+  activeTab,
+  csvData,
+  csvFilename,
+  chainOptions,
+  selectedOptions,
+  deploymentOptionsFilter,
+  sourceOptions,
+  symbolOptions,
+  isLoading,
+  onSelectChain,
+  onSelectSource,
+  onSelectMarket,
+  onSelectSymbol,
+  handleBarSizeChange,
+  handleTabChange
+}: FiltersProps) => {
+  return (
+    <>
+      <div className='tablet:flex hidden items-center justify-end gap-3 px-0 py-3'>
         <div className='flex gap-2'>
           <MultiSelect
             options={chainOptions || []}
-            value={selectedChains}
+            value={selectedOptions.chain}
             onChange={onSelectChain}
             placeholder='Chain'
             disabled={isLoading}
           />
           <MultiSelect
             options={deploymentOptionsFilter || []}
-            value={selectedMarkets}
-            onChange={setSelectedMarkets}
+            value={selectedOptions.deployment}
+            onChange={onSelectMarket}
             placeholder='Market'
             disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
           />
@@ -356,8 +477,8 @@ const CompoundRevenueBlock = ({
               sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
               []
             }
-            value={selectedSources}
-            onChange={setSelectedSources}
+            value={selectedOptions.source}
+            onChange={onSelectSource}
             placeholder='Source'
             disabled={isLoading}
           />
@@ -366,8 +487,8 @@ const CompoundRevenueBlock = ({
               symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
               []
             }
-            value={selectedSymbols}
-            onChange={setSelectedSymbols}
+            value={selectedOptions.symbol}
+            onChange={onSelectSymbol}
             placeholder='Reserve Symbols'
             disabled={isLoading}
           />
@@ -389,23 +510,63 @@ const CompoundRevenueBlock = ({
           filename={csvFilename}
         />
       </div>
-      <View.Condition if={!isLoading && !isError && hasData}>
-        <div className='h-[400px]'>
-          <CompoundRevenue
-            data={processedChartData}
-            barSize={barSize}
-            barCountToSet={barCount}
-            onZoom={handleResetActiveTab}
+      <div className='tablet:hidden flex flex-col items-end justify-end gap-3 px-0 py-3'>
+        <div className='z-[1] flex items-center gap-2'>
+          <MultiSelect
+            options={chainOptions || []}
+            value={selectedOptions.chain}
+            onChange={onSelectChain}
+            placeholder='Chain'
+            disabled={isLoading}
+          />
+          <MultiSelect
+            options={deploymentOptionsFilter || []}
+            value={selectedOptions.deployment}
+            onChange={onSelectMarket}
+            placeholder='Market'
+            disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
+          />
+          <MultiSelect
+            options={
+              sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+              []
+            }
+            value={selectedOptions.source}
+            onChange={onSelectSource}
+            placeholder='Source'
+            disabled={isLoading}
+          />
+          <MultiSelect
+            options={
+              symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+              []
+            }
+            value={selectedOptions.symbol}
+            onChange={onSelectSymbol}
+            placeholder='Reserve Symbols'
+            disabled={isLoading}
           />
         </div>
-      </View.Condition>
-      <View.Condition if={!isLoading && !isError && !hasData}>
-        <NoDataPlaceholder
-          onButtonClick={handleResetFilters}
-          text={noDataMessage}
-        />
-      </View.Condition>
-    </Card>
+        <div className='flex items-center gap-3'>
+          <TabsGroup
+            tabs={['D', 'W', 'M']}
+            value={barSize}
+            onTabChange={handleBarSizeChange}
+            disabled={isLoading}
+          />
+          <TabsGroup
+            tabs={['7B', '30B', '90B', '180B']}
+            value={activeTab}
+            onTabChange={handleTabChange}
+            disabled={isLoading}
+          />
+          <CSVDownloadButton
+            data={csvData}
+            filename={csvFilename}
+          />
+        </div>
+      </div>
+    </>
   );
 };
 

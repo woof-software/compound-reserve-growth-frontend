@@ -66,7 +66,7 @@ const RevenueMetrics = ({
             isLoading={isLoading}
             isError={isError}
             className={{
-              container: 'min-w-64 flex-1 basis-64',
+              container: 'max-w-[358px] min-w-64 flex-1 basis-64',
               loading: 'h-[317px]'
             }}
             title={!isPlaceholder ? `${year} Revenue` : undefined}
