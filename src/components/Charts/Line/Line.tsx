@@ -487,11 +487,11 @@ const LineChart: FC<LineChartProps> = ({
           containerProps={{ style: { width: '100%', height: '100%' } }}
         />
       </div>
-      <div className='flex shrink-0 items-center justify-center gap-4 py-2'>
+      <div className='tablet:py-2 flex shrink-0 items-center justify-center gap-4 py-0'>
         {isLegendEnabled && aggregatedSeries.length > 1 && (
           <Button
             onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
-            className='text-primary-14 cursor-pointer rounded-md border border-[color:var(--color-primary-16)] px-2 py-1 text-[12px] hover:border-[color:var(--color-primary-14)]'
+            className='text-primary-14 h-8 cursor-pointer rounded-md border border-[color:var(--color-primary-16)] px-2 py-1 text-[12px] hover:border-[color:var(--color-primary-14)]'
           >
             {areAllSeriesHidden ? 'Select All' : 'Unselect All'}
           </Button>
@@ -499,7 +499,7 @@ const LineChart: FC<LineChartProps> = ({
         {eventsData.length > 0 && (
           <Button
             onClick={() => setShowEvents((prev) => !prev)}
-            className='text-primary-14 cursor-pointer rounded-md border border-[color:var(--color-primary-16)] px-2 py-1 text-[12px] hover:border-[color:var(--color-primary-14)]'
+            className='text-primary-14 h-8 cursor-pointer rounded-md border border-[color:var(--color-primary-16)] px-2 py-1 text-[12px] hover:border-[color:var(--color-primary-14)]'
           >
             {showEvents ? 'Hide Events' : 'Show Events'}
           </Button>

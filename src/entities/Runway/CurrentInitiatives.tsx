@@ -90,13 +90,13 @@ const CurrentInitiativesBlock = () => {
         loading: 'min-h-[571px]'
       }}
     >
-      <div className='flex justify-between gap-10'>
+      <div className='tablet:flex-row flex flex-col justify-between gap-10'>
         <CurrentInitiatives
           data={processedData.tableData}
           footerData={processedData.footerData}
         />
         <PieChart
-          className='max-h-[400px] max-w-[336.5px]'
+          className='tablet:max-w-[336.5px] tablet:max-h-[400px] max-w-full'
           data={processedData.pieData}
         />
       </div>

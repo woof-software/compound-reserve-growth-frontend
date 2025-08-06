@@ -70,7 +70,7 @@ const Header: FC = () => {
 
   return (
     <header className='py-3'>
-      <div className='flex items-center gap-5'>
+      <div className='mx-auto flex w-full max-w-[1084px] items-center gap-5'>
         <Link to={commonRoutes.TREASURY}>
           <Icon
             name='logo'
