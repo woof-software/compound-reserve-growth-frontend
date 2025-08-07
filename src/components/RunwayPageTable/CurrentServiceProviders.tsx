@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { cn } from '@/shared/lib/classNames/classNames';
 import { formatNumber, formatQuantity } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Text from '@/shared/ui/Text/Text';
@@ -87,20 +89,123 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
   );
 
   return (
-    <DataTable
-      data={data}
-      columns={columns}
-      pageSize={5}
-      footerContent={footerRow}
-      containerTableClassName='min-h-[372px]'
-      className='flex min-h-[400px] flex-col justify-between'
-      headerCellClassName='py-[13px] px-[5px]'
-      cellClassName='py-3 px-[5px]'
-      headerTextClassName='text-primary-14 font-medium'
-      enableSorting
-      enablePagination
-      paginationClassName='py-[13px] px-[5px]'
-    />
+    <>
+      <MobileDataTable tableData={data}>
+        {(dataRows) =>
+          dataRows.map((row, index) => (
+            <div
+              key={index}
+              className={cn(
+                'border-secondary-23 flex flex-wrap items-center justify-between gap-x-[63px] gap-y-3 px-10 py-5',
+                { 'border-b': index !== dataRows.length - 1 }
+              )}
+            >
+              <div className='grid w-full max-w-[73px]'>
+                <Text
+                  size='8'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  Provider
+                </Text>
+                <Text
+                  size='11'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {row.provider}
+                </Text>
+              </div>
+              <div className='grid w-full max-w-[73px]'>
+                <Text
+                  size='8'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  Discipline
+                </Text>
+                <Text
+                  size='11'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {row.discipline}
+                </Text>
+              </div>
+              <div className='grid w-full max-w-[73px]'>
+                <Text
+                  size='8'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  Token
+                </Text>
+                <Text
+                  size='11'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {row.token}
+                </Text>
+              </div>
+              <div className='grid w-full max-w-[73px]'>
+                <Text
+                  size='8'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  Amount (Qty)
+                </Text>
+                <Text
+                  size='11'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {formatQuantity(row.amount)}
+                </Text>
+              </div>
+              <div className='grid w-full max-w-[73px]'>
+                <Text
+                  size='8'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  Value ($)
+                </Text>
+                <Text
+                  size='11'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {formatNumber(row.value)}
+                </Text>
+              </div>
+            </div>
+          ))
+        }
+      </MobileDataTable>
+      <div className='hidden w-full max-w-full lg:block'>
+        <DataTable
+          data={data}
+          columns={columns}
+          pageSize={5}
+          footerContent={footerRow}
+          containerTableClassName='min-h-[372px]'
+          className='flex min-h-[400px] flex-col justify-between'
+          headerCellClassName='py-[13px] px-[5px]'
+          cellClassName='py-3 px-[5px]'
+          headerTextClassName='text-primary-14 font-medium'
+          enableSorting
+          enablePagination
+          paginationClassName='py-[13px] px-[5px]'
+        />
+      </div>
+    </>
   );
 };
 

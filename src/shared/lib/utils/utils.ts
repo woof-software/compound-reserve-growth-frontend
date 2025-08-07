@@ -336,8 +336,11 @@ export const getValueByPath = (obj: any, path: string): any => {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 };
 
-export const capitalizeFirstLetter = (str: string): string => {
-  if (!str) return 'Unknown';
+export const capitalizeFirstLetter = (
+  str: string,
+  replaceSymbol?: string
+): string => {
+  if (!str) return replaceSymbol || 'Unknown';
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 

@@ -140,7 +140,8 @@ const AnnualisedExpensesBlock = () => {
       isLoading={isLoading}
       isError={isError}
       className={{
-        loading: 'min-h-[571px]'
+        loading: 'min-h-[571px]',
+        content: 'p-0 pb-10 lg:p-10'
       }}
     >
       <div className='flex flex-col justify-between gap-10 lg:flex-row'>
