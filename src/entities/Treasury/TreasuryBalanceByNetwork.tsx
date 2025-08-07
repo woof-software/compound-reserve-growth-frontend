@@ -216,12 +216,13 @@ const TreasuryBalanceByNetworkBlock = ({
       id='treasury-balance-by-network'
       className={{
         loading: 'min-h-[inherit]',
-        container: 'min-h-[458.5px] overflow-visible',
+        container: 'min-h-[427px] overflow-visible lg:min-h-[458.5px]',
         header: 'rounded-t-lg',
-        content: 'flex flex-col gap-3 rounded-b-lg px-10 pt-0 pb-10'
+        content:
+          'flex flex-col gap-3 rounded-b-lg px-0 pt-0 pb-0 lg:px-10 lg:pb-10'
       }}
     >
-      <div className='flex items-center justify-end gap-3 px-0 py-3'>
+      <div className='flex items-center justify-end gap-3 px-10 py-3 lg:px-0'>
         <MultiSelect
           options={chainOptions || []}
           value={selectedOptions.chain}
