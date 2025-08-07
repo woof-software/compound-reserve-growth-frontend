@@ -15,43 +15,25 @@ import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
 interface FiltersProps {
   chainOptions: OptionType[];
-
   deploymentOptionsFilter: OptionType[];
-
   assetTypeOptions: OptionType[];
-
   symbolOptions: OptionType[];
-
   barSize: BarSize;
-
   activeTab: TimeRange | null;
-
   isLoading: boolean;
-
   csvFilename: string;
-
   csvData: Record<string, string | number>[];
-
   selectedOptions: {
     chain: OptionType[];
-
     assetType: OptionType[];
-
     deployment: OptionType[];
-
     symbol: OptionType[];
   };
-
   onSelectChain: (chain: OptionType[]) => void;
-
   onSelectAssetType: (assetType: OptionType[]) => void;
-
   onSelectMarket: (deployment: OptionType[]) => void;
-
   onSelectSymbol: (symbol: OptionType[]) => void;
-
   handleBarSizeChange: (value: string) => void;
-
   handleTabChange: (value: string) => void;
 }
 
@@ -174,13 +156,12 @@ const CompoundCumulativeRevenue = ({
 
       const dailyTotals = new Map<number, number>();
       for (const point of series.data) {
-        if (point.y > 0) {
-          const date = new Date(point.x);
-          date.setUTCHours(0, 0, 0, 0);
-          const dayStartTimestamp = date.getTime();
-          const currentTotal = dailyTotals.get(dayStartTimestamp) || 0;
-          dailyTotals.set(dayStartTimestamp, currentTotal + point.y);
-        }
+        const date = new Date(point.x);
+        date.setUTCHours(0, 0, 0, 0);
+        const dayStartTimestamp = date.getTime();
+        const currentTotal = dailyTotals.get(dayStartTimestamp) || 0;
+        const valueToAdd = point.y < 0 ? 0 : point.y;
+        dailyTotals.set(dayStartTimestamp, currentTotal + valueToAdd);
       }
 
       const sortedDailyPoints = Array.from(dailyTotals.entries())
@@ -292,7 +273,6 @@ const CompoundCumulativeRevenue = ({
       symbol: []
     });
   }, []);
-
   return (
     <Card
       title='Compound Cumulative Revenue'
