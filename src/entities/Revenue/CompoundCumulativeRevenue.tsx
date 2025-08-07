@@ -343,7 +343,7 @@ const Filters = ({
 }: FiltersProps) => {
   return (
     <>
-      <div className='tablet:flex hidden items-center justify-end gap-3 px-0 py-3'>
+      <div className='hidden items-center justify-end gap-3 px-0 py-3 lg:flex'>
         <div className='flex gap-2'>
           <MultiSelect
             options={chainOptions || []}
@@ -398,7 +398,7 @@ const Filters = ({
           filename={csvFilename}
         />
       </div>
-      <div className='tablet:hidden flex flex-col items-end justify-end gap-3 px-0 py-3'>
+      <div className='flex flex-col items-end justify-end gap-3 px-0 py-3 lg:hidden'>
         <div className='z-[1] flex items-center gap-2'>
           <MultiSelect
             options={chainOptions || []}

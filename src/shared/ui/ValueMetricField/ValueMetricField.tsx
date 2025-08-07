@@ -60,9 +60,7 @@ const ValueMetricField = ({
           </View.Condition>
         </div>
       </View.Condition>
-      <div
-        className={cn('tablet:gap-2 flex flex-col gap-5', className?.content)}
-      >
+      <div className={cn('flex flex-col gap-5 lg:gap-2', className?.content)}>
         <div className='flex flex-wrap items-center gap-3.5'>
           <Text
             size='32'
@@ -90,7 +88,7 @@ const ValueMetricField = ({
           size='11'
           weight='500'
           className={cn(
-            'text-primary-13 tablet:leading-[27px] leading-[19px]',
+            'text-primary-13 leading-[19px] lg:leading-[27px]',
             className?.label
           )}
         >

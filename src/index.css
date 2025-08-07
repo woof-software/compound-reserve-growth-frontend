@@ -68,6 +68,7 @@
   --secondary-20: #6D7E8F;
   --secondary-21: #CDD3D9;
   --secondary-22: #F0F2F5;
+  --secondary-23: #17212B24;
 
   /*=======================*/
   /* Success Colors */
@@ -124,6 +125,7 @@
   --secondary-20: #FFFFFF;
   --secondary-21: #32404D;
   --secondary-22: #151E27;
+  --secondary-23: #FFFFFF24;
 
   /*=======================*/
   /* Success Colors */
@@ -188,6 +190,7 @@
   --color-secondary-20: var(--secondary-20);
   --color-secondary-21: var(--secondary-21);
   --color-secondary-22: var(--secondary-22);
+  --color-secondary-23: var(--secondary-23);
 
   /*=======================*/
   /* Success Colors */
@@ -234,11 +237,6 @@
   --color-hot-pink: #FAB3FF;
   --color-greenish-cyan: #58F0C5;
   --color-grey-teal: #62B1FF;
-
-  /*=======================*/
-  /* Breakpoint */
-  --breakpoint-xs: 0px;
-  --breakpoint-tablet: 1116px;
 }
 
 @layer base {

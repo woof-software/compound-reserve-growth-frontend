@@ -317,7 +317,7 @@ const TotalTresuaryValue = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px]',
-        content: 'tablet:pb-10 flex flex-col gap-3 px-10 pt-0 pb-[60px]'
+        content: 'flex flex-col gap-3 px-10 pt-0 pb-[60px] lg:pb-10'
       }}
     >
       <Filters
@@ -385,7 +385,7 @@ const Filters = ({
 }: FiltersProps) => {
   return (
     <>
-      <div className='tablet:flex hidden items-center justify-end gap-3 px-0 py-3'>
+      <div className='hidden items-center justify-end gap-3 px-0 py-3 lg:flex'>
         <MultiSelect
           options={chainOptions || []}
           value={selectedOptions.chain}
@@ -457,7 +457,7 @@ const Filters = ({
           filename={csvFilename}
         />
       </div>
-      <div className='tablet:hidden flex flex-col items-end justify-end gap-3 px-0 py-3'>
+      <div className='flex flex-col items-end justify-end gap-3 px-0 py-3 lg:hidden'>
         <div className='flex items-center gap-3'>
           <TabsGroup
             tabs={['D', 'W', 'M']}

@@ -78,7 +78,7 @@ const TreasuryComposition = ({
   }, [activeFilter]);
 
   return (
-    <div className='tablet:max-w-[522px] max-h-[400px] w-full max-w-1/2 overflow-y-auto'>
+    <div className='max-h-[400px] w-full max-w-1/2 overflow-y-auto lg:max-w-[522px]'>
       <DataTable
         data={tableData}
         columns={columns}

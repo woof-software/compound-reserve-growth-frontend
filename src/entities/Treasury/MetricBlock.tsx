@@ -103,7 +103,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
       <div className='flex flex-row gap-5'>
         <Card
           isLoading={isLoading}
-          className={{ container: 'tablet:h-[200px] h-[230px] flex-1' }}
+          className={{ container: 'h-[230px] flex-1 lg:h-[200px]' }}
         >
           <ValueMetricField
             className={{
@@ -124,7 +124,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
         </Card>
         <Card
           isLoading={isLoading}
-          className={{ container: 'tablet:h-[200px] h-[230px] flex-1' }}
+          className={{ container: 'h-[230px] flex-1 lg:h-[200px]' }}
         >
           <ValueMetricField
             label='Total COMP Value'
@@ -141,7 +141,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
         </Card>
         <Card
           isLoading={isLoading}
-          className={{ container: 'tablet:h-[200px] h-[230px] flex-1' }}
+          className={{ container: 'h-[230px] flex-1 lg:h-[200px]' }}
         >
           <ValueMetricField
             label='Total Non-Comp Value'

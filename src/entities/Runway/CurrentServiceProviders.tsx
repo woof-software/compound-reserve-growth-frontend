@@ -94,9 +94,9 @@ const CurrentServiceProvidersBlock = () => {
         loading: 'min-h-[571px]'
       }}
     >
-      <div className='tablet:flex-row flex flex-col justify-between gap-10'>
+      <div className='flex flex-col justify-between gap-10 lg:flex-row'>
         <PieChart
-          className='tablet:max-w-[336.5px] tablet:max-h-[400px] max-w-full'
+          className='max-w-full lg:max-h-[400px] lg:max-w-[336.5px]'
           data={processedData.pieData}
         />
         <CurrentServiceProviders

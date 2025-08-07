@@ -6,6 +6,7 @@ type HeaderTagType = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
 const text = cva('text-primary-11', {
   variants: {
     size: {
+      '8': 'text-[8px]',
       '9': 'text-[9px]',
       '11': 'text-[11px]',
       '12': 'text-[12px]',

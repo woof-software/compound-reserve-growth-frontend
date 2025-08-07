@@ -1,4 +1,8 @@
+import * as React from 'react';
+
+import { usePagination } from '@/shared/hooks/usePagination';
 import { formatLargeNumber, formatPrice } from '@/shared/lib/utils/utils';
+import Button from '@/shared/ui/Button/Button';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -80,25 +84,205 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
   }
 ];
 
+const MobileDataTable = ({ tableData }: TreasuryBalanceByNetworkProps) => {
+  const pageSize = 10;
+
+  const { dataRows, pageIndex, maxPages, goNext, goPrev, goLast, goFirst } =
+    usePagination({
+      tableData,
+      pageSize
+    });
+
+  return (
+    <div className='block lg:hidden'>
+      {dataRows.map((row, index) => (
+        <div
+          key={index}
+          className='border-secondary-23 flex flex-wrap items-center justify-items-start gap-x-[63px] gap-y-3 border-b px-10 py-5'
+        >
+          <div className='grid w-full max-w-[73px]'>
+            <Text
+              size='8'
+              lineHeight='18'
+              weight='500'
+              className='text-primary-14'
+            >
+              Symbol
+            </Text>
+            <div className='flex items-center gap-1'>
+              <Icon
+                name={row.symbol || 'not-found-icon'}
+                className='h-4 w-4'
+                folder='collaterals'
+              />
+              <Text
+                size='11'
+                lineHeight='21'
+                className='truncate'
+              >
+                {row.symbol}
+              </Text>
+            </div>
+          </div>
+          <div className='grid w-full max-w-[73px]'>
+            <Text
+              size='8'
+              lineHeight='18'
+              weight='500'
+              className='text-primary-14'
+            >
+              QTY
+            </Text>
+            <Text
+              size='11'
+              lineHeight='21'
+              className='truncate'
+            >
+              {formatLargeNumber(row.qty, 1)}
+            </Text>
+          </div>
+          <div className='grid w-full max-w-[73px]'>
+            <Text
+              size='8'
+              lineHeight='18'
+              weight='500'
+              className='text-primary-14'
+            >
+              Value
+            </Text>
+            <Text
+              size='11'
+              lineHeight='21'
+              className='truncate'
+            >
+              {formatPrice(row.value, 1)}
+            </Text>
+          </div>
+          <div className='grid w-full max-w-[73px]'>
+            <Text
+              size='8'
+              lineHeight='18'
+              weight='500'
+              className='text-primary-14'
+            >
+              Market
+            </Text>
+            <Text
+              size='11'
+              lineHeight='21'
+              className='truncate'
+            >
+              {row.market === 'no market' ? ' - ' : row.market}
+            </Text>
+          </div>
+          <div className='grid w-full max-w-[73px]'>
+            <Text
+              size='8'
+              lineHeight='18'
+              weight='500'
+              className='text-primary-14'
+            >
+              Source
+            </Text>
+            <Text
+              size='11'
+              lineHeight='21'
+              className='truncate'
+            >
+              {row.source}
+            </Text>
+          </div>
+        </div>
+      ))}
+      <div className='flex items-center justify-between px-10 py-5'>
+        <Text className='text-primary-14 !text-[12.6px]'>
+          Showing{' '}
+          <span className='mx-1 text-[11.5px] leading-[21px] font-bold'>
+            {pageIndex * pageSize + 1}
+          </span>
+          to{' '}
+          <span className='mx-1 text-[11.5px] leading-[21px] font-bold'>
+            {Math.min((pageIndex + 1) * pageSize, tableData.length)}
+          </span>
+          of{' '}
+          <span className='mx-1 text-[11.5px] leading-[21px] font-bold'>
+            {tableData.length}
+          </span>{' '}
+          results
+        </Text>
+        <div className='flex items-center gap-1'>
+          <Button
+            onClick={goFirst}
+            disabled={pageIndex === 0}
+            className='text-primary-14 hover:bg-secondary-22 size-8 cursor-pointer rounded-lg disabled:cursor-not-allowed disabled:opacity-50'
+          >
+            <Icon
+              name='double-arrow'
+              className='h-4 w-4'
+            />
+          </Button>
+          <Button
+            onClick={goPrev}
+            disabled={pageIndex === 0}
+            className='text-primary-14 hover:bg-secondary-22 flex h-8 cursor-pointer items-center gap-2 rounded-lg pt-2 pr-2.5 pb-2 pl-2 text-[11px] font-medium disabled:cursor-not-allowed disabled:opacity-50'
+          >
+            <Icon
+              name='arrow-left'
+              className='h-4 w-4'
+            />
+            <span className='text-[11px] leading-none font-medium'>
+              Previous
+            </span>
+          </Button>
+          <Button
+            onClick={goNext}
+            disabled={pageIndex === maxPages - 1}
+            className='text-primary-14 hover:bg-secondary-22 flex h-8 cursor-pointer items-center gap-2 rounded-lg pt-2 pr-2 pb-2 pl-2.5 text-[11px] font-medium disabled:cursor-not-allowed disabled:opacity-50'
+          >
+            <span className='text-[11px] leading-none font-medium'>Next</span>
+            <Icon
+              name='arrow-right'
+              className='h-4 w-4'
+            />
+          </Button>
+          <Button
+            onClick={goLast}
+            disabled={pageIndex === maxPages - 1}
+            className='text-primary-14 hover:bg-secondary-22 size-8 rotate-180 cursor-pointer rounded-lg disabled:cursor-not-allowed disabled:opacity-50'
+          >
+            <Icon
+              name='double-arrow'
+              className='h-4 w-4'
+            />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const TreasuryBalanceByNetwork = ({
   tableData
 }: TreasuryBalanceByNetworkProps) => {
   return (
-    <div className='tablet:max-w-[522px] w-full max-w-full'>
-      <DataTable
-        data={tableData}
-        columns={treasuryColumns}
-        enableSorting
-        enablePagination
-        pageSize={10}
-        containerTableClassName='min-h-[518px]'
-        className='flex min-h-[565px] flex-col justify-between'
-        headerCellClassName='py-[13px] px-[5px]'
-        cellClassName='py-3 px-[5px]'
-        headerTextClassName='text-primary-14 font-medium'
-        paginationClassName='py-[13px] px-[5px]'
-      />
-    </div>
+    <>
+      <MobileDataTable tableData={tableData} />
+      <div className='hidden w-full max-w-full lg:block lg:max-w-[522px]'>
+        <DataTable
+          data={tableData}
+          columns={treasuryColumns}
+          enableSorting
+          enablePagination
+          pageSize={10}
+          containerTableClassName='min-h-[518px]'
+          className='flex min-h-[565px] flex-col justify-between'
+          headerCellClassName='py-[13px] px-[5px]'
+          cellClassName='py-3 px-[5px]'
+          headerTextClassName='text-primary-14 font-medium'
+          paginationClassName='py-[13px] px-[5px]'
+        />
+      </div>
+    </>
   );
 };
 

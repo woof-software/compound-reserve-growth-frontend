@@ -205,12 +205,12 @@ const TreasuryHoldingsBlock = ({
       id='full-treasury-holdings'
       className={{
         loading: 'min-h-[inherit]',
-        container: 'min-h-[458.5px] overflow-visible',
-        content: 'rounded-b-lg pt-0',
+        container: 'min-h-[427px] overflow-visible lg:min-h-[458.5px]',
+        content: 'rounded-b-lg px-0 pt-0 pb-0 lg:px-10 lg:pb-10',
         header: 'rounded-t-lg'
       }}
     >
-      <div className='flex items-center justify-end gap-3 px-0 py-3'>
+      <div className='flex items-center justify-end gap-3 px-10 py-3 lg:px-0'>
         <MultiSelect
           options={chainOptions || []}
           value={selectedOptions.chain}
