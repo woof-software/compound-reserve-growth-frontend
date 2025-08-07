@@ -234,11 +234,6 @@
   --color-hot-pink: #FAB3FF;
   --color-greenish-cyan: #58F0C5;
   --color-grey-teal: #62B1FF;
-
-  /*=======================*/
-  /* Breakpoint */
-  --breakpoint-xs: 0px;
-  --breakpoint-tablet: 1116px;
 }
 
 @layer base {

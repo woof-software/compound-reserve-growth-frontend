@@ -487,7 +487,7 @@ const LineChart: FC<LineChartProps> = ({
           containerProps={{ style: { width: '100%', height: '100%' } }}
         />
       </div>
-      <div className='tablet:py-2 flex shrink-0 items-center justify-center gap-4 py-0'>
+      <div className='flex shrink-0 items-center justify-center gap-4 py-0 lg:py-2'>
         {isLegendEnabled && aggregatedSeries.length > 1 && (
           <Button
             onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}

@@ -11,7 +11,7 @@ const RunwayPage = () => {
   const { isLoading } = useRunway();
   useScrollToHash(!isLoading);
   return (
-    <div className='tablet:gap-[70px] flex flex-col gap-[42px]'>
+    <div className='flex flex-col gap-[42px] lg:gap-[70px]'>
       <div className='flex flex-col gap-[15px]'>
         <Text
           tag='h1'

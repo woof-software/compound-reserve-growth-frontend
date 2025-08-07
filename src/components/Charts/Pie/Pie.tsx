@@ -3,7 +3,6 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
-import { useMediaWidth } from '@/shared/hooks/useMediaWidth';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { colorPicker } from '@/shared/lib/utils/utils';
 import Text from '@/shared/ui/Text/Text';
@@ -30,28 +29,9 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
 
   const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
 
-  const { width } = useMediaWidth();
-
   useMemo(() => {
     setHiddenItems(new Set());
   }, [data]);
-
-  const legendNavigation = useMemo<Highcharts.LegendNavigationOptions>(() => {
-    if (width <= 1116) {
-      return { enabled: false };
-    }
-
-    return {
-      animation: true,
-      arrowSize: 11,
-      activeColor: theme === 'light' ? '#17212B' : '#FFFFFF',
-      inactiveColor: '#7A899A',
-      style: {
-        cursor: 'pointer',
-        color: theme === 'light' ? '#17212B' : '#FFFFFF'
-      }
-    };
-  }, [width, theme]);
 
   const chartData = useMemo(() => {
     const visibleItems = data.filter((item) => !hiddenItems.has(item.name));
@@ -213,7 +193,16 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         fontFamily: 'Haas Grot Text R, sans-serif'
       },
       maxHeight: 100,
-      navigation: legendNavigation
+      navigation: {
+        animation: true,
+        arrowSize: 11,
+        activeColor: theme === 'light' ? '#17212B' : '#FFFFFF',
+        inactiveColor: '#7A899A',
+        style: {
+          cursor: 'pointer',
+          color: theme === 'light' ? '#17212B' : '#FFFFFF'
+        }
+      }
     },
     series: [
       {
@@ -221,7 +210,19 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         borderWidth: 0,
         data: chartData as unknown as Highcharts.PointOptionsObject[]
       }
-    ]
+    ],
+    responsive: {
+      rules: [
+        {
+          condition: { maxWidth: 1116 },
+          chartOptions: {
+            legend: {
+              navigation: { enabled: false }
+            }
+          }
+        }
+      ]
+    }
   };
 
   return (

@@ -84,7 +84,7 @@ const TreasuryBalanceByNetwork = ({
   tableData
 }: TreasuryBalanceByNetworkProps) => {
   return (
-    <div className='tablet:max-w-[522px] w-full max-w-full'>
+    <div className='w-full max-w-full lg:max-w-[522px]'>
       <DataTable
         data={tableData}
         columns={treasuryColumns}
