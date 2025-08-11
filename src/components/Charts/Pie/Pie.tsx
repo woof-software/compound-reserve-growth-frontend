@@ -211,6 +211,7 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         data: chartData as unknown as Highcharts.PointOptionsObject[]
       }
     ]
+    //TODO: add navigate responsive
     // responsive: {
     //   rules: [
     //     {
