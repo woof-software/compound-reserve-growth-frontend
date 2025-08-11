@@ -210,19 +210,20 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         borderWidth: 0,
         data: chartData as unknown as Highcharts.PointOptionsObject[]
       }
-    ],
-    responsive: {
-      rules: [
-        {
-          condition: { maxWidth: 1116 },
-          chartOptions: {
-            legend: {
-              navigation: { enabled: false }
-            }
-          }
-        }
-      ]
-    }
+    ]
+    //TODO: add navigate responsive
+    // responsive: {
+    //   rules: [
+    //     {
+    //       condition: { maxWidth: 1116 },
+    //       chartOptions: {
+    //         legend: {
+    //           navigation: { enabled: false }
+    //         }
+    //       }
+    //     }
+    //   ]
+    // }
   };
 
   return (

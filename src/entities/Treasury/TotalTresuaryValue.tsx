@@ -447,7 +447,9 @@ const Filters = ({
             selectedValue={groupBy}
             onToggle={toggleSingle}
             onClose={closeSingle}
-            onSelect={selectSingle}
+            onSelect={(value: string) => {
+              selectSingle(value);
+            }}
             disabled={isLoading}
             triggerContentClassName='p-[5px]'
           />

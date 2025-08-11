@@ -1,6 +1,5 @@
 import React, { FC } from 'react';
 
-import { cn } from '@/shared/lib/classNames/classNames';
 import {
   Dropdown,
   DropdownItem,
@@ -32,33 +31,32 @@ const SingleDropdown: FC<SingleDropdownProps> = ({
   contentClassName
 }) => {
   return (
-    <div className={cn({ 'pointer-events-none': disabled })}>
-      <Dropdown
-        triggerContent={
-          <TriggerContent
-            className={triggerContentClassName}
-            title={selectedValue || options[0]}
-            isOpen={isOpen}
-          />
-        }
-        open={isOpen}
-        onToggle={onToggle}
-        onClose={onClose}
-        contentClassName={contentClassName}
-      >
-        <Each
-          data={options}
-          render={(el, index) => (
-            <DropdownItem
-              key={index}
-              asset={el}
-              onSelect={onSelect}
-              isSelected={selectedValue === el}
-            />
-          )}
+    <Dropdown
+      isDisabled={disabled}
+      triggerContent={
+        <TriggerContent
+          className={triggerContentClassName}
+          title={selectedValue || options[0]}
+          isOpen={isOpen}
         />
-      </Dropdown>
-    </div>
+      }
+      open={isOpen}
+      onToggle={onToggle}
+      onClose={onClose}
+      contentClassName={contentClassName}
+    >
+      <Each
+        data={options}
+        render={(el, index) => (
+          <DropdownItem
+            key={index}
+            asset={el}
+            onSelect={onSelect}
+            isSelected={selectedValue === el}
+          />
+        )}
+      />
+    </Dropdown>
   );
 };
 

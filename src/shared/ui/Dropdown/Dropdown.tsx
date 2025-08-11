@@ -18,9 +18,15 @@ import CheckStroke from '@/assets/svg/check-stroke.svg';
 
 interface DropdownProps extends PropsWithChildren {
   triggerContent: ReactNode;
+
   open: boolean;
+
+  isDisabled?: boolean;
+
   onToggle: () => void;
+
   onClose: () => void;
+
   contentClassName?: string;
 }
 
@@ -73,6 +79,7 @@ const useDropdown = (type: 'single' | 'multiple') => {
 
 const Dropdown: FC<DropdownProps> = ({
   open,
+  isDisabled,
   onToggle,
   onClose,
   triggerContent,
@@ -85,8 +92,10 @@ const Dropdown: FC<DropdownProps> = ({
 
   return (
     <div
-      className='relative z-10 w-fit'
       ref={containerRef}
+      className={cn('relative z-10 w-fit', {
+        'pointer-events-none': isDisabled
+      })}
     >
       <div>
         <div
@@ -101,6 +110,8 @@ const Dropdown: FC<DropdownProps> = ({
               'hide-scrollbar shadow-10 border-secondary-18 bg-primary-15 absolute top-10 right-0 grid max-h-[234px] min-w-[168px] gap-0.5 overflow-y-auto rounded-lg border border-solid p-2',
               contentClassName
             )}
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
           >
             {children}
           </div>
@@ -123,7 +134,9 @@ const DropdownItem: FC<DropdownItemProps> = ({
           'bg-secondary-12': isSelected
         }
       )}
-      onClick={() => onSelect(asset)}
+      onClick={() => {
+        onSelect(asset);
+      }}
     >
       <Text
         size='11'
