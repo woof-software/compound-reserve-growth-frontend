@@ -450,7 +450,7 @@ const LineChart: FC<LineChartProps> = ({
           states: { hover: { lineWidthPlus: 0 } },
           threshold: null,
           fillOpacity: 0.1,
-          stacking: 'normal',
+          // stacking: 'normal',
           findNearestPointBy: 'x'
         }
       },
