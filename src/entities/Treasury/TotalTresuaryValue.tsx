@@ -303,6 +303,7 @@ const TotalTresuaryValue = ({
   }, []);
 
   const onClearAll = useCallback(() => {
+    console.log(1);
     onClearSelectedOptions();
 
     selectSingle('None');
@@ -447,7 +448,10 @@ const Filters = ({
             selectedValue={groupBy}
             onToggle={toggleSingle}
             onClose={closeSingle}
-            onSelect={selectSingle}
+            onSelect={(value: string) => {
+              console.log('value=>', value);
+              selectSingle(value);
+            }}
             disabled={isLoading}
             triggerContentClassName='p-[5px]'
           />

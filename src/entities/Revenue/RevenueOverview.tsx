@@ -2,12 +2,21 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import RevenueOverviewUSD, {
-  TableRowData
+  DATE_TYPE_TABS,
+  DateType,
+  Period,
+  PeriodMap,
+  ROLLING_TABS,
+  TableRowData,
+  TO_DATE_TABS,
+  toDateHeaderMap,
+  ToDateTab
 } from '@/components/RevenuePageTable/RevenueOverviewUSD';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
   capitalizeFirstLetter,
   formatPrice,
+  formatUSD,
   networkColorMap
 } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
@@ -15,15 +24,6 @@ import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
-
-const formatUSD = (num: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(num);
-};
 
 const getStartDateForPeriod = (
   period: string,
@@ -58,21 +58,6 @@ const getStartDateForPeriod = (
 
   now.setHours(0, 0, 0, 0);
   return now;
-};
-
-const ROLLING_TABS = ['7D', '30D', '90D', '180D', '365D'] as const;
-const TO_DATE_TABS = ['WTD', 'MTD', 'YTD'] as const;
-const DATE_TYPE_TABS = ['Rolling', 'To Date'] as const;
-
-type RollingTab = (typeof ROLLING_TABS)[number];
-type ToDateTab = (typeof TO_DATE_TABS)[number];
-type DateType = (typeof DATE_TYPE_TABS)[number];
-type Period = RollingTab | ToDateTab;
-
-const toDateHeaderMap: Record<ToDateTab, string> = {
-  WTD: 'Week to Date',
-  MTD: 'Month to Date',
-  YTD: 'Year to Date'
 };
 
 const createTableColumns = (
@@ -126,15 +111,13 @@ const RevenueOverview = ({
   const [dateType, setDateType] = useState<DateType>('Rolling');
   const [period, setPeriod] = useState<Period>('7D');
 
-  const primaryTabs = dateType === 'Rolling' ? ROLLING_TABS : TO_DATE_TABS;
+  const [totalFooterData, setTotalFooterData] = useState<PeriodMap | null>(
+    null
+  );
 
-  useEffect(() => {
-    if (dateType === 'To Date') {
-      setPeriod(TO_DATE_TABS[0]);
-    } else {
-      setPeriod(ROLLING_TABS[0]);
-    }
-  }, [dateType]);
+  console.log('totalFooterData=>', totalFooterData);
+
+  const primaryTabs = dateType === 'Rolling' ? ROLLING_TABS : TO_DATE_TABS;
 
   const stableTableColumns = useMemo(() => {
     return createTableColumns(primaryTabs, dateType);
@@ -182,6 +165,8 @@ const RevenueOverview = ({
         totals[p] += chainData[p] as number;
       });
     }
+
+    setTotalFooterData(totals);
 
     const tableData: TableRowData[] = Array.from(tableDataMap.values());
 
@@ -246,6 +231,14 @@ const RevenueOverview = ({
 
   const tableKey = `${dateType}-${primaryTabs.join('-')}`;
 
+  useEffect(() => {
+    if (dateType === 'To Date') {
+      setPeriod(TO_DATE_TABS[0]);
+    } else {
+      setPeriod(ROLLING_TABS[0]);
+    }
+  }, [dateType]);
+
   return (
     <Card
       title='Revenue Overview USD'
@@ -255,7 +248,7 @@ const RevenueOverview = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px]',
-        content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-10 lg:px-10'
       }}
     >
       <div className='flex justify-end gap-3 px-0 py-3'>
@@ -287,6 +280,8 @@ const RevenueOverview = ({
             data={processedData.tableData}
             columns={stableTableColumns}
             footerContent={processedData.footerContent}
+            dateType={dateType}
+            totalFooterData={totalFooterData}
           />
           <PieChart
             className='max-h-[400px] w-full max-w-full lg:max-w-[336.5px]'

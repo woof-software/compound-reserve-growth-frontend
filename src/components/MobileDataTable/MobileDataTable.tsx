@@ -26,7 +26,7 @@ const MobileDataTable = <T,>({
     });
 
   return (
-    <div className='block lg:hidden'>
+    <div className='block w-full lg:hidden'>
       {children(dataRows)}
       <div
         className={cn('hidden items-center justify-between px-10 py-5', {

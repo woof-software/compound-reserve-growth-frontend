@@ -19,6 +19,7 @@ import Text from '../Text/Text';
 
 export type ExtendedColumnDef<T> = ColumnDef<T> & {
   align?: 'left' | 'center' | 'right';
+  accessorKey?: keyof T;
 };
 
 interface DataTableProps<T> {
