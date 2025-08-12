@@ -99,15 +99,20 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
   } = mapMetricData(data);
 
   return (
-    <div className='flex flex-col gap-5'>
-      <div className='flex flex-row gap-5'>
+    <div className='flex flex-col gap-2.5 md:gap-5'>
+      <div className='flex flex-row flex-wrap gap-2.5 md:gap-5'>
         <Card
           isLoading={isLoading}
-          className={{ container: 'h-[230px] flex-1 lg:h-[200px]' }}
+          className={{
+            container:
+              'h-auto min-h-[214px] min-w-[343px] flex-1 md:h-[230px] md:min-w-auto lg:h-[200px]',
+            content: 'p-8 md:p-10'
+          }}
         >
           <ValueMetricField
             className={{
-              container: 'flex-wrap'
+              container: 'flex-wrap',
+              content: ''
             }}
             label='Total Treasury Value'
             value={formatPrice(totalValue, 1)}
@@ -124,7 +129,11 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
         </Card>
         <Card
           isLoading={isLoading}
-          className={{ container: 'h-[230px] flex-1 lg:h-[200px]' }}
+          className={{
+            container:
+              'h-auto min-h-[214px] min-w-[343px] flex-1 md:h-[230px] md:min-w-auto lg:h-[200px]',
+            content: 'p-8 md:p-10'
+          }}
         >
           <ValueMetricField
             label='Total COMP Value'
@@ -141,7 +150,11 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
         </Card>
         <Card
           isLoading={isLoading}
-          className={{ container: 'h-[230px] flex-1 lg:h-[200px]' }}
+          className={{
+            container:
+              'h-auto min-h-[214px] min-w-[343px] flex-1 md:h-[230px] md:min-w-auto lg:h-[200px]',
+            content: 'p-8 md:p-10'
+          }}
         >
           <ValueMetricField
             label='Total Non-Comp Value'
@@ -157,10 +170,14 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           />
         </Card>
       </div>
-      <div className='flex flex-row gap-5'>
+      <div className='flex flex-row flex-wrap gap-2.5 md:gap-5'>
         <Card
           isLoading={isLoading}
-          className={{ container: 'h-[225px] flex-1' }}
+          className={{
+            container:
+              'h-auto min-h-[214px] min-w-[343px] flex-1 md:h-[225px] md:min-w-auto',
+            content: 'p-8 md:p-10'
+          }}
         >
           <ValueMetricField
             className={{
@@ -182,7 +199,11 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
         </Card>
         <Card
           isLoading={isLoading}
-          className={{ container: 'h-[225px] flex-1' }}
+          className={{
+            container:
+              'h-auto min-h-[214px] min-w-[343px] flex-1 md:h-[225px] md:min-w-auto',
+            content: 'p-8 md:p-10'
+          }}
         >
           <ValueMetricField
             className={{

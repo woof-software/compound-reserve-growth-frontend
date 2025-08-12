@@ -103,6 +103,8 @@ function isPeriod(value: string): value is Period {
   return allPeriods.includes(value);
 }
 
+const NO_DATA_AVAILABLE = 'No data available';
+
 const RevenueOverview = ({
   revenueData: rawData,
   isLoading,
@@ -114,8 +116,6 @@ const RevenueOverview = ({
   const [totalFooterData, setTotalFooterData] = useState<PeriodMap | null>(
     null
   );
-
-  console.log('totalFooterData=>', totalFooterData);
 
   const primaryTabs = dateType === 'Rolling' ? ROLLING_TABS : TO_DATE_TABS;
 
@@ -211,6 +211,10 @@ const RevenueOverview = ({
     return { tableData, pieData, footerContent };
   }, [rawData, dateType, period, primaryTabs]);
 
+  const hasData = processedData.tableData.length > 0;
+
+  const tableKey = `${dateType}-${primaryTabs.join('-')}`;
+
   const handleDateTypeChange = useCallback(
     (newType: string) => {
       if (isDateType(newType) && newType !== dateType) {
@@ -225,11 +229,6 @@ const RevenueOverview = ({
       setPeriod(newPeriod);
     }
   }, []);
-
-  const hasData = processedData.tableData.length > 0;
-  const noDataMessage = 'No data available';
-
-  const tableKey = `${dateType}-${primaryTabs.join('-')}`;
 
   useEffect(() => {
     if (dateType === 'To Date') {
@@ -248,10 +247,10 @@ const RevenueOverview = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px]',
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-10 lg:px-10'
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-0 md:pb-10 lg:px-10'
       }}
     >
-      <div className='flex justify-end gap-3 px-0 py-3'>
+      <div className='flex justify-end gap-3 px-10 py-3 lg:px-0'>
         <TabsGroup
           key={dateType}
           tabs={[...primaryTabs]}
@@ -270,7 +269,7 @@ const RevenueOverview = ({
             size='12'
             className='text-primary-14'
           >
-            {noDataMessage}
+            {NO_DATA_AVAILABLE}
           </Text>
         </div>
       ) : (

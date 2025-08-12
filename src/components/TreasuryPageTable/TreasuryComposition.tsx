@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
+import * as React from 'react';
 
+import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { formatPrice } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -78,31 +80,107 @@ const TreasuryComposition = ({
   }, [activeFilter]);
 
   return (
-    <div className='max-h-[400px] w-full max-w-1/2 overflow-y-auto lg:max-w-[522px]'>
-      <DataTable
-        data={tableData}
-        columns={columns}
-        pageSize={10}
-        enableSorting={true}
-        headerCellClassName='py-[13px] px-[5px]'
-        cellClassName='py-3 px-[5px]'
-        headerTextClassName='text-primary-14 font-medium'
-      />
-      <div className='flex items-center justify-between px-[5px] py-3'>
-        <Text
-          size='11'
-          className='text-primary-14'
-        >
-          Total Balance
-        </Text>
-        <Text
-          size='11'
-          className='text-primary-14'
-        >
-          {formatPrice(totalBalance, 1)}
-        </Text>
+    <>
+      <MobileDataTable
+        className='md:hidden'
+        tableData={tableData}
+      >
+        {(dataRows) => (
+          <>
+            {dataRows.map((row, index) => (
+              <div
+                key={index}
+                className='border-secondary-23 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b px-6 py-5 md:gap-x-[63px]'
+              >
+                <div className='grid w-full max-w-[73px]'>
+                  <Text
+                    size='8'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14 min-w-[73px]'
+                  >
+                    Asset
+                  </Text>
+                  <div className='flex items-center gap-1'>
+                    <Icon
+                      name={filterConfig[activeFilter].getIconName(row)}
+                      className='h-4 w-4'
+                      folder={filterConfig[activeFilter].folder}
+                    />
+                    <Text
+                      size='11'
+                      lineHeight='21'
+                      className='truncate'
+                    >
+                      {row.name}
+                    </Text>
+                  </div>
+                </div>
+                <div className='grid w-full max-w-[73px]'>
+                  <Text
+                    size='8'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Total Balance USD
+                  </Text>
+                  <Text
+                    size='11'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {formatPrice(row.balance, 1)}
+                  </Text>
+                </div>
+              </div>
+            ))}
+            <div className='flex w-full items-center justify-between px-6 py-5'>
+              <Text
+                size='8'
+                lineHeight='18'
+                weight='500'
+                className='text-primary-14 min-w-[73px]'
+              >
+                Total Balance
+              </Text>
+              <Text
+                size='11'
+                lineHeight='21'
+                className='min-w-[73px] truncate'
+              >
+                {formatPrice(totalBalance, 1)}
+              </Text>
+            </div>
+          </>
+        )}
+      </MobileDataTable>
+      <div className='hidden max-h-[400px] w-full max-w-full overflow-y-auto md:block md:max-w-1/2 lg:max-w-[522px]'>
+        <DataTable
+          data={tableData}
+          columns={columns}
+          pageSize={10}
+          enableSorting={true}
+          headerCellClassName='py-[13px] px-[5px]'
+          cellClassName='py-3 px-[5px]'
+          headerTextClassName='text-primary-14 font-medium'
+        />
+        <div className='flex items-center justify-between px-[5px] py-3'>
+          <Text
+            size='11'
+            className='text-primary-14'
+          >
+            Total Balance
+          </Text>
+          <Text
+            size='11'
+            className='text-primary-14'
+          >
+            {formatPrice(totalBalance, 1)}
+          </Text>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

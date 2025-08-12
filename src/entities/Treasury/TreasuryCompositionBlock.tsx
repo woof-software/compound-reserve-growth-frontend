@@ -185,10 +185,10 @@ const TreasuryCompositionBlock = memo(
         className={{
           loading: 'min-h-[inherit]',
           container: 'min-h-[571px]',
-          content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
+          content: 'flex flex-col gap-3 px-0 pt-0 pb-3 md:px-10 md:pb-10'
         }}
       >
-        <div className='flex items-center justify-end gap-4 py-3'>
+        <div className='flex flex-wrap items-center justify-end gap-4 px-6 py-4 md:px-0 md:py-3'>
           <Switch
             label='Include COMP Holdings'
             positionLabel='left'
@@ -217,13 +217,13 @@ const TreasuryCompositionBlock = memo(
             />
           </div>
         </div>
-        <div className='flex justify-between'>
+        <div className='flex flex-col justify-between md:flex-row'>
           <View.Condition if={!hasData}>
             <NoDataPlaceholder onButtonClick={onClearAll} />
           </View.Condition>
           <View.Condition if={hasData}>
             <PieChart
-              className='max-h-[400px] max-w-1/2 lg:max-w-[336.5px]'
+              className='max-h-[400px] max-w-full md:max-w-1/2 lg:max-w-[336.5px]'
               data={chartData}
             />
             <TreasuryComposition

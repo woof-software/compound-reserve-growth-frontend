@@ -22,7 +22,7 @@ const RevenuePage = () => {
   useScrollToHash(!isLoading);
 
   return (
-    <div className='flex flex-col gap-[70px]'>
+    <div className='flex flex-col gap-6 md:gap-[42px] lg:gap-[70px]'>
       <div className='flex flex-col gap-[15px]'>
         <Text
           tag='h1'
@@ -34,12 +34,12 @@ const RevenuePage = () => {
         <Text
           tag='p'
           size='15'
-          className='text-primary-14'
+          className='text-primary-14 leading-[140%] md:leading-[100%]'
         >
           Track Compound Protocol revenue streams across various networks.
         </Text>
       </div>
-      <div className='flex flex-col gap-5'>
+      <div className='flex flex-col gap-2.5 md:gap-5'>
         <RevenueMetrics
           revenueData={pageData}
           isLoading={isLoading}
