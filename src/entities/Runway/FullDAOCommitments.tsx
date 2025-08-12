@@ -126,7 +126,7 @@ const FullDAOCommitmentsBlock = () => {
         loading: 'min-h-[571px]'
       }}
     >
-      <div className='flex justify-end gap-3 px-0 py-3'>
+      <div className='flex justify-end gap-3 px-6 py-3 md:px-6 lg:px-0'>
         <CSVDownloadButton
           data={processedData}
           filename='Full DAO Commitments'

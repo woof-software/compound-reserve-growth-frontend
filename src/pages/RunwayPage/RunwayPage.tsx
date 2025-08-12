@@ -11,7 +11,7 @@ const RunwayPage = () => {
   const { isLoading } = useRunway();
   useScrollToHash(!isLoading);
   return (
-    <div className='flex flex-col gap-[42px] lg:gap-[70px]'>
+    <div className='flex flex-col gap-6 md:gap-[42px] lg:gap-[70px]'>
       <div className='flex flex-col gap-[15px]'>
         <Text
           tag='h1'
@@ -23,13 +23,13 @@ const RunwayPage = () => {
         <Text
           tag='p'
           size='15'
-          className='text-primary-14'
+          className='text-primary-14 leading-[140%] md:leading-[100%]'
         >
           Track Compound DAO&apos;s financial health through treasury runway,
           expenses, and service provider commitments.
         </Text>
       </div>
-      <div className='flex flex-col gap-5'>
+      <div className='flex flex-col gap-2.5 md:gap-5'>
         <RunwayMetrics />
         <AnnualisedExpensesBlock />
         <CurrentServiceProvidersBlock />

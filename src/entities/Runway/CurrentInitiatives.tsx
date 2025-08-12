@@ -88,7 +88,7 @@ const CurrentInitiativesBlock = () => {
       isError={isError}
       className={{
         loading: 'min-h-[571px]',
-        content: 'px-0 lg:px-10'
+        content: 'px-0 pt-0 lg:px-10 lg:pt-10'
       }}
     >
       <div className='flex flex-col justify-between gap-10 lg:flex-row'>

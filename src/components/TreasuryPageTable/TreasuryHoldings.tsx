@@ -1,10 +1,9 @@
 import * as React from 'react';
-import { type ColumnDef } from '@tanstack/react-table';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { formatLargeNumber, formatPrice } from '@/shared/lib/utils/utils';
-import DataTable from '@/shared/ui/DataTable/DataTable';
+import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
@@ -25,9 +24,10 @@ export interface TreasuryHoldingsProps {
   tableData: TreasuryBalanceByNetworkType[];
 }
 
-const treasuryColumns: ColumnDef<TreasuryBalanceByNetworkType>[] = [
+const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
   {
-    accessorKey: 'symbol',
+    id: 'symbol',
+    accessorFn: (row) => row.symbol,
     header: 'Symbol',
     enableSorting: true,
     size: 168,
@@ -43,12 +43,14 @@ const treasuryColumns: ColumnDef<TreasuryBalanceByNetworkType>[] = [
     )
   },
   {
-    accessorKey: 'chain',
+    id: 'chain',
+    accessorFn: (row) => row.chain,
     header: 'Chain',
     enableSorting: true
   },
   {
-    accessorKey: 'market',
+    id: 'market',
+    accessorFn: (row) => row.market,
     header: 'Market',
     enableSorting: true,
     cell: ({ row }) => (
@@ -58,7 +60,8 @@ const treasuryColumns: ColumnDef<TreasuryBalanceByNetworkType>[] = [
     )
   },
   {
-    accessorKey: 'qty',
+    id: 'qty',
+    accessorFn: (row) => row.qty,
     header: 'QTY',
     enableSorting: true,
     cell: ({ row }) => (
@@ -66,7 +69,8 @@ const treasuryColumns: ColumnDef<TreasuryBalanceByNetworkType>[] = [
     )
   },
   {
-    accessorKey: 'value',
+    id: 'value',
+    accessorFn: (row) => row.value,
     header: 'Value',
     enableSorting: true,
     cell: ({ row }) => (
@@ -74,7 +78,8 @@ const treasuryColumns: ColumnDef<TreasuryBalanceByNetworkType>[] = [
     )
   },
   {
-    accessorKey: 'price',
+    id: 'price',
+    accessorFn: (row) => row.price,
     header: 'Price',
     enableSorting: true,
     cell: ({ row }) => (
@@ -82,21 +87,18 @@ const treasuryColumns: ColumnDef<TreasuryBalanceByNetworkType>[] = [
     )
   },
   {
-    accessorKey: 'source',
+    id: 'source',
+    accessorFn: (row) => row.source,
     header: 'Source',
     enableSorting: true,
     size: 120,
-    cell: ({ row }) => {
-      const { source, address, chain } = row.original;
-
-      return (
-        <AddressTooltip
-          text={source}
-          address={address}
-          chain={chain}
-        />
-      );
-    }
+    cell: ({ row }) => (
+      <AddressTooltip
+        text={row.original.source}
+        address={row.original.address}
+        chain={row.original.chain}
+      />
+    )
   }
 ];
 
@@ -108,7 +110,7 @@ const TreasuryHoldings = ({ tableData }: TreasuryHoldingsProps) => {
           dataRows.map((row, index) => (
             <div
               key={index}
-              className='border-secondary-23 flex flex-wrap items-center justify-items-start gap-x-[63px] gap-y-3 border-b px-10 py-5'
+              className='border-secondary-23 flex flex-wrap items-center justify-items-start gap-x-3 gap-y-3 border-b px-6 py-5 md:gap-x-[63px] md:px-10'
             >
               <div className='grid w-full max-w-[73px]'>
                 <Text

@@ -53,7 +53,7 @@ const RevenueMetrics = ({
   }
 
   return (
-    <div className='flex flex-row flex-wrap gap-5'>
+    <div className='flex flex-row flex-wrap gap-2.5 md:gap-5'>
       {yearsToDisplay.map((yearOrIndex, index) => {
         const isPlaceholder = isLoading || isError;
         const key = isPlaceholder ? index : (yearOrIndex as string);
@@ -67,7 +67,8 @@ const RevenueMetrics = ({
             isError={isError}
             className={{
               container: 'max-w-full min-w-64 flex-1 basis-64',
-              loading: 'h-[317px]'
+              loading: 'h-[317px]',
+              header: 'px-10'
             }}
             title={!isPlaceholder ? `${year} Revenue` : undefined}
           >

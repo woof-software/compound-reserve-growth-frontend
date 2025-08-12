@@ -12,11 +12,14 @@ interface MobileDataTableProps<T> {
   pageSize?: number;
 
   children: (dataRows: T[]) => ReactNode;
+
+  className?: string;
 }
 
 const MobileDataTable = <T,>({
   tableData,
   pageSize = 10,
+  className,
   children
 }: MobileDataTableProps<T>) => {
   const { dataRows, pageIndex, maxPages, goNext, goPrev, goLast, goFirst } =
@@ -26,14 +29,17 @@ const MobileDataTable = <T,>({
     });
 
   return (
-    <div className='block w-full lg:hidden'>
+    <div className={cn('block w-full lg:hidden', className)}>
       {children(dataRows)}
       <div
-        className={cn('hidden items-center justify-between px-10 py-5', {
-          flex: tableData.length > pageSize
-        })}
+        className={cn(
+          'hidden items-center justify-center px-6 py-5 md:justify-between md:px-10',
+          {
+            flex: tableData.length > pageSize
+          }
+        )}
       >
-        <Text className='text-primary-14 !text-[12.6px]'>
+        <Text className='text-primary-14 hidden !text-[12.6px] md:block'>
           Showing{' '}
           <span className='mx-1 text-[11.5px] leading-[21px] font-bold'>
             {pageIndex * pageSize + 1}

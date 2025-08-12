@@ -247,7 +247,7 @@ const RevenueOverview = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px]',
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-10 lg:px-10'
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-0 md:pb-10 lg:px-10'
       }}
     >
       <div className='flex justify-end gap-3 px-10 py-3 lg:px-0'>

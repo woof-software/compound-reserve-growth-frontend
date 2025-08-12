@@ -69,7 +69,7 @@ const Card: FC<CardProps> = ({
         <View.Condition if={Boolean(title)}>
           <div
             className={cn(
-              'bg-card-header flex items-center gap-3 px-10 py-4',
+              'bg-card-header flex items-center gap-3 px-6 py-5 md:px-10 md:py-4',
               className?.header
             )}
           >

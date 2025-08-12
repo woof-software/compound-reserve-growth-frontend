@@ -93,7 +93,7 @@ const TreasuryBalanceByNetwork = ({
           dataRows.map((row, index) => (
             <div
               key={index}
-              className='border-secondary-23 flex flex-wrap items-center justify-between gap-x-[63px] gap-y-3 border-b px-10 py-5'
+              className='border-secondary-23 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b px-6 py-5 md:gap-x-[63px] md:px-10'
             >
               <div className='grid w-full max-w-[73px]'>
                 <Text
