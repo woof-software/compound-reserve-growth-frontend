@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import {
@@ -6,6 +6,8 @@ import {
   routeTitles,
   VALID_NAVIGATION_ROUTES
 } from '@/app/providers/router/config';
+import Portal from '@/components/Portal/Portal';
+import { cn } from '@/shared/lib/classNames/classNames';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import Link from '@/shared/ui/Link/Link';
@@ -49,6 +51,8 @@ const Header: FC = () => {
   const navigate = useNavigate();
   const currentPath = location.pathname;
 
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
   const isValidRoute = (VALID_NAVIGATION_ROUTES as readonly string[]).includes(
     currentPath
   );
@@ -56,6 +60,10 @@ const Header: FC = () => {
   const activeRoute = isValidRoute
     ? (currentPath as commonRoutes)
     : commonRoutes.TREASURY;
+
+  const isActive = (route: commonRoutes) => activeRoute === route;
+
+  const onToggle = () => setIsOpen(!isOpen);
 
   useEffect(() => {
     const isComingSoonRoute = navLinks.some(
@@ -66,20 +74,30 @@ const Header: FC = () => {
     }
   }, [currentPath, isValidRoute, navigate]);
 
-  const isActive = (route: commonRoutes) => activeRoute === route;
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('disable-scroll-vertical');
+    } else {
+      document.body.classList.remove('disable-scroll-vertical');
+    }
+
+    return () => {
+      document.body.classList.remove('disable-scroll-vertical');
+    };
+  }, [isOpen]);
 
   return (
-    <header className='py-3'>
-      <div className='mx-auto flex w-full max-w-[1084px] items-center gap-5'>
+    <header className='z-[1000] py-3 md:mt-4 md:py-[8.5px]'>
+      <div className='mx-auto flex w-full max-w-[1084px] items-center justify-between gap-5 md:justify-start'>
         <Link to={commonRoutes.TREASURY}>
           <Icon
             name='logo'
-            className='h-[28px] w-[121px]'
+            className='h-[27px] w-[121px]'
             color='primary-11'
             isRound={false}
           />
         </Link>
-        <nav className='flex items-center gap-1.5'>
+        <nav className='hidden items-center gap-1.5 md:flex'>
           <Each
             data={navLinks}
             render={(link, index) =>
@@ -131,7 +149,49 @@ const Header: FC = () => {
             }
           />
         </nav>
+        <button
+          className='p4 bg-secondary-24 flex h-11 w-11 items-center justify-center rounded-full md:hidden'
+          onClick={onToggle}
+        >
+          <Icon
+            name={isOpen ? 'close-menu' : 'burger-menu'}
+            className='h-4 w-4'
+          />
+        </button>
       </div>
+      <Portal>
+        <aside
+          className={cn(
+            'bg-background fixed top-[68px] right-0 z-[100] h-full w-full transform p-10 transition-transform duration-200 ease-in-out',
+            isOpen ? 'translate-x-0' : 'translate-x-full'
+          )}
+        >
+          <div className='flex h-full flex-col justify-center gap-2'>
+            <Each
+              data={navLinks}
+              render={(link, index) => (
+                <NavLink
+                  key={index}
+                  to={link.to}
+                  isActive={isActive(link.to)}
+                  onClick={onToggle}
+                >
+                  <Text
+                    className={cn('text-secondary-25 w-fit', {
+                      'text-success-11': isActive(link.to)
+                    })}
+                    size='32'
+                    lineHeight='36'
+                    weight='500'
+                  >
+                    {link.title}
+                  </Text>
+                </NavLink>
+              )}
+            />
+          </div>
+        </aside>
+      </Portal>
     </header>
   );
 };

@@ -132,11 +132,6 @@ const RevenueBreakdown = ({ data, columns }: RevenueBreakdownProps) => {
     });
   }, [data, columns]);
 
-  console.log('data=>', data);
-  console.log('columns=>', columns);
-
-  console.log('filteredMobileData=>', filteredMobileData);
-
   return (
     <>
       <MobileDataTable tableData={filteredMobileData}>

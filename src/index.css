@@ -69,6 +69,8 @@
   --secondary-21: #CDD3D9;
   --secondary-22: #F0F2F5;
   --secondary-23: #17212B24;
+  --secondary-24: #D8DFE5;
+  --secondary-25: #19232E;
 
   /*=======================*/
   /* Success Colors */
@@ -126,6 +128,8 @@
   --secondary-21: #32404D;
   --secondary-22: #151E27;
   --secondary-23: #FFFFFF24;
+  --secondary-24: #2B3947;
+  --secondary-25: #FFF;
 
   /*=======================*/
   /* Success Colors */
@@ -191,6 +195,8 @@
   --color-secondary-21: var(--secondary-21);
   --color-secondary-22: var(--secondary-22);
   --color-secondary-23: var(--secondary-23);
+  --color-secondary-24: var(--secondary-24);
+  --color-secondary-25: var(--secondary-25);
 
   /*=======================*/
   /* Success Colors */
@@ -284,4 +290,12 @@
 
 .highcharts-container .highcharts-background  {
   fill: transparent;
+}
+
+.disable-scroll-vertical {
+  overflow: hidden !important;
+
+  overscroll-behavior: none;
+
+  touch-action: none;
 }
