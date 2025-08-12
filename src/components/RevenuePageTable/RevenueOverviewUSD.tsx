@@ -131,7 +131,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                         lineHeight='21'
                         className='truncate'
                       >
-                        {el[1]}
+                        {formatUSD(el[1] || 0)}
                       </Text>
                     </div>
                   )

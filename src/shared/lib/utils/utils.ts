@@ -482,3 +482,25 @@ export const formatUSD = (num: number): string => {
     maximumFractionDigits: 2
   }).format(num);
 };
+
+export const formatCurrencyValue = (value: unknown): string => {
+  const num = Number(value);
+
+  if (
+    value === null ||
+    typeof value === 'undefined' ||
+    isNaN(num) ||
+    num === 0
+  ) {
+    return '-';
+  }
+
+  const isNegative = num < 0;
+  const absValue = Math.abs(num);
+
+  const formattedNumber = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 0
+  }).format(absValue);
+
+  return isNegative ? `-$${formattedNumber}` : `$${formattedNumber}`;
+};

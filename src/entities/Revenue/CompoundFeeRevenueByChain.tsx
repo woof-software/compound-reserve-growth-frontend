@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import CompoundFeeRevenuebyChainComponent, {
+  Interval,
   ProcessedRevenueData as TableData
 } from '@/components/RevenuePageTable/CompoundFeeRevenuebyChain';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
@@ -8,6 +9,7 @@ import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
   capitalizeFirstLetter,
   ChartDataItem,
+  formatCurrencyValue,
   longMonthNames,
   shortMonthNames
 } from '@/shared/lib/utils/utils';
@@ -34,29 +36,9 @@ export interface PrecomputedViews {
   weekly: Record<string, View>;
 }
 
-const intervalOptions = ['Quarterly', 'Monthly', 'Weekly'];
+const intervalOptions: Interval[] = ['Quarterly', 'Monthly', 'Weekly'];
 
-const formatCurrencyValue = (value: unknown): string => {
-  const num = Number(value);
-
-  if (
-    value === null ||
-    typeof value === 'undefined' ||
-    isNaN(num) ||
-    num === 0
-  ) {
-    return '-';
-  }
-
-  const isNegative = num < 0;
-  const absValue = Math.abs(num);
-
-  const formattedNumber = new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 0
-  }).format(absValue);
-
-  return isNegative ? `-$${formattedNumber}` : `$${formattedNumber}`;
-};
+const NO_DATA_AVAILABLE = 'No data available';
 
 export function precomputeViews(
   rawData: ChartDataItem[]
@@ -236,7 +218,9 @@ const CompoundFeeRevenueByChain = ({
   const intervalDropdown = useDropdown('single');
   const periodDropdown = useDropdown('single');
 
-  const [selectedInterval, setSelectedInterval] = useState(intervalOptions[0]);
+  const [selectedInterval, setSelectedInterval] = useState<Interval>(
+    intervalOptions[0]
+  );
   const [selectedPeriod, setSelectedPeriod] = useState<string | undefined>();
 
   const precomputedViews = useMemo(
@@ -248,18 +232,6 @@ const CompoundFeeRevenueByChain = ({
     () => generateOptions(precomputedViews, selectedInterval),
     [precomputedViews, selectedInterval]
   );
-
-  useEffect(() => {
-    if (precomputedViews && !selectedPeriod) {
-      const initialOptions = generateOptions(
-        precomputedViews,
-        selectedInterval
-      );
-      if (initialOptions.options.length > 0) {
-        setSelectedPeriod(initialOptions.options[0]);
-      }
-    }
-  }, [precomputedViews, selectedPeriod, selectedInterval]);
 
   const currentView = useMemo(() => {
     if (!precomputedViews || !selectedPeriod) {
@@ -296,12 +268,14 @@ const CompoundFeeRevenueByChain = ({
     return { ...viewData, columns: finalColumns };
   }, [precomputedViews, selectedInterval, selectedPeriod]);
 
+  const hasData = currentView.tableData.length > 0;
+
   const handleIntervalSelect = (newInterval: string) => {
     const newOptions = generateOptions(precomputedViews, newInterval);
     const newDefaultPeriod =
       newOptions.options.length > 0 ? newOptions.options[0] : undefined;
 
-    setSelectedInterval(newInterval);
+    setSelectedInterval(newInterval as Interval);
     setSelectedPeriod(newDefaultPeriod);
     intervalDropdown.close();
   };
@@ -311,8 +285,17 @@ const CompoundFeeRevenueByChain = ({
     periodDropdown.close();
   };
 
-  const hasData = currentView.tableData.length > 0;
-  const noDataMessage = 'No data available';
+  useEffect(() => {
+    if (precomputedViews && !selectedPeriod) {
+      const initialOptions = generateOptions(
+        precomputedViews,
+        selectedInterval
+      );
+      if (initialOptions.options.length > 0) {
+        setSelectedPeriod(initialOptions.options[0]);
+      }
+    }
+  }, [precomputedViews, selectedPeriod, selectedInterval]);
 
   return (
     <Card
@@ -322,10 +305,10 @@ const CompoundFeeRevenueByChain = ({
       isError={isError}
       className={{
         loading: 'min-h-[571px]',
-        content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-10 lg:px-10'
       }}
     >
-      <div className='flex justify-end gap-3 px-0 py-3'>
+      <div className='flex justify-end gap-3 px-10 py-3 lg:px-0'>
         <div className='flex items-center gap-1'>
           <Text
             tag='span'
@@ -373,7 +356,7 @@ const CompoundFeeRevenueByChain = ({
             size='12'
             className='text-primary-14'
           >
-            {noDataMessage}
+            {NO_DATA_AVAILABLE}
           </Text>
         </div>
       ) : (
@@ -381,6 +364,7 @@ const CompoundFeeRevenueByChain = ({
           data={currentView.tableData}
           columns={currentView.columns}
           totals={currentView.totals}
+          selectedInterval={selectedInterval}
         />
       )}
     </Card>
