@@ -317,7 +317,8 @@ const TotalTresuaryValue = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px]',
-        content: 'flex flex-col gap-3 px-10 pt-0 pb-[60px] lg:pb-10'
+        content:
+          'flex flex-col gap-3 px-1 pt-0 pb-0 md:px-10 md:pb-[60px] lg:pb-10'
       }}
     >
       <Filters

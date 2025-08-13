@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import * as React from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { cn } from '@/shared/lib/classNames/classNames';
 import { formatPrice } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -90,7 +91,12 @@ const TreasuryComposition = ({
             {dataRows.map((row, index) => (
               <div
                 key={index}
-                className='border-secondary-23 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b px-6 py-5 md:gap-x-[63px]'
+                className={cn(
+                  'border-secondary-23 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b px-6 py-5 md:gap-x-[63px]',
+                  {
+                    'border-t': index === 0
+                  }
+                )}
               >
                 <div className='grid w-full max-w-[73px]'>
                   <Text

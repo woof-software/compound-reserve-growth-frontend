@@ -141,10 +141,10 @@ const AnnualisedExpensesBlock = () => {
       isError={isError}
       className={{
         loading: 'min-h-[571px]',
-        content: 'p-0 pb-10 lg:p-10'
+        content: 'p-0 lg:p-10'
       }}
     >
-      <div className='flex flex-col justify-between gap-10 lg:flex-row'>
+      <div className='flex flex-col-reverse justify-between gap-0 lg:flex-row lg:gap-10'>
         <AnnualisedExpenses
           data={processedData.tableData}
           footerData={processedData.footerData}

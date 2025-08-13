@@ -92,10 +92,10 @@ const CurrentServiceProvidersBlock = () => {
       isError={isError}
       className={{
         loading: 'min-h-[571px]',
-        content: 'px-0 lg:px-10'
+        content: 'px-0 pb-0 lg:px-10'
       }}
     >
-      <div className='flex flex-col justify-between gap-10 lg:flex-row'>
+      <div className='flex flex-col justify-between lg:flex-row lg:gap-10'>
         <PieChart
           className='max-w-full lg:max-h-[400px] lg:max-w-[336.5px]'
           data={processedData.pieData}
