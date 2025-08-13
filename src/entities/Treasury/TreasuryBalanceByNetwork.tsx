@@ -258,7 +258,7 @@ const TreasuryBalanceByNetworkBlock = ({
         />
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
-        <div className='flex flex-col justify-between gap-10 lg:flex-row'>
+        <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
           <CryptoChart data={chartData} />
           <TreasuryBalanceByNetwork tableData={tableData} />
         </div>

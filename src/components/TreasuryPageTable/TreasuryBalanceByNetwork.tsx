@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { cn } from '@/shared/lib/classNames/classNames';
 import { formatLargeNumber, formatPrice } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -93,9 +94,14 @@ const TreasuryBalanceByNetwork = ({
           dataRows.map((row, index) => (
             <div
               key={index}
-              className='border-secondary-23 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b px-6 py-5 md:gap-x-[63px] md:px-10'
+              className={cn(
+                'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b px-6 py-5 md:gap-x-[63px] md:px-10',
+                {
+                  'border-t': index === 0
+                }
+              )}
             >
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full'>
                 <Text
                   size='8'
                   lineHeight='18'
@@ -119,7 +125,7 @@ const TreasuryBalanceByNetwork = ({
                   </Text>
                 </div>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full'>
                 <Text
                   size='8'
                   lineHeight='18'
@@ -136,7 +142,7 @@ const TreasuryBalanceByNetwork = ({
                   {formatLargeNumber(row.qty, 1)}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full'>
                 <Text
                   size='8'
                   lineHeight='18'
@@ -153,7 +159,7 @@ const TreasuryBalanceByNetwork = ({
                   {formatPrice(row.value, 1)}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full'>
                 <Text
                   size='8'
                   lineHeight='18'
@@ -170,7 +176,7 @@ const TreasuryBalanceByNetwork = ({
                   {row.market === 'no market' ? ' - ' : row.market}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full'>
                 <Text
                   size='8'
                   lineHeight='18'

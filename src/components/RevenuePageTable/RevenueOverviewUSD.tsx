@@ -53,9 +53,10 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
               <div
                 key={index}
                 className={cn(
-                  'border-secondary-23 flex flex-wrap items-center justify-start gap-x-3 gap-y-3 border-b px-6 py-5 md:gap-x-[63px] md:px-10',
+                  'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b px-6 py-5 md:gap-x-[63px] md:px-10',
                   {
                     'border-b': index !== dataRows.length - 1,
+                    'border-t': index === 0,
                     'justify-between': dateType !== 'Rolling'
                   }
                 )}
@@ -94,7 +95,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
             <View.Condition if={Boolean(totalFooterData)}>
               <div
                 className={cn(
-                  'flex flex-wrap items-center justify-start gap-x-3 gap-y-3 px-6 py-5 md:gap-x-[63px] md:px-10',
+                  'grid grid-cols-3 gap-x-10 gap-y-3 px-6 py-5 md:gap-x-[63px] md:px-10',
                   {
                     'justify-between': dateType !== 'Rolling'
                   }

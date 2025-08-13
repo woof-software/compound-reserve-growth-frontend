@@ -122,7 +122,7 @@ const FullDAOCommitmentsBlock = () => {
       isLoading={isLoading}
       isError={isError}
       className={{
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-10 lg:px-10',
+        content: 'flex flex-col p-0 md:pb-10 lg:gap-3 lg:px-10',
         loading: 'min-h-[571px]'
       }}
     >
