@@ -155,7 +155,7 @@ const Header: FC = () => {
         >
           <Icon
             name={isOpen ? 'close-menu' : 'burger-menu'}
-            className='h-4 w-4'
+            className='text-secondary-25 h-4 w-4'
           />
         </button>
       </div>
