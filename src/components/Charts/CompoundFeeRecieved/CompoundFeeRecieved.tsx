@@ -11,7 +11,9 @@ import HighchartsReact from 'highcharts-react-official';
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
+import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 import 'highcharts/modules/stock';
 import 'highcharts/modules/mouse-wheel-zoom';
@@ -431,7 +433,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
           containerProps={{ style: { width: '100%', height: '100%' } }}
         />
       </div>
-      <div className='flex shrink-0 items-center justify-center gap-4 py-2'>
+      <div className='hidden shrink-0 items-center justify-center gap-4 py-2 md:flex'>
         {seriesData.length > 1 && (
           <Button
             onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
@@ -440,6 +442,26 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
             {areAllSeriesHidden ? 'Select All' : 'Unselect All'}
           </Button>
         )}
+      </div>
+      <div className='absolute right-6 block md:hidden'>
+        <div className='flex items-center gap-3'>
+          <View.Condition if={Boolean(seriesData.length > 1)}>
+            <div
+              className={cn(
+                'outline-secondary-18 rounded-lg p-1 opacity-50 outline-[0.25px]',
+                {
+                  'opacity-100': areAllSeriesHidden
+                }
+              )}
+              onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
+            >
+              <Icon
+                name='eye'
+                className='h-6 w-6'
+              />
+            </div>
+          </View.Condition>
+        </div>
       </div>
     </div>
   );
