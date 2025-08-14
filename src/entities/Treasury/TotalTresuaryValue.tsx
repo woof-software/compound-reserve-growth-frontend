@@ -450,7 +450,7 @@ const Filters = memo(
                   name='filters'
                   className='h-[14px] w-[14px]'
                 />
-                Filter
+                Filters
               </Button>
               <CSVDownloadButton
                 data={csvData}

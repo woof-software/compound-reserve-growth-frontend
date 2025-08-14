@@ -2,7 +2,9 @@ import React, { useMemo } from 'react';
 
 import MetricBlock from '@/entities/Treasury/MetricBlock';
 import TotalTresuaryValue from '@/entities/Treasury/TotalTresuaryValue';
+import TreasuryBalanceByNetworkBlock from '@/entities/Treasury/TreasuryBalanceByNetwork';
 import TreasuryCompositionBlock from '@/entities/Treasury/TreasuryCompositionBlock';
+import TreasuryHoldingsBlock from '@/entities/Treasury/TreasuryHoldingsBlock';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
 import {
@@ -86,16 +88,16 @@ const TreasuryPage = () => {
           isError={isError}
           data={treasuryData}
         />
-        {/*<TreasuryBalanceByNetworkBlock*/}
-        {/*  data={uniqData}*/}
-        {/*  isError={isError}*/}
-        {/*  isLoading={isLoading}*/}
-        {/*/>*/}
-        {/*<TreasuryHoldingsBlock*/}
-        {/*  data={uniqData}*/}
-        {/*  isError={isError}*/}
-        {/*  isLoading={isLoading}*/}
-        {/*/>*/}
+        <TreasuryBalanceByNetworkBlock
+          data={uniqData}
+          isError={isError}
+          isLoading={isLoading}
+        />
+        <TreasuryHoldingsBlock
+          data={uniqData}
+          isError={isError}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );

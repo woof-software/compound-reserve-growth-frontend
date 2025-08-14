@@ -1,18 +1,26 @@
 import React, { useCallback, useMemo, useReducer } from 'react';
 
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
-import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
+import {
+  MultiSelect,
+  MultiSelectDrawer
+} from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import TreasuryHoldings, {
   TreasuryBalanceByNetworkType
 } from '@/components/TreasuryPageTable/TreasuryHoldings';
+import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
   extractFilterOptions
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { OptionType } from '@/shared/types/types';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Drawer from '@/shared/ui/Drawer/Drawer';
+import Icon from '@/shared/ui/Icon/Icon';
+import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
 interface TreasuryHoldingsBlockProps {
@@ -45,6 +53,8 @@ const TreasuryHoldingsBlock = ({
   isError,
   data
 }: TreasuryHoldingsBlockProps) => {
+  const { isOpen, onOpenModal, onCloseModal } = useModal();
+
   const [selectedOptions, setSelectedOptions] = useReducer(
     (prev, next) => ({
       ...prev,
@@ -210,7 +220,7 @@ const TreasuryHoldingsBlock = ({
         header: 'rounded-t-lg'
       }}
     >
-      <div className='flex items-center justify-end gap-3 px-10 py-3 lg:px-0'>
+      <div className='hidden items-center justify-end gap-3 px-10 py-3 md:flex lg:px-0'>
         <MultiSelect
           options={chainOptions || []}
           value={selectedOptions.chain}
@@ -248,6 +258,81 @@ const TreasuryHoldingsBlock = ({
           data={tableData}
           filename='Full Treasury Holdings'
         />
+      </div>
+      <div className='block md:hidden'>
+        <div className='flex flex-wrap items-center justify-end gap-3 px-6 py-3'>
+          <Button
+            onClick={onOpenModal}
+            className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+          >
+            <Icon
+              name='filters'
+              className='h-[14px] w-[14px]'
+            />
+            Filters
+          </Button>
+          <CSVDownloadButton
+            data={tableData}
+            filename='Full Treasury Holdings'
+          />
+        </div>
+        <Drawer
+          isOpen={isOpen}
+          onClose={onCloseModal}
+        >
+          <Text
+            size='17'
+            weight='700'
+            lineHeight='140'
+            align='center'
+            className='mb-8 w-full'
+          >
+            Filters
+          </Text>
+          <div className='grid gap-3'>
+            <MultiSelectDrawer
+              options={chainOptions || []}
+              value={selectedOptions.chain}
+              onChange={onSelectChain}
+              placeholder='Chain'
+              disabled={isLoading}
+            />
+            <MultiSelectDrawer
+              options={deploymentOptionsFilter || []}
+              value={selectedOptions.deployment}
+              onChange={onSelectMarket}
+              placeholder='Market'
+              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
+            />
+            <MultiSelectDrawer
+              options={
+                assetTypeOptions?.sort((a, b) =>
+                  a.label.localeCompare(b.label)
+                ) || []
+              }
+              value={selectedOptions.assetType}
+              onChange={onSelectAssetType}
+              placeholder='Asset Type'
+              disabled={isLoading}
+            />
+            <MultiSelectDrawer
+              options={
+                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+                []
+              }
+              value={selectedOptions.symbol}
+              onChange={onSelectSymbol}
+              placeholder='Reserve Symbols'
+              disabled={isLoading}
+            />
+          </div>
+          <Button
+            className='bg-secondary-14 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
+            onClick={onClearAll}
+          >
+            Clear Filters
+          </Button>
+        </Drawer>
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <TreasuryHoldings tableData={tableData} />
