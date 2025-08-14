@@ -39,7 +39,7 @@ const SingleDropdown: FC<SingleDropdownProps> = ({
 }) => {
   return (
     <>
-      <div className='hidden lg:block'>
+      <View.Tablet>
         <Dropdown
           isDisabled={disabled}
           triggerContent={
@@ -66,8 +66,8 @@ const SingleDropdown: FC<SingleDropdownProps> = ({
             )}
           />
         </Dropdown>
-      </div>
-      <div className='lg:hidden'>
+      </View.Tablet>
+      <View.Mobile>
         <div
           className={cn(
             'hover:bg-secondary-11 flex items-center gap-1.5 rounded-sm px-[17px] py-1',
@@ -133,7 +133,7 @@ const SingleDropdown: FC<SingleDropdownProps> = ({
             )}
           />
         </Drawer>
-      </div>
+      </View.Mobile>
     </>
   );
 };

@@ -42,7 +42,7 @@ const TabsGroup = ({
     >
       <TabsList
         className={cn(
-          'h-8 w-fit rounded-full p-1',
+          'h-10 w-fit rounded-full p-1 lg:h-8',
           'bg-primary-18 dark:shadow-13 shadow-14 border-none',
           className?.list
         )}
@@ -52,8 +52,8 @@ const TabsGroup = ({
             key={tab}
             value={tab}
             className={cn(
-              'hover:bg-card-content flex cursor-pointer items-center justify-center rounded-full px-3 py-1 text-[11px] transition-opacity hover:opacity-70',
-              'h-6 leading-6',
+              'hover:bg-card-content flex cursor-pointer items-center justify-center rounded-full px-3 py-1 text-sm transition-opacity hover:opacity-70 md:text-[11px]',
+              'h-8 leading-6 lg:h-6',
               'text-primary-11',
               'data-[state=active]:bg-card-content',
               'data-[state=active]:text-primary-11',
