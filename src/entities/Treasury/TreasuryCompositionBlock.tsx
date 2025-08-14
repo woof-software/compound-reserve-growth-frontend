@@ -2,7 +2,9 @@ import React, { memo, useMemo, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
+import SingleDropdown, {
+  SingleDrawer
+} from '@/components/SingleDropdown/SingleDropdown';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import {
   capitalizeFirstLetter,
@@ -79,10 +81,10 @@ const mapTableData = (data: Record<string, TokenData[]>) => {
 const TreasuryCompositionBlock = memo(
   ({ isLoading, data }: TreasuryCompositionBlockProps) => {
     const {
-      open: openSingle,
+      isOpen: isOpenSingle,
       selectedValue: selectedSingle,
-      toggle: toggleSingle,
       close: closeSingle,
+      open: openSingle,
       select: selectSingle
     } = useDropdown('single');
 
@@ -206,15 +208,29 @@ const TreasuryCompositionBlock = memo(
             >
               Group by
             </Text>
-            <SingleDropdown
-              options={options}
-              isOpen={openSingle}
-              selectedValue={selectedGroup}
-              onToggle={toggleSingle}
-              onClose={closeSingle}
-              onSelect={selectSingle}
-              triggerContentClassName='p-[5px]'
-            />
+            <div className='hidden md:block'>
+              <SingleDropdown
+                options={options}
+                isOpen={isOpenSingle}
+                selectedValue={selectedGroup}
+                onOpen={openSingle}
+                onClose={closeSingle}
+                onSelect={selectSingle}
+                triggerContentClassName='p-[5px]'
+              />
+            </div>
+            <div className='block md:hidden'>
+              <SingleDrawer
+                options={options}
+                isOpen={isOpenSingle}
+                selectedValue={selectedGroup}
+                onOpen={openSingle}
+                onClose={closeSingle}
+                onSelect={selectSingle}
+                disabled={isLoading}
+                triggerContentClassName='p-[5px]'
+              />
+            </div>
           </div>
         </div>
         <div className='flex flex-col justify-between md:flex-row'>

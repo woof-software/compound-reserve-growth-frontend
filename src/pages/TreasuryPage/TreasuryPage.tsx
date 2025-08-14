@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import MetricBlock from '@/entities/Treasury/MetricBlock';
 import TotalTresuaryValue from '@/entities/Treasury/TotalTresuaryValue';
@@ -51,7 +51,7 @@ const TreasuryPage = () => {
 
   return (
     <div className='flex flex-col gap-6 md:gap-[42px] xl:gap-[70px]'>
-      <div className='flex flex-col gap-[15px]'>
+      <div className='mt-5 flex flex-col gap-[15px] px-4 md:mt-0 md:px-0'>
         <Text
           tag='h1'
           size='32'
@@ -68,7 +68,7 @@ const TreasuryPage = () => {
           allocation, strategic holdings, and investment returns.
         </Text>
       </div>
-      <div className='flex flex-col gap-2.5 md:gap-5'>
+      <div className='flex flex-col gap-0 md:gap-5'>
         <MetricBlock
           isLoading={isLoading}
           data={{

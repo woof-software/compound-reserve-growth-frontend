@@ -23,7 +23,7 @@ const RevenuePage = () => {
 
   return (
     <div className='flex flex-col gap-6 md:gap-[42px] lg:gap-[70px]'>
-      <div className='flex flex-col gap-[15px]'>
+      <div className='mt-5 flex flex-col gap-[15px] px-4 md:mt-0 md:px-0'>
         <Text
           tag='h1'
           size='32'
@@ -39,7 +39,7 @@ const RevenuePage = () => {
           Track Compound Protocol revenue streams across various networks.
         </Text>
       </div>
-      <div className='flex flex-col gap-2.5 md:gap-5'>
+      <div className='flex flex-col gap-0 md:gap-5'>
         <RevenueMetrics
           revenueData={pageData}
           isLoading={isLoading}

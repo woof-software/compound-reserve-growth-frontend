@@ -8,7 +8,7 @@ import ThemeSwitcher from '@/shared/ui/ThemeSwitcher/ThemeSwitcher';
 
 const Footer: FC = () => {
   return (
-    <footer className='border-primary-17 border-t'>
+    <footer className='md:border-primary-17 px-4 md:border-t md:px-0'>
       <div className='mx-auto max-w-[1084px]'>
         <div className='flex justify-between py-6'>
           <div className='text-primary-14 flex items-center gap-6 text-[13px]'>
@@ -40,7 +40,7 @@ const Footer: FC = () => {
           <ThemeSwitcher />
         </div>
         <div className='py-5'>
-          <div className='flex items-center justify-between'>
+          <div className='flex flex-wrap items-center justify-center gap-2.5 md:justify-between md:gap-0'>
             <div className='flex items-center gap-10'>
               <Link to={commonRoutes.TREASURY}>
                 <Icon
@@ -64,7 +64,7 @@ const Footer: FC = () => {
         </div>
         <Text
           size='11'
-          className='text-primary-14 mx-auto flex w-[70%] pb-6 !text-center'
+          className='text-primary-14 flex w-full pb-6 !text-center md:mx-auto md:w-[70%]'
         >
           The information displayed on this platform is for informational
           purposes only. The dashboards are based solely on publicly available

@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import CompoundFeeRevenuebyChainComponent, {
   Interval,
   ProcessedRevenueData as TableData
 } from '@/components/RevenuePageTable/CompoundFeeRevenuebyChain';
-import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
+import SingleDropdown, {
+  SingleDrawer
+} from '@/components/SingleDropdown/SingleDropdown';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
   capitalizeFirstLetter,
@@ -305,10 +307,10 @@ const CompoundFeeRevenueByChain = ({
       isError={isError}
       className={{
         loading: 'min-h-[571px]',
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-0 md:pb-10 lg:px-10'
+        content: 'flex flex-col px-0 pt-0 pb-0 md:gap-3 md:pb-10 lg:px-10'
       }}
     >
-      <div className='flex justify-end gap-3 px-10 py-3 lg:px-0'>
+      <div className='flex justify-end gap-3 px-6 py-3 md:px-10 lg:px-0'>
         <div className='flex items-center gap-1'>
           <Text
             tag='span'
@@ -319,15 +321,29 @@ const CompoundFeeRevenueByChain = ({
           >
             Interval
           </Text>
-          <SingleDropdown
-            options={intervalOptions}
-            isOpen={intervalDropdown.open}
-            onToggle={intervalDropdown.toggle}
-            onClose={intervalDropdown.close}
-            onSelect={handleIntervalSelect}
-            selectedValue={selectedInterval}
-            triggerContentClassName='p-[5px]'
-          />
+          <div className='hidden md:block'>
+            <SingleDropdown
+              options={intervalOptions}
+              isOpen={intervalDropdown.isOpen}
+              onOpen={intervalDropdown.open}
+              onClose={intervalDropdown.close}
+              onSelect={handleIntervalSelect}
+              selectedValue={selectedInterval}
+              triggerContentClassName='p-[5px]'
+            />
+          </div>
+          <div className='block md:hidden'>
+            <SingleDrawer
+              placeholder='Interval'
+              options={intervalOptions}
+              isOpen={intervalDropdown.isOpen}
+              onOpen={intervalDropdown.open}
+              onClose={intervalDropdown.close}
+              onSelect={handleIntervalSelect}
+              selectedValue={selectedInterval}
+              triggerContentClassName='p-[5px]'
+            />
+          </div>
         </div>
         <div className='flex items-center gap-1'>
           <Text
@@ -339,15 +355,29 @@ const CompoundFeeRevenueByChain = ({
           >
             {dynamicOptions.label}
           </Text>
-          <SingleDropdown
-            options={dynamicOptions.options}
-            isOpen={periodDropdown.open}
-            onToggle={periodDropdown.toggle}
-            onClose={periodDropdown.close}
-            onSelect={handlePeriodSelect}
-            selectedValue={selectedPeriod}
-            triggerContentClassName='p-[5px]'
-          />
+          <div className='hidden md:block'>
+            <SingleDropdown
+              options={dynamicOptions.options}
+              isOpen={periodDropdown.isOpen}
+              onOpen={periodDropdown.open}
+              onClose={periodDropdown.close}
+              onSelect={handlePeriodSelect}
+              selectedValue={selectedPeriod}
+              triggerContentClassName='p-[5px]'
+            />
+          </div>
+          <div className='block md:hidden'>
+            <SingleDrawer
+              placeholder={dynamicOptions.label}
+              options={dynamicOptions.options}
+              isOpen={periodDropdown.isOpen}
+              onOpen={periodDropdown.open}
+              onClose={periodDropdown.close}
+              onSelect={handlePeriodSelect}
+              selectedValue={selectedPeriod}
+              triggerContentClassName='p-[5px]'
+            />
+          </div>
         </div>
       </div>
       {!isLoading && !isError && !hasData ? (

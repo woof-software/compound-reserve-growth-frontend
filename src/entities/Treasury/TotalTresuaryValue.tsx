@@ -1,20 +1,30 @@
-import React, { useCallback, useMemo, useReducer } from 'react';
+import React, { memo, useCallback, useMemo, useReducer } from 'react';
 
 import LineChart from '@/components/Charts/Line/Line';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
-import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
+import {
+  MultiSelect,
+  MultiSelectDrawer
+} from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
+import SingleDropdown, {
+  SingleDrawer
+} from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
+import { useModal } from '@/shared/hooks/useModal';
 import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { BarSize, OptionType, TimeRange } from '@/shared/types/types';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
+import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
 
@@ -46,7 +56,7 @@ interface FiltersProps {
 
   isLoading: boolean;
 
-  openSingle: boolean;
+  isOpenSingle: boolean;
 
   groupBy: string;
 
@@ -76,9 +86,11 @@ interface FiltersProps {
 
   handleTabChange: (value: string) => void;
 
-  toggleSingle: () => void;
+  openSingleDropdown: () => void;
 
   closeSingle: () => void;
+
+  onClearAll: () => void;
 
   selectSingle: (value: string) => void;
 }
@@ -102,10 +114,10 @@ const TotalTresuaryValue = ({
   );
 
   const {
-    open: openSingle,
+    isOpen: isOpenSingle,
     selectedValue: selectedSingle,
-    toggle: toggleSingle,
     close: closeSingle,
+    open: openSingleDropdown,
     select: selectSingle
   } = useDropdown('single');
 
@@ -333,16 +345,17 @@ const TotalTresuaryValue = ({
         activeTab={activeTab}
         csvData={csvData}
         csvFilename={csvFilename}
-        openSingle={openSingle}
+        isOpenSingle={isOpenSingle}
         onSelectChain={onSelectChain}
         onSelectAssetType={onSelectAssetType}
         onSelectMarket={onSelectMarket}
         onSelectSymbol={onSelectSymbol}
         handleBarSizeChange={handleBarSizeChange}
         handleTabChange={handleTabChange}
-        toggleSingle={toggleSingle}
+        openSingleDropdown={openSingleDropdown}
         closeSingle={closeSingle}
         selectSingle={selectSingle}
+        onClearAll={onClearAll}
       />
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder onButtonClick={onClearAll} />
@@ -361,185 +374,298 @@ const TotalTresuaryValue = ({
   );
 };
 
-const Filters = ({
-  barSize,
-  activeTab,
-  openSingle,
-  groupBy,
-  csvData,
-  csvFilename,
-  chainOptions,
-  selectedOptions,
-  deploymentOptionsFilter,
-  assetTypeOptions,
-  symbolOptions,
-  isLoading,
-  onSelectChain,
-  onSelectAssetType,
-  onSelectMarket,
-  onSelectSymbol,
-  handleBarSizeChange,
-  handleTabChange,
-  toggleSingle,
-  closeSingle,
-  selectSingle
-}: FiltersProps) => {
-  return (
-    <>
-      <div className='hidden items-center justify-end gap-3 px-0 py-3 lg:flex'>
-        <MultiSelect
-          options={chainOptions || []}
-          value={selectedOptions.chain}
-          onChange={onSelectChain}
-          placeholder='Chain'
-          disabled={isLoading}
-        />
-        <MultiSelect
-          options={deploymentOptionsFilter}
-          value={selectedOptions.deployment}
-          onChange={onSelectMarket}
-          placeholder='Market'
-          disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-        />
-        <MultiSelect
-          options={
-            assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-            []
-          }
-          value={selectedOptions.assetType}
-          onChange={onSelectAssetType}
-          placeholder='Asset Type'
-          disabled={isLoading}
-        />
-        <MultiSelect
-          options={
-            symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || []
-          }
-          value={selectedOptions.symbol}
-          onChange={onSelectSymbol}
-          placeholder='Reserve Symbols'
-          disabled={isLoading}
-        />
-        <TabsGroup
-          tabs={['D', 'W', 'M']}
-          value={barSize}
-          onTabChange={handleBarSizeChange}
-          disabled={isLoading}
-        />
-        <TabsGroup
-          tabs={['7B', '30B', '90B', '180B']}
-          value={activeTab}
-          onTabChange={handleTabChange}
-          disabled={isLoading}
-        />
-        <div className='flex items-center gap-1'>
-          <Text
-            tag='span'
-            size='11'
-            weight='600'
-            lineHeight='16'
-            className='text-primary-14'
+const Filters = memo(
+  ({
+    barSize,
+    activeTab,
+    isOpenSingle,
+    groupBy,
+    csvData,
+    csvFilename,
+    chainOptions,
+    selectedOptions,
+    deploymentOptionsFilter,
+    assetTypeOptions,
+    symbolOptions,
+    isLoading,
+    onSelectChain,
+    onSelectAssetType,
+    onSelectMarket,
+    onSelectSymbol,
+    handleBarSizeChange,
+    handleTabChange,
+    openSingleDropdown,
+    closeSingle,
+    selectSingle,
+    onClearAll
+  }: FiltersProps) => {
+    const { isOpen, onOpenModal, onCloseModal } = useModal();
+    return (
+      <>
+        <View.Mobile>
+          <div className='flex flex-col justify-end gap-3 px-6 py-3'>
+            <div className='flex flex-wrap justify-end gap-3'>
+              <TabsGroup
+                tabs={['D', 'W', 'M']}
+                value={barSize}
+                onTabChange={handleBarSizeChange}
+                disabled={isLoading}
+              />
+              <TabsGroup
+                tabs={['7B', '30B', '90B', '180B']}
+                value={activeTab}
+                onTabChange={handleTabChange}
+                disabled={isLoading}
+              />
+              <div className='flex items-center gap-1'>
+                <Text
+                  tag='span'
+                  size='11'
+                  weight='600'
+                  lineHeight='16'
+                  className='text-primary-14'
+                >
+                  Group by
+                </Text>
+                <SingleDrawer
+                  options={groupByOptions}
+                  isOpen={isOpenSingle}
+                  selectedValue={groupBy}
+                  onOpen={openSingleDropdown}
+                  onClose={closeSingle}
+                  onSelect={(value: string) => {
+                    selectSingle(value);
+                  }}
+                  disabled={isLoading}
+                  triggerContentClassName='p-[5px]'
+                />
+              </div>
+            </div>
+            <div className='flex flex-wrap items-center justify-end gap-3'>
+              <Button
+                onClick={onOpenModal}
+                className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+              >
+                <Icon
+                  name='filters'
+                  className='h-[14px] w-[14px]'
+                />
+                Filters
+              </Button>
+              <CSVDownloadButton
+                data={csvData}
+                filename={csvFilename}
+              />
+            </div>
+          </div>
+          <Drawer
+            isOpen={isOpen}
+            onClose={onCloseModal}
           >
-            Group by
-          </Text>
-          <SingleDropdown
-            options={groupByOptions}
-            isOpen={openSingle}
-            selectedValue={groupBy}
-            onToggle={toggleSingle}
-            onClose={closeSingle}
-            onSelect={(value: string) => {
-              selectSingle(value);
-            }}
-            disabled={isLoading}
-            triggerContentClassName='p-[5px]'
-          />
-        </div>
-        <CSVDownloadButton
-          data={csvData}
-          filename={csvFilename}
-        />
-      </div>
-      <div className='flex flex-col items-end justify-end gap-3 px-0 py-3 lg:hidden'>
-        <div className='flex items-center gap-3'>
-          <TabsGroup
-            tabs={['D', 'W', 'M']}
-            value={barSize}
-            onTabChange={handleBarSizeChange}
-            disabled={isLoading}
-          />
-          <TabsGroup
-            tabs={['7B', '30B', '90B', '180B']}
-            value={activeTab}
-            onTabChange={handleTabChange}
-            disabled={isLoading}
-          />
-          <div className='flex items-center gap-1'>
             <Text
-              tag='span'
-              size='11'
-              weight='600'
-              lineHeight='16'
-              className='text-primary-14'
+              size='17'
+              weight='700'
+              lineHeight='140'
+              align='center'
+              className='mb-8 w-full'
             >
-              Group by
+              Filters
             </Text>
-            <SingleDropdown
-              options={groupByOptions}
-              isOpen={openSingle}
-              selectedValue={groupBy}
-              onToggle={toggleSingle}
-              onClose={closeSingle}
-              onSelect={selectSingle}
+            <div className='grid gap-3'>
+              <MultiSelectDrawer
+                options={chainOptions || []}
+                value={selectedOptions.chain}
+                onChange={onSelectChain}
+                placeholder='Chain'
+                disabled={isLoading}
+              />
+              <MultiSelectDrawer
+                options={deploymentOptionsFilter}
+                value={selectedOptions.deployment}
+                onChange={onSelectMarket}
+                placeholder='Market'
+                disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
+              />
+              <MultiSelectDrawer
+                options={
+                  assetTypeOptions?.sort((a, b) =>
+                    a.label.localeCompare(b.label)
+                  ) || []
+                }
+                value={selectedOptions.assetType}
+                onChange={onSelectAssetType}
+                placeholder='Asset Type'
+                disabled={isLoading}
+              />
+            </div>
+            <Button
+              className='bg-secondary-14 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
+              onClick={onClearAll}
+            >
+              Clear Filters
+            </Button>
+          </Drawer>
+        </View.Mobile>
+        <View.Tablet>
+          <div className='hidden items-center justify-end gap-3 px-0 py-3 lg:flex'>
+            <MultiSelect
+              options={chainOptions || []}
+              value={selectedOptions.chain}
+              onChange={onSelectChain}
+              placeholder='Chain'
               disabled={isLoading}
-              triggerContentClassName='p-[5px]'
+            />
+            <MultiSelect
+              options={deploymentOptionsFilter}
+              value={selectedOptions.deployment}
+              onChange={onSelectMarket}
+              placeholder='Market'
+              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
+            />
+            <MultiSelect
+              options={
+                assetTypeOptions?.sort((a, b) =>
+                  a.label.localeCompare(b.label)
+                ) || []
+              }
+              value={selectedOptions.assetType}
+              onChange={onSelectAssetType}
+              placeholder='Asset Type'
+              disabled={isLoading}
+            />
+            <MultiSelect
+              options={
+                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+                []
+              }
+              value={selectedOptions.symbol}
+              onChange={onSelectSymbol}
+              placeholder='Reserve Symbols'
+              disabled={isLoading}
+            />
+            <TabsGroup
+              tabs={['D', 'W', 'M']}
+              value={barSize}
+              onTabChange={handleBarSizeChange}
+              disabled={isLoading}
+            />
+            <TabsGroup
+              tabs={['7B', '30B', '90B', '180B']}
+              value={activeTab}
+              onTabChange={handleTabChange}
+              disabled={isLoading}
+            />
+            <div className='flex items-center gap-1'>
+              <Text
+                tag='span'
+                size='11'
+                weight='600'
+                lineHeight='16'
+                className='text-primary-14'
+              >
+                Group by
+              </Text>
+              <SingleDropdown
+                options={groupByOptions}
+                isOpen={isOpenSingle}
+                selectedValue={groupBy}
+                onOpen={openSingleDropdown}
+                onClose={closeSingle}
+                onSelect={(value: string) => {
+                  selectSingle(value);
+                }}
+                disabled={isLoading}
+                triggerContentClassName='p-[5px]'
+              />
+            </div>
+            <CSVDownloadButton
+              data={csvData}
+              filename={csvFilename}
             />
           </div>
-        </div>
-        <div className='z-[1] flex items-center gap-3'>
-          <MultiSelect
-            options={chainOptions || []}
-            value={selectedOptions.chain}
-            onChange={onSelectChain}
-            placeholder='Chain'
-            disabled={isLoading}
-          />
-          <MultiSelect
-            options={deploymentOptionsFilter}
-            value={selectedOptions.deployment}
-            onChange={onSelectMarket}
-            placeholder='Market'
-            disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-          />
-          <MultiSelect
-            options={
-              assetTypeOptions?.sort((a, b) =>
-                a.label.localeCompare(b.label)
-              ) || []
-            }
-            value={selectedOptions.assetType}
-            onChange={onSelectAssetType}
-            placeholder='Asset Type'
-            disabled={isLoading}
-          />
-          <MultiSelect
-            options={
-              symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-              []
-            }
-            value={selectedOptions.symbol}
-            onChange={onSelectSymbol}
-            placeholder='Reserve Symbols'
-            disabled={isLoading}
-          />
-          <CSVDownloadButton
-            data={csvData}
-            filename={csvFilename}
-          />
-        </div>
-      </div>
-    </>
-  );
-};
+          <div className='flex flex-col items-end justify-end gap-3 px-0 py-3 lg:hidden'>
+            <div className='flex items-center gap-3'>
+              <TabsGroup
+                tabs={['D', 'W', 'M']}
+                value={barSize}
+                onTabChange={handleBarSizeChange}
+                disabled={isLoading}
+              />
+              <TabsGroup
+                tabs={['7B', '30B', '90B', '180B']}
+                value={activeTab}
+                onTabChange={handleTabChange}
+                disabled={isLoading}
+              />
+              <div className='flex items-center gap-1'>
+                <Text
+                  tag='span'
+                  size='11'
+                  weight='600'
+                  lineHeight='16'
+                  className='text-primary-14'
+                >
+                  Group by
+                </Text>
+                <SingleDropdown
+                  options={groupByOptions}
+                  isOpen={isOpenSingle}
+                  selectedValue={groupBy}
+                  onOpen={openSingleDropdown}
+                  onClose={closeSingle}
+                  onSelect={selectSingle}
+                  disabled={isLoading}
+                  triggerContentClassName='p-[5px]'
+                />
+              </div>
+            </div>
+            <div className='z-[1] flex items-center gap-3'>
+              <MultiSelect
+                options={chainOptions || []}
+                value={selectedOptions.chain}
+                onChange={onSelectChain}
+                placeholder='Chain'
+                disabled={isLoading}
+              />
+              <MultiSelect
+                options={deploymentOptionsFilter}
+                value={selectedOptions.deployment}
+                onChange={onSelectMarket}
+                placeholder='Market'
+                disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
+              />
+              <MultiSelect
+                options={
+                  assetTypeOptions?.sort((a, b) =>
+                    a.label.localeCompare(b.label)
+                  ) || []
+                }
+                value={selectedOptions.assetType}
+                onChange={onSelectAssetType}
+                placeholder='Asset Type'
+                disabled={isLoading}
+              />
+              <MultiSelect
+                options={
+                  symbolOptions?.sort((a, b) =>
+                    a.label.localeCompare(b.label)
+                  ) || []
+                }
+                value={selectedOptions.symbol}
+                onChange={onSelectSymbol}
+                placeholder='Reserve Symbols'
+                disabled={isLoading}
+              />
+              <CSVDownloadButton
+                data={csvData}
+                filename={csvFilename}
+              />
+            </div>
+          </div>
+        </View.Tablet>
+      </>
+    );
+  }
+);
 
 export default TotalTresuaryValue;

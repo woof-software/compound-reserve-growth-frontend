@@ -1,12 +1,18 @@
-import { useCallback, useMemo, useReducer } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
-import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
+import {
+  MultiSelect,
+  MultiSelectDrawer
+} from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import RevenueBreakdown, {
   FormattedRevenueData
 } from '@/components/RevenuePageTable/RevenueBreakdown';
-import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
+import SingleDropdown, {
+  SingleDrawer
+} from '@/components/SingleDropdown/SingleDropdown';
+import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
   capitalizeFirstLetter,
@@ -14,9 +20,12 @@ import {
   formatNumber
 } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
+import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
@@ -39,6 +48,8 @@ const RevenueBreakDownBlock = ({
     symbol: []
   };
 
+  const { isOpen, onOpenModal, onCloseModal } = useModal();
+
   const [selectedOptions, setSelectedOptions] = useReducer(
     (
       prev: SelectedFiltersState,
@@ -51,9 +62,9 @@ const RevenueBreakDownBlock = ({
   );
 
   const {
-    open: yearOpen,
+    isOpen: yearOpen,
     selectedValue: selectedYear,
-    toggle: toggleYear,
+    open: openYear,
     close: closeYear,
     select: selectYear
   } = useDropdown('single');
@@ -280,24 +291,75 @@ const RevenueBreakDownBlock = ({
         content: 'flex flex-col gap-3 px-0 pt-0 pb-0 md:pb-10 lg:px-10'
       }}
     >
-      <div className='flex justify-end gap-3 px-10 py-3 lg:px-0'>
-        <div className='flex items-center gap-5'>
-          <div className='flex items-center gap-1'>
-            <MultiSelect
+      <View.Mobile>
+        <div className='flex flex-col items-end gap-3 px-6 py-3'>
+          <div className='flex w-fit flex-wrap items-center justify-end gap-3'>
+            <Text
+              tag='span'
+              size='11'
+              weight='600'
+              lineHeight='16'
+              className='text-primary-14'
+            >
+              Group by
+            </Text>
+            <SingleDrawer
+              options={yearOptions}
+              isOpen={yearOpen}
+              selectedValue={selectedYear?.[0] || yearOptions[0] || ''}
+              onOpen={openYear}
+              onClose={closeYear}
+              onSelect={selectYear}
+              triggerContentClassName='p-[5px]'
+              disabled={isLoading}
+            />
+          </div>
+          <div className='flex flex-wrap items-center justify-end gap-3'>
+            <Button
+              onClick={onOpenModal}
+              className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+            >
+              <Icon
+                name='filters'
+                className='h-[14px] w-[14px]'
+              />
+              Filters
+            </Button>
+            <CSVDownloadButton
+              data={tableData}
+              filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
+            />
+          </div>
+        </div>
+        <Drawer
+          isOpen={isOpen}
+          onClose={onCloseModal}
+        >
+          <Text
+            size='17'
+            weight='700'
+            lineHeight='140'
+            align='center'
+            className='mb-8 w-full'
+          >
+            Filters
+          </Text>
+          <div className='grid gap-3'>
+            <MultiSelectDrawer
               options={chainOptions || []}
               value={selectedOptions.chain}
               onChange={onSelectChain}
               placeholder='Chain'
               disabled={isLoading}
             />
-            <MultiSelect
+            <MultiSelectDrawer
               options={marketOptions || []}
               value={selectedOptions.market}
               onChange={onSelectMarket}
               placeholder='Market'
               disabled={isLoading || !Boolean(marketOptions.length)}
             />
-            <MultiSelect
+            <MultiSelectDrawer
               options={
                 sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
                 []
@@ -307,7 +369,7 @@ const RevenueBreakDownBlock = ({
               placeholder='Source'
               disabled={isLoading}
             />
-            <MultiSelect
+            <MultiSelectDrawer
               options={
                 symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
                 []
@@ -318,34 +380,84 @@ const RevenueBreakDownBlock = ({
               disabled={isLoading}
             />
           </div>
-          <div className='flex items-center gap-1'>
-            <Text
-              tag='span'
-              size='11'
-              weight='600'
-              lineHeight='16'
-              className='text-primary-14'
-            >
-              Group by
-            </Text>
-            <SingleDropdown
-              options={yearOptions}
-              isOpen={yearOpen}
-              selectedValue={selectedYear?.[0] || yearOptions[0] || ''}
-              onToggle={toggleYear}
-              onClose={closeYear}
-              onSelect={selectYear}
-              // contentClassName='p-[5px]'
-              triggerContentClassName='p-[5px]'
-              disabled={isLoading}
-            />
+          <Button
+            className='bg-secondary-14 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
+            onClick={handleResetFilters}
+          >
+            Clear Filters
+          </Button>
+        </Drawer>
+      </View.Mobile>
+      <View.Tablet>
+        <div className='flex justify-end gap-3 px-10 py-3 lg:px-0'>
+          <div className='flex items-center gap-5'>
+            <div className='flex items-center gap-1'>
+              <MultiSelect
+                options={chainOptions || []}
+                value={selectedOptions.chain}
+                onChange={onSelectChain}
+                placeholder='Chain'
+                disabled={isLoading}
+              />
+              <MultiSelect
+                options={marketOptions || []}
+                value={selectedOptions.market}
+                onChange={onSelectMarket}
+                placeholder='Market'
+                disabled={isLoading || !Boolean(marketOptions.length)}
+              />
+              <MultiSelect
+                options={
+                  sourceOptions?.sort((a, b) =>
+                    a.label.localeCompare(b.label)
+                  ) || []
+                }
+                value={selectedOptions.source}
+                onChange={onSelectSource}
+                placeholder='Source'
+                disabled={isLoading}
+              />
+              <MultiSelect
+                options={
+                  symbolOptions?.sort((a, b) =>
+                    a.label.localeCompare(b.label)
+                  ) || []
+                }
+                value={selectedOptions.symbol}
+                onChange={onSelectSymbol}
+                placeholder='Reserve Symbols'
+                disabled={isLoading}
+              />
+            </div>
+            <div className='flex items-center gap-1'>
+              <Text
+                tag='span'
+                size='11'
+                weight='600'
+                lineHeight='16'
+                className='text-primary-14'
+              >
+                Group by
+              </Text>
+              <SingleDropdown
+                options={yearOptions}
+                isOpen={yearOpen}
+                selectedValue={selectedYear?.[0] || yearOptions[0] || ''}
+                onOpen={openYear}
+                onClose={closeYear}
+                onSelect={selectYear}
+                // contentClassName='p-[5px]'
+                triggerContentClassName='p-[5px]'
+                disabled={isLoading}
+              />
+            </div>
           </div>
+          <CSVDownloadButton
+            data={tableData}
+            filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
+          />
         </div>
-        <CSVDownloadButton
-          data={tableData}
-          filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
-        />
-      </div>
+      </View.Tablet>
       <View.Condition if={hasData}>
         <RevenueBreakdown
           data={tableData}
