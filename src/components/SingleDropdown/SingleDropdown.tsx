@@ -28,6 +28,7 @@ interface SingleDropdownProps {
 
 interface SingleDrawerProps {
   triggerContentClassName?: string;
+  placeholder?: string;
   selectedValue?: string;
   options: string[];
   disabled?: boolean;
@@ -81,6 +82,7 @@ const SingleDropdown: FC<SingleDropdownProps> = ({
 export const SingleDrawer: FC<SingleDrawerProps> = ({
   triggerContentClassName,
   selectedValue,
+  placeholder,
   options,
   disabled,
   isOpen,
@@ -130,34 +132,36 @@ export const SingleDrawer: FC<SingleDrawerProps> = ({
           align='center'
           className='mb-8 w-full'
         >
-          Group By
+          {placeholder || 'Group By'}
         </Text>
-        <Each
-          data={options}
-          render={(el, index) => (
-            <div
-              key={index}
-              className='hover:bg-secondary-12 flex h-10 cursor-pointer items-center justify-between rounded-lg py-3'
-              onClick={() => {
-                onSelect(el);
-              }}
-            >
-              <Text
-                size='14'
-                weight='500'
-                lineHeight='16'
+        <div className='max-h-[450px] overflow-y-auto'>
+          <Each
+            data={options}
+            render={(el, index) => (
+              <div
+                key={index}
+                className='hover:bg-secondary-12 flex h-10 cursor-pointer items-center justify-between rounded-lg py-3'
+                onClick={() => {
+                  onSelect(el);
+                }}
               >
-                {el}
-              </Text>
-              <View.Condition if={selectedValue === el}>
-                <CheckStroke
-                  width={16}
-                  height={16}
-                />
-              </View.Condition>
-            </div>
-          )}
-        />
+                <Text
+                  size='14'
+                  weight='500'
+                  lineHeight='16'
+                >
+                  {el}
+                </Text>
+                <View.Condition if={selectedValue === el}>
+                  <CheckStroke
+                    width={16}
+                    height={16}
+                  />
+                </View.Condition>
+              </div>
+            )}
+          />
+        </div>
       </Drawer>
     </div>
   );

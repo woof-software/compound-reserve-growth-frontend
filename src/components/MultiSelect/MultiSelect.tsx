@@ -334,6 +334,7 @@ export const MultiSelectDrawer: FC<MultiSelectProps> = ({
         </div>
       </div>
       <Drawer
+        isOverlay={false}
         isOpen={isOpen}
         onClose={onCloseModal}
       >

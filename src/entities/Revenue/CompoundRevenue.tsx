@@ -2,15 +2,23 @@ import React, { useCallback, useMemo, useReducer } from 'react';
 
 import CompoundRevenue from '@/components/Charts/CompoundRevenue/CompoundRevenue';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
-import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
+import {
+  MultiSelect,
+  MultiSelectDrawer
+} from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
+import { useModal } from '@/shared/hooks/useModal';
 import { type RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { capitalizeFirstLetter, ChartDataItem } from '@/shared/lib/utils/utils';
 import { BarSize, OptionType, TimeRange } from '@/shared/types/types';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Drawer from '@/shared/ui/Drawer/Drawer';
+import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
 interface PreprocessedItem {
@@ -76,6 +84,8 @@ interface FiltersProps {
   handleBarSizeChange: (value: string) => void;
 
   handleTabChange: (value: string) => void;
+
+  onClearAll: () => void;
 }
 
 function preprocessData(rawData: ChartDataItem[]): PreprocessedResult {
@@ -415,6 +425,7 @@ const CompoundRevenueBlock = ({
         onSelectSymbol={onSelectSymbol}
         handleBarSizeChange={handleBarSizeChange}
         handleTabChange={handleTabChange}
+        onClearAll={onClearSelectedOptions}
       />
       <View.Condition if={!isLoading && !isError && hasData}>
         <div className='h-[400px]'>
@@ -452,102 +463,51 @@ const Filters = ({
   onSelectMarket,
   onSelectSymbol,
   handleBarSizeChange,
-  handleTabChange
+  handleTabChange,
+  onClearAll
 }: FiltersProps) => {
+  const { isOpen, onOpenModal, onCloseModal } = useModal();
+
   return (
     <>
-      <div className='hidden items-center justify-end gap-3 px-0 py-3 lg:flex'>
-        <div className='flex gap-2'>
-          <MultiSelect
-            options={chainOptions || []}
-            value={selectedOptions.chain}
-            onChange={onSelectChain}
-            placeholder='Chain'
-            disabled={isLoading}
-          />
-          <MultiSelect
-            options={deploymentOptionsFilter || []}
-            value={selectedOptions.deployment}
-            onChange={onSelectMarket}
-            placeholder='Market'
-            disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-          />
-          <MultiSelect
-            options={
-              sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-              []
-            }
-            value={selectedOptions.source}
-            onChange={onSelectSource}
-            placeholder='Source'
-            disabled={isLoading}
-          />
-          <MultiSelect
-            options={
-              symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-              []
-            }
-            value={selectedOptions.symbol}
-            onChange={onSelectSymbol}
-            placeholder='Reserve Symbols'
-            disabled={isLoading}
-          />
-        </div>
-        <TabsGroup
-          tabs={['D', 'W', 'M']}
-          value={barSize}
-          onTabChange={handleBarSizeChange}
-          disabled={isLoading}
-        />
-        <TabsGroup
-          tabs={['7B', '30B', '90B', '180B']}
-          value={activeTab}
-          onTabChange={handleTabChange}
-          disabled={isLoading}
-        />
-        <CSVDownloadButton
-          data={csvData}
-          filename={csvFilename}
-        />
-      </div>
-      <div className='flex flex-col items-end justify-end gap-3 px-0 py-3 lg:hidden'>
-        <div className='z-[1] flex items-center gap-2'>
-          <MultiSelect
-            options={chainOptions || []}
-            value={selectedOptions.chain}
-            onChange={onSelectChain}
-            placeholder='Chain'
-            disabled={isLoading}
-          />
-          <MultiSelect
-            options={deploymentOptionsFilter || []}
-            value={selectedOptions.deployment}
-            onChange={onSelectMarket}
-            placeholder='Market'
-            disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-          />
-          <MultiSelect
-            options={
-              sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-              []
-            }
-            value={selectedOptions.source}
-            onChange={onSelectSource}
-            placeholder='Source'
-            disabled={isLoading}
-          />
-          <MultiSelect
-            options={
-              symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-              []
-            }
-            value={selectedOptions.symbol}
-            onChange={onSelectSymbol}
-            placeholder='Reserve Symbols'
-            disabled={isLoading}
-          />
-        </div>
-        <div className='flex items-center gap-3'>
+      <View.Tablet>
+        <div className='hidden items-center justify-end gap-3 px-0 py-3 lg:flex'>
+          <div className='flex gap-2'>
+            <MultiSelect
+              options={chainOptions || []}
+              value={selectedOptions.chain}
+              onChange={onSelectChain}
+              placeholder='Chain'
+              disabled={isLoading}
+            />
+            <MultiSelect
+              options={deploymentOptionsFilter || []}
+              value={selectedOptions.deployment}
+              onChange={onSelectMarket}
+              placeholder='Market'
+              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
+            />
+            <MultiSelect
+              options={
+                sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+                []
+              }
+              value={selectedOptions.source}
+              onChange={onSelectSource}
+              placeholder='Source'
+              disabled={isLoading}
+            />
+            <MultiSelect
+              options={
+                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+                []
+              }
+              value={selectedOptions.symbol}
+              onChange={onSelectSymbol}
+              placeholder='Reserve Symbols'
+              disabled={isLoading}
+            />
+          </div>
           <TabsGroup
             tabs={['D', 'W', 'M']}
             value={barSize}
@@ -565,7 +525,153 @@ const Filters = ({
             filename={csvFilename}
           />
         </div>
-      </div>
+        <div className='flex flex-col items-end justify-end gap-3 px-0 py-3 lg:hidden'>
+          <div className='z-[1] flex items-center gap-2'>
+            <MultiSelect
+              options={chainOptions || []}
+              value={selectedOptions.chain}
+              onChange={onSelectChain}
+              placeholder='Chain'
+              disabled={isLoading}
+            />
+            <MultiSelect
+              options={deploymentOptionsFilter || []}
+              value={selectedOptions.deployment}
+              onChange={onSelectMarket}
+              placeholder='Market'
+              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
+            />
+            <MultiSelect
+              options={
+                sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+                []
+              }
+              value={selectedOptions.source}
+              onChange={onSelectSource}
+              placeholder='Source'
+              disabled={isLoading}
+            />
+            <MultiSelect
+              options={
+                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+                []
+              }
+              value={selectedOptions.symbol}
+              onChange={onSelectSymbol}
+              placeholder='Reserve Symbols'
+              disabled={isLoading}
+            />
+          </div>
+          <div className='flex items-center gap-3'>
+            <TabsGroup
+              tabs={['D', 'W', 'M']}
+              value={barSize}
+              onTabChange={handleBarSizeChange}
+              disabled={isLoading}
+            />
+            <TabsGroup
+              tabs={['7B', '30B', '90B', '180B']}
+              value={activeTab}
+              onTabChange={handleTabChange}
+              disabled={isLoading}
+            />
+            <CSVDownloadButton
+              data={csvData}
+              filename={csvFilename}
+            />
+          </div>
+        </div>
+      </View.Tablet>
+      <View.Mobile>
+        <div className='flex flex-col justify-end gap-3 px-6 py-3'>
+          <div className='flex flex-wrap justify-end gap-3'>
+            <TabsGroup
+              tabs={['D', 'W', 'M']}
+              value={barSize}
+              onTabChange={handleBarSizeChange}
+              disabled={isLoading}
+            />
+            <TabsGroup
+              tabs={['7B', '30B', '90B', '180B']}
+              value={activeTab}
+              onTabChange={handleTabChange}
+              disabled={isLoading}
+            />
+          </div>
+          <div className='flex flex-wrap items-center justify-end gap-3'>
+            <Button
+              onClick={onOpenModal}
+              className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+            >
+              <Icon
+                name='filters'
+                className='h-[14px] w-[14px]'
+              />
+              Filters
+            </Button>
+            <CSVDownloadButton
+              data={csvData}
+              filename={csvFilename}
+            />
+          </div>
+        </div>
+        <Drawer
+          isOpen={isOpen}
+          onClose={onCloseModal}
+        >
+          <Text
+            size='17'
+            weight='700'
+            lineHeight='140'
+            align='center'
+            className='mb-8 w-full'
+          >
+            Filters
+          </Text>
+          <div className='grid gap-3'>
+            <MultiSelectDrawer
+              options={chainOptions || []}
+              value={selectedOptions.chain}
+              onChange={onSelectChain}
+              placeholder='Chain'
+              disabled={isLoading}
+            />
+            <MultiSelectDrawer
+              options={deploymentOptionsFilter || []}
+              value={selectedOptions.deployment}
+              onChange={onSelectMarket}
+              placeholder='Market'
+              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
+            />
+            <MultiSelectDrawer
+              options={
+                sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+                []
+              }
+              value={selectedOptions.source}
+              onChange={onSelectSource}
+              placeholder='Source'
+              disabled={isLoading}
+            />
+            <MultiSelectDrawer
+              options={
+                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+                []
+              }
+              value={selectedOptions.symbol}
+              onChange={onSelectSymbol}
+              placeholder='Reserve Symbols'
+              disabled={isLoading}
+            />
+          </div>
+          <Button
+            className='bg-secondary-14 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
+            onClick={onClearAll}
+          >
+            Clear Filters
+          </Button>
+        </Drawer>
+      </View.Mobile>
     </>
   );
 };

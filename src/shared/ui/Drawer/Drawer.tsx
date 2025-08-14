@@ -27,19 +27,15 @@ const DrawerContent = memo(
       typeof window !== 'undefined' ? window.innerHeight - 100 : 600;
     const { Spring, Gesture } = useAnimationLibs();
 
-    // держим компонент смонтированным, пока идёт анимация
     const [mounted, setMounted] = useState<boolean>(isOpen || false);
 
-    // панель
     const [{ y }, api] = Spring.useSpring(() => ({
       y: height,
       immediate: true
     }));
 
-    // оверлей
     const overlayOpacity = y.to([0, height], [1, 0]);
 
-    // анимации
     const E = Spring.easings;
     const PANEL_MS = 300;
 
@@ -60,32 +56,27 @@ const DrawerContent = memo(
           onResolve: () => {
             document.body.classList.remove('disable-scroll-vertical');
             setMounted(false);
-            onClose?.(); // <- теперь гарантировано ПОСЛЕ анимации
+            onClose?.();
           }
         });
       },
       [api, height, E, onClose]
     );
 
-    // реагируем на внешние изменения isOpen
     useEffect(() => {
       if (isOpen) {
         setMounted(true);
       } else if (mounted) {
-        // запускаем мягкое закрытие, а не размонтируемся сразу
         closeAnim();
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen]);
 
-    // когда только что смонтировались и нужно открыть — стартуем анимацию
     useEffect(() => {
       if (mounted && isOpen) {
         openAnim();
       }
     }, [mounted, isOpen, openAnim]);
 
-    // жест свайпа
     const bind = Gesture.useDrag(
       ({
         last,
@@ -136,7 +127,7 @@ const DrawerContent = memo(
           <Spring.a.div
             className={cn(
               'bg-secondary-26 pointer-events-auto fixed inset-0 backdrop-blur-lg',
-              { 'bg-transparent backdrop-blur-none': !isOverlay }
+              { 'backdrop-blur-xs': !isOverlay }
             )}
             style={{ opacity: overlayOpacity }}
             onClick={() => closeAnim()}

@@ -91,7 +91,7 @@ const RunwayMetrics = () => {
         isError={isError}
         className={{
           loading: 'min-h-[130px] md:min-h-[153px]',
-          container: 'min-w-[343px] flex-1',
+          container: 'min-w-[343px] flex-1 md:min-w-auto',
           content: 'p-8'
         }}
       >
@@ -105,7 +105,7 @@ const RunwayMetrics = () => {
         isError={isError}
         className={{
           loading: 'min-h-[130px] md:min-h-[153px]',
-          container: 'min-w-[343px] flex-1',
+          container: 'min-w-[343px] flex-1 md:min-w-auto',
           content: 'p-8'
         }}
       >
@@ -119,7 +119,7 @@ const RunwayMetrics = () => {
         isError={isError}
         className={{
           loading: 'min-h-[130px] md:min-h-[153px]',
-          container: 'min-w-[343px] flex-1',
+          container: 'min-w-[343px] flex-1 md:min-w-auto',
           content: 'p-8'
         }}
       >
