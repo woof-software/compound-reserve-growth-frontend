@@ -1,4 +1,4 @@
-import { memo, PropsWithChildren, useCallback, useEffect } from 'react';
+import React, { memo, PropsWithChildren, useCallback, useEffect } from 'react';
 
 import Portal from '@/components/Portal/Portal';
 import { cn } from '@/shared/lib/classNames/classNames';
@@ -9,12 +9,16 @@ import {
 
 interface DrawerProps extends PropsWithChildren {
   className?: string;
+
+  lazy?: boolean;
+
   isOpen?: boolean;
+
   onClose?: () => void;
 }
 
 const DrawerContent = memo(
-  ({ className, children, isOpen, onClose }: DrawerProps) => {
+  ({ className, children, onClose, isOpen }: DrawerProps) => {
     const height = window.innerHeight - 100;
 
     const { Spring, Gesture } = useAnimationLibs();
@@ -33,7 +37,7 @@ const DrawerContent = memo(
         document.body.classList.remove('disable-scroll-vertical');
       }
       return () => document.body.classList.remove('disable-scroll-vertical');
-    }, [isOpen, openDrawer]);
+    }, [api, isOpen, openDrawer]);
 
     const close = (velocity = 0) => {
       api.start({
@@ -72,21 +76,26 @@ const DrawerContent = memo(
       }
     );
 
-    if (!isOpen) return null;
+    if (!isOpen) {
+      return null;
+    }
 
     const display = y.to((py) => (py < height ? 'block' : 'none'));
 
     return (
       <Portal element={document.getElementById('drawer') ?? document.body}>
-        <div className={cn('fixed inset-0 z-10 flex items-end', className)}>
+        <div className={cn('fixed inset-0 z-50 flex items-end', className)}>
           <div
             className='bg-secondary-26 pointer-events-auto fixed inset-0 backdrop-blur-lg'
             onClick={() => close()}
           />
           <Spring.a.div
-            className='fixed inset-x-0 bottom-0 z-[3] mx-auto min-h-[290px] max-w-[750px] rounded-t-3xl bg-white px-5 py-10'
+            className='bg-card-content pointer-events-auto fixed z-50 w-full translate-y-0 touch-none rounded-t-3xl px-5 pt-10 pb-5'
             style={{ display, y }}
             {...bind()}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
           >
             {children}
           </Spring.a.div>
@@ -98,7 +107,11 @@ const DrawerContent = memo(
 
 const DrawerAsync = (props: DrawerProps) => {
   const { isLoaded } = useAnimationLibs();
-  if (!isLoaded) return null;
+
+  if (!isLoaded) {
+    return null;
+  }
+
   return <DrawerContent {...props} />;
 };
 
