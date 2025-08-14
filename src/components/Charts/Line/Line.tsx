@@ -12,7 +12,9 @@ import HighchartsReact from 'highcharts-react-official';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { getStableColorForSeries } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
+import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 import 'highcharts/modules/stock';
 import 'highcharts/modules/mouse-wheel-zoom';
@@ -487,7 +489,7 @@ const LineChart: FC<LineChartProps> = ({
           containerProps={{ style: { width: '100%', height: '100%' } }}
         />
       </div>
-      <div className='flex shrink-0 items-center justify-center gap-4 py-0 lg:py-2'>
+      <div className='hidden shrink-0 items-center justify-center gap-4 py-0 md:flex lg:py-2'>
         {isLegendEnabled && aggregatedSeries.length > 1 && (
           <Button
             onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
@@ -504,6 +506,44 @@ const LineChart: FC<LineChartProps> = ({
             {showEvents ? 'Hide Events' : 'Show Events'}
           </Button>
         )}
+      </div>
+      <div className='absolute right-6 block md:hidden'>
+        <div className='flex items-center gap-3'>
+          <View.Condition
+            if={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
+          >
+            <div
+              className={cn(
+                'outline-secondary-18 rounded-lg p-1 opacity-50 outline-[0.25px]',
+                {
+                  'opacity-100': areAllSeriesHidden
+                }
+              )}
+              onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
+            >
+              <Icon
+                name='eye'
+                className='h-6 w-6'
+              />
+            </div>
+          </View.Condition>
+          <View.Condition if={Boolean(eventsData.length > 0)}>
+            <div
+              className={cn(
+                'outline-secondary-18 rounded-lg p-1 opacity-50 outline-[0.25px]',
+                {
+                  'opacity-100': showEvents
+                }
+              )}
+              onClick={() => setShowEvents((prev) => !prev)}
+            >
+              <Icon
+                name='calendar-check'
+                className='h-6 w-6'
+              />
+            </div>
+          </View.Condition>
+        </div>
       </div>
     </div>
   );
