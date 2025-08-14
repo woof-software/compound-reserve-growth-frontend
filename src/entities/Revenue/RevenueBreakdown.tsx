@@ -51,9 +51,9 @@ const RevenueBreakDownBlock = ({
   );
 
   const {
-    open: yearOpen,
+    isOpen: yearOpen,
     selectedValue: selectedYear,
-    toggle: toggleYear,
+    open: openYear,
     close: closeYear,
     select: selectYear
   } = useDropdown('single');
@@ -332,7 +332,7 @@ const RevenueBreakDownBlock = ({
               options={yearOptions}
               isOpen={yearOpen}
               selectedValue={selectedYear?.[0] || yearOptions[0] || ''}
-              onToggle={toggleYear}
+              onOpen={openYear}
               onClose={closeYear}
               onSelect={selectYear}
               // contentClassName='p-[5px]'
