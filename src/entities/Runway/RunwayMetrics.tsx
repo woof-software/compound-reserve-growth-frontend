@@ -85,13 +85,14 @@ const RunwayMetrics = () => {
   }, [runwayResponse]);
 
   return (
-    <div className='flex flex-row flex-wrap gap-2.5 md:gap-5'>
+    <div className='flex flex-row flex-wrap gap-0 md:gap-5'>
       <Card
         isLoading={isLoading}
         isError={isError}
         className={{
           loading: 'min-h-[130px] md:min-h-[153px]',
-          container: 'min-w-[343px] flex-1 md:min-w-auto',
+          container:
+            'border-card-header min-w-[343px] flex-1 border md:min-w-auto',
           content: 'p-8'
         }}
       >
@@ -105,7 +106,8 @@ const RunwayMetrics = () => {
         isError={isError}
         className={{
           loading: 'min-h-[130px] md:min-h-[153px]',
-          container: 'min-w-[343px] flex-1 md:min-w-auto',
+          container:
+            'border-card-header min-w-[343px] flex-1 border md:min-w-auto',
           content: 'p-8'
         }}
       >
@@ -119,7 +121,8 @@ const RunwayMetrics = () => {
         isError={isError}
         className={{
           loading: 'min-h-[130px] md:min-h-[153px]',
-          container: 'min-w-[343px] flex-1 md:min-w-auto',
+          container:
+            'border-card-header min-w-[343px] flex-1 border md:min-w-auto',
           content: 'p-8'
         }}
       >

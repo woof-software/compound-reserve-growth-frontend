@@ -7,7 +7,7 @@ import { withTheme } from './app/providers/ThemeProvider/theme-provider';
 
 function App() {
   return (
-    <PageWrapper className='gap-[60px]'>
+    <PageWrapper className='gap-0 md:gap-[60px]'>
       <Header />
       <main className='mx-auto flex w-full max-w-[1084px] flex-grow flex-col'>
         <AppRouter />

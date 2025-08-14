@@ -217,7 +217,7 @@ const TreasuryHoldingsBlock = ({
         loading: 'min-h-[inherit]',
         container: 'min-h-[427px] overflow-visible lg:min-h-[458.5px]',
         content: 'rounded-b-lg px-0 pt-0 pb-0 lg:px-10 lg:pb-10',
-        header: 'rounded-t-lg'
+        header: 'rounded-none md:rounded-t-lg'
       }}
     >
       <div className='hidden items-center justify-end gap-3 px-10 py-3 md:flex lg:px-0'>
