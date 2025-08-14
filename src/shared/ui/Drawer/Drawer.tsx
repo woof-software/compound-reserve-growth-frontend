@@ -1,4 +1,3 @@
-// src/shared/ui/Drawer/Drawer.tsx
 import { memo, PropsWithChildren, useCallback, useEffect } from 'react';
 
 import Portal from '@/components/Portal/Portal';
@@ -17,9 +16,14 @@ interface DrawerProps extends PropsWithChildren {
 const DrawerContent = memo(
   ({ className, children, isOpen, onClose }: DrawerProps) => {
     const height = window.innerHeight - 100;
+
     const { Spring, Gesture } = useAnimationLibs();
+
     const [{ y }, api] = Spring.useSpring(() => ({ y: height }));
-    const openDrawer = useCallback(() => api.start({ y: 0 }), [api]);
+
+    const openDrawer = useCallback(() => {
+      api.start({ y: 0, immediate: false });
+    }, [api]);
 
     useEffect(() => {
       if (isOpen) {
@@ -34,6 +38,7 @@ const DrawerContent = memo(
     const close = (velocity = 0) => {
       api.start({
         y: height,
+        immediate: false,
         config: { ...Spring.config.stiff, velocity },
         onResolve: onClose
       });
@@ -47,12 +52,11 @@ const DrawerContent = memo(
         movement: [, my],
         cancel
       }) => {
-        if (my < -70) {
-          cancel();
-        }
+        if (my < -70) cancel();
+
         if (last) {
           if (my > height * 0.5 || (vy > 0.5 && dy > 0)) {
-            close(vy);
+            close();
           } else {
             openDrawer();
           }
@@ -60,29 +64,29 @@ const DrawerContent = memo(
           api.start({ y: my, immediate: true });
         }
       },
-      { from: () => [0, y.get()], bounds: { top: 0 }, rubberband: true }
+      {
+        from: () => [0, y.get()],
+        filterTaps: true,
+        bounds: { top: 0 },
+        rubberband: true
+      }
     );
 
     if (!isOpen) return null;
+
     const display = y.to((py) => (py < height ? 'block' : 'none'));
 
     return (
       <Portal element={document.getElementById('drawer') ?? document.body}>
-        <div
-          className={cn(
-            'pointer-events-none fixed inset-0 z-10 flex items-end overflow-hidden',
-            className
-          )}
-        >
+        <div className={cn('fixed inset-0 z-10 flex items-end', className)}>
           <div
             className='bg-secondary-26 pointer-events-auto fixed inset-0 backdrop-blur-lg'
             onClick={() => close()}
           />
           <Spring.a.div
-            {...bind()}
+            className='fixed inset-x-0 bottom-0 z-[3] mx-auto min-h-[290px] max-w-[750px] rounded-t-3xl bg-white px-5 py-10'
             style={{ display, y }}
-            className='pointer-events-auto fixed inset-x-0 bottom-0 z-[3] mx-auto min-h-[290px] max-w-[750px] rounded-t-3xl bg-white px-5 py-10 shadow-lg'
-            onTouchStart={(e) => e.stopPropagation()}
+            {...bind()}
           >
             {children}
           </Spring.a.div>

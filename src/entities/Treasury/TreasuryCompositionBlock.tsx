@@ -11,9 +11,7 @@ import {
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Card from '@/shared/ui/Card/Card';
-import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
-import Each from '@/shared/ui/Each/Each';
 import Switch from '@/shared/ui/Switch/Switch';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
@@ -235,15 +233,6 @@ const TreasuryCompositionBlock = memo(
             />
           </View.Condition>
         </div>
-        <Drawer
-          isOpen={openSingle}
-          onClose={closeSingle}
-        >
-          <Each
-            data={options}
-            render={(el) => <div>{el}</div>}
-          />
-        </Drawer>
       </Card>
     );
   }
