@@ -71,6 +71,7 @@
   --secondary-23: #17212B24;
   --secondary-24: #D8DFE5;
   --secondary-25: #19232E;
+  --secondary-26: #AFBBC780;
 
   /*=======================*/
   /* Success Colors */
@@ -92,6 +93,8 @@
   /*=======================*/
   /* Layout */
   --background: #0D131A;
+
+  --blur-background: #AFBBC780;
 
   /*=======================*/
   /* Primary Colors */
@@ -130,6 +133,7 @@
   --secondary-23: #FFFFFF24;
   --secondary-24: #2B3947;
   --secondary-25: #FFF;
+  --secondary-26: #AFBBC780;
 
   /*=======================*/
   /* Success Colors */
@@ -197,6 +201,7 @@
   --color-secondary-23: var(--secondary-23);
   --color-secondary-24: var(--secondary-24);
   --color-secondary-25: var(--secondary-25);
+  --color-secondary-26: var(--secondary-26);
 
   /*=======================*/
   /* Success Colors */
