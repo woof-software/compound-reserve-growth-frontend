@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
@@ -6,17 +6,24 @@ import SingleDropdown, {
   SingleDrawer
 } from '@/components/SingleDropdown/SingleDropdown';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
+import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
   formatPrice,
   groupByKey
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
+import Each from '@/shared/ui/Each/Each';
+import Icon from '@/shared/ui/Icon/Icon';
 import Switch from '@/shared/ui/Switch/Switch';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
+
+import CheckStroke from '@/assets/svg/check-stroke.svg';
 
 const options = ['Asset Type', 'Chain', 'Market'];
 
@@ -78,6 +85,17 @@ const mapTableData = (data: Record<string, TokenData[]>) => {
     .sort((a, b) => b.balance - a.balance);
 };
 
+export const treasuryCompositionColumns = [
+  {
+    accessorKey: 'name',
+    header: 'Asset'
+  },
+  {
+    accessorKey: 'balance',
+    header: 'Total Balance USD'
+  }
+];
+
 const TreasuryCompositionBlock = memo(
   ({ isLoading, data }: TreasuryCompositionBlockProps) => {
     const {
@@ -85,10 +103,18 @@ const TreasuryCompositionBlock = memo(
       selectedValue: selectedSingle,
       close: closeSingle,
       open: openSingle,
-      select: selectSingle
+      select: selectSingle,
+      selectClose: selectSingleClose
     } = useDropdown('single');
 
-    const [includeComp, setIncludeComp] = useState(true);
+    const [includeComp, setIncludeComp] = useState<boolean>(true);
+
+    const [sortType, setSortType] = useState<{
+      key: string;
+      type: string;
+    }>({ key: 'balance', type: 'asc' });
+
+    const { isOpen, onOpenModal, onCloseModal } = useModal();
 
     const filteredData = useMemo(() => {
       if (includeComp || !data.uniqDataByCategory.COMP) {
@@ -173,6 +199,26 @@ const TreasuryCompositionBlock = memo(
       return tableData.length > 0 && chartData.length > 0;
     }, [tableData, chartData]);
 
+    const onSortTypeByKeySelect = useCallback(
+      (value: string) => {
+        setSortType({
+          ...sortType,
+          key: value
+        });
+      },
+      [sortType]
+    );
+
+    const onSortTypeByTypeSelect = useCallback(
+      (value: string) => {
+        setSortType({
+          ...sortType,
+          type: value
+        });
+      },
+      [sortType]
+    );
+
     const onClearAll = () => {
       selectSingle('Asset Type');
 
@@ -186,7 +232,7 @@ const TreasuryCompositionBlock = memo(
         title='Treasury Composition'
         className={{
           loading: 'min-h-[inherit]',
-          container: 'min-h-[571px]',
+          container: 'border-background min-h-[571px] border',
           content: 'flex flex-col gap-3 px-0 pt-0 pb-3 md:px-10 md:pb-10'
         }}
       >
@@ -208,7 +254,7 @@ const TreasuryCompositionBlock = memo(
             >
               Group by
             </Text>
-            <div className='hidden md:block'>
+            <View.Tablet>
               <SingleDropdown
                 options={options}
                 isOpen={isOpenSingle}
@@ -218,20 +264,122 @@ const TreasuryCompositionBlock = memo(
                 onSelect={selectSingle}
                 triggerContentClassName='p-[5px]'
               />
-            </div>
-            <div className='block md:hidden'>
+            </View.Tablet>
+            <View.Mobile>
               <SingleDrawer
                 options={options}
                 isOpen={isOpenSingle}
                 selectedValue={selectedGroup}
                 onOpen={openSingle}
                 onClose={closeSingle}
-                onSelect={selectSingle}
+                onSelect={selectSingleClose}
                 disabled={isLoading}
                 triggerContentClassName='p-[5px]'
               />
-            </div>
+            </View.Mobile>
           </div>
+          <Button
+            onClick={onOpenModal}
+            className='bg-secondary-27 outline-secondary-18 text-gray-11 block flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px] md:hidden'
+          >
+            <Icon
+              name='sort-icon'
+              className='h-[14px] w-[14px]'
+            />
+            Sort
+          </Button>
+          <Drawer
+            isOpen={isOpen}
+            onClose={onCloseModal}
+          >
+            <Text
+              size='17'
+              weight='700'
+              lineHeight='140'
+              align='center'
+              className='mb-8 w-full'
+            >
+              Sort
+            </Text>
+            <div className='grid gap-3'>
+              <div className='grid gap-4'>
+                <Text
+                  size='14'
+                  weight='700'
+                  lineHeight='140'
+                  align='center'
+                  className='w-full'
+                >
+                  Sort type
+                </Text>
+                <Each
+                  data={[
+                    { type: 'asc', header: 'Ascending' },
+                    {
+                      type: 'desc',
+                      header: 'Descending'
+                    }
+                  ]}
+                  render={(el) => (
+                    <div
+                      className='flex items-center justify-between'
+                      key={el.type}
+                      onClick={() => onSortTypeByTypeSelect(el.type)}
+                    >
+                      <Text
+                        size='14'
+                        weight='500'
+                        lineHeight='16'
+                      >
+                        {el.header}
+                      </Text>
+                      <View.Condition if={el.type === sortType?.type}>
+                        <CheckStroke
+                          width={16}
+                          height={16}
+                        />
+                      </View.Condition>
+                    </div>
+                  )}
+                />
+              </div>
+              <div className='grid gap-4'>
+                <Text
+                  size='14'
+                  weight='700'
+                  lineHeight='140'
+                  align='center'
+                  className='w-full'
+                >
+                  Columns
+                </Text>
+                <Each
+                  data={treasuryCompositionColumns}
+                  render={(el) => (
+                    <div
+                      className='flex items-center justify-between'
+                      key={el.accessorKey}
+                      onClick={() => onSortTypeByKeySelect(el.accessorKey)}
+                    >
+                      <Text
+                        size='14'
+                        weight='500'
+                        lineHeight='16'
+                      >
+                        {el.header}
+                      </Text>
+                      <View.Condition if={el.accessorKey === sortType?.key}>
+                        <CheckStroke
+                          width={16}
+                          height={16}
+                        />
+                      </View.Condition>
+                    </div>
+                  )}
+                />
+              </div>
+            </div>
+          </Drawer>
         </div>
         <div className='flex flex-col justify-between md:flex-row'>
           <View.Condition if={!hasData}>
@@ -243,6 +391,7 @@ const TreasuryCompositionBlock = memo(
               data={chartData}
             />
             <TreasuryComposition
+              sortType={sortType}
               tableData={tableData}
               totalBalance={totalBalance}
               activeFilter={selectedGroup as 'Chain' | 'Asset Type' | 'Market'}

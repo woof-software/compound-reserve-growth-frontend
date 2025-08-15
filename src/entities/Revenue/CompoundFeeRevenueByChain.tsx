@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import CompoundFeeRevenuebyChainComponent, {
   Interval,
@@ -7,6 +7,7 @@ import CompoundFeeRevenuebyChainComponent, {
 import SingleDropdown, {
   SingleDrawer
 } from '@/components/SingleDropdown/SingleDropdown';
+import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
   capitalizeFirstLetter,
@@ -15,11 +16,17 @@ import {
   longMonthNames,
   shortMonthNames
 } from '@/shared/lib/utils/utils';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
+import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
+
+import CheckStroke from '@/assets/svg/check-stroke.svg';
 
 export interface ProcessedRevenueData {
   chain: string;
@@ -225,6 +232,17 @@ const CompoundFeeRevenueByChain = ({
   );
   const [selectedPeriod, setSelectedPeriod] = useState<string | undefined>();
 
+  const [sortType, setSortType] = useState<{
+    key: string;
+    type: string;
+  }>({ key: 'chain', type: 'asc' });
+
+  const {
+    isOpen: isSortOpen,
+    onOpenModal: onSortOpen,
+    onCloseModal: onSortClose
+  } = useModal();
+
   const precomputedViews = useMemo(
     () => precomputeViews(revenueData || []),
     [revenueData]
@@ -270,6 +288,36 @@ const CompoundFeeRevenueByChain = ({
     return { ...viewData, columns: finalColumns };
   }, [precomputedViews, selectedInterval, selectedPeriod]);
 
+  const compoundFeeRevenueByCainColumns = useMemo(() => {
+    if (!precomputedViews || !selectedPeriod) {
+      return [
+        {
+          accessorKey: 'chain',
+          header: 'Chain'
+        }
+      ];
+    }
+
+    const viewData: View | undefined =
+      precomputedViews[
+        selectedInterval.toLowerCase() as keyof PrecomputedViews
+      ]?.[selectedPeriod];
+
+    const columns =
+      viewData?.columns?.map((el) => ({
+        accessorKey: el.accessorKey,
+        header: el.header
+      })) || [];
+
+    return [
+      {
+        accessorKey: 'chain',
+        header: 'Chain'
+      },
+      ...columns
+    ];
+  }, [precomputedViews, selectedPeriod, selectedInterval]);
+
   const hasData = currentView.tableData.length > 0;
 
   const handleIntervalSelect = (newInterval: string) => {
@@ -286,6 +334,26 @@ const CompoundFeeRevenueByChain = ({
     setSelectedPeriod(period);
     periodDropdown.close();
   };
+
+  const onSortTypeByKeySelect = useCallback(
+    (value: string) => {
+      setSortType({
+        ...sortType,
+        key: value
+      });
+    },
+    [sortType]
+  );
+
+  const onSortTypeByTypeSelect = useCallback(
+    (value: string) => {
+      setSortType({
+        ...sortType,
+        type: value
+      });
+    },
+    [sortType]
+  );
 
   useEffect(() => {
     if (precomputedViews && !selectedPeriod) {
@@ -306,11 +374,12 @@ const CompoundFeeRevenueByChain = ({
       isLoading={isLoading}
       isError={isError}
       className={{
+        container: 'border-background border',
         loading: 'min-h-[571px]',
         content: 'flex flex-col px-0 pt-0 pb-0 md:gap-3 md:pb-10 lg:px-10'
       }}
     >
-      <div className='flex justify-end gap-3 px-6 py-3 md:px-10 lg:px-0'>
+      <div className='flex flex-wrap justify-end gap-3 px-6 py-3 md:px-10 lg:px-0'>
         <div className='flex items-center gap-1'>
           <Text
             tag='span'
@@ -379,6 +448,16 @@ const CompoundFeeRevenueByChain = ({
             />
           </div>
         </div>
+        <Button
+          onClick={onSortOpen}
+          className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+        >
+          <Icon
+            name='sort-icon'
+            className='h-[14px] w-[14px]'
+          />
+          Sort
+        </Button>
       </div>
       {!isLoading && !isError && !hasData ? (
         <div className='flex h-[400px] items-center justify-center'>
@@ -391,12 +470,107 @@ const CompoundFeeRevenueByChain = ({
         </div>
       ) : (
         <CompoundFeeRevenuebyChainComponent
+          sortType={sortType}
           data={currentView.tableData}
           columns={currentView.columns}
           totals={currentView.totals}
           selectedInterval={selectedInterval}
         />
       )}
+      <Drawer
+        isOpen={isSortOpen}
+        onClose={onSortClose}
+      >
+        <Text
+          size='17'
+          weight='700'
+          lineHeight='140'
+          align='center'
+          className='mb-8 w-full'
+        >
+          Sort
+        </Text>
+        <div className='grid gap-3'>
+          <div className='grid gap-4'>
+            <Text
+              size='14'
+              weight='700'
+              lineHeight='140'
+              align='center'
+              className='w-full'
+            >
+              Sort type
+            </Text>
+            <Each
+              data={[
+                { type: 'asc', header: 'Ascending' },
+                {
+                  type: 'desc',
+                  header: 'Descending'
+                }
+              ]}
+              render={(el) => (
+                <div
+                  className='flex items-center justify-between'
+                  key={el.type}
+                  onClick={() => onSortTypeByTypeSelect(el.type)}
+                >
+                  <Text
+                    size='14'
+                    weight='500'
+                    lineHeight='16'
+                  >
+                    {el.header}
+                  </Text>
+                  <View.Condition if={el.type === sortType?.type}>
+                    <CheckStroke
+                      width={16}
+                      height={16}
+                    />
+                  </View.Condition>
+                </div>
+              )}
+            />
+          </div>
+          <div className='grid gap-4'>
+            <Text
+              size='14'
+              weight='700'
+              lineHeight='140'
+              align='center'
+              className='w-full'
+            >
+              Columns
+            </Text>
+            <Each
+              data={compoundFeeRevenueByCainColumns}
+              render={(el) => (
+                <div
+                  className='flex items-center justify-between'
+                  key={el.accessorKey}
+                  onClick={() =>
+                    onSortTypeByKeySelect(el.accessorKey as string)
+                  }
+                >
+                  <Text
+                    size='14'
+                    weight='500'
+                    lineHeight='16'
+                  >
+                    {el.header as string}
+                  </Text>
+                  <View.Condition if={el.accessorKey === sortType?.key}>
+                    <CheckStroke
+                      width={16}
+                      height={16}
+                    />
+                  </View.Condition>
+                </div>
+              )}
+            />
+          </div>
+        </div>
+      </Drawer>
     </Card>
   );
 };

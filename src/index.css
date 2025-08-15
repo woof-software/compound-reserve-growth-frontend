@@ -274,22 +274,6 @@
 
 /*=======================*/
 /* Scrollbar Styles */
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-primary-10;
-
-  border-radius: 18px;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-primary-12;
-
-  border-radius: 18px;
-}
-
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;

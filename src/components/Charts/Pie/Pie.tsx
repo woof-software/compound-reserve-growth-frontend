@@ -194,10 +194,11 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       },
       maxHeight: 100,
       navigation: {
-        animation: true,
+        enabled: true,
         arrowSize: 11,
         activeColor: theme === 'light' ? '#17212B' : '#FFFFFF',
         inactiveColor: '#7A899A',
+        animation: { duration: 250 },
         style: {
           cursor: 'pointer',
           color: theme === 'light' ? '#17212B' : '#FFFFFF'
@@ -211,19 +212,6 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         data: chartData as unknown as Highcharts.PointOptionsObject[]
       }
     ]
-    //TODO: add navigate responsive
-    // responsive: {
-    //   rules: [
-    //     {
-    //       condition: { maxWidth: 1116 },
-    //       chartOptions: {
-    //         legend: {
-    //           navigation: { enabled: false }
-    //         }
-    //       }
-    //     }
-    //   ]
-    // }
   };
 
   return (

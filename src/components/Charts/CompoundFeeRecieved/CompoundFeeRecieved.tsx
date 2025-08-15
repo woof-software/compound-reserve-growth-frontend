@@ -283,9 +283,11 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       layout: 'horizontal',
       useHTML: true,
       itemStyle: {
-        color: 'var(--color-primary-11)',
-        fontWeight: 'normal',
+        color: '#7A8A99',
+        fontSize: '11px',
+        fontWeight: '400',
         textDecoration: 'none',
+        lineHeight: '100%',
         fontFamily: 'Haas Grot Text R, sans-serif'
       },
       itemHoverStyle: {
@@ -301,6 +303,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       symbolWidth: 0,
       symbolHeight: 0,
       itemDistance: 20,
+      maxHeight: 100,
       labelFormatter: function () {
         const series = this as Highcharts.Series;
         const textDecoration = series.visible ? 'none' : 'line-through';
@@ -311,6 +314,17 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       <span style="width: 12px; height: 2px; background-color: ${series.color}; display: inline-block; border-radius: 1px; opacity: ${series.visible ? '1' : '0.5'};"></span>
       <span style="font-size: 11px; text-decoration: ${textDecoration}; color: ${textColor}; font-family: 'Haas Grot Text R', sans-serif;">${series.name}</span>
     </span>`;
+      },
+      navigation: {
+        enabled: true,
+        arrowSize: 11,
+        activeColor: theme === 'light' ? '#17212B' : '#FFFFFF',
+        inactiveColor: '#7A899A',
+        animation: { duration: 250 },
+        style: {
+          cursor: 'pointer',
+          color: theme === 'light' ? '#17212B' : '#FFFFFF'
+        }
       }
     },
     plotOptions: {

@@ -20,6 +20,7 @@ interface TreasuryCompositionProps {
   tableData: TreasuryCompositionType[];
   totalBalance: number;
   activeFilter: 'Chain' | 'Asset Type' | 'Market';
+  sortType: { key: string; type: string };
 }
 
 const filterConfig = {
@@ -41,6 +42,7 @@ const filterConfig = {
 };
 
 const TreasuryComposition = ({
+  sortType,
   tableData,
   totalBalance,
   activeFilter
@@ -80,17 +82,41 @@ const TreasuryComposition = ({
     ];
   }, [activeFilter]);
 
+  const mobileTableData = useMemo(() => {
+    if (!sortType?.key) {
+      return tableData;
+    }
+
+    const key = sortType.key as keyof TreasuryCompositionType;
+    return [...tableData].sort((a, b) => {
+      const aVal = a[key];
+      const bVal = b[key];
+
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortType.type === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortType.type === 'asc'
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+
+      return 0;
+    });
+  }, [tableData, sortType]);
+
   return (
     <>
       <MobileDataTable
         className='md:hidden'
-        tableData={tableData}
+        tableData={mobileTableData}
       >
         {(dataRows) => (
           <>
             {dataRows.map((row, index) => (
               <div
-                key={index}
+                key={row.name + index}
                 className={cn(
                   'border-secondary-23 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b px-6 py-5 md:gap-x-[63px]',
                   {

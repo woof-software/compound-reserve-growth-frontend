@@ -67,7 +67,7 @@ const RevenueMetrics = ({
             isError={isError}
             className={{
               container:
-                'border-card-header max-w-full min-w-64 flex-1 basis-64 border',
+                'border-background max-w-full min-w-64 flex-1 basis-64 border',
               loading: 'h-[317px]',
               header: 'px-10'
             }}

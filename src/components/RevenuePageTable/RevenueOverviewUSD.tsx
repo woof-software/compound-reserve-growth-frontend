@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { cn } from '@/shared/lib/classNames/classNames';
@@ -31,10 +31,16 @@ export const toDateHeaderMap: Record<ToDateTab, string> = {
 
 interface RevenueOverviewUSDProps {
   data: TableRowData[];
+
   columns: ExtendedColumnDef<TableRowData>[];
+
   footerContent: React.ReactNode;
+
   totalFooterData: PeriodMap | null;
+
   dateType: DateType;
+
+  sortType: { key: string; type: string };
 }
 
 const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
@@ -42,16 +48,41 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
   columns,
   dateType,
   footerContent,
-  totalFooterData
+  totalFooterData,
+  sortType
 }) => {
+  const mobileTableData = useMemo(() => {
+    if (!sortType?.key) {
+      return data;
+    }
+
+    const key = sortType.key as keyof TableRowData;
+    return [...data].sort((a, b) => {
+      const aVal = a[key];
+      const bVal = b[key];
+
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortType.type === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortType.type === 'asc'
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+
+      return 0;
+    });
+  }, [data, sortType]);
+
   return (
     <>
-      <MobileDataTable tableData={data}>
+      <MobileDataTable tableData={mobileTableData}>
         {(dataRows) => (
           <>
             {dataRows.map((row, index) => (
               <div
-                key={index}
+                key={row.chain + index}
                 className={cn(
                   'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b px-6 py-5 md:gap-x-[63px] md:px-10',
                   {
