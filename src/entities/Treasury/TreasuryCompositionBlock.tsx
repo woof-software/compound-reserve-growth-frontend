@@ -85,7 +85,8 @@ const TreasuryCompositionBlock = memo(
       selectedValue: selectedSingle,
       close: closeSingle,
       open: openSingle,
-      select: selectSingle
+      select: selectSingle,
+      selectClose: selectSingleClose
     } = useDropdown('single');
 
     const [includeComp, setIncludeComp] = useState(true);
@@ -226,7 +227,7 @@ const TreasuryCompositionBlock = memo(
                 selectedValue={selectedGroup}
                 onOpen={openSingle}
                 onClose={closeSingle}
-                onSelect={selectSingle}
+                onSelect={selectSingleClose}
                 disabled={isLoading}
                 triggerContentClassName='p-[5px]'
               />

@@ -58,8 +58,20 @@ const useDropdown = (type: 'single' | 'multiple') => {
   const select = (value: string) => {
     if (type === 'single') {
       setSelectedValue([value]);
+    } else {
+      const newValues = selectedValue?.includes(value)
+        ? selectedValue?.filter((v) => v !== value)
+        : [...(selectedValue || []), value];
 
-      // setIsOpen(false);
+      setSelectedValue(newValues);
+    }
+  };
+
+  const selectClose = (value: string) => {
+    if (type === 'single') {
+      setSelectedValue([value]);
+
+      setIsOpen(false);
     } else {
       const newValues = selectedValue?.includes(value)
         ? selectedValue?.filter((v) => v !== value)
@@ -75,7 +87,8 @@ const useDropdown = (type: 'single' | 'multiple') => {
     toggle,
     open,
     close,
-    select
+    select,
+    selectClose
   };
 };
 
