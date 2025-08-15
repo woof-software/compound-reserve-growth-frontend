@@ -366,7 +366,7 @@ const CompoundFeeRevenueRecieved = ({
       isError={isError}
       className={{
         loading: 'min-h-[inherit]',
-        container: 'min-h-[571px]',
+        container: 'border-background min-h-[571px] border',
         content: 'flex flex-col gap-3 p-0 md:px-10 md:pb-10'
       }}
     >
