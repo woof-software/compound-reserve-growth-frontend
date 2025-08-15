@@ -59,7 +59,7 @@ const useDropdown = (type: 'single' | 'multiple') => {
     if (type === 'single') {
       setSelectedValue([value]);
 
-      setIsOpen(false);
+      // setIsOpen(false);
     } else {
       const newValues = selectedValue?.includes(value)
         ? selectedValue?.filter((v) => v !== value)

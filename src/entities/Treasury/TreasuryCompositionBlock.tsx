@@ -208,7 +208,7 @@ const TreasuryCompositionBlock = memo(
             >
               Group by
             </Text>
-            <div className='hidden md:block'>
+            <View.Tablet>
               <SingleDropdown
                 options={options}
                 isOpen={isOpenSingle}
@@ -218,8 +218,8 @@ const TreasuryCompositionBlock = memo(
                 onSelect={selectSingle}
                 triggerContentClassName='p-[5px]'
               />
-            </div>
-            <div className='block md:hidden'>
+            </View.Tablet>
+            <View.Mobile>
               <SingleDrawer
                 options={options}
                 isOpen={isOpenSingle}
@@ -230,7 +230,7 @@ const TreasuryCompositionBlock = memo(
                 disabled={isLoading}
                 triggerContentClassName='p-[5px]'
               />
-            </div>
+            </View.Mobile>
           </div>
         </div>
         <div className='flex flex-col justify-between md:flex-row'>
