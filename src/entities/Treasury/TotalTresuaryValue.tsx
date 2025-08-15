@@ -93,6 +93,8 @@ interface FiltersProps {
   onClearAll: () => void;
 
   selectSingle: (value: string) => void;
+
+  selectSingleClose: (value: string) => void;
 }
 
 const TotalTresuaryValue = ({
@@ -118,7 +120,8 @@ const TotalTresuaryValue = ({
     selectedValue: selectedSingle,
     close: closeSingle,
     open: openSingleDropdown,
-    select: selectSingle
+    select: selectSingle,
+    selectClose: selectSingleClose
   } = useDropdown('single');
 
   const {
@@ -354,6 +357,7 @@ const TotalTresuaryValue = ({
         openSingleDropdown={openSingleDropdown}
         closeSingle={closeSingle}
         selectSingle={selectSingle}
+        selectSingleClose={selectSingleClose}
         onClearAll={onClearAll}
       />
       {!isLoading && !isError && !hasData ? (
@@ -396,6 +400,7 @@ const Filters = memo(
     openSingleDropdown,
     closeSingle,
     selectSingle,
+    selectSingleClose,
     onClearAll
   }: FiltersProps) => {
     const { isOpen, onOpenModal, onCloseModal } = useModal();
@@ -571,7 +576,7 @@ const Filters = memo(
                 onOpen={openSingleDropdown}
                 onClose={closeSingle}
                 onSelect={(value: string) => {
-                  selectSingle(value);
+                  selectSingleClose(value);
                 }}
                 disabled={isLoading}
                 triggerContentClassName='p-[5px]'

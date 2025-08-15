@@ -84,7 +84,8 @@ const RevenueBreakDownBlock = ({
     selectedValue: selectedYear,
     open: openYear,
     close: closeYear,
-    select: selectYear
+    select: selectYear,
+    selectClose: selectYearClose
   } = useDropdown('single');
 
   const onSelectChain = useCallback(
@@ -500,7 +501,7 @@ const RevenueBreakDownBlock = ({
                 selectedValue={selectedYear?.[0] || yearOptions[0] || ''}
                 onOpen={openYear}
                 onClose={closeYear}
-                onSelect={selectYear}
+                onSelect={selectYearClose}
                 // contentClassName='p-[5px]'
                 triggerContentClassName='p-[5px]'
                 disabled={isLoading}
