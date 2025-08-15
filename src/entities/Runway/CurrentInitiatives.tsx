@@ -151,7 +151,7 @@ const CurrentInitiativesBlock = () => {
       isError={isError}
       className={{
         loading: 'min-h-[571px]',
-        content: 'p-0 lg:px-10 lg:pt-10',
+        content: 'p-0 lg:px-10 lg:py-10',
         container: 'border-background border'
       }}
     >
