@@ -92,7 +92,7 @@ const RunwayMetrics = () => {
         className={{
           loading: 'min-h-[130px] md:min-h-[153px]',
           container:
-            'border-card-header min-w-[343px] flex-1 border md:min-w-auto',
+            'border-background min-w-[343px] flex-1 border md:min-w-auto',
           content: 'p-8'
         }}
       >
@@ -107,7 +107,7 @@ const RunwayMetrics = () => {
         className={{
           loading: 'min-h-[130px] md:min-h-[153px]',
           container:
-            'border-card-header min-w-[343px] flex-1 border md:min-w-auto',
+            'border-background min-w-[343px] flex-1 border md:min-w-auto',
           content: 'p-8'
         }}
       >
@@ -122,7 +122,7 @@ const RunwayMetrics = () => {
         className={{
           loading: 'min-h-[130px] md:min-h-[153px]',
           container:
-            'border-card-header min-w-[343px] flex-1 border md:min-w-auto',
+            'border-background min-w-[343px] flex-1 border md:min-w-auto',
           content: 'p-8'
         }}
       >

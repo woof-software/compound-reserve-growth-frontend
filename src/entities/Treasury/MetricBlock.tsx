@@ -105,7 +105,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           isLoading={isLoading}
           className={{
             container:
-              'border-card-header h-auto min-h-[214px] min-w-[343px] flex-1 border md:h-[230px] md:min-w-auto lg:h-[200px]',
+              'border-background h-auto min-h-[214px] min-w-[343px] flex-1 border md:h-[230px] md:min-w-auto lg:h-[200px]',
             content: 'p-8 md:p-10'
           }}
         >
@@ -131,7 +131,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           isLoading={isLoading}
           className={{
             container:
-              'border-card-header h-auto min-h-[214px] min-w-[343px] flex-1 border md:h-[230px] md:min-w-auto lg:h-[200px]',
+              'border-background h-auto min-h-[214px] min-w-[343px] flex-1 border md:h-[230px] md:min-w-auto lg:h-[200px]',
             content: 'p-8 md:p-10'
           }}
         >
@@ -152,7 +152,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           isLoading={isLoading}
           className={{
             container:
-              'border-card-header h-auto min-h-[214px] min-w-[343px] flex-1 border md:h-[230px] md:min-w-auto lg:h-[200px]',
+              'border-background h-auto min-h-[214px] min-w-[343px] flex-1 border md:h-[230px] md:min-w-auto lg:h-[200px]',
             content: 'p-8 md:p-10'
           }}
         >
@@ -175,7 +175,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           isLoading={isLoading}
           className={{
             container:
-              'border-card-header h-auto min-h-[214px] min-w-[343px] flex-1 border md:h-[225px] md:min-w-auto',
+              'border-background h-auto min-h-[214px] min-w-[343px] flex-1 border md:h-[225px] md:min-w-auto',
             content: 'p-8 md:p-10'
           }}
         >
@@ -201,7 +201,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           isLoading={isLoading}
           className={{
             container:
-              'border-card-header h-auto min-h-[214px] min-w-[343px] flex-1 border md:h-[225px] md:min-w-auto',
+              'border-background h-auto min-h-[214px] min-w-[343px] flex-1 border md:h-[225px] md:min-w-auto',
             content: 'p-8 md:p-10'
           }}
         >

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { cn } from '@/shared/lib/classNames/classNames';
@@ -30,6 +30,8 @@ export interface FullDAOCommitmentRow {
 
 interface FullDAOCommitmentsProps {
   data: FullDAOCommitmentRow[];
+
+  sortType: { key: string; type: string };
 }
 
 const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
@@ -165,14 +167,41 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
   }
 ];
 
-const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({ data }) => {
+const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
+  data,
+  sortType
+}) => {
+  const mobileTableData = useMemo(() => {
+    if (!sortType?.key) {
+      return data;
+    }
+
+    const key = sortType.key as keyof FullDAOCommitmentRow;
+    return [...data].sort((a, b) => {
+      const aVal = a[key];
+      const bVal = b[key];
+
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortType.type === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortType.type === 'asc'
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+
+      return 0;
+    });
+  }, [data, sortType]);
+
   return (
     <>
-      <MobileDataTable tableData={data}>
+      <MobileDataTable tableData={mobileTableData}>
         {(dataRows) =>
           dataRows.map((row, index) => (
             <div
-              key={index}
+              key={row.token + index}
               className='border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b px-6 py-5 md:gap-x-[63px] md:px-10'
             >
               <div className='grid w-full max-w-[73px]'>
