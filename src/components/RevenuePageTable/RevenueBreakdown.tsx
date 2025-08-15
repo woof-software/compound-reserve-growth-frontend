@@ -15,7 +15,10 @@ export interface FormattedRevenueData {
 
 interface RevenueBreakdownProps {
   data: FormattedRevenueData[];
+
   columns: ExtendedColumnDef<FormattedRevenueData>[];
+
+  sortType: { key: string; type: string };
 }
 
 type ColKey = { accessorKey: string; header: string };
@@ -41,7 +44,11 @@ const formatCurrencyValue = (value: unknown): string => {
   return isNegative ? `-$${formattedNumber}` : `$${formattedNumber}`;
 };
 
-const RevenueBreakdown = ({ data, columns }: RevenueBreakdownProps) => {
+const RevenueBreakdown = ({
+  data,
+  columns,
+  sortType
+}: RevenueBreakdownProps) => {
   const totals = useMemo(() => {
     const columnTotals: Record<string, number> = {};
 
@@ -123,51 +130,78 @@ const RevenueBreakdown = ({ data, columns }: RevenueBreakdownProps) => {
       return { accessorKey: accessorKey || '', header };
     });
 
-    return data.map((row) => {
-      const rowData: Record<string, unknown> = {};
-      columnsKeys.forEach(({ accessorKey, header }) => {
-        rowData[header] = row[accessorKey];
+    const tableData = [...data];
+
+    if (!sortType?.key) {
+      return tableData;
+    }
+
+    const key = sortType.key as keyof FormattedRevenueData;
+    return tableData
+      .sort((a, b) => {
+        const aVal = a[key];
+        const bVal = b[key];
+
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return sortType.type === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+
+        if (typeof aVal === 'string' && typeof bVal === 'string') {
+          return sortType.type === 'asc'
+            ? aVal.localeCompare(bVal)
+            : bVal.localeCompare(aVal);
+        }
+
+        return 0;
+      })
+      .map((row) => {
+        const rowData: Record<string, unknown> = {};
+        columnsKeys.forEach(({ accessorKey, header }) => {
+          rowData[header] = row[accessorKey];
+        });
+        return rowData;
       });
-      return rowData;
-    });
-  }, [data, columns]);
+  }, [data, columns, sortType]);
 
   return (
     <>
       <MobileDataTable tableData={filteredMobileData}>
         {(dataRows) => (
           <>
-            {dataRows.map((rowObj, rowIndex) => (
-              <div
-                key={rowIndex}
-                className='border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b px-6 py-5 md:gap-x-[63px] md:px-10'
-              >
-                {Object.entries(rowObj).map(([key, value], colIndex) => (
-                  <div
-                    key={colIndex}
-                    className='grid w-full max-w-[73px]'
-                  >
-                    <Text
-                      size='8'
-                      lineHeight='18'
-                      weight='500'
-                      className='text-primary-14'
+            {dataRows.map((rowObj, rowIndex) => {
+              return (
+                <div
+                  key={rowIndex}
+                  className='border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b px-6 py-5 md:gap-x-[63px] md:px-10'
+                >
+                  {Object.entries(rowObj).map(([key, value], colIndex) => (
+                    <div
+                      id={key + value}
+                      key={colIndex}
+                      className='grid w-full max-w-[73px]'
                     >
-                      {capitalizeFirstLetter(key)}
-                    </Text>
-                    <Text
-                      size='11'
-                      lineHeight='21'
-                      className='truncate'
-                    >
-                      {key === 'Chain'
-                        ? (value as string)
-                        : formatCurrencyValue(value || 0)}
-                    </Text>
-                  </div>
-                ))}
-              </div>
-            ))}
+                      <Text
+                        size='8'
+                        lineHeight='18'
+                        weight='500'
+                        className='text-primary-14'
+                      >
+                        {capitalizeFirstLetter(key)}
+                      </Text>
+                      <Text
+                        size='11'
+                        lineHeight='21'
+                        className='truncate'
+                      >
+                        {key === 'Chain'
+                          ? (value as string)
+                          : formatCurrencyValue(value || 0)}
+                      </Text>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
             <div className='grid grid-cols-3 gap-x-10 gap-y-3 px-6 py-5 md:gap-x-[63px] md:px-10'>
               <div className='grid min-h-[39px] w-full max-w-[73px]'>
                 <Text

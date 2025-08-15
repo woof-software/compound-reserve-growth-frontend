@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useReducer } from 'react';
+import React, { useCallback, useMemo, useReducer, useState } from 'react';
 
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import {
@@ -25,9 +25,12 @@ import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
+import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
+
+import CheckStroke from '@/assets/svg/check-stroke.svg';
 
 interface SelectedFiltersState {
   chain: OptionType[];
@@ -48,7 +51,22 @@ const RevenueBreakDownBlock = ({
     symbol: []
   };
 
-  const { isOpen, onOpenModal, onCloseModal } = useModal();
+  const [sortType, setSortType] = useState<{
+    key: string;
+    type: string;
+  }>({ key: 'chain', type: 'asc' });
+
+  const {
+    isOpen: isFilterOpen,
+    onOpenModal: onFilterOpen,
+    onCloseModal: onFilterClose
+  } = useModal();
+
+  const {
+    isOpen: isSortOpen,
+    onOpenModal: onSortOpen,
+    onCloseModal: onSortClose
+  } = useModal();
 
   const [selectedOptions, setSelectedOptions] = useReducer(
     (
@@ -266,9 +284,36 @@ const RevenueBreakDownBlock = ({
     return { tableData: finalData, dynamicColumns: columns };
   }, [filteredData, selectedYear, yearOptions, selectedOptions]);
 
+  const revenueBreakdownColumns = useMemo(() => {
+    return dynamicColumns.map((column) => ({
+      accessorKey: column.accessorKey,
+      header: column.header
+    }));
+  }, [dynamicColumns]);
+
   const handleResetFilters = useCallback(() => {
     setSelectedOptions(initialState);
   }, []);
+
+  const onSortTypeByKeySelect = useCallback(
+    (value: string) => {
+      setSortType({
+        ...sortType,
+        key: value
+      });
+    },
+    [sortType]
+  );
+
+  const onSortTypeByTypeSelect = useCallback(
+    (value: string) => {
+      setSortType({
+        ...sortType,
+        type: value
+      });
+    },
+    [sortType]
+  );
 
   const hasData = tableData.length > 0;
 
@@ -287,7 +332,7 @@ const RevenueBreakDownBlock = ({
       isError={isError}
       className={{
         loading: 'min-h-[inherit]',
-        container: 'min-h-[571px]',
+        container: 'border-background min-h-[571px] border',
         content: 'flex flex-col gap-3 px-0 pt-0 pb-0 md:pb-10 lg:px-10'
       }}
     >
@@ -316,7 +361,7 @@ const RevenueBreakDownBlock = ({
           </div>
           <div className='flex flex-wrap items-center justify-end gap-3'>
             <Button
-              onClick={onOpenModal}
+              onClick={onFilterOpen}
               className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
             >
               <Icon
@@ -325,6 +370,16 @@ const RevenueBreakDownBlock = ({
               />
               Filters
             </Button>
+            <Button
+              onClick={onSortOpen}
+              className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+            >
+              <Icon
+                name='sort-icon'
+                className='h-[14px] w-[14px]'
+              />
+              Sort
+            </Button>
             <CSVDownloadButton
               data={tableData}
               filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
@@ -332,8 +387,8 @@ const RevenueBreakDownBlock = ({
           </div>
         </div>
         <Drawer
-          isOpen={isOpen}
-          onClose={onCloseModal}
+          isOpen={isFilterOpen}
+          onClose={onFilterClose}
         >
           <Text
             size='17'
@@ -462,6 +517,7 @@ const RevenueBreakDownBlock = ({
         <RevenueBreakdown
           data={tableData}
           columns={dynamicColumns}
+          sortType={sortType}
         />
       </View.Condition>
       <View.Condition if={!hasData}>
@@ -470,6 +526,100 @@ const RevenueBreakDownBlock = ({
           text={noDataMessage}
         />
       </View.Condition>
+      <Drawer
+        isOpen={isSortOpen}
+        onClose={onSortClose}
+      >
+        <Text
+          size='17'
+          weight='700'
+          lineHeight='140'
+          align='center'
+          className='mb-8 w-full'
+        >
+          Sort
+        </Text>
+        <div className='grid gap-3'>
+          <div className='grid gap-4'>
+            <Text
+              size='14'
+              weight='700'
+              lineHeight='140'
+              align='center'
+              className='w-full'
+            >
+              Sort type
+            </Text>
+            <Each
+              data={[
+                { type: 'asc', header: 'Ascending' },
+                {
+                  type: 'desc',
+                  header: 'Descending'
+                }
+              ]}
+              render={(el) => (
+                <div
+                  className='flex items-center justify-between'
+                  key={el.type}
+                  onClick={() => onSortTypeByTypeSelect(el.type)}
+                >
+                  <Text
+                    size='14'
+                    weight='500'
+                    lineHeight='16'
+                  >
+                    {el.header}
+                  </Text>
+                  <View.Condition if={el.type === sortType?.type}>
+                    <CheckStroke
+                      width={16}
+                      height={16}
+                    />
+                  </View.Condition>
+                </div>
+              )}
+            />
+          </div>
+          <div className='grid gap-4'>
+            <Text
+              size='14'
+              weight='700'
+              lineHeight='140'
+              align='center'
+              className='w-full'
+            >
+              Columns
+            </Text>
+            <Each
+              data={revenueBreakdownColumns}
+              render={(el) => (
+                <div
+                  className='flex items-center justify-between'
+                  key={el.accessorKey}
+                  onClick={() =>
+                    onSortTypeByKeySelect(el.accessorKey as string)
+                  }
+                >
+                  <Text
+                    size='14'
+                    weight='500'
+                    lineHeight='16'
+                  >
+                    {el.header as string}
+                  </Text>
+                  <View.Condition if={el.accessorKey === sortType?.key}>
+                    <CheckStroke
+                      width={16}
+                      height={16}
+                    />
+                  </View.Condition>
+                </div>
+              )}
+            />
+          </div>
+        </div>
+      </Drawer>
     </Card>
   );
 };

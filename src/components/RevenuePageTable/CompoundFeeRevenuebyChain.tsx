@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { cn } from '@/shared/lib/classNames/classNames';
@@ -19,16 +19,22 @@ export type Interval = 'Quarterly' | 'Monthly' | 'Weekly';
 
 interface CompoundFeeRevenuebyChainProps {
   data: ProcessedRevenueData[];
+
   columns: ExtendedColumnDef<ProcessedRevenueData>[];
+
   selectedInterval: Interval;
+
   totals: { [key: string]: number };
+
+  sortType: { key: string; type: string };
 }
 
 const CompoundFeeRevenuebyChain = ({
   data,
   columns,
   totals,
-  selectedInterval
+  selectedInterval,
+  sortType
 }: CompoundFeeRevenuebyChainProps) => {
   const footerRow = (
     <tr key='footer-total-row'>
@@ -72,14 +78,38 @@ const CompoundFeeRevenuebyChain = ({
     </tr>
   );
 
+  const mobileTableData = useMemo(() => {
+    if (!sortType?.key) {
+      return data;
+    }
+
+    const key = sortType.key as keyof ProcessedRevenueData;
+    return [...data].sort((a, b) => {
+      const aVal = a[key];
+      const bVal = b[key];
+
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortType.type === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortType.type === 'asc'
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+
+      return 0;
+    });
+  }, [data, sortType]);
+
   return (
     <>
-      <MobileDataTable tableData={data}>
+      <MobileDataTable tableData={mobileTableData}>
         {(dataRows) => (
           <>
             {dataRows.map((rowObj, rowIndex) => (
               <div
-                key={rowIndex}
+                key={rowObj.chain + rowIndex}
                 className={cn(
                   'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b px-6 py-5 md:gap-x-[63px] md:px-10',
                   {
