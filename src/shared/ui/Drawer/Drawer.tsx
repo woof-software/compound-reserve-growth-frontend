@@ -156,7 +156,7 @@ const DrawerContent = memo(
 
       const t = Math.max(0, Math.min(py / h, 1));
 
-      return 0.6 * (1 - t);
+      return 1 - t;
     });
 
     return (

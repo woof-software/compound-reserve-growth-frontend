@@ -20,6 +20,8 @@ export type OptionType = {
   marketType?: string;
 };
 
+export type ValueOf<T> = T[keyof T];
+
 export type SortDirectionType = 'ASC' | 'DESC';
 
 export type ResponseDataType = {

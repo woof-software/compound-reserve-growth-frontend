@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { cn } from '@/shared/lib/classNames/classNames';
@@ -21,6 +22,8 @@ export type TreasuryBalanceByNetworkType = {
 
 interface TreasuryBalanceByNetworkProps {
   tableData: TreasuryBalanceByNetworkType[];
+
+  sortType: { key: string; type: string };
 }
 
 const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
@@ -85,15 +88,40 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
 ];
 
 const TreasuryBalanceByNetwork = ({
+  sortType,
   tableData
 }: TreasuryBalanceByNetworkProps) => {
+  const mobileTableData = useMemo(() => {
+    if (!sortType?.key) {
+      return tableData;
+    }
+
+    const key = sortType.key as keyof TreasuryBalanceByNetworkType;
+    return [...tableData].sort((a, b) => {
+      const aVal = a[key];
+      const bVal = b[key];
+
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortType.type === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortType.type === 'asc'
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+
+      return 0;
+    });
+  }, [tableData, sortType]);
+
   return (
     <>
-      <MobileDataTable tableData={tableData}>
+      <MobileDataTable tableData={mobileTableData}>
         {(dataRows) =>
           dataRows.map((row, index) => (
             <div
-              key={index}
+              key={row.symbol + index}
               className={cn(
                 'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b px-6 py-5 md:gap-x-[63px] md:px-10',
                 {

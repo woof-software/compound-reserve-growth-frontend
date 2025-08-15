@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useReducer } from 'react';
+import React, { useCallback, useMemo, useReducer, useState } from 'react';
 
 import CryptoChart from '@/components/Charts/Bar/Bar';
 import {
@@ -20,9 +20,12 @@ import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import Drawer from '@/shared/ui/Drawer/Drawer';
+import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
+
+import CheckStroke from '@/assets/svg/check-stroke.svg';
 
 interface TreasuryBalanceByNetworkBlockProps {
   isLoading?: boolean;
@@ -49,12 +52,45 @@ const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
   });
 };
 
+export const treasuryBalanceByNetworkColumns = [
+  {
+    accessorKey: 'symbol',
+    header: 'Symbol'
+  },
+  {
+    accessorKey: 'qty',
+    header: 'QTY'
+  },
+  {
+    accessorKey: 'value',
+    header: 'Value'
+  },
+  {
+    accessorKey: 'market',
+    header: 'Market'
+  },
+  {
+    accessorKey: 'source',
+    header: 'Source'
+  }
+];
+
 const TreasuryBalanceByNetworkBlock = ({
   isLoading,
   isError,
   data
 }: TreasuryBalanceByNetworkBlockProps) => {
-  const { isOpen, onOpenModal, onCloseModal } = useModal();
+  const {
+    isOpen: isFilterOpen,
+    onOpenModal: onFilterOpen,
+    onCloseModal: onFilterClose
+  } = useModal();
+
+  const {
+    isOpen: isSortOpen,
+    onOpenModal: onSortOpen,
+    onCloseModal: onSortClose
+  } = useModal();
 
   const [selectedOptions, setSelectedOptions] = useReducer(
     (prev, next) => ({
@@ -68,6 +104,11 @@ const TreasuryBalanceByNetworkBlock = ({
       symbol: [] as OptionType[]
     }
   );
+
+  const [sortType, setSortType] = useState<{
+    key: string;
+    type: string;
+  }>({ key: 'symbol', type: 'asc' });
 
   const filterOptionsConfig = useMemo(
     () => ({
@@ -205,6 +246,26 @@ const TreasuryBalanceByNetworkBlock = ({
     });
   }, []);
 
+  const onSortTypeByKeySelect = useCallback(
+    (value: string) => {
+      setSortType({
+        ...sortType,
+        key: value
+      });
+    },
+    [sortType]
+  );
+
+  const onSortTypeByTypeSelect = useCallback(
+    (value: string) => {
+      setSortType({
+        ...sortType,
+        type: value
+      });
+    },
+    [sortType]
+  );
+
   const onClearSelectedOptions = useCallback(() => {
     setSelectedOptions({
       chain: [],
@@ -279,7 +340,7 @@ const TreasuryBalanceByNetworkBlock = ({
       <div className='block px-6 py-3 md:hidden'>
         <div className='flex flex-wrap items-center justify-end gap-3'>
           <Button
-            onClick={onOpenModal}
+            onClick={onFilterOpen}
             className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
           >
             <Icon
@@ -288,10 +349,112 @@ const TreasuryBalanceByNetworkBlock = ({
             />
             Filters
           </Button>
+          <Button
+            onClick={onSortOpen}
+            className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+          >
+            <Icon
+              name='sort-icon'
+              className='h-[14px] w-[14px]'
+            />
+            Sort
+          </Button>
         </div>
         <Drawer
-          isOpen={isOpen}
-          onClose={onCloseModal}
+          isOpen={isSortOpen}
+          onClose={onSortClose}
+        >
+          <Text
+            size='17'
+            weight='700'
+            lineHeight='140'
+            align='center'
+            className='mb-8 w-full'
+          >
+            Sort
+          </Text>
+          <div className='grid gap-3'>
+            <div className='grid gap-4'>
+              <Text
+                size='14'
+                weight='700'
+                lineHeight='140'
+                align='center'
+                className='w-full'
+              >
+                Sort type
+              </Text>
+              <Each
+                data={[
+                  { type: 'asc', header: 'Ascending' },
+                  {
+                    type: 'desc',
+                    header: 'Descending'
+                  }
+                ]}
+                render={(el) => (
+                  <div
+                    className='flex items-center justify-between'
+                    key={el.type}
+                    onClick={() => onSortTypeByTypeSelect(el.type)}
+                  >
+                    <Text
+                      size='14'
+                      weight='500'
+                      lineHeight='16'
+                    >
+                      {el.header}
+                    </Text>
+                    <View.Condition if={el.type === sortType?.type}>
+                      <CheckStroke
+                        width={16}
+                        height={16}
+                      />
+                    </View.Condition>
+                  </div>
+                )}
+              />
+            </div>
+            <div className='grid gap-4'>
+              <Text
+                size='14'
+                weight='700'
+                lineHeight='140'
+                align='center'
+                className='w-full'
+              >
+                Columns
+              </Text>
+              <Each
+                data={treasuryBalanceByNetworkColumns}
+                render={(el) => (
+                  <div
+                    className='flex items-center justify-between'
+                    key={el.accessorKey}
+                    onClick={() => onSortTypeByKeySelect(el.accessorKey)}
+                  >
+                    <Text
+                      size='14'
+                      weight='500'
+                      lineHeight='16'
+                    >
+                      {el.header}
+                    </Text>
+                    <View.Condition if={el.accessorKey === sortType?.key}>
+                      <CheckStroke
+                        width={16}
+                        height={16}
+                      />
+                    </View.Condition>
+                  </div>
+                )}
+              />
+            </div>
+          </div>
+        </Drawer>
+        <Drawer
+          isOpen={isFilterOpen}
+          onClose={onFilterClose}
         >
           <Text
             size='17'
@@ -350,7 +513,10 @@ const TreasuryBalanceByNetworkBlock = ({
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
           <CryptoChart data={chartData} />
-          <TreasuryBalanceByNetwork tableData={tableData} />
+          <TreasuryBalanceByNetwork
+            sortType={sortType}
+            tableData={tableData}
+          />
         </div>
       </View.Condition>
       <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
