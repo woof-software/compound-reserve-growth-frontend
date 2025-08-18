@@ -134,7 +134,7 @@ export const SingleDrawer: FC<SingleDrawerProps> = ({
         >
           {placeholder || 'Group By'}
         </Text>
-        <div className='max-h-[450px] overflow-y-auto'>
+        <div className='hide-scrollbar max-h-[450px] overflow-y-auto'>
           <Each
             data={options}
             render={(el, index) => (

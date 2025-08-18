@@ -285,7 +285,8 @@ const TreasuryHoldingsBlock = ({
       id='full-treasury-holdings'
       className={{
         loading: 'min-h-[inherit]',
-        container: 'min-h-[427px] overflow-visible lg:min-h-[458.5px]',
+        container:
+          'border-background min-h-[427px] overflow-visible border lg:min-h-[458.5px]',
         content: 'rounded-b-lg px-0 pt-0 pb-0 lg:px-10 lg:pb-10',
         header: 'rounded-none md:rounded-t-lg'
       }}

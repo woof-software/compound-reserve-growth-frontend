@@ -357,7 +357,7 @@ export const MultiSelectDrawer: FC<MultiSelectProps> = ({
             />
           </div>
         </View.Condition>
-        <div className='mt-8 max-h-[450px] overflow-y-auto'>
+        <div className='hide-scrollbar mt-8 max-h-[450px] overflow-y-auto'>
           <Each
             data={filteredOptions}
             render={(option, index) => {
