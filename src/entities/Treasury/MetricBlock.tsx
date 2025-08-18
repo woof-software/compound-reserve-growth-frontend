@@ -181,7 +181,8 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
         >
           <ValueMetricField
             className={{
-              container: 'gap-10'
+              container: 'gap-10',
+              value: '!text-[23px]'
             }}
             iconText='Stablecoin Holdings'
             label='Total Stablecoin Holdings'
@@ -207,7 +208,8 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
         >
           <ValueMetricField
             className={{
-              container: 'gap-10'
+              container: 'gap-10',
+              value: '!text-[23px]'
             }}
             iconText='ETH Correlated Holdings'
             label='Total ETH Correlated Holdings'
