@@ -12,7 +12,7 @@ interface CSVDownloadButtonProps {
 const CSVDownloadButton: FC<CSVDownloadButtonProps> = ({
   data,
   filename = 'export.csv',
-  className = 'bg-primary-20 flex items-center justify-center p-1 rounded-lg w-8 h-8 border border-solid border-secondary-19 hover:opacity-80 transition-opacity duration-200'
+  className = 'bg-primary-20 flex items-center justify-center p-1 rounded-lg w-8 h-8 shadow-13 hover:opacity-80 transition-opacity duration-200'
 }) => {
   return (
     <CSVLink

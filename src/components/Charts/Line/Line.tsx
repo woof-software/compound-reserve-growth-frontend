@@ -11,7 +11,6 @@ import HighchartsReact from 'highcharts-react-official';
 
 import { cn } from '@/shared/lib/classNames/classNames';
 import { getStableColorForSeries } from '@/shared/lib/utils/utils';
-import Button from '@/shared/ui/Button/Button';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
@@ -471,7 +470,12 @@ const LineChart: FC<LineChartProps> = ({
   ]);
 
   return (
-    <div className={cn('highcharts-container flex h-full flex-col', className)}>
+    <div
+      className={cn(
+        'highcharts-container relative flex h-full flex-col',
+        className
+      )}
+    >
       <div className='relative flex-grow'>
         {areAllSeriesHidden && (
           <Text
@@ -489,56 +493,28 @@ const LineChart: FC<LineChartProps> = ({
           containerProps={{ style: { width: '100%', height: '100%' } }}
         />
       </div>
-      <div className='hidden shrink-0 items-center justify-center gap-4 py-0 md:flex lg:py-2'>
-        {isLegendEnabled && aggregatedSeries.length > 1 && (
-          <Button
-            onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
-            className='text-primary-14 h-8 cursor-pointer rounded-md border border-[color:var(--color-primary-16)] px-2 py-1 text-[12px] hover:border-[color:var(--color-primary-14)]'
-          >
-            {areAllSeriesHidden ? 'Select All' : 'Unselect All'}
-          </Button>
-        )}
-        {eventsData.length > 0 && (
-          <Button
-            onClick={() => setShowEvents((prev) => !prev)}
-            className='text-primary-14 h-8 cursor-pointer rounded-md border border-[color:var(--color-primary-16)] px-2 py-1 text-[12px] hover:border-[color:var(--color-primary-14)]'
-          >
-            {showEvents ? 'Hide Events' : 'Show Events'}
-          </Button>
-        )}
-      </div>
-      <div className='absolute right-6 block md:hidden'>
+      <div className='absolute right-6 block'>
         <div className='flex items-center gap-3'>
           <View.Condition
             if={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
           >
             <div
-              className={cn(
-                'outline-secondary-18 rounded-lg p-1 opacity-50 outline-[0.25px]',
-                {
-                  'opacity-100': areAllSeriesHidden
-                }
-              )}
+              className='shadow-13 cursor-pointer rounded-lg p-1'
               onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
             >
               <Icon
-                name='eye'
+                name={areAllSeriesHidden ? 'eye' : 'eye-closed'}
                 className='h-6 w-6'
               />
             </div>
           </View.Condition>
           <View.Condition if={Boolean(eventsData.length > 0)}>
             <div
-              className={cn(
-                'outline-secondary-18 rounded-lg p-1 opacity-50 outline-[0.25px]',
-                {
-                  'opacity-100': showEvents
-                }
-              )}
+              className='shadow-13 cursor-pointer rounded-lg p-1'
               onClick={() => setShowEvents((prev) => !prev)}
             >
               <Icon
-                name='calendar-check'
+                name={showEvents ? 'calendar-check' : 'calendar-uncheck'}
                 className='h-6 w-6'
               />
             </div>

@@ -293,7 +293,7 @@ const CompoundCumulativeRevenue = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'border-background min-h-[571px] border',
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-2 md:px-10 md:pb-[88px]'
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-2 md:px-10 md:pb-10'
       }}
     >
       <Filters
@@ -517,7 +517,7 @@ const Filters = ({
             >
               Filters
             </Text>
-            <div className='grid gap-3'>
+            <div className='grid gap-3 px-2'>
               <MultiSelectDrawer
                 options={chainOptions || []}
                 value={selectedOptions.chain}
@@ -555,12 +555,14 @@ const Filters = ({
                 disabled={isLoading}
               />
             </div>
-            <Button
-              className='bg-secondary-14 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
-              onClick={onClearAll}
-            >
-              Clear Filters
-            </Button>
+            <div className='w-full px-2'>
+              <Button
+                className='bg-secondary-14 mx-2 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
+                onClick={onClearAll}
+              >
+                Clear Filters
+              </Button>
+            </div>
           </Drawer>
         </div>
       </View.Mobile>

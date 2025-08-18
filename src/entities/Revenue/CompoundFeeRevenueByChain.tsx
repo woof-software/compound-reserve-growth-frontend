@@ -490,7 +490,7 @@ const CompoundFeeRevenueByChain = ({
         >
           Sort
         </Text>
-        <div className='grid gap-3'>
+        <div className='grid gap-3 px-2'>
           <div className='grid gap-4'>
             <Text
               size='14'
