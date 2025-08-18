@@ -258,7 +258,9 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     },
     yAxis: {
       title: { text: undefined },
-      gridLineWidth: 0,
+      gridLineWidth: 1,
+      gridLineColor: theme === 'light' ? '#E5E7EA' : '#2B3947',
+      gridLineDashStyle: 'Dash',
       labels: {
         style: {
           fontSize: '11px',
