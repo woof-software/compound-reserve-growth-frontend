@@ -322,7 +322,9 @@ const LineChart: FC<LineChartProps> = ({
       },
       yAxis: {
         title: { text: '' },
-        gridLineWidth: 0,
+        gridLineWidth: 1,
+        gridLineColor: 'var(--color-secondary-13)',
+        gridLineDashStyle: 'Dash',
         labels: {
           style: {
             color: 'var(--color-primary-14)',
@@ -337,8 +339,7 @@ const LineChart: FC<LineChartProps> = ({
             if (val >= 1e3) return `${(val / 1e3).toFixed(0)}K`;
             return val.toString();
           }
-        },
-        gridLineColor: 'var(--color-secondary-13)'
+        }
       },
       tooltip: {
         useHTML: true,
