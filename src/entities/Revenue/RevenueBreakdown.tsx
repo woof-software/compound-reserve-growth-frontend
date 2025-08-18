@@ -400,7 +400,7 @@ const RevenueBreakDownBlock = ({
           >
             Filters
           </Text>
-          <div className='grid gap-3'>
+          <div className='grid gap-3 px-2'>
             <MultiSelectDrawer
               options={chainOptions || []}
               value={selectedOptions.chain}
@@ -436,12 +436,14 @@ const RevenueBreakDownBlock = ({
               disabled={isLoading}
             />
           </div>
-          <Button
-            className='bg-secondary-14 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
-            onClick={handleResetFilters}
-          >
-            Clear Filters
-          </Button>
+          <div className='w-full px-2'>
+            <Button
+              className='bg-secondary-14 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
+              onClick={handleResetFilters}
+            >
+              Clear Filters
+            </Button>
+          </div>
         </Drawer>
       </View.Mobile>
       <View.Tablet>
@@ -540,7 +542,7 @@ const RevenueBreakDownBlock = ({
         >
           Sort
         </Text>
-        <div className='grid gap-3'>
+        <div className='grid gap-3 px-2'>
           <div className='grid gap-4'>
             <Text
               size='14'

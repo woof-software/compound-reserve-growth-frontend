@@ -374,7 +374,7 @@ const TreasuryBalanceByNetworkBlock = ({
           >
             Sort
           </Text>
-          <div className='grid gap-3'>
+          <div className='grid gap-3 px-2'>
             <div className='grid gap-4'>
               <Text
                 size='14'
@@ -466,7 +466,7 @@ const TreasuryBalanceByNetworkBlock = ({
           >
             Filters
           </Text>
-          <div className='grid gap-3'>
+          <div className='grid gap-3 px-2'>
             <MultiSelectDrawer
               options={chainOptions || []}
               value={selectedOptions.chain}
@@ -503,12 +503,14 @@ const TreasuryBalanceByNetworkBlock = ({
               disabled={isLoading}
             />
           </div>
-          <Button
-            className='bg-secondary-14 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
-            onClick={onClearFilters}
-          >
-            Clear Filters
-          </Button>
+          <div className='w-full px-2'>
+            <Button
+              className='bg-secondary-14 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
+              onClick={onClearFilters}
+            >
+              Clear Filters
+            </Button>
+          </div>
         </Drawer>
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>

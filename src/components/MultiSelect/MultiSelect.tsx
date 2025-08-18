@@ -257,12 +257,14 @@ export const MultiSelect: FC<MultiSelectProps> = ({
           </div>
         </div>
         {value.length > 0 && (
-          <Button
-            className='bg-secondary-12 sticky bottom-[-1px] w-full cursor-pointer border-t border-t-[#F9FAFB26] p-1 text-[11px] text-[--primary-13]'
-            onClick={onClearFilters}
-          >
-            Clear filters
-          </Button>
+          <div className='w-full px-2'>
+            <Button
+              className='bg-secondary-12 sticky bottom-[-1px] w-full cursor-pointer border-t border-t-[#F9FAFB26] p-1 text-[11px] text-[--primary-13]'
+              onClick={onClearFilters}
+            >
+              Clear filters
+            </Button>
+          </div>
         )}
       </Dropdown>
     </div>
@@ -348,7 +350,7 @@ export const MultiSelectDrawer: FC<MultiSelectProps> = ({
           {placeholder}
         </Text>
         <View.Condition if={options.length > 5}>
-          <div className='outline-secondary-19 rounded-lg py-2 pr-5 pl-3 outline'>
+          <div className='outline-secondary-19 mx-2 rounded-lg py-2 pr-5 pl-3 outline'>
             <input
               className='placeholder:text-secondary-21 h-[19px] w-full focus-visible:outline-none'
               placeholder='Search'
@@ -367,7 +369,7 @@ export const MultiSelectDrawer: FC<MultiSelectProps> = ({
                 <div
                   key={index}
                   className={cn(
-                    'hover:bg-secondary-12 flex cursor-pointer items-center justify-between py-3'
+                    'hover:bg-secondary-12 flex cursor-pointer items-center justify-between rounded-lg px-2 py-3'
                   )}
                   onClick={() => onSelect(option)}
                 >

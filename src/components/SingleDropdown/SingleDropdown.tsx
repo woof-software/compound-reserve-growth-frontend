@@ -140,7 +140,7 @@ export const SingleDrawer: FC<SingleDrawerProps> = ({
             render={(el, index) => (
               <div
                 key={index}
-                className='hover:bg-secondary-12 flex h-10 cursor-pointer items-center justify-between rounded-lg py-3'
+                className='hover:bg-secondary-12 flex h-10 cursor-pointer items-center justify-between rounded-lg px-2 py-3'
                 onClick={() => {
                   onSelect(el);
                 }}
