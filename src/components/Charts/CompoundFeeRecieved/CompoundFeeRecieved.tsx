@@ -10,7 +10,6 @@ import HighchartsReact from 'highcharts-react-official';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { cn } from '@/shared/lib/classNames/classNames';
-import Button from '@/shared/ui/Button/Button';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
@@ -447,18 +446,19 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
           containerProps={{ style: { width: '100%', height: '100%' } }}
         />
       </div>
-      <div className='hidden shrink-0 items-center justify-center gap-4 py-2 md:flex'>
-        {seriesData.length > 1 && (
-          <Button
-            onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
-            className='text-primary-14 cursor-pointer rounded-md border border-[color:var(--color-primary-16)] px-2 py-1 text-[12px] hover:border-[color:var(--color-primary-14)]'
-          >
-            {areAllSeriesHidden ? 'Select All' : 'Unselect All'}
-          </Button>
-        )}
-      </div>
       <div className='absolute right-6 block md:hidden'>
         <div className='flex items-center gap-3'>
+          <View.Condition if={Boolean(seriesData.length > 1)}>
+            <div
+              className='shadow-13 cursor-pointer rounded-lg p-1'
+              onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
+            >
+              <Icon
+                name={areAllSeriesHidden ? 'eye' : 'eye-closed'}
+                className='h-6 w-6'
+              />
+            </div>
+          </View.Condition>
           <View.Condition if={Boolean(seriesData.length > 1)}>
             <div
               className={cn(
