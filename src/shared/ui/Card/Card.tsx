@@ -45,6 +45,9 @@ const Card: FC<CardProps> = ({
       id={id}
       className={cn(
         'bg-card-content w-full overflow-hidden rounded-sm shadow-md md:rounded-lg',
+        {
+          'justify-center': isLoading
+        },
         className?.container
       )}
     >
