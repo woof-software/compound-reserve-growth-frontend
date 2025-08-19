@@ -297,8 +297,8 @@ const TreasuryBalanceByNetworkBlock = ({
       className={{
         loading: 'min-h-[inherit]',
         container:
-          'border-background min-h-[427px] overflow-visible border lg:min-h-[458.5px]',
-        header: 'rounded-none md:rounded-t-lg',
+          'min-h-[427px] overflow-visible rounded-lg lg:min-h-[458.5px]',
+        header: 'rounded-t-lg',
         content:
           'flex flex-col gap-3 rounded-b-lg px-0 pt-0 pb-0 lg:px-10 lg:pb-10'
       }}

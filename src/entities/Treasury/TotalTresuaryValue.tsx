@@ -331,7 +331,7 @@ const TotalTresuaryValue = ({
       id='total-treasury-value'
       className={{
         loading: 'min-h-[inherit]',
-        container: 'border-background min-h-[571px] border',
+        container: 'min-h-[571px] rounded-lg',
         content: 'flex flex-col gap-3 px-1 pt-0 pb-0 md:px-10 md:pb-10'
       }}
     >

@@ -44,7 +44,7 @@ const Card: FC<CardProps> = ({
     <div
       id={id}
       className={cn(
-        'bg-card-content w-full overflow-hidden rounded-none shadow-md md:rounded-lg',
+        'bg-card-content w-full overflow-hidden rounded-sm shadow-md md:rounded-lg',
         className?.container
       )}
     >
