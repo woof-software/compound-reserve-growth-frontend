@@ -238,7 +238,7 @@ export const MultiSelect: FC<MultiSelectProps> = ({
               />
             </div>
           </View.Condition>
-          <div className='max-h-[165px] overflow-auto'>
+          <div className='hide-scrollbar max-h-[165px] overflow-auto'>
             {filteredOptions.map((option, index) => {
               const isSelected = value.some((v) => v.id === option.id);
               const isHighlighted = index === highlightedIndex;
