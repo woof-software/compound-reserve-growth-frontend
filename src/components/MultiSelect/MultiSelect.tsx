@@ -155,26 +155,28 @@ export const MultiSelect: FC<MultiSelectProps> = ({
   const customTrigger = (
     <div
       className={cn(
-        'bg-custom-trigger flex items-center gap-1.5 rounded-full px-3 py-2',
+        'bg-custom-trigger flex items-center gap-1.5 rounded-full p-1.5 pr-3',
         className
       )}
     >
       {value.length > 0 ? (
-        <div className='bg-white-10 flex h-4 w-4 items-center justify-center rounded-full'>
+        <div className='bg-secondary-29 flex h-5 w-5 items-center justify-center rounded-full'>
           <Text
             size='11'
             weight='500'
-            className='leading-none !text-[color:var(--color-gray-12)] tabular-nums'
+            className='text-primary-14 leading-none tabular-nums'
           >
             {value.length}
           </Text>
         </div>
       ) : (
-        <Icon
-          name='plus'
-          className='h-4 w-4'
-          color='color-gray-11'
-        />
+        <div className='p-0.5'>
+          <Icon
+            name='plus'
+            className='h-4 w-4'
+            color='color-gray-11'
+          />
+        </div>
       )}
       <Text
         size='11'
@@ -236,7 +238,7 @@ export const MultiSelect: FC<MultiSelectProps> = ({
               />
             </div>
           </View.Condition>
-          <div className='max-h-[165px] overflow-auto'>
+          <div className='hide-scrollbar max-h-[165px] overflow-auto'>
             {filteredOptions.map((option, index) => {
               const isSelected = value.some((v) => v.id === option.id);
               const isHighlighted = index === highlightedIndex;
