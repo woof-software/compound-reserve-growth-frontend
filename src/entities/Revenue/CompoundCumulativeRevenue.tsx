@@ -491,7 +491,7 @@ const Filters = ({
           <div className='flex flex-wrap items-center justify-end gap-2'>
             <Button
               onClick={onOpenModal}
-              className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+              className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
             >
               <Icon
                 name='filters'

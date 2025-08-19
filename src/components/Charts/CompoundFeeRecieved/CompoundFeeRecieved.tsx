@@ -463,12 +463,9 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
           </View.Condition>
           <View.Condition if={Boolean(seriesData.length > 1)}>
             <div
-              className={cn(
-                'outline-secondary-18 rounded-lg p-1 opacity-50 outline-[0.25px]',
-                {
-                  'opacity-100': areAllSeriesHidden
-                }
-              )}
+              className={cn('shadow-13 rounded-lg p-1 opacity-50', {
+                'opacity-100': areAllSeriesHidden
+              })}
               onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
             >
               <Icon
