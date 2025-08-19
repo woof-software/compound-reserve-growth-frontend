@@ -583,7 +583,7 @@ const Filters = ({
         </div>
       </View.Tablet>
       <View.Mobile>
-        <div className='flex flex-col justify-end gap-3 px-6 py-3'>
+        <div className='flex flex-col justify-end gap-3 px-5 py-3'>
           <div className='flex flex-wrap justify-end gap-3'>
             <TabsGroup
               tabs={['D', 'W', 'M']}

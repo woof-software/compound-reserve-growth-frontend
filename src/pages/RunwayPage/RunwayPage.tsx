@@ -12,7 +12,7 @@ const RunwayPage = () => {
   useScrollToHash(!isLoading);
   return (
     <div className='flex flex-col gap-6 md:gap-[42px] lg:gap-[70px]'>
-      <div className='mt-5 flex flex-col gap-[15px] px-4 md:mt-0 md:px-0'>
+      <div className='mt-5 flex flex-col gap-[15px] px-3 md:mt-0 md:px-0'>
         <Text
           tag='h1'
           size='32'

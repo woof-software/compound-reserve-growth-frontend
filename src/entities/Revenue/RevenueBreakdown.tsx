@@ -338,7 +338,7 @@ const RevenueBreakDownBlock = ({
       }}
     >
       <View.Mobile>
-        <div className='flex flex-col items-end gap-3 px-6 py-3'>
+        <div className='flex flex-col items-end gap-3 px-5 py-3'>
           <div className='flex w-fit flex-wrap items-center justify-end gap-3'>
             <Text
               tag='span'

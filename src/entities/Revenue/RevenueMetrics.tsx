@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
+import { cn } from '@/shared/lib/classNames/classNames';
 import { formatGrowth, formatPrice } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
@@ -66,10 +67,17 @@ const RevenueMetrics = ({
             isLoading={isLoading}
             isError={isError}
             className={{
-              container:
-                'border-background max-w-full min-w-64 flex-1 basis-64 border',
+              container: cn(
+                'max-w-full min-w-64 flex-1 basis-64 rounded-none md:border-none',
+                {
+                  'rounded-t-sm': index === 0,
+                  'rounded-b-sm': yearsToDisplay.length - 1 === index,
+                  'border-b-secondary-26 border-b-1':
+                    yearsToDisplay.length - 1 !== index
+                }
+              ),
               loading: 'h-[317px]',
-              header: 'px-10',
+              header: 'px-5 py-4',
               content: 'flex items-center'
             }}
             title={!isPlaceholder ? `${year} Revenue` : undefined}
