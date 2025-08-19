@@ -92,7 +92,7 @@ const RunwayMetrics = () => {
         className={{
           loading: 'min-h-[130px] md:min-h-[153px]',
           container:
-            'border-background min-w-[343px] flex-1 border md:min-w-auto',
+            'border-background flex min-w-[343px] flex-1 items-center border md:min-w-auto',
           content: 'p-8'
         }}
       >
