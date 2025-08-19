@@ -172,7 +172,7 @@ const RevenueBreakdown = ({
               return (
                 <div
                   key={rowIndex}
-                  className='border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b px-6 py-5 md:gap-x-[63px] md:px-10'
+                  className='border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10'
                 >
                   {Object.entries(rowObj).map(([key, value], colIndex) => (
                     <div
@@ -202,7 +202,7 @@ const RevenueBreakdown = ({
                 </div>
               );
             })}
-            <div className='grid grid-cols-3 gap-x-10 gap-y-3 px-6 py-5 md:gap-x-[63px] md:px-10'>
+            <div className='grid grid-cols-3 gap-x-10 gap-y-3 p-5 md:gap-x-[63px] md:px-10'>
               <div className='grid min-h-[39px] w-full max-w-[73px]'>
                 <Text
                   size='8'

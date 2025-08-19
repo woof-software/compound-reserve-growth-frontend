@@ -106,7 +106,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           className={{
             container:
               'flex h-auto min-h-[214px] min-w-[343px] flex-1 items-center md:h-[230px] md:min-w-auto lg:h-[200px]',
-            content: 'p-8 md:p-10'
+            content: 'p-5 md:p-10'
           }}
         >
           <ValueMetricField
@@ -132,7 +132,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           className={{
             container:
               'h-auto min-h-[214px] min-w-[343px] flex-1 md:h-[230px] md:min-w-auto lg:h-[200px]',
-            content: 'p-8 md:p-10'
+            content: 'p-5 md:p-10'
           }}
         >
           <ValueMetricField
@@ -153,7 +153,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           className={{
             container:
               'h-auto min-h-[214px] min-w-[343px] flex-1 md:h-[230px] md:min-w-auto lg:h-[200px]',
-            content: 'p-8 md:p-10'
+            content: 'p-5 md:p-10'
           }}
         >
           <ValueMetricField
@@ -176,7 +176,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           className={{
             container:
               'h-auto min-h-[214px] min-w-[343px] flex-1 md:h-[225px] md:min-w-auto',
-            content: 'p-8 md:p-10'
+            content: 'p-5 md:p-10'
           }}
         >
           <ValueMetricField
@@ -203,7 +203,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           className={{
             container:
               'h-auto min-h-[214px] min-w-[343px] flex-1 md:h-[225px] md:min-w-auto',
-            content: 'p-8 md:p-10'
+            content: 'p-5 md:p-10'
           }}
         >
           <ValueMetricField

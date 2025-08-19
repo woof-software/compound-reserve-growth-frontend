@@ -236,7 +236,7 @@ const TreasuryCompositionBlock = memo(
           content: 'flex flex-col gap-3 px-0 pt-0 pb-3 md:px-10 md:pb-10'
         }}
       >
-        <div className='flex flex-wrap items-center justify-end gap-4 px-6 py-4 md:px-0 md:py-3'>
+        <div className='flex flex-wrap items-center justify-end gap-4 px-5 py-3 md:px-0 md:py-3'>
           <Switch
             label='Include COMP Holdings'
             positionLabel='left'

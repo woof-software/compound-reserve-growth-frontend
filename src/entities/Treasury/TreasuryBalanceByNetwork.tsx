@@ -338,7 +338,7 @@ const TreasuryBalanceByNetworkBlock = ({
           disabled={isLoading}
         />
       </div>
-      <div className='block px-6 py-3 md:hidden'>
+      <div className='block px-5 py-3 md:hidden'>
         <div className='flex flex-wrap items-center justify-end gap-3'>
           <Button
             onClick={onFilterOpen}
