@@ -331,7 +331,7 @@ const TotalTresuaryValue = ({
       id='total-treasury-value'
       className={{
         loading: 'min-h-[inherit]',
-        container: 'border-background min-h-[571px] border',
+        container: 'min-h-[571px] rounded-lg',
         content: 'flex flex-col gap-3 px-1 pt-0 pb-0 md:px-10 md:pb-10'
       }}
     >
@@ -407,7 +407,7 @@ const Filters = memo(
     return (
       <>
         <View.Mobile>
-          <div className='flex flex-col justify-end gap-3 px-6 py-3'>
+          <div className='flex flex-col justify-end gap-3 px-5 py-3'>
             <div className='flex flex-wrap justify-end gap-3'>
               <TabsGroup
                 tabs={['D', 'W', 'M']}
@@ -448,7 +448,7 @@ const Filters = memo(
             <div className='flex flex-wrap items-center justify-end gap-3'>
               <Button
                 onClick={onOpenModal}
-                className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+                className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
               >
                 <Icon
                   name='filters'

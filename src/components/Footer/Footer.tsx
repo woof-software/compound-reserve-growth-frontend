@@ -8,7 +8,7 @@ import ThemeSwitcher from '@/shared/ui/ThemeSwitcher/ThemeSwitcher';
 
 const Footer: FC = () => {
   return (
-    <footer className='md:border-primary-17 px-4 md:border-t md:px-0'>
+    <footer className='md:border-primary-17 px-3 md:border-t md:px-0'>
       <div className='mx-auto max-w-[1084px]'>
         <div className='flex justify-between py-6'>
           <div className='text-primary-14 flex items-center gap-6 text-[13px]'>

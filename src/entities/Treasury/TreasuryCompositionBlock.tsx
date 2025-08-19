@@ -232,11 +232,11 @@ const TreasuryCompositionBlock = memo(
         title='Treasury Composition'
         className={{
           loading: 'min-h-[inherit]',
-          container: 'border-background min-h-[571px] border',
+          container: 'min-h-[571px] rounded-lg',
           content: 'flex flex-col gap-3 px-0 pt-0 pb-3 md:px-10 md:pb-10'
         }}
       >
-        <div className='flex flex-wrap items-center justify-end gap-4 px-6 py-4 md:px-0 md:py-3'>
+        <div className='flex flex-wrap items-center justify-end gap-4 px-5 py-3 md:px-0 md:py-3'>
           <Switch
             label='Include COMP Holdings'
             positionLabel='left'
@@ -280,7 +280,7 @@ const TreasuryCompositionBlock = memo(
           </div>
           <Button
             onClick={onOpenModal}
-            className='bg-secondary-27 outline-secondary-18 text-gray-11 block flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px] md:hidden'
+            className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:hidden'
           >
             <Icon
               name='sort-icon'

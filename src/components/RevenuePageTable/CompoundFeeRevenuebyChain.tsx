@@ -111,7 +111,7 @@ const CompoundFeeRevenuebyChain = ({
               <div
                 key={rowObj.chain + rowIndex}
                 className={cn(
-                  'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b px-6 py-5 md:gap-x-[63px] md:px-10',
+                  'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
                   {
                     'justify-between': selectedInterval === 'Weekly'
                   }
@@ -145,7 +145,7 @@ const CompoundFeeRevenuebyChain = ({
             ))}
             <div
               className={cn(
-                'grid grid-cols-3 gap-x-10 gap-y-3 px-6 py-5 md:gap-x-[63px] md:px-10',
+                'grid grid-cols-3 gap-x-10 gap-y-3 p-5 md:gap-x-[63px] md:px-10',
                 {
                   'justify-between': selectedInterval === 'Weekly'
                 }

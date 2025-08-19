@@ -16,7 +16,7 @@ const PageWrapper: FC<PageWrapperProps> = ({
   return (
     <div
       className={cn(
-        `hide-scrollbar mx-auto flex max-w-[${maxWidth}px] min-h-screen w-full flex-col px-0 md:px-4`,
+        `hide-scrollbar mx-auto flex max-w-[${maxWidth}px] min-h-screen w-full flex-col px-1 md:px-4`,
         className
       )}
       {...props}

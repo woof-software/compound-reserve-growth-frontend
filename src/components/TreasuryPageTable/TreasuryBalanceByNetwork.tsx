@@ -123,7 +123,7 @@ const TreasuryBalanceByNetwork = ({
             <div
               key={row.symbol + index}
               className={cn(
-                'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b px-6 py-5 md:gap-x-[63px] md:px-10',
+                'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
                 {
                   'border-t': index === 0
                 }

@@ -297,8 +297,8 @@ const TreasuryBalanceByNetworkBlock = ({
       className={{
         loading: 'min-h-[inherit]',
         container:
-          'border-background min-h-[427px] overflow-visible border lg:min-h-[458.5px]',
-        header: 'rounded-none md:rounded-t-lg',
+          'min-h-[427px] overflow-visible rounded-lg lg:min-h-[458.5px]',
+        header: 'rounded-t-lg',
         content:
           'flex flex-col gap-3 rounded-b-lg px-0 pt-0 pb-0 lg:px-10 lg:pb-10'
       }}
@@ -338,11 +338,11 @@ const TreasuryBalanceByNetworkBlock = ({
           disabled={isLoading}
         />
       </div>
-      <div className='block px-6 py-3 md:hidden'>
+      <div className='block px-5 py-3 md:hidden'>
         <div className='flex flex-wrap items-center justify-end gap-3'>
           <Button
             onClick={onFilterOpen}
-            className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+            className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
           >
             <Icon
               name='filters'
@@ -352,7 +352,7 @@ const TreasuryBalanceByNetworkBlock = ({
           </Button>
           <Button
             onClick={onSortOpen}
-            className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+            className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
           >
             <Icon
               name='sort-icon'

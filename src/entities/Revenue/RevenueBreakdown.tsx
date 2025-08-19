@@ -338,7 +338,7 @@ const RevenueBreakDownBlock = ({
       }}
     >
       <View.Mobile>
-        <div className='flex flex-col items-end gap-3 px-6 py-3'>
+        <div className='flex flex-col items-end gap-3 px-5 py-3'>
           <div className='flex w-fit flex-wrap items-center justify-end gap-3'>
             <Text
               tag='span'
@@ -363,7 +363,7 @@ const RevenueBreakDownBlock = ({
           <div className='flex flex-wrap items-center justify-end gap-3'>
             <Button
               onClick={onFilterOpen}
-              className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+              className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
             >
               <Icon
                 name='filters'
@@ -373,7 +373,7 @@ const RevenueBreakDownBlock = ({
             </Button>
             <Button
               onClick={onSortOpen}
-              className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+              className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
             >
               <Icon
                 name='sort-icon'
