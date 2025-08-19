@@ -61,7 +61,12 @@ const TreasuryComposition = ({
               className='h-6 w-6'
               folder={config.folder}
             />
-            <Text size='13'>{row.original.name}</Text>
+            <Text
+              size='13'
+              weight='500'
+            >
+              {row.original.name}
+            </Text>
           </div>
         )
       },
@@ -118,7 +123,7 @@ const TreasuryComposition = ({
               <div
                 key={row.name + index}
                 className={cn(
-                  'border-secondary-23 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b px-6 py-5 md:gap-x-[63px]',
+                  'border-secondary-23 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b p-5 md:gap-x-[63px]',
                   {
                     'border-t': index === 0
                   }
@@ -194,18 +199,20 @@ const TreasuryComposition = ({
           pageSize={10}
           enableSorting={true}
           headerCellClassName='py-[13px] px-[5px]'
-          cellClassName='py-3 px-[5px]'
-          headerTextClassName='text-primary-14 font-medium'
+          cellClassName='py-3 px-[5px] !font-medium'
+          headerTextClassName='text-primary-14'
         />
         <div className='flex items-center justify-between px-[5px] py-3'>
           <Text
             size='11'
+            weight='500'
             className='text-primary-14'
           >
             Total Balance
           </Text>
           <Text
             size='11'
+            weight='500'
             className='text-primary-14'
           >
             {formatPrice(totalBalance, 1)}

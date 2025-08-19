@@ -306,7 +306,7 @@ const RevenueOverview = ({
         content: 'flex flex-col gap-3 px-0 pt-0 pb-0 md:pb-10 lg:px-10'
       }}
     >
-      <div className='flex flex-wrap justify-end gap-3 px-6 py-3 lg:px-10'>
+      <div className='flex flex-wrap justify-end gap-3 px-5 py-3 lg:px-10'>
         <TabsGroup
           key={dateType}
           tabs={[...primaryTabs]}
@@ -320,7 +320,7 @@ const RevenueOverview = ({
         />
         <Button
           onClick={onSortOpen}
-          className='bg-secondary-27 outline-secondary-18 text-gray-11 block flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px] md:hidden'
+          className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:hidden'
         >
           <Icon
             name='sort-icon'

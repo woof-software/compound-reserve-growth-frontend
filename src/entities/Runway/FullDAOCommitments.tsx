@@ -205,11 +205,11 @@ const FullDAOCommitmentsBlock = () => {
         loading: 'min-h-[571px]'
       }}
     >
-      <div className='flex justify-end gap-3 px-6 py-3 md:px-6 lg:px-0'>
+      <div className='flex justify-end gap-3 px-5 py-3 md:px-6 lg:px-0'>
         <div className='block md:hidden'>
           <Button
             onClick={onSortOpen}
-            className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+            className='bg-secondary-27 outline-secondary-18 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
           >
             <Icon
               name='sort-icon'

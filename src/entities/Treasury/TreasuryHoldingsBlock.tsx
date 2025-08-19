@@ -286,9 +286,9 @@ const TreasuryHoldingsBlock = ({
       className={{
         loading: 'min-h-[inherit]',
         container:
-          'border-background min-h-[427px] overflow-visible border lg:min-h-[458.5px]',
+          'min-h-[427px] overflow-visible rounded-lg lg:min-h-[458.5px]',
         content: 'rounded-b-lg px-0 pt-0 pb-0 lg:px-10 lg:pb-10',
-        header: 'rounded-none md:rounded-t-lg'
+        header: 'rounded-t-lg'
       }}
     >
       <div className='hidden items-center justify-end gap-3 px-10 py-3 md:flex lg:px-0'>
@@ -331,10 +331,10 @@ const TreasuryHoldingsBlock = ({
         />
       </div>
       <div className='block md:hidden'>
-        <div className='flex flex-wrap items-center justify-end gap-3 px-6 py-3'>
+        <div className='flex flex-wrap items-center justify-end gap-3 px-5 py-3'>
           <Button
             onClick={onFilterOpen}
-            className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+            className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
           >
             <Icon
               name='filters'
@@ -344,7 +344,7 @@ const TreasuryHoldingsBlock = ({
           </Button>
           <Button
             onClick={onSortOpen}
-            className='bg-secondary-27 outline-secondary-18 text-gray-11 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold outline-[0.25px]'
+            className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
           >
             <Icon
               name='sort-icon'

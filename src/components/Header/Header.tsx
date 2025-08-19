@@ -87,7 +87,7 @@ const Header: FC = () => {
   }, [isOpen]);
 
   return (
-    <header className='z-[1000] px-4 py-3 md:mt-4 md:px-0 md:py-[8.5px]'>
+    <header className='z-[1000] px-3 py-3 md:mt-4 md:px-0 md:py-[8.5px]'>
       <div className='mx-auto flex w-full max-w-[1084px] items-center justify-between gap-5 md:justify-start'>
         <Link to={commonRoutes.TREASURY}>
           <Icon
