@@ -501,7 +501,7 @@ const LineChart: FC<LineChartProps> = ({
             if={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
           >
             <div
-              className='shadow-13 cursor-pointer rounded-lg p-1'
+              className='shadow-13 bg-card-header cursor-pointer rounded-lg p-1'
               onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
             >
               <Icon
@@ -512,7 +512,7 @@ const LineChart: FC<LineChartProps> = ({
           </View.Condition>
           <View.Condition if={Boolean(eventsData.length > 0)}>
             <div
-              className='shadow-13 cursor-pointer rounded-lg p-1'
+              className='shadow-13 bg-card-header cursor-pointer rounded-lg p-1'
               onClick={() => setShowEvents((prev) => !prev)}
             >
               <Icon

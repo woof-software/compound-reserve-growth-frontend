@@ -452,7 +452,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
         <div className='flex items-center gap-3'>
           <View.Condition if={Boolean(seriesData.length > 1)}>
             <div
-              className='shadow-13 cursor-pointer rounded-lg p-1'
+              className='shadow-13 bg-card-header cursor-pointer rounded-lg p-1'
               onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
             >
               <Icon
