@@ -12,6 +12,7 @@ import RevenueOverviewUSD, {
   toDateHeaderMap,
   ToDateTab
 } from '@/components/RevenuePageTable/RevenueOverviewUSD';
+import SortDrawer from '@/components/SortDrawer/SortDrawer';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
@@ -23,14 +24,9 @@ import {
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
-import Drawer from '@/shared/ui/Drawer/Drawer';
-import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
-
-import CheckStroke from '@/assets/svg/check-stroke.svg';
 
 const getStartDateForPeriod = (
   period: string,
@@ -355,98 +351,14 @@ const RevenueOverview = ({
           />
         </div>
       )}
-      <Drawer
+      <SortDrawer
         isOpen={isSortOpen}
         onClose={onSortClose}
-      >
-        <Text
-          size='17'
-          weight='700'
-          lineHeight='140'
-          align='center'
-          className='mb-8 w-full'
-        >
-          Sort
-        </Text>
-        <div className='grid gap-3 px-2'>
-          <div className='grid gap-4'>
-            <Text
-              size='14'
-              weight='700'
-              lineHeight='140'
-              align='center'
-              className='w-full'
-            >
-              Sort type
-            </Text>
-            <Each
-              data={[
-                { type: 'asc', header: 'Ascending' },
-                {
-                  type: 'desc',
-                  header: 'Descending'
-                }
-              ]}
-              render={(el) => (
-                <div
-                  className='flex items-center justify-between'
-                  key={el.type}
-                  onClick={() => onSortTypeByTypeSelect(el.type)}
-                >
-                  <Text
-                    size='14'
-                    weight='500'
-                    lineHeight='16'
-                  >
-                    {el.header}
-                  </Text>
-                  <View.Condition if={el.type === sortType?.type}>
-                    <CheckStroke
-                      width={16}
-                      height={16}
-                    />
-                  </View.Condition>
-                </div>
-              )}
-            />
-          </div>
-          <div className='grid gap-4'>
-            <Text
-              size='14'
-              weight='700'
-              lineHeight='140'
-              align='center'
-              className='w-full'
-            >
-              Columns
-            </Text>
-            <Each
-              data={revenueOverviewColumns}
-              render={(el) => (
-                <div
-                  className='flex items-center justify-between'
-                  key={el.accessorKey}
-                  onClick={() => onSortTypeByKeySelect(el.accessorKey)}
-                >
-                  <Text
-                    size='14'
-                    weight='500'
-                    lineHeight='16'
-                  >
-                    {el.header}
-                  </Text>
-                  <View.Condition if={el.accessorKey === sortType?.key}>
-                    <CheckStroke
-                      width={16}
-                      height={16}
-                    />
-                  </View.Condition>
-                </div>
-              )}
-            />
-          </div>
-        </div>
-      </Drawer>
+        sortType={sortType}
+        columns={revenueOverviewColumns}
+        onTypeSelect={onSortTypeByTypeSelect}
+        onKeySelect={onSortTypeByKeySelect}
+      />
     </Card>
   );
 };
