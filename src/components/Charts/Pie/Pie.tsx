@@ -1,11 +1,21 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, {
+  FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { colorPicker } from '@/shared/lib/utils/utils';
+import Button from '@/shared/ui/Button/Button';
+import Each from '@/shared/ui/Each/Each';
+import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 interface PieDataItem {
   name: string;
@@ -25,9 +35,58 @@ interface PieChartProps {
 }
 
 const PieChart: FC<PieChartProps> = ({ data, className }) => {
-  const { theme } = useTheme();
+  const chartRef = useRef<HighchartsReact.RefObject>(null);
 
   const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
+
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const [hc, setHc] = useState<Highcharts.Chart | null>(null);
+
+  const updateArrows = useCallback(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setCanScrollLeft(scrollLeft > 1);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
+  }, []);
+
+  const scrollByDir = (dir: 'left' | 'right') => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const step = Math.max(el.clientWidth * 0.6, 120);
+    el.scrollBy({ left: dir === 'left' ? -step : step, behavior: 'smooth' });
+  };
+
+  const findPointByName = useCallback(
+    (name: string) =>
+      hc?.series?.[0]?.points.find(
+        (p) => p.name === name && p.visible !== false
+      ),
+    [hc]
+  );
+
+  const highlightPoint = useCallback(
+    (name: string) => {
+      const pt = findPointByName(name);
+      if (!pt) return;
+
+      pt.series.points.forEach((p) =>
+        p.setState(p === pt ? 'hover' : 'inactive')
+      );
+      hc?.tooltip?.refresh(pt);
+    },
+    [hc, findPointByName]
+  );
+
+  const clearHighlight = useCallback(() => {
+    const s = hc?.series?.[0];
+    if (!s) return;
+    s.points.forEach((p) => p.setState(''));
+    hc?.tooltip?.hide(0);
+  }, [hc]);
 
   useMemo(() => {
     setHiddenItems(new Set());
@@ -77,15 +136,17 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
     );
   }, [data, hiddenItems]);
 
-  const handleLegendItemClick = (itemName: string) => {
+  const onLegendItemClick = (itemName: string) => {
     setHiddenItems((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(itemName)) {
-        newSet.delete(itemName);
+      const next = new Set(prev);
+
+      if (next.has(itemName)) {
+        next.delete(itemName);
       } else {
-        newSet.add(itemName);
+        next.add(itemName);
       }
-      return newSet;
+
+      return next;
     });
   };
 
@@ -141,6 +202,9 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       `
     },
     plotOptions: {
+      series: {
+        states: { inactive: { opacity: 0.25 } }
+      },
       pie: {
         innerSize: '70%',
         allowPointSelect: false,
@@ -165,46 +229,13 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         point: {
           events: {
             legendItemClick: function (this: Highcharts.Point): boolean {
-              handleLegendItemClick(this.name);
               return false;
             }
           }
         }
       }
     },
-    legend: {
-      enabled: true,
-      layout: 'horizontal',
-      align: 'center',
-      verticalAlign: 'bottom',
-      symbolHeight: 12,
-      symbolWidth: 12,
-      symbolRadius: 3,
-      symbolPadding: 6,
-      itemStyle: {
-        color: '#7A8A99',
-        fontSize: '11px',
-        fontWeight: '400',
-        lineHeight: '100%',
-        fontFamily: 'Haas Grot Text R, sans-serif'
-      },
-      itemHoverStyle: {
-        color: theme === 'light' ? '#17212B' : '#FFFFFF',
-        fontFamily: 'Haas Grot Text R, sans-serif'
-      },
-      maxHeight: 100,
-      navigation: {
-        enabled: true,
-        arrowSize: 11,
-        activeColor: theme === 'light' ? '#17212B' : '#FFFFFF',
-        inactiveColor: '#7A899A',
-        animation: { duration: 250 },
-        style: {
-          cursor: 'pointer',
-          color: theme === 'light' ? '#17212B' : '#FFFFFF'
-        }
-      }
-    },
+    legend: { enabled: false },
     series: [
       {
         type: 'pie',
@@ -213,6 +244,16 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       }
     ]
   };
+
+  useEffect(() => {
+    updateArrows();
+
+    const onResize = () => updateArrows();
+
+    window.addEventListener('resize', onResize);
+
+    return () => window.removeEventListener('resize', onResize);
+  }, [chartData.length, updateArrows]);
 
   return (
     <div className={cn('highcharts-container relative', className)}>
@@ -233,9 +274,108 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         </Text>
       )}
       <HighchartsReact
+        ref={chartRef}
         highcharts={Highcharts}
         options={options}
+        callback={(chart: any) => setHc(chart)}
+        ptions={{
+          ...options,
+          chart: {
+            ...options.chart,
+            height: '100%'
+          }
+        }}
+        containerProps={{
+          style: {
+            width: '100%',
+            maxHeight: '350px'
+          }
+        }}
       />
+      <div className='mx-5 md:mx-0'>
+        <div
+          className={cn(
+            'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit rounded-[39px]',
+            'before:pointer-events-none before:absolute before:top-[1px] before:left-[1px] before:h-full before:w-20 before:rounded-[39px] before:opacity-0',
+            'after:pointer-events-none after:absolute after:top-[1px] after:right-[1px] after:h-full after:w-20 after:rounded-r-[39px] after:opacity-0',
+            {
+              'before:max-h-[36px] before:rotate-180 before:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)] before:opacity-100':
+                canScrollLeft,
+              'after:max-h-[36px] after:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)] after:opacity-100':
+                canScrollRight
+            }
+          )}
+        >
+          <View.Condition if={canScrollLeft}>
+            <Button
+              className={cn(
+                'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
+              )}
+              onClick={() => {
+                clearHighlight();
+                scrollByDir('left');
+              }}
+            >
+              <Icon
+                name='arrow-triangle'
+                className='h-[6px] w-[6px]'
+              />
+            </Button>
+          </View.Condition>
+          <div
+            ref={viewportRef}
+            onScroll={() => {
+              updateArrows();
+              clearHighlight();
+            }}
+            className={cn(
+              'hide-scrollbar mx-0.5 flex h-full max-w-[99%] items-center gap-4 overflow-x-auto scroll-smooth p-1.5'
+            )}
+          >
+            <Each
+              data={chartData}
+              render={(item) => (
+                <Button
+                  key={item.name}
+                  className={cn(
+                    'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
+                    {
+                      'line-through opacity-30': hiddenItems.has(item.name)
+                    }
+                  )}
+                  onMouseEnter={() => highlightPoint(item.name)}
+                  onFocus={() => highlightPoint(item.name)}
+                  onMouseLeave={clearHighlight}
+                  onBlur={clearHighlight}
+                  onClick={() => onLegendItemClick(item.name)}
+                >
+                  <span
+                    className='inline-block h-3 w-3 rounded-full'
+                    style={{ backgroundColor: item.color }}
+                  />
+                  {item.name}
+                </Button>
+              )}
+            />
+          </div>
+          <View.Condition if={canScrollRight}>
+            <Button
+              className={cn(
+                'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
+              )}
+              onClick={() => {
+                clearHighlight();
+                scrollByDir('right');
+              }}
+            >
+              <Icon
+                name='arrow-triangle'
+                className='h-[6px] w-[6px] rotate-180'
+              />
+            </Button>
+          </View.Condition>
+        </div>
+      </div>
     </div>
   );
 };
