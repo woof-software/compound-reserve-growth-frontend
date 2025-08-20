@@ -178,10 +178,10 @@ const RevenueBreakdown = ({
                     <div
                       id={key + value}
                       key={colIndex}
-                      className='grid w-full max-w-[73px]'
+                      className='grid w-full max-w-[100px]'
                     >
                       <Text
-                        size='8'
+                        size='11'
                         lineHeight='18'
                         weight='500'
                         className='text-primary-14'
@@ -189,7 +189,7 @@ const RevenueBreakdown = ({
                         {capitalizeFirstLetter(key)}
                       </Text>
                       <Text
-                        size='11'
+                        size='13'
                         lineHeight='21'
                         className='truncate'
                       >
@@ -203,9 +203,9 @@ const RevenueBreakdown = ({
               );
             })}
             <div className='grid grid-cols-3 gap-x-10 gap-y-3 p-5 md:gap-x-[63px] md:px-10'>
-              <div className='grid min-h-[39px] w-full max-w-[73px]'>
+              <div className='grid min-h-[39px] w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='13'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -230,10 +230,10 @@ const RevenueBreakdown = ({
                   return (
                     <div
                       key={columnKey}
-                      className='grid min-h-[39px] w-full max-w-[73px]'
+                      className='grid min-h-[39px] w-full max-w-[100px]'
                     >
                       <Text
-                        size='8'
+                        size='13'
                         lineHeight='18'
                         weight='500'
                         className='text-primary-14'
@@ -259,10 +259,10 @@ const RevenueBreakdown = ({
                 return (
                   <div
                     key={columnKey}
-                    className='grid min-h-[39px] w-full max-w-[73px]'
+                    className='grid min-h-[39px] w-full max-w-[100px]'
                   >
                     <Text
-                      size='8'
+                      size='11'
                       lineHeight='18'
                       weight='500'
                       className='text-primary-14'
@@ -270,7 +270,7 @@ const RevenueBreakdown = ({
                       {columnHeader}
                     </Text>
                     <Text
-                      size='11'
+                      size='13'
                       lineHeight='21'
                       weight='500'
                     >

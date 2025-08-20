@@ -131,7 +131,7 @@ const TreasuryBalanceByNetwork = ({
             >
               <div className='grid w-full'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -145,7 +145,7 @@ const TreasuryBalanceByNetwork = ({
                     folder='collaterals'
                   />
                   <Text
-                    size='11'
+                    size='13'
                     lineHeight='21'
                     className='truncate'
                   >
@@ -155,7 +155,7 @@ const TreasuryBalanceByNetwork = ({
               </div>
               <div className='grid w-full'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -163,7 +163,7 @@ const TreasuryBalanceByNetwork = ({
                   QTY
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
@@ -172,7 +172,7 @@ const TreasuryBalanceByNetwork = ({
               </div>
               <div className='grid w-full'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -180,7 +180,7 @@ const TreasuryBalanceByNetwork = ({
                   Value
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
@@ -189,7 +189,7 @@ const TreasuryBalanceByNetwork = ({
               </div>
               <div className='grid w-full'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -197,7 +197,7 @@ const TreasuryBalanceByNetwork = ({
                   Market
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
@@ -206,7 +206,7 @@ const TreasuryBalanceByNetwork = ({
               </div>
               <div className='grid w-full'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -214,7 +214,7 @@ const TreasuryBalanceByNetwork = ({
                   Source
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >

@@ -101,10 +101,10 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                   return (
                     <div
                       key={index}
-                      className='grid w-full max-w-[73px]'
+                      className='grid w-full max-w-[100px]'
                     >
                       <Text
-                        size='8'
+                        size='11'
                         lineHeight='18'
                         weight='500'
                         className='text-primary-14'
@@ -112,7 +112,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                         {column.header as string}
                       </Text>
                       <Text
-                        size='11'
+                        size='13'
                         lineHeight='21'
                         className='truncate'
                       >
@@ -134,9 +134,9 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                   }
                 )}
               >
-                <div className='grid min-h-[39px] w-full max-w-[73px]'>
+                <div className='grid min-h-[39px] w-full max-w-[100px]'>
                   <Text
-                    size='8'
+                    size='11'
                     lineHeight='18'
                     weight='500'
                     className='text-primary-14'
@@ -148,7 +148,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                   (el, index) => (
                     <div
                       key={index}
-                      className='grid w-full max-w-[73px]'
+                      className='grid w-full max-w-[100px]'
                     >
                       <Text
                         size='8'
@@ -161,7 +161,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                           : toDateHeaderMap[el[0] as ToDateTab] || el[0]}
                       </Text>
                       <Text
-                        size='11'
+                        size='13'
                         lineHeight='21'
                         className='truncate'
                       >

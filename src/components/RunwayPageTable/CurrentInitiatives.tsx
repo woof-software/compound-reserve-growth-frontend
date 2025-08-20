@@ -132,9 +132,9 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
                 }
               )}
             >
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -142,16 +142,16 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
                   Initiative
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
                   {row.initiative}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -159,16 +159,16 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
                   Discipline
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
                   {row.discipline}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -176,16 +176,16 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
                   Token
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
                   {row.token}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -193,16 +193,16 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
                   Amount (Qty)
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
                   {formatQuantity(row.amount)}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -210,7 +210,7 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
                   Value ($)
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
