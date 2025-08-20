@@ -279,6 +279,22 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     }, 0);
   }, []);
 
+  const handleSelectAll = useCallback(() => {
+    const chart = chartRef.current?.chart;
+    if (!chart) return;
+    chart.series.forEach((s) => s.setVisible(true, false));
+    chart.redraw();
+    setAreAllSeriesHidden(false);
+  }, []);
+
+  const handleDeselectAll = useCallback(() => {
+    const chart = chartRef.current?.chart;
+    if (!chart) return;
+    chart.series.forEach((s) => s.setVisible(false, false));
+    chart.redraw();
+    setAreAllSeriesHidden(true);
+  }, []);
+
   let xAxisLabelFormat: string;
   switch (barSize) {
     case 'D':
@@ -530,6 +546,21 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
           options={chartOptions}
           containerProps={{ style: { width: '100%', height: '100%' } }}
         />
+      </div>
+      <div className='absolute right-6 block md:hidden'>
+        <div className='flex items-center gap-3'>
+          <View.Condition if={Boolean(seriesData.length > 1)}>
+            <div
+              className='shadow-13 cursor-pointer rounded-lg p-1'
+              onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
+            >
+              <Icon
+                name={areAllSeriesHidden ? 'eye' : 'eye-closed'}
+                className='h-6 w-6'
+              />
+            </div>
+          </View.Condition>
+        </div>
       </div>
       <View.Condition if={isSmall}>
         <div className='mx-5 md:mx-0'>

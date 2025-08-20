@@ -103,6 +103,14 @@ const Dropdown: FC<DropdownProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const onTriggerClick = () => {
+    if (open) {
+      onClose();
+    } else {
+      onToggle();
+    }
+  };
+
   useClickOutside(containerRef as RefObject<HTMLDivElement>, onClose);
 
   return (
@@ -115,7 +123,7 @@ const Dropdown: FC<DropdownProps> = ({
       <div>
         <div
           className='cursor-pointer'
-          onClick={onToggle}
+          onClick={onTriggerClick}
         >
           {triggerContent}
         </div>

@@ -169,7 +169,7 @@ const DrawerContent = memo(
         >
           <Spring.a.div
             className={cn(
-              'bg-secondary-26 pointer-events-auto fixed inset-0 backdrop-blur-lg',
+              'bg-secondary-30 pointer-events-auto fixed inset-0 backdrop-blur-lg',
               { 'backdrop-blur-xs': !isOverlay }
             )}
             style={{
@@ -183,7 +183,7 @@ const DrawerContent = memo(
           <Spring.a.div
             {...bind()}
             ref={panelRef}
-            className='bg-card-content pointer-events-auto fixed right-0 bottom-0 left-0 z-50 w-full touch-none rounded-t-3xl px-3 pt-10 pb-5 will-change-transform'
+            className='bg-card-content pointer-events-auto fixed right-0 bottom-0 left-0 z-50 w-full touch-none rounded-t-3xl px-5 pt-10 pb-5 will-change-transform'
             style={{
               transform: y.to((py) => `translateY(${py}px)`),
               visibility: measured ? 'visible' : 'hidden'
