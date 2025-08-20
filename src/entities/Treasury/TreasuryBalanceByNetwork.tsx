@@ -303,7 +303,7 @@ const TreasuryBalanceByNetworkBlock = ({
           'flex flex-col gap-3 rounded-b-lg px-0 pt-0 pb-0 lg:px-10 lg:pb-10'
       }}
     >
-      <div className='hidden items-center justify-end gap-3 px-10 py-3 md:flex lg:px-0'>
+      <div className='hidden items-center justify-end gap-3 px-10 py-3 lg:flex lg:px-0'>
         <MultiSelect
           options={chainOptions || []}
           value={selectedOptions.chain}
@@ -338,7 +338,7 @@ const TreasuryBalanceByNetworkBlock = ({
           disabled={isLoading}
         />
       </div>
-      <div className='block px-5 py-3 md:hidden'>
+      <div className='block px-5 py-3 lg:hidden'>
         <div className='flex flex-wrap items-center justify-end gap-3'>
           <Button
             onClick={onFilterOpen}

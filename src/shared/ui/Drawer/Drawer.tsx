@@ -163,7 +163,7 @@ const DrawerContent = memo(
       <Portal element={document.getElementById('drawer') ?? document.body}>
         <div
           className={cn(
-            'fixed inset-0 z-10 flex items-end overflow-hidden md:hidden',
+            'fixed inset-0 z-10 flex items-end overflow-hidden lg:hidden',
             className
           )}
         >

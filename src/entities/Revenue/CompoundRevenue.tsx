@@ -470,7 +470,7 @@ const Filters = ({
 
   return (
     <>
-      <View.Tablet>
+      <div className='hidden lg:block'>
         <div className='hidden items-center justify-end gap-3 px-0 py-3 lg:flex'>
           <div className='flex gap-2'>
             <MultiSelect
@@ -581,8 +581,8 @@ const Filters = ({
             />
           </div>
         </div>
-      </View.Tablet>
-      <View.Mobile>
+      </div>
+      <div className='block lg:hidden'>
         <div className='flex flex-col justify-end gap-3 px-5 py-3'>
           <div className='flex flex-wrap justify-end gap-3'>
             <TabsGroup
@@ -673,7 +673,7 @@ const Filters = ({
             </Button>
           </div>
         </Drawer>
-      </View.Mobile>
+      </div>
     </>
   );
 };

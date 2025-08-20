@@ -317,7 +317,7 @@ const RevenueOverview = ({
         />
         <Button
           onClick={onSortOpen}
-          className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:hidden'
+          className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold lg:hidden'
         >
           <Icon
             name='sort-icon'

@@ -254,7 +254,7 @@ const TreasuryCompositionBlock = memo(
             >
               Group by
             </Text>
-            <View.Tablet>
+            <div className='hidden lg:block'>
               <SingleDropdown
                 options={options}
                 isOpen={isOpenSingle}
@@ -264,8 +264,8 @@ const TreasuryCompositionBlock = memo(
                 onSelect={selectSingle}
                 triggerContentClassName='p-[5px]'
               />
-            </View.Tablet>
-            <View.Mobile>
+            </div>
+            <div className='block lg:hidden'>
               <SingleDrawer
                 options={options}
                 isOpen={isOpenSingle}
@@ -276,7 +276,7 @@ const TreasuryCompositionBlock = memo(
                 disabled={isLoading}
                 triggerContentClassName='p-[5px]'
               />
-            </View.Mobile>
+            </div>
           </div>
           <Button
             onClick={onOpenModal}

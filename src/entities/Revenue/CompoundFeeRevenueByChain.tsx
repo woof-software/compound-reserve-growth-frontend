@@ -390,7 +390,7 @@ const CompoundFeeRevenueByChain = ({
           >
             Interval
           </Text>
-          <div className='hidden md:block'>
+          <div className='hidden lg:block'>
             <SingleDropdown
               options={intervalOptions}
               isOpen={intervalDropdown.isOpen}
@@ -401,7 +401,7 @@ const CompoundFeeRevenueByChain = ({
               triggerContentClassName='p-[5px]'
             />
           </div>
-          <div className='block md:hidden'>
+          <div className='block lg:hidden'>
             <SingleDrawer
               placeholder='Interval'
               options={intervalOptions}
@@ -424,7 +424,7 @@ const CompoundFeeRevenueByChain = ({
           >
             {dynamicOptions.label}
           </Text>
-          <div className='hidden md:block'>
+          <div className='hidden lg:block'>
             <SingleDropdown
               options={dynamicOptions.options}
               isOpen={periodDropdown.isOpen}
@@ -435,7 +435,7 @@ const CompoundFeeRevenueByChain = ({
               triggerContentClassName='p-[5px]'
             />
           </div>
-          <div className='block md:hidden'>
+          <div className='block lg:hidden'>
             <SingleDrawer
               placeholder={dynamicOptions.label}
               options={dynamicOptions.options}
@@ -450,7 +450,7 @@ const CompoundFeeRevenueByChain = ({
         </div>
         <Button
           onClick={onSortOpen}
-          className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:hidden'
+          className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold lg:hidden'
         >
           <Icon
             name='sort-icon'
