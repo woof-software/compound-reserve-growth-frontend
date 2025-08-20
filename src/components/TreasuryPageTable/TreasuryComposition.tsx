@@ -123,10 +123,7 @@ const TreasuryComposition = ({
               <div
                 key={row.name + index}
                 className={cn(
-                  'border-secondary-23 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b p-5 md:gap-x-[63px]',
-                  {
-                    'border-t': index === 0
-                  }
+                  'border-secondary-23 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b p-5 md:gap-x-[63px]'
                 )}
               >
                 <div className='grid w-full max-w-[100px]'>

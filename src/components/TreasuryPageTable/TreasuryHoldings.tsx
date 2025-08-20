@@ -137,7 +137,12 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
           dataRows.map((row, index) => (
             <div
               key={row.symbol + index}
-              className='border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10'
+              className={cn(
+                'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                {
+                  'border-none': dataRows.length - 1 === index
+                }
+              )}
             >
               <div className='grid w-full'>
                 <Text
