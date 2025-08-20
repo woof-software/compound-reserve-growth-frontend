@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
-import { cn } from '@/shared/lib/classNames/classNames';
 import { formatGrowth, formatPrice } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
@@ -54,7 +53,7 @@ const RevenueMetrics = ({
   }
 
   return (
-    <div className='flex flex-row flex-wrap gap-0 md:gap-5'>
+    <div className='flex flex-row flex-wrap gap-2.5 md:gap-5'>
       {yearsToDisplay.map((yearOrIndex, index) => {
         const isPlaceholder = isLoading || isError;
         const key = isPlaceholder ? index : (yearOrIndex as string);
@@ -67,15 +66,7 @@ const RevenueMetrics = ({
             isLoading={isLoading}
             isError={isError}
             className={{
-              container: cn(
-                'max-w-full min-w-64 flex-1 basis-64 rounded-none md:border-none',
-                {
-                  'rounded-t-sm': index === 0,
-                  'rounded-b-sm': yearsToDisplay.length - 1 === index,
-                  'border-b-secondary-26 border-b-1':
-                    yearsToDisplay.length - 1 !== index
-                }
-              ),
+              container: 'max-w-full min-w-64 flex-1 basis-64',
               loading: 'h-[317px]',
               header: 'px-5 py-4',
               content: 'flex items-center'
