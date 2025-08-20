@@ -58,17 +58,19 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
 
     const key = sortType.key as keyof TableRowData;
     return [...data].sort((a, b) => {
-      const aVal = a[key];
-      const bVal = b[key];
+      const firstValue = a[key];
+      const secondValue = b[key];
 
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        return sortType.type === 'asc' ? aVal - bVal : bVal - aVal;
+      if (typeof firstValue === 'number' && typeof secondValue === 'number') {
+        return sortType.type === 'asc'
+          ? firstValue - secondValue
+          : secondValue - firstValue;
       }
 
-      if (typeof aVal === 'string' && typeof bVal === 'string') {
+      if (typeof firstValue === 'string' && typeof secondValue === 'string') {
         return sortType.type === 'asc'
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
+          ? firstValue.localeCompare(secondValue)
+          : secondValue.localeCompare(firstValue);
       }
 
       return 0;

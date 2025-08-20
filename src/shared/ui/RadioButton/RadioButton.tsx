@@ -1,5 +1,6 @@
 import React, {
   createContext,
+  FC,
   ReactNode,
   useCallback,
   useContext,
@@ -112,8 +113,6 @@ interface RadioProps
 
   label?: ReactNode;
 
-  description?: ReactNode;
-
   checked?: boolean;
 
   defaultChecked?: boolean;
@@ -128,10 +127,9 @@ interface RadioProps
   disabled?: boolean;
 }
 
-function Radio({
+function RadioItem({
   value,
   label,
-  description,
   checked,
   defaultChecked,
   onChange,
@@ -149,12 +147,11 @@ function Radio({
   const isChecked = isInGroup ? ctx!.value === value : checked;
 
   const circleSize = 'h-5 w-5';
-  const dotSize = 'h-2.5 w-2.5';
 
   return (
     <label
       className={cn(
-        'group/radio inline-flex cursor-pointer items-start gap-5 select-none',
+        'group/radio inline-flex cursor-pointer items-center gap-5 select-none',
         disabled && 'cursor-not-allowed opacity-60',
         className
       )}
@@ -178,30 +175,48 @@ function Radio({
         className={cn(
           'relative flex items-center justify-center rounded-full border transition',
           'border-secondary-23 bg-transparent',
-          'peer-focus-visible:outline-primary-11 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2',
-          circleSize
+          circleSize,
+          {
+            'border-none': isChecked
+          }
         )}
       >
         <span
           className={cn(
-            'rounded-full transition-transform',
-            dotSize,
-            isChecked ? 'bg-primary-11 scale-100' : 'scale-0 bg-transparent'
+            'h-full w-full rounded-full transition-transform',
+            isChecked
+              ? 'bg-card-content border-success-13 scale-100 border-[6px]'
+              : 'scale-0 bg-transparent'
           )}
         />
       </span>
       <span className='flex min-w-0 flex-col'>
-        <View.Condition if={Boolean(label)}>
-          <span className='text-secondary-33 text-sm leading-4'>{label}</span>
-        </View.Condition>
-        <View.Condition if={Boolean(description)}>
-          <span className='text-primary-14 text-[12px] leading-5'>
-            {description}
-          </span>
-        </View.Condition>
+        <View.Condition if={Boolean(label)}>{label}</View.Condition>
       </span>
     </label>
   );
 }
 
-export { Radio, RadioGroup };
+interface RadioLabelProps {
+  label: string;
+
+  className?: string;
+}
+
+const RadioLabel: FC<RadioLabelProps> = ({ label, className }) => {
+  return (
+    <span
+      className={cn('text-primary-14 text-sm leading-4 font-medium', className)}
+    >
+      {label}
+    </span>
+  );
+};
+
+const Radio = {
+  Group: RadioGroup,
+  Label: RadioLabel,
+  Item: RadioItem
+};
+
+export { Radio };
