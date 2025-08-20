@@ -278,13 +278,6 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         highcharts={Highcharts}
         options={options}
         callback={(chart: any) => setHc(chart)}
-        ptions={{
-          ...options,
-          chart: {
-            ...options.chart,
-            height: '100%'
-          }
-        }}
         containerProps={{
           style: {
             width: '100%',
@@ -299,9 +292,9 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
             'before:pointer-events-none before:absolute before:top-[1px] before:left-[1px] before:h-full before:w-20 before:rounded-[39px] before:opacity-0',
             'after:pointer-events-none after:absolute after:top-[1px] after:right-[1px] after:h-full after:w-20 after:rounded-r-[39px] after:opacity-0',
             {
-              'before:max-h-[36px] before:rotate-180 before:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)] before:opacity-100':
+              'before:max-h-[36px] before:rotate-180 before:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] before:opacity-100 dark:before:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
                 canScrollLeft,
-              'after:max-h-[36px] after:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)] after:opacity-100':
+              'after:max-h-[36px] after:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] after:opacity-100 dark:after:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
                 canScrollRight
             }
           )}

@@ -10,6 +10,8 @@ import HighchartsReact from 'highcharts-react-official';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { cn } from '@/shared/lib/classNames/classNames';
+import Button from '@/shared/ui/Button/Button';
+import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
@@ -21,9 +23,11 @@ const formatValue = (value: number) => {
   if (Math.abs(value) >= 1_000_000) {
     return (value / 1_000_000).toFixed(1) + 'M';
   }
+
   if (Math.abs(value) >= 1_000) {
     return (value / 1_000).toFixed(1) + 'K';
   }
+
   return value.toFixed(0);
 };
 
@@ -31,12 +35,10 @@ interface StackedChartData {
   date: string;
   [key: string]: string | number;
 }
-
 interface AggregatedPoint {
   x: number;
   [key: string]: number;
 }
-
 interface CompoundFeeRecievedProps {
   data: StackedChartData[];
   groupBy: string;
@@ -55,13 +57,54 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   className
 }) => {
   const { theme } = useTheme();
+
   const chartRef = useRef<HighchartsReact.RefObject>(null);
   const programmaticChange = useRef(false);
+
   const [areAllSeriesHidden, setAreAllSeriesHidden] = useState(false);
 
+  const [isSmall, setIsSmall] = useState(
+    typeof window !== 'undefined' ? window.innerWidth <= 1023 : true
+  );
+
   useEffect(() => {
-    setAreAllSeriesHidden(false);
-  }, [data]);
+    const onResize = () => setIsSmall(window.innerWidth <= 1023);
+    window.addEventListener('resize', onResize);
+
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
+
+  const viewportRef = useRef<HTMLDivElement>(null);
+
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateArrows = useCallback(() => {
+    const el = viewportRef.current;
+
+    if (!el) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+
+    setCanScrollLeft(scrollLeft > 1);
+
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
+  }, []);
+
+  const scrollByDir = (dir: 'left' | 'right') => {
+    const el = viewportRef.current;
+
+    if (!el) return;
+
+    const step = Math.max(el.clientWidth * 0.6, 120);
+
+    el.scrollBy({ left: dir === 'left' ? -step : step, behavior: 'smooth' });
+  };
+
+  useEffect(() => setAreAllSeriesHidden(false), [data]);
 
   const { seriesData, aggregatedData } = useMemo(() => {
     if (!data || data.length === 0) {
@@ -139,9 +182,12 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       });
     });
 
+    const palette = Highcharts.getOptions().colors || [];
+
     const finalSeries = Array.from(activeSeriesKeys).map(
-      (key): Highcharts.SeriesColumnOptions => ({
+      (key, idx): Highcharts.SeriesColumnOptions => ({
         type: 'column',
+        color: palette[idx % palette.length],
         name: key.charAt(0).toUpperCase() + key.slice(1),
         data: sortedAggregated.map((item) => [
           item.x,
@@ -169,20 +215,68 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     }
   }, [barCount, aggregatedData]);
 
-  const handleSelectAll = useCallback(() => {
+  const highlightSeries = useCallback((name: string) => {
     const chart = chartRef.current?.chart;
+
     if (!chart) return;
-    chart.series.forEach((s) => s.setVisible(true, false));
-    chart.redraw();
-    setAreAllSeriesHidden(false);
+
+    chart.series.forEach((s) => {
+      const active = s.name === name && s.visible !== false;
+
+      (s as any).group?.attr({ opacity: active ? 1 : 0.25 });
+
+      (s as any).markerGroup?.attr?.({ opacity: active ? 1 : 0.25 });
+
+      (s as any).dataLabelsGroup?.attr?.({ opacity: active ? 1 : 0.25 });
+
+      if (active) (s as any).group?.toFront();
+    });
   }, []);
 
-  const handleDeselectAll = useCallback(() => {
+  const clearHighlight = useCallback(() => {
     const chart = chartRef.current?.chart;
+
     if (!chart) return;
-    chart.series.forEach((s) => s.setVisible(false, false));
+
+    chart.series.forEach((s) => {
+      (s as any).group?.attr({ opacity: 1 });
+
+      (s as any).markerGroup?.attr?.({ opacity: 1 });
+
+      (s as any).dataLabelsGroup?.attr?.({ opacity: 1 });
+    });
+  }, []);
+
+  const toggleSeriesByName = useCallback((name: string) => {
+    const chart = chartRef.current?.chart;
+
+    if (!chart) return;
+
+    const s = chart.series.find((sr) => sr.name === name);
+
+    if (!s) return;
+
+    s.setVisible(!s.visible, false);
+
     chart.redraw();
-    setAreAllSeriesHidden(true);
+
+    setHiddenItems((prev) => {
+      const next = new Set(prev);
+
+      if (s.visible) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
+
+      return next;
+    });
+
+    setTimeout(() => {
+      const anyVisible = chart.series.some((sr) => sr.visible);
+
+      setAreAllSeriesHidden(!anyVisible);
+    }, 0);
   }, []);
 
   let xAxisLabelFormat: string;
@@ -196,6 +290,45 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       xAxisLabelFormat = "{value:%b '%y}";
       break;
   }
+
+  const legendDesktop: Highcharts.LegendOptions = {
+    enabled: true,
+    align: 'center',
+    verticalAlign: 'bottom',
+    layout: 'horizontal',
+    useHTML: true,
+    itemStyle: {
+      color: '#7A8A99',
+      fontSize: '11px',
+      fontWeight: '400',
+      textDecoration: 'none',
+      lineHeight: '100%',
+      fontFamily: 'Haas Grot Text R, sans-serif'
+    },
+    itemHoverStyle: {
+      color: 'var(--color-primary-11)',
+      textDecoration: 'none',
+      fontFamily: 'Haas Grot Text R, sans-serif'
+    },
+    itemHiddenStyle: {
+      color: '#4B5563',
+      textDecoration: 'line-through',
+      fontFamily: 'Haas Grot Text R, sans-serif'
+    },
+    symbolWidth: 0,
+    symbolHeight: 0,
+    itemDistance: 20,
+    maxHeight: 100,
+    labelFormatter: function () {
+      const s = this as Highcharts.Series;
+      const deco = s.visible ? 'none' : 'line-through';
+      const color = s.visible ? 'var(--color-primary-11)' : '#4B5563';
+      return `<span style="display:inline-flex;align-items:center;gap:8px;">
+        <span style="width:12px;height:2px;background-color:${s.color};display:inline-block;border-radius:1px;opacity:${s.visible ? '1' : '0.5'};"></span>
+        <span style="font-size:11px;text-decoration:${deco};color:${color};font-family:'Haas Grot Text R',sans-serif;">${s.name}</span>
+      </span>`;
+    }
+  };
 
   const chartOptions: Highcharts.Options = {
     chart: {
@@ -235,23 +368,17 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
         dashStyle: 'ShortDash'
       },
       events: {
-        setExtremes: function (e) {
+        setExtremes: (e) => {
           if (programmaticChange.current) {
             programmaticChange.current = false;
             return;
           }
-
-          if (e.trigger === 'zoom') {
-            return;
-          }
-
+          if (e.trigger === 'zoom') return;
           const visibleCount = Math.round(
             aggregatedData.filter(
-              (point) =>
-                point.x >= (e.min || 0) && point.x <= (e.max || Infinity)
+              (p) => p.x >= (e.min || 0) && p.x <= (e.max || Infinity)
             ).length
           );
-
           onVisibleBarsChange?.(visibleCount);
         }
       }
@@ -268,66 +395,15 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
           fontFamily: 'Haas Grot Text R, sans-serif'
         },
         formatter: function () {
-          const value = this.value as number;
-          if (Math.abs(value) >= 1000000)
-            return (value / 1000000).toFixed(0) + 'M';
-          if (Math.abs(value) >= 1000) return (value / 1000).toFixed(0) + 'K';
-          return value.toString();
+          const v = this.value as number;
+          if (Math.abs(v) >= 1_000_000) return (v / 1_000_000).toFixed(0) + 'M';
+          if (Math.abs(v) >= 1_000) return (v / 1_000).toFixed(0) + 'K';
+          return v.toString();
         }
       },
       lineWidth: 0
     },
-    legend: {
-      enabled: true,
-      align: 'center',
-      verticalAlign: 'bottom',
-      layout: 'horizontal',
-      useHTML: true,
-      itemStyle: {
-        color: '#7A8A99',
-        fontSize: '11px',
-        fontWeight: '400',
-        textDecoration: 'none',
-        lineHeight: '100%',
-        fontFamily: 'Haas Grot Text R, sans-serif'
-      },
-      itemHoverStyle: {
-        color: 'var(--color-primary-11)',
-        textDecoration: 'none',
-        fontFamily: 'Haas Grot Text R, sans-serif'
-      },
-      itemHiddenStyle: {
-        color: '#4B5563',
-        textDecoration: 'line-through',
-        fontFamily: 'Haas Grot Text R, sans-serif'
-      },
-      symbolWidth: 0,
-      symbolHeight: 0,
-      itemDistance: 20,
-      maxHeight: 100,
-      labelFormatter: function () {
-        const series = this as Highcharts.Series;
-        const textDecoration = series.visible ? 'none' : 'line-through';
-        const textColor = series.visible
-          ? 'var(--color-primary-11)'
-          : '#4B5563';
-        return `<span style="display: inline-flex; align-items: center; gap: 8px;">
-      <span style="width: 12px; height: 2px; background-color: ${series.color}; display: inline-block; border-radius: 1px; opacity: ${series.visible ? '1' : '0.5'};"></span>
-      <span style="font-size: 11px; text-decoration: ${textDecoration}; color: ${textColor}; font-family: 'Haas Grot Text R', sans-serif;">${series.name}</span>
-    </span>`;
-      },
-      navigation: {
-        enabled: true,
-        arrowSize: 11,
-        activeColor: theme === 'light' ? '#17212B' : '#FFFFFF',
-        inactiveColor: '#7A899A',
-        animation: { duration: 250 },
-        style: {
-          cursor: 'pointer',
-          color: theme === 'light' ? '#17212B' : '#FFFFFF'
-        }
-      }
-    },
+    legend: isSmall ? { enabled: false } : legendDesktop,
     plotOptions: {
       column: {
         pointPadding: 0.05,
@@ -335,39 +411,34 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
         borderWidth: 0,
         states: { hover: { animation: false }, inactive: { opacity: 1 } }
       },
-      series: {
-        animation: { duration: 500 },
-        stickyTracking: true,
-        findNearestPointBy: 'x',
-        cursor: 'pointer',
-        enableMouseTracking: true,
-        states: {
-          inactive: {
-            opacity: 1
-          }
-        },
-        events: {
-          legendItemClick: function (this: Highcharts.Series): boolean {
-            const chart = this.chart;
-            const isAnyOtherSeriesVisible = chart.series.some(
-              (s) => s !== this && s.visible
-            );
-            if (!this.visible && !isAnyOtherSeriesVisible) {
-              chart.series.forEach((s) => s.setVisible(s === this, false));
-              chart.redraw();
-              setAreAllSeriesHidden(false);
-              return false;
+      series: !isSmall
+        ? {
+            animation: { duration: 500 },
+            stickyTracking: true,
+            findNearestPointBy: 'x',
+            enableMouseTracking: true,
+            states: { inactive: { opacity: 1 } },
+            events: {
+              legendItemClick: function (this: Highcharts.Series) {
+                const chart = this.chart;
+                const anyOtherVisible = chart.series.some(
+                  (s) => s !== this && s.visible
+                );
+                if (!this.visible && !anyOtherVisible) {
+                  chart.series.forEach((s) => s.setVisible(s === this, false));
+                  chart.redraw();
+                  setAreAllSeriesHidden(false);
+                  return false;
+                }
+                setTimeout(() => {
+                  const anyVisible = chart.series.some((s) => s.visible);
+                  setAreAllSeriesHidden(!anyVisible);
+                }, 0);
+                return true;
+              }
             }
-            setTimeout(() => {
-              const isAnySeriesVisibleAfterClick = chart.series.some(
-                (s) => s.visible
-              );
-              setAreAllSeriesHidden(!isAnySeriesVisibleAfterClick);
-            }, 0);
-            return true;
           }
-        }
-      }
+        : { states: { inactive: { opacity: 0.25 } } }
     },
     credits: { enabled: false },
     tooltip: {
@@ -424,11 +495,23 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
         return header + body + footer;
       }
     },
-    series: seriesData,
+    series: seriesData as unknown as Highcharts.SeriesOptionsType[],
     navigator: { enabled: false },
     scrollbar: { enabled: false },
     rangeSelector: { enabled: false }
   };
+
+  useEffect(() => {
+    if (!isSmall) return;
+
+    updateArrows();
+
+    const onResize = () => updateArrows();
+
+    window.addEventListener('resize', onResize);
+
+    return () => window.removeEventListener('resize', onResize);
+  }, [seriesData.length, updateArrows, isSmall]);
 
   return (
     <div className={cn('highcharts-container flex h-full flex-col', className)}>
@@ -436,7 +519,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
         {areAllSeriesHidden && (
           <Text
             size='11'
-            className='text-primary-14 absolute inset-0 flex -translate-y-10 transform items-center justify-center'
+            className='text-primary-14 absolute inset-0 flex -translate-y-10 items-center justify-center'
           >
             All series are hidden
           </Text>
@@ -448,34 +531,90 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
           containerProps={{ style: { width: '100%', height: '100%' } }}
         />
       </div>
-      <div className='absolute right-6 block md:hidden'>
-        <div className='flex items-center gap-3'>
-          <View.Condition if={Boolean(seriesData.length > 1)}>
+      <View.Condition if={isSmall}>
+        <div className='mx-5 md:mx-0'>
+          <div
+            className={cn(
+              'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit overflow-hidden rounded-[39px]',
+              'before:pointer-events-none before:absolute before:top-[1px] before:left-[1px] before:h-full before:w-20 before:rounded-[39px] before:opacity-0',
+              'after:pointer-events-none after:absolute after:top-[1px] after:right-[1px] after:h-full after:w-20 after:rounded-r-[39px] after:opacity-0',
+              {
+                'before:max-h-[36px] before:rotate-180 before:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] before:opacity-100 dark:before:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
+                  canScrollLeft,
+                'after:max-h-[36px] after:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] after:opacity-100 dark:after:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
+                  canScrollRight
+              }
+            )}
+          >
+            <View.Condition if={canScrollLeft}>
+              <Button
+                className={cn(
+                  'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
+                )}
+                onClick={() => {
+                  clearHighlight();
+                  scrollByDir('left');
+                }}
+              >
+                <Icon
+                  name='arrow-triangle'
+                  className='h-[6px] w-[6px]'
+                />
+              </Button>
+            </View.Condition>
             <div
-              className='shadow-13 cursor-pointer rounded-lg p-1'
-              onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
+              ref={viewportRef}
+              onScroll={() => {
+                updateArrows();
+                clearHighlight();
+              }}
+              className={cn(
+                'hide-scrollbar mx-0.5 flex h-full max-w-[99%] items-center gap-4 overflow-x-auto scroll-smooth p-1.5'
+              )}
             >
-              <Icon
-                name={areAllSeriesHidden ? 'eye' : 'eye-closed'}
-                className='h-6 w-6'
+              <Each
+                data={seriesData}
+                render={(s) => (
+                  <Button
+                    key={s.name}
+                    className={cn(
+                      'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
+                      { 'line-through opacity-30': hiddenItems.has(s.name!) }
+                    )}
+                    onMouseEnter={() => highlightSeries(s.name!)}
+                    onFocus={() => highlightSeries(s.name!)}
+                    onMouseLeave={clearHighlight}
+                    onBlur={clearHighlight}
+                    onClick={() => toggleSeriesByName(s.name!)}
+                  >
+                    <span
+                      className='inline-block h-3 w-3 rounded-full'
+                      style={{ backgroundColor: (s as any).color }}
+                    />
+                    {s.name}
+                  </Button>
+                )}
               />
             </div>
-          </View.Condition>
-          <View.Condition if={Boolean(seriesData.length > 1)}>
-            <div
-              className={cn('shadow-13 rounded-lg p-1 opacity-50', {
-                'opacity-100': areAllSeriesHidden
-              })}
-              onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
-            >
-              <Icon
-                name='eye'
-                className='h-6 w-6'
-              />
-            </div>
-          </View.Condition>
+            <View.Condition if={canScrollRight}>
+              <Button
+                className={cn(
+                  'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
+                )}
+                onClick={() => {
+                  clearHighlight();
+                  scrollByDir('right');
+                }}
+              >
+                <Icon
+                  name='arrow-triangle'
+                  className='h-[6px] w-[6px] rotate-180'
+                />
+              </Button>
+            </View.Condition>
+          </div>
         </div>
-      </div>
+      </View.Condition>
     </div>
   );
 };
