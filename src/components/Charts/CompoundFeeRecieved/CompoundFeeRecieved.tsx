@@ -461,19 +461,6 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
               />
             </div>
           </View.Condition>
-          <View.Condition if={Boolean(seriesData.length > 1)}>
-            <div
-              className={cn('shadow-13 rounded-lg p-1 opacity-50', {
-                'opacity-100': areAllSeriesHidden
-              })}
-              onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
-            >
-              <Icon
-                name='eye'
-                className='h-6 w-6'
-              />
-            </div>
-          </View.Condition>
         </div>
       </div>
     </div>
