@@ -439,9 +439,7 @@ const Filters = memo(
       onSelectAssetType,
       onSelectChain,
       onSelectMarket,
-      selectedOptions.assetType,
-      selectedOptions.chain,
-      selectedOptions.deployment
+      selectedOptions
     ]);
 
     return (
