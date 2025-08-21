@@ -239,7 +239,14 @@ const Filter: FC<FilterProps> = ({
                   onClick={() => onSelectOptionInFilter(option)}
                 >
                   <div className='flex items-end gap-1'>
-                    <span className='text-color-gray-11 rounded-sm text-sm font-medium'>
+                    <span
+                      className={cn(
+                        'text-primary-14 rounded-sm text-sm font-medium',
+                        {
+                          'text-secondary-10': isSelected
+                        }
+                      )}
+                    >
                       {option.label}
                     </span>
                   </div>
