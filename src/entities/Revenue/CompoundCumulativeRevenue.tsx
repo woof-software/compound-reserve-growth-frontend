@@ -371,16 +371,6 @@ const Filters = ({
     };
 
     const assetTypeFilterOptions = {
-      id: 'reserveSymbol',
-      placeholder: 'Reserve Symbols',
-      total: selectedOptions.symbol.length,
-      selectedOptions: selectedOptions.symbol,
-      options:
-        symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
-      onChange: onSelectSymbol
-    };
-
-    const symbolFilterOptions = {
       id: 'assetType',
       placeholder: 'Asset Type',
       total: selectedOptions.assetType.length,
@@ -388,6 +378,16 @@ const Filters = ({
       options:
         assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
       onChange: onSelectAssetType
+    };
+
+    const symbolFilterOptions = {
+      id: 'reserveSymbol',
+      placeholder: 'Reserve Symbols',
+      total: selectedOptions.symbol.length,
+      selectedOptions: selectedOptions.symbol,
+      options:
+        symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
+      onChange: onSelectSymbol
     };
 
     return [
