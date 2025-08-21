@@ -202,11 +202,16 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
           dataRows.map((row, index) => (
             <div
               key={row.token + index}
-              className='border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10'
+              className={cn(
+                'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                {
+                  'border-none': index === dataRows.length - 1
+                }
+              )}
             >
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -214,16 +219,16 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
                   Recipient
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
                   {row.recipient}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -231,16 +236,16 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
                   Discipline
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
                   {row.discipline}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -248,16 +253,16 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
                   Status
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
                   {capitalizeFirstLetter(row.status, '-')}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -265,16 +270,16 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
                   Total Amount
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
                   {row.amount ? `$${formatLargeNumber(row.amount, 2)}` : '-'}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -282,7 +287,7 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
                   Paid Amount
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
@@ -291,9 +296,9 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
                     : '-'}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -301,7 +306,7 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
                   % Paid
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
@@ -310,9 +315,9 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
                     : '-'}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -320,16 +325,16 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
                   Payment Type
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
                   {row.paymentType}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -337,16 +342,16 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
                   Start Date
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
                   {row.startDate ? formatDateWithOrdinal(row.startDate) : '-'}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -354,7 +359,7 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
                   End Date
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >

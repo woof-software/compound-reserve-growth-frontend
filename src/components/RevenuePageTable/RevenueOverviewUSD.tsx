@@ -58,17 +58,19 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
 
     const key = sortType.key as keyof TableRowData;
     return [...data].sort((a, b) => {
-      const aVal = a[key];
-      const bVal = b[key];
+      const firstValue = a[key];
+      const secondValue = b[key];
 
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        return sortType.type === 'asc' ? aVal - bVal : bVal - aVal;
+      if (typeof firstValue === 'number' && typeof secondValue === 'number') {
+        return sortType.type === 'asc'
+          ? firstValue - secondValue
+          : secondValue - firstValue;
       }
 
-      if (typeof aVal === 'string' && typeof bVal === 'string') {
+      if (typeof firstValue === 'string' && typeof secondValue === 'string') {
         return sortType.type === 'asc'
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
+          ? firstValue.localeCompare(secondValue)
+          : secondValue.localeCompare(firstValue);
       }
 
       return 0;
@@ -86,8 +88,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                 className={cn(
                   'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
                   {
-                    'border-b': index !== dataRows.length - 1,
-                    'border-t': index === 0,
+                    'border-b': index === dataRows.length - 1,
                     'justify-between': dateType !== 'Rolling'
                   }
                 )}
@@ -99,10 +100,10 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                   return (
                     <div
                       key={index}
-                      className='grid w-full max-w-[73px]'
+                      className='grid w-full max-w-[100px]'
                     >
                       <Text
-                        size='8'
+                        size='11'
                         lineHeight='18'
                         weight='500'
                         className='text-primary-14'
@@ -110,7 +111,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                         {column.header as string}
                       </Text>
                       <Text
-                        size='11'
+                        size='13'
                         lineHeight='21'
                         className='truncate'
                       >
@@ -132,9 +133,9 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                   }
                 )}
               >
-                <div className='grid min-h-[39px] w-full max-w-[73px]'>
+                <div className='grid min-h-[39px] w-full max-w-[100px]'>
                   <Text
-                    size='8'
+                    size='11'
                     lineHeight='18'
                     weight='500'
                     className='text-primary-14'
@@ -146,7 +147,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                   (el, index) => (
                     <div
                       key={index}
-                      className='grid w-full max-w-[73px]'
+                      className='grid w-full max-w-[100px]'
                     >
                       <Text
                         size='8'
@@ -159,7 +160,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                           : toDateHeaderMap[el[0] as ToDateTab] || el[0]}
                       </Text>
                       <Text
-                        size='11'
+                        size='13'
                         lineHeight='21'
                         className='truncate'
                       >

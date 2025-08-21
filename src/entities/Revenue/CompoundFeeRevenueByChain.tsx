@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState
+} from 'react';
 
 import CompoundFeeRevenuebyChainComponent, {
   Interval,
@@ -7,6 +13,7 @@ import CompoundFeeRevenuebyChainComponent, {
 import SingleDropdown, {
   SingleDrawer
 } from '@/components/SingleDropdown/SingleDropdown';
+import SortDrawer from '@/components/SortDrawer/SortDrawer';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
@@ -19,14 +26,10 @@ import {
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
-import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
-import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
-
-import CheckStroke from '@/assets/svg/check-stroke.svg';
 
 export interface ProcessedRevenueData {
   chain: string;
@@ -232,10 +235,13 @@ const CompoundFeeRevenueByChain = ({
   );
   const [selectedPeriod, setSelectedPeriod] = useState<string | undefined>();
 
-  const [sortType, setSortType] = useState<{
-    key: string;
-    type: string;
-  }>({ key: 'chain', type: 'asc' });
+  const [sortType, setSortType] = useReducer(
+    (prev, next) => ({
+      ...prev,
+      ...next
+    }),
+    { key: '', type: 'asc' }
+  );
 
   const {
     isOpen: isSortOpen,
@@ -320,6 +326,13 @@ const CompoundFeeRevenueByChain = ({
 
   const hasData = currentView.tableData.length > 0;
 
+  const sortColumns = useMemo(() => {
+    return compoundFeeRevenueByCainColumns.map((col) => ({
+      accessorKey: String(col.accessorKey),
+      header: typeof col.header === 'string' ? col.header : ''
+    }));
+  }, [compoundFeeRevenueByCainColumns]);
+
   const handleIntervalSelect = (newInterval: string) => {
     const newOptions = generateOptions(precomputedViews, newInterval);
     const newDefaultPeriod =
@@ -335,25 +348,17 @@ const CompoundFeeRevenueByChain = ({
     periodDropdown.close();
   };
 
-  const onSortTypeByKeySelect = useCallback(
-    (value: string) => {
-      setSortType({
-        ...sortType,
-        key: value
-      });
-    },
-    [sortType]
-  );
+  const onKeySelect = useCallback((value: string) => {
+    setSortType({
+      key: value
+    });
+  }, []);
 
-  const onSortTypeByTypeSelect = useCallback(
-    (value: string) => {
-      setSortType({
-        ...sortType,
-        type: value
-      });
-    },
-    [sortType]
-  );
+  const onTypeSelect = useCallback((value: string) => {
+    setSortType({
+      type: value
+    });
+  }, []);
 
   useEffect(() => {
     if (precomputedViews && !selectedPeriod) {
@@ -390,7 +395,7 @@ const CompoundFeeRevenueByChain = ({
           >
             Interval
           </Text>
-          <div className='hidden md:block'>
+          <div className='hidden lg:block'>
             <SingleDropdown
               options={intervalOptions}
               isOpen={intervalDropdown.isOpen}
@@ -401,7 +406,7 @@ const CompoundFeeRevenueByChain = ({
               triggerContentClassName='p-[5px]'
             />
           </div>
-          <div className='block md:hidden'>
+          <div className='block lg:hidden'>
             <SingleDrawer
               placeholder='Interval'
               options={intervalOptions}
@@ -424,7 +429,7 @@ const CompoundFeeRevenueByChain = ({
           >
             {dynamicOptions.label}
           </Text>
-          <div className='hidden md:block'>
+          <div className='hidden lg:block'>
             <SingleDropdown
               options={dynamicOptions.options}
               isOpen={periodDropdown.isOpen}
@@ -435,7 +440,7 @@ const CompoundFeeRevenueByChain = ({
               triggerContentClassName='p-[5px]'
             />
           </div>
-          <div className='block md:hidden'>
+          <div className='block lg:hidden'>
             <SingleDrawer
               placeholder={dynamicOptions.label}
               options={dynamicOptions.options}
@@ -450,7 +455,7 @@ const CompoundFeeRevenueByChain = ({
         </div>
         <Button
           onClick={onSortOpen}
-          className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:hidden'
+          className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold lg:hidden'
         >
           <Icon
             name='sort-icon'
@@ -477,100 +482,14 @@ const CompoundFeeRevenueByChain = ({
           selectedInterval={selectedInterval}
         />
       )}
-      <Drawer
+      <SortDrawer
         isOpen={isSortOpen}
+        sortType={sortType}
+        columns={sortColumns}
         onClose={onSortClose}
-      >
-        <Text
-          size='17'
-          weight='700'
-          lineHeight='140'
-          align='center'
-          className='mb-8 w-full'
-        >
-          Sort
-        </Text>
-        <div className='grid gap-3 px-2'>
-          <div className='grid gap-4'>
-            <Text
-              size='14'
-              weight='700'
-              lineHeight='140'
-              align='center'
-              className='w-full'
-            >
-              Sort type
-            </Text>
-            <Each
-              data={[
-                { type: 'asc', header: 'Ascending' },
-                {
-                  type: 'desc',
-                  header: 'Descending'
-                }
-              ]}
-              render={(el) => (
-                <div
-                  className='flex items-center justify-between'
-                  key={el.type}
-                  onClick={() => onSortTypeByTypeSelect(el.type)}
-                >
-                  <Text
-                    size='14'
-                    weight='500'
-                    lineHeight='16'
-                  >
-                    {el.header}
-                  </Text>
-                  <View.Condition if={el.type === sortType?.type}>
-                    <CheckStroke
-                      width={16}
-                      height={16}
-                    />
-                  </View.Condition>
-                </div>
-              )}
-            />
-          </div>
-          <div className='grid gap-4'>
-            <Text
-              size='14'
-              weight='700'
-              lineHeight='140'
-              align='center'
-              className='w-full'
-            >
-              Columns
-            </Text>
-            <Each
-              data={compoundFeeRevenueByCainColumns}
-              render={(el) => (
-                <div
-                  className='flex items-center justify-between'
-                  key={el.accessorKey}
-                  onClick={() =>
-                    onSortTypeByKeySelect(el.accessorKey as string)
-                  }
-                >
-                  <Text
-                    size='14'
-                    weight='500'
-                    lineHeight='16'
-                  >
-                    {el.header as string}
-                  </Text>
-                  <View.Condition if={el.accessorKey === sortType?.key}>
-                    <CheckStroke
-                      width={16}
-                      height={16}
-                    />
-                  </View.Condition>
-                </div>
-              )}
-            />
-          </div>
-        </div>
-      </Drawer>
+        onKeySelect={onKeySelect}
+        onTypeSelect={onTypeSelect}
+      />
     </Card>
   );
 };

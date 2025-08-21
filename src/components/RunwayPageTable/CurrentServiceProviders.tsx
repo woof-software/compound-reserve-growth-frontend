@@ -126,14 +126,13 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
               className={cn(
                 'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 p-5 md:gap-x-[63px] md:px-10',
                 {
-                  'border-b': index !== dataRows.length - 1,
-                  'border-t': index === 0
+                  'border-b': index !== dataRows.length - 1
                 }
               )}
             >
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -141,16 +140,16 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
                   Provider
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
                   {row.provider}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -158,16 +157,16 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
                   Discipline
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
                   {row.discipline}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -175,16 +174,16 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
                   Token
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
                   {row.token}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -192,16 +191,16 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
                   Amount (Qty)
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
                   {formatQuantity(row.amount)}
                 </Text>
               </div>
-              <div className='grid w-full max-w-[73px]'>
+              <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -209,7 +208,7 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
                   Value ($)
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >

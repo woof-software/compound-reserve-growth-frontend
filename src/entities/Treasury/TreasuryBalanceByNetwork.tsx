@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useReducer, useState } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 
 import CryptoChart from '@/components/Charts/Bar/Bar';
 import {
@@ -6,6 +6,7 @@ import {
   MultiSelectDrawer
 } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
+import SortDrawer from '@/components/SortDrawer/SortDrawer';
 import TreasuryBalanceByNetwork, {
   TreasuryBalanceByNetworkType
 } from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
@@ -20,12 +21,9 @@ import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import Drawer from '@/shared/ui/Drawer/Drawer';
-import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
-
-import CheckStroke from '@/assets/svg/check-stroke.svg';
 
 interface TreasuryBalanceByNetworkBlockProps {
   isLoading?: boolean;
@@ -105,10 +103,13 @@ const TreasuryBalanceByNetworkBlock = ({
     }
   );
 
-  const [sortType, setSortType] = useState<{
-    key: string;
-    type: string;
-  }>({ key: 'symbol', type: 'asc' });
+  const [sortType, setSortType] = useReducer(
+    (prev, next) => ({
+      ...prev,
+      ...next
+    }),
+    { key: '', type: 'asc' }
+  );
 
   const filterOptionsConfig = useMemo(
     () => ({
@@ -246,25 +247,17 @@ const TreasuryBalanceByNetworkBlock = ({
     });
   }, []);
 
-  const onSortTypeByKeySelect = useCallback(
-    (value: string) => {
-      setSortType({
-        ...sortType,
-        key: value
-      });
-    },
-    [sortType]
-  );
+  const onKeySelect = useCallback((value: string) => {
+    setSortType({
+      key: value
+    });
+  }, []);
 
-  const onSortTypeByTypeSelect = useCallback(
-    (value: string) => {
-      setSortType({
-        ...sortType,
-        type: value
-      });
-    },
-    [sortType]
-  );
+  const onTypeSelect = useCallback((value: string) => {
+    setSortType({
+      type: value
+    });
+  }, []);
 
   const onClearSelectedOptions = useCallback(() => {
     setSelectedOptions({
@@ -303,7 +296,7 @@ const TreasuryBalanceByNetworkBlock = ({
           'flex flex-col gap-3 rounded-b-lg px-0 pt-0 pb-0 lg:px-10 lg:pb-10'
       }}
     >
-      <div className='hidden items-center justify-end gap-3 px-10 py-3 md:flex lg:px-0'>
+      <div className='hidden items-center justify-end gap-3 px-10 py-3 lg:flex lg:px-0'>
         <MultiSelect
           options={chainOptions || []}
           value={selectedOptions.chain}
@@ -338,7 +331,7 @@ const TreasuryBalanceByNetworkBlock = ({
           disabled={isLoading}
         />
       </div>
-      <div className='block px-5 py-3 md:hidden'>
+      <div className='block px-5 py-3 lg:hidden'>
         <div className='flex flex-wrap items-center justify-end gap-3'>
           <Button
             onClick={onFilterOpen}
@@ -361,98 +354,14 @@ const TreasuryBalanceByNetworkBlock = ({
             Sort
           </Button>
         </div>
-        <Drawer
+        <SortDrawer
           isOpen={isSortOpen}
+          sortType={sortType}
+          columns={treasuryBalanceByNetworkColumns}
           onClose={onSortClose}
-        >
-          <Text
-            size='17'
-            weight='700'
-            lineHeight='140'
-            align='center'
-            className='mb-8 w-full'
-          >
-            Sort
-          </Text>
-          <div className='grid gap-3 px-2'>
-            <div className='grid gap-4'>
-              <Text
-                size='14'
-                weight='700'
-                lineHeight='140'
-                align='center'
-                className='w-full'
-              >
-                Sort type
-              </Text>
-              <Each
-                data={[
-                  { type: 'asc', header: 'Ascending' },
-                  {
-                    type: 'desc',
-                    header: 'Descending'
-                  }
-                ]}
-                render={(el) => (
-                  <div
-                    className='flex items-center justify-between'
-                    key={el.type}
-                    onClick={() => onSortTypeByTypeSelect(el.type)}
-                  >
-                    <Text
-                      size='14'
-                      weight='500'
-                      lineHeight='16'
-                    >
-                      {el.header}
-                    </Text>
-                    <View.Condition if={el.type === sortType?.type}>
-                      <CheckStroke
-                        width={16}
-                        height={16}
-                      />
-                    </View.Condition>
-                  </div>
-                )}
-              />
-            </div>
-            <div className='grid gap-4'>
-              <Text
-                size='14'
-                weight='700'
-                lineHeight='140'
-                align='center'
-                className='w-full'
-              >
-                Columns
-              </Text>
-              <Each
-                data={treasuryBalanceByNetworkColumns}
-                render={(el) => (
-                  <div
-                    className='flex items-center justify-between'
-                    key={el.accessorKey}
-                    onClick={() => onSortTypeByKeySelect(el.accessorKey)}
-                  >
-                    <Text
-                      size='14'
-                      weight='500'
-                      lineHeight='16'
-                    >
-                      {el.header}
-                    </Text>
-                    <View.Condition if={el.accessorKey === sortType?.key}>
-                      <CheckStroke
-                        width={16}
-                        height={16}
-                      />
-                    </View.Condition>
-                  </div>
-                )}
-              />
-            </div>
-          </div>
-        </Drawer>
+          onKeySelect={onKeySelect}
+          onTypeSelect={onTypeSelect}
+        />
         <Drawer
           isOpen={isFilterOpen}
           onClose={onFilterClose}

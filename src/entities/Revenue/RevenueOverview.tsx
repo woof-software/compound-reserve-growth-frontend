@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState
+} from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import RevenueOverviewUSD, {
@@ -113,10 +119,13 @@ const RevenueOverview = ({
   isLoading,
   isError
 }: RevenuePageProps) => {
-  const [sortType, setSortType] = useState<{
-    key: string;
-    type: string;
-  }>({ key: 'chain', type: 'asc' });
+  const [sortType, setSortType] = useReducer(
+    (prev, next) => ({
+      ...prev,
+      ...next
+    }),
+    { key: '', type: 'asc' }
+  );
 
   const [dateType, setDateType] = useState<DateType>('Rolling');
   const [period, setPeriod] = useState<Period>('7D');
@@ -262,25 +271,17 @@ const RevenueOverview = ({
     }
   }, []);
 
-  const onSortTypeByKeySelect = useCallback(
-    (value: string) => {
-      setSortType({
-        ...sortType,
-        key: value
-      });
-    },
-    [sortType]
-  );
+  const onKeySelect = useCallback((value: string) => {
+    setSortType({
+      key: value
+    });
+  }, []);
 
-  const onSortTypeByTypeSelect = useCallback(
-    (value: string) => {
-      setSortType({
-        ...sortType,
-        type: value
-      });
-    },
-    [sortType]
-  );
+  const onTypeSelect = useCallback((value: string) => {
+    setSortType({
+      type: value
+    });
+  }, []);
 
   useEffect(() => {
     if (dateType === 'To Date') {
@@ -316,7 +317,7 @@ const RevenueOverview = ({
         />
         <Button
           onClick={onSortOpen}
-          className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:hidden'
+          className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold lg:hidden'
         >
           <Icon
             name='sort-icon'
@@ -356,8 +357,8 @@ const RevenueOverview = ({
         onClose={onSortClose}
         sortType={sortType}
         columns={revenueOverviewColumns}
-        onTypeSelect={onSortTypeByTypeSelect}
-        onKeySelect={onSortTypeByKeySelect}
+        onTypeSelect={onTypeSelect}
+        onKeySelect={onKeySelect}
       />
     </Card>
   );

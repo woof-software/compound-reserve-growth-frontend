@@ -1,10 +1,10 @@
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Each from '@/shared/ui/Each/Each';
-import { Radio, RadioGroup } from '@/shared/ui/RadioButton/RadioButton';
+import { Radio } from '@/shared/ui/RadioButton/RadioButton';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 
@@ -38,7 +38,24 @@ const SortDrawer: FC<SortDrawerProps> = ({
 
   const [radioValue, setRadioValue] = useState<string>(sortType?.key || '');
 
-  const isApplyButtonDisabled = Boolean(radioValue) && Boolean(tabValue);
+  const isApplyButtonDisabled = useMemo(
+    () => Boolean(radioValue) && Boolean(tabValue),
+    [radioValue, tabValue]
+  );
+
+  const initApplyButtonValues = useMemo(() => {
+    return {
+      tabValue,
+      radioValue
+    };
+  }, [isOpen]);
+
+  const isApplyButtonChanged = useMemo(() => {
+    return (
+      initApplyButtonValues.tabValue !== tabValue ||
+      initApplyButtonValues.radioValue !== radioValue
+    );
+  }, [initApplyButtonValues, radioValue, tabValue]);
 
   const onTabsChange = useCallback((value: string) => {
     setTabValue(value);
@@ -52,7 +69,9 @@ const SortDrawer: FC<SortDrawerProps> = ({
     } else {
       onTypeSelect('desc');
     }
-  }, [radioValue, tabValue, onKeySelect, onTypeSelect]);
+
+    onClose();
+  }, [onKeySelect, radioValue, tabValue, onClose, onTypeSelect]);
 
   const onClearAll = useCallback(() => {
     setRadioValue('');
@@ -62,12 +81,14 @@ const SortDrawer: FC<SortDrawerProps> = ({
     onKeySelect('');
 
     onTypeSelect('');
-  }, [onKeySelect, onTypeSelect]);
+
+    onClose();
+  }, [onClose, onKeySelect, onTypeSelect]);
 
   return (
     <Drawer
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={onClearAll}
     >
       <Text
         size='17'
@@ -85,7 +106,7 @@ const SortDrawer: FC<SortDrawerProps> = ({
           onTabChange={onTabsChange}
         />
       </div>
-      <RadioGroup
+      <Radio.Group
         className='gap-1.5'
         direction='vertical'
         value={radioValue}
@@ -93,22 +114,34 @@ const SortDrawer: FC<SortDrawerProps> = ({
       >
         <Each
           data={columns}
-          render={(column) => (
-            <Radio
-              className='p-3'
+          render={(column, index) => (
+            <Radio.Item
+              key={index}
+              className={cn('p-3', {
+                'bg-secondary-38 rounded-lg': radioValue === column.accessorKey
+              })}
               value={column.accessorKey}
-              label={column.header}
+              label={
+                <Radio.Label
+                  className={cn({
+                    'text-secondary-28': radioValue === column.accessorKey
+                  })}
+                  label={column.header}
+                />
+              }
             />
           )}
         />
-      </RadioGroup>
+      </Radio.Group>
       <div className='mt-5 grid w-full gap-3'>
         <Button
+          disabled={!Boolean(isApplyButtonDisabled && isApplyButtonChanged)}
           onClick={onApply}
           className={cn(
             'bg-secondary-31 text-secondary-32 h-[45px] w-full rounded-lg text-[11px] leading-4 font-medium',
             {
-              'bg-success-13 text-white': isApplyButtonDisabled
+              'bg-success-13 text-white':
+                isApplyButtonDisabled && isApplyButtonChanged
             }
           )}
         >

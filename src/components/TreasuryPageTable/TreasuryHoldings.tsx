@@ -137,11 +137,16 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
           dataRows.map((row, index) => (
             <div
               key={row.symbol + index}
-              className='border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10'
+              className={cn(
+                'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                {
+                  'border-none': dataRows.length - 1 === index
+                }
+              )}
             >
               <div className='grid w-full'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -155,7 +160,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                     folder='collaterals'
                   />
                   <Text
-                    size='11'
+                    size='13'
                     lineHeight='21'
                     className='truncate'
                   >
@@ -165,7 +170,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
               </div>
               <div className='grid w-full'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -173,7 +178,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                   Chain
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
@@ -182,7 +187,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
               </div>
               <div className='grid w-full'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -190,7 +195,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                   Market
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
@@ -199,7 +204,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
               </div>
               <div className='grid w-full'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -207,7 +212,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                   QTY
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
@@ -216,7 +221,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
               </div>
               <div className='grid w-full'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -224,7 +229,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                   Value
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
@@ -233,7 +238,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
               </div>
               <div className='grid w-full'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -241,7 +246,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                   Price
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >
@@ -250,7 +255,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
               </div>
               <div className='grid w-full'>
                 <Text
-                  size='8'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -258,7 +263,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                   Source
                 </Text>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='21'
                   className='truncate'
                 >

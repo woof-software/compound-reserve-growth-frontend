@@ -22,7 +22,6 @@ import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
 interface SelectedOptionsState {
   chain: OptionType[];
@@ -440,7 +439,7 @@ const Filters = ({
 
   return (
     <>
-      <View.Tablet>
+      <div className='hidden lg:block'>
         <div className='hidden items-center justify-end gap-3 px-0 py-3 lg:flex'>
           <MultiSelect
             options={chainOptions || []}
@@ -516,7 +515,7 @@ const Filters = ({
           />
         </div>
         <div className='flex flex-col items-end justify-end gap-3 px-0 py-3 lg:hidden'>
-          <div className='z-[1] flex items-center gap-3'>
+          <div className='z-[3] flex items-center gap-3'>
             <MultiSelect
               options={chainOptions || []}
               value={selectedOptions.chain}
@@ -593,8 +592,8 @@ const Filters = ({
             />
           </div>
         </div>
-      </View.Tablet>
-      <View.Mobile>
+      </div>
+      <div className='block lg:hidden'>
         <div className='flex flex-col justify-end gap-3 px-5 py-3'>
           <div className='flex flex-wrap justify-end gap-3'>
             <TabsGroup
@@ -707,7 +706,7 @@ const Filters = ({
             </Button>
           </div>
         </Drawer>
-      </View.Mobile>
+      </div>
     </>
   );
 };

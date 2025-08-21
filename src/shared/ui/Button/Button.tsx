@@ -17,6 +17,7 @@ const Button: FC<ButtonProps> = ({
 }) => {
   return (
     <button
+      disabled={disabled}
       className={cn(
         'flex cursor-pointer items-center justify-center',
         { 'cursor-not-allowed': disabled },

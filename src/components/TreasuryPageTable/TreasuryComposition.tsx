@@ -123,18 +123,15 @@ const TreasuryComposition = ({
               <div
                 key={row.name + index}
                 className={cn(
-                  'border-secondary-23 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b p-5 md:gap-x-[63px]',
-                  {
-                    'border-t': index === 0
-                  }
+                  'border-secondary-23 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b p-5 md:gap-x-[63px]'
                 )}
               >
-                <div className='grid w-full max-w-[73px]'>
+                <div className='grid w-full max-w-[100px]'>
                   <Text
-                    size='8'
+                    size='11'
                     lineHeight='18'
                     weight='500'
-                    className='text-primary-14 min-w-[73px]'
+                    className='text-primary-14 min-w-[100px]'
                   >
                     Asset
                   </Text>
@@ -145,7 +142,7 @@ const TreasuryComposition = ({
                       folder={filterConfig[activeFilter].folder}
                     />
                     <Text
-                      size='11'
+                      size='13'
                       lineHeight='21'
                       className='truncate'
                     >
@@ -153,9 +150,9 @@ const TreasuryComposition = ({
                     </Text>
                   </div>
                 </div>
-                <div className='grid w-full max-w-[73px]'>
+                <div className='grid w-full max-w-[100px]'>
                   <Text
-                    size='8'
+                    size='11'
                     lineHeight='18'
                     weight='500'
                     className='text-primary-14'
@@ -163,7 +160,7 @@ const TreasuryComposition = ({
                     Total Balance USD
                   </Text>
                   <Text
-                    size='11'
+                    size='13'
                     lineHeight='21'
                     className='truncate'
                   >
@@ -174,17 +171,17 @@ const TreasuryComposition = ({
             ))}
             <div className='flex w-full items-center justify-between px-6 py-5'>
               <Text
-                size='8'
+                size='11'
                 lineHeight='18'
                 weight='500'
-                className='text-primary-14 min-w-[73px]'
+                className='text-primary-14 min-w-[100px]'
               >
                 Total Balance
               </Text>
               <Text
-                size='11'
+                size='13'
                 lineHeight='21'
-                className='min-w-[73px] truncate'
+                className='min-w-[100px] truncate'
               >
                 {formatPrice(totalBalance, 1)}
               </Text>

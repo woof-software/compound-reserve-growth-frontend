@@ -24,7 +24,6 @@ import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
 const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
 
@@ -406,7 +405,7 @@ const Filters = memo(
     const { isOpen, onOpenModal, onCloseModal } = useModal();
     return (
       <>
-        <View.Mobile>
+        <div className='block lg:hidden'>
           <div className='flex flex-col justify-end gap-3 px-5 py-3'>
             <div className='flex flex-wrap justify-end gap-3'>
               <TabsGroup
@@ -511,8 +510,8 @@ const Filters = memo(
               </Button>
             </div>
           </Drawer>
-        </View.Mobile>
-        <View.Tablet>
+        </div>
+        <div className='hidden lg:block'>
           <div className='hidden items-center justify-end gap-3 px-0 py-3 lg:flex'>
             <MultiSelect
               options={chainOptions || []}
@@ -668,7 +667,7 @@ const Filters = memo(
               />
             </div>
           </div>
-        </View.Tablet>
+        </div>
       </>
     );
   }

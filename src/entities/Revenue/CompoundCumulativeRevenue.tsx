@@ -20,7 +20,6 @@ import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
 interface FiltersProps {
   chainOptions: OptionType[];
@@ -358,7 +357,7 @@ const Filters = ({
 
   return (
     <>
-      <View.Tablet>
+      <div className='hidden lg:block'>
         <div className='hidden items-center justify-end gap-3 px-0 py-3 lg:flex'>
           <div className='flex gap-2'>
             <MultiSelect
@@ -471,8 +470,8 @@ const Filters = ({
             />
           </div>
         </div>
-      </View.Tablet>
-      <View.Mobile>
+      </div>
+      <div className='block lg:hidden'>
         <div className='flex flex-wrap justify-end gap-3 px-5 py-3'>
           <div className='flex flex-wrap items-center justify-end gap-2'>
             <TabsGroup
@@ -565,7 +564,7 @@ const Filters = ({
             </div>
           </Drawer>
         </div>
-      </View.Mobile>
+      </div>
     </>
   );
 };
