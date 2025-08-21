@@ -2,10 +2,8 @@ import React, { memo, useCallback, useMemo, useReducer } from 'react';
 
 import LineChart from '@/components/Charts/Line/Line';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
-import {
-  MultiSelect,
-  MultiSelectDrawer
-} from '@/components/MultiSelect/MultiSelect';
+import Filter from '@/components/Filter/Filter';
+import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import SingleDropdown, {
   SingleDrawer
@@ -19,7 +17,6 @@ import { TokenData } from '@/shared/types/Treasury/types';
 import { BarSize, OptionType, TimeRange } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
-import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
@@ -403,6 +400,50 @@ const Filters = memo(
     onClearAll
   }: FiltersProps) => {
     const { isOpen, onOpenModal, onCloseModal } = useModal();
+
+    const filterOptions = useMemo(() => {
+      const chainFilterOptions = {
+        id: 'chain',
+        placeholder: 'Chain',
+        total: selectedOptions.chain.length,
+        selectedOptions: selectedOptions.chain,
+        options: chainOptions || [],
+        onChange: onSelectChain
+      };
+
+      const marketFilterOptions = {
+        id: 'market',
+        placeholder: 'Market',
+        total: selectedOptions.deployment.length,
+        selectedOptions: selectedOptions.deployment,
+        options: deploymentOptionsFilter || [],
+        onChange: onSelectMarket
+      };
+
+      const assetTypeFilterOptions = {
+        id: 'assetType',
+        placeholder: 'Asset Type',
+        total: selectedOptions.assetType.length,
+        selectedOptions: selectedOptions.assetType,
+        options:
+          assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+          [],
+        onChange: onSelectAssetType
+      };
+
+      return [chainFilterOptions, marketFilterOptions, assetTypeFilterOptions];
+    }, [
+      assetTypeOptions,
+      chainOptions,
+      deploymentOptionsFilter,
+      onSelectAssetType,
+      onSelectChain,
+      onSelectMarket,
+      selectedOptions.assetType,
+      selectedOptions.chain,
+      selectedOptions.deployment
+    ]);
+
     return (
       <>
         <div className='block lg:hidden'>
@@ -461,58 +502,15 @@ const Filters = memo(
               />
             </div>
           </div>
-          <Drawer
+          <Filter
             isOpen={isOpen}
+            filterOptions={filterOptions}
             onClose={onCloseModal}
-          >
-            <Text
-              size='17'
-              weight='700'
-              lineHeight='140'
-              align='center'
-              className='mb-8 w-full'
-            >
-              Filters
-            </Text>
-            <div className='grid gap-3 px-2'>
-              <MultiSelectDrawer
-                options={chainOptions || []}
-                value={selectedOptions.chain}
-                onChange={onSelectChain}
-                placeholder='Chain'
-                disabled={isLoading}
-              />
-              <MultiSelectDrawer
-                options={deploymentOptionsFilter}
-                value={selectedOptions.deployment}
-                onChange={onSelectMarket}
-                placeholder='Market'
-                disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-              />
-              <MultiSelectDrawer
-                options={
-                  assetTypeOptions?.sort((a, b) =>
-                    a.label.localeCompare(b.label)
-                  ) || []
-                }
-                value={selectedOptions.assetType}
-                onChange={onSelectAssetType}
-                placeholder='Asset Type'
-                disabled={isLoading}
-              />
-            </div>
-            <div className='w-full px-2'>
-              <Button
-                className='bg-secondary-14 mx-2 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
-                onClick={onClearAll}
-              >
-                Clear Filters
-              </Button>
-            </div>
-          </Drawer>
+            onClearAll={onClearAll}
+          />
         </div>
         <div className='hidden lg:block'>
-          <div className='hidden items-center justify-end gap-3 px-0 py-3 lg:flex'>
+          <div className='flex items-center justify-end gap-3 px-0 py-3'>
             <MultiSelect
               options={chainOptions || []}
               value={selectedOptions.chain}
@@ -588,7 +586,7 @@ const Filters = memo(
               filename={csvFilename}
             />
           </div>
-          <div className='flex flex-col items-end justify-end gap-3 px-0 py-3 lg:hidden'>
+          <div className='flex flex-col items-end justify-end gap-3 px-0 py-3'>
             <div className='flex items-center gap-3'>
               <TabsGroup
                 tabs={['D', 'W', 'M']}

@@ -85,6 +85,7 @@
   --secondary-38: #F0F2F5;
   --secondary-39: #17212B26;
   --secondary-40: #CACED3;
+  --secondary-41: #516070;
 
   /*=======================*/
   /* Success Colors */
@@ -161,6 +162,7 @@
   --secondary-38: #151E27;
   --secondary-39: #FFFFFF26;
   --secondary-40: #0D131A;
+  --secondary-41: #FFFFFF;
 
   /*=======================*/
   /* Success Colors */
@@ -245,6 +247,7 @@
   --color-secondary-38: var(--secondary-38);
   --color-secondary-39: var(--secondary-39);
   --color-secondary-40: var(--secondary-40);
+  --color-secondary-41: var(--secondary-41);
 
   /*=======================*/
   /* Success Colors */
