@@ -4,6 +4,7 @@ import {
   PropsWithChildren,
   ReactNode,
   RefObject,
+  useEffect,
   useRef,
   useState
 } from 'react';
@@ -110,6 +111,22 @@ const Dropdown: FC<DropdownProps> = ({
       onToggle();
     }
   };
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open, onClose]);
 
   useClickOutside(containerRef as RefObject<HTMLDivElement>, onClose);
 
