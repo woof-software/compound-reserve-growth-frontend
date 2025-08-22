@@ -1,164 +1,269 @@
-import { FC, memo, RefObject, useRef } from 'react';
+import React, { ChangeEvent, FC, useCallback, useMemo, useState } from 'react';
 
-import { useClickOutside } from '@/shared/hooks/useClickOutside';
-import { useModal } from '@/shared/hooks/useModal';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import Each from '@/shared/ui/Each/Each';
-import { Select } from '@/shared/ui/Select/Select';
+import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-import FilterIcon from '@/assets/svg/filter-icon.svg';
-
-export type SelectedFiltersType = {
+type FilterOptions = {
   id: string;
-  selectedItems: string[];
-};
 
-type FilterListItem = {
-  id: string;
-  title: string;
   placeholder: string;
-  options: string[];
+
+  total: number;
+
+  selectedOptions: OptionType[];
+
+  options: OptionType[];
+
+  onChange?: (selectedOptions: OptionType[]) => void;
 };
 
 interface FilterProps {
-  activeFilters: number;
-  filtersList: FilterListItem[];
-  selectedItems: SelectedFiltersType[];
-  onFilterItemSelect: (filterId: string, item: string) => void;
-  onClear: () => void;
-  onApply: () => void;
-  onOutsideClick: () => void;
-  disabled?: boolean;
+  isOpen: boolean;
+
+  filterOptions: FilterOptions[];
+
+  onClose: () => void;
+
+  onClearAll: () => void;
 }
 
-const Filter: FC<FilterProps> = memo(
-  ({
-    activeFilters,
-    filtersList,
-    selectedItems,
-    onFilterItemSelect,
-    onApply,
-    onClear,
-    onOutsideClick: onOutside,
-    disabled
-  }) => {
-    const { isOpen, onCloseModal, onToggleModal } = useModal();
+const getKey = (f: FilterOptions) => f.id ?? f.placeholder;
 
-    const containerRef = useRef<HTMLDivElement>(null);
+const Filter: FC<FilterProps> = ({
+  isOpen,
+  filterOptions,
+  onClose,
+  onClearAll
+}) => {
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
-    const onClearClick = () => {
-      onClear();
+  const [searchValue, setSearchValue] = useState('');
 
-      onCloseModal();
-    };
-
-    const onApplyClick = () => {
-      onApply();
-
-      onCloseModal();
-    };
-
-    const onOutsideClick = () => {
-      if (isOpen) {
-        onOutside();
-
-        onCloseModal();
-      }
-    };
-
-    useClickOutside(containerRef as RefObject<HTMLDivElement>, onOutsideClick);
-
+  const activeFilter = useMemo<FilterOptions | null>(() => {
+    if (!filterOptions.length) return null;
     return (
-      <div
-        ref={containerRef}
-        className={cn('relative z-10', { 'pointer-events-none': disabled })}
-      >
-        <div
-          className={cn(
-            'hover:bg-secondary-11 flex max-w-[90px] cursor-pointer items-center gap-1.5 rounded-sm px-2 py-1',
-            {
-              'bg-secondary-11': isOpen
-            }
-          )}
-          onClick={onToggleModal}
-        >
-          <FilterIcon />
-          <Text
-            className='text-primary-14'
-            size='11'
-            weight='500'
-            lineHeight='16'
-          >
-            Filter
-          </Text>
-          <View.Condition if={Boolean(activeFilters)}>
-            <Text
-              tag='span'
-              className='bg-secondary-17 text-primary-14 h-5 min-h-5 w-5 min-w-5 rounded-full p-0.5'
-              size='11'
-              weight='500'
-              lineHeight='16'
-              align='center'
-            >
-              {activeFilters}
-            </Text>
-          </View.Condition>
-        </div>
-        <View.Condition if={isOpen}>
-          <div className='bg-primary-15 shadow-12 border-secondary-18 absolute top-9 right-0 grid min-w-[600px] gap-5 rounded-lg border border-solid px-8 py-10'>
-            <Text
-              className='text-secondary-10'
-              size='17'
-              weight='600'
-              lineHeight='20'
-            >
-              Filter
-            </Text>
-            <div className='grid gap-5'>
-              <Each
-                data={filtersList}
-                render={(filterItem, index) => {
-                  const selectedFilter = selectedItems.find(
-                    (el) => el.id === filterItem.id
-                  );
-
-                  return (
-                    <Select
-                      key={index}
-                      filterId={filterItem.id}
-                      {...filterItem}
-                      selectedItems={selectedFilter?.selectedItems || []}
-                      onItemSelect={onFilterItemSelect}
-                      onItemDelete={onFilterItemSelect}
-                    />
-                  );
-                }}
-              />
-            </div>
-            <div className='flex w-full justify-end'>
-              <div className='flex gap-2'>
-                <Button
-                  className='h-8 w-[100px] cursor-pointer rounded-[100px] p-2 text-[11px] leading-4 font-medium'
-                  onClick={onClearClick}
-                >
-                  Clear All
-                </Button>
-                <Button
-                  className='bg-secondary-16 text-secondary-10 h-8 w-[100px] cursor-pointer rounded-[100px] p-2 text-[11px] leading-4 font-medium'
-                  onClick={onApplyClick}
-                >
-                  Apply
-                </Button>
-              </div>
-            </div>
-          </div>
-        </View.Condition>
-      </div>
+      filterOptions.find((f) => getKey(f) === selectedKey) ?? filterOptions[0]
     );
-  }
-);
+  }, [filterOptions, selectedKey]);
+
+  const filteredOptions = useMemo(
+    () =>
+      activeFilter
+        ? activeFilter?.options.filter((option) =>
+            option.label.toLowerCase().includes(searchValue.toLowerCase())
+          )
+        : [],
+    [activeFilter, searchValue]
+  );
+
+  const onChangeSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(e.target.value);
+  }, []);
+
+  const onSelectOptionInFilter = useCallback(
+    (optionToToggle: OptionType) => {
+      if (!activeFilter?.onChange) return;
+
+      const isSelected = activeFilter?.selectedOptions.some(
+        (v) => v.id === optionToToggle.id
+      );
+
+      const newSelectedValue = isSelected
+        ? activeFilter?.selectedOptions.filter(
+            (v) => v.id !== optionToToggle.id
+          )
+        : [...(activeFilter?.selectedOptions || []), optionToToggle];
+
+      activeFilter?.onChange(newSelectedValue);
+    },
+    [activeFilter]
+  );
+
+  const onSelectFilter = useCallback((selectedFilter: FilterOptions) => {
+    setSelectedKey(getKey(selectedFilter));
+
+    setSearchValue('');
+  }, []);
+
+  const onSelectedFilterClose = useCallback(() => {
+    setSearchValue('');
+
+    setSelectedKey(null);
+  }, []);
+
+  const onDrawerClose = useCallback(() => {
+    onClose();
+
+    setSearchValue('');
+
+    setSelectedKey(null);
+  }, [onClose]);
+
+  return (
+    <Drawer
+      isOpen={isOpen}
+      onClose={onDrawerClose}
+    >
+      <View.Condition if={!Boolean(selectedKey)}>
+        <Text
+          size='17'
+          weight='700'
+          lineHeight='140'
+          align='center'
+          className='mb-5 w-full'
+        >
+          Filter
+        </Text>
+        <div className='grid gap-3'>
+          <Each
+            data={filterOptions}
+            render={(option, index) => (
+              <div
+                key={index}
+                className='flex h-[42px] cursor-pointer items-center justify-between px-3 py-2.5'
+                onClick={() => onSelectFilter(option)}
+              >
+                <div className='flex items-center gap-1.5'>
+                  <Icon
+                    name='plus'
+                    className='h-2.5 w-2.5'
+                    color={cn('color-primary-14', {
+                      'color-secondary-41': Boolean(option.total)
+                    })}
+                  />
+                  <Text
+                    size='14'
+                    weight='500'
+                    className={cn('text-primary-14 text-sm font-medium', {
+                      'text-secondary-41': Boolean(option.total)
+                    })}
+                  >
+                    {option.placeholder}
+                  </Text>
+                </div>
+                <View.Condition if={Boolean(option.total)}>
+                  <div className='bg-secondary-22 flex h-6 w-6 items-center justify-center rounded-full'>
+                    <Text
+                      size='11'
+                      weight='500'
+                      className='text-primary-14 leading-none tabular-nums'
+                    >
+                      {option.total}
+                    </Text>
+                  </div>
+                </View.Condition>
+              </div>
+            )}
+          />
+        </div>
+        <div className='w-full px-2'>
+          <Button
+            className='text-primary-14 mx-2 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
+            onClick={onClearAll}
+          >
+            Clear Filters
+          </Button>
+        </div>
+      </View.Condition>
+      <View.Condition if={Boolean(selectedKey)}>
+        <div className='mb-8 flex items-center'>
+          <Button onClick={onSelectedFilterClose}>
+            <Icon
+              name='arrow-line'
+              className='h-6 w-6'
+            />
+          </Button>
+          <Text
+            size='17'
+            weight='700'
+            lineHeight='140'
+            align='center'
+            className='w-[calc(100%-24px)]'
+          >
+            {activeFilter?.placeholder}
+          </Text>
+        </div>
+        <View.Condition
+          if={Boolean(activeFilter && activeFilter?.options?.length > 5)}
+        >
+          <div
+            className={cn(
+              'outline-secondary-19 rounded-lg py-2 pr-5 pl-3 outline',
+              {
+                'outline-red-11':
+                  !Boolean(filteredOptions?.length) &&
+                  Boolean(searchValue.length)
+              }
+            )}
+          >
+            <input
+              className='placeholder:text-secondary-21 h-[19px] w-full focus-visible:outline-none'
+              placeholder='Search'
+              value={searchValue}
+              onChange={onChangeSearch}
+            />
+          </div>
+          <View.Condition if={Boolean(!filteredOptions?.length)}>
+            <div className='mt-3'>
+              <Text
+                size='12'
+                weight='400'
+                lineHeight='100'
+                className='text-red-11'
+              >
+                No results found
+              </Text>
+            </div>
+          </View.Condition>
+        </View.Condition>
+        <div className='hide-scrollbar mt-8 max-h-[450px] overflow-y-auto'>
+          <Each
+            data={filteredOptions}
+            render={(option, index) => {
+              const isSelected = activeFilter?.selectedOptions.some(
+                (v) => v.id === option.id
+              );
+
+              return (
+                <div
+                  key={index}
+                  className={cn(
+                    'hover:bg-secondary-12 flex cursor-pointer items-center justify-between rounded-lg px-2 py-3'
+                  )}
+                  onClick={() => onSelectOptionInFilter(option)}
+                >
+                  <div className='flex items-end gap-1'>
+                    <span
+                      className={cn(
+                        'text-primary-14 rounded-sm text-sm font-medium',
+                        {
+                          'text-secondary-10': isSelected
+                        }
+                      )}
+                    >
+                      {option.label}
+                    </span>
+                  </div>
+                  <View.Condition if={Boolean(isSelected)}>
+                    <Icon
+                      name='check-stroke'
+                      className='h-4 w-4'
+                    />
+                  </View.Condition>
+                </div>
+              );
+            }}
+          />
+        </div>
+      </View.Condition>
+    </Drawer>
+  );
+};
 
 export default Filter;

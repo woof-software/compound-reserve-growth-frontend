@@ -2,10 +2,8 @@ import React, { useCallback, useMemo, useReducer } from 'react';
 
 import CompoundRevenue from '@/components/Charts/CompoundRevenue/CompoundRevenue';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
-import {
-  MultiSelect,
-  MultiSelectDrawer
-} from '@/components/MultiSelect/MultiSelect';
+import Filter from '@/components/Filter/Filter';
+import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
@@ -15,10 +13,8 @@ import { capitalizeFirstLetter, ChartDataItem } from '@/shared/lib/utils/utils';
 import { BarSize, OptionType, TimeRange } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
-import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
 interface PreprocessedItem {
@@ -468,6 +464,61 @@ const Filters = ({
 }: FiltersProps) => {
   const { isOpen, onOpenModal, onCloseModal } = useModal();
 
+  const filterOptions = useMemo(() => {
+    const chainFilterOptions = {
+      id: 'chain',
+      placeholder: 'Chain',
+      total: selectedOptions.chain.length,
+      selectedOptions: selectedOptions.chain,
+      options: chainOptions || [],
+      onChange: onSelectChain
+    };
+
+    const marketFilterOptions = {
+      id: 'market',
+      placeholder: 'Market',
+      total: selectedOptions.deployment.length,
+      selectedOptions: selectedOptions.deployment,
+      options: deploymentOptionsFilter || [],
+      onChange: onSelectMarket
+    };
+
+    const sourceFilterOptions = {
+      id: 'source',
+      placeholder: 'Source',
+      total: selectedOptions.source.length,
+      selectedOptions: selectedOptions.source,
+      options:
+        sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
+      onChange: onSelectSource
+    };
+
+    const symbolFilterOptions = {
+      id: 'reserveSymbol',
+      placeholder: 'Reserve Symbols',
+      total: selectedOptions.symbol.length,
+      selectedOptions: selectedOptions.symbol,
+      options:
+        symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
+      onChange: onSelectSymbol
+    };
+
+    return [
+      chainFilterOptions,
+      marketFilterOptions,
+      sourceFilterOptions,
+      symbolFilterOptions
+    ];
+  }, [
+    sourceOptions,
+    chainOptions,
+    deploymentOptionsFilter,
+    onSelectSource,
+    onSelectChain,
+    onSelectMarket,
+    selectedOptions
+  ]);
+
   return (
     <>
       <div className='hidden lg:block'>
@@ -615,64 +666,12 @@ const Filters = ({
             />
           </div>
         </div>
-        <Drawer
+        <Filter
           isOpen={isOpen}
+          filterOptions={filterOptions}
           onClose={onCloseModal}
-        >
-          <Text
-            size='17'
-            weight='700'
-            lineHeight='140'
-            align='center'
-            className='mb-8 w-full'
-          >
-            Filters
-          </Text>
-          <div className='grid gap-3 px-2'>
-            <MultiSelectDrawer
-              options={chainOptions || []}
-              value={selectedOptions.chain}
-              onChange={onSelectChain}
-              placeholder='Chain'
-              disabled={isLoading}
-            />
-            <MultiSelectDrawer
-              options={deploymentOptionsFilter || []}
-              value={selectedOptions.deployment}
-              onChange={onSelectMarket}
-              placeholder='Market'
-              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-            />
-            <MultiSelectDrawer
-              options={
-                sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-                []
-              }
-              value={selectedOptions.source}
-              onChange={onSelectSource}
-              placeholder='Source'
-              disabled={isLoading}
-            />
-            <MultiSelectDrawer
-              options={
-                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-                []
-              }
-              value={selectedOptions.symbol}
-              onChange={onSelectSymbol}
-              placeholder='Reserve Symbols'
-              disabled={isLoading}
-            />
-          </div>
-          <div className='w-full px-2'>
-            <Button
-              className='bg-secondary-14 mx-2 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
-              onClick={onClearAll}
-            >
-              Clear Filters
-            </Button>
-          </div>
-        </Drawer>
+          onClearAll={onClearAll}
+        />
       </div>
     </>
   );

@@ -32,8 +32,11 @@ const DrawerContent = memo(
   }: DrawerProps) => {
     const { Spring, Gesture } = useAnimationLibs();
 
-    const DURATION = 280;
-    const EASE = Spring.easings.easeOutCubic;
+    const DURATION_OPEN = 250;
+    const DURATION_CLOSE = 150;
+
+    const EASE_OPEN = Spring.easings.easeOutCubic;
+    const EASE_CLOSE = Spring.easings.easeInCubic;
 
     const [{ y }, api] = Spring.useSpring(() => ({ y: 0 }));
 
@@ -61,7 +64,10 @@ const DrawerContent = memo(
     const animateOpen = useCallback(() => {
       closingRef.current = false;
 
-      api.start({ y: 0, config: { duration: DURATION, easing: EASE } });
+      api.start({
+        y: 0,
+        config: { duration: DURATION_OPEN, easing: EASE_OPEN }
+      });
     }, [api]);
 
     const animateClose = useCallback(
@@ -74,10 +80,12 @@ const DrawerContent = memo(
 
         api.start({
           y: h,
-          config: { duration: DURATION, easing: EASE },
+          config: { duration: DURATION_CLOSE, easing: EASE_CLOSE },
           onResolve: () => {
             setMounted(false);
+
             document.body.classList.remove('disable-scroll-vertical');
+
             if (notify) onClose?.();
             closingRef.current = false;
           }

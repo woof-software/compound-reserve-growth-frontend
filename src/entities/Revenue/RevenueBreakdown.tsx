@@ -1,10 +1,8 @@
 import React, { useCallback, useMemo, useReducer } from 'react';
 
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
-import {
-  MultiSelect,
-  MultiSelectDrawer
-} from '@/components/MultiSelect/MultiSelect';
+import Filter from '@/components/Filter/Filter';
+import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import RevenueBreakdown, {
   FormattedRevenueData
@@ -24,7 +22,6 @@ import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
-import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -319,6 +316,63 @@ const RevenueBreakDownBlock = ({
       ? 'No data for selected filters'
       : 'No data available';
 
+  const filterOptions = useMemo(() => {
+    const chainFilterOptions = {
+      id: 'chain',
+      placeholder: 'Chain',
+      total: selectedOptions.chain.length,
+      selectedOptions: selectedOptions.chain,
+      options: chainOptions || [],
+      onChange: onSelectChain
+    };
+
+    const marketFilterOptions = {
+      id: 'market',
+      placeholder: 'Market',
+      total: selectedOptions.market.length,
+      selectedOptions: selectedOptions.market,
+      options: marketOptions || [],
+      onChange: onSelectMarket
+    };
+
+    const sourceFilterOptions = {
+      id: 'source',
+      placeholder: 'Source',
+      total: selectedOptions.source.length,
+      selectedOptions: selectedOptions.source,
+      options:
+        sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
+      onChange: onSelectSource
+    };
+
+    const symbolFilterOptions = {
+      id: 'reserveSymbol',
+      placeholder: 'Reserve Symbols',
+      total: selectedOptions.symbol.length,
+      selectedOptions: selectedOptions.symbol,
+      options:
+        symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
+      onChange: onSelectSymbol
+    };
+
+    return [
+      chainFilterOptions,
+      marketFilterOptions,
+      sourceFilterOptions,
+      symbolFilterOptions
+    ];
+  }, [
+    chainOptions,
+    marketOptions,
+    onSelectChain,
+    onSelectMarket,
+    onSelectSource,
+    onSelectSymbol,
+    selectedOptions,
+    sourceOptions,
+    symbolOptions
+  ]);
+
   return (
     <Card
       title='Revenue Breakdown'
@@ -380,64 +434,6 @@ const RevenueBreakDownBlock = ({
             />
           </div>
         </div>
-        <Drawer
-          isOpen={isFilterOpen}
-          onClose={onFilterClose}
-        >
-          <Text
-            size='17'
-            weight='700'
-            lineHeight='140'
-            align='center'
-            className='mb-8 w-full'
-          >
-            Filters
-          </Text>
-          <div className='grid gap-3 px-2'>
-            <MultiSelectDrawer
-              options={chainOptions || []}
-              value={selectedOptions.chain}
-              onChange={onSelectChain}
-              placeholder='Chain'
-              disabled={isLoading}
-            />
-            <MultiSelectDrawer
-              options={marketOptions || []}
-              value={selectedOptions.market}
-              onChange={onSelectMarket}
-              placeholder='Market'
-              disabled={isLoading || !Boolean(marketOptions.length)}
-            />
-            <MultiSelectDrawer
-              options={
-                sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-                []
-              }
-              value={selectedOptions.source}
-              onChange={onSelectSource}
-              placeholder='Source'
-              disabled={isLoading}
-            />
-            <MultiSelectDrawer
-              options={
-                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-                []
-              }
-              value={selectedOptions.symbol}
-              onChange={onSelectSymbol}
-              placeholder='Reserve Symbols'
-              disabled={isLoading}
-            />
-          </div>
-          <div className='w-full px-2'>
-            <Button
-              className='bg-secondary-14 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
-              onClick={handleResetFilters}
-            >
-              Clear Filters
-            </Button>
-          </div>
-        </Drawer>
       </View.Mobile>
       <View.Tablet>
         <div className='flex justify-end gap-3 px-10 py-3 lg:px-0'>
@@ -529,6 +525,12 @@ const RevenueBreakDownBlock = ({
         onClose={onSortClose}
         onKeySelect={onKeySelect}
         onTypeSelect={onTypeSelect}
+      />
+      <Filter
+        isOpen={isFilterOpen}
+        filterOptions={filterOptions}
+        onClose={onFilterClose}
+        onClearAll={handleResetFilters}
       />
     </Card>
   );

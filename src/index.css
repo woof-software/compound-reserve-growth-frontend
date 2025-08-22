@@ -74,7 +74,7 @@
   --secondary-26: #AFBBC780;
   --secondary-27: #F0F2F5;
   --secondary-28: #516070;
-  --secondary-29: #FFFFFF;
+  --secondary-29: #17212B26;
   --secondary-30: #AFBBC780;
   --secondary-31: #F0F2F5;
   --secondary-32: #BABBCB;
@@ -83,6 +83,9 @@
   --secondary-36: #FFFFFF;
   --secondary-37: #CCCCCC;
   --secondary-38: #F0F2F5;
+  --secondary-39: #17212B26;
+  --secondary-40: #CACED3;
+  --secondary-41: #516070;
 
   /*=======================*/
   /* Success Colors */
@@ -157,6 +160,9 @@
   --secondary-36: #1D2833;
   --secondary-37: #7A8A99;
   --secondary-38: #151E27;
+  --secondary-39: #FFFFFF26;
+  --secondary-40: #0D131A;
+  --secondary-41: #FFFFFF;
 
   /*=======================*/
   /* Success Colors */
@@ -183,6 +189,8 @@
   --shadow-12: 0px 8px 20px 0px #0D131A0A, 0px 2px 12px 0px #0D131A05;
   --shadow-13: inset 0 0 0 0.25px #F9FAFB26;
   --shadow-14: inset 0 0 0 0.25px #0C131A26;
+
+  --shadow-15: inset 0 0px 0 0.25px var(--secondary-39);
 
   /*=======================*/
   /* Layout */
@@ -237,6 +245,9 @@
   --color-secondary-36: var(--secondary-36);
   --color-secondary-37: var(--secondary-37);
   --color-secondary-38: var(--secondary-38);
+  --color-secondary-39: var(--secondary-39);
+  --color-secondary-40: var(--secondary-40);
+  --color-secondary-41: var(--secondary-41);
 
   /*=======================*/
   /* Success Colors */
@@ -630,4 +641,20 @@ html, body {
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
   display: none;                 /* Chrome, Safari, Opera */
+}
+
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-primary-10;
+
+  border-radius: 18px;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary-12;
+
+  border-radius: 18px;
 }
