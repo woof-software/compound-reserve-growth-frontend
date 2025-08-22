@@ -69,7 +69,7 @@ const RevenueMetrics = ({
               container: 'max-w-full min-w-64 flex-1 basis-64',
               loading: 'h-[317px]',
               header: 'px-5 py-4',
-              content: 'flex items-center'
+              content: 'flex items-center px-5 py-10 md:p-10'
             }}
             title={!isPlaceholder ? `${year} Revenue` : undefined}
           >
