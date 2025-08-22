@@ -356,7 +356,7 @@ const CompoundFeeRevenueRecieved = ({
 
   return (
     <Card
-      title='Compound Fee Revenue Recieved'
+      title='Compound Fee Revenue Received'
       id='compound-fee-revenue-received'
       isLoading={isLoading}
       isError={isError}
