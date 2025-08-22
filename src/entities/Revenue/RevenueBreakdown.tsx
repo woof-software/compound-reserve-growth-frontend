@@ -385,9 +385,94 @@ const RevenueBreakDownBlock = ({
         content: 'flex flex-col gap-3 px-0 pt-0 pb-0 md:pb-10 lg:px-10'
       }}
     >
-      <View.Mobile>
-        <div className='flex flex-col items-end gap-3 px-5 py-3'>
-          <div className='flex w-fit flex-wrap items-center justify-end gap-3'>
+      <div className='flex flex-col items-end gap-3 px-5 py-3 lg:hidden'>
+        <div className='flex w-fit flex-wrap items-center justify-end gap-3'>
+          <Text
+            tag='span'
+            size='11'
+            weight='600'
+            lineHeight='16'
+            className='text-primary-14'
+          >
+            Group by
+          </Text>
+          <SingleDrawer
+            options={yearOptions}
+            isOpen={yearOpen}
+            selectedValue={selectedYear?.[0] || yearOptions[0] || ''}
+            onOpen={openYear}
+            onClose={closeYear}
+            onSelect={selectYear}
+            triggerContentClassName='p-[5px]'
+            disabled={isLoading}
+          />
+        </div>
+        <div className='flex flex-wrap items-center justify-end gap-3'>
+          <Button
+            onClick={onFilterOpen}
+            className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
+          >
+            <Icon
+              name='filters'
+              className='h-[14px] w-[14px]'
+            />
+            Filters
+          </Button>
+          <Button
+            onClick={onSortOpen}
+            className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
+          >
+            <Icon
+              name='sort-icon'
+              className='h-[14px] w-[14px]'
+            />
+            Sort
+          </Button>
+          <CSVDownloadButton
+            data={tableData}
+            filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
+          />
+        </div>
+      </div>
+      <div className='hidden justify-end gap-3 px-10 py-3 lg:flex lg:px-0'>
+        <div className='flex items-center gap-5'>
+          <div className='flex items-center gap-1'>
+            <MultiSelect
+              options={chainOptions || []}
+              value={selectedOptions.chain}
+              onChange={onSelectChain}
+              placeholder='Chain'
+              disabled={isLoading}
+            />
+            <MultiSelect
+              options={marketOptions || []}
+              value={selectedOptions.market}
+              onChange={onSelectMarket}
+              placeholder='Market'
+              disabled={isLoading || !Boolean(marketOptions.length)}
+            />
+            <MultiSelect
+              options={
+                sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+                []
+              }
+              value={selectedOptions.source}
+              onChange={onSelectSource}
+              placeholder='Source'
+              disabled={isLoading}
+            />
+            <MultiSelect
+              options={
+                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+                []
+              }
+              value={selectedOptions.symbol}
+              onChange={onSelectSymbol}
+              placeholder='Reserve Symbols'
+              disabled={isLoading}
+            />
+          </div>
+          <div className='flex items-center gap-1'>
             <Text
               tag='span'
               size='11'
@@ -397,115 +482,24 @@ const RevenueBreakDownBlock = ({
             >
               Group by
             </Text>
-            <SingleDrawer
+            <SingleDropdown
               options={yearOptions}
               isOpen={yearOpen}
               selectedValue={selectedYear?.[0] || yearOptions[0] || ''}
               onOpen={openYear}
               onClose={closeYear}
-              onSelect={selectYear}
+              onSelect={selectYearClose}
+              // contentClassName='p-[5px]'
               triggerContentClassName='p-[5px]'
               disabled={isLoading}
             />
           </div>
-          <div className='flex flex-wrap items-center justify-end gap-3'>
-            <Button
-              onClick={onFilterOpen}
-              className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
-            >
-              <Icon
-                name='filters'
-                className='h-[14px] w-[14px]'
-              />
-              Filters
-            </Button>
-            <Button
-              onClick={onSortOpen}
-              className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
-            >
-              <Icon
-                name='sort-icon'
-                className='h-[14px] w-[14px]'
-              />
-              Sort
-            </Button>
-            <CSVDownloadButton
-              data={tableData}
-              filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
-            />
-          </div>
         </div>
-      </View.Mobile>
-      <View.Tablet>
-        <div className='flex justify-end gap-3 px-10 py-3 lg:px-0'>
-          <div className='flex items-center gap-5'>
-            <div className='flex items-center gap-1'>
-              <MultiSelect
-                options={chainOptions || []}
-                value={selectedOptions.chain}
-                onChange={onSelectChain}
-                placeholder='Chain'
-                disabled={isLoading}
-              />
-              <MultiSelect
-                options={marketOptions || []}
-                value={selectedOptions.market}
-                onChange={onSelectMarket}
-                placeholder='Market'
-                disabled={isLoading || !Boolean(marketOptions.length)}
-              />
-              <MultiSelect
-                options={
-                  sourceOptions?.sort((a, b) =>
-                    a.label.localeCompare(b.label)
-                  ) || []
-                }
-                value={selectedOptions.source}
-                onChange={onSelectSource}
-                placeholder='Source'
-                disabled={isLoading}
-              />
-              <MultiSelect
-                options={
-                  symbolOptions?.sort((a, b) =>
-                    a.label.localeCompare(b.label)
-                  ) || []
-                }
-                value={selectedOptions.symbol}
-                onChange={onSelectSymbol}
-                placeholder='Reserve Symbols'
-                disabled={isLoading}
-              />
-            </div>
-            <div className='flex items-center gap-1'>
-              <Text
-                tag='span'
-                size='11'
-                weight='600'
-                lineHeight='16'
-                className='text-primary-14'
-              >
-                Group by
-              </Text>
-              <SingleDropdown
-                options={yearOptions}
-                isOpen={yearOpen}
-                selectedValue={selectedYear?.[0] || yearOptions[0] || ''}
-                onOpen={openYear}
-                onClose={closeYear}
-                onSelect={selectYearClose}
-                // contentClassName='p-[5px]'
-                triggerContentClassName='p-[5px]'
-                disabled={isLoading}
-              />
-            </div>
-          </div>
-          <CSVDownloadButton
-            data={tableData}
-            filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
-          />
-        </div>
-      </View.Tablet>
+        <CSVDownloadButton
+          data={tableData}
+          filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
+        />
+      </div>
       <View.Condition if={hasData}>
         <RevenueBreakdown
           data={tableData}
