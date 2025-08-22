@@ -68,7 +68,7 @@ const TreasuryPage = () => {
           allocation, strategic holdings, and investment returns.
         </Text>
       </div>
-      <div className='flex flex-col gap-2.5 md:gap-5'>
+      <div className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
         <MetricBlock
           isLoading={isLoading}
           data={{

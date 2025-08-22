@@ -284,7 +284,12 @@ const CompoundFeeRevenueByChain = ({
               className='h-6 w-6'
               folder='network'
             />
-            <Text size='13'>{capitalizeFirstLetter(row.original.chain)}</Text>
+            <Text
+              size='13'
+              weight='500'
+            >
+              {capitalizeFirstLetter(row.original.chain)}
+            </Text>
           </div>
         )
       },

@@ -47,7 +47,14 @@ const columns: ExtendedColumnDef<CurrentInitiativeRow>[] = [
         );
       }
 
-      return <Text size='13'>{initiative}</Text>;
+      return (
+        <Text
+          size='13'
+          weight='500'
+        >
+          {initiative}
+        </Text>
+      );
     }
   },
   {

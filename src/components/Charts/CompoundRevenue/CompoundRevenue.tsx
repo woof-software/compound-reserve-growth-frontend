@@ -118,8 +118,8 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
     yAxis: {
       title: { text: undefined },
       gridLineDashStyle: 'Dash',
-      gridLineColor: '#7A8A99',
-      gridLineWidth: 0.5,
+      gridLineColor: 'var(--color-secondary-13)',
+      gridLineWidth: 1,
       labels: {
         style: { fontSize: '11px', color: '#7A8A99' },
         formatter: function () {
@@ -145,9 +145,9 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
     credits: { enabled: false },
     tooltip: {
       outside: true,
-      backgroundColor: 'rgba(18, 24, 47, 0.55)',
+      backgroundColor: '#0E172E80',
       borderColor: 'rgba(186, 187, 203, 0.2)',
-      style: { color: '#FFFFFF', fontSize: '12px' },
+      style: { color: '#FFFFFF', fontSize: '11px' },
       shared: true,
       useHTML: true,
       formatter: function () {
@@ -174,7 +174,16 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
           });
-        return `<div><p style="color: #BABBCB; font-weight: 600; font-size: 12px;">${date}</p><div style="display: flex; align-items: center; gap: 10px;"><span style="display: inline-block; width: 12px; height: 12px; background-color: #00D395; border-radius: 3px;"></span><span style="font-size: 10px;">Revenue</span><strong style="font-size: 12px;">${value}</strong></div></div>`;
+        return `<div>
+                 <p style="color: #BABBCB; font-weight: 500; font-size: 11px; margin-bottom: 12px;">${date}</p>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="display: inline-block; width: 14px; height: 14px; background-color: #00D395; border-radius: 2px;"></span>
+                  <span style="font-size: 11px;">Revenue</span>
+                  <span style="font-size: 11px;">${value}</span>
+                </div>
+                </div>
+              </div>`;
       }
     },
     series: [

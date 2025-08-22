@@ -87,10 +87,7 @@ const ValueMetricField = ({
         <Text
           size='11'
           weight='500'
-          className={cn(
-            'text-primary-13 leading-[19px] lg:leading-[27px]',
-            className?.label
-          )}
+          className={cn('text-primary-13 leading-none', className?.label)}
         >
           {label}
         </Text>

@@ -95,7 +95,12 @@ const createTableColumns = (
             className='h-6 w-6'
             folder='network'
           />
-          <Text size='13'>{capitalizeFirstLetter(row.original.chain)}</Text>
+          <Text
+            size='13'
+            weight='500'
+          >
+            {capitalizeFirstLetter(row.original.chain)}
+          </Text>
         </div>
       )
     },
@@ -336,7 +341,7 @@ const RevenueOverview = ({
           </Text>
         </div>
       ) : (
-        <div className='flex flex-col-reverse items-start justify-between lg:flex-row'>
+        <div className='flex flex-col-reverse items-start justify-between gap-8 lg:flex-row'>
           <RevenueOverviewUSD
             key={tableKey}
             data={processedData.tableData}

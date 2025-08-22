@@ -1,5 +1,6 @@
 import { memo } from 'react';
 
+import { cn } from '@/shared/lib/classNames/classNames';
 import { formatPrice, sumValues } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { AssetType } from '@/shared/types/types';
@@ -99,14 +100,18 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
   } = mapMetricData(data);
 
   return (
-    <div className='flex flex-col gap-0 md:gap-5'>
-      <div className='flex flex-col gap-0 md:flex-row md:gap-5'>
+    <div className='flex flex-col gap-0 md:gap-2.5 lg:gap-5'>
+      <div className='flex flex-col gap-0 md:flex-row md:gap-2.5 lg:gap-5'>
         <Card
           isLoading={isLoading}
           className={{
-            container:
-              'flex h-auto min-h-[214px] min-w-[343px] flex-1 items-center rounded-b-none md:h-[230px] md:min-w-auto lg:h-[200px]',
-            content: 'p-5 md:p-10'
+            container: cn(
+              'flex h-auto min-h-auto min-w-[343px] flex-1 items-center rounded-b-none md:h-[230px] md:min-h-[214px] md:min-w-auto lg:h-[200px]',
+              {
+                'min-h-[219px]': isLoading
+              }
+            ),
+            content: 'w-full p-5 md:p-10'
           }}
         >
           <ValueMetricField
@@ -130,9 +135,13 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
         <Card
           isLoading={isLoading}
           className={{
-            container:
-              'border-secondary-26 h-auto min-h-[214px] min-w-[343px] flex-1 rounded-none border-t-1 border-b-1 md:h-[230px] md:min-w-auto md:border-none lg:h-[200px]',
-            content: 'p-5 md:p-10'
+            container: cn(
+              'border-secondary-26 flex h-auto min-h-auto min-w-[343px] flex-1 items-center rounded-none border-t-1 border-b-1 md:h-[230px] md:min-h-[214px] md:min-w-auto md:border-none lg:h-[200px]',
+              {
+                'min-h-[219px]': isLoading
+              }
+            ),
+            content: 'w-full p-5 md:p-10'
           }}
         >
           <ValueMetricField
@@ -151,9 +160,13 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
         <Card
           isLoading={isLoading}
           className={{
-            container:
-              'border-b-secondary-26 h-auto min-h-[214px] min-w-[343px] flex-1 rounded-b-none border-b-1 md:h-[230px] md:min-w-auto md:border-none lg:h-[200px]',
-            content: 'p-5 md:p-10'
+            container: cn(
+              'border-b-secondary-26 flex h-auto min-h-auto min-w-[343px] flex-1 items-center rounded-b-none border-b-1 md:h-[230px] md:min-h-[214px] md:min-w-auto md:border-none lg:h-[200px]',
+              {
+                'min-h-[219px]': isLoading
+              }
+            ),
+            content: 'w-full p-5 md:p-10'
           }}
         >
           <ValueMetricField
@@ -170,13 +183,17 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           />
         </Card>
       </div>
-      <div className='flex flex-col gap-0 md:flex-row md:gap-5'>
+      <div className='flex flex-col gap-0 md:flex-row md:gap-2.5 lg:gap-5'>
         <Card
           isLoading={isLoading}
           className={{
-            container:
-              'border-b-secondary-26 h-auto min-h-[214px] min-w-[343px] flex-1 rounded-t-none rounded-b-none border-b-1 md:h-[225px] md:min-w-auto md:border-none',
-            content: 'p-5 md:p-10'
+            container: cn(
+              'border-b-secondary-26 flex h-auto min-h-auto min-w-[343px] flex-1 items-center rounded-t-none rounded-b-none border-b-1 md:h-[225px] md:min-h-[214px] md:min-w-auto md:border-none',
+              {
+                'min-h-[219px]': isLoading
+              }
+            ),
+            content: 'w-full p-5 md:p-10'
           }}
         >
           <ValueMetricField
@@ -201,9 +218,13 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
         <Card
           isLoading={isLoading}
           className={{
-            container:
-              'h-auto min-h-[214px] min-w-[343px] flex-1 rounded-t-none md:h-[225px] md:min-w-auto',
-            content: 'p-5 md:p-10'
+            container: cn(
+              'flex h-auto min-h-auto min-w-[343px] flex-1 items-center rounded-t-none md:h-[225px] md:min-h-[214px] md:min-w-auto',
+              {
+                'min-h-[219px]': isLoading
+              }
+            ),
+            content: 'w-full p-5 md:p-10'
           }}
         >
           <ValueMetricField

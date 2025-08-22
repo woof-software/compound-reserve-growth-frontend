@@ -38,7 +38,12 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
           className='h-6 w-6'
           folder='collaterals'
         />
-        <Text size='13'>{row.original.symbol}</Text>
+        <Text
+          size='13'
+          weight='500'
+        >
+          {row.original.symbol}
+        </Text>
       </div>
     )
   },

@@ -39,7 +39,7 @@ const RevenuePage = () => {
           Track Compound Protocol revenue streams across various networks.
         </Text>
       </div>
-      <div className='flex flex-col gap-2.5 md:gap-5'>
+      <div className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
         <RevenueMetrics
           revenueData={pageData}
           isLoading={isLoading}

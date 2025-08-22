@@ -273,7 +273,7 @@ export const MultiSelect: FC<MultiSelectProps> = ({
           <View.Condition if={options.length > 5}>
             <div
               className={cn(
-                'outline-secondary-19 m-2 rounded-lg py-2.5 pr-5 pl-3 outline',
+                'outline-secondary-19 m-2 flex h-10 justify-center rounded-lg py-2.5 pr-5 pl-3 outline',
                 {
                   'outline-red-11':
                     !Boolean(filteredOptions.length) &&
@@ -337,7 +337,7 @@ export const MultiSelect: FC<MultiSelectProps> = ({
             className='bg-secondary-29 h-px w-full origin-top scale-y-[.5] transform-gpu'
           />
           <Button
-            className='bg-secondary-12 text-primary-14 hover:bg-secondary-40 m-2 rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white'
+            className='bg-secondary-12 text-primary-14 hover:bg-secondary-40 m-2 h-[35px] rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white'
             onClick={onClearFilters}
           >
             Clear filters

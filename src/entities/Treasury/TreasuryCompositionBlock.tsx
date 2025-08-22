@@ -224,8 +224,8 @@ const TreasuryCompositionBlock = memo(
         title='Treasury Composition'
         className={{
           loading: 'min-h-[inherit]',
-          container: 'min-h-[571px] rounded-lg',
-          content: 'flex flex-col gap-3 px-0 pt-0 pb-3 md:px-10 md:pb-10'
+          container: 'min-h-[553px] rounded-lg',
+          content: 'flex flex-col gap-3 px-0 py-0 md:px-10 md:pb-10'
         }}
       >
         <div className='flex flex-wrap items-center justify-end gap-4 px-5 py-3 md:px-0 md:py-3'>
@@ -289,7 +289,7 @@ const TreasuryCompositionBlock = memo(
             onTypeSelect={onTypeSelect}
           />
         </div>
-        <div className='flex flex-col justify-between md:flex-row'>
+        <div className='flex flex-col justify-between gap-8 md:flex-row'>
           <View.Condition if={!hasData}>
             <NoDataPlaceholder onButtonClick={onClearAll} />
           </View.Condition>

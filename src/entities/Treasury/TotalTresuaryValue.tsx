@@ -328,7 +328,7 @@ const TotalTresuaryValue = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',
-        content: 'flex flex-col gap-3 px-1 pt-0 pb-0 md:px-10 md:pb-10'
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-10 md:pb-10'
       }}
     >
       <Filters
@@ -363,7 +363,7 @@ const TotalTresuaryValue = ({
           key={groupBy}
           data={correctedChartSeries}
           groupBy={groupBy}
-          className='max-h-auto md:max-h-[400px]'
+          className='max-h-fit'
           barSize={barSize}
           barCountToSet={barCount}
           onZoom={handleResetActiveTab}

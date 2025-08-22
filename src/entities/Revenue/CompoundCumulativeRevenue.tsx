@@ -288,7 +288,7 @@ const CompoundCumulativeRevenue = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'border-background min-h-[571px] border',
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-2 md:px-10 md:pb-10'
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-10 md:pb-10'
       }}
     >
       <Filters
@@ -317,7 +317,7 @@ const CompoundCumulativeRevenue = ({
         />
       ) : (
         <LineChart
-          className='max-h-auto md:max-h-[400px]'
+          className='max-h-fit'
           barSize={barSize}
           barCountToSet={barCount}
           data={cumulativeChartSeries}

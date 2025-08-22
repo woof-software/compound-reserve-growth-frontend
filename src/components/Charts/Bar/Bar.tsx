@@ -57,8 +57,8 @@ const CryptoChart: FC<CryptoChartProps> = ({ data }) => {
         text: undefined
       },
       gridLineDashStyle: 'Dash',
-      gridLineColor: '#7a8a99',
-      gridLineWidth: 0.5,
+      gridLineColor: 'var(--color-secondary-13)',
+      gridLineWidth: 1,
       labels: {
         style: {
           fontSize: '11px',
