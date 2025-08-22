@@ -131,7 +131,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           isLoading={isLoading}
           className={{
             container:
-              'border-secondary-26 h-auto min-h-[214px] min-w-[343px] flex-1 rounded-none border-t-1 border-b-1 md:h-[230px] md:min-w-auto md:border-none lg:h-[200px]',
+              'border-secondary-26 flex h-auto min-h-[214px] min-w-[343px] flex-1 items-center rounded-none border-t-1 border-b-1 md:h-[230px] md:min-w-auto md:border-none lg:h-[200px]',
             content: 'p-5 md:p-10'
           }}
         >
@@ -152,7 +152,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           isLoading={isLoading}
           className={{
             container:
-              'border-b-secondary-26 h-auto min-h-[214px] min-w-[343px] flex-1 rounded-b-none border-b-1 md:h-[230px] md:min-w-auto md:border-none lg:h-[200px]',
+              'border-b-secondary-26 flex h-auto min-h-[214px] min-w-[343px] flex-1 items-center rounded-b-none border-b-1 md:h-[230px] md:min-w-auto md:border-none lg:h-[200px]',
             content: 'p-5 md:p-10'
           }}
         >
@@ -175,7 +175,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           isLoading={isLoading}
           className={{
             container:
-              'border-b-secondary-26 h-auto min-h-[214px] min-w-[343px] flex-1 rounded-t-none rounded-b-none border-b-1 md:h-[225px] md:min-w-auto md:border-none',
+              'border-b-secondary-26 flex h-auto min-h-[214px] min-w-[343px] flex-1 items-center rounded-t-none rounded-b-none border-b-1 md:h-[225px] md:min-w-auto md:border-none',
             content: 'p-5 md:p-10'
           }}
         >
@@ -202,7 +202,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           isLoading={isLoading}
           className={{
             container:
-              'h-auto min-h-[214px] min-w-[343px] flex-1 rounded-t-none md:h-[225px] md:min-w-auto',
+              'flex h-auto min-h-[214px] min-w-[343px] flex-1 items-center rounded-t-none md:h-[225px] md:min-w-auto',
             content: 'p-5 md:p-10'
           }}
         >
