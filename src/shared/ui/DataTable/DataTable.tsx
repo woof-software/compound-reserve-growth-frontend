@@ -172,6 +172,7 @@ const DataTable = <T,>({
                         {header.isPlaceholder ? null : (
                           <Text
                             size='11'
+                            weight='500'
                             className={headerTextClassName}
                           >
                             {flexRender(
@@ -224,7 +225,7 @@ const DataTable = <T,>({
                   className={cn(onRowClick && 'cursor-pointer', rowClassName)}
                   onClick={() => onRowClick?.(row.original)}
                 >
-                  {row.getVisibleCells().map((cell) => {
+                  {row.getVisibleCells().map((cell, index) => {
                     const columnAlign = (
                       cell.column.columnDef as ExtendedColumnDef<T>
                     ).align;
@@ -234,6 +235,7 @@ const DataTable = <T,>({
                         key={cell.id}
                         className={cn(
                           'text-[13px] whitespace-nowrap',
+                          { 'font-medium': index === 0 },
                           getAlignmentClass(columnAlign),
                           cellClassName
                         )}
