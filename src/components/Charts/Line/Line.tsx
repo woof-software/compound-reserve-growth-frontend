@@ -10,7 +10,10 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import { cn } from '@/shared/lib/classNames/classNames';
-import { getStableColorForSeries } from '@/shared/lib/utils/utils';
+import {
+  capitalizeFirstLetter,
+  getStableColorForSeries
+} from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -46,11 +49,6 @@ interface LineChartProps {
   onZoom?: () => void;
 }
 
-const capitalizeFirstLetter = (str: string): string => {
-  if (!str) return '';
-  return str.charAt(0).toUpperCase() + str.slice(1);
-};
-
 const formatValue = (value: number) => {
   if (Math.abs(value) >= 1_000_000) {
     return (value / 1_000_000).toFixed(1) + 'M';
@@ -71,16 +69,25 @@ const LineChart: FC<LineChartProps> = ({
   onZoom
 }) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
+
   const programmaticChange = useRef(false);
-  const [areAllSeriesHidden, setAreAllSeriesHidden] = useState(false);
-  const [eventsData, setEventsData] = useState<EventDataItem[]>([]);
-  const [showEvents, setShowEvents] = useState(true);
+
   const currentZoom = useRef<{ min: number; max: number } | null>(null);
 
+  const [areAllSeriesHidden, setAreAllSeriesHidden] = useState(false);
+
+  const [eventsData, setEventsData] = useState<EventDataItem[]>([]);
+
+  const [showEvents, setShowEvents] = useState(true);
+
   const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
+
   const viewportRef = useRef<HTMLDivElement>(null);
+
   const [canScrollLeft, setCanScrollLeft] = useState(false);
+
   const [canScrollRight, setCanScrollRight] = useState(false);
+
   const updateArrows = useCallback(() => {
     const el = viewportRef.current;
     if (!el) return;
@@ -88,6 +95,7 @@ const LineChart: FC<LineChartProps> = ({
     setCanScrollLeft(scrollLeft > 1);
     setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
   }, []);
+
   const scrollByDir = (dir: 'left' | 'right') => {
     const el = viewportRef.current;
     if (!el) return;
@@ -513,8 +521,11 @@ const LineChart: FC<LineChartProps> = ({
 
   useEffect(() => {
     updateArrows();
+
     const onResize = () => updateArrows();
+
     window.addEventListener('resize', onResize);
+
     return () => window.removeEventListener('resize', onResize);
   }, [aggregatedSeries.length, updateArrows]);
 
