@@ -281,7 +281,7 @@ const LineChart: FC<LineChartProps> = ({
     const yPositions = [40, 60, 80, 100, 120, 140, 160, 180];
     const eventPlotLines = showEvents
       ? eventsData.map((event, index) => ({
-          color: 'var(--color-primary-14)',
+          color: '#7A8A99',
           width: 1,
           value: event.x,
           dashStyle: 'Dash' as const,
@@ -345,7 +345,7 @@ const LineChart: FC<LineChartProps> = ({
         plotLines: eventPlotLines,
         labels: {
           style: {
-            color: 'var(--color-primary-14)',
+            color: '#7A8A99',
             fontSize: '11px',
             fontFamily: 'Haas Grot Text R, sans-serif'
           },
@@ -357,11 +357,11 @@ const LineChart: FC<LineChartProps> = ({
           month: "%b '%y",
           year: '%Y'
         },
-        lineColor: 'var(--color-secondary-12)',
-        tickColor: 'var(--color-secondary-12)',
+        lineColor: '#7A8A99',
+        tickColor: '#7A8A99',
         crosshair: {
           width: 1,
-          color: 'var(--color-primary-14)',
+          color: '#7A8A99',
           dashStyle: 'Dash'
         },
         events: {
@@ -393,7 +393,7 @@ const LineChart: FC<LineChartProps> = ({
         gridLineDashStyle: 'Dash',
         labels: {
           style: {
-            color: 'var(--color-primary-14)',
+            color: '#7A8A99',
             fontSize: '11px',
             fontFamily: 'Haas Grot Text R, sans-serif'
           },

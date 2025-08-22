@@ -118,8 +118,8 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
     yAxis: {
       title: { text: undefined },
       gridLineDashStyle: 'Dash',
-      gridLineColor: '#7A8A99',
-      gridLineWidth: 0.5,
+      gridLineColor: 'var(--color-secondary-13)',
+      gridLineWidth: 1,
       labels: {
         style: { fontSize: '11px', color: '#7A8A99' },
         formatter: function () {
