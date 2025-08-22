@@ -85,7 +85,7 @@ const RunwayMetrics = () => {
   }, [runwayResponse]);
 
   return (
-    <div className='flex flex-col gap-0 md:flex-row md:gap-5'>
+    <div className='flex flex-col gap-0 md:flex-row md:gap-2.5 lg:gap-5'>
       <Card
         isLoading={isLoading}
         isError={isError}

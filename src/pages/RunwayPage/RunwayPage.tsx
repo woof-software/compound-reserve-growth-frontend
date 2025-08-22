@@ -29,7 +29,7 @@ const RunwayPage = () => {
           expenses, and service provider commitments.
         </Text>
       </div>
-      <div className='flex flex-col gap-2.5 md:gap-5'>
+      <div className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
         <RunwayMetrics />
         <AnnualisedExpensesBlock />
         <CurrentServiceProvidersBlock />

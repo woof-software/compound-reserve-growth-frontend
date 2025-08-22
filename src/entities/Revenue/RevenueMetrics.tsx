@@ -53,7 +53,7 @@ const RevenueMetrics = ({
   }
 
   return (
-    <div className='flex flex-row flex-wrap gap-2.5 md:gap-5'>
+    <div className='flex flex-row flex-wrap gap-2.5 lg:gap-5'>
       {yearsToDisplay.map((yearOrIndex, index) => {
         const isPlaceholder = isLoading || isError;
         const key = isPlaceholder ? index : (yearOrIndex as string);
