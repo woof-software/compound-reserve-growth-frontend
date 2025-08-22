@@ -393,11 +393,11 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       },
       shared: true,
       formatter: function () {
-        const header = `<div style="font-weight: 500; margin-bottom: 8px; font-size: 12px; font-family: 'Haas Grot Text R', sans-serif;">${Highcharts.dateFormat('%B %e, %Y', this.x as number)}</div>`;
+        const header = `<div style="font-weight: 500; margin-bottom: 12px; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${Highcharts.dateFormat('%B %e, %Y', this.x as number)}</div>`;
         if (groupBy === 'none') {
           const point = this.points?.find((p) => p.series.type === 'area');
           if (!point) return '';
-          return `${header}<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 8px; height: 8px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">$${Highcharts.numberFormat(point.y ?? 0, 0, '.', ',')}</span></div>`;
+          return `${header}<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 14px; height: 14px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">$${Highcharts.numberFormat(point.y ?? 0, 0, '.', ',')}</span></div>`;
         }
         const dataPoints = (this.points || []).filter(
           (p) => p.series.type !== 'scatter'
@@ -430,7 +430,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
             )
             .join('');
         }
-        const footer = `<div style=" padding-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 16px;"><span style="font-weight: 500; font-size: 12px; font-family: 'Haas Grot Text R', sans-serif;">Total</span><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(total)}</span></div>`;
+        const footer = `<div style="padding-top: 12px; display: flex; justify-content: space-between; align-items: center; gap: 16px;"><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">Total</span><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(total)}</span></div>`;
         return header + body + footer;
       }
     },
