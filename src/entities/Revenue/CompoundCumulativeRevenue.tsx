@@ -317,7 +317,7 @@ const CompoundCumulativeRevenue = ({
         />
       ) : (
         <LineChart
-          className='max-h-auto md:max-h-[400px]'
+          className='max-h-fit'
           barSize={barSize}
           barCountToSet={barCount}
           data={cumulativeChartSeries}
