@@ -341,7 +341,7 @@ const RevenueOverview = ({
           </Text>
         </div>
       ) : (
-        <div className='flex flex-col-reverse items-start justify-between lg:flex-row'>
+        <div className='flex flex-col-reverse items-start justify-between gap-8 lg:flex-row'>
           <RevenueOverviewUSD
             key={tableKey}
             data={processedData.tableData}
