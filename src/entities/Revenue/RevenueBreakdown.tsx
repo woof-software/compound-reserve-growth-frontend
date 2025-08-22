@@ -376,6 +376,7 @@ const RevenueBreakDownBlock = ({
   return (
     <Card
       title='Revenue Breakdown'
+      id='revenue-breakdown'
       isLoading={isLoading}
       isError={isError}
       className={{
