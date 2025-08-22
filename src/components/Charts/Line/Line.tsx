@@ -77,10 +77,6 @@ const LineChart: FC<LineChartProps> = ({
   const [showEvents, setShowEvents] = useState(true);
   const currentZoom = useRef<{ min: number; max: number } | null>(null);
 
-  const [isSmall, setIsSmall] = useState(
-    typeof window !== 'undefined' ? window.innerWidth <= 1023 : true
-  );
-
   const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
   const viewportRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -216,25 +212,6 @@ const LineChart: FC<LineChartProps> = ({
 
   const isLegendEnabled =
     (showLegend ?? groupBy !== 'none') && aggregatedSeries.length > 0;
-
-  const legendDesktop: Highcharts.LegendOptions = {
-    enabled: isLegendEnabled,
-    layout: 'horizontal',
-    align: 'center',
-    verticalAlign: 'bottom',
-    symbolRadius: 0,
-    symbolWidth: 10,
-    symbolHeight: 10,
-    itemStyle: {
-      color: 'var(--color-primary-11)',
-      fontWeight: 'normal',
-      fontFamily: 'Haas Grot Text R, sans-serif'
-    },
-    itemHoverStyle: {
-      color: 'var(--color-primary-11)',
-      fontFamily: 'Haas Grot Text R, sans-serif'
-    }
-  };
 
   const highlightSeries = useCallback((name: string) => {
     const chart = chartRef.current?.chart;
@@ -484,7 +461,7 @@ const LineChart: FC<LineChartProps> = ({
           return header + body + footer;
         }
       },
-      legend: isSmall ? { enabled: false } : legendDesktop,
+      legend: { enabled: false },
       plotOptions: {
         series: {
           animation: false,
@@ -515,8 +492,7 @@ const LineChart: FC<LineChartProps> = ({
     isLegendEnabled,
     eventsData,
     showEvents,
-    onZoom,
-    isSmall
+    onZoom
   ]);
 
   const handleSelectAll = useCallback(() => {
@@ -536,18 +512,11 @@ const LineChart: FC<LineChartProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!isSmall) return;
     updateArrows();
     const onResize = () => updateArrows();
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  }, [aggregatedSeries.length, updateArrows, isSmall]);
-
-  useEffect(() => {
-    const onResize = () => setIsSmall(window.innerWidth <= 1023);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
+  }, [aggregatedSeries.length, updateArrows]);
 
   return (
     <div
@@ -602,8 +571,7 @@ const LineChart: FC<LineChartProps> = ({
           </View.Condition>
         </div>
       </div>
-      {/* Мобильная прокручиваемая легенда (≤1023px) */}
-      {isSmall && isLegendEnabled && (
+      {isLegendEnabled && (
         <div className='mx-5 md:mx-0'>
           <div
             className={cn(

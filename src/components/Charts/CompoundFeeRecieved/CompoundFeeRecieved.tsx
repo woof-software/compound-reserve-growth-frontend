@@ -63,17 +63,6 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
 
   const [areAllSeriesHidden, setAreAllSeriesHidden] = useState(false);
 
-  const [isSmall, setIsSmall] = useState(
-    typeof window !== 'undefined' ? window.innerWidth <= 1023 : true
-  );
-
-  useEffect(() => {
-    const onResize = () => setIsSmall(window.innerWidth <= 1023);
-    window.addEventListener('resize', onResize);
-
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
-
   const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
 
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -307,45 +296,6 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       break;
   }
 
-  const legendDesktop: Highcharts.LegendOptions = {
-    enabled: true,
-    align: 'center',
-    verticalAlign: 'bottom',
-    layout: 'horizontal',
-    useHTML: true,
-    itemStyle: {
-      color: '#7A8A99',
-      fontSize: '11px',
-      fontWeight: '400',
-      textDecoration: 'none',
-      lineHeight: '100%',
-      fontFamily: 'Haas Grot Text R, sans-serif'
-    },
-    itemHoverStyle: {
-      color: 'var(--color-primary-11)',
-      textDecoration: 'none',
-      fontFamily: 'Haas Grot Text R, sans-serif'
-    },
-    itemHiddenStyle: {
-      color: '#4B5563',
-      textDecoration: 'line-through',
-      fontFamily: 'Haas Grot Text R, sans-serif'
-    },
-    symbolWidth: 0,
-    symbolHeight: 0,
-    itemDistance: 20,
-    maxHeight: 100,
-    labelFormatter: function () {
-      const s = this as Highcharts.Series;
-      const deco = s.visible ? 'none' : 'line-through';
-      const color = s.visible ? 'var(--color-primary-11)' : '#4B5563';
-      return `<span style="display:inline-flex;align-items:center;gap:8px;">
-        <span style="width:12px;height:2px;background-color:${s.color};display:inline-block;border-radius:1px;opacity:${s.visible ? '1' : '0.5'};"></span>
-        <span style="font-size:11px;text-decoration:${deco};color:${color};font-family:'Haas Grot Text R',sans-serif;">${s.name}</span>
-      </span>`;
-    }
-  };
-
   const chartOptions: Highcharts.Options = {
     chart: {
       type: 'column',
@@ -419,7 +369,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       },
       lineWidth: 0
     },
-    legend: isSmall ? { enabled: false } : legendDesktop,
+    legend: { enabled: false },
     plotOptions: {
       column: {
         pointPadding: 0.05,
@@ -427,34 +377,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
         borderWidth: 0,
         states: { hover: { animation: false }, inactive: { opacity: 1 } }
       },
-      series: !isSmall
-        ? {
-            animation: { duration: 500 },
-            stickyTracking: true,
-            findNearestPointBy: 'x',
-            enableMouseTracking: true,
-            states: { inactive: { opacity: 1 } },
-            events: {
-              legendItemClick: function (this: Highcharts.Series) {
-                const chart = this.chart;
-                const anyOtherVisible = chart.series.some(
-                  (s) => s !== this && s.visible
-                );
-                if (!this.visible && !anyOtherVisible) {
-                  chart.series.forEach((s) => s.setVisible(s === this, false));
-                  chart.redraw();
-                  setAreAllSeriesHidden(false);
-                  return false;
-                }
-                setTimeout(() => {
-                  const anyVisible = chart.series.some((s) => s.visible);
-                  setAreAllSeriesHidden(!anyVisible);
-                }, 0);
-                return true;
-              }
-            }
-          }
-        : { states: { inactive: { opacity: 0.25 } } }
+      series: { states: { inactive: { opacity: 0.25 } } }
     },
     credits: { enabled: false },
     tooltip: {
@@ -518,8 +441,6 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   };
 
   useEffect(() => {
-    if (!isSmall) return;
-
     updateArrows();
 
     const onResize = () => updateArrows();
@@ -527,7 +448,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     window.addEventListener('resize', onResize);
 
     return () => window.removeEventListener('resize', onResize);
-  }, [seriesData.length, updateArrows, isSmall]);
+  }, [seriesData.length, updateArrows]);
 
   return (
     <div className={cn('highcharts-container flex h-full flex-col', className)}>
@@ -562,90 +483,88 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
           </View.Condition>
         </div>
       </div>
-      <View.Condition if={isSmall}>
-        <div className='mx-5 md:mx-0'>
+      <div className='mx-5 md:mx-0'>
+        <div
+          className={cn(
+            'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit overflow-hidden rounded-[39px]',
+            'before:pointer-events-none before:absolute before:top-[1px] before:left-[1px] before:h-full before:w-20 before:rounded-[39px] before:opacity-0',
+            'after:pointer-events-none after:absolute after:top-[1px] after:right-[1px] after:h-full after:w-20 after:rounded-r-[39px] after:opacity-0',
+            {
+              'before:max-h-[36px] before:rotate-180 before:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] before:opacity-100 dark:before:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
+                canScrollLeft,
+              'after:max-h-[36px] after:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] after:opacity-100 dark:after:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
+                canScrollRight
+            }
+          )}
+        >
+          <View.Condition if={canScrollLeft}>
+            <Button
+              className={cn(
+                'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
+              )}
+              onClick={() => {
+                clearHighlight();
+                scrollByDir('left');
+              }}
+            >
+              <Icon
+                name='arrow-triangle'
+                className='h-[6px] w-[6px]'
+              />
+            </Button>
+          </View.Condition>
           <div
+            ref={viewportRef}
+            onScroll={() => {
+              updateArrows();
+              clearHighlight();
+            }}
             className={cn(
-              'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit overflow-hidden rounded-[39px]',
-              'before:pointer-events-none before:absolute before:top-[1px] before:left-[1px] before:h-full before:w-20 before:rounded-[39px] before:opacity-0',
-              'after:pointer-events-none after:absolute after:top-[1px] after:right-[1px] after:h-full after:w-20 after:rounded-r-[39px] after:opacity-0',
-              {
-                'before:max-h-[36px] before:rotate-180 before:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] before:opacity-100 dark:before:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
-                  canScrollLeft,
-                'after:max-h-[36px] after:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] after:opacity-100 dark:after:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
-                  canScrollRight
-              }
+              'hide-scrollbar mx-0.5 flex h-full max-w-[99%] items-center gap-4 overflow-x-auto scroll-smooth p-1.5'
             )}
           >
-            <View.Condition if={canScrollLeft}>
-              <Button
-                className={cn(
-                  'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
-                )}
-                onClick={() => {
-                  clearHighlight();
-                  scrollByDir('left');
-                }}
-              >
-                <Icon
-                  name='arrow-triangle'
-                  className='h-[6px] w-[6px]'
-                />
-              </Button>
-            </View.Condition>
-            <div
-              ref={viewportRef}
-              onScroll={() => {
-                updateArrows();
-                clearHighlight();
-              }}
-              className={cn(
-                'hide-scrollbar mx-0.5 flex h-full max-w-[99%] items-center gap-4 overflow-x-auto scroll-smooth p-1.5'
+            <Each
+              data={seriesData}
+              render={(s) => (
+                <Button
+                  key={s.name}
+                  className={cn(
+                    'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
+                    { 'line-through opacity-30': hiddenItems.has(s.name!) }
+                  )}
+                  onMouseEnter={() => highlightSeries(s.name!)}
+                  onFocus={() => highlightSeries(s.name!)}
+                  onMouseLeave={clearHighlight}
+                  onBlur={clearHighlight}
+                  onClick={() => toggleSeriesByName(s.name!)}
+                >
+                  <span
+                    className='inline-block h-3 w-3 rounded-full'
+                    style={{ backgroundColor: (s as any).color }}
+                  />
+                  {s.name}
+                </Button>
               )}
-            >
-              <Each
-                data={seriesData}
-                render={(s) => (
-                  <Button
-                    key={s.name}
-                    className={cn(
-                      'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
-                      { 'line-through opacity-30': hiddenItems.has(s.name!) }
-                    )}
-                    onMouseEnter={() => highlightSeries(s.name!)}
-                    onFocus={() => highlightSeries(s.name!)}
-                    onMouseLeave={clearHighlight}
-                    onBlur={clearHighlight}
-                    onClick={() => toggleSeriesByName(s.name!)}
-                  >
-                    <span
-                      className='inline-block h-3 w-3 rounded-full'
-                      style={{ backgroundColor: (s as any).color }}
-                    />
-                    {s.name}
-                  </Button>
-                )}
-              />
-            </div>
-            <View.Condition if={canScrollRight}>
-              <Button
-                className={cn(
-                  'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
-                )}
-                onClick={() => {
-                  clearHighlight();
-                  scrollByDir('right');
-                }}
-              >
-                <Icon
-                  name='arrow-triangle'
-                  className='h-[6px] w-[6px] rotate-180'
-                />
-              </Button>
-            </View.Condition>
+            />
           </div>
+          <View.Condition if={canScrollRight}>
+            <Button
+              className={cn(
+                'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
+              )}
+              onClick={() => {
+                clearHighlight();
+                scrollByDir('right');
+              }}
+            >
+              <Icon
+                name='arrow-triangle'
+                className='h-[6px] w-[6px] rotate-180'
+              />
+            </Button>
+          </View.Condition>
         </div>
-      </View.Condition>
+      </div>
     </div>
   );
 };
