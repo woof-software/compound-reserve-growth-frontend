@@ -151,7 +151,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                       className='grid w-full max-w-[100px]'
                     >
                       <Text
-                        size='8'
+                        size='11'
                         lineHeight='18'
                         weight='500'
                         className='text-primary-14'

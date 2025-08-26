@@ -24,7 +24,7 @@ interface DropdownProps extends PropsWithChildren {
 
   isDisabled?: boolean;
 
-  onToggle: () => void;
+  onOpen: () => void;
 
   onClose: () => void;
 
@@ -96,7 +96,7 @@ const useDropdown = (type: 'single' | 'multiple') => {
 const Dropdown: FC<DropdownProps> = ({
   open,
   isDisabled,
-  onToggle,
+  onOpen,
   onClose,
   triggerContent,
   children,
@@ -108,7 +108,7 @@ const Dropdown: FC<DropdownProps> = ({
     if (open) {
       onClose();
     } else {
-      onToggle();
+      onOpen();
     }
   };
 
@@ -141,6 +141,7 @@ const Dropdown: FC<DropdownProps> = ({
         <div
           className='cursor-pointer'
           onClick={onTriggerClick}
+          onMouseDown={(e) => e.preventDefault()}
         >
           {triggerContent}
         </div>

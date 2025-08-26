@@ -253,7 +253,7 @@ export const MultiSelect: FC<MultiSelectProps> = ({
     <div className={cn({ 'pointer-events-none': disabled })}>
       <Dropdown
         open={isOpen}
-        onToggle={onOpenModal}
+        onOpen={onOpenModal}
         onClose={onCloseDropdown}
         triggerContent={
           <MultiSelectTrigger
