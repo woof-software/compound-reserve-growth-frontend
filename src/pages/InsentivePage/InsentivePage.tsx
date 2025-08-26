@@ -1,9 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
+import CurrentSpendingByChainBlock from '@/entities/Insentive/CurrentSpendingByChain';
+import DailyExpenses from '@/entities/Insentive/DailyExpenses';
+import HistoricalExpencesByNetworks from '@/entities/Insentive/HistoricalExpencesByNetworks';
+import IncomeVsExpensesOnChainsAndMarkets from '@/entities/Insentive/IncomeVsExpensesOnChainsAndMarkets';
 import MetricBlock from '@/entities/Treasury/MetricBlock';
-import TotalTresuaryValue from '@/entities/Treasury/TotalTresuaryValue';
-import TreasuryBalanceByNetworkBlock from '@/entities/Treasury/TreasuryBalanceByNetwork';
-import TreasuryHoldingsBlock from '@/entities/Treasury/TreasuryHoldingsBlock';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
 import {
@@ -97,22 +98,22 @@ const InsentivePage = () => {
             }}
           />
         </div>
-        <TreasuryBalanceByNetworkBlock
+        <CurrentSpendingByChainBlock
           data={uniqData}
           isError={isError}
           isLoading={isLoading}
         />
-        <TotalTresuaryValue
+        <HistoricalExpencesByNetworks
           isLoading={isLoading}
           isError={isError}
           data={treasuryData}
         />
-        <TotalTresuaryValue
+        <IncomeVsExpensesOnChainsAndMarkets
           isLoading={isLoading}
           isError={isError}
           data={treasuryData}
         />
-        <TreasuryHoldingsBlock
+        <DailyExpenses
           data={uniqData}
           isError={isError}
           isLoading={isLoading}
