@@ -123,7 +123,10 @@ const TreasuryComposition = ({
               <div
                 key={row.name + index}
                 className={cn(
-                  'border-secondary-23 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b p-5 md:gap-x-[63px]'
+                  'border-secondary-23 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b p-5 md:gap-x-[63px]',
+                  {
+                    'pt-0': index === 0
+                  }
                 )}
               >
                 <div className='grid w-full max-w-[100px]'>
@@ -181,6 +184,7 @@ const TreasuryComposition = ({
               <Text
                 size='13'
                 lineHeight='21'
+                weight='500'
                 className='min-w-[100px] truncate'
               >
                 {formatPrice(totalBalance, 1)}

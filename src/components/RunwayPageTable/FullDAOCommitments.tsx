@@ -385,15 +385,15 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
           columns={columns}
           pageSize={10}
           className={cn('flex flex-col justify-between', {
-            'min-h-[565px]': data.length > 10
+            'min-h-[505px]': data.length > 10
           })}
           containerTableClassName='min-h-[473px]'
           headerCellClassName='py-[13px] px-[5px]'
           cellClassName='py-3 px-[5px]'
           headerTextClassName='text-primary-14 font-medium'
           enableSorting
-          enablePagination
-          paginationClassName='py-[13px] px-[5px]'
+          enablePagination={data.length > 10}
+          paginationClassName='py-0 px-[5px]'
           initialSort={{ id: 'startDate', desc: true }}
         />
       </div>

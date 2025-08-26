@@ -9,6 +9,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
+import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
 import Each from '@/shared/ui/Each/Each';
@@ -471,15 +472,13 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       <div className='absolute right-6 block md:hidden'>
         <div className='flex items-center gap-3'>
           <View.Condition if={Boolean(seriesData.length > 1)}>
-            <div
-              className='shadow-13 bg-card-header cursor-pointer rounded-lg p-1'
+            <ChartIconToggle
+              active={areAllSeriesHidden}
               onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
-            >
-              <Icon
-                name={areAllSeriesHidden ? 'eye' : 'eye-closed'}
-                className='h-6 w-6'
-              />
-            </div>
+              onIcon='eye'
+              offIcon='eye-closed'
+              ariaLabel='Toggle all series visibility'
+            />
           </View.Condition>
         </div>
       </div>

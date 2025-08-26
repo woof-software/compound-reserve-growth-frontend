@@ -24,11 +24,16 @@ const Mobile = ({ children }: PropsWithChildren) => {
   return <div className='block md:hidden'>{children}</div>;
 };
 
+const TabletMobile = ({ children }: PropsWithChildren) => {
+  return <div className='block lg:hidden'>{children}</div>;
+};
+
 const View = {
   Condition,
   Desktop,
   Tablet,
-  Mobile
+  Mobile,
+  TabletMobile
 };
 
 export default View;

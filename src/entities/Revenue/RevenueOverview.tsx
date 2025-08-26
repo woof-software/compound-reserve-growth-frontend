@@ -200,13 +200,13 @@ const RevenueOverview = ({
 
     const footerContent = (
       <tr>
-        <td className='text-primary-14 px-[5px] py-[13px] text-left text-[11px]'>
+        <td className='text-primary-14 px-[5px] py-[13px] text-left text-[11px] font-medium'>
           Total
         </td>
         {primaryTabs.map((p) => (
           <td
             key={p}
-            className='text-primary-14 px-[5px] py-[13px] text-left text-[11px]'
+            className='text-primary-14 px-[5px] py-[13px] text-left text-[11px] font-medium'
           >
             {formatUSD(totals[p] || 0)}
           </td>

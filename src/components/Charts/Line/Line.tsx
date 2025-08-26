@@ -9,6 +9,7 @@ import React, {
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
+import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
   capitalizeFirstLetter,
@@ -310,6 +311,13 @@ const LineChart: FC<LineChartProps> = ({
         }))
       : [];
 
+    const bringMarkersToFront = (chart: Highcharts.Chart) => {
+      chart.series.forEach((s: any) => {
+        s.markerGroup?.toFront?.();
+        s.dataLabelsGroup?.toFront?.();
+      });
+    };
+
     return {
       chart: {
         type: 'area',
@@ -324,8 +332,7 @@ const LineChart: FC<LineChartProps> = ({
             type: 'x',
             preventDefault: true
           },
-          type: undefined,
-          pinchType: undefined,
+          pinchType: 'x',
           resetButton: { theme: { display: 'none' } }
         },
         events: {
@@ -337,6 +344,11 @@ const LineChart: FC<LineChartProps> = ({
                 false
               );
             }
+
+            bringMarkersToFront(this as Highcharts.Chart);
+          },
+          render: function () {
+            bringMarkersToFront(this as Highcharts.Chart);
           }
         }
       },
@@ -473,10 +485,12 @@ const LineChart: FC<LineChartProps> = ({
       plotOptions: {
         series: {
           animation: false,
-          turboThreshold: 0
+          turboThreshold: 0,
+          clip: false
         },
         area: {
           marker: {
+            zIndex: 5,
             enabled: false,
             symbol: 'circle',
             radius: 5,
@@ -550,7 +564,14 @@ const LineChart: FC<LineChartProps> = ({
           highcharts={Highcharts}
           options={options}
           allowChartUpdate
-          containerProps={{ style: { width: '100%', height: '100%' } }}
+          containerProps={{
+            style: {
+              width: '100%',
+              height: '100%',
+              touchAction: 'none',
+              overscrollBehaviorX: 'contain'
+            }
+          }}
         />
       </div>
       <div className='absolute right-6 block'>
@@ -558,26 +579,22 @@ const LineChart: FC<LineChartProps> = ({
           <View.Condition
             if={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
           >
-            <div
-              className='shadow-13 bg-card-header cursor-pointer rounded-lg p-1'
+            <ChartIconToggle
+              active={areAllSeriesHidden}
               onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
-            >
-              <Icon
-                name={areAllSeriesHidden ? 'eye' : 'eye-closed'}
-                className='h-6 w-6'
-              />
-            </div>
+              onIcon='eye'
+              offIcon='eye-closed'
+              ariaLabel='Toggle all series visibility'
+            />
           </View.Condition>
           <View.Condition if={Boolean(eventsData.length > 0)}>
-            <div
-              className='shadow-13 bg-card-header cursor-pointer rounded-lg p-1'
+            <ChartIconToggle
+              active={showEvents}
               onClick={() => setShowEvents((prev) => !prev)}
-            >
-              <Icon
-                name={showEvents ? 'calendar-check' : 'calendar-uncheck'}
-                className='h-6 w-6'
-              />
-            </div>
+              onIcon='calendar-check'
+              offIcon='calendar-uncheck'
+              ariaLabel='Toggle events'
+            />
           </View.Condition>
         </div>
       </div>

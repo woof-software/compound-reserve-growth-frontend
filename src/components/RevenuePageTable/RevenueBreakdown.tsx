@@ -109,7 +109,7 @@ const RevenueBreakdown = ({
         return (
           <td
             key={columnKey}
-            className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'
+            className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'
           >
             {formatCurrencyValue(totalValue)}
           </td>
@@ -292,7 +292,7 @@ const RevenueBreakdown = ({
           data={data}
           columns={displayColumns}
           pageSize={10}
-          className='flex min-h-[565px] flex-col justify-between'
+          className='flex min-h-[518px] flex-col justify-between'
           headerCellClassName='py-[13px] px-[5px]'
           cellClassName='py-3 px-[5px]'
           headerTextClassName='text-primary-14 font-medium'

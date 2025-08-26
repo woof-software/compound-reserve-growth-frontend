@@ -89,7 +89,8 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                   'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
                   {
                     'border-b': index === dataRows.length - 1,
-                    'justify-between': dateType !== 'Rolling'
+                    'justify-between': dateType !== 'Rolling',
+                    'pt-0': index === 0
                   }
                 )}
               >
@@ -150,7 +151,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                       className='grid w-full max-w-[100px]'
                     >
                       <Text
-                        size='8'
+                        size='11'
                         lineHeight='18'
                         weight='500'
                         className='text-primary-14'
@@ -162,6 +163,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                       <Text
                         size='13'
                         lineHeight='21'
+                        weight='500'
                         className='truncate'
                       >
                         {formatUSD(el[1] || 0)}

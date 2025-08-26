@@ -60,7 +60,7 @@ const SingleDropdown: FC<SingleDropdownProps> = ({
         />
       }
       open={isOpen}
-      onToggle={onOpen}
+      onOpen={onOpen}
       onClose={onClose}
       contentClassName={contentClassName}
     >

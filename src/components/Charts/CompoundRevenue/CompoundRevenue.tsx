@@ -175,7 +175,7 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
             maximumFractionDigits: 2
           });
         return `<div>
-                 <p style="color: #BABBCB; font-weight: 500; font-size: 11px; margin-bottom: 12px;">${date}</p>
+                 <p style="color: #FFFFFF; font-weight: 500; font-size: 11px; margin-bottom: 12px;">${date}</p>
                 <div style="display: flex; align-items: center; gap: 10px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <span style="display: inline-block; width: 14px; height: 14px; background-color: #00D395; border-radius: 2px;"></span>
