@@ -325,8 +325,8 @@ const LineChart: FC<LineChartProps> = ({
             type: 'x',
             preventDefault: true
           },
-          type: undefined,
-          pinchType: undefined,
+          // type: undefined,
+          pinchType: 'x',
           resetButton: { theme: { display: 'none' } }
         },
         events: {
@@ -551,7 +551,14 @@ const LineChart: FC<LineChartProps> = ({
           highcharts={Highcharts}
           options={options}
           allowChartUpdate
-          containerProps={{ style: { width: '100%', height: '100%' } }}
+          containerProps={{
+            style: {
+              width: '100%',
+              height: '100%',
+              touchAction: 'none',
+              overscrollBehaviorX: 'contain'
+            }
+          }}
         />
       </div>
       <div className='absolute right-6 block'>
