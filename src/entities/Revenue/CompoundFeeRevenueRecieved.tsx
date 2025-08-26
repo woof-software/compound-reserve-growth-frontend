@@ -112,12 +112,15 @@ const CompoundFeeRevenueRecieved = ({
     handleVisibleBarsChange
   } = useChartControls({ initialTimeRange: '7B', initialBarSize: 'D' });
 
-  const initialState: SelectedOptionsState = {
-    chain: [],
-    market: [],
-    symbol: [],
-    assetType: []
-  };
+  const initialState: SelectedOptionsState = useMemo(
+    () => ({
+      chain: [],
+      market: [],
+      symbol: [],
+      assetType: []
+    }),
+    []
+  );
 
   const [selectedOptions, setSelectedOptions] = useReducer(
     (
@@ -131,21 +134,19 @@ const CompoundFeeRevenueRecieved = ({
   );
 
   const [groupBy, setGroupBy] = useState<string>('Chain');
-  const [isGroupByOpen, setIsGroupByOpen] = useState(false);
 
-  const toggleGroupBy = useCallback(
-    () => setIsGroupByOpen((prev) => !prev),
-    []
-  );
-
-  const closeGroupBy = useCallback(() => setIsGroupByOpen(false), []);
+  const {
+    isOpen: isGroupByOpen,
+    onOpenModal: onGroupByOpen,
+    onCloseModal: onGroupByClose
+  } = useModal();
 
   const handleSelectGroupBy = useCallback(
     (value: string) => {
       setGroupBy(value);
-      closeGroupBy();
+      onGroupByClose();
     },
-    [closeGroupBy]
+    [onGroupByClose]
   );
 
   const {
@@ -385,8 +386,8 @@ const CompoundFeeRevenueRecieved = ({
         onSelectSymbol={onSelectSymbol}
         handleBarSizeChange={handleBarSizeChange}
         handleTabChange={handleTabChange}
-        toggleSingle={toggleGroupBy}
-        closeSingle={closeGroupBy}
+        toggleSingle={onGroupByOpen}
+        closeSingle={onGroupByClose}
         selectSingle={handleSelectGroupBy}
         onClearAll={handleResetFilters}
       />
@@ -408,166 +409,93 @@ const CompoundFeeRevenueRecieved = ({
   );
 };
 
-const Filters = ({
-  barSize,
-  activeTab,
-  openSingle,
-  groupBy,
-  csvData,
-  csvFilename,
-  chainOptions,
-  selectedOptions,
-  deploymentOptionsFilter,
-  assetTypeOptions,
-  symbolOptions,
-  isLoading,
-  onSelectChain,
-  onSelectAssetType,
-  onSelectMarket,
-  onSelectSymbol,
-  handleBarSizeChange,
-  handleTabChange,
-  toggleSingle,
-  closeSingle,
-  selectSingle,
-  onClearAll
-}: FiltersProps) => {
-  const { isOpen, onOpenModal, onCloseModal } = useModal();
-
-  const filterOptions = useMemo(() => {
-    const chainFilterOptions = {
-      id: 'chain',
-      placeholder: 'Chain',
-      total: selectedOptions.chain.length,
-      selectedOptions: selectedOptions.chain,
-      options: chainOptions || [],
-      onChange: onSelectChain
-    };
-
-    const marketFilterOptions = {
-      id: 'market',
-      placeholder: 'Market',
-      total: selectedOptions.market.length,
-      selectedOptions: selectedOptions.market,
-      options: deploymentOptionsFilter || [],
-      onChange: onSelectMarket
-    };
-
-    const assetTypeFilterOptions = {
-      id: 'assetType',
-      placeholder: 'Asset Type',
-      total: selectedOptions.assetType.length,
-      selectedOptions: selectedOptions.assetType,
-      options:
-        assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
-      onChange: onSelectAssetType
-    };
-
-    const symbolFilterOptions = {
-      id: 'reserveSymbol',
-      placeholder: 'Reserve Symbols',
-      total: selectedOptions.symbol.length,
-      selectedOptions: selectedOptions.symbol,
-      options:
-        symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
-      onChange: onSelectSymbol
-    };
-
-    return [
-      chainFilterOptions,
-      marketFilterOptions,
-      assetTypeFilterOptions,
-      symbolFilterOptions
-    ];
-  }, [
-    assetTypeOptions,
+const Filters = memo(
+  ({
+    barSize,
+    activeTab,
+    openSingle,
+    groupBy,
+    csvData,
+    csvFilename,
     chainOptions,
+    selectedOptions,
     deploymentOptionsFilter,
-    onSelectAssetType,
+    assetTypeOptions,
+    symbolOptions,
+    isLoading,
     onSelectChain,
+    onSelectAssetType,
     onSelectMarket,
-    selectedOptions
-  ]);
+    onSelectSymbol,
+    handleBarSizeChange,
+    handleTabChange,
+    toggleSingle,
+    closeSingle,
+    selectSingle,
+    onClearAll
+  }: FiltersProps) => {
+    const { isOpen, onOpenModal, onCloseModal } = useModal();
 
-  return (
-    <>
-      <div className='hidden lg:block'>
-        <div className='hidden items-center justify-end gap-3 px-0 py-3 lg:flex'>
-          <MultiSelect
-            options={chainOptions || []}
-            value={selectedOptions.chain}
-            onChange={onSelectChain}
-            placeholder='Chain'
-            disabled={isLoading}
-          />
-          <MultiSelect
-            options={deploymentOptionsFilter}
-            value={selectedOptions.market}
-            onChange={onSelectMarket}
-            placeholder='Market'
-            disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-          />
-          <MultiSelect
-            options={
-              assetTypeOptions?.sort((a, b) =>
-                a.label.localeCompare(b.label)
-              ) || []
-            }
-            value={selectedOptions.assetType}
-            onChange={onSelectAssetType}
-            placeholder='Asset Type'
-            disabled={isLoading}
-          />
-          <MultiSelect
-            options={
-              symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-              []
-            }
-            value={selectedOptions.symbol}
-            onChange={onSelectSymbol}
-            placeholder='Reserve Symbols'
-            disabled={isLoading}
-          />
-          <TabsGroup
-            tabs={['D', 'W', 'M']}
-            value={barSize}
-            onTabChange={handleBarSizeChange}
-            disabled={isLoading}
-          />
-          <TabsGroup
-            tabs={['7B', '30B', '90B', '180B']}
-            value={activeTab}
-            onTabChange={handleTabChange}
-            disabled={isLoading}
-          />
-          <div className='flex items-center gap-1'>
-            <Text
-              tag='span'
-              size='11'
-              weight='600'
-              lineHeight='16'
-              className='text-primary-14'
-            >
-              Group by
-            </Text>
-            <SingleDropdown
-              options={groupByOptions}
-              isOpen={openSingle}
-              selectedValue={groupBy}
-              onOpen={toggleSingle}
-              onClose={closeSingle}
-              onSelect={selectSingle}
-              disabled={isLoading}
-              triggerContentClassName='p-[5px]'
-            />
-          </div>
-          <CSVDownloadButton
-            data={csvData}
-            filename={csvFilename}
-          />
-        </div>
-        <div className='flex flex-col items-end justify-end gap-3 px-0 py-3 lg:hidden'>
-          <div className='z-[3] flex items-center gap-3'>
+    const filterOptions = useMemo(() => {
+      const chainFilterOptions = {
+        id: 'chain',
+        placeholder: 'Chain',
+        total: selectedOptions.chain.length,
+        selectedOptions: selectedOptions.chain,
+        options: chainOptions || [],
+        onChange: onSelectChain
+      };
+
+      const marketFilterOptions = {
+        id: 'market',
+        placeholder: 'Market',
+        total: selectedOptions.market.length,
+        selectedOptions: selectedOptions.market,
+        options: deploymentOptionsFilter || [],
+        onChange: onSelectMarket
+      };
+
+      const assetTypeFilterOptions = {
+        id: 'assetType',
+        placeholder: 'Asset Type',
+        total: selectedOptions.assetType.length,
+        selectedOptions: selectedOptions.assetType,
+        options:
+          assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+          [],
+        onChange: onSelectAssetType
+      };
+
+      const symbolFilterOptions = {
+        id: 'reserveSymbol',
+        placeholder: 'Reserve Symbols',
+        total: selectedOptions.symbol.length,
+        selectedOptions: selectedOptions.symbol,
+        options:
+          symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
+        onChange: onSelectSymbol
+      };
+
+      return [
+        chainFilterOptions,
+        marketFilterOptions,
+        assetTypeFilterOptions,
+        symbolFilterOptions
+      ];
+    }, [
+      assetTypeOptions,
+      chainOptions,
+      deploymentOptionsFilter,
+      onSelectAssetType,
+      onSelectChain,
+      onSelectMarket,
+      selectedOptions
+    ]);
+
+    return (
+      <>
+        <div className='hidden lg:block'>
+          <div className='flex items-center justify-end gap-3 px-0 py-3'>
             <MultiSelect
               options={chainOptions || []}
               value={selectedOptions.chain}
@@ -603,8 +531,6 @@ const Filters = ({
               placeholder='Reserve Symbols'
               disabled={isLoading}
             />
-          </div>
-          <div className='z-[2] flex items-center gap-3'>
             <TabsGroup
               tabs={['D', 'W', 'M']}
               value={barSize}
@@ -644,70 +570,70 @@ const Filters = ({
             />
           </div>
         </div>
-      </div>
-      <div className='block lg:hidden'>
-        <div className='flex flex-col justify-end gap-3 px-5 py-3'>
-          <div className='flex flex-wrap justify-end gap-3'>
-            <TabsGroup
-              tabs={['D', 'W', 'M']}
-              value={barSize}
-              onTabChange={handleBarSizeChange}
-              disabled={isLoading}
-            />
-            <TabsGroup
-              tabs={['7B', '30B', '90B', '180B']}
-              value={activeTab}
-              onTabChange={handleTabChange}
-              disabled={isLoading}
-            />
-            <div className='flex items-center gap-1'>
-              <Text
-                tag='span'
-                size='11'
-                weight='600'
-                lineHeight='16'
-                className='text-primary-14'
-              >
-                Group by
-              </Text>
-              <SingleDrawer
-                options={groupByOptions}
-                isOpen={openSingle}
-                selectedValue={groupBy}
-                onOpen={toggleSingle}
-                onClose={closeSingle}
-                onSelect={selectSingle}
+        <div className='block lg:hidden'>
+          <div className='flex flex-col justify-end gap-3 px-5 py-3'>
+            <div className='flex flex-wrap justify-end gap-3'>
+              <TabsGroup
+                tabs={['D', 'W', 'M']}
+                value={barSize}
+                onTabChange={handleBarSizeChange}
                 disabled={isLoading}
-                triggerContentClassName='p-[5px]'
+              />
+              <TabsGroup
+                tabs={['7B', '30B', '90B', '180B']}
+                value={activeTab}
+                onTabChange={handleTabChange}
+                disabled={isLoading}
+              />
+              <div className='flex items-center gap-1'>
+                <Text
+                  tag='span'
+                  size='11'
+                  weight='600'
+                  lineHeight='16'
+                  className='text-primary-14'
+                >
+                  Group by
+                </Text>
+                <SingleDrawer
+                  options={groupByOptions}
+                  isOpen={openSingle}
+                  selectedValue={groupBy}
+                  onOpen={toggleSingle}
+                  onClose={closeSingle}
+                  onSelect={selectSingle}
+                  disabled={isLoading}
+                  triggerContentClassName='p-[5px]'
+                />
+              </div>
+            </div>
+            <div className='flex flex-wrap items-center justify-end gap-3'>
+              <Button
+                onClick={onOpenModal}
+                className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
+              >
+                <Icon
+                  name='filters'
+                  className='h-[14px] w-[14px]'
+                />
+                Filters
+              </Button>
+              <CSVDownloadButton
+                data={csvData}
+                filename={csvFilename}
               />
             </div>
           </div>
-          <div className='flex flex-wrap items-center justify-end gap-3'>
-            <Button
-              onClick={onOpenModal}
-              className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
-            >
-              <Icon
-                name='filters'
-                className='h-[14px] w-[14px]'
-              />
-              Filters
-            </Button>
-            <CSVDownloadButton
-              data={csvData}
-              filename={csvFilename}
-            />
-          </div>
+          <Filter
+            isOpen={isOpen}
+            filterOptions={filterOptions}
+            onClose={onCloseModal}
+            onClearAll={onClearAll}
+          />
         </div>
-        <Filter
-          isOpen={isOpen}
-          filterOptions={filterOptions}
-          onClose={onCloseModal}
-          onClearAll={onClearAll}
-        />
-      </div>
-    </>
-  );
-};
+      </>
+    );
+  }
+);
 
 export default memo(CompoundFeeRevenueRecieved);

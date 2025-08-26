@@ -311,6 +311,13 @@ const LineChart: FC<LineChartProps> = ({
         }))
       : [];
 
+    const bringMarkersToFront = (chart: Highcharts.Chart) => {
+      chart.series.forEach((s: any) => {
+        s.markerGroup?.toFront?.();
+        s.dataLabelsGroup?.toFront?.();
+      });
+    };
+
     return {
       chart: {
         type: 'area',
@@ -325,8 +332,7 @@ const LineChart: FC<LineChartProps> = ({
             type: 'x',
             preventDefault: true
           },
-          type: undefined,
-          pinchType: undefined,
+          pinchType: 'x',
           resetButton: { theme: { display: 'none' } }
         },
         events: {
@@ -338,6 +344,11 @@ const LineChart: FC<LineChartProps> = ({
                 false
               );
             }
+
+            bringMarkersToFront(this as Highcharts.Chart);
+          },
+          render: function () {
+            bringMarkersToFront(this as Highcharts.Chart);
           }
         }
       },
@@ -474,10 +485,12 @@ const LineChart: FC<LineChartProps> = ({
       plotOptions: {
         series: {
           animation: false,
-          turboThreshold: 0
+          turboThreshold: 0,
+          clip: false
         },
         area: {
           marker: {
+            zIndex: 5,
             enabled: false,
             symbol: 'circle',
             radius: 5,
@@ -551,7 +564,14 @@ const LineChart: FC<LineChartProps> = ({
           highcharts={Highcharts}
           options={options}
           allowChartUpdate
-          containerProps={{ style: { width: '100%', height: '100%' } }}
+          containerProps={{
+            style: {
+              width: '100%',
+              height: '100%',
+              touchAction: 'none',
+              overscrollBehaviorX: 'contain'
+            }
+          }}
         />
       </div>
       <div className='absolute right-6 block'>
