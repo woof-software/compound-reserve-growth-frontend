@@ -108,7 +108,7 @@ const MultiSelectTrigger: FC<MultiSelectDrawerProps> = ({
           <Text
             size='11'
             weight='500'
-            className='text-primary-14 leading-none tabular-nums'
+            className='text-secondary-43 leading-none tabular-nums'
           >
             {value.length}
           </Text>
