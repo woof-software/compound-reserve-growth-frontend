@@ -179,7 +179,7 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
                 </div>
               </div>
             ))}
-            <div className='border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10'>
+            <div className='grid grid-cols-3 gap-x-10 gap-y-3 p-5 md:gap-x-[63px] md:px-10'>
               <div className='grid min-h-[39px] w-full max-w-[100px]'>
                 <Text
                   size='11'
@@ -237,8 +237,8 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
           cellClassName='py-3 px-[5px]'
           headerTextClassName='text-primary-14 font-medium'
           enableSorting
-          enablePagination
-          paginationClassName='py-[13px] px-[5px]'
+          enablePagination={data.length > 10}
+          paginationClassName='py-0 px-[5px]'
           className='flex min-h-[400px] flex-col justify-between'
         />
       </div>

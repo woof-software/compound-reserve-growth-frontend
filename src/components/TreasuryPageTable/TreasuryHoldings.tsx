@@ -283,7 +283,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
         data={tableData}
         columns={treasuryColumns}
         enableSorting
-        enablePagination
+        enablePagination={tableData.length > 10}
         pageSize={10}
         containerTableClassName='min-h-[518px]'
         className={cn('hidden flex-col justify-between lg:flex', {
@@ -292,7 +292,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
         headerCellClassName='py-[13px] px-[5px]'
         cellClassName='py-3 px-[5px]'
         headerTextClassName='text-primary-14 font-medium'
-        paginationClassName='py-[13px] px-[5px]'
+        paginationClassName='py-0 px-[5px]'
       />
     </>
   );
