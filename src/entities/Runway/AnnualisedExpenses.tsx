@@ -217,7 +217,7 @@ const AnnualisedExpensesBlock = () => {
           onTypeSelect={onTypeSelect}
         />
       </div>
-      <div className='flex flex-col-reverse justify-between gap-0 lg:flex-row lg:gap-10'>
+      <div className='flex flex-col-reverse justify-between gap-8 lg:flex-row lg:gap-10'>
         <AnnualisedExpenses
           sortType={sortType}
           data={processedData.tableData}

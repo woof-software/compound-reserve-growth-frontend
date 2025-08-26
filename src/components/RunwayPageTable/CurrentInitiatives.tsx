@@ -134,7 +134,8 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
               className={cn(
                 'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
                 {
-                  'border-b-0': dataRows.length - 1 === index
+                  'border-b-0': dataRows.length - 1 === index,
+                  'pt-0': index === 0
                 }
               )}
             >
