@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
+import MetricIncentivesBlock from '@/components/TreasuryPageTable/MetricIncentives';
 import CurrentSpendingByChainBlock from '@/entities/Insentive/CurrentSpendingByChain';
 import DailyExpenses from '@/entities/Insentive/DailyExpenses';
 import HistoricalExpencesByNetworks from '@/entities/Insentive/HistoricalExpencesByNetworks';
 import IncomeVsExpensesOnChainsAndMarkets from '@/entities/Insentive/IncomeVsExpensesOnChainsAndMarkets';
-import MetricBlock from '@/entities/Insentive/MetricBlock';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
 import {
@@ -90,7 +90,7 @@ const InsentivePage = () => {
               onTabChange={onTabsChange}
             />
           </div>
-          <MetricBlock
+          <MetricIncentivesBlock
             isLoading={isLoading}
             data={{
               uniqDataByCategory,

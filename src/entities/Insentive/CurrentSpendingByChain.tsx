@@ -3,12 +3,11 @@ import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import CryptoChart from '@/components/Charts/Bar/Bar';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
+import CurrentSpendingByChain from '@/components/IncentivesPageTable/CurrentSpendingByChain';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import SortDrawer from '@/components/SortDrawer/SortDrawer';
-import TreasuryBalanceByNetwork, {
-  TreasuryBalanceByNetworkType
-} from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
+import { TreasuryBalanceByNetworkType } from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
@@ -340,8 +339,6 @@ const CurrentSpendingByChainBlock = ({
     symbolOptions
   ]);
 
-  console.log('tableData=>', tableData);
-
   return (
     <Card
       isLoading={isLoading}
@@ -423,7 +420,7 @@ const CurrentSpendingByChainBlock = ({
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
           <CryptoChart data={chartData} />
-          <TreasuryBalanceByNetwork
+          <CurrentSpendingByChain
             sortType={sortType}
             tableData={tableData}
           />

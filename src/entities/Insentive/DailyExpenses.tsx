@@ -2,12 +2,11 @@ import React, { useCallback, useMemo, useReducer } from 'react';
 
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
+import DailyExpensesTable from '@/components/IncentivesPageTable/DailyExpenses';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import SortDrawer from '@/components/SortDrawer/SortDrawer';
-import TreasuryHoldings, {
-  TreasuryBalanceByNetworkType
-} from '@/components/TreasuryPageTable/TreasuryHoldings';
+import { TreasuryBalanceByNetworkType } from '@/components/TreasuryPageTable/TreasuryHoldings';
 import { treasuryBalanceByNetworkColumns } from '@/entities/Treasury/TreasuryBalanceByNetwork';
 import { useModal } from '@/shared/hooks/useModal';
 import {
@@ -19,6 +18,7 @@ import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
+import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import View from '@/shared/ui/View/View';
 
 interface TreasuryHoldingsBlockProps {
@@ -101,9 +101,7 @@ const DailyExpenses = ({
     }),
     {
       chain: [] as OptionType[],
-      assetType: [] as OptionType[],
-      deployment: [] as OptionType[],
-      symbol: [] as OptionType[]
+      deployment: [] as OptionType[]
     }
   );
 
@@ -118,18 +116,15 @@ const DailyExpenses = ({
   const filterOptionsConfig = useMemo(
     () => ({
       chain: { path: 'source.network' },
-      assetType: { path: 'source.asset.type' },
-      deployment: { path: 'source.market' },
-      symbol: { path: 'source.asset.symbol' }
+      deployment: { path: 'source.market' }
     }),
     []
   );
 
-  const { chainOptions, assetTypeOptions, deploymentOptions, symbolOptions } =
-    useMemo(
-      () => extractFilterOptions(data, filterOptionsConfig),
-      [data, filterOptionsConfig]
-    );
+  const { chainOptions, deploymentOptions } = useMemo(
+    () => extractFilterOptions(data, filterOptionsConfig),
+    [data, filterOptionsConfig]
+  );
 
   const deploymentOptionsFilter = useMemo(() => {
     const marketV2 =
@@ -174,30 +169,12 @@ const DailyExpenses = ({
         return false;
       }
 
-      if (
-        selectedOptions.assetType.length > 0 &&
-        !selectedOptions.assetType.some(
-          (o: OptionType) => o.id === item.source.asset.type
-        )
-      ) {
-        return false;
-      }
-
       const market = item.source.market ?? 'no market';
 
       if (
         selectedOptions.deployment.length > 0 &&
         !selectedOptions.deployment.some((o: OptionType) =>
           o.id === 'no name' ? market === 'no market' : o.id === market
-        )
-      ) {
-        return false;
-      }
-
-      if (
-        selectedOptions.symbol.length > 0 &&
-        !selectedOptions.symbol.some(
-          (o: OptionType) => o.id === item.source.asset.symbol
         )
       ) {
         return false;
@@ -223,21 +200,9 @@ const DailyExpenses = ({
     [selectedOptions.deployment]
   );
 
-  const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      assetType: selectedOptions
-    });
-  }, []);
-
   const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
       deployment: selectedOptions
-    });
-  }, []);
-
-  const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      symbol: selectedOptions
     });
   }, []);
 
@@ -285,50 +250,21 @@ const DailyExpenses = ({
       onChange: onSelectMarket
     };
 
-    const assetTypeFilterOptions = {
-      id: 'assetType',
-      placeholder: 'Asset Type',
-      total: selectedOptions.assetType.length,
-      selectedOptions: selectedOptions.assetType,
-      options:
-        assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
-      onChange: onSelectAssetType
-    };
-
-    const symbolFilterOptions = {
-      id: 'reserveSymbol',
-      placeholder: 'Reserve Symbols',
-      total: selectedOptions.symbol.length,
-      selectedOptions: selectedOptions.symbol,
-      options:
-        symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
-      onChange: onSelectSymbol
-    };
-
-    return [
-      chainFilterOptions,
-      marketFilterOptions,
-      assetTypeFilterOptions,
-      symbolFilterOptions
-    ];
+    return [chainFilterOptions, marketFilterOptions];
   }, [
-    assetTypeOptions,
     chainOptions,
     deploymentOptionsFilter,
-    onSelectAssetType,
     onSelectChain,
     onSelectMarket,
-    onSelectSymbol,
-    selectedOptions,
-    symbolOptions
+    selectedOptions
   ]);
 
   return (
     <Card
       isError={isError}
       isLoading={isLoading}
-      title='Full Treasury Holdings'
-      id='full-treasury-holdings'
+      title='Daily expenses'
+      id='daily-expenses'
       className={{
         loading: 'min-h-[inherit]',
         container:
@@ -338,6 +274,11 @@ const DailyExpenses = ({
       }}
     >
       <div className='hidden items-center justify-end gap-3 px-10 py-3 lg:flex lg:px-0'>
+        <TabsGroup
+          tabs={['COMP', 'USD']}
+          value={'COMP'}
+          onTabChange={() => {}}
+        />
         <MultiSelect
           options={chainOptions || []}
           value={selectedOptions.chain}
@@ -351,25 +292,6 @@ const DailyExpenses = ({
           onChange={onSelectMarket}
           placeholder='Market'
           disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-        />
-        <MultiSelect
-          options={
-            assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-            []
-          }
-          value={selectedOptions.assetType}
-          onChange={onSelectAssetType}
-          placeholder='Asset Type'
-          disabled={isLoading}
-        />
-        <MultiSelect
-          options={
-            symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || []
-          }
-          value={selectedOptions.symbol}
-          onChange={onSelectSymbol}
-          placeholder='Reserve Symbols'
-          disabled={isLoading}
         />
         <CSVDownloadButton
           data={tableData}
@@ -419,7 +341,7 @@ const DailyExpenses = ({
         />
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
-        <TreasuryHoldings
+        <DailyExpensesTable
           sortType={sortType}
           tableData={tableData}
         />

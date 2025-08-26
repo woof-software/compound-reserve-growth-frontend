@@ -5,9 +5,6 @@ import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton'
 import Filter from '@/components/Filter/Filter';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import SingleDropdown, {
-  SingleDrawer
-} from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
@@ -17,12 +14,9 @@ import { TokenData } from '@/shared/types/Treasury/types';
 import { BarSize, OptionType, TimeRange } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
-import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
+import Switch from '@/shared/ui/Switch/Switch';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import Text from '@/shared/ui/Text/Text';
-
-const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
 
 const groupByMapping: Record<string, string> = {
   'Asset Type': 'assetType',
@@ -42,19 +36,11 @@ interface FiltersProps {
 
   deploymentOptionsFilter: OptionType[];
 
-  assetTypeOptions: OptionType[];
-
-  symbolOptions: OptionType[];
-
   barSize: BarSize;
 
   activeTab: TimeRange | null;
 
   isLoading: boolean;
-
-  isOpenSingle: boolean;
-
-  groupBy: string;
 
   csvFilename: string;
 
@@ -63,34 +49,18 @@ interface FiltersProps {
   selectedOptions: {
     chain: OptionType[];
 
-    assetType: OptionType[];
-
     deployment: OptionType[];
-
-    symbol: OptionType[];
   };
 
   onSelectChain: (chain: OptionType[]) => void;
 
-  onSelectAssetType: (assetType: OptionType[]) => void;
-
   onSelectMarket: (deployment: OptionType[]) => void;
-
-  onSelectSymbol: (symbol: OptionType[]) => void;
 
   handleBarSizeChange: (value: string) => void;
 
   handleTabChange: (value: string) => void;
 
-  openSingleDropdown: () => void;
-
-  closeSingle: () => void;
-
   onClearAll: () => void;
-
-  selectSingle: (value: string) => void;
-
-  selectSingleClose: (value: string) => void;
 }
 
 const IncomeVsExpensesOnChainsAndMarkets = ({
@@ -110,15 +80,6 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
       symbol: [] as OptionType[]
     }
   );
-
-  const {
-    isOpen: isOpenSingle,
-    selectedValue: selectedSingle,
-    close: closeSingle,
-    open: openSingleDropdown,
-    select: selectSingle,
-    selectClose: selectSingleClose
-  } = useDropdown('single');
 
   const {
     activeTab,
@@ -149,11 +110,10 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
     []
   );
 
-  const { chainOptions, assetTypeOptions, symbolOptions, deploymentOptions } =
-    useMemo(
-      () => extractFilterOptions(rawData, filterOptionsConfig),
-      [rawData, filterOptionsConfig]
-    );
+  const { chainOptions, deploymentOptions } = useMemo(
+    () => extractFilterOptions(rawData, filterOptionsConfig),
+    [rawData, filterOptionsConfig]
+  );
 
   const deploymentOptionsFilter = useMemo(() => {
     const marketV2 =
@@ -187,7 +147,7 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
     return allMarkets;
   }, [deploymentOptions, selectedOptions]);
 
-  const groupBy = selectedSingle?.[0] || 'None';
+  const groupBy = 'None';
 
   const activeFilters = useMemo(
     () =>
@@ -286,21 +246,9 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
     [selectedOptions.deployment]
   );
 
-  const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      assetType: selectedOptions
-    });
-  }, []);
-
   const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
       deployment: selectedOptions
-    });
-  }, []);
-
-  const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      symbol: selectedOptions
     });
   }, []);
 
@@ -315,16 +263,14 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
 
   const onClearAll = useCallback(() => {
     onClearSelectedOptions();
-
-    selectSingle('None');
-  }, [onClearSelectedOptions, selectSingle]);
+  }, [onClearSelectedOptions]);
 
   return (
     <Card
       isLoading={isLoading}
       isError={isError}
-      title='Total Treasury Value'
-      id='total-treasury-value'
+      title='Income vs Expenses on chains and markets'
+      id='income-vs-expenses-on-chains-and-markets'
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',
@@ -332,28 +278,18 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
       }}
     >
       <Filters
-        groupBy={groupBy}
-        assetTypeOptions={assetTypeOptions}
         selectedOptions={selectedOptions}
         chainOptions={chainOptions}
-        symbolOptions={symbolOptions}
         deploymentOptionsFilter={deploymentOptionsFilter}
         isLoading={isLoading || false}
         barSize={barSize}
         activeTab={activeTab}
         csvData={csvData}
         csvFilename={csvFilename}
-        isOpenSingle={isOpenSingle}
         onSelectChain={onSelectChain}
-        onSelectAssetType={onSelectAssetType}
         onSelectMarket={onSelectMarket}
-        onSelectSymbol={onSelectSymbol}
         handleBarSizeChange={handleBarSizeChange}
         handleTabChange={handleTabChange}
-        openSingleDropdown={openSingleDropdown}
-        closeSingle={closeSingle}
-        selectSingle={selectSingle}
-        selectSingleClose={selectSingleClose}
         onClearAll={onClearAll}
       />
       {!isLoading && !isError && !hasData ? (
@@ -377,26 +313,16 @@ const Filters = memo(
   ({
     barSize,
     activeTab,
-    isOpenSingle,
-    groupBy,
     csvData,
     csvFilename,
     chainOptions,
     selectedOptions,
     deploymentOptionsFilter,
-    assetTypeOptions,
-    symbolOptions,
     isLoading,
     onSelectChain,
-    onSelectAssetType,
     onSelectMarket,
-    onSelectSymbol,
     handleBarSizeChange,
     handleTabChange,
-    openSingleDropdown,
-    closeSingle,
-    selectSingle,
-    selectSingleClose,
     onClearAll
   }: FiltersProps) => {
     const { isOpen, onOpenModal, onCloseModal } = useModal();
@@ -420,23 +346,10 @@ const Filters = memo(
         onChange: onSelectMarket
       };
 
-      const assetTypeFilterOptions = {
-        id: 'assetType',
-        placeholder: 'Asset Type',
-        total: selectedOptions.assetType.length,
-        selectedOptions: selectedOptions.assetType,
-        options:
-          assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-          [],
-        onChange: onSelectAssetType
-      };
-
-      return [chainFilterOptions, marketFilterOptions, assetTypeFilterOptions];
+      return [chainFilterOptions, marketFilterOptions];
     }, [
-      assetTypeOptions,
       chainOptions,
       deploymentOptionsFilter,
-      onSelectAssetType,
       onSelectChain,
       onSelectMarket,
       selectedOptions
@@ -459,29 +372,13 @@ const Filters = memo(
                 onTabChange={handleTabChange}
                 disabled={isLoading}
               />
-              <div className='flex items-center gap-1'>
-                <Text
-                  tag='span'
-                  size='11'
-                  weight='600'
-                  lineHeight='16'
-                  className='text-primary-14'
-                >
-                  Group by
-                </Text>
-                <SingleDrawer
-                  options={groupByOptions}
-                  isOpen={isOpenSingle}
-                  selectedValue={groupBy}
-                  onOpen={openSingleDropdown}
-                  onClose={closeSingle}
-                  onSelect={(value: string) => {
-                    selectSingle(value);
-                  }}
-                  disabled={isLoading}
-                  triggerContentClassName='p-[5px]'
-                />
-              </div>
+              <Switch
+                label='Fees Only'
+                positionLabel='left'
+                checked={false}
+                onCheckedChange={() => {}}
+                classNameTitle='!text-[11px]'
+              />
             </div>
             <div className='flex flex-wrap items-center justify-end gap-3'>
               <Button
@@ -497,6 +394,7 @@ const Filters = memo(
               <CSVDownloadButton
                 data={csvData}
                 filename={csvFilename}
+                tooltipContent='CSV with the entire historical data can be downloaded'
               />
             </div>
           </div>
@@ -509,6 +407,25 @@ const Filters = memo(
         </div>
         <div className='hidden lg:block'>
           <div className='flex items-center justify-end gap-3 px-0 py-3'>
+            <TabsGroup
+              tabs={['D', 'W', 'M']}
+              value={barSize}
+              onTabChange={handleBarSizeChange}
+              disabled={isLoading}
+            />
+            <TabsGroup
+              tabs={['7B', '30B', '90B', '180B']}
+              value={activeTab}
+              onTabChange={handleTabChange}
+              disabled={isLoading}
+            />
+            <Switch
+              label='Fees Only'
+              positionLabel='left'
+              checked={false}
+              onCheckedChange={() => {}}
+              classNameTitle='!text-[11px]'
+            />
             <MultiSelect
               options={chainOptions || []}
               value={selectedOptions.chain}
@@ -523,65 +440,10 @@ const Filters = memo(
               placeholder='Market'
               disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
             />
-            <MultiSelect
-              options={
-                assetTypeOptions?.sort((a, b) =>
-                  a.label.localeCompare(b.label)
-                ) || []
-              }
-              value={selectedOptions.assetType}
-              onChange={onSelectAssetType}
-              placeholder='Asset Type'
-              disabled={isLoading}
-            />
-            <MultiSelect
-              options={
-                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-                []
-              }
-              value={selectedOptions.symbol}
-              onChange={onSelectSymbol}
-              placeholder='Reserve Symbols'
-              disabled={isLoading}
-            />
-            <TabsGroup
-              tabs={['D', 'W', 'M']}
-              value={barSize}
-              onTabChange={handleBarSizeChange}
-              disabled={isLoading}
-            />
-            <TabsGroup
-              tabs={['7B', '30B', '90B', '180B']}
-              value={activeTab}
-              onTabChange={handleTabChange}
-              disabled={isLoading}
-            />
-            <div className='flex items-center gap-1'>
-              <Text
-                tag='span'
-                size='11'
-                weight='600'
-                lineHeight='16'
-                className='text-primary-14'
-              >
-                Group by
-              </Text>
-              <SingleDropdown
-                options={groupByOptions}
-                isOpen={isOpenSingle}
-                selectedValue={groupBy}
-                onOpen={openSingleDropdown}
-                onClose={closeSingle}
-                onSelect={(value: string) => {
-                  selectSingleClose(value);
-                }}
-                disabled={isLoading}
-                triggerContentClassName='p-[5px]'
-              />
-            </div>
             <CSVDownloadButton
               data={csvData}
               filename={csvFilename}
+              tooltipContent='CSV with the entire historical data can be downloaded'
             />
           </div>
         </div>

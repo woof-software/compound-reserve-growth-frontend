@@ -2,33 +2,15 @@ import React, { memo, useCallback, useMemo, useReducer } from 'react';
 
 import LineChart from '@/components/Charts/Line/Line';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
-import Filter from '@/components/Filter/Filter';
-import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import SingleDropdown, {
-  SingleDrawer
-} from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
-import { useModal } from '@/shared/hooks/useModal';
-import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
+import { ChartDataItem } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { BarSize, OptionType, TimeRange } from '@/shared/types/types';
-import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
-import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
-import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import Text from '@/shared/ui/Text/Text';
-
-const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
-
-const groupByMapping: Record<string, string> = {
-  'Asset Type': 'assetType',
-  Chain: 'chain',
-  Market: 'deployment'
-};
 
 interface TotalTreasuryValueProps {
   isLoading?: boolean;
@@ -38,59 +20,19 @@ interface TotalTreasuryValueProps {
 }
 
 interface FiltersProps {
-  chainOptions: OptionType[];
-
-  deploymentOptionsFilter: OptionType[];
-
-  assetTypeOptions: OptionType[];
-
-  symbolOptions: OptionType[];
-
   barSize: BarSize;
 
   activeTab: TimeRange | null;
 
   isLoading: boolean;
 
-  isOpenSingle: boolean;
-
-  groupBy: string;
-
   csvFilename: string;
 
   csvData: Record<string, string | number>[];
 
-  selectedOptions: {
-    chain: OptionType[];
-
-    assetType: OptionType[];
-
-    deployment: OptionType[];
-
-    symbol: OptionType[];
-  };
-
-  onSelectChain: (chain: OptionType[]) => void;
-
-  onSelectAssetType: (assetType: OptionType[]) => void;
-
-  onSelectMarket: (deployment: OptionType[]) => void;
-
-  onSelectSymbol: (symbol: OptionType[]) => void;
-
   handleBarSizeChange: (value: string) => void;
 
   handleTabChange: (value: string) => void;
-
-  openSingleDropdown: () => void;
-
-  closeSingle: () => void;
-
-  onClearAll: () => void;
-
-  selectSingle: (value: string) => void;
-
-  selectSingleClose: (value: string) => void;
 }
 
 const HistoricalExpencesByNetworks = ({
@@ -112,15 +54,6 @@ const HistoricalExpencesByNetworks = ({
   );
 
   const {
-    isOpen: isOpenSingle,
-    selectedValue: selectedSingle,
-    close: closeSingle,
-    open: openSingleDropdown,
-    select: selectSingle,
-    selectClose: selectSingleClose
-  } = useDropdown('single');
-
-  const {
     activeTab,
     barSize,
     barCount,
@@ -138,56 +71,6 @@ const HistoricalExpencesByNetworks = ({
     }
     return [...treasuryApiResponse].sort((a, b) => a.date - b.date);
   }, [treasuryApiResponse]);
-
-  const filterOptionsConfig = useMemo(
-    () => ({
-      chain: { path: 'source.network' },
-      assetType: { path: 'source.asset.type' },
-      deployment: { path: 'source.market' },
-      symbol: { path: 'source.asset.symbol' }
-    }),
-    []
-  );
-
-  const { chainOptions, assetTypeOptions, symbolOptions, deploymentOptions } =
-    useMemo(
-      () => extractFilterOptions(rawData, filterOptionsConfig),
-      [rawData, filterOptionsConfig]
-    );
-
-  const deploymentOptionsFilter = useMemo(() => {
-    const marketV2 =
-      deploymentOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const marketV3 =
-      deploymentOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const noMarkets = deploymentOptions?.find(
-      (el) => el.id.toLowerCase() === 'no name'
-    );
-
-    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
-
-    let allMarkets = [...marketV3, ...marketV2];
-
-    if (noMarkets) {
-      allMarkets = [...allMarkets, noMarkets];
-    }
-
-    if (selectedChainIds.length) {
-      return allMarkets.filter(
-        (el) => el.chain?.some((c) => selectedChainIds.includes(c)) ?? false
-      );
-    }
-
-    return allMarkets;
-  }, [deploymentOptions, selectedOptions]);
-
-  const groupBy = selectedSingle?.[0] || 'None';
 
   const activeFilters = useMemo(
     () =>
@@ -210,13 +93,8 @@ const HistoricalExpencesByNetworks = ({
       deployment: 'source.market',
       symbol: 'source.asset.symbol'
     },
-    groupBy,
-    groupByKeyPath:
-      groupBy === 'None'
-        ? null
-        : filterOptionsConfig[
-            groupByMapping[groupBy] as keyof typeof filterOptionsConfig
-          ].path,
+    groupBy: 'None',
+    groupByKeyPath: null,
     defaultSeriesName: 'Treasury Value'
   });
 
@@ -260,7 +138,7 @@ const HistoricalExpencesByNetworks = ({
   const { csvData, csvFilename } = useCSVExport({
     chartSeries: correctedChartSeries,
     barSize,
-    groupBy,
+    groupBy: 'None',
     filePrefix: 'Total_Treasury_Value',
     aggregationType: 'sum'
   });
@@ -271,38 +149,6 @@ const HistoricalExpencesByNetworks = ({
       correctedChartSeries.some((s) => s.data.length > 0)
     );
   }, [correctedChartSeries]);
-
-  const onSelectChain = useCallback(
-    (chain: OptionType[]) => {
-      const selectedChainIds = chain.map((o) => o.id);
-
-      const filteredDeployment = selectedOptions.deployment.filter((el) =>
-        selectedChainIds.length === 0
-          ? true
-          : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
-      );
-      setSelectedOptions({ chain, deployment: filteredDeployment });
-    },
-    [selectedOptions.deployment]
-  );
-
-  const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      assetType: selectedOptions
-    });
-  }, []);
-
-  const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      deployment: selectedOptions
-    });
-  }, []);
-
-  const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      symbol: selectedOptions
-    });
-  }, []);
 
   const onClearSelectedOptions = useCallback(() => {
     setSelectedOptions({
@@ -315,16 +161,14 @@ const HistoricalExpencesByNetworks = ({
 
   const onClearAll = useCallback(() => {
     onClearSelectedOptions();
-
-    selectSingle('None');
-  }, [onClearSelectedOptions, selectSingle]);
+  }, [onClearSelectedOptions]);
 
   return (
     <Card
       isLoading={isLoading}
       isError={isError}
-      title='Total Treasury Value'
-      id='total-treasury-value'
+      title='Historical expences by networks'
+      id='historical-expences-by-networks'
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',
@@ -332,37 +176,21 @@ const HistoricalExpencesByNetworks = ({
       }}
     >
       <Filters
-        groupBy={groupBy}
-        assetTypeOptions={assetTypeOptions}
-        selectedOptions={selectedOptions}
-        chainOptions={chainOptions}
-        symbolOptions={symbolOptions}
-        deploymentOptionsFilter={deploymentOptionsFilter}
         isLoading={isLoading || false}
         barSize={barSize}
         activeTab={activeTab}
         csvData={csvData}
         csvFilename={csvFilename}
-        isOpenSingle={isOpenSingle}
-        onSelectChain={onSelectChain}
-        onSelectAssetType={onSelectAssetType}
-        onSelectMarket={onSelectMarket}
-        onSelectSymbol={onSelectSymbol}
         handleBarSizeChange={handleBarSizeChange}
         handleTabChange={handleTabChange}
-        openSingleDropdown={openSingleDropdown}
-        closeSingle={closeSingle}
-        selectSingle={selectSingle}
-        selectSingleClose={selectSingleClose}
-        onClearAll={onClearAll}
       />
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder onButtonClick={onClearAll} />
       ) : (
         <LineChart
-          key={groupBy}
+          // key={groupBy}
           data={correctedChartSeries}
-          groupBy={groupBy}
+          groupBy={'None'}
           className='max-h-fit'
           barSize={barSize}
           barCountToSet={barCount}
@@ -377,76 +205,23 @@ const Filters = memo(
   ({
     barSize,
     activeTab,
-    isOpenSingle,
-    groupBy,
     csvData,
     csvFilename,
-    chainOptions,
-    selectedOptions,
-    deploymentOptionsFilter,
-    assetTypeOptions,
-    symbolOptions,
     isLoading,
-    onSelectChain,
-    onSelectAssetType,
-    onSelectMarket,
-    onSelectSymbol,
     handleBarSizeChange,
-    handleTabChange,
-    openSingleDropdown,
-    closeSingle,
-    selectSingle,
-    selectSingleClose,
-    onClearAll
+    handleTabChange
   }: FiltersProps) => {
-    const { isOpen, onOpenModal, onCloseModal } = useModal();
-
-    const filterOptions = useMemo(() => {
-      const chainFilterOptions = {
-        id: 'chain',
-        placeholder: 'Chain',
-        total: selectedOptions.chain.length,
-        selectedOptions: selectedOptions.chain,
-        options: chainOptions || [],
-        onChange: onSelectChain
-      };
-
-      const marketFilterOptions = {
-        id: 'market',
-        placeholder: 'Market',
-        total: selectedOptions.deployment.length,
-        selectedOptions: selectedOptions.deployment,
-        options: deploymentOptionsFilter || [],
-        onChange: onSelectMarket
-      };
-
-      const assetTypeFilterOptions = {
-        id: 'assetType',
-        placeholder: 'Asset Type',
-        total: selectedOptions.assetType.length,
-        selectedOptions: selectedOptions.assetType,
-        options:
-          assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-          [],
-        onChange: onSelectAssetType
-      };
-
-      return [chainFilterOptions, marketFilterOptions, assetTypeFilterOptions];
-    }, [
-      assetTypeOptions,
-      chainOptions,
-      deploymentOptionsFilter,
-      onSelectAssetType,
-      onSelectChain,
-      onSelectMarket,
-      selectedOptions
-    ]);
-
     return (
       <>
         <div className='block lg:hidden'>
           <div className='flex flex-col justify-end gap-3 px-5 py-3'>
             <div className='flex flex-wrap justify-end gap-3'>
+              <TabsGroup
+                tabs={['Lend Incentive', 'Borrow Incentive', 'Total']}
+                value={'Borrow Incentive'}
+                onTabChange={() => {}}
+                disabled={isLoading}
+              />
               <TabsGroup
                 tabs={['D', 'W', 'M']}
                 value={barSize}
@@ -459,89 +234,22 @@ const Filters = memo(
                 onTabChange={handleTabChange}
                 disabled={isLoading}
               />
-              <div className='flex items-center gap-1'>
-                <Text
-                  tag='span'
-                  size='11'
-                  weight='600'
-                  lineHeight='16'
-                  className='text-primary-14'
-                >
-                  Group by
-                </Text>
-                <SingleDrawer
-                  options={groupByOptions}
-                  isOpen={isOpenSingle}
-                  selectedValue={groupBy}
-                  onOpen={openSingleDropdown}
-                  onClose={closeSingle}
-                  onSelect={(value: string) => {
-                    selectSingle(value);
-                  }}
-                  disabled={isLoading}
-                  triggerContentClassName='p-[5px]'
-                />
-              </div>
             </div>
             <div className='flex flex-wrap items-center justify-end gap-3'>
-              <Button
-                onClick={onOpenModal}
-                className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
-              >
-                <Icon
-                  name='filters'
-                  className='h-[14px] w-[14px]'
-                />
-                Filters
-              </Button>
               <CSVDownloadButton
                 data={csvData}
                 filename={csvFilename}
+                tooltipContent='CSV with the entire historical data can be downloaded'
               />
             </div>
           </div>
-          <Filter
-            isOpen={isOpen}
-            filterOptions={filterOptions}
-            onClose={onCloseModal}
-            onClearAll={onClearAll}
-          />
         </div>
         <div className='hidden lg:block'>
           <div className='flex items-center justify-end gap-3 px-0 py-3'>
-            <MultiSelect
-              options={chainOptions || []}
-              value={selectedOptions.chain}
-              onChange={onSelectChain}
-              placeholder='Chain'
-              disabled={isLoading}
-            />
-            <MultiSelect
-              options={deploymentOptionsFilter}
-              value={selectedOptions.deployment}
-              onChange={onSelectMarket}
-              placeholder='Market'
-              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-            />
-            <MultiSelect
-              options={
-                assetTypeOptions?.sort((a, b) =>
-                  a.label.localeCompare(b.label)
-                ) || []
-              }
-              value={selectedOptions.assetType}
-              onChange={onSelectAssetType}
-              placeholder='Asset Type'
-              disabled={isLoading}
-            />
-            <MultiSelect
-              options={
-                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-                []
-              }
-              value={selectedOptions.symbol}
-              onChange={onSelectSymbol}
-              placeholder='Reserve Symbols'
+            <TabsGroup
+              tabs={['Lend Incentive', 'Borrow Incentive', 'Total']}
+              value={'Borrow Incentive'}
+              onTabChange={() => {}}
               disabled={isLoading}
             />
             <TabsGroup
@@ -556,32 +264,10 @@ const Filters = memo(
               onTabChange={handleTabChange}
               disabled={isLoading}
             />
-            <div className='flex items-center gap-1'>
-              <Text
-                tag='span'
-                size='11'
-                weight='600'
-                lineHeight='16'
-                className='text-primary-14'
-              >
-                Group by
-              </Text>
-              <SingleDropdown
-                options={groupByOptions}
-                isOpen={isOpenSingle}
-                selectedValue={groupBy}
-                onOpen={openSingleDropdown}
-                onClose={closeSingle}
-                onSelect={(value: string) => {
-                  selectSingleClose(value);
-                }}
-                disabled={isLoading}
-                triggerContentClassName='p-[5px]'
-              />
-            </div>
             <CSVDownloadButton
               data={csvData}
               filename={csvFilename}
+              tooltipContent='CSV with the entire historical data can be downloaded'
             />
           </div>
         </div>
