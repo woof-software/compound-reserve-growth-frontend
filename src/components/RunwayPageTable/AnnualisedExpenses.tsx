@@ -96,50 +96,98 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
   return (
     <>
       <MobileDataTable tableData={mobileTableData}>
-        {(dataRows) =>
-          dataRows.map((row, index) => (
-            <div
-              key={row.token + index}
-              className={cn(
-                'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
-                {
-                  'border-b-0': dataRows.length - 1 === index,
-                  'pt-0': index === 0
-                }
-              )}
-            >
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Discipline
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.discipline}
-                </Text>
+        {(dataRows) => (
+          <>
+            {dataRows.map((row, index) => (
+              <div
+                key={row.token + index}
+                className={cn(
+                  'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                  {
+                    'border-b-0': dataRows.length - 1 === index,
+                    'pt-0': index === 0
+                  }
+                )}
+              >
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Discipline
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.discipline}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Token
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.token}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Amount (Qty)
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {formatLargeNumber(row.amount, 2)}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Value
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    ${formatLargeNumber(row.value, 2)}
+                  </Text>
+                </div>
               </div>
-              <div className='grid w-full max-w-[100px]'>
+            ))}
+            <div className='border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10'>
+              <div className='grid min-h-[39px] w-full max-w-[100px]'>
                 <Text
                   size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
                 >
-                  Token
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.token}
+                  Total
                 </Text>
               </div>
               <div className='grid w-full max-w-[100px]'>
@@ -156,7 +204,7 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
                   lineHeight='21'
                   className='truncate'
                 >
-                  {formatLargeNumber(row.amount, 2)}
+                  {formatLargeNumber(footerData.amount, 2)}
                 </Text>
               </div>
               <div className='grid w-full max-w-[100px]'>
@@ -172,13 +220,11 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
                   size='13'
                   lineHeight='21'
                   className='truncate'
-                >
-                  ${formatLargeNumber(row.value, 2)}
-                </Text>
+                >{`$${formatLargeNumber(footerData.value, 2)}`}</Text>
               </div>
             </div>
-          ))
-        }
+          </>
+        )}
       </MobileDataTable>
       <div className='hidden w-full max-w-full lg:block'>
         <DataTable

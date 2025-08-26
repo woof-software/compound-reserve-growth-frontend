@@ -2,7 +2,11 @@ import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { formatNumber, formatQuantity } from '@/shared/lib/utils/utils';
+import {
+  formatLargeNumber,
+  formatNumber,
+  formatQuantity
+} from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Text from '@/shared/ui/Text/Text';
 
@@ -126,34 +130,125 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
   return (
     <>
       <MobileDataTable tableData={mobileTableData}>
-        {(dataRows) =>
-          dataRows.map((row, index) => (
-            <div
-              key={row.token + index}
-              className={cn(
-                'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 p-5 md:gap-x-[63px] md:px-10',
-                {
-                  'border-b': index !== dataRows.length - 1,
-                  'pt-0': index === 0
-                }
-              )}
-            >
-              <div className='grid w-full max-w-[100px]'>
+        {(dataRows) => (
+          <>
+            {dataRows.map((row, index) => (
+              <div
+                key={row.token + index}
+                className={cn(
+                  'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 p-5 md:gap-x-[63px] md:px-10',
+                  {
+                    'border-b': index !== dataRows.length - 1,
+                    'pt-0': index === 0
+                  }
+                )}
+              >
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Provider
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.provider}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Discipline
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.discipline}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Token
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.token}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  ></Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  ></Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Value ($)
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {formatNumber(row.value)}
+                  </Text>
+                </div>
+              </div>
+            ))}
+            <div className='border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10'>
+              <div className='grid min-h-[39px] w-full max-w-[100px]'>
                 <Text
                   size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
                 >
-                  Provider
+                  Total
                 </Text>
+              </div>
+              <div className='grid w-full max-w-[100px]'>
+                <Text
+                  size='8'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                ></Text>
                 <Text
                   size='13'
                   lineHeight='21'
                   className='truncate'
-                >
-                  {row.provider}
-                </Text>
+                ></Text>
               </div>
               <div className='grid w-full max-w-[100px]'>
                 <Text
@@ -162,70 +257,17 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
                   weight='500'
                   className='text-primary-14'
                 >
-                  Discipline
+                  Value
                 </Text>
                 <Text
                   size='13'
                   lineHeight='21'
                   className='truncate'
-                >
-                  {row.discipline}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Token
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.token}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Amount (Qty)
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {formatQuantity(row.amount)}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Value ($)
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {formatNumber(row.value)}
-                </Text>
+                >{`$${formatLargeNumber(footerData.value, 2)}`}</Text>
               </div>
             </div>
-          ))
-        }
+          </>
+        )}
       </MobileDataTable>
       <div className='hidden w-full max-w-full lg:block'>
         <DataTable
