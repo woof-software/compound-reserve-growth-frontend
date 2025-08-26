@@ -29,7 +29,7 @@ interface TreasuryBalanceByNetworkProps {
 const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
   {
     accessorKey: 'symbol',
-    header: 'Symbol',
+    header: 'Network',
     enableSorting: true,
     cell: ({ row }) => (
       <div className='flex items-center gap-3'>
@@ -49,7 +49,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
   },
   {
     accessorKey: 'qty',
-    header: 'QTY',
+    header: 'Value COMP',
     enableSorting: true,
     cell: ({ row }) => (
       <Text size='13'>{formatLargeNumber(row.original.qty, 1)}</Text>
@@ -57,20 +57,10 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
   },
   {
     accessorKey: 'value',
-    header: 'Value',
+    header: 'Value USDC',
     enableSorting: true,
     cell: ({ row }) => (
       <Text size='13'>{formatPrice(row.original.value, 1)}</Text>
-    )
-  },
-  {
-    accessorKey: 'market',
-    header: 'Market',
-    enableSorting: true,
-    cell: ({ row }) => (
-      <Text size='13'>
-        {row.original.market === 'no market' ? ' - ' : row.original.market}
-      </Text>
     )
   },
   {
@@ -92,7 +82,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
   }
 ];
 
-const TreasuryBalanceByNetwork = ({
+const CurrentSpendingByChain = ({
   sortType,
   tableData
 }: TreasuryBalanceByNetworkProps) => {
@@ -249,4 +239,4 @@ const TreasuryBalanceByNetwork = ({
   );
 };
 
-export default TreasuryBalanceByNetwork;
+export default CurrentSpendingByChain;

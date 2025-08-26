@@ -12,15 +12,16 @@ import { AddressTooltip } from '../AddressTooltip/AddressTooltip';
 
 export type TreasuryBalanceByNetworkType = {
   symbol: string;
+  chain: string;
+  market: string | null;
   qty: number;
   value: number;
+  price: number;
   source: string;
-  market: string;
   address: string;
-  chain: string;
 };
 
-interface TreasuryBalanceByNetworkProps {
+export interface TreasuryHoldingsProps {
   tableData: TreasuryBalanceByNetworkType[];
 
   sortType: { key: string; type: string };
@@ -28,9 +29,11 @@ interface TreasuryBalanceByNetworkProps {
 
 const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
   {
-    accessorKey: 'symbol',
-    header: 'Symbol',
+    id: 'symbol',
+    accessorFn: (row) => row.symbol,
+    header: 'Network',
     enableSorting: true,
+    size: 168,
     cell: ({ row }) => (
       <div className='flex items-center gap-3'>
         <Icon
@@ -48,23 +51,8 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     )
   },
   {
-    accessorKey: 'qty',
-    header: 'QTY',
-    enableSorting: true,
-    cell: ({ row }) => (
-      <Text size='13'>{formatLargeNumber(row.original.qty, 1)}</Text>
-    )
-  },
-  {
-    accessorKey: 'value',
-    header: 'Value',
-    enableSorting: true,
-    cell: ({ row }) => (
-      <Text size='13'>{formatPrice(row.original.value, 1)}</Text>
-    )
-  },
-  {
-    accessorKey: 'market',
+    id: 'market',
+    accessorFn: (row) => row.market,
     header: 'Market',
     enableSorting: true,
     cell: ({ row }) => (
@@ -74,28 +62,49 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     )
   },
   {
-    accessorKey: 'source',
+    id: 'qty',
+    accessorFn: (row) => row.qty,
+    header: 'Lend Incentive',
+    enableSorting: true,
+    cell: ({ row }) => (
+      <Text size='13'>{formatLargeNumber(row.original.qty, 1)}</Text>
+    )
+  },
+  {
+    id: 'value',
+    accessorFn: (row) => row.value,
+    header: 'Borrow Incentive',
+    enableSorting: true,
+    cell: ({ row }) => (
+      <Text size='13'>{formatPrice(row.original.value, 1)}</Text>
+    )
+  },
+  {
+    id: 'price',
+    accessorFn: (row) => row.price,
+    header: 'Total',
+    enableSorting: true,
+    cell: ({ row }) => (
+      <Text size='13'>{formatPrice(row.original.price, 1)}</Text>
+    )
+  },
+  {
+    id: 'source',
+    accessorFn: (row) => row.source,
     header: 'Source',
     enableSorting: true,
     size: 120,
-    cell: ({ row }) => {
-      const { source, address, chain } = row.original;
-
-      return (
-        <AddressTooltip
-          text={source}
-          address={address}
-          chain={chain}
-        />
-      );
-    }
+    cell: ({ row }) => (
+      <AddressTooltip
+        text={row.original.source}
+        address={row.original.address}
+        chain={row.original.chain}
+      />
+    )
   }
 ];
 
-const TreasuryBalanceByNetwork = ({
-  sortType,
-  tableData
-}: TreasuryBalanceByNetworkProps) => {
+const DailyExpensesTable = ({ tableData, sortType }: TreasuryHoldingsProps) => {
   const mobileTableData = useMemo(() => {
     if (!sortType?.key) {
       return tableData;
@@ -165,6 +174,40 @@ const TreasuryBalanceByNetwork = ({
                   weight='500'
                   className='text-primary-14'
                 >
+                  Chain
+                </Text>
+                <Text
+                  size='13'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {row.chain}
+                </Text>
+              </div>
+              <div className='grid w-full'>
+                <Text
+                  size='11'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  Market
+                </Text>
+                <Text
+                  size='13'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {row.market === 'no market' ? ' - ' : row.market}
+                </Text>
+              </div>
+              <div className='grid w-full'>
+                <Text
+                  size='11'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
                   QTY
                 </Text>
                 <Text
@@ -199,14 +242,14 @@ const TreasuryBalanceByNetwork = ({
                   weight='500'
                   className='text-primary-14'
                 >
-                  Market
+                  Price
                 </Text>
                 <Text
                   size='13'
                   lineHeight='21'
                   className='truncate'
                 >
-                  {row.market === 'no market' ? ' - ' : row.market}
+                  {formatPrice(row.price, 1)}
                 </Text>
               </div>
               <div className='grid w-full'>
@@ -230,23 +273,23 @@ const TreasuryBalanceByNetwork = ({
           ))
         }
       </MobileDataTable>
-      <div className='hidden w-full max-w-full lg:block lg:max-w-[522px]'>
-        <DataTable
-          data={tableData}
-          columns={treasuryColumns}
-          enableSorting
-          enablePagination
-          pageSize={10}
-          containerTableClassName='min-h-[518px]'
-          className='flex min-h-[565px] flex-col justify-between'
-          headerCellClassName='py-[13px] px-[5px]'
-          cellClassName='py-3 px-[5px]'
-          headerTextClassName='text-primary-14 font-medium'
-          paginationClassName='py-[13px] px-[5px]'
-        />
-      </div>
+      <DataTable
+        data={tableData}
+        columns={treasuryColumns}
+        enableSorting
+        enablePagination={tableData.length > 10}
+        pageSize={10}
+        containerTableClassName='min-h-[518px]'
+        className={cn('hidden flex-col justify-between lg:flex', {
+          'min-h-[565px]': tableData.length > 10
+        })}
+        headerCellClassName='py-[13px] px-[5px]'
+        cellClassName='py-3 px-[5px]'
+        headerTextClassName='text-primary-14 font-medium'
+        paginationClassName='py-0 px-[5px]'
+      />
     </>
   );
 };
 
-export default TreasuryBalanceByNetwork;
+export default DailyExpensesTable;
