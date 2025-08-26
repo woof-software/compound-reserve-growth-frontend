@@ -1,6 +1,7 @@
-import React, { useCallback, useMemo, useReducer } from 'react';
+import React, { useCallback, useMemo, useReducer, useState } from 'react';
 
 import CryptoChart from '@/components/Charts/Bar/Bar';
+import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
@@ -19,6 +20,7 @@ import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
+import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import View from '@/shared/ui/View/View';
 
 interface CurrentSpendingByChainBlockProps {
@@ -51,19 +53,15 @@ const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
 export const treasuryBalanceByNetworkColumns = [
   {
     accessorKey: 'symbol',
-    header: 'Symbol'
+    header: 'Network'
   },
   {
     accessorKey: 'qty',
-    header: 'QTY'
+    header: 'Value COMP'
   },
   {
     accessorKey: 'value',
-    header: 'Value'
-  },
-  {
-    accessorKey: 'market',
-    header: 'Market'
+    header: 'Value USDC'
   },
   {
     accessorKey: 'source',
@@ -87,6 +85,8 @@ const CurrentSpendingByChainBlock = ({
     onOpenModal: onSortOpen,
     onCloseModal: onSortClose
   } = useModal();
+
+  const [tabValue, setTabValue] = useState<string>('Borrow Incentive');
 
   const [selectedOptions, setSelectedOptions] = useReducer(
     (prev, next) => ({
@@ -257,6 +257,10 @@ const CurrentSpendingByChainBlock = ({
     });
   }, []);
 
+  const onTabsChange = useCallback((value: string) => {
+    setTabValue(value);
+  }, []);
+
   const onClearSelectedOptions = useCallback(() => {
     setSelectedOptions({
       chain: [],
@@ -336,6 +340,8 @@ const CurrentSpendingByChainBlock = ({
     symbolOptions
   ]);
 
+  console.log('tableData=>', tableData);
+
   return (
     <Card
       isLoading={isLoading}
@@ -365,6 +371,15 @@ const CurrentSpendingByChainBlock = ({
           onChange={onSelectChain}
           placeholder='Chain'
           disabled={isLoading}
+        />
+        <TabsGroup
+          tabs={['Lend Incentive', 'Borrow Incentive', 'Total']}
+          value={tabValue}
+          onTabChange={onTabsChange}
+        />
+        <CSVDownloadButton
+          data={tableData}
+          filename='Full Treasury Holdings'
         />
       </div>
       <div className='block px-5 py-3 lg:hidden'>

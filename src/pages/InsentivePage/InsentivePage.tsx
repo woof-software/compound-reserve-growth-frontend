@@ -4,7 +4,7 @@ import CurrentSpendingByChainBlock from '@/entities/Insentive/CurrentSpendingByC
 import DailyExpenses from '@/entities/Insentive/DailyExpenses';
 import HistoricalExpencesByNetworks from '@/entities/Insentive/HistoricalExpencesByNetworks';
 import IncomeVsExpensesOnChainsAndMarkets from '@/entities/Insentive/IncomeVsExpensesOnChainsAndMarkets';
-import MetricBlock from '@/entities/Treasury/MetricBlock';
+import MetricBlock from '@/entities/Insentive/MetricBlock';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
 import {
