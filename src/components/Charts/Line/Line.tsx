@@ -9,6 +9,7 @@ import React, {
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
+import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
   capitalizeFirstLetter,
@@ -558,26 +559,22 @@ const LineChart: FC<LineChartProps> = ({
           <View.Condition
             if={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
           >
-            <div
-              className='shadow-13 bg-card-header cursor-pointer rounded-lg p-1'
+            <ChartIconToggle
+              active={areAllSeriesHidden}
               onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
-            >
-              <Icon
-                name={areAllSeriesHidden ? 'eye' : 'eye-closed'}
-                className='h-6 w-6'
-              />
-            </div>
+              onIcon='eye'
+              offIcon='eye-closed'
+              ariaLabel='Toggle all series visibility'
+            />
           </View.Condition>
           <View.Condition if={Boolean(eventsData.length > 0)}>
-            <div
-              className='shadow-13 bg-card-header cursor-pointer rounded-lg p-1'
+            <ChartIconToggle
+              active={showEvents}
               onClick={() => setShowEvents((prev) => !prev)}
-            >
-              <Icon
-                name={showEvents ? 'calendar-check' : 'calendar-uncheck'}
-                className='h-6 w-6'
-              />
-            </div>
+              onIcon='calendar-check'
+              offIcon='calendar-uncheck'
+              ariaLabel='Toggle events'
+            />
           </View.Condition>
         </div>
       </div>
