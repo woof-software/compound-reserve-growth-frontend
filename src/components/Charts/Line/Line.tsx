@@ -311,6 +311,13 @@ const LineChart: FC<LineChartProps> = ({
         }))
       : [];
 
+    const bringMarkersToFront = (chart: Highcharts.Chart) => {
+      chart.series.forEach((s: any) => {
+        s.markerGroup?.toFront?.();
+        s.dataLabelsGroup?.toFront?.();
+      });
+    };
+
     return {
       chart: {
         type: 'area',
@@ -325,7 +332,6 @@ const LineChart: FC<LineChartProps> = ({
             type: 'x',
             preventDefault: true
           },
-          // type: undefined,
           pinchType: 'x',
           resetButton: { theme: { display: 'none' } }
         },
@@ -338,6 +344,11 @@ const LineChart: FC<LineChartProps> = ({
                 false
               );
             }
+
+            bringMarkersToFront(this as Highcharts.Chart);
+          },
+          render: function () {
+            bringMarkersToFront(this as Highcharts.Chart);
           }
         }
       },
@@ -474,10 +485,12 @@ const LineChart: FC<LineChartProps> = ({
       plotOptions: {
         series: {
           animation: false,
-          turboThreshold: 0
+          turboThreshold: 0,
+          clip: false
         },
         area: {
           marker: {
+            zIndex: 5,
             enabled: false,
             symbol: 'circle',
             radius: 5,
