@@ -184,6 +184,7 @@ const TreasuryComposition = ({
               <Text
                 size='13'
                 lineHeight='21'
+                weight='500'
                 className='min-w-[100px] truncate'
               >
                 {formatPrice(totalBalance, 1)}
