@@ -46,7 +46,7 @@
   --primary-16: #D6DFE8;
   --primary-17: #CED1D4;
   --primary-18: #F0F2F5;
-  --primary-20: #e4e5e9;
+  --primary-20: #F0F2F5;
 
   /*=======================*/
   /* Card Colors */
@@ -193,8 +193,8 @@
   --shadow-12: 0px 8px 20px 0px #0D131A0A, 0px 2px 12px 0px #0D131A05;
   --shadow-13: inset 0 0 0 0.25px #F9FAFB26;
   --shadow-14: inset 0 0 0 0.25px #0C131A26;
-
   --shadow-15: inset 0 0px 0 0.25px var(--secondary-39);
+  --shadow-16: inset 0 0 0 0.25px #17212B26;
 
   /*=======================*/
   /* Layout */

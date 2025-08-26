@@ -16,7 +16,7 @@ const ChartIconToggle: FC<{
     aria-label={ariaLabel}
     onClick={onClick}
     onMouseDown={(e) => e.preventDefault()}
-    className='shadow-13 bg-card-header grid place-items-center rounded-lg p-1 outline-none select-none'
+    className='shadow-16 dark:shadow-13 bg-primary-20 grid place-items-center rounded-lg p-1 outline-none select-none'
   >
     <span className='relative h-6 w-6'>
       <Icon
