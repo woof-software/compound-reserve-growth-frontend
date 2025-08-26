@@ -109,7 +109,7 @@ const RevenueBreakdown = ({
         return (
           <td
             key={columnKey}
-            className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'
+            className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'
           >
             {formatCurrencyValue(totalValue)}
           </td>

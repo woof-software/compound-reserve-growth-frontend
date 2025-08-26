@@ -167,7 +167,7 @@ const CurrentInitiativesBlock = () => {
           onTypeSelect={onTypeSelect}
         />
       </div>
-      <div className='flex flex-col-reverse justify-between lg:flex-row lg:gap-10'>
+      <div className='flex flex-col-reverse justify-between gap-8 lg:flex-row lg:gap-10'>
         <CurrentInitiatives
           sortType={sortType}
           data={processedData.tableData}

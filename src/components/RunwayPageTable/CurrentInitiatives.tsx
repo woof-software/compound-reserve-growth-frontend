@@ -2,7 +2,11 @@ import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { formatNumber, formatQuantity } from '@/shared/lib/utils/utils';
+import {
+  formatLargeNumber,
+  formatNumber,
+  formatQuantity
+} from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Text from '@/shared/ui/Text/Text';
 
@@ -87,13 +91,13 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
   const footerContent = (
     <>
       <tr>
-        <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'>
+        <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
           Total
         </td>
         <td></td>
         <td></td>
         <td></td>
-        <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px]'>
+        <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px] font-medium'>
           {formatNumber(footerData.totalValue)}
         </td>
       </tr>
@@ -127,32 +131,115 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
   return (
     <>
       <MobileDataTable tableData={mobileTableData}>
-        {(dataRows) =>
-          dataRows.map((row, index) => (
-            <div
-              key={row.token + index}
-              className={cn(
-                'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
-                {
-                  'border-b-0': dataRows.length - 1 === index
-                }
-              )}
-            >
-              <div className='grid w-full max-w-[100px]'>
+        {(dataRows) => (
+          <>
+            {dataRows.map((row, index) => (
+              <div
+                key={row.token + index}
+                className={cn(
+                  'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                  {
+                    'border-b-0': dataRows.length - 1 === index,
+                    'pt-0': index === 0
+                  }
+                )}
+              >
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Initiative
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.initiative}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Discipline
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.discipline}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Token
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.token}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Amount (Qty)
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {formatQuantity(row.amount)}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Value ($)
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {formatNumber(row.value)}
+                  </Text>
+                </div>
+              </div>
+            ))}
+            <div className='border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10'>
+              <div className='grid min-h-[39px] w-full max-w-[100px]'>
                 <Text
                   size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
                 >
-                  Initiative
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.initiative}
+                  Total
                 </Text>
               </div>
               <div className='grid w-full max-w-[100px]'>
@@ -161,16 +248,12 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
-                >
-                  Discipline
-                </Text>
+                ></Text>
                 <Text
                   size='13'
                   lineHeight='21'
                   className='truncate'
-                >
-                  {row.discipline}
-                </Text>
+                ></Text>
               </div>
               <div className='grid w-full max-w-[100px]'>
                 <Text
@@ -179,53 +262,17 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
                   weight='500'
                   className='text-primary-14'
                 >
-                  Token
+                  Value
                 </Text>
                 <Text
                   size='13'
                   lineHeight='21'
                   className='truncate'
-                >
-                  {row.token}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Amount (Qty)
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {formatQuantity(row.amount)}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Value ($)
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {formatNumber(row.value)}
-                </Text>
+                >{`$${formatLargeNumber(footerData.totalValue, 2)}`}</Text>
               </div>
             </div>
-          ))
-        }
+          </>
+        )}
       </MobileDataTable>
       <div className='hidden w-full max-w-full lg:block'>
         <DataTable

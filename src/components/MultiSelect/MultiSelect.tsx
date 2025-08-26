@@ -108,7 +108,7 @@ const MultiSelectTrigger: FC<MultiSelectDrawerProps> = ({
           <Text
             size='11'
             weight='500'
-            className='text-primary-14 leading-none tabular-nums'
+            className='text-secondary-43 leading-none tabular-nums'
           >
             {value.length}
           </Text>
@@ -337,7 +337,7 @@ export const MultiSelect: FC<MultiSelectProps> = ({
             className='bg-secondary-29 h-px w-full origin-top scale-y-[.5] transform-gpu'
           />
           <Button
-            className='bg-secondary-12 text-primary-14 hover:bg-secondary-40 m-2 h-[35px] rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white'
+            className='bg-secondary-12 text-primary-14 hover:bg-secondary-40 m-2 h-[30px] rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white'
             onClick={onClearFilters}
           >
             Clear filters
