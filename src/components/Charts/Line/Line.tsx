@@ -485,12 +485,10 @@ const LineChart: FC<LineChartProps> = ({
       plotOptions: {
         series: {
           animation: false,
-          turboThreshold: 0,
-          clip: false
+          turboThreshold: 0
         },
         area: {
           marker: {
-            zIndex: 5,
             enabled: false,
             symbol: 'circle',
             radius: 5,
