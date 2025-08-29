@@ -290,6 +290,7 @@ const RevenueBreakdown = ({
       <div className='hidden w-full max-w-full lg:block'>
         <DataTable
           data={data}
+          enableSorting
           columns={displayColumns}
           pageSize={10}
           className='flex min-h-[518px] flex-col justify-between'
