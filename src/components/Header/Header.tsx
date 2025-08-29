@@ -35,7 +35,7 @@ const navLinks = [
   {
     to: commonRoutes.INCENTIVES,
     title: routeTitles.INCENTIVES,
-    icon: 'star'
+    icon: 'diamond'
   },
   {
     to: commonRoutes.OEV,
