@@ -680,31 +680,33 @@ const LineChart: FC<LineChartProps> = ({
               </View.Condition>
             </div>
           </div>
-          <div className='mx-auto hidden max-w-[902px] flex-wrap justify-center gap-5 px-[15px] py-2 lg:flex'>
-            <Each
-              data={aggregatedSeries}
-              render={(s) => (
-                <Button
-                  key={s.name}
-                  className={cn(
-                    'text-secondary-42 flex shrink-0 gap-2.5 text-[11px] leading-none font-normal',
-                    { 'line-through opacity-30': hiddenItems.has(s.name!) }
-                  )}
-                  onMouseEnter={() => highlightSeries(s.name!)}
-                  onFocus={() => highlightSeries(s.name!)}
-                  onMouseLeave={clearHighlight}
-                  onBlur={clearHighlight}
-                  onClick={() => toggleSeriesByName(s.name!)}
-                >
-                  <span
-                    className='inline-block h-3 w-3 rounded-full'
-                    style={{ backgroundColor: (s as any).color }}
-                  />
-                  {s.name}
-                </Button>
-              )}
-            />
-          </div>
+          <View.Condition if={Boolean(aggregatedSeries.length > 1)}>
+            <div className='mx-auto hidden max-w-[902px] flex-wrap justify-center gap-5 px-[15px] py-2 lg:flex'>
+              <Each
+                data={aggregatedSeries}
+                render={(s) => (
+                  <Button
+                    key={s.name}
+                    className={cn(
+                      'text-secondary-42 flex shrink-0 gap-2.5 text-[11px] leading-none font-normal',
+                      { 'line-through opacity-30': hiddenItems.has(s.name!) }
+                    )}
+                    onMouseEnter={() => highlightSeries(s.name!)}
+                    onFocus={() => highlightSeries(s.name!)}
+                    onMouseLeave={clearHighlight}
+                    onBlur={clearHighlight}
+                    onClick={() => toggleSeriesByName(s.name!)}
+                  >
+                    <span
+                      className='inline-block h-3 w-3 rounded-full'
+                      style={{ backgroundColor: (s as any).color }}
+                    />
+                    {s.name}
+                  </Button>
+                )}
+              />
+            </div>
+          </View.Condition>
         </>
       )}
     </div>

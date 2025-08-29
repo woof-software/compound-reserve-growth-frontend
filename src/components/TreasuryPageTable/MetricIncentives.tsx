@@ -192,7 +192,7 @@ const MetricIncentivesBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             loading: 'h-[200px]',
             header: 'px-5 py-4',
             content:
-              'relative flex items-center overflow-auto bg-[linear-gradient(270deg,#154F48_2.63%,#1D2833_100%)] px-5 py-10 md:p-10'
+              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#154F48_2.63%,#1D2833_100%)] px-5 py-10 md:p-10'
           }}
         >
           <div className='grid gap-3'>
