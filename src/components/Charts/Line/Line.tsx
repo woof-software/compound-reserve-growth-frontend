@@ -680,7 +680,7 @@ const LineChart: FC<LineChartProps> = ({
               </View.Condition>
             </div>
           </div>
-          <div className='mx-auto hidden max-w-[902px] flex-wrap justify-start gap-[35px] px-[15px] py-2 lg:flex'>
+          <div className='mx-auto hidden max-w-[902px] flex-wrap justify-center gap-5 px-[15px] py-2 lg:flex'>
             <Each
               data={aggregatedSeries}
               render={(s) => (
