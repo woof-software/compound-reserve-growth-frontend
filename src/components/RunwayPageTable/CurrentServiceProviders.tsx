@@ -91,13 +91,13 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
 }) => {
   const footerRow = (
     <tr>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
+      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[11px] font-medium'>
         Total
       </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'></td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'></td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-center text-[13px]'></td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px] font-medium'>
+      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[11px]'></td>
+      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[11px]'></td>
+      <td className='text-primary-14 px-[5px] py-[13px] text-center text-[11px]'></td>
+      <td className='text-primary-14 px-[5px] py-[13px] text-right text-[11px] font-medium'>
         {formatNumber(footerData.value)}
       </td>
     </tr>
