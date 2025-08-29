@@ -401,7 +401,7 @@ const CompoundRevenueBlock = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'border-background min-h-[567px] border',
-        content: 'flex flex-col gap-3 p-0 pb-5 md:px-10 md:pb-10'
+        content: 'flex flex-col gap-3 p-0 pb-5 md:px-10 lg:pb-10'
       }}
     >
       <Filters

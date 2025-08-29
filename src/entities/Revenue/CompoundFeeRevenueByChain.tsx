@@ -386,7 +386,7 @@ const CompoundFeeRevenueByChain = ({
       className={{
         container: 'border-background border',
         loading: 'min-h-[571px]',
-        content: 'flex flex-col px-0 pt-0 pb-0 md:gap-3 md:pb-10 lg:px-10'
+        content: 'flex flex-col px-0 pt-0 pb-0 md:gap-3 lg:px-10 lg:pb-10'
       }}
     >
       <div className='flex flex-wrap justify-end gap-3 px-5 py-3 md:px-10 lg:px-0'>

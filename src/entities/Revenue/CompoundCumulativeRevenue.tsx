@@ -287,8 +287,8 @@ const CompoundCumulativeRevenue = ({
       isError={isError}
       className={{
         loading: 'min-h-[inherit]',
-        container: 'border-background min-h-[571px] border',
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-10 md:pb-10'
+        container: 'border-background min-h-[550px] border',
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-10 lg:pb-10'
       }}
     >
       <Filters
