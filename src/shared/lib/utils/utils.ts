@@ -290,7 +290,11 @@ export function formatLargeNumber(
 }
 
 export const formatPrice = (price: number, decimals = 2): string => {
-  return `$${formatLargeNumber(price, decimals)}`;
+  const priceFormat = `$${formatLargeNumber(price, decimals)}`;
+
+  return priceFormat.startsWith('$-')
+    ? `-${priceFormat.replace('-', '')}`
+    : priceFormat;
 };
 
 export const groupByTypeLast30Days = <T extends ResponseDataType>(
