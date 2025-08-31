@@ -13,16 +13,9 @@ interface ChartData {
 interface CompoundRevenueProps {
   data: ChartData[];
   barSize: 'D' | 'W' | 'M';
-  barCountToSet: number;
-  onZoom?: () => void;
 }
 
-const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
-  data,
-  barSize,
-  barCountToSet,
-  onZoom
-}) => {
+const CompoundRevenue: React.FC<CompoundRevenueProps> = ({ data, barSize }) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
   const programmaticChange = useRef(false);
 
@@ -101,14 +94,6 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
           if (programmaticChange.current) {
             programmaticChange.current = false;
             return;
-          }
-
-          if (
-            e.trigger &&
-            e.trigger !== 'navigator' &&
-            e.trigger !== 'rangeSelector'
-          ) {
-            onZoom?.();
           }
 
           if (e.min === undefined || e.max === undefined) return;
@@ -205,9 +190,9 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
 
     chart.series[0].setData(aggregatedData, false);
 
-    if (aggregatedData.length > 0 && barCountToSet > 0) {
+    if (aggregatedData.length > 0) {
       const dataLength = aggregatedData.length;
-      const startIndex = Math.max(0, dataLength - barCountToSet);
+      const startIndex = Math.max(0, dataLength);
 
       if (startIndex < dataLength) {
         const min = aggregatedData[startIndex][0];
@@ -220,7 +205,7 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({
     } else {
       chart.redraw();
     }
-  }, [aggregatedData, barCountToSet]);
+  }, [aggregatedData]);
 
   return (
     <HighchartsReact

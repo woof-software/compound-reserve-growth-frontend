@@ -288,7 +288,7 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       <div className='mx-5 md:mx-0'>
         <div
           className={cn(
-            'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit rounded-[39px]',
+            'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit rounded-lg',
             'before:pointer-events-none before:absolute before:top-[1px] before:left-[1px] before:h-full before:w-20 before:rounded-[39px] before:opacity-0',
             'after:pointer-events-none after:absolute after:top-[1px] after:right-[1px] after:h-full after:w-20 after:rounded-r-[39px] after:opacity-0',
             {
@@ -302,7 +302,7 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
           <View.Condition if={canScrollLeft}>
             <Button
               className={cn(
-                'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
+                'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-lg'
               )}
               onClick={() => {
                 clearHighlight();
@@ -354,7 +354,7 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
           <View.Condition if={canScrollRight}>
             <Button
               className={cn(
-                'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
+                'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-lg'
               )}
               onClick={() => {
                 clearHighlight();

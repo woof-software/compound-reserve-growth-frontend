@@ -11,7 +11,7 @@ import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useModal } from '@/shared/hooks/useModal';
 import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
-import { BarSize, OptionType, TimeRange } from '@/shared/types/types';
+import { BarSize, OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -38,8 +38,6 @@ interface FiltersProps {
 
   barSize: BarSize;
 
-  activeTab: TimeRange | null;
-
   isLoading: boolean;
 
   csvFilename: string;
@@ -57,8 +55,6 @@ interface FiltersProps {
   onSelectMarket: (deployment: OptionType[]) => void;
 
   handleBarSizeChange: (value: string) => void;
-
-  handleTabChange: (value: string) => void;
 
   onClearAll: () => void;
 }
@@ -81,15 +77,7 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
     }
   );
 
-  const {
-    activeTab,
-    barSize,
-    barCount,
-    handleTabChange,
-    handleResetActiveTab,
-    handleBarSizeChange
-  } = useChartControls({
-    initialTimeRange: '7B',
+  const { barSize, handleBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
 
@@ -283,13 +271,11 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
         deploymentOptionsFilter={deploymentOptionsFilter}
         isLoading={isLoading || false}
         barSize={barSize}
-        activeTab={activeTab}
         csvData={csvData}
         csvFilename={csvFilename}
         onSelectChain={onSelectChain}
         onSelectMarket={onSelectMarket}
         handleBarSizeChange={handleBarSizeChange}
-        handleTabChange={handleTabChange}
         onClearAll={onClearAll}
       />
       {!isLoading && !isError && !hasData ? (
@@ -301,8 +287,6 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
           groupBy={groupBy}
           className='max-h-fit'
           barSize={barSize}
-          barCountToSet={barCount}
-          onZoom={handleResetActiveTab}
         />
       )}
     </Card>
@@ -312,7 +296,6 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
 const Filters = memo(
   ({
     barSize,
-    activeTab,
     csvData,
     csvFilename,
     chainOptions,
@@ -322,7 +305,6 @@ const Filters = memo(
     onSelectChain,
     onSelectMarket,
     handleBarSizeChange,
-    handleTabChange,
     onClearAll
   }: FiltersProps) => {
     const { isOpen, onOpenModal, onCloseModal } = useModal();
@@ -366,12 +348,6 @@ const Filters = memo(
                 onTabChange={handleBarSizeChange}
                 disabled={isLoading}
               />
-              <TabsGroup
-                tabs={['7B', '30B', '90B', '180B']}
-                value={activeTab}
-                onTabChange={handleTabChange}
-                disabled={isLoading}
-              />
               <Switch
                 label='Fees Only'
                 positionLabel='left'
@@ -411,12 +387,6 @@ const Filters = memo(
               tabs={['D', 'W', 'M']}
               value={barSize}
               onTabChange={handleBarSizeChange}
-              disabled={isLoading}
-            />
-            <TabsGroup
-              tabs={['7B', '30B', '90B', '180B']}
-              value={activeTab}
-              onTabChange={handleTabChange}
               disabled={isLoading}
             />
             <Switch

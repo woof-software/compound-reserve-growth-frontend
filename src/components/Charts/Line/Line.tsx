@@ -45,9 +45,7 @@ interface LineChartProps {
   groupBy: string;
   className?: string;
   barSize: 'D' | 'W' | 'M';
-  barCountToSet: number;
   showLegend?: boolean;
-  onZoom?: () => void;
 }
 
 const formatValue = (value: number) => {
@@ -65,9 +63,7 @@ const LineChart: FC<LineChartProps> = ({
   groupBy,
   className,
   barSize,
-  barCountToSet,
-  showLegend,
-  onZoom
+  showLegend
 }) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
 
@@ -199,25 +195,6 @@ const LineChart: FC<LineChartProps> = ({
       };
     });
   }, [data, barSize]);
-
-  useEffect(() => {
-    const chart = chartRef.current?.chart;
-
-    if (!chart || !barCountToSet) return;
-
-    const seriesData = aggregatedSeries[0].data as [number, number][];
-
-    if (seriesData.length === 0) return;
-
-    const len = seriesData.length;
-    const start = Math.max(0, len - barCountToSet);
-
-    const min = seriesData[start]![0] ?? 0;
-    const max = seriesData[len - 1]![0] ?? 0;
-
-    programmaticChange.current = true;
-    chart.xAxis[0].setExtremes(min, max, true);
-  }, [barCountToSet, aggregatedSeries]);
 
   const isLegendEnabled =
     (showLegend ?? groupBy !== 'none') && aggregatedSeries.length > 0;
@@ -385,18 +362,10 @@ const LineChart: FC<LineChartProps> = ({
           dashStyle: 'Dash'
         },
         events: {
-          setExtremes: function (e) {
+          setExtremes: function () {
             if (programmaticChange.current) {
               programmaticChange.current = false;
               return;
-            }
-
-            if (
-              e.trigger &&
-              e.trigger !== 'navigator' &&
-              e.trigger !== 'rangeSelector'
-            ) {
-              onZoom?.();
             }
           },
           afterSetExtremes: function (e) {
@@ -506,14 +475,7 @@ const LineChart: FC<LineChartProps> = ({
       scrollbar: { enabled: false },
       rangeSelector: { enabled: false }
     };
-  }, [
-    aggregatedSeries,
-    groupBy,
-    isLegendEnabled,
-    eventsData,
-    showEvents,
-    onZoom
-  ]);
+  }, [aggregatedSeries, groupBy, isLegendEnabled, eventsData, showEvents]);
 
   const handleSelectAll = useCallback(() => {
     const chart = chartRef.current?.chart;
@@ -578,7 +540,7 @@ const LineChart: FC<LineChartProps> = ({
             if={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
           >
             <ChartIconToggle
-              active={areAllSeriesHidden}
+              active={!areAllSeriesHidden}
               onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
               onIcon='eye'
               offIcon='eye-closed'

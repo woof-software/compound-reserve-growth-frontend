@@ -10,7 +10,7 @@ import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useModal } from '@/shared/hooks/useModal';
 import { type RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { capitalizeFirstLetter, ChartDataItem } from '@/shared/lib/utils/utils';
-import { BarSize, OptionType, TimeRange } from '@/shared/types/types';
+import { BarSize, OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -51,8 +51,6 @@ interface FiltersProps {
 
   barSize: BarSize;
 
-  activeTab: TimeRange | null;
-
   isLoading: boolean;
 
   csvFilename: string;
@@ -78,8 +76,6 @@ interface FiltersProps {
   onSelectSymbol: (symbol: OptionType[]) => void;
 
   handleBarSizeChange: (value: string) => void;
-
-  handleTabChange: (value: string) => void;
 
   onClearAll: () => void;
 }
@@ -200,15 +196,7 @@ const CompoundRevenueBlock = ({
     }
   );
 
-  const {
-    activeTab,
-    barSize,
-    barCount,
-    handleTabChange,
-    handleResetActiveTab,
-    handleBarSizeChange
-  } = useChartControls({
-    initialTimeRange: '7B',
+  const { barSize, handleBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
 
@@ -406,7 +394,6 @@ const CompoundRevenueBlock = ({
     >
       <Filters
         barSize={barSize}
-        activeTab={activeTab}
         csvData={csvData}
         csvFilename={csvFilename}
         chainOptions={chainOptions}
@@ -420,7 +407,6 @@ const CompoundRevenueBlock = ({
         onSelectMarket={onSelectMarket}
         onSelectSymbol={onSelectSymbol}
         handleBarSizeChange={handleBarSizeChange}
-        handleTabChange={handleTabChange}
         onClearAll={onClearSelectedOptions}
       />
       <View.Condition if={!isLoading && !isError && hasData}>
@@ -428,8 +414,6 @@ const CompoundRevenueBlock = ({
           <CompoundRevenue
             data={processedChartData}
             barSize={barSize}
-            barCountToSet={barCount}
-            onZoom={handleResetActiveTab}
           />
         </div>
       </View.Condition>
@@ -445,7 +429,6 @@ const CompoundRevenueBlock = ({
 
 const Filters = ({
   barSize,
-  activeTab,
   csvData,
   csvFilename,
   chainOptions,
@@ -459,7 +442,6 @@ const Filters = ({
   onSelectMarket,
   onSelectSymbol,
   handleBarSizeChange,
-  handleTabChange,
   onClearAll
 }: FiltersProps) => {
   const { isOpen, onOpenModal, onCloseModal } = useModal();
@@ -565,12 +547,6 @@ const Filters = ({
             onTabChange={handleBarSizeChange}
             disabled={isLoading}
           />
-          <TabsGroup
-            tabs={['7B', '30B', '90B', '180B']}
-            value={activeTab}
-            onTabChange={handleTabChange}
-            disabled={isLoading}
-          />
           <CSVDownloadButton
             data={csvData}
             filename={csvFilename}
@@ -620,12 +596,6 @@ const Filters = ({
               onTabChange={handleBarSizeChange}
               disabled={isLoading}
             />
-            <TabsGroup
-              tabs={['7B', '30B', '90B', '180B']}
-              value={activeTab}
-              onTabChange={handleTabChange}
-              disabled={isLoading}
-            />
             <CSVDownloadButton
               data={csvData}
               filename={csvFilename}
@@ -640,12 +610,6 @@ const Filters = ({
               tabs={['D', 'W', 'M']}
               value={barSize}
               onTabChange={handleBarSizeChange}
-              disabled={isLoading}
-            />
-            <TabsGroup
-              tabs={['7B', '30B', '90B', '180B']}
-              value={activeTab}
-              onTabChange={handleTabChange}
               disabled={isLoading}
             />
           </div>
