@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { LayoutGroup, motion } from 'framer-motion';
 
 import {
   commonRoutes,
@@ -17,21 +18,9 @@ import Text from '@/shared/ui/Text/Text';
 import { Tooltip } from '../Tooltip/Tooltip';
 
 const navLinks = [
-  {
-    to: commonRoutes.TREASURY,
-    title: routeTitles.TREASURY,
-    icon: 'wallet'
-  },
-  {
-    to: commonRoutes.RUNWAY,
-    title: routeTitles.RUNWAY,
-    icon: 'lightning'
-  },
-  {
-    to: commonRoutes.REVENUE,
-    title: routeTitles.REVENUE,
-    icon: 'storage'
-  },
+  { to: commonRoutes.TREASURY, title: routeTitles.TREASURY, icon: 'wallet' },
+  { to: commonRoutes.RUNWAY, title: routeTitles.RUNWAY, icon: 'lightning' },
+  { to: commonRoutes.REVENUE, title: routeTitles.REVENUE, icon: 'storage' },
   {
     to: commonRoutes.INCENTIVES,
     title: routeTitles.INCENTIVES,
@@ -45,12 +34,18 @@ const navLinks = [
   }
 ];
 
+const MotionDiv = motion.div;
+
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [clickedIndex, setClickedIndex] = useState<number | null>(null);
+
+  const activeIndex = hoveredIndex !== null ? hoveredIndex : clickedIndex;
 
   const isValidRoute = (VALID_NAVIGATION_ROUTES as readonly string[]).includes(
     currentPath
@@ -75,15 +70,20 @@ const Header = () => {
   }, [currentPath, isValidRoute, navigate]);
 
   useEffect(() => {
+    const foundIndex = navLinks.findIndex((link) => link.to === activeRoute);
+
+    if (foundIndex !== -1) {
+      setClickedIndex(foundIndex);
+    }
+  }, [activeRoute]);
+
+  useEffect(() => {
     if (isOpen) {
       document.body.classList.add('disable-scroll-vertical');
     } else {
       document.body.classList.remove('disable-scroll-vertical');
     }
-
-    return () => {
-      document.body.classList.remove('disable-scroll-vertical');
-    };
+    return () => document.body.classList.remove('disable-scroll-vertical');
   }, [isOpen]);
 
   return (
@@ -97,58 +97,78 @@ const Header = () => {
             isRound={false}
           />
         </Link>
-        <nav className='hidden items-center gap-1.5 md:flex'>
-          <Each
-            data={navLinks}
-            render={(link, index) =>
-              link.isComingSoon ? (
-                <Tooltip
-                  key={index}
-                  content='Coming Soon'
-                >
-                  <div className='flex cursor-not-allowed items-center gap-1.5 px-1 py-1 text-[13px] leading-3 opacity-30'>
-                    <Icon
-                      name={link.icon}
-                      className='h-3 w-3'
-                      color='color-gray-11'
-                    />
-                    <Text
-                      className='text-color-gray-11'
-                      size='13'
-                      weight='500'
-                    >
-                      {link.title}
-                    </Text>
-                  </div>
-                </Tooltip>
-              ) : (
-                <NavLink
-                  key={index}
-                  to={link.to}
-                  isActive={isActive(link.to)}
-                  className='text-secondary-10 h-[26px] gap-1.5 rounded-[2.25rem] px-3 py-1 text-[13px] leading-3'
-                  activeClassName='bg-primary-16'
-                  leftIcon={
-                    <Icon
-                      name={link.icon}
-                      className='h-3 w-3'
-                      isRound={false}
-                      color='color-gray-11'
-                    />
-                  }
-                >
-                  <Text
-                    className='text-color-gray-11'
-                    size='13'
-                    weight='500'
+        <LayoutGroup>
+          <nav className='hidden items-center gap-1.5 md:flex'>
+            <Each
+              data={navLinks}
+              render={(link, index) =>
+                link.isComingSoon ? (
+                  <Tooltip
+                    key={index}
+                    content='Coming Soon'
                   >
-                    {link.title}
-                  </Text>
-                </NavLink>
-              )
-            }
-          />
-        </nav>
+                    <div className='flex cursor-not-allowed items-center gap-1.5 px-1 py-1 text-[13px] leading-3 opacity-30'>
+                      <Icon
+                        name={link.icon}
+                        className='h-3 w-3'
+                        color='color-gray-11'
+                      />
+                      <Text
+                        className='text-color-gray-11'
+                        size='13'
+                        weight='500'
+                      >
+                        {link.title}
+                      </Text>
+                    </div>
+                  </Tooltip>
+                ) : (
+                  <div
+                    key={index}
+                    className='relative'
+                    onMouseEnter={() => setHoveredIndex(index)}
+                    onMouseLeave={() => setHoveredIndex(null)}
+                    onClick={() => setClickedIndex(index)}
+                  >
+                    {index === activeIndex && (
+                      <MotionDiv
+                        layoutId='nav-highlight'
+                        className='bg-primary-16 absolute inset-0 rounded-[2.25rem] shadow-md'
+                        transition={{
+                          type: 'spring',
+                          stiffness: 500,
+                          damping: 40
+                        }}
+                      />
+                    )}
+                    <NavLink
+                      to={link.to}
+                      isActive={isActive(link.to)}
+                      className='text-secondary-10 relative z-10 h-[26px] gap-1.5 rounded-[2.25rem] px-3 py-1 text-[13px] leading-3'
+                      activeClassName='text-white'
+                      leftIcon={
+                        <Icon
+                          name={link.icon}
+                          className='h-3 w-3'
+                          isRound={false}
+                          color='color-gray-11'
+                        />
+                      }
+                    >
+                      <Text
+                        className='text-color-gray-11'
+                        size='13'
+                        weight='500'
+                      >
+                        {link.title}
+                      </Text>
+                    </NavLink>
+                  </div>
+                )
+              }
+            />
+          </nav>
+        </LayoutGroup>
         <button
           className='p4 bg-secondary-24 flex h-11 w-11 items-center justify-center rounded-full md:hidden'
           onClick={onToggle}
@@ -163,9 +183,7 @@ const Header = () => {
         <aside
           className={cn(
             'bg-background fixed top-[68px] right-0 z-[100] h-full w-full translate-x-full transform p-10 transition-transform duration-300 ease-in-out',
-            {
-              'translate-x-0': isOpen
-            }
+            { 'translate-x-0': isOpen }
           )}
         >
           <div className='flex h-full flex-col justify-center gap-2'>
