@@ -27,7 +27,7 @@ const NavLink: FC<NavLinkProps> = ({
     <Link
       to={to}
       className={cn(
-        'flex items-center no-underline',
+        'flex items-center no-underline transition-colors duration-200',
         className,
         isActive && activeClassName
       )}
@@ -39,4 +39,5 @@ const NavLink: FC<NavLinkProps> = ({
     </Link>
   );
 };
+
 export default NavLink;

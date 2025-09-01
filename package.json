@@ -30,6 +30,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^16.5.0",
+    "framer-motion": "^12.23.12",
     "highcharts": "^12.3.0",
     "highcharts-react-official": "^3.2.2",
     "lucide-react": "^0.516.0",
