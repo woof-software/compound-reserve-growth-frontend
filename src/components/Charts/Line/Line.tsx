@@ -561,7 +561,9 @@ const LineChart: FC<LineChartProps> = ({
           </View.Condition>
         </div>
       </div>
-      <View.Condition if={Boolean(isLegendEnabled && !areAllSeriesHidden)}>
+      <View.Condition
+        if={Boolean(isLegendEnabled && !areAllSeriesHidden && data.length > 1)}
+      >
         <div className='mx-5 block md:mx-0 lg:hidden'>
           <div
             className={cn(
