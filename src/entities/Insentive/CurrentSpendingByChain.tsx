@@ -419,7 +419,10 @@ const CurrentSpendingByChainBlock = ({
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
-          <CryptoChart data={chartData} />
+          <CryptoChart
+            data={chartData}
+            onClear={onClearFilters}
+          />
           <CurrentSpendingByChain
             sortType={sortType}
             tableData={tableData}
