@@ -8,7 +8,7 @@ import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { ChartDataItem } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
-import { BarSize, OptionType, TimeRange } from '@/shared/types/types';
+import { BarSize, OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
@@ -22,8 +22,6 @@ interface TotalTreasuryValueProps {
 interface FiltersProps {
   barSize: BarSize;
 
-  activeTab: TimeRange | null;
-
   isLoading: boolean;
 
   csvFilename: string;
@@ -31,8 +29,6 @@ interface FiltersProps {
   csvData: Record<string, string | number>[];
 
   handleBarSizeChange: (value: string) => void;
-
-  handleTabChange: (value: string) => void;
 }
 
 const HistoricalExpencesByNetworks = ({
@@ -53,15 +49,7 @@ const HistoricalExpencesByNetworks = ({
     }
   );
 
-  const {
-    activeTab,
-    barSize,
-    barCount,
-    handleTabChange,
-    handleResetActiveTab,
-    handleBarSizeChange
-  } = useChartControls({
-    initialTimeRange: '7B',
+  const { barSize, handleBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
 
@@ -172,29 +160,24 @@ const HistoricalExpencesByNetworks = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-10 md:pb-10'
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-10 lg:pb-10'
       }}
     >
       <Filters
         isLoading={isLoading || false}
         barSize={barSize}
-        activeTab={activeTab}
         csvData={csvData}
         csvFilename={csvFilename}
         handleBarSizeChange={handleBarSizeChange}
-        handleTabChange={handleTabChange}
       />
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder onButtonClick={onClearAll} />
       ) : (
         <LineChart
-          // key={groupBy}
           data={correctedChartSeries}
           groupBy={'None'}
           className='max-h-fit'
           barSize={barSize}
-          barCountToSet={barCount}
-          onZoom={handleResetActiveTab}
         />
       )}
     </Card>
@@ -204,12 +187,10 @@ const HistoricalExpencesByNetworks = ({
 const Filters = memo(
   ({
     barSize,
-    activeTab,
     csvData,
     csvFilename,
     isLoading,
-    handleBarSizeChange,
-    handleTabChange
+    handleBarSizeChange
   }: FiltersProps) => {
     return (
       <>
@@ -226,12 +207,6 @@ const Filters = memo(
                 tabs={['D', 'W', 'M']}
                 value={barSize}
                 onTabChange={handleBarSizeChange}
-                disabled={isLoading}
-              />
-              <TabsGroup
-                tabs={['7B', '30B', '90B', '180B']}
-                value={activeTab}
-                onTabChange={handleTabChange}
                 disabled={isLoading}
               />
             </div>
@@ -256,12 +231,6 @@ const Filters = memo(
               tabs={['D', 'W', 'M']}
               value={barSize}
               onTabChange={handleBarSizeChange}
-              disabled={isLoading}
-            />
-            <TabsGroup
-              tabs={['7B', '30B', '90B', '180B']}
-              value={activeTab}
-              onTabChange={handleTabChange}
               disabled={isLoading}
             />
             <CSVDownloadButton

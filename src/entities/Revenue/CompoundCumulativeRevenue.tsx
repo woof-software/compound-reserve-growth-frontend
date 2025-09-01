@@ -11,7 +11,7 @@ import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
-import { BarSize, OptionType, TimeRange } from '@/shared/types/types';
+import { BarSize, OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -23,7 +23,6 @@ interface FiltersProps {
   assetTypeOptions: OptionType[];
   symbolOptions: OptionType[];
   barSize: BarSize;
-  activeTab: TimeRange | null;
   isLoading: boolean;
   csvFilename: string;
   csvData: Record<string, string | number>[];
@@ -38,7 +37,6 @@ interface FiltersProps {
   onSelectMarket: (deployment: OptionType[]) => void;
   onSelectSymbol: (symbol: OptionType[]) => void;
   handleBarSizeChange: (value: string) => void;
-  handleTabChange: (value: string) => void;
   onClearAll: () => void;
 }
 
@@ -60,15 +58,7 @@ const CompoundCumulativeRevenue = ({
     }
   );
 
-  const {
-    activeTab,
-    barSize,
-    barCount,
-    handleTabChange,
-    handleResetActiveTab,
-    handleBarSizeChange
-  } = useChartControls({
-    initialTimeRange: '7B',
+  const { barSize, handleBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
 
@@ -287,13 +277,12 @@ const CompoundCumulativeRevenue = ({
       isError={isError}
       className={{
         loading: 'min-h-[inherit]',
-        container: 'border-background min-h-[571px] border',
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-10 md:pb-10'
+        container: 'border-background min-h-[550px] border',
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-10 lg:pb-10'
       }}
     >
       <Filters
         barSize={barSize}
-        activeTab={activeTab}
         csvData={csvData}
         csvFilename={csvFilename}
         chainOptions={chainOptions}
@@ -307,7 +296,6 @@ const CompoundCumulativeRevenue = ({
         onSelectMarket={onSelectMarket}
         onSelectSymbol={onSelectSymbol}
         handleBarSizeChange={handleBarSizeChange}
-        handleTabChange={handleTabChange}
         onClearAll={onClearSelectedOptions}
       />
       {!isLoading && !isError && !hasData ? (
@@ -319,11 +307,9 @@ const CompoundCumulativeRevenue = ({
         <LineChart
           className='max-h-fit'
           barSize={barSize}
-          barCountToSet={barCount}
           data={cumulativeChartSeries}
           groupBy={getGroupByForChart()}
           showLegend={false}
-          onZoom={handleResetActiveTab}
         />
       )}
     </Card>
@@ -332,7 +318,6 @@ const CompoundCumulativeRevenue = ({
 
 const Filters = ({
   barSize,
-  activeTab,
   csvData,
   csvFilename,
   chainOptions,
@@ -346,7 +331,6 @@ const Filters = ({
   onSelectMarket,
   onSelectSymbol,
   handleBarSizeChange,
-  handleTabChange,
   onClearAll
 }: FiltersProps) => {
   const { isOpen, onOpenModal, onCloseModal } = useModal();
@@ -455,12 +439,6 @@ const Filters = ({
             onTabChange={handleBarSizeChange}
             disabled={isLoading}
           />
-          <TabsGroup
-            tabs={['7B', '30B', '90B', '180B']}
-            value={activeTab}
-            onTabChange={handleTabChange}
-            disabled={isLoading}
-          />
           <CSVDownloadButton
             data={csvData}
             filename={csvFilename}
@@ -511,12 +489,6 @@ const Filters = ({
               onTabChange={handleBarSizeChange}
               disabled={isLoading}
             />
-            <TabsGroup
-              tabs={['7B', '30B', '90B', '180B']}
-              value={activeTab}
-              onTabChange={handleTabChange}
-              disabled={isLoading}
-            />
             <CSVDownloadButton
               data={csvData}
               filename={csvFilename}
@@ -531,12 +503,6 @@ const Filters = ({
               tabs={['D', 'W', 'M']}
               value={barSize}
               onTabChange={handleBarSizeChange}
-              disabled={isLoading}
-            />
-            <TabsGroup
-              tabs={['7B', '30B', '90B', '180B']}
-              value={activeTab}
-              onTabChange={handleTabChange}
               disabled={isLoading}
             />
           </div>

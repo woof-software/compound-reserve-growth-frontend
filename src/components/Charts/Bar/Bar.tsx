@@ -2,6 +2,10 @@ import React, { FC, useEffect, useMemo, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
+import Button from '@/shared/ui/Button/Button';
+import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
+
 interface ChartData {
   name: string;
   value: number;
@@ -10,9 +14,11 @@ interface ChartData {
 
 interface CryptoChartProps {
   data: ChartData[];
+
+  onClear: () => void;
 }
 
-const CryptoChart: FC<CryptoChartProps> = ({ data }) => {
+const CryptoChart: FC<CryptoChartProps> = ({ data, onClear }) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
 
   const maxValue = useMemo(
@@ -177,11 +183,32 @@ const CryptoChart: FC<CryptoChartProps> = ({ data }) => {
   }, [data]);
 
   return (
-    <HighchartsReact
-      ref={chartRef}
-      highcharts={Highcharts}
-      options={chartOptions}
-    />
+    <>
+      <View.Condition if={Boolean(data.length > 1)}>
+        <HighchartsReact
+          ref={chartRef}
+          highcharts={Highcharts}
+          options={chartOptions}
+        />
+      </View.Condition>
+      <View.Condition if={Boolean(data.length <= 1)}>
+        <div className='flex flex-col items-center justify-center gap-3.5'>
+          <Text
+            size='11'
+            weight='500'
+            className='text-secondary-32'
+          >
+            Select more options in order to see the Graph comparison
+          </Text>
+          <Button
+            className='bg-aqua-green h-[36px] w-[108px] rounded-lg text-[11px] font-semibold'
+            onClick={onClear}
+          >
+            Reset Filters
+          </Button>
+        </div>
+      </View.Condition>
+    </>
   );
 };
 

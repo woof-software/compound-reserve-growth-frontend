@@ -10,7 +10,6 @@ export type FilterItem = {
   options: string[];
 };
 
-export type TimeRange = '7B' | '30B' | '90B' | '180B';
 export type BarSize = 'D' | 'W' | 'M';
 
 export type OptionType = {

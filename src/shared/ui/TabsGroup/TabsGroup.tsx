@@ -39,11 +39,13 @@ const TabsGroup = ({
       value={internalValue}
       defaultValue={defaultTab || tabs[0]}
       onValueChange={onTabChange}
-      className={cn(className?.container, { 'pointer-events-none': disabled })}
+      className={cn(className?.container, {
+        'pointer-events-none': disabled
+      })}
     >
       <TabsList
         className={cn(
-          'h-8 w-fit rounded-full p-1',
+          'h-8 w-fit rounded-lg p-1',
           'bg-primary-18 dark:shadow-13 shadow-14 border-none',
           className?.list
         )}
@@ -55,7 +57,7 @@ const TabsGroup = ({
               key={tab}
               value={tab}
               className={cn(
-                'hover:bg-card-content flex cursor-pointer items-center justify-center rounded-full px-3 py-1 text-[11px] font-medium transition-opacity hover:opacity-70',
+                'hover:bg-card-content flex cursor-pointer items-center justify-center rounded-lg px-3 py-1 text-[11px] font-medium transition-opacity hover:opacity-70',
                 'h-6 leading-6',
                 'text-primary-11',
                 'data-[state=active]:bg-card-content',

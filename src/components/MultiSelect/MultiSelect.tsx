@@ -99,7 +99,7 @@ const MultiSelectTrigger: FC<MultiSelectDrawerProps> = ({
   return (
     <div
       className={cn(
-        'bg-custom-trigger flex items-center gap-1.5 rounded-full p-1.5 pr-3',
+        'bg-custom-trigger flex items-center gap-1.5 rounded-lg p-1.5 pr-3',
         className
       )}
     >

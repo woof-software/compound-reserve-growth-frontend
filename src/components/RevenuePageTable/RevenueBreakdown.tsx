@@ -93,7 +93,7 @@ const RevenueBreakdown = ({
           return (
             <td
               key='footer-total-label'
-              className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'
+              className='text-primary-14 px-[5px] py-[13px] text-left text-[11px] font-medium'
             >
               Total
             </td>
@@ -109,7 +109,7 @@ const RevenueBreakdown = ({
         return (
           <td
             key={columnKey}
-            className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'
+            className='text-primary-14 px-[5px] py-[13px] text-left text-[11px] font-medium'
           >
             {formatCurrencyValue(totalValue)}
           </td>
@@ -290,6 +290,7 @@ const RevenueBreakdown = ({
       <div className='hidden w-full max-w-full lg:block'>
         <DataTable
           data={data}
+          enableSorting
           columns={displayColumns}
           pageSize={10}
           className='flex min-h-[518px] flex-col justify-between'

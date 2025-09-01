@@ -224,8 +224,8 @@ const TreasuryCompositionBlock = memo(
         title='Treasury Composition'
         className={{
           loading: 'min-h-[inherit]',
-          container: 'min-h-[553px] rounded-lg',
-          content: 'flex flex-col gap-3 px-0 py-0 md:px-10 md:pb-10'
+          container: 'min-h-[520px] rounded-lg',
+          content: 'flex flex-col gap-3 px-0 py-0 md:px-10 md:pb-5 lg:pb-10'
         }}
       >
         <div className='flex flex-wrap items-center justify-end gap-4 px-5 py-3 md:px-0 md:py-3'>

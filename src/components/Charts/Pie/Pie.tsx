@@ -285,90 +285,94 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
           }
         }}
       />
-      <div className='mx-5 md:mx-0'>
-        <div
-          className={cn(
-            'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit rounded-[39px]',
-            'before:pointer-events-none before:absolute before:top-[1px] before:left-[1px] before:h-full before:w-20 before:rounded-[39px] before:opacity-0',
-            'after:pointer-events-none after:absolute after:top-[1px] after:right-[1px] after:h-full after:w-20 after:rounded-r-[39px] after:opacity-0',
-            {
-              'before:max-h-[36px] before:rotate-180 before:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] before:opacity-100 dark:before:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
-                canScrollLeft,
-              'after:max-h-[36px] after:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] after:opacity-100 dark:after:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
-                canScrollRight
-            }
-          )}
-        >
-          <View.Condition if={canScrollLeft}>
-            <Button
-              className={cn(
-                'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
-              )}
-              onClick={() => {
-                clearHighlight();
-                scrollByDir('left');
-              }}
-            >
-              <Icon
-                name='arrow-triangle'
-                className='h-[6px] w-[6px]'
-              />
-            </Button>
-          </View.Condition>
+      <View.Condition
+        if={Boolean(!areAllSeriesHidden && !shouldShowNoDataMessage)}
+      >
+        <div className='mx-5 md:mx-0'>
           <div
-            ref={viewportRef}
-            onScroll={() => {
-              updateArrows();
-              clearHighlight();
-            }}
             className={cn(
-              'hide-scrollbar mx-0.5 flex h-full max-w-[99%] items-center gap-4 overflow-x-auto scroll-smooth p-1.5'
+              'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit rounded-lg',
+              'before:pointer-events-none before:absolute before:top-[1px] before:left-[1px] before:h-full before:w-20 before:rounded-[39px] before:opacity-0',
+              'after:pointer-events-none after:absolute after:top-[1px] after:right-[1px] after:h-full after:w-20 after:rounded-r-[39px] after:opacity-0',
+              {
+                'before:max-h-[36px] before:rotate-180 before:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] before:opacity-100 dark:before:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
+                  canScrollLeft,
+                'after:max-h-[36px] after:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] after:opacity-100 dark:after:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
+                  canScrollRight
+              }
             )}
           >
-            <Each
-              data={chartData}
-              render={(item) => (
-                <Button
-                  key={item.name}
-                  className={cn(
-                    'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
-                    {
-                      'line-through opacity-30': hiddenItems.has(item.name)
-                    }
-                  )}
-                  onMouseEnter={() => highlightPoint(item.name)}
-                  onFocus={() => highlightPoint(item.name)}
-                  onMouseLeave={clearHighlight}
-                  onBlur={clearHighlight}
-                  onClick={() => onLegendItemClick(item.name)}
-                >
-                  <span
-                    className='inline-block h-3 w-3 rounded-full'
-                    style={{ backgroundColor: item.color }}
-                  />
-                  {item.name}
-                </Button>
-              )}
-            />
-          </div>
-          <View.Condition if={canScrollRight}>
-            <Button
-              className={cn(
-                'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
-              )}
-              onClick={() => {
+            <View.Condition if={canScrollLeft}>
+              <Button
+                className={cn(
+                  'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-lg'
+                )}
+                onClick={() => {
+                  clearHighlight();
+                  scrollByDir('left');
+                }}
+              >
+                <Icon
+                  name='arrow-triangle'
+                  className='h-[6px] w-[6px]'
+                />
+              </Button>
+            </View.Condition>
+            <div
+              ref={viewportRef}
+              onScroll={() => {
+                updateArrows();
                 clearHighlight();
-                scrollByDir('right');
               }}
+              className={cn(
+                'hide-scrollbar mx-0.5 flex h-full max-w-[99%] items-center gap-4 overflow-x-auto scroll-smooth p-1.5'
+              )}
             >
-              <Icon
-                name='arrow-triangle'
-                className='h-[6px] w-[6px] rotate-180'
+              <Each
+                data={chartData}
+                render={(item) => (
+                  <Button
+                    key={item.name}
+                    className={cn(
+                      'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
+                      {
+                        'line-through opacity-30': hiddenItems.has(item.name)
+                      }
+                    )}
+                    onMouseEnter={() => highlightPoint(item.name)}
+                    onFocus={() => highlightPoint(item.name)}
+                    onMouseLeave={clearHighlight}
+                    onBlur={clearHighlight}
+                    onClick={() => onLegendItemClick(item.name)}
+                  >
+                    <span
+                      className='inline-block h-3 w-3 rounded-full'
+                      style={{ backgroundColor: item.color }}
+                    />
+                    {item.name}
+                  </Button>
+                )}
               />
-            </Button>
-          </View.Condition>
+            </div>
+            <View.Condition if={canScrollRight}>
+              <Button
+                className={cn(
+                  'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-lg'
+                )}
+                onClick={() => {
+                  clearHighlight();
+                  scrollByDir('right');
+                }}
+              >
+                <Icon
+                  name='arrow-triangle'
+                  className='h-[6px] w-[6px] rotate-180'
+                />
+              </Button>
+            </View.Condition>
+          </div>
         </div>
-      </div>
+      </View.Condition>
     </div>
   );
 };

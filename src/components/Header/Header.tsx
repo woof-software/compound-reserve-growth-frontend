@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import {
@@ -35,7 +35,7 @@ const navLinks = [
   {
     to: commonRoutes.INCENTIVES,
     title: routeTitles.INCENTIVES,
-    icon: 'star'
+    icon: 'diamond'
   },
   {
     to: commonRoutes.OEV,
@@ -45,7 +45,7 @@ const navLinks = [
   }
 ];
 
-const Header: FC = () => {
+const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
@@ -68,6 +68,7 @@ const Header: FC = () => {
     const isComingSoonRoute = navLinks.some(
       (link) => link.to === currentPath && link.isComingSoon
     );
+
     if (!isValidRoute && !isComingSoonRoute) {
       navigate(commonRoutes.TREASURY, { replace: true });
     }
@@ -161,8 +162,10 @@ const Header: FC = () => {
       <Portal>
         <aside
           className={cn(
-            'bg-background fixed top-[68px] right-0 z-[100] h-full w-full transform p-10 transition-transform duration-200 ease-in-out',
-            isOpen ? 'translate-x-0' : 'translate-x-full'
+            'bg-background fixed top-[68px] right-0 z-[100] h-full w-full translate-x-full transform p-10 transition-transform duration-300 ease-in-out',
+            {
+              'translate-x-0': isOpen
+            }
           )}
         >
           <div className='flex h-full flex-col justify-center gap-2'>

@@ -13,7 +13,7 @@ import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
-import { BarSize, OptionType, TimeRange } from '@/shared/types/types';
+import { BarSize, OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -55,8 +55,6 @@ interface FiltersProps {
 
   barSize: BarSize;
 
-  activeTab: TimeRange | null;
-
   isLoading: boolean;
 
   openSingle: boolean;
@@ -87,8 +85,6 @@ interface FiltersProps {
 
   handleBarSizeChange: (value: string) => void;
 
-  handleTabChange: (value: string) => void;
-
   toggleSingle: () => void;
 
   closeSingle: () => void;
@@ -103,14 +99,9 @@ const CompoundFeeRevenueRecieved = ({
   isLoading,
   isError
 }: RevenuePageProps) => {
-  const {
-    activeTab,
-    barSize,
-    barCount,
-    handleTabChange,
-    handleBarSizeChange,
-    handleVisibleBarsChange
-  } = useChartControls({ initialTimeRange: '7B', initialBarSize: 'D' });
+  const { barSize, handleBarSizeChange } = useChartControls({
+    initialBarSize: 'D'
+  });
 
   const initialState: SelectedOptionsState = useMemo(
     () => ({
@@ -364,7 +355,7 @@ const CompoundFeeRevenueRecieved = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'border-background min-h-[571px] border',
-        content: 'flex flex-col gap-3 p-0 pb-5 md:px-10 md:pb-10'
+        content: 'flex flex-col gap-3 p-0 pb-5 md:px-10 lg:pb-10'
       }}
     >
       <Filters
@@ -376,7 +367,6 @@ const CompoundFeeRevenueRecieved = ({
         deploymentOptionsFilter={deploymentOptionsFilter}
         isLoading={isLoading || false}
         barSize={barSize}
-        activeTab={activeTab}
         csvData={csvData}
         csvFilename={csvFilename}
         openSingle={isGroupByOpen}
@@ -385,7 +375,6 @@ const CompoundFeeRevenueRecieved = ({
         onSelectMarket={onSelectMarket}
         onSelectSymbol={onSelectSymbol}
         handleBarSizeChange={handleBarSizeChange}
-        handleTabChange={handleTabChange}
         toggleSingle={onGroupByOpen}
         closeSingle={onGroupByClose}
         selectSingle={handleSelectGroupBy}
@@ -400,9 +389,7 @@ const CompoundFeeRevenueRecieved = ({
         <CompoundFeeRecieved
           data={chartData}
           groupBy={groupBy}
-          barCount={barCount}
           barSize={barSize}
-          onVisibleBarsChange={handleVisibleBarsChange}
         />
       )}
     </Card>
@@ -412,7 +399,6 @@ const CompoundFeeRevenueRecieved = ({
 const Filters = memo(
   ({
     barSize,
-    activeTab,
     openSingle,
     groupBy,
     csvData,
@@ -428,7 +414,6 @@ const Filters = memo(
     onSelectMarket,
     onSelectSymbol,
     handleBarSizeChange,
-    handleTabChange,
     toggleSingle,
     closeSingle,
     selectSingle,
@@ -537,12 +522,6 @@ const Filters = memo(
               onTabChange={handleBarSizeChange}
               disabled={isLoading}
             />
-            <TabsGroup
-              tabs={['7B', '30B', '90B', '180B']}
-              value={activeTab}
-              onTabChange={handleTabChange}
-              disabled={isLoading}
-            />
             <div className='flex items-center gap-1'>
               <Text
                 tag='span'
@@ -577,12 +556,6 @@ const Filters = memo(
                 tabs={['D', 'W', 'M']}
                 value={barSize}
                 onTabChange={handleBarSizeChange}
-                disabled={isLoading}
-              />
-              <TabsGroup
-                tabs={['7B', '30B', '90B', '180B']}
-                value={activeTab}
-                onTabChange={handleTabChange}
                 disabled={isLoading}
               />
               <div className='flex items-center gap-1'>

@@ -14,7 +14,7 @@ import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useModal } from '@/shared/hooks/useModal';
 import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
-import { BarSize, OptionType, TimeRange } from '@/shared/types/types';
+import { BarSize, OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
@@ -48,8 +48,6 @@ interface FiltersProps {
 
   barSize: BarSize;
 
-  activeTab: TimeRange | null;
-
   isLoading: boolean;
 
   isOpenSingle: boolean;
@@ -79,8 +77,6 @@ interface FiltersProps {
   onSelectSymbol: (symbol: OptionType[]) => void;
 
   handleBarSizeChange: (value: string) => void;
-
-  handleTabChange: (value: string) => void;
 
   openSingleDropdown: () => void;
 
@@ -120,15 +116,7 @@ const TotalTresuaryValue = ({
     selectClose: selectSingleClose
   } = useDropdown('single');
 
-  const {
-    activeTab,
-    barSize,
-    barCount,
-    handleTabChange,
-    handleResetActiveTab,
-    handleBarSizeChange
-  } = useChartControls({
-    initialTimeRange: '7B',
+  const { barSize, handleBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
 
@@ -328,7 +316,7 @@ const TotalTresuaryValue = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-10 md:pb-10'
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-10 lg:pb-10'
       }}
     >
       <Filters
@@ -340,7 +328,6 @@ const TotalTresuaryValue = ({
         deploymentOptionsFilter={deploymentOptionsFilter}
         isLoading={isLoading || false}
         barSize={barSize}
-        activeTab={activeTab}
         csvData={csvData}
         csvFilename={csvFilename}
         isOpenSingle={isOpenSingle}
@@ -349,7 +336,6 @@ const TotalTresuaryValue = ({
         onSelectMarket={onSelectMarket}
         onSelectSymbol={onSelectSymbol}
         handleBarSizeChange={handleBarSizeChange}
-        handleTabChange={handleTabChange}
         openSingleDropdown={openSingleDropdown}
         closeSingle={closeSingle}
         selectSingle={selectSingle}
@@ -365,8 +351,6 @@ const TotalTresuaryValue = ({
           groupBy={groupBy}
           className='max-h-fit'
           barSize={barSize}
-          barCountToSet={barCount}
-          onZoom={handleResetActiveTab}
         />
       )}
     </Card>
@@ -376,7 +360,6 @@ const TotalTresuaryValue = ({
 const Filters = memo(
   ({
     barSize,
-    activeTab,
     isOpenSingle,
     groupBy,
     csvData,
@@ -392,7 +375,6 @@ const Filters = memo(
     onSelectMarket,
     onSelectSymbol,
     handleBarSizeChange,
-    handleTabChange,
     openSingleDropdown,
     closeSingle,
     selectSingle,
@@ -453,12 +435,6 @@ const Filters = memo(
                 onTabChange={handleBarSizeChange}
                 disabled={isLoading}
               />
-              <TabsGroup
-                tabs={['7B', '30B', '90B', '180B']}
-                value={activeTab}
-                onTabChange={handleTabChange}
-                disabled={isLoading}
-              />
               <div className='flex items-center gap-1'>
                 <Text
                   tag='span'
@@ -509,6 +485,12 @@ const Filters = memo(
         </div>
         <div className='hidden lg:block'>
           <div className='flex items-center justify-end gap-3 px-0 py-3'>
+            <TabsGroup
+              tabs={['D', 'W', 'M']}
+              value={barSize}
+              onTabChange={handleBarSizeChange}
+              disabled={isLoading}
+            />
             <MultiSelect
               options={chainOptions || []}
               value={selectedOptions.chain}
@@ -542,18 +524,6 @@ const Filters = memo(
               value={selectedOptions.symbol}
               onChange={onSelectSymbol}
               placeholder='Reserve Symbols'
-              disabled={isLoading}
-            />
-            <TabsGroup
-              tabs={['D', 'W', 'M']}
-              value={barSize}
-              onTabChange={handleBarSizeChange}
-              disabled={isLoading}
-            />
-            <TabsGroup
-              tabs={['7B', '30B', '90B', '180B']}
-              value={activeTab}
-              onTabChange={handleTabChange}
               disabled={isLoading}
             />
             <div className='flex items-center gap-1'>
