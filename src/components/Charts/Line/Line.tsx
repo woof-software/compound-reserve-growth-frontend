@@ -511,14 +511,16 @@ const LineChart: FC<LineChartProps> = ({
       )}
     >
       <div className='relative flex-grow'>
-        {areAllSeriesHidden && (
-          <Text
-            size='11'
-            className='text-primary-14 absolute inset-0 flex -translate-y-10 transform items-center justify-center'
-          >
-            All series are hidden
-          </Text>
-        )}
+        <View.Condition if={areAllSeriesHidden}>
+          <div className='flex min-h-[400px] items-center justify-center'>
+            <Text
+              size='11'
+              className='text-primary-14 items-center justify-center'
+            >
+              All series are hidden
+            </Text>
+          </div>
+        </View.Condition>
         <HighchartsReact
           ref={chartRef}
           highcharts={Highcharts}
@@ -526,6 +528,7 @@ const LineChart: FC<LineChartProps> = ({
           allowChartUpdate
           containerProps={{
             style: {
+              display: !areAllSeriesHidden ? 'block' : 'none',
               width: '100%',
               height: '100%',
               touchAction: 'none',
@@ -558,99 +561,56 @@ const LineChart: FC<LineChartProps> = ({
           </View.Condition>
         </div>
       </div>
-      {isLegendEnabled && (
-        <>
-          <div className='mx-5 block md:mx-0 lg:hidden'>
+      <View.Condition
+        if={Boolean(isLegendEnabled && !areAllSeriesHidden && data.length > 1)}
+      >
+        <div className='mx-5 block md:mx-0 lg:hidden'>
+          <div
+            className={cn(
+              'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit overflow-hidden rounded-[39px]',
+              'before:pointer-events-none before:absolute before:top-[1px] before:left-[1px] before:h-full before:w-20 before:rounded-[39px] before:opacity-0',
+              'after:pointer-events-none after:absolute after:top-[1px] after:right-[1px] after:h-full after:w-20 after:rounded-r-[39px] after:opacity-0',
+              {
+                'before:max-h-[36px] before:rotate-180 before:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] before:opacity-100 dark:before:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
+                  canScrollLeft,
+                'after:max-h-[36px] after:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] after:opacity-100 dark:after:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
+                  canScrollRight
+              }
+            )}
+          >
+            <View.Condition if={canScrollLeft}>
+              <Button
+                className={cn(
+                  'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
+                )}
+                onClick={() => {
+                  clearHighlight();
+                  scrollByDir('left');
+                }}
+              >
+                <Icon
+                  name='arrow-triangle'
+                  className='h-[6px] w-[6px]'
+                />
+              </Button>
+            </View.Condition>
             <div
+              ref={viewportRef}
+              onScroll={() => {
+                updateArrows();
+                clearHighlight();
+              }}
               className={cn(
-                'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit overflow-hidden rounded-[39px]',
-                'before:pointer-events-none before:absolute before:top-[1px] before:left-[1px] before:h-full before:w-20 before:rounded-[39px] before:opacity-0',
-                'after:pointer-events-none after:absolute after:top-[1px] after:right-[1px] after:h-full after:w-20 after:rounded-r-[39px] after:opacity-0',
-                {
-                  'before:max-h-[36px] before:rotate-180 before:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] before:opacity-100 dark:before:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
-                    canScrollLeft,
-                  'after:max-h-[36px] after:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] after:opacity-100 dark:after:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
-                    canScrollRight
-                }
+                'hide-scrollbar mx-0.5 flex h-full max-w-[99%] items-center gap-4 overflow-x-auto scroll-smooth p-1.5'
               )}
             >
-              <View.Condition if={canScrollLeft}>
-                <Button
-                  className={cn(
-                    'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
-                  )}
-                  onClick={() => {
-                    clearHighlight();
-                    scrollByDir('left');
-                  }}
-                >
-                  <Icon
-                    name='arrow-triangle'
-                    className='h-[6px] w-[6px]'
-                  />
-                </Button>
-              </View.Condition>
-              <div
-                ref={viewportRef}
-                onScroll={() => {
-                  updateArrows();
-                  clearHighlight();
-                }}
-                className={cn(
-                  'hide-scrollbar mx-0.5 flex h-full max-w-[99%] items-center gap-4 overflow-x-auto scroll-smooth p-1.5'
-                )}
-              >
-                <Each
-                  data={aggregatedSeries}
-                  render={(s) => (
-                    <Button
-                      key={s.name}
-                      className={cn(
-                        'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
-                        { 'line-through opacity-30': hiddenItems.has(s.name!) }
-                      )}
-                      onMouseEnter={() => highlightSeries(s.name!)}
-                      onFocus={() => highlightSeries(s.name!)}
-                      onMouseLeave={clearHighlight}
-                      onBlur={clearHighlight}
-                      onClick={() => toggleSeriesByName(s.name!)}
-                    >
-                      <span
-                        className='inline-block h-3 w-3 rounded-full'
-                        style={{ backgroundColor: (s as any).color }}
-                      />
-                      {s.name}
-                    </Button>
-                  )}
-                />
-              </div>
-              <View.Condition if={canScrollRight}>
-                <Button
-                  className={cn(
-                    'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
-                  )}
-                  onClick={() => {
-                    clearHighlight();
-                    scrollByDir('right');
-                  }}
-                >
-                  <Icon
-                    name='arrow-triangle'
-                    className='h-[6px] w-[6px] rotate-180'
-                  />
-                </Button>
-              </View.Condition>
-            </div>
-          </div>
-          <View.Condition if={Boolean(aggregatedSeries.length > 1)}>
-            <div className='mx-auto hidden max-w-[902px] flex-wrap justify-center gap-5 px-[15px] py-2 lg:flex'>
               <Each
                 data={aggregatedSeries}
                 render={(s) => (
                   <Button
                     key={s.name}
                     className={cn(
-                      'text-secondary-42 flex shrink-0 gap-2.5 text-[11px] leading-none font-normal',
+                      'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
                       { 'line-through opacity-30': hiddenItems.has(s.name!) }
                     )}
                     onMouseEnter={() => highlightSeries(s.name!)}
@@ -668,9 +628,52 @@ const LineChart: FC<LineChartProps> = ({
                 )}
               />
             </div>
-          </View.Condition>
-        </>
-      )}
+            <View.Condition if={canScrollRight}>
+              <Button
+                className={cn(
+                  'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
+                )}
+                onClick={() => {
+                  clearHighlight();
+                  scrollByDir('right');
+                }}
+              >
+                <Icon
+                  name='arrow-triangle'
+                  className='h-[6px] w-[6px] rotate-180'
+                />
+              </Button>
+            </View.Condition>
+          </div>
+        </div>
+        <View.Condition if={Boolean(aggregatedSeries.length > 1)}>
+          <div className='mx-auto hidden max-w-[902px] flex-wrap justify-center gap-5 px-[15px] py-2 lg:flex'>
+            <Each
+              data={aggregatedSeries}
+              render={(s) => (
+                <Button
+                  key={s.name}
+                  className={cn(
+                    'text-secondary-42 flex shrink-0 gap-2.5 text-[11px] leading-none font-normal',
+                    { 'line-through opacity-30': hiddenItems.has(s.name!) }
+                  )}
+                  onMouseEnter={() => highlightSeries(s.name!)}
+                  onFocus={() => highlightSeries(s.name!)}
+                  onMouseLeave={clearHighlight}
+                  onBlur={clearHighlight}
+                  onClick={() => toggleSeriesByName(s.name!)}
+                >
+                  <span
+                    className='inline-block h-3 w-3 rounded-full'
+                    style={{ backgroundColor: (s as any).color }}
+                  />
+                  {s.name}
+                </Button>
+              )}
+            />
+          </div>
+        </View.Condition>
+      </View.Condition>
     </div>
   );
 };

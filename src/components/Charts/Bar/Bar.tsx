@@ -192,7 +192,7 @@ const CryptoChart: FC<CryptoChartProps> = ({ data, onClear }) => {
         />
       </View.Condition>
       <View.Condition if={Boolean(data.length <= 1)}>
-        <div className='flex flex-col items-center justify-center gap-3.5'>
+        <div className='flex min-w-[400px] flex-col items-center justify-center gap-3.5'>
           <Text
             size='11'
             weight='500'
