@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useReducer } from 'react';
+import { CSVLink } from 'react-csv';
 
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
@@ -18,7 +19,9 @@ import { TokenData } from '@/shared/types/Treasury/types';
 import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
+import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
 interface TreasuryHoldingsBlockProps {
@@ -92,6 +95,12 @@ const TreasuryHoldingsBlock = ({
     isOpen: isSortOpen,
     onOpenModal: onSortOpen,
     onCloseModal: onSortClose
+  } = useModal();
+
+  const {
+    isOpen: isMoreOpen,
+    onOpenModal: onMoreOpen,
+    onCloseModal: onMoreClose
   } = useModal();
 
   const [selectedOptions, setSelectedOptions] = useReducer(
@@ -398,10 +407,15 @@ const TreasuryHoldingsBlock = ({
             />
             Sort
           </Button>
-          <CSVDownloadButton
-            data={tableData}
-            filename='Full Treasury Holdings'
-          />
+          <Button
+            onClick={onMoreOpen}
+            className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto lg:hidden'
+          >
+            <Icon
+              name='3-dots'
+              className='h-6 w-6'
+            />
+          </Button>
         </div>
         <SortDrawer
           isOpen={isSortOpen}
@@ -417,6 +431,31 @@ const TreasuryHoldingsBlock = ({
           onClose={onFilterClose}
           onClearAll={onClearAll}
         />
+        <Drawer
+          isOpen={isMoreOpen}
+          onClose={onMoreClose}
+        >
+          <div className='flex flex-col gap-3'>
+            <CSVLink
+              data={tableData}
+              filename='Full Treasury Holdings'
+              onClick={onMoreClose}
+            >
+              <div className='flex items-center gap-1.5'>
+                <Icon
+                  name='download'
+                  className='h-6 w-6'
+                />
+                <Text
+                  size='11'
+                  weight='400'
+                >
+                  CSV with the entire historical data
+                </Text>
+              </div>
+            </CSVLink>
+          </div>
+        </Drawer>
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <TreasuryHoldings

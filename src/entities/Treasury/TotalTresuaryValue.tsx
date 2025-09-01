@@ -1,5 +1,7 @@
 import React, { memo, useCallback, useMemo, useReducer } from 'react';
+import { CSVLink } from 'react-csv';
 
+import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import LineChart from '@/components/Charts/Line/Line';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
@@ -10,6 +12,7 @@ import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
+import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   ChartDataItem,
@@ -20,10 +23,12 @@ import { TokenData } from '@/shared/types/Treasury/types';
 import { BarSize, OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
 
@@ -51,6 +56,8 @@ interface FiltersProps {
 
   barSize: BarSize;
 
+  showEvents: boolean;
+
   isLoading: boolean;
 
   isOpenSingle: boolean;
@@ -59,7 +66,13 @@ interface FiltersProps {
 
   csvFilename: string;
 
+  isShowEyeIcon: boolean;
+
+  isShowCalendarIcon: boolean;
+
   csvData: Record<string, string | number>[];
+
+  areAllSeriesHidden: boolean;
 
   selectedOptions: {
     chain: OptionType[];
@@ -87,9 +100,15 @@ interface FiltersProps {
 
   onClearAll: () => void;
 
+  onSelectAll: () => void;
+
+  onDeselectAll: () => void;
+
   selectSingle: (value: string) => void;
 
   selectSingleClose: (value: string) => void;
+
+  onShowEvents: (value: boolean) => void;
 }
 
 const TotalTresuaryValue = ({
@@ -263,6 +282,24 @@ const TotalTresuaryValue = ({
     );
   }, [correctedChartSeries]);
 
+  const {
+    chartRef,
+    eventsData,
+    showEvents,
+    isLegendEnabled,
+    aggregatedSeries,
+    areAllSeriesHidden,
+    onAllSeriesHidden,
+    onEventsData,
+    onShowEvents,
+    onSelectAll,
+    onDeselectAll
+  } = useLineChart({
+    groupBy,
+    data: correctedChartSeries,
+    barSize
+  });
+
   const onSelectChain = useCallback(
     (chain: OptionType[]) => {
       const selectedChainIds = chain.map((o) => o.id);
@@ -319,11 +356,15 @@ const TotalTresuaryValue = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-10 lg:pb-10'
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-5 lg:px-10 lg:pb-10'
       }}
     >
       <Filters
         groupBy={groupBy}
+        showEvents={showEvents}
+        areAllSeriesHidden={areAllSeriesHidden}
+        isShowCalendarIcon={Boolean(eventsData.length > 0)}
+        isShowEyeIcon={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
         assetTypeOptions={assetTypeOptions}
         selectedOptions={selectedOptions}
         chainOptions={chainOptions}
@@ -344,6 +385,9 @@ const TotalTresuaryValue = ({
         selectSingle={selectSingle}
         selectSingleClose={selectSingleClose}
         onClearAll={onClearAll}
+        onSelectAll={onSelectAll}
+        onDeselectAll={onDeselectAll}
+        onShowEvents={onShowEvents}
       />
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder onButtonClick={onClearAll} />
@@ -354,6 +398,16 @@ const TotalTresuaryValue = ({
           groupBy={groupBy}
           className='max-h-fit'
           barSize={barSize}
+          chartRef={chartRef}
+          isLegendEnabled={isLegendEnabled}
+          eventsData={eventsData}
+          showEvents={showEvents}
+          areAllSeriesHidden={areAllSeriesHidden}
+          onAllSeriesHidden={onAllSeriesHidden}
+          onSelectAll={onSelectAll}
+          onDeselectAll={onDeselectAll}
+          onShowEvents={onShowEvents}
+          onEventsData={onEventsData}
         />
       )}
     </Card>
@@ -364,9 +418,13 @@ const Filters = memo(
   ({
     barSize,
     isOpenSingle,
+    isShowEyeIcon,
+    isShowCalendarIcon,
+    showEvents,
     groupBy,
     csvData,
     csvFilename,
+    areAllSeriesHidden,
     chainOptions,
     selectedOptions,
     deploymentOptionsFilter,
@@ -382,9 +440,18 @@ const Filters = memo(
     closeSingle,
     selectSingle,
     selectSingleClose,
-    onClearAll
+    onClearAll,
+    onSelectAll,
+    onDeselectAll,
+    onShowEvents
   }: FiltersProps) => {
     const { isOpen, onOpenModal, onCloseModal } = useModal();
+
+    const {
+      isOpen: isMoreOpen,
+      onOpenModal: onMoreOpen,
+      onCloseModal: onMoreClose
+    } = useModal();
 
     const filterOptions = useMemo(() => {
       const chainFilterOptions = {
@@ -427,10 +494,26 @@ const Filters = memo(
       selectedOptions
     ]);
 
+    const onEyeClick = () => {
+      if (areAllSeriesHidden) {
+        onSelectAll();
+      } else {
+        onDeselectAll();
+      }
+
+      onMoreClose();
+    };
+
+    const onCalendarClick = () => {
+      onShowEvents(!showEvents);
+
+      onMoreClose();
+    };
+
     return (
       <>
         <div className='block lg:hidden'>
-          <div className='flex flex-col justify-end gap-2 px-5 py-3'>
+          <div className='flex flex-col justify-end gap-2 px-5 py-3 md:px-0 lg:px-5'>
             <div className='flex flex-col-reverse items-center justify-end gap-2 sm:flex-row'>
               <TabsGroup
                 className={{
@@ -463,10 +546,15 @@ const Filters = memo(
                   />
                   Filters
                 </Button>
-                <CSVDownloadButton
-                  data={csvData}
-                  filename={csvFilename}
-                />
+                <Button
+                  onClick={onMoreOpen}
+                  className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto lg:hidden'
+                >
+                  <Icon
+                    name='3-dots'
+                    className='h-6 w-6'
+                  />
+                </Button>
               </div>
             </div>
           </div>
@@ -483,6 +571,65 @@ const Filters = memo(
             onClose={closeSingle}
             onSelect={selectSingle}
           />
+          <Drawer
+            isOpen={isMoreOpen}
+            onClose={onMoreClose}
+          >
+            <div className='flex flex-col gap-3'>
+              <CSVLink
+                data={csvData}
+                filename={csvFilename}
+                onClick={onMoreClose}
+              >
+                <div className='flex items-center gap-1.5'>
+                  <Icon
+                    name='download'
+                    className='h-6 w-6'
+                  />
+                  <Text
+                    size='11'
+                    weight='400'
+                  >
+                    CSV with the entire historical data
+                  </Text>
+                </div>
+              </CSVLink>
+              <View.Condition if={isShowEyeIcon}>
+                <ChartIconToggle
+                  active={!areAllSeriesHidden}
+                  onIcon='eye'
+                  offIcon='eye-closed'
+                  ariaLabel='Toggle all series visibility'
+                  className='flex items-center gap-1.5 bg-transparent p-0 !shadow-none'
+                  onClick={onEyeClick}
+                >
+                  <Text
+                    size='11'
+                    weight='400'
+                  >
+                    EYE text text
+                  </Text>
+                </ChartIconToggle>
+              </View.Condition>
+              <View.Condition if={isShowCalendarIcon}>
+                <ChartIconToggle
+                  active={showEvents}
+                  onIcon='calendar-check'
+                  offIcon='calendar-uncheck'
+                  ariaLabel='Toggle events'
+                  className='flex items-center gap-1.5 bg-transparent p-0 !shadow-none'
+                  onClick={onCalendarClick}
+                >
+                  <Text
+                    size='11'
+                    weight='400'
+                  >
+                    Hide Events
+                  </Text>
+                </ChartIconToggle>
+              </View.Condition>
+            </div>
+          </Drawer>
         </div>
         <div className='hidden lg:block'>
           <div className='flex items-center justify-end gap-3 px-0 py-3'>

@@ -1,5 +1,6 @@
 import React, {
   FC,
+  RefObject,
   useCallback,
   useEffect,
   useMemo,
@@ -10,9 +11,11 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
+import { EventDataItem } from '@/shared/hooks/useLineChart';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
   capitalizeFirstLetter,
+  formatValue,
   getStableColorForSeries
 } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
@@ -23,12 +26,6 @@ import View from '@/shared/ui/View/View';
 
 import 'highcharts/modules/stock';
 import 'highcharts/modules/mouse-wheel-zoom';
-
-interface EventDataItem {
-  x: number;
-  title: string;
-  text: string;
-}
 
 interface LineDataItem {
   x: number;
@@ -42,40 +39,53 @@ export interface LineChartSeries {
 
 interface LineChartProps {
   data: LineChartSeries[];
-  groupBy: string;
-  className?: string;
-  barSize: 'D' | 'W' | 'M';
-  showLegend?: boolean;
-}
 
-const formatValue = (value: number) => {
-  if (Math.abs(value) >= 1_000_000) {
-    return (value / 1_000_000).toFixed(1) + 'M';
-  }
-  if (Math.abs(value) >= 1_000) {
-    return (value / 1_000).toFixed(1) + 'K';
-  }
-  return value.toFixed(0);
-};
+  groupBy: string;
+
+  barSize: 'D' | 'W' | 'M';
+
+  chartRef: RefObject<HighchartsReact.RefObject | null>;
+
+  isLegendEnabled: boolean;
+
+  eventsData: EventDataItem[];
+
+  showEvents: boolean;
+
+  areAllSeriesHidden: boolean;
+
+  className?: string;
+
+  onAllSeriesHidden: (value: boolean) => void;
+
+  onSelectAll: () => void;
+
+  onDeselectAll: () => void;
+
+  onShowEvents: (value: boolean) => void;
+
+  onEventsData: (value: EventDataItem[]) => void;
+}
 
 const LineChart: FC<LineChartProps> = ({
   data,
   groupBy,
-  className,
   barSize,
-  showLegend
+  chartRef,
+  isLegendEnabled,
+  eventsData,
+  showEvents,
+  areAllSeriesHidden,
+  className,
+  onAllSeriesHidden,
+  onSelectAll,
+  onDeselectAll,
+  onShowEvents,
+  onEventsData
 }) => {
-  const chartRef = useRef<HighchartsReact.RefObject>(null);
-
   const programmaticChange = useRef(false);
 
   const currentZoom = useRef<{ min: number; max: number } | null>(null);
-
-  const [areAllSeriesHidden, setAreAllSeriesHidden] = useState(false);
-
-  const [eventsData, setEventsData] = useState<EventDataItem[]>([]);
-
-  const [showEvents, setShowEvents] = useState(true);
 
   const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
 
@@ -99,38 +109,6 @@ const LineChart: FC<LineChartProps> = ({
     const step = Math.max(el.clientWidth * 0.6, 120);
     el.scrollBy({ left: dir === 'left' ? -step : step, behavior: 'smooth' });
   };
-
-  useEffect(() => setAreAllSeriesHidden(false), [data]);
-
-  useEffect(() => {
-    const eventsApiUrl =
-      'https://compound-reserve-growth-backend-dev.woof.software/api/events';
-    const fetchEvents = async () => {
-      try {
-        const response = await fetch(eventsApiUrl);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const rawEvents: {
-          date: number;
-          name: string;
-          description: string;
-        }[] = await response.json();
-        const formattedEvents = rawEvents
-          .filter((e) => e.date)
-          .map((event) => ({
-            x: event.date * 1000,
-            title: event.name,
-            text: event.description || event.name
-          }));
-        setEventsData(formattedEvents);
-      } catch (error) {
-        console.error('Failed to fetch chart events:', error);
-        setEventsData([]);
-      }
-    };
-    fetchEvents();
-  }, []);
 
   const aggregatedSeries = useMemo<Highcharts.SeriesAreaOptions[]>(() => {
     const allSeriesNames = data.map((series) => series.name);
@@ -196,9 +174,6 @@ const LineChart: FC<LineChartProps> = ({
     });
   }, [data, barSize]);
 
-  const isLegendEnabled =
-    (showLegend ?? groupBy !== 'none') && aggregatedSeries.length > 0;
-
   const highlightSeries = useCallback((name: string) => {
     const chart = chartRef.current?.chart;
 
@@ -259,7 +234,7 @@ const LineChart: FC<LineChartProps> = ({
     setTimeout(() => {
       const anyVisible = chart.series.some((sr) => sr.visible);
 
-      setAreAllSeriesHidden(!anyVisible);
+      onAllSeriesHidden(!anyVisible);
     }, 0);
   }, []);
 
@@ -477,20 +452,34 @@ const LineChart: FC<LineChartProps> = ({
     };
   }, [aggregatedSeries, groupBy, isLegendEnabled, eventsData, showEvents]);
 
-  const handleSelectAll = useCallback(() => {
-    const chart = chartRef.current?.chart;
-    if (!chart) return;
-    chart.series.forEach((s) => s.setVisible(true, false));
-    chart.redraw();
-    setAreAllSeriesHidden(false);
-  }, []);
-
-  const handleDeselectAll = useCallback(() => {
-    const chart = chartRef.current?.chart;
-    if (!chart) return;
-    chart.series.forEach((s) => s.setVisible(false, false));
-    chart.redraw();
-    setAreAllSeriesHidden(true);
+  useEffect(() => {
+    const eventsApiUrl =
+      'https://compound-reserve-growth-backend-dev.woof.software/api/events';
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch(eventsApiUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const rawEvents: {
+          date: number;
+          name: string;
+          description: string;
+        }[] = await response.json();
+        const formattedEvents = rawEvents
+          .filter((e) => e.date)
+          .map((event) => ({
+            x: event.date * 1000,
+            title: event.name,
+            text: event.description || event.name
+          }));
+        onEventsData(formattedEvents);
+      } catch (error) {
+        console.error('Failed to fetch chart events:', error);
+        onEventsData([]);
+      }
+    };
+    fetchEvents();
   }, []);
 
   useEffect(() => {
@@ -538,13 +527,13 @@ const LineChart: FC<LineChartProps> = ({
         />
       </div>
       <div className='absolute right-6 block'>
-        <div className='flex items-center gap-3'>
+        <div className='hidden items-center gap-3 lg:flex'>
           <View.Condition
             if={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
           >
             <ChartIconToggle
               active={!areAllSeriesHidden}
-              onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
+              onClick={areAllSeriesHidden ? onSelectAll : onDeselectAll}
               onIcon='eye'
               offIcon='eye-closed'
               ariaLabel='Toggle all series visibility'
@@ -553,7 +542,7 @@ const LineChart: FC<LineChartProps> = ({
           <View.Condition if={Boolean(eventsData.length > 0)}>
             <ChartIconToggle
               active={showEvents}
-              onClick={() => setShowEvents((prev) => !prev)}
+              onClick={() => onShowEvents(!showEvents)}
               onIcon='calendar-check'
               offIcon='calendar-uncheck'
               ariaLabel='Toggle events'
