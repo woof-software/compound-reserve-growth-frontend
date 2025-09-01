@@ -497,19 +497,21 @@ const Filters = ({
         </div>
       </div>
       <div className='block lg:hidden'>
-        <div className='flex flex-wrap justify-end gap-3 px-5 py-3'>
-          <div className='flex flex-wrap items-center justify-end gap-2'>
+        <div className='flex flex-wrap justify-end gap-2 px-5 py-3'>
+          <div className='flex w-full flex-row items-center justify-end gap-2 sm:w-auto'>
             <TabsGroup
+              className={{
+                container: 'w-full sm:w-auto',
+                list: 'w-full sm:w-auto'
+              }}
               tabs={['D', 'W', 'M']}
               value={barSize}
               onTabChange={handleBarSizeChange}
               disabled={isLoading}
             />
-          </div>
-          <div className='flex flex-wrap items-center justify-end gap-2'>
             <Button
               onClick={onOpenModal}
-              className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
+              className='bg-secondary-27 text-gray-11 shadow-13 flex w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto'
             >
               <Icon
                 name='filters'

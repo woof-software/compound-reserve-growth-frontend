@@ -30,7 +30,6 @@ const CSVDownloadButton: FC<CSVDownloadButtonProps> = ({
         <CSVLink
           data={data}
           filename={filename}
-          className={className}
         >
           <Icon
             name='download'

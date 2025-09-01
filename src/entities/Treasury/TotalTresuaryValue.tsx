@@ -3,16 +3,19 @@ import React, { memo, useCallback, useMemo, useReducer } from 'react';
 import LineChart from '@/components/Charts/Line/Line';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
+import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import SingleDropdown, {
-  SingleDrawer
-} from '@/components/SingleDropdown/SingleDropdown';
+import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useModal } from '@/shared/hooks/useModal';
-import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
+import {
+  ChartDataItem,
+  extractFilterOptions,
+  groupOptionsDto
+} from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { BarSize, OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
@@ -427,53 +430,44 @@ const Filters = memo(
     return (
       <>
         <div className='block lg:hidden'>
-          <div className='flex flex-col justify-end gap-3 px-5 py-3'>
-            <div className='flex flex-wrap justify-end gap-3'>
+          <div className='flex flex-col justify-end gap-2 px-5 py-3'>
+            <div className='flex flex-col-reverse items-center justify-end gap-2 sm:flex-row'>
               <TabsGroup
+                className={{
+                  container: 'w-full sm:w-auto',
+                  list: 'w-full sm:w-auto'
+                }}
                 tabs={['D', 'W', 'M']}
                 value={barSize}
                 onTabChange={handleBarSizeChange}
                 disabled={isLoading}
               />
-              <div className='flex items-center gap-1'>
-                <Text
-                  tag='span'
-                  size='11'
-                  weight='600'
-                  lineHeight='16'
-                  className='text-primary-14'
+              <div className='flex w-full items-center gap-2 sm:w-auto'>
+                <Button
+                  onClick={openSingleDropdown}
+                  className='bg-secondary-27 text-gray-11 shadow-13 flex w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto lg:hidden'
                 >
-                  Group by
-                </Text>
-                <SingleDrawer
-                  options={groupByOptions}
-                  isOpen={isOpenSingle}
-                  selectedValue={groupBy}
-                  onOpen={openSingleDropdown}
-                  onClose={closeSingle}
-                  onSelect={(value: string) => {
-                    selectSingle(value);
-                  }}
-                  disabled={isLoading}
-                  triggerContentClassName='p-[5px]'
+                  <Icon
+                    name='group-grid'
+                    className='h-[14px] w-[14px]'
+                  />
+                  Group
+                </Button>
+                <Button
+                  onClick={onOpenModal}
+                  className='bg-secondary-27 text-gray-11 shadow-13 flex w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto'
+                >
+                  <Icon
+                    name='filters'
+                    className='h-[14px] w-[14px]'
+                  />
+                  Filters
+                </Button>
+                <CSVDownloadButton
+                  data={csvData}
+                  filename={csvFilename}
                 />
               </div>
-            </div>
-            <div className='flex flex-wrap items-center justify-end gap-3'>
-              <Button
-                onClick={onOpenModal}
-                className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
-              >
-                <Icon
-                  name='filters'
-                  className='h-[14px] w-[14px]'
-                />
-                Filters
-              </Button>
-              <CSVDownloadButton
-                data={csvData}
-                filename={csvFilename}
-              />
             </div>
           </div>
           <Filter
@@ -481,6 +475,13 @@ const Filters = memo(
             filterOptions={filterOptions}
             onClose={onCloseModal}
             onClearAll={onClearAll}
+          />
+          <GroupDrawer
+            isOpen={isOpenSingle}
+            selectedOption={groupBy}
+            options={groupOptionsDto(groupByOptions)}
+            onClose={closeSingle}
+            onSelect={selectSingle}
           />
         </div>
         <div className='hidden lg:block'>

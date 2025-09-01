@@ -508,3 +508,10 @@ export const formatCurrencyValue = (value: unknown): string => {
 
   return isNegative ? `-$${formattedNumber}` : `$${formattedNumber}`;
 };
+
+export const groupOptionsDto = (options: string[]) => {
+  return options.map((option) => ({
+    header: option,
+    accessorKey: option
+  }));
+};

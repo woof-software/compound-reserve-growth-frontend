@@ -385,10 +385,10 @@ const TreasuryBalanceByNetworkBlock = ({
         />
       </div>
       <div className='block px-5 py-3 lg:hidden'>
-        <div className='flex flex-wrap items-center justify-end gap-3'>
+        <div className='flex flex-row items-center justify-end gap-2'>
           <Button
             onClick={onFilterOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
+            className='bg-secondary-27 text-gray-11 shadow-13 flex w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto'
           >
             <Icon
               name='filters'
@@ -398,7 +398,7 @@ const TreasuryBalanceByNetworkBlock = ({
           </Button>
           <Button
             onClick={onSortOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
+            className='bg-secondary-27 text-gray-11 shadow-13 flex w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto'
           >
             <Icon
               name='sort-icon'

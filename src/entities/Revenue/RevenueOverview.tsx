@@ -308,28 +308,37 @@ const RevenueOverview = ({
         content: 'flex flex-col gap-3 px-0 pt-0 pb-0 lg:px-10 lg:pb-10'
       }}
     >
-      <div className='flex flex-wrap justify-end gap-3 px-5 py-3 lg:px-0'>
+      <div className='flex flex-col-reverse justify-end gap-2 px-5 py-3 sm:flex-row lg:px-0'>
         <TabsGroup
+          className={{
+            list: 'w-full sm:w-auto'
+          }}
           key={dateType}
           tabs={[...primaryTabs]}
           value={period}
           onTabChange={handlePeriodChange}
         />
-        <TabsGroup
-          tabs={[...DATE_TYPE_TABS]}
-          value={dateType}
-          onTabChange={handleDateTypeChange}
-        />
-        <Button
-          onClick={onSortOpen}
-          className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold lg:hidden'
-        >
-          <Icon
-            name='sort-icon'
-            className='h-[14px] w-[14px]'
+        <div className='flex gap-2'>
+          <TabsGroup
+            className={{
+              container: 'w-1/2 sm:w-auto',
+              list: 'w-full sm:w-auto'
+            }}
+            tabs={[...DATE_TYPE_TABS]}
+            value={dateType}
+            onTabChange={handleDateTypeChange}
           />
-          Sort
-        </Button>
+          <Button
+            onClick={onSortOpen}
+            className='bg-secondary-27 sm:w-auot text-gray-11 shadow-13 flex w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold lg:hidden'
+          >
+            <Icon
+              name='sort-icon'
+              className='h-[14px] w-[14px]'
+            />
+            Sort
+          </Button>
+        </div>
       </div>
       {!isLoading && !isError && !hasData ? (
         <div className='flex h-[400px] items-center justify-center'>
