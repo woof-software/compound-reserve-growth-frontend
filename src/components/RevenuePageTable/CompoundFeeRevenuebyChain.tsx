@@ -40,7 +40,7 @@ const CompoundFeeRevenuebyChain = ({
 }: CompoundFeeRevenuebyChainProps) => {
   const footerRow = (
     <tr key='footer-total-row'>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[11px] font-medium'>
+      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
         Total
       </td>
       {columns.slice(1).map((col) => {
