@@ -133,8 +133,8 @@ const Filter: FC<FilterProps> = ({
                   <Icon
                     name='plus'
                     className='h-2.5 w-2.5'
-                    color={cn('color-primary-14', {
-                      'color-secondary-41': Boolean(option.total)
+                    color={cn('primary-14', {
+                      'secondary-41': Boolean(option.total)
                     })}
                   />
                   <Text

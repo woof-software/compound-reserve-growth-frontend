@@ -16,6 +16,7 @@ import SingleDropdown, {
 import SortDrawer from '@/components/SortDrawer/SortDrawer';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
+import { cn } from '@/shared/lib/classNames/classNames';
 import {
   capitalizeFirstLetter,
   ChartDataItem,
@@ -26,8 +27,11 @@ import {
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
+import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
+import { Radio } from '@/shared/ui/RadioButton/RadioButton';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
@@ -46,6 +50,32 @@ export interface PrecomputedViews {
   quarterly: Record<string, View>;
   monthly: Record<string, View>;
   weekly: Record<string, View>;
+}
+
+interface GroupDrawerProps {
+  isOpen: boolean;
+
+  onClose: () => void;
+
+  interval: {
+    label: string;
+
+    options: Interval[];
+
+    selectedValue: Interval;
+  };
+
+  groupDynamic: {
+    label: string;
+
+    options: string[];
+
+    selectedValue: string;
+  };
+
+  onIntervalSelect: (value: Interval) => void;
+
+  onDynamicSelect: (value: string) => void;
 }
 
 const intervalOptions: Interval[] = ['Quarterly', 'Monthly', 'Weekly'];
@@ -233,6 +263,7 @@ const CompoundFeeRevenueByChain = ({
   const [selectedInterval, setSelectedInterval] = useState<Interval>(
     intervalOptions[0]
   );
+
   const [selectedPeriod, setSelectedPeriod] = useState<string | undefined>();
 
   const [sortType, setSortType] = useReducer(
@@ -249,6 +280,20 @@ const CompoundFeeRevenueByChain = ({
     onCloseModal: onSortClose
   } = useModal();
 
+  const {
+    isOpen: isGroupByOpen,
+    onOpenModal: onGroupByOpen,
+    onCloseModal: onGroupByClose
+  } = useModal();
+
+  const groupInterval = useMemo(() => {
+    return {
+      label: 'Interval',
+      options: intervalOptions,
+      selectedValue: selectedInterval
+    };
+  }, [selectedInterval]);
+
   const precomputedViews = useMemo(
     () => precomputeViews(revenueData || []),
     [revenueData]
@@ -258,6 +303,14 @@ const CompoundFeeRevenueByChain = ({
     () => generateOptions(precomputedViews, selectedInterval),
     [precomputedViews, selectedInterval]
   );
+
+  const groupDynamic = useMemo(() => {
+    return {
+      label: dynamicOptions.label,
+      options: dynamicOptions.options,
+      selectedValue: selectedPeriod || ''
+    };
+  }, [dynamicOptions, selectedPeriod]);
 
   const currentView = useMemo(() => {
     if (!precomputedViews || !selectedPeriod) {
@@ -390,7 +443,7 @@ const CompoundFeeRevenueByChain = ({
       }}
     >
       <div className='flex flex-wrap justify-end gap-2 px-5 py-3 md:px-10 lg:px-0'>
-        <div className='flex items-center gap-1'>
+        <div className='hidden items-center gap-1 lg:flex'>
           <Text
             tag='span'
             size='11'
@@ -424,7 +477,7 @@ const CompoundFeeRevenueByChain = ({
             />
           </div>
         </div>
-        <div className='flex items-center gap-1'>
+        <div className='hidden items-center gap-1 lg:flex'>
           <Text
             tag='span'
             size='11'
@@ -458,6 +511,16 @@ const CompoundFeeRevenueByChain = ({
             />
           </div>
         </div>
+        <Button
+          onClick={onGroupByOpen}
+          className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
+        >
+          <Icon
+            name='group-grid'
+            className='h-[14px] w-[14px] fill-none'
+          />
+          Group
+        </Button>
         <Button
           onClick={onSortOpen}
           className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
@@ -495,7 +558,230 @@ const CompoundFeeRevenueByChain = ({
         onKeySelect={onKeySelect}
         onTypeSelect={onTypeSelect}
       />
+      <GroupDrawer
+        isOpen={isGroupByOpen}
+        onClose={onGroupByClose}
+        interval={groupInterval}
+        groupDynamic={groupDynamic}
+        onIntervalSelect={handleIntervalSelect}
+        onDynamicSelect={handlePeriodSelect}
+      />
     </Card>
+  );
+};
+
+const GroupDrawer = ({
+  isOpen,
+  interval,
+  groupDynamic,
+  onIntervalSelect,
+  onDynamicSelect,
+  onClose
+}: GroupDrawerProps) => {
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+
+  const onSelectedFilterClose = useCallback(() => {
+    setSelectedKey(null);
+  }, []);
+
+  const onSelectFilter = useCallback((selectedFilter: string) => {
+    setSelectedKey(selectedFilter);
+  }, []);
+
+  const onIntervalSelectClick = useCallback(
+    (selectedInterval: Interval) => {
+      onIntervalSelect(selectedInterval);
+
+      onClose();
+
+      setSelectedKey(null);
+    },
+    [onClose, onIntervalSelect]
+  );
+
+  const onDynamicSelectClick = useCallback(
+    (selectedInterval: string) => {
+      onDynamicSelect(selectedInterval);
+
+      onClose();
+
+      setSelectedKey(null);
+    },
+    [onClose, onDynamicSelect]
+  );
+
+  const onDrawerClose = useCallback(() => {
+    onClose();
+
+    setSelectedKey(null);
+  }, [onClose]);
+
+  return (
+    <Drawer
+      isOpen={isOpen}
+      onClose={onDrawerClose}
+    >
+      <View.Condition if={!Boolean(selectedKey)}>
+        <Text
+          size='17'
+          weight='700'
+          lineHeight='140'
+          align='center'
+          className='mb-5 w-full'
+        >
+          Group
+        </Text>
+        <div className='grid gap-3'>
+          <div
+            className='flex h-[42px] cursor-pointer items-center justify-between px-3 py-2.5'
+            onClick={() => onSelectFilter(interval.label)}
+          >
+            <div className='flex items-center gap-1.5'>
+              <Icon
+                name='plus'
+                className='h-2.5 w-2.5'
+                color={cn('primary-14', {
+                  'secondary-41': Boolean(interval.selectedValue)
+                })}
+              />
+              <Text
+                size='14'
+                weight='500'
+                className={cn('text-primary-14 text-sm font-medium', {
+                  'text-secondary-41': Boolean(interval.selectedValue)
+                })}
+              >
+                {interval.label}
+              </Text>
+            </div>
+          </div>
+          <div
+            className='flex h-[42px] cursor-pointer items-center justify-between px-3 py-2.5'
+            onClick={() => onSelectFilter(groupDynamic.label)}
+          >
+            <div className='flex items-center gap-1.5'>
+              <Icon
+                name='plus'
+                className='h-2.5 w-2.5'
+                color={cn('primary-14', {
+                  'secondary-41': Boolean(groupDynamic.selectedValue)
+                })}
+              />
+              <Text
+                size='14'
+                weight='500'
+                className={cn('text-primary-14 text-sm font-medium', {
+                  'text-secondary-41': Boolean(groupDynamic.selectedValue)
+                })}
+              >
+                {groupDynamic.label}
+              </Text>
+            </div>
+          </div>
+        </div>
+      </View.Condition>
+      <View.Condition if={Boolean(selectedKey)}>
+        <View.Condition if={selectedKey === interval.label}>
+          <div className='mb-8 flex items-center'>
+            <Button onClick={onSelectedFilterClose}>
+              <Icon
+                name='arrow-line'
+                className='h-6 w-6'
+              />
+            </Button>
+            <Text
+              size='17'
+              weight='700'
+              lineHeight='140'
+              align='center'
+              className='w-[calc(100%-24px)]'
+            >
+              {interval.label}
+            </Text>
+          </div>
+          <div className='hide-scrollbar mt-8 max-h-[450px] overflow-y-auto'>
+            <Radio.Group
+              className='gap-1.5'
+              direction='vertical'
+              value={interval.selectedValue}
+              onChange={(v) => onIntervalSelectClick(v as any)}
+            >
+              <Each
+                data={interval.options}
+                render={(option, index) => (
+                  <Radio.Item
+                    key={index}
+                    className={cn('p-3', {
+                      'bg-secondary-38 rounded-lg':
+                        interval.selectedValue === option
+                    })}
+                    value={option}
+                    label={
+                      <Radio.Label
+                        className={cn({
+                          'text-secondary-28': interval.selectedValue === option
+                        })}
+                        label={option}
+                      />
+                    }
+                  />
+                )}
+              />
+            </Radio.Group>
+          </div>
+        </View.Condition>
+        <View.Condition if={selectedKey === groupDynamic.label}>
+          <div className='mb-8 flex items-center'>
+            <Button onClick={onSelectedFilterClose}>
+              <Icon
+                name='arrow-line'
+                className='h-6 w-6'
+              />
+            </Button>
+            <Text
+              size='17'
+              weight='700'
+              lineHeight='140'
+              align='center'
+              className='w-[calc(100%-24px)]'
+            >
+              {groupDynamic.label}
+            </Text>
+          </div>
+          <div className='hide-scrollbar mt-8 max-h-[450px] overflow-y-auto'>
+            <Radio.Group
+              className='gap-1.5'
+              direction='vertical'
+              value={groupDynamic.selectedValue}
+              onChange={(v) => onDynamicSelectClick(v as any)}
+            >
+              <Each
+                data={groupDynamic.options}
+                render={(option, index) => (
+                  <Radio.Item
+                    key={index}
+                    className={cn('p-3', {
+                      'bg-secondary-38 rounded-lg':
+                        groupDynamic.selectedValue === option
+                    })}
+                    value={option}
+                    label={
+                      <Radio.Label
+                        className={cn({
+                          'text-secondary-28':
+                            groupDynamic.selectedValue === option
+                        })}
+                        label={option}
+                      />
+                    }
+                  />
+                )}
+              />
+            </Radio.Group>
+          </div>
+        </View.Condition>
+      </View.Condition>
+    </Drawer>
   );
 };
 
