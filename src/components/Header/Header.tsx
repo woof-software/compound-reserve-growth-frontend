@@ -193,6 +193,7 @@ const Header = () => {
               render={(link, index) =>
                 link.isComingSoon ? (
                   <div
+                    key={index}
                     className='flex w-fit cursor-not-allowed opacity-60'
                     onClick={(e) => e.preventDefault()}
                   >

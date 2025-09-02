@@ -54,6 +54,10 @@ interface FiltersProps {
     symbol: OptionType[];
   };
 
+  isShowEyeIcon: boolean;
+
+  areAllSeriesHidden: boolean;
+
   onSelectChain: (chain: OptionType[]) => void;
 
   onSelectAssetType: (assetType: OptionType[]) => void;
@@ -67,6 +71,10 @@ interface FiltersProps {
   onClearAll: () => void;
 
   onShowEvents: (value: boolean) => void;
+
+  onSelectAll: () => void;
+
+  onDeselectAll: () => void;
 }
 
 const CompoundCumulativeRevenue = ({
@@ -236,6 +244,7 @@ const CompoundCumulativeRevenue = ({
     eventsData,
     showEvents,
     isLegendEnabled,
+    aggregatedSeries,
     areAllSeriesHidden,
     onAllSeriesHidden,
     onEventsData,
@@ -330,6 +339,8 @@ const CompoundCumulativeRevenue = ({
       <Filters
         barSize={barSize}
         csvData={csvData}
+        areAllSeriesHidden={areAllSeriesHidden}
+        isShowEyeIcon={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
         showEvents={showEvents}
         csvFilename={csvFilename}
         chainOptions={chainOptions}
@@ -346,6 +357,8 @@ const CompoundCumulativeRevenue = ({
         handleBarSizeChange={handleBarSizeChange}
         onClearAll={onClearSelectedOptions}
         onShowEvents={onShowEvents}
+        onSelectAll={onSelectAll}
+        onDeselectAll={onDeselectAll}
       />
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder
@@ -355,10 +368,10 @@ const CompoundCumulativeRevenue = ({
       ) : (
         <LineChart
           className='max-h-fit'
-          barSize={barSize}
           data={cumulativeChartSeries}
           groupBy={getGroupByForChart()}
           chartRef={chartRef}
+          aggregatedSeries={aggregatedSeries}
           isLegendEnabled={isLegendEnabled}
           eventsData={eventsData}
           showEvents={showEvents}
@@ -381,6 +394,8 @@ const Filters = ({
   chainOptions,
   selectedOptions,
   deploymentOptionsFilter,
+  isShowEyeIcon,
+  areAllSeriesHidden,
   assetTypeOptions,
   symbolOptions,
   showEvents,
@@ -392,7 +407,9 @@ const Filters = ({
   onSelectSymbol,
   handleBarSizeChange,
   onClearAll,
-  onShowEvents
+  onShowEvents,
+  onSelectAll,
+  onDeselectAll
 }: FiltersProps) => {
   const { isOpen, onOpenModal, onCloseModal } = useModal();
 
@@ -461,6 +478,16 @@ const Filters = ({
 
   const onCalendarClick = () => {
     onShowEvents(!showEvents);
+
+    onMoreClose();
+  };
+
+  const onEyeClick = () => {
+    if (areAllSeriesHidden) {
+      onSelectAll();
+    } else {
+      onDeselectAll();
+    }
 
     onMoreClose();
   };
@@ -641,6 +668,30 @@ const Filters = ({
                   </div>
                 </CSVLink>
               </div>
+              <View.Condition if={isShowEyeIcon}>
+                <div className='px-3 py-2'>
+                  <ChartIconToggle
+                    active={!areAllSeriesHidden}
+                    onIcon='eye'
+                    offIcon='eye-closed'
+                    ariaLabel='Toggle all series visibility'
+                    className={{
+                      container:
+                        'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
+                      icon: 'h-[26px] w-[26px]',
+                      iconContainer: 'h-[26px] w-[26px]'
+                    }}
+                    onClick={onEyeClick}
+                  >
+                    <Text
+                      size='14'
+                      weight='500'
+                    >
+                      Unselect All
+                    </Text>
+                  </ChartIconToggle>
+                </div>
+              </View.Condition>
               <View.Condition if={isShowCalendarIcon}>
                 <div className='px-3 py-2'>
                   <ChartIconToggle

@@ -396,8 +396,8 @@ const TotalTresuaryValue = ({
           key={groupBy}
           data={correctedChartSeries}
           groupBy={groupBy}
+          aggregatedSeries={aggregatedSeries}
           className='max-h-fit'
-          barSize={barSize}
           chartRef={chartRef}
           isLegendEnabled={isLegendEnabled}
           eventsData={eventsData}
@@ -509,6 +509,9 @@ const Filters = memo(
 
       onMoreClose();
     };
+
+    console.log('areAllSeriesHidden=>', areAllSeriesHidden);
+    console.log('showEvents=>', showEvents);
 
     return (
       <>

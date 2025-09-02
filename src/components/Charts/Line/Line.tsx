@@ -7,17 +7,13 @@ import React, {
   useRef,
   useState
 } from 'react';
-import Highcharts from 'highcharts';
+import Highcharts, { SeriesAreaOptions } from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { EventDataItem } from '@/shared/hooks/useLineChart';
 import { cn } from '@/shared/lib/classNames/classNames';
-import {
-  capitalizeFirstLetter,
-  formatValue,
-  getStableColorForSeries
-} from '@/shared/lib/utils/utils';
+import { formatValue } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -42,13 +38,13 @@ interface LineChartProps {
 
   groupBy: string;
 
-  barSize: 'D' | 'W' | 'M';
-
   chartRef: RefObject<HighchartsReact.RefObject | null>;
 
   isLegendEnabled: boolean;
 
   eventsData: EventDataItem[];
+
+  aggregatedSeries: SeriesAreaOptions[];
 
   showEvents: boolean;
 
@@ -70,11 +66,11 @@ interface LineChartProps {
 const LineChart: FC<LineChartProps> = ({
   data,
   groupBy,
-  barSize,
   chartRef,
   isLegendEnabled,
   eventsData,
   showEvents,
+  aggregatedSeries,
   areAllSeriesHidden,
   className,
   onAllSeriesHidden,
@@ -109,70 +105,6 @@ const LineChart: FC<LineChartProps> = ({
     const step = Math.max(el.clientWidth * 0.6, 120);
     el.scrollBy({ left: dir === 'left' ? -step : step, behavior: 'smooth' });
   };
-
-  const aggregatedSeries = useMemo<Highcharts.SeriesAreaOptions[]>(() => {
-    const allSeriesNames = data.map((series) => series.name);
-
-    if (barSize === 'D') {
-      return data.map((series) => ({
-        id: series.name,
-        type: 'area' as const,
-        name: capitalizeFirstLetter(series.name),
-        data: series.data.map((d) => [d.x, d.y]),
-        color: getStableColorForSeries(series.name, allSeriesNames)
-      }));
-    }
-
-    return data.map((series) => {
-      if (!series.data?.length) {
-        return {
-          id: series.name,
-          type: 'area' as const,
-          name: capitalizeFirstLetter(series.name),
-          data: [],
-          color: getStableColorForSeries(series.name, allSeriesNames)
-        };
-      }
-
-      const aggregatedPoints = new Map<number, number>();
-
-      for (const point of series.data) {
-        const date = new Date(point.x);
-        date.setUTCHours(0, 0, 0, 0);
-        let periodStartTimestamp: number;
-
-        if (barSize === 'W') {
-          const dayOfWeek = date.getUTCDay();
-          const diff =
-            date.getUTCDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-          const startOfWeek = new Date(date);
-          startOfWeek.setUTCDate(diff);
-          periodStartTimestamp = startOfWeek.getTime();
-        } else {
-          periodStartTimestamp = new Date(
-            date.getUTCFullYear(),
-            date.getUTCMonth(),
-            1
-          ).getTime();
-        }
-        aggregatedPoints.set(periodStartTimestamp, point.y);
-      }
-
-      const resultData = Array.from(aggregatedPoints.entries()).map(
-        ([timestamp, yValue]) => [timestamp, yValue]
-      );
-
-      resultData.sort((a, b) => a[0] - b[0]);
-
-      return {
-        id: series.name,
-        type: 'area' as const,
-        name: capitalizeFirstLetter(series.name),
-        data: resultData,
-        color: getStableColorForSeries(series.name, allSeriesNames)
-      };
-    });
-  }, [data, barSize]);
 
   const isLastActiveLegend = useMemo(() => {
     return hiddenItems.size === aggregatedSeries.length - 1;
