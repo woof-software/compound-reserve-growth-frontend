@@ -95,7 +95,7 @@ const Card: FC<CardProps> = ({
                 ) : (
                   <Icon
                     name='link'
-                    color='color-primary-14'
+                    color='primary-14'
                     onClick={() => handleCopyLink?.(id)}
                   />
                 ))}
