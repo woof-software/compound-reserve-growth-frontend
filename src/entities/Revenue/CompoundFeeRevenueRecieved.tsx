@@ -542,6 +542,12 @@ const Filters = memo(
       <>
         <div className='hidden lg:block'>
           <div className='flex items-center justify-end gap-2 px-0 py-3'>
+            <TabsGroup
+              tabs={['D', 'W', 'M']}
+              value={barSize}
+              onTabChange={handleBarSizeChange}
+              disabled={isLoading}
+            />
             <MultiSelect
               options={chainOptions || []}
               value={selectedOptions.chain}
@@ -575,12 +581,6 @@ const Filters = memo(
               value={selectedOptions.symbol}
               onChange={onSelectSymbol}
               placeholder='Reserve Symbols'
-              disabled={isLoading}
-            />
-            <TabsGroup
-              tabs={['D', 'W', 'M']}
-              value={barSize}
-              onTabChange={handleBarSizeChange}
               disabled={isLoading}
             />
             <div className='flex items-center gap-1'>

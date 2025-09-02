@@ -469,6 +469,12 @@ const Filters = ({
     <>
       <div className='hidden lg:block'>
         <div className='hidden items-center justify-end gap-2 px-0 py-3 lg:flex'>
+          <TabsGroup
+            tabs={['D', 'W', 'M']}
+            value={barSize}
+            onTabChange={handleBarSizeChange}
+            disabled={isLoading}
+          />
           <div className='flex gap-2'>
             <MultiSelect
               options={chainOptions || []}
@@ -506,12 +512,6 @@ const Filters = ({
               disabled={isLoading}
             />
           </div>
-          <TabsGroup
-            tabs={['D', 'W', 'M']}
-            value={barSize}
-            onTabChange={handleBarSizeChange}
-            disabled={isLoading}
-          />
           <CSVDownloadButton
             data={csvData}
             filename={csvFilename}
