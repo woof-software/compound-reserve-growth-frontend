@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useReducer } from 'react';
+import { CSVLink } from 'react-csv';
 
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import FullDAOCommitments from '@/components/RunwayPageTable/FullDAOCommitments';
@@ -8,7 +9,9 @@ import type { RunwayItem } from '@/shared/hooks/useRunway';
 import { useRunway } from '@/shared/hooks/useRunway';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
+import Text from '@/shared/ui/Text/Text';
 
 export const fullDAOCommitmentsColumns = [
   {
@@ -64,6 +67,12 @@ const FullDAOCommitmentsBlock = () => {
     isOpen: isSortOpen,
     onOpenModal: onSortOpen,
     onCloseModal: onSortClose
+  } = useModal();
+
+  const {
+    isOpen: isMoreOpen,
+    onOpenModal: onMoreOpen,
+    onCloseModal: onMoreClose
   } = useModal();
 
   const processedData = useMemo(() => {
@@ -196,7 +205,7 @@ const FullDAOCommitmentsBlock = () => {
       }}
     >
       <div className='flex justify-end gap-3 px-5 py-3 md:px-6 lg:px-0'>
-        <div className='block lg:hidden'>
+        <div className='flex items-center gap-2 lg:hidden'>
           <Button
             onClick={onSortOpen}
             className='bg-secondary-27 outline-secondary-18 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
@@ -207,11 +216,22 @@ const FullDAOCommitmentsBlock = () => {
             />
             Sort
           </Button>
+          <Button
+            onClick={onMoreOpen}
+            className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto lg:hidden'
+          >
+            <Icon
+              name='3-dots'
+              className='h-6 w-6 fill-none'
+            />
+          </Button>
         </div>
-        <CSVDownloadButton
-          data={processedData}
-          filename='Full DAO Commitments'
-        />
+        <div className='hidden lg:block'>
+          <CSVDownloadButton
+            data={processedData}
+            filename='Full DAO Commitments'
+          />
+        </div>
       </div>
       <FullDAOCommitments
         sortType={sortType}
@@ -225,6 +245,31 @@ const FullDAOCommitmentsBlock = () => {
         onKeySelect={onKeySelect}
         onTypeSelect={onTypeSelect}
       />
+      <Drawer
+        isOpen={isMoreOpen}
+        onClose={onMoreClose}
+      >
+        <div className='flex flex-col gap-3'>
+          <CSVLink
+            data={processedData}
+            filename='Full DAO Commitments'
+            onClick={onMoreClose}
+          >
+            <div className='flex items-center gap-1.5'>
+              <Icon
+                name='download'
+                className='h-6 w-6'
+              />
+              <Text
+                size='11'
+                weight='400'
+              >
+                CSV with the entire historical data
+              </Text>
+            </div>
+          </CSVLink>
+        </div>
+      </Drawer>
     </Card>
   );
 };

@@ -190,7 +190,7 @@ const RevenueBreakdown = ({
                       className='grid w-full max-w-[100px]'
                     >
                       <Text
-                        size='11'
+                        size='13'
                         lineHeight='18'
                         weight='500'
                         className='text-primary-14'
@@ -245,7 +245,7 @@ const RevenueBreakdown = ({
                         {columnHeader}
                       </Text>
                       <Text
-                        size='8'
+                        size='13'
                         lineHeight='18'
                         weight='500'
                       >
@@ -266,7 +266,7 @@ const RevenueBreakdown = ({
                     className='grid min-h-[39px] w-full max-w-[100px]'
                   >
                     <Text
-                      size='11'
+                      size='13'
                       lineHeight='18'
                       weight='500'
                       className='text-primary-14'

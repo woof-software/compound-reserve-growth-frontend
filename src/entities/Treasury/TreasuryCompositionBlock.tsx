@@ -1,17 +1,17 @@
 import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
+import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import SingleDropdown, {
-  SingleDrawer
-} from '@/components/SingleDropdown/SingleDropdown';
+import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import SortDrawer from '@/components/SortDrawer/SortDrawer';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
   formatPrice,
-  groupByKey
+  groupByKey,
+  groupOptionsDto
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Button from '@/shared/ui/Button/Button';
@@ -100,8 +100,7 @@ const TreasuryCompositionBlock = memo(
       selectedValue: selectedSingle,
       close: closeSingle,
       open: openSingle,
-      select: selectSingle,
-      selectClose: selectSingleClose
+      select: selectSingle
     } = useDropdown('single');
 
     const [includeComp, setIncludeComp] = useState<boolean>(true);
@@ -114,7 +113,17 @@ const TreasuryCompositionBlock = memo(
       { key: '', type: 'asc' }
     );
 
-    const { isOpen, onOpenModal, onCloseModal } = useModal();
+    const {
+      isOpen: isSortOpen,
+      onOpenModal: onSortOpen,
+      onCloseModal: onSortClose
+    } = useModal();
+
+    const {
+      isOpen: isGroupOpen,
+      onOpenModal: onGroupOpen,
+      onCloseModal: onGroupClose
+    } = useModal();
 
     const filteredData = useMemo(() => {
       if (includeComp || !data.uniqDataByCategory.COMP) {
@@ -199,13 +208,13 @@ const TreasuryCompositionBlock = memo(
       return tableData.length > 0 && chartData.length > 0;
     }, [tableData, chartData]);
 
-    const onKeySelect = useCallback((value: string) => {
+    const onSortKeySelect = useCallback((value: string) => {
       setSortType({
         key: value
       });
     }, []);
 
-    const onTypeSelect = useCallback((value: string) => {
+    const onSortTypeSelect = useCallback((value: string) => {
       setSortType({
         type: value
       });
@@ -225,28 +234,40 @@ const TreasuryCompositionBlock = memo(
         className={{
           loading: 'min-h-[inherit]',
           container: 'min-h-[520px] rounded-lg',
-          content: 'flex flex-col gap-3 px-0 py-0 md:px-10 md:pb-5 lg:pb-10'
+          content: 'flex flex-col gap-3 px-0 py-0 md:px-5 md:pb-5 lg:pb-10'
         }}
       >
-        <div className='flex flex-wrap items-center justify-end gap-4 px-5 py-3 md:px-0 md:py-3'>
-          <Switch
-            label='Include COMP Holdings'
-            positionLabel='left'
-            checked={includeComp}
-            onCheckedChange={setIncludeComp}
-            classNameTitle='!text-[12px]'
-          />
-          <div className='flex items-center gap-1'>
-            <Text
-              tag='span'
-              size='11'
-              weight='600'
-              lineHeight='16'
-              className='text-primary-14'
+        <div className='flex flex-col-reverse items-center justify-end gap-3 px-5 py-3 sm:flex-row md:px-0 md:py-3'>
+          <div className='flex w-full justify-end sm:w-auto'>
+            <Switch
+              label='Include COMP Holdings'
+              positionLabel='left'
+              checked={includeComp}
+              onCheckedChange={setIncludeComp}
+              classNameTitle='!text-[12px]'
+            />
+          </div>
+          <div className='flex w-full items-center gap-2 sm:w-auto'>
+            <Button
+              onClick={onGroupOpen}
+              className='bg-secondary-27 text-gray-11 shadow-13 flex w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto lg:hidden'
             >
-              Group by
-            </Text>
-            <div className='hidden lg:block'>
+              <Icon
+                name='group-grid'
+                className='h-[14px] w-[14px]'
+              />
+              Group
+            </Button>
+            <div className='hidden items-center gap-1 lg:flex'>
+              <Text
+                tag='span'
+                size='11'
+                weight='600'
+                lineHeight='16'
+                className='text-primary-14'
+              >
+                Group by
+              </Text>
               <SingleDropdown
                 options={options}
                 isOpen={isOpenSingle}
@@ -257,37 +278,17 @@ const TreasuryCompositionBlock = memo(
                 triggerContentClassName='p-[5px]'
               />
             </div>
-            <div className='block lg:hidden'>
-              <SingleDrawer
-                options={options}
-                isOpen={isOpenSingle}
-                selectedValue={selectedGroup}
-                onOpen={openSingle}
-                onClose={closeSingle}
-                onSelect={selectSingleClose}
-                disabled={isLoading}
-                triggerContentClassName='p-[5px]'
+            <Button
+              onClick={onSortOpen}
+              className='bg-secondary-27 text-gray-11 shadow-13 flex w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:hidden'
+            >
+              <Icon
+                name='sort-icon'
+                className='h-[14px] w-[14px]'
               />
-            </div>
+              Sort
+            </Button>
           </div>
-          <Button
-            onClick={onOpenModal}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:hidden'
-          >
-            <Icon
-              name='sort-icon'
-              className='h-[14px] w-[14px]'
-            />
-            Sort
-          </Button>
-          <SortDrawer
-            isOpen={isOpen}
-            sortType={sortType}
-            columns={treasuryCompositionColumns}
-            onClose={onCloseModal}
-            onKeySelect={onKeySelect}
-            onTypeSelect={onTypeSelect}
-          />
         </div>
         <div className='flex flex-col justify-between gap-8 md:flex-row'>
           <View.Condition if={!hasData}>
@@ -306,6 +307,21 @@ const TreasuryCompositionBlock = memo(
             />
           </View.Condition>
         </div>
+        <SortDrawer
+          isOpen={isSortOpen}
+          sortType={sortType}
+          columns={treasuryCompositionColumns}
+          onClose={onSortClose}
+          onKeySelect={onSortKeySelect}
+          onTypeSelect={onSortTypeSelect}
+        />
+        <GroupDrawer
+          isOpen={isGroupOpen}
+          selectedOption={selectedGroup}
+          options={groupOptionsDto(options)}
+          onClose={onGroupClose}
+          onSelect={selectSingle}
+        />
       </Card>
     );
   }

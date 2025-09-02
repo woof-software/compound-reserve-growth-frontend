@@ -1,27 +1,29 @@
 import React, { useCallback, useMemo, useReducer } from 'react';
+import { CSVLink } from 'react-csv';
 
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
+import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import RevenueBreakdown, {
   FormattedRevenueData
 } from '@/components/RevenuePageTable/RevenueBreakdown';
-import SingleDropdown, {
-  SingleDrawer
-} from '@/components/SingleDropdown/SingleDropdown';
+import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import SortDrawer from '@/components/SortDrawer/SortDrawer';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
   capitalizeFirstLetter,
   extractFilterOptions,
-  formatNumber
+  formatNumber,
+  groupOptionsDto
 } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -64,6 +66,12 @@ const RevenueBreakDownBlock = ({
     isOpen: isSortOpen,
     onOpenModal: onSortOpen,
     onCloseModal: onSortClose
+  } = useModal();
+
+  const {
+    isOpen: isMoreOpen,
+    onOpenModal: onMoreOpen,
+    onCloseModal: onMoreClose
   } = useModal();
 
   const [selectedOptions, setSelectedOptions] = useReducer(
@@ -385,53 +393,51 @@ const RevenueBreakDownBlock = ({
         content: 'flex flex-col gap-3 px-0 pt-0 pb-0 lg:px-10 lg:pb-10'
       }}
     >
-      <div className='flex flex-col items-end gap-3 px-5 py-3 lg:hidden'>
-        <div className='flex w-fit flex-wrap items-center justify-end gap-3'>
-          <Text
-            tag='span'
-            size='11'
-            weight='600'
-            lineHeight='16'
-            className='text-primary-14'
-          >
-            Group by
-          </Text>
-          <SingleDrawer
-            options={yearOptions}
-            isOpen={yearOpen}
-            selectedValue={selectedYear?.[0] || yearOptions[0] || ''}
-            onOpen={openYear}
-            onClose={closeYear}
-            onSelect={selectYear}
-            triggerContentClassName='p-[5px]'
-            disabled={isLoading}
-          />
-        </div>
-        <div className='flex flex-wrap items-center justify-end gap-3'>
-          <Button
-            onClick={onFilterOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
-          >
-            <Icon
-              name='filters'
-              className='h-[14px] w-[14px]'
-            />
-            Filters
-          </Button>
-          <Button
-            onClick={onSortOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
-          >
-            <Icon
-              name='sort-icon'
-              className='h-[14px] w-[14px]'
-            />
-            Sort
-          </Button>
-          <CSVDownloadButton
-            data={tableData}
-            filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
-          />
+      <div className='flex justify-end gap-2 px-5 py-3 lg:hidden'>
+        <div className='flex w-full flex-col items-center justify-end gap-2 sm:flex-row'>
+          <div className='flex w-full items-center gap-2 sm:w-auto'>
+            <Button
+              onClick={openYear}
+              className='bg-secondary-27 text-gray-11 shadow-13 flex w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto lg:hidden'
+            >
+              <Icon
+                name='group-grid'
+                className='h-[14px] w-[14px]'
+              />
+              Group
+            </Button>
+            <Button
+              onClick={onFilterOpen}
+              className='bg-secondary-27 text-gray-11 shadow-13 flex w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto'
+            >
+              <Icon
+                name='filters'
+                className='h-[14px] w-[14px]'
+              />
+              Filters
+            </Button>
+          </div>
+          <div className='flex w-full items-center gap-2 sm:w-auto'>
+            <Button
+              onClick={onSortOpen}
+              className='bg-secondary-27 text-gray-11 sm:auto shadow-13 flex w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
+            >
+              <Icon
+                name='sort-icon'
+                className='h-[14px] w-[14px]'
+              />
+              Sort
+            </Button>
+            <Button
+              onClick={onMoreOpen}
+              className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto lg:hidden'
+            >
+              <Icon
+                name='3-dots'
+                className='h-6 w-6 fill-none'
+              />
+            </Button>
+          </div>
         </div>
       </div>
       <div className='hidden justify-end gap-3 px-10 py-3 lg:flex lg:px-0'>
@@ -527,6 +533,38 @@ const RevenueBreakDownBlock = ({
         onClose={onFilterClose}
         onClearAll={handleResetFilters}
       />
+      <GroupDrawer
+        isOpen={yearOpen}
+        selectedOption={selectedYear?.[0] || yearOptions[0] || ''}
+        options={groupOptionsDto(yearOptions)}
+        onClose={closeYear}
+        onSelect={selectYear}
+      />
+      <Drawer
+        isOpen={isMoreOpen}
+        onClose={onMoreClose}
+      >
+        <div className='flex flex-col gap-3'>
+          <CSVLink
+            data={tableData}
+            filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
+            onClick={onMoreClose}
+          >
+            <div className='flex items-center gap-1.5'>
+              <Icon
+                name='download'
+                className='h-6 w-6'
+              />
+              <Text
+                size='11'
+                weight='400'
+              >
+                CSV with the entire historical data
+              </Text>
+            </div>
+          </CSVLink>
+        </div>
+      </Drawer>
     </Card>
   );
 };

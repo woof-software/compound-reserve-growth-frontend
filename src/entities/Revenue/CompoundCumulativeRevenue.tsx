@@ -1,5 +1,7 @@
 import React, { useCallback, useMemo, useReducer } from 'react';
+import { CSVLink } from 'react-csv';
 
+import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import LineChart from '@/components/Charts/Line/Line';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
@@ -8,36 +10,63 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
+import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
 import { BarSize, OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 interface FiltersProps {
   chainOptions: OptionType[];
+
   deploymentOptionsFilter: OptionType[];
+
   assetTypeOptions: OptionType[];
+
   symbolOptions: OptionType[];
+
   barSize: BarSize;
+
   isLoading: boolean;
+
+  showEvents: boolean;
+
+  isShowCalendarIcon: boolean;
+
   csvFilename: string;
+
   csvData: Record<string, string | number>[];
+
   selectedOptions: {
     chain: OptionType[];
+
     assetType: OptionType[];
+
     deployment: OptionType[];
+
     symbol: OptionType[];
   };
+
   onSelectChain: (chain: OptionType[]) => void;
+
   onSelectAssetType: (assetType: OptionType[]) => void;
+
   onSelectMarket: (deployment: OptionType[]) => void;
+
   onSelectSymbol: (symbol: OptionType[]) => void;
+
   handleBarSizeChange: (value: string) => void;
+
   onClearAll: () => void;
+
+  onShowEvents: (value: boolean) => void;
 }
 
 const CompoundCumulativeRevenue = ({
@@ -202,6 +231,23 @@ const CompoundCumulativeRevenue = ({
     aggregationType: 'last'
   });
 
+  const {
+    chartRef,
+    eventsData,
+    showEvents,
+    isLegendEnabled,
+    areAllSeriesHidden,
+    onAllSeriesHidden,
+    onEventsData,
+    onShowEvents,
+    onSelectAll,
+    onDeselectAll
+  } = useLineChart({
+    groupBy,
+    data: cumulativeChartSeries,
+    barSize
+  });
+
   const hasData = useMemo(() => {
     return (
       cumulativeChartSeries.length > 0 &&
@@ -284,9 +330,11 @@ const CompoundCumulativeRevenue = ({
       <Filters
         barSize={barSize}
         csvData={csvData}
+        showEvents={showEvents}
         csvFilename={csvFilename}
         chainOptions={chainOptions}
         selectedOptions={selectedOptions}
+        isShowCalendarIcon={Boolean(eventsData.length > 0)}
         deploymentOptionsFilter={deploymentOptionsFilter}
         assetTypeOptions={assetTypeOptions}
         symbolOptions={symbolOptions}
@@ -297,6 +345,7 @@ const CompoundCumulativeRevenue = ({
         onSelectSymbol={onSelectSymbol}
         handleBarSizeChange={handleBarSizeChange}
         onClearAll={onClearSelectedOptions}
+        onShowEvents={onShowEvents}
       />
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder
@@ -309,7 +358,16 @@ const CompoundCumulativeRevenue = ({
           barSize={barSize}
           data={cumulativeChartSeries}
           groupBy={getGroupByForChart()}
-          showLegend={false}
+          chartRef={chartRef}
+          isLegendEnabled={isLegendEnabled}
+          eventsData={eventsData}
+          showEvents={showEvents}
+          areAllSeriesHidden={areAllSeriesHidden}
+          onAllSeriesHidden={onAllSeriesHidden}
+          onSelectAll={onSelectAll}
+          onDeselectAll={onDeselectAll}
+          onShowEvents={onShowEvents}
+          onEventsData={onEventsData}
         />
       )}
     </Card>
@@ -325,15 +383,24 @@ const Filters = ({
   deploymentOptionsFilter,
   assetTypeOptions,
   symbolOptions,
+  showEvents,
+  isShowCalendarIcon,
   isLoading,
   onSelectChain,
   onSelectAssetType,
   onSelectMarket,
   onSelectSymbol,
   handleBarSizeChange,
-  onClearAll
+  onClearAll,
+  onShowEvents
 }: FiltersProps) => {
   const { isOpen, onOpenModal, onCloseModal } = useModal();
+
+  const {
+    isOpen: isMoreOpen,
+    onOpenModal: onMoreOpen,
+    onCloseModal: onMoreClose
+  } = useModal();
 
   const filterOptions = useMemo(() => {
     const chainFilterOptions = {
@@ -391,6 +458,12 @@ const Filters = ({
     selectedOptions,
     symbolOptions
   ]);
+
+  const onCalendarClick = () => {
+    onShowEvents(!showEvents);
+
+    onMoreClose();
+  };
 
   return (
     <>
@@ -497,19 +570,21 @@ const Filters = ({
         </div>
       </div>
       <div className='block lg:hidden'>
-        <div className='flex flex-wrap justify-end gap-3 px-5 py-3'>
-          <div className='flex flex-wrap items-center justify-end gap-2'>
+        <div className='flex flex-wrap justify-end gap-2 px-5 py-3'>
+          <div className='flex w-full flex-row items-center justify-end gap-2 sm:w-auto'>
             <TabsGroup
+              className={{
+                container: 'w-full sm:w-auto',
+                list: 'w-full sm:w-auto'
+              }}
               tabs={['D', 'W', 'M']}
               value={barSize}
               onTabChange={handleBarSizeChange}
               disabled={isLoading}
             />
-          </div>
-          <div className='flex flex-wrap items-center justify-end gap-2'>
             <Button
               onClick={onOpenModal}
-              className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
+              className='bg-secondary-27 text-gray-11 shadow-13 flex w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto'
             >
               <Icon
                 name='filters'
@@ -517,10 +592,15 @@ const Filters = ({
               />
               Filters
             </Button>
-            <CSVDownloadButton
-              data={csvData}
-              filename={csvFilename}
-            />
+            <Button
+              onClick={onMoreOpen}
+              className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto lg:hidden'
+            >
+              <Icon
+                name='3-dots'
+                className='h-6 w-6 fill-none'
+              />
+            </Button>
           </div>
           <Filter
             isOpen={isOpen}
@@ -528,6 +608,48 @@ const Filters = ({
             onClose={onCloseModal}
             onClearAll={onClearAll}
           />
+          <Drawer
+            isOpen={isMoreOpen}
+            onClose={onMoreClose}
+          >
+            <div className='flex flex-col gap-3'>
+              <CSVLink
+                data={csvData}
+                filename={csvFilename}
+                onClick={onMoreClose}
+              >
+                <div className='flex items-center gap-1.5'>
+                  <Icon
+                    name='download'
+                    className='h-6 w-6'
+                  />
+                  <Text
+                    size='11'
+                    weight='400'
+                  >
+                    CSV with the entire historical data
+                  </Text>
+                </div>
+              </CSVLink>
+              <View.Condition if={isShowCalendarIcon}>
+                <ChartIconToggle
+                  active={showEvents}
+                  onIcon='calendar-check'
+                  offIcon='calendar-uncheck'
+                  ariaLabel='Toggle events'
+                  className='flex items-center gap-1.5 bg-transparent p-0 !shadow-none'
+                  onClick={onCalendarClick}
+                >
+                  <Text
+                    size='11'
+                    weight='400'
+                  >
+                    Hide Events
+                  </Text>
+                </ChartIconToggle>
+              </View.Condition>
+            </div>
+          </Drawer>
         </div>
       </div>
     </>

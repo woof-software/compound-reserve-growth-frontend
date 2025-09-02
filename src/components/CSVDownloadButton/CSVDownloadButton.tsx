@@ -2,6 +2,7 @@ import React, { FC } from 'react';
 import { CSVLink } from 'react-csv';
 
 import { Tooltip } from '@/components/Tooltip/Tooltip';
+import { cn } from '@/shared/lib/classNames/classNames';
 import Icon from '@/shared/ui/Icon/Icon';
 
 interface CSVDownloadButtonProps {
@@ -15,14 +16,17 @@ const CSVDownloadButton: FC<CSVDownloadButtonProps> = ({
   data,
   tooltipContent,
   filename = 'export.csv',
-  className = 'bg-primary-20 flex items-center justify-center p-1 rounded-lg w-8 h-8 shadow-16 dark:shadow-13 hover:opacity-80 transition-opacity duration-200'
+  className
 }) => {
   return (
     <Tooltip
       content={tooltipContent || 'Current data can be downloaded in CSV'}
     >
       <span
-        className={className}
+        className={cn(
+          'bg-primary-20 shadow-16 dark:shadow-13 flex h-8 w-8 items-center justify-center rounded-lg p-1 transition-opacity duration-200 hover:opacity-80',
+          className
+        )}
         role='button'
         tabIndex={0}
         style={{ display: 'inline-flex' }}
@@ -30,7 +34,6 @@ const CSVDownloadButton: FC<CSVDownloadButtonProps> = ({
         <CSVLink
           data={data}
           filename={filename}
-          className={className}
         >
           <Icon
             name='download'

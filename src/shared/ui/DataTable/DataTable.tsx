@@ -131,7 +131,7 @@ const DataTable = <T,>({
   }
 
   return (
-    <div className={cn('w-full', className)}>
+    <div className={cn('w-full gap-[26px]', className)}>
       <div className={cn('overflow-x-auto', containerTableClassName)}>
         <table className={cn('min-w-full', tableClassName)}>
           <thead className={cn('bg-transparent', headerClassName)}>

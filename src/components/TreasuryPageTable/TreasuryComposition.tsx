@@ -174,7 +174,7 @@ const TreasuryComposition = ({
             ))}
             <div className='flex w-full items-center justify-between px-6 py-5'>
               <Text
-                size='11'
+                size='13'
                 lineHeight='18'
                 weight='500'
                 className='text-primary-14 min-w-[100px]'
@@ -205,14 +205,14 @@ const TreasuryComposition = ({
         />
         <div className='flex items-center justify-between px-[5px] py-3'>
           <Text
-            size='11'
+            size='13'
             weight='500'
             className='text-primary-14'
           >
             Total Balance
           </Text>
           <Text
-            size='11'
+            size='13'
             weight='500'
             className='text-primary-14'
           >

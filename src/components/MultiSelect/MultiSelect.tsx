@@ -104,11 +104,11 @@ const MultiSelectTrigger: FC<MultiSelectDrawerProps> = ({
       )}
     >
       <View.Condition if={Boolean(value.length > 0)}>
-        <div className='bg-secondary-29 flex h-5 w-5 items-center justify-center rounded-full'>
+        <div className='bg-secondary-46 flex h-5 w-5 items-center justify-center rounded-sm'>
           <Text
             size='11'
             weight='500'
-            className='text-secondary-43 leading-none tabular-nums'
+            className='text-primary-18 leading-none tabular-nums'
           >
             {value.length}
           </Text>

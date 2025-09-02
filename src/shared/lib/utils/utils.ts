@@ -508,3 +508,20 @@ export const formatCurrencyValue = (value: unknown): string => {
 
   return isNegative ? `-$${formattedNumber}` : `$${formattedNumber}`;
 };
+
+export const groupOptionsDto = (options: string[]) => {
+  return options.map((option) => ({
+    header: option,
+    accessorKey: option
+  }));
+};
+
+export const formatValue = (value: number) => {
+  if (Math.abs(value) >= 1_000_000) {
+    return (value / 1_000_000).toFixed(1) + 'M';
+  }
+  if (Math.abs(value) >= 1_000) {
+    return (value / 1_000).toFixed(1) + 'K';
+  }
+  return value.toFixed(0);
+};
