@@ -56,7 +56,7 @@ const CompoundFeeRevenuebyChain = ({
           return (
             <td
               key={columnKey}
-              className='text-primary-14 px-[5px] py-[13px] text-left text-[11px] font-medium'
+              className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'
             >
               -
             </td>
@@ -71,7 +71,7 @@ const CompoundFeeRevenuebyChain = ({
         return (
           <td
             key={columnKey}
-            className='text-primary-14 px-[5px] py-[13px] text-left text-[11px] font-medium'
+            className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'
           >
             {formattedValue}
           </td>
