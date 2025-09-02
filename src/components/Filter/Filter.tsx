@@ -148,11 +148,11 @@ const Filter: FC<FilterProps> = ({
                   </Text>
                 </div>
                 <View.Condition if={Boolean(option.total)}>
-                  <div className='bg-secondary-22 flex h-6 w-6 items-center justify-center rounded-full'>
+                  <div className='bg-secondary-46 flex h-6 w-6 items-center justify-center rounded-sm'>
                     <Text
                       size='11'
                       weight='500'
-                      className='text-primary-14 leading-none tabular-nums'
+                      className='text-primary-18 leading-none tabular-nums'
                     >
                       {option.total}
                     </Text>
