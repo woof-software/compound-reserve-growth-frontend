@@ -133,8 +133,8 @@ const Filter: FC<FilterProps> = ({
                   <Icon
                     name='plus'
                     className='h-2.5 w-2.5'
-                    color={cn('color-primary-14', {
-                      'color-secondary-41': Boolean(option.total)
+                    color={cn('primary-14', {
+                      'secondary-41': Boolean(option.total)
                     })}
                   />
                   <Text
@@ -148,11 +148,11 @@ const Filter: FC<FilterProps> = ({
                   </Text>
                 </div>
                 <View.Condition if={Boolean(option.total)}>
-                  <div className='bg-secondary-22 flex h-6 w-6 items-center justify-center rounded-full'>
+                  <div className='bg-secondary-46 flex h-6 w-6 items-center justify-center rounded-sm'>
                     <Text
                       size='11'
                       weight='500'
-                      className='text-primary-14 leading-none tabular-nums'
+                      className='text-primary-18 leading-none tabular-nums'
                     >
                       {option.total}
                     </Text>

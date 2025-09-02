@@ -11,10 +11,7 @@ import HighchartsReact from 'highcharts-react-official';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
-import {
-  AggregatedPoint,
-  StackedChartData
-} from '@/shared/hooks/useCompoundReceivedBars';
+import { AggregatedPoint } from '@/shared/hooks/useCompoundReceivedBars';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { formatValue } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
@@ -27,8 +24,6 @@ import 'highcharts/modules/stock';
 import 'highcharts/modules/mouse-wheel-zoom';
 
 interface CompoundFeeRecievedProps {
-  data: StackedChartData[];
-
   seriesData: Highcharts.SeriesColumnOptions[];
 
   chartRef: RefObject<HighchartsReact.RefObject | null>;
@@ -58,7 +53,6 @@ interface CompoundFeeRecievedProps {
 
 const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   chartRef,
-  data = [],
   groupBy,
   seriesData = [],
   aggregatedData = [],
@@ -389,7 +383,9 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
           </View.Condition>
         </div>
       </div>
-      <View.Condition if={Boolean(!areAllSeriesHidden && data.length > 1)}>
+      <View.Condition
+        if={Boolean(!areAllSeriesHidden && seriesData.length > 1)}
+      >
         <div className='mx-5 block md:mx-0 lg:hidden'>
           <div
             className={cn(
@@ -476,7 +472,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
             </View.Condition>
           </div>
         </div>
-        <View.Condition if={Boolean(data.length > 1)}>
+        <View.Condition if={Boolean(seriesData.length > 1)}>
           <div className='mx-auto hidden max-w-[902px] flex-wrap justify-center gap-5 px-[15px] py-2 lg:flex'>
             <Each
               data={seriesData}
