@@ -316,6 +316,21 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     return () => window.removeEventListener('resize', onResize);
   }, [seriesData.length, updateArrows]);
 
+  useEffect(() => {
+    const chart = chartRef.current?.chart;
+    if (!chart) return;
+
+    chart.series.forEach((s) => {
+      if (hiddenItems.has(s.name)) {
+        if (s.visible) s.setVisible(false, false);
+      } else {
+        if (!s.visible) s.setVisible(true, false);
+      }
+    });
+
+    chart.redraw();
+  }, [areAllSeriesHidden, hiddenItems]);
+
   return (
     <div
       className={cn(
@@ -324,19 +339,27 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       )}
     >
       <div className='relative flex-grow'>
-        {areAllSeriesHidden && (
-          <Text
-            size='11'
-            className='text-primary-14 absolute inset-0 flex -translate-y-10 items-center justify-center'
-          >
-            All series are hidden
-          </Text>
-        )}
+        <View.Condition if={areAllSeriesHidden}>
+          <div className='flex min-h-[400px] items-center justify-center'>
+            <Text
+              size='11'
+              className='text-primary-14 items-center justify-center'
+            >
+              All series are hidden
+            </Text>
+          </div>
+        </View.Condition>
         <HighchartsReact
           ref={chartRef}
           highcharts={Highcharts}
           options={chartOptions}
-          containerProps={{ style: { width: '100%', height: '100%' } }}
+          containerProps={{
+            style: {
+              display: !areAllSeriesHidden ? 'block' : 'none',
+              width: '100%',
+              height: '100%'
+            }
+          }}
         />
       </div>
       <div className='absolute right-0 hidden lg:block'>

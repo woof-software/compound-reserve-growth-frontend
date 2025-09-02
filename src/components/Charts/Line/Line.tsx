@@ -492,6 +492,21 @@ const LineChart: FC<LineChartProps> = ({
     return () => window.removeEventListener('resize', onResize);
   }, [aggregatedSeries.length, updateArrows]);
 
+  useEffect(() => {
+    const chart = chartRef.current?.chart;
+    if (!chart) return;
+
+    chart.series.forEach((s) => {
+      if (hiddenItems.has(s.name)) {
+        if (s.visible) s.setVisible(false, false);
+      } else {
+        if (!s.visible) s.setVisible(true, false);
+      }
+    });
+
+    chart.redraw();
+  }, [areAllSeriesHidden, hiddenItems]);
+
   return (
     <div
       className={cn(
