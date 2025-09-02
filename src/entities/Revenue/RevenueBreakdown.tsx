@@ -398,7 +398,7 @@ const RevenueBreakDownBlock = ({
           <div className='flex w-full items-center gap-2 sm:w-auto'>
             <Button
               onClick={openYear}
-              className='bg-secondary-27 text-gray-11 shadow-13 flex w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto lg:hidden'
+              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
             >
               <Icon
                 name='group-grid'
@@ -408,11 +408,11 @@ const RevenueBreakDownBlock = ({
             </Button>
             <Button
               onClick={onFilterOpen}
-              className='bg-secondary-27 text-gray-11 shadow-13 flex w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto'
+              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
             >
               <Icon
                 name='filters'
-                className='h-[14px] w-[14px]'
+                className='h-[14px] w-[14px] fill-none'
               />
               Filters
             </Button>
@@ -420,7 +420,7 @@ const RevenueBreakDownBlock = ({
           <div className='flex w-full items-center gap-2 sm:w-auto'>
             <Button
               onClick={onSortOpen}
-              className='bg-secondary-27 text-gray-11 sm:auto shadow-13 flex w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
+              className='bg-secondary-27 text-gray-11 sm:auto shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8'
             >
               <Icon
                 name='sort-icon'
@@ -430,7 +430,7 @@ const RevenueBreakDownBlock = ({
             </Button>
             <Button
               onClick={onMoreOpen}
-              className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto lg:hidden'
+              className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
             >
               <Icon
                 name='3-dots'

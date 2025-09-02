@@ -306,7 +306,7 @@ const DailyExpenses = ({
           >
             <Icon
               name='filters'
-              className='h-[14px] w-[14px]'
+              className='h-[14px] w-[14px] fill-none'
             />
             Filters
           </Button>

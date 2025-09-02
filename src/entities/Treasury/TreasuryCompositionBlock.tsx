@@ -250,7 +250,7 @@ const TreasuryCompositionBlock = memo(
           <div className='flex w-full items-center gap-2 sm:w-auto'>
             <Button
               onClick={onGroupOpen}
-              className='bg-secondary-27 text-gray-11 shadow-13 flex w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto lg:hidden'
+              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
             >
               <Icon
                 name='group-grid'
@@ -280,7 +280,7 @@ const TreasuryCompositionBlock = memo(
             </div>
             <Button
               onClick={onSortOpen}
-              className='bg-secondary-27 text-gray-11 shadow-13 flex w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:hidden'
+              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:hidden md:h-8'
             >
               <Icon
                 name='sort-icon'

@@ -208,7 +208,7 @@ const FullDAOCommitmentsBlock = () => {
         <div className='flex items-center gap-2 lg:hidden'>
           <Button
             onClick={onSortOpen}
-            className='bg-secondary-27 outline-secondary-18 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
+            className='bg-secondary-27 outline-secondary-18 text-gray-11 shadow-13 flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8'
           >
             <Icon
               name='sort-icon'
@@ -218,7 +218,7 @@ const FullDAOCommitmentsBlock = () => {
           </Button>
           <Button
             onClick={onMoreOpen}
-            className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto lg:hidden'
+            className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
           >
             <Icon
               name='3-dots'

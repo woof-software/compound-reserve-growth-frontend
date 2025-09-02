@@ -388,17 +388,17 @@ const TreasuryBalanceByNetworkBlock = ({
         <div className='flex flex-row items-center justify-end gap-2'>
           <Button
             onClick={onFilterOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto'
+            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
           >
             <Icon
               name='filters'
-              className='h-[14px] w-[14px]'
+              className='h-[14px] w-[14px] fill-none'
             />
             Filters
           </Button>
           <Button
             onClick={onSortOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto'
+            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
           >
             <Icon
               name='sort-icon'
