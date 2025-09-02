@@ -544,25 +544,35 @@ const RevenueBreakDownBlock = ({
         isOpen={isMoreOpen}
         onClose={onMoreClose}
       >
-        <div className='flex flex-col gap-3'>
-          <CSVLink
-            data={tableData}
-            filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
-            onClick={onMoreClose}
-          >
-            <div className='flex items-center gap-1.5'>
-              <Icon
-                name='download'
-                className='h-6 w-6'
-              />
-              <Text
-                size='11'
-                weight='400'
-              >
-                CSV with the entire historical data
-              </Text>
-            </div>
-          </CSVLink>
+        <Text
+          size='17'
+          weight='700'
+          align='center'
+          className='mb-5'
+        >
+          Actions
+        </Text>
+        <div className='flex flex-col gap-1.5'>
+          <div className='px-3 py-2'>
+            <CSVLink
+              data={tableData}
+              filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
+              onClick={onMoreClose}
+            >
+              <div className='flex items-center gap-1.5'>
+                <Icon
+                  name='download'
+                  className='h-[26px] w-[26px]'
+                />
+                <Text
+                  size='14'
+                  weight='500'
+                >
+                  CSV with the entire historical data
+                </Text>
+              </div>
+            </CSVLink>
+          </div>
         </div>
       </Drawer>
     </Card>

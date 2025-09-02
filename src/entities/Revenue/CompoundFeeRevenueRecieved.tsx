@@ -675,41 +675,58 @@ const Filters = memo(
             isOpen={isMoreOpen}
             onClose={onMoreClose}
           >
-            <div className='flex flex-col gap-3'>
-              <CSVLink
-                data={csvData}
-                filename={csvFilename}
-                onClick={onMoreClose}
-              >
-                <div className='flex items-center gap-1.5'>
-                  <Icon
-                    name='download'
-                    className='h-6 w-6'
-                  />
-                  <Text
-                    size='11'
-                    weight='400'
-                  >
-                    CSV with the entire historical data
-                  </Text>
-                </div>
-              </CSVLink>
-              <View.Condition if={isShowEyeIcon}>
-                <ChartIconToggle
-                  active={!areAllSeriesHidden}
-                  onIcon='eye'
-                  offIcon='eye-closed'
-                  ariaLabel='Toggle all series visibility'
-                  className='flex items-center gap-1.5 bg-transparent p-0 !shadow-none'
-                  onClick={onEyeClick}
+            <Text
+              size='17'
+              weight='700'
+              align='center'
+              className='mb-5'
+            >
+              Actions
+            </Text>
+            <div className='flex flex-col gap-1.5'>
+              <div className='px-3 py-2'>
+                <CSVLink
+                  data={csvData}
+                  filename={csvFilename}
+                  onClick={onMoreClose}
                 >
-                  <Text
-                    size='11'
-                    weight='400'
+                  <div className='flex items-center gap-1.5'>
+                    <Icon
+                      name='download'
+                      className='h-[26px] w-[26px]'
+                    />
+                    <Text
+                      size='14'
+                      weight='500'
+                    >
+                      CSV with the entire historical data
+                    </Text>
+                  </div>
+                </CSVLink>
+              </div>
+              <View.Condition if={isShowEyeIcon}>
+                <div className='px-3 py-2'>
+                  <ChartIconToggle
+                    active={!areAllSeriesHidden}
+                    onIcon='eye'
+                    offIcon='eye-closed'
+                    ariaLabel='Toggle all series visibility'
+                    className={{
+                      container:
+                        'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
+                      icon: 'h-[26px] w-[26px]',
+                      iconContainer: 'h-[26px] w-[26px]'
+                    }}
+                    onClick={onEyeClick}
                   >
-                    EYE text text
-                  </Text>
-                </ChartIconToggle>
+                    <Text
+                      size='14'
+                      weight='500'
+                    >
+                      Unselect All
+                    </Text>
+                  </ChartIconToggle>
+                </div>
               </View.Condition>
             </div>
           </Drawer>
