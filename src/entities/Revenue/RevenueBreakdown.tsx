@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useReducer } from 'react';
+import { CSVLink } from 'react-csv';
 
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
@@ -22,6 +23,7 @@ import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -64,6 +66,12 @@ const RevenueBreakDownBlock = ({
     isOpen: isSortOpen,
     onOpenModal: onSortOpen,
     onCloseModal: onSortClose
+  } = useModal();
+
+  const {
+    isOpen: isMoreOpen,
+    onOpenModal: onMoreOpen,
+    onCloseModal: onMoreClose
   } = useModal();
 
   const [selectedOptions, setSelectedOptions] = useReducer(
@@ -420,10 +428,15 @@ const RevenueBreakDownBlock = ({
               />
               Sort
             </Button>
-            <CSVDownloadButton
-              data={tableData}
-              filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
-            />
+            <Button
+              onClick={onMoreOpen}
+              className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto lg:hidden'
+            >
+              <Icon
+                name='3-dots'
+                className='h-6 w-6 fill-none'
+              />
+            </Button>
           </div>
         </div>
       </div>
@@ -527,6 +540,31 @@ const RevenueBreakDownBlock = ({
         onClose={closeYear}
         onSelect={selectYear}
       />
+      <Drawer
+        isOpen={isMoreOpen}
+        onClose={onMoreClose}
+      >
+        <div className='flex flex-col gap-3'>
+          <CSVLink
+            data={tableData}
+            filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
+            onClick={onMoreClose}
+          >
+            <div className='flex items-center gap-1.5'>
+              <Icon
+                name='download'
+                className='h-6 w-6'
+              />
+              <Text
+                size='11'
+                weight='400'
+              >
+                CSV with the entire historical data
+              </Text>
+            </div>
+          </CSVLink>
+        </div>
+      </Drawer>
     </Card>
   );
 };

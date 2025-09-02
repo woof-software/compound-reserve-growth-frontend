@@ -1,7 +1,7 @@
 import React, {
+  RefObject,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState
 } from 'react';
@@ -10,7 +10,12 @@ import HighchartsReact from 'highcharts-react-official';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
+import {
+  AggregatedPoint,
+  StackedChartData
+} from '@/shared/hooks/useCompoundReceivedBars';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { formatValue } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -20,51 +25,55 @@ import View from '@/shared/ui/View/View';
 import 'highcharts/modules/stock';
 import 'highcharts/modules/mouse-wheel-zoom';
 
-const formatValue = (value: number) => {
-  if (Math.abs(value) >= 1_000_000) {
-    return (value / 1_000_000).toFixed(1) + 'M';
-  }
-
-  if (Math.abs(value) >= 1_000) {
-    return (value / 1_000).toFixed(1) + 'K';
-  }
-
-  return value.toFixed(0);
-};
-
-interface StackedChartData {
-  date: string;
-  [key: string]: string | number;
-}
-interface AggregatedPoint {
-  x: number;
-  [key: string]: number;
-}
 interface CompoundFeeRecievedProps {
   data: StackedChartData[];
+
+  seriesData: Highcharts.SeriesColumnOptions[];
+
+  chartRef: RefObject<HighchartsReact.RefObject | null>;
+
+  aggregatedData: AggregatedPoint[];
+
   groupBy: string;
+
+  hiddenItems: Set<string>;
+
+  areAllSeriesHidden: boolean;
+
   barCount?: number;
+
   barSize?: 'D' | 'W' | 'M';
-  onVisibleBarsChange?: (count: number) => void;
+
   className?: string;
+
+  toggleSeriesByName: (name: string) => void;
+
+  onSelectAll: () => void;
+
+  onDeselectAll: () => void;
+
+  onVisibleBarsChange?: (count: number) => void;
 }
 
 const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
+  chartRef,
   data = [],
   groupBy,
+  seriesData = [],
+  aggregatedData = [],
   barCount = 90,
   barSize = 'D',
+  hiddenItems,
+  areAllSeriesHidden,
+  toggleSeriesByName,
+  onSelectAll,
+  onDeselectAll,
   onVisibleBarsChange,
   className
 }) => {
   const { theme } = useTheme();
 
-  const chartRef = useRef<HighchartsReact.RefObject>(null);
   const programmaticChange = useRef(false);
-
-  const [areAllSeriesHidden, setAreAllSeriesHidden] = useState(false);
-
-  const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
 
   const viewportRef = useRef<HTMLDivElement>(null);
 
@@ -93,102 +102,6 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
 
     el.scrollBy({ left: dir === 'left' ? -step : step, behavior: 'smooth' });
   };
-
-  useEffect(() => setAreAllSeriesHidden(false), [data]);
-
-  const { seriesData, aggregatedData } = useMemo(() => {
-    if (!data || data.length === 0) {
-      return { seriesData: [], aggregatedData: [] };
-    }
-
-    const allKeys = new Set<string>();
-    data.forEach((item) => {
-      Object.keys(item).forEach((key) => {
-        if (key !== 'date') {
-          allKeys.add(key);
-        }
-      });
-    });
-
-    const aggregated = new Map<number, AggregatedPoint>();
-
-    data.forEach((item) => {
-      const date = new Date(item.date);
-      let keyDate: Date;
-
-      switch (barSize) {
-        case 'D': {
-          keyDate = new Date(
-            Date.UTC(
-              date.getUTCFullYear(),
-              date.getUTCMonth(),
-              date.getUTCDate()
-            )
-          );
-          break;
-        }
-        case 'W': {
-          const day = date.getUTCDay();
-          const diff = date.getUTCDate() - day + (day === 0 ? -6 : 1);
-          keyDate = new Date(
-            Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), diff)
-          );
-          break;
-        }
-        case 'M': {
-          keyDate = new Date(
-            Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)
-          );
-          break;
-        }
-        default:
-          keyDate = date;
-      }
-
-      const keyTimestamp = keyDate.getTime();
-
-      if (!aggregated.has(keyTimestamp)) {
-        aggregated.set(keyTimestamp, { x: keyTimestamp });
-      }
-
-      const aggregatedPoint = aggregated.get(keyTimestamp)!;
-
-      allKeys.forEach((key) => {
-        const value = (item[key] as number) || 0;
-        aggregatedPoint[key] = (aggregatedPoint[key] || 0) + value;
-      });
-    });
-
-    const sortedAggregated = Array.from(aggregated.values()).sort(
-      (a, b) => a.x - b.x
-    );
-
-    const activeSeriesKeys = new Set<string>();
-    sortedAggregated.forEach((point) => {
-      Object.keys(point).forEach((key) => {
-        if (key !== 'x' && point[key] !== 0) {
-          activeSeriesKeys.add(key);
-        }
-      });
-    });
-
-    const palette = Highcharts.getOptions().colors || [];
-
-    const finalSeries = Array.from(activeSeriesKeys).map(
-      (key, idx): Highcharts.SeriesColumnOptions => ({
-        type: 'column',
-        color: palette[idx % palette.length],
-        name: key.charAt(0).toUpperCase() + key.slice(1),
-        data: sortedAggregated.map((item) => [
-          item.x,
-          (item[key] as number) || 0
-        ]),
-        showInLegend: true
-      })
-    );
-
-    return { seriesData: finalSeries, aggregatedData: sortedAggregated };
-  }, [data, barSize]);
 
   useEffect(() => {
     const chart = chartRef.current?.chart;
@@ -235,54 +148,6 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
 
       (s as any).dataLabelsGroup?.attr?.({ opacity: 1 });
     });
-  }, []);
-
-  const toggleSeriesByName = useCallback((name: string) => {
-    const chart = chartRef.current?.chart;
-
-    if (!chart) return;
-
-    const s = chart.series.find((sr) => sr.name === name);
-
-    if (!s) return;
-
-    s.setVisible(!s.visible, false);
-
-    chart.redraw();
-
-    setHiddenItems((prev) => {
-      const next = new Set(prev);
-
-      if (s.visible) {
-        next.delete(name);
-      } else {
-        next.add(name);
-      }
-
-      return next;
-    });
-
-    setTimeout(() => {
-      const anyVisible = chart.series.some((sr) => sr.visible);
-
-      setAreAllSeriesHidden(!anyVisible);
-    }, 0);
-  }, []);
-
-  const handleSelectAll = useCallback(() => {
-    const chart = chartRef.current?.chart;
-    if (!chart) return;
-    chart.series.forEach((s) => s.setVisible(true, false));
-    chart.redraw();
-    setAreAllSeriesHidden(false);
-  }, []);
-
-  const handleDeselectAll = useCallback(() => {
-    const chart = chartRef.current?.chart;
-    if (!chart) return;
-    chart.series.forEach((s) => s.setVisible(false, false));
-    chart.redraw();
-    setAreAllSeriesHidden(true);
   }, []);
 
   let xAxisLabelFormat: string;
@@ -452,7 +317,12 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   }, [seriesData.length, updateArrows]);
 
   return (
-    <div className={cn('highcharts-container flex h-full flex-col', className)}>
+    <div
+      className={cn(
+        'highcharts-container relative flex h-full flex-col',
+        className
+      )}
+    >
       <div className='relative flex-grow'>
         {areAllSeriesHidden && (
           <Text
@@ -469,12 +339,12 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
           containerProps={{ style: { width: '100%', height: '100%' } }}
         />
       </div>
-      <div className='absolute right-6 block md:hidden'>
+      <div className='absolute right-0 hidden lg:block'>
         <div className='flex items-center gap-3'>
           <View.Condition if={Boolean(seriesData.length > 1)}>
             <ChartIconToggle
-              active={areAllSeriesHidden}
-              onClick={areAllSeriesHidden ? handleSelectAll : handleDeselectAll}
+              active={!areAllSeriesHidden}
+              onClick={areAllSeriesHidden ? onSelectAll : onDeselectAll}
               onIcon='eye'
               offIcon='eye-closed'
               ariaLabel='Toggle all series visibility'

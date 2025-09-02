@@ -526,7 +526,7 @@ const LineChart: FC<LineChartProps> = ({
           }}
         />
       </div>
-      <div className='absolute right-6 block'>
+      <div className='absolute right-0 block'>
         <div className='hidden items-center gap-3 lg:flex'>
           <View.Condition
             if={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}

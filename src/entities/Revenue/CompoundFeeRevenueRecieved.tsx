@@ -1,5 +1,7 @@
 import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
+import { CSVLink } from 'react-csv';
 
+import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/CompoundFeeRecieved';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
@@ -8,6 +10,7 @@ import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useCompoundReceivedBars } from '@/shared/hooks/useCompoundReceivedBars';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
@@ -18,9 +21,11 @@ import {
 import { BarSize, OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 interface SelectedOptionsState {
   chain: OptionType[];
@@ -57,6 +62,8 @@ interface FiltersProps {
 
   barSize: BarSize;
 
+  isShowEyeIcon: boolean;
+
   isLoading: boolean;
 
   openSingle: boolean;
@@ -64,6 +71,8 @@ interface FiltersProps {
   groupBy: string;
 
   csvFilename: string;
+
+  areAllSeriesHidden: boolean;
 
   csvData: Record<string, string | number>[];
 
@@ -92,6 +101,10 @@ interface FiltersProps {
   closeSingle: () => void;
 
   onClearAll: () => void;
+
+  onSelectAll: () => void;
+
+  onDeselectAll: () => void;
 
   selectSingle: (value: string) => void;
 }
@@ -275,6 +288,20 @@ const CompoundFeeRevenueRecieved = ({
     getValueByPath
   });
 
+  const {
+    chartRef,
+    seriesData,
+    aggregatedData,
+    areAllSeriesHidden,
+    hiddenItems,
+    toggleSeriesByName,
+    onSelectAll,
+    onDeselectAll
+  } = useCompoundReceivedBars({
+    barSize,
+    data: chartData
+  });
+
   const deploymentOptionsFilter = useMemo(() => {
     const marketV2 =
       marketOptions
@@ -362,6 +389,8 @@ const CompoundFeeRevenueRecieved = ({
     >
       <Filters
         groupBy={groupBy}
+        areAllSeriesHidden={areAllSeriesHidden}
+        isShowEyeIcon={Boolean(seriesData.length > 1)}
         assetTypeOptions={assetTypeOptions}
         selectedOptions={selectedOptions}
         chainOptions={chainOptions}
@@ -381,6 +410,8 @@ const CompoundFeeRevenueRecieved = ({
         closeSingle={onGroupByClose}
         selectSingle={handleSelectGroupBy}
         onClearAll={handleResetFilters}
+        onSelectAll={onSelectAll}
+        onDeselectAll={onDeselectAll}
       />
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder
@@ -389,9 +420,17 @@ const CompoundFeeRevenueRecieved = ({
         />
       ) : (
         <CompoundFeeRecieved
+          chartRef={chartRef}
+          hiddenItems={hiddenItems}
+          areAllSeriesHidden={areAllSeriesHidden}
           data={chartData}
           groupBy={groupBy}
           barSize={barSize}
+          seriesData={seriesData}
+          aggregatedData={aggregatedData}
+          toggleSeriesByName={toggleSeriesByName}
+          onSelectAll={onSelectAll}
+          onDeselectAll={onDeselectAll}
         />
       )}
     </Card>
@@ -407,6 +446,8 @@ const Filters = memo(
     csvFilename,
     chainOptions,
     selectedOptions,
+    isShowEyeIcon,
+    areAllSeriesHidden,
     deploymentOptionsFilter,
     assetTypeOptions,
     symbolOptions,
@@ -419,9 +460,17 @@ const Filters = memo(
     toggleSingle,
     closeSingle,
     selectSingle,
-    onClearAll
+    onClearAll,
+    onSelectAll,
+    onDeselectAll
   }: FiltersProps) => {
     const { isOpen, onOpenModal, onCloseModal } = useModal();
+
+    const {
+      isOpen: isMoreOpen,
+      onOpenModal: onMoreOpen,
+      onCloseModal: onMoreClose
+    } = useModal();
 
     const filterOptions = useMemo(() => {
       const chainFilterOptions = {
@@ -478,6 +527,16 @@ const Filters = memo(
       onSelectMarket,
       selectedOptions
     ]);
+
+    const onEyeClick = () => {
+      if (areAllSeriesHidden) {
+        onSelectAll();
+      } else {
+        onDeselectAll();
+      }
+
+      onMoreClose();
+    };
 
     return (
       <>
@@ -579,7 +638,7 @@ const Filters = memo(
               <div className='flex w-full flex-row items-center gap-2 sm:w-auto'>
                 <Button
                   onClick={onOpenModal}
-                  className='bg-secondary-27 text-gray-11 shadow-13 flex w-[95%] min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto'
+                  className='bg-secondary-27 text-gray-11 shadow-13 flex w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto'
                 >
                   <Icon
                     name='filters'
@@ -587,10 +646,15 @@ const Filters = memo(
                   />
                   Filters
                 </Button>
-                <CSVDownloadButton
-                  data={csvData}
-                  filename={csvFilename}
-                />
+                <Button
+                  onClick={onMoreOpen}
+                  className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto lg:hidden'
+                >
+                  <Icon
+                    name='3-dots'
+                    className='h-6 w-6 fill-none'
+                  />
+                </Button>
               </div>
             </div>
           </div>
@@ -607,6 +671,48 @@ const Filters = memo(
             onClose={closeSingle}
             onSelect={selectSingle}
           />
+          <Drawer
+            isOpen={isMoreOpen}
+            onClose={onMoreClose}
+          >
+            <div className='flex flex-col gap-3'>
+              <CSVLink
+                data={csvData}
+                filename={csvFilename}
+                onClick={onMoreClose}
+              >
+                <div className='flex items-center gap-1.5'>
+                  <Icon
+                    name='download'
+                    className='h-6 w-6'
+                  />
+                  <Text
+                    size='11'
+                    weight='400'
+                  >
+                    CSV with the entire historical data
+                  </Text>
+                </div>
+              </CSVLink>
+              <View.Condition if={isShowEyeIcon}>
+                <ChartIconToggle
+                  active={!areAllSeriesHidden}
+                  onIcon='eye'
+                  offIcon='eye-closed'
+                  ariaLabel='Toggle all series visibility'
+                  className='flex items-center gap-1.5 bg-transparent p-0 !shadow-none'
+                  onClick={onEyeClick}
+                >
+                  <Text
+                    size='11'
+                    weight='400'
+                  >
+                    EYE text text
+                  </Text>
+                </ChartIconToggle>
+              </View.Condition>
+            </div>
+          </Drawer>
         </div>
       </>
     );

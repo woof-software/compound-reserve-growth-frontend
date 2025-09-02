@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useReducer } from 'react';
+import { CSVLink } from 'react-csv';
 
 import CompoundRevenue from '@/components/Charts/CompoundRevenue/CompoundRevenue';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
@@ -13,8 +14,10 @@ import { capitalizeFirstLetter, ChartDataItem } from '@/shared/lib/utils/utils';
 import { BarSize, OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
 interface PreprocessedItem {
@@ -389,7 +392,7 @@ const CompoundRevenueBlock = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'border-background min-h-[567px] border',
-        content: 'flex flex-col gap-3 p-0 pb-5 md:px-10 lg:pb-10'
+        content: 'flex flex-col gap-3 p-0 px-0 pb-5 md:px-5 lg:pb-10'
       }}
     >
       <Filters
@@ -445,6 +448,12 @@ const Filters = ({
   onClearAll
 }: FiltersProps) => {
   const { isOpen, onOpenModal, onCloseModal } = useModal();
+
+  const {
+    isOpen: isMoreOpen,
+    onOpenModal: onMoreOpen,
+    onCloseModal: onMoreClose
+  } = useModal();
 
   const filterOptions = useMemo(() => {
     const chainFilterOptions = {
@@ -604,7 +613,7 @@ const Filters = ({
         </div>
       </div>
       <div className='block lg:hidden'>
-        <div className='flex flex-col justify-end gap-2 px-5 py-3'>
+        <div className='flex flex-col justify-end gap-2 px-5 py-3 md:px-0'>
           <div className='flex w-full flex-row items-center justify-end gap-2 sm:w-auto'>
             <TabsGroup
               className={{
@@ -626,10 +635,15 @@ const Filters = ({
               />
               Filters
             </Button>
-            <CSVDownloadButton
-              data={csvData}
-              filename={csvFilename}
-            />
+            <Button
+              onClick={onMoreOpen}
+              className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto lg:hidden'
+            >
+              <Icon
+                name='3-dots'
+                className='h-6 w-6 fill-none'
+              />
+            </Button>
           </div>
         </div>
         <Filter
@@ -638,6 +652,31 @@ const Filters = ({
           onClose={onCloseModal}
           onClearAll={onClearAll}
         />
+        <Drawer
+          isOpen={isMoreOpen}
+          onClose={onMoreClose}
+        >
+          <div className='flex flex-col gap-3'>
+            <CSVLink
+              data={csvData}
+              filename={csvFilename}
+              onClick={onMoreClose}
+            >
+              <div className='flex items-center gap-1.5'>
+                <Icon
+                  name='download'
+                  className='h-6 w-6'
+                />
+                <Text
+                  size='11'
+                  weight='400'
+                >
+                  CSV with the entire historical data
+                </Text>
+              </div>
+            </CSVLink>
+          </div>
+        </Drawer>
       </div>
     </>
   );
