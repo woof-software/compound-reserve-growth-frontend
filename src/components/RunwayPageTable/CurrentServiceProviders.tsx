@@ -200,12 +200,16 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
                     lineHeight='18'
                     weight='500'
                     className='text-primary-14'
-                  ></Text>
+                  >
+                    Amount (Qty)
+                  </Text>
                   <Text
                     size='13'
                     lineHeight='21'
                     className='truncate'
-                  ></Text>
+                  >
+                    {formatQuantity(row.amount)}
+                  </Text>
                 </div>
                 <div className='grid w-full max-w-[100px]'>
                   <Text
@@ -247,6 +251,7 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
                 <Text
                   size='13'
                   lineHeight='21'
+                  weight='500'
                   className='truncate'
                 ></Text>
               </div>
@@ -262,6 +267,7 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
                 <Text
                   size='13'
                   lineHeight='21'
+                  weight='500'
                   className='truncate'
                 >{`$${formatLargeNumber(footerData.value, 2)}`}</Text>
               </div>

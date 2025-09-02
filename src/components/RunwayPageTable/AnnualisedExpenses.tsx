@@ -202,6 +202,7 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
                 <Text
                   size='13'
                   lineHeight='21'
+                  weight='500'
                   className='truncate'
                 >
                   {formatLargeNumber(footerData.amount, 2)}
@@ -219,6 +220,7 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
                 <Text
                   size='13'
                   lineHeight='21'
+                  weight='500'
                   className='truncate'
                 >{`$${formatLargeNumber(footerData.value, 2)}`}</Text>
               </div>
