@@ -195,8 +195,8 @@ const Filters = memo(
     return (
       <>
         <div className='block lg:hidden'>
-          <div className='flex flex-col justify-end gap-3 px-5 py-3'>
-            <div className='flex flex-wrap justify-end gap-3'>
+          <div className='flex flex-col justify-end gap-2 px-5 py-3'>
+            <div className='flex flex-wrap justify-end gap-2'>
               <TabsGroup
                 tabs={['Lend Incentive', 'Borrow Incentive', 'Total']}
                 value={'Borrow Incentive'}
@@ -210,7 +210,7 @@ const Filters = memo(
                 disabled={isLoading}
               />
             </div>
-            <div className='flex flex-wrap items-center justify-end gap-3'>
+            <div className='flex flex-wrap items-center justify-end gap-2'>
               <CSVDownloadButton
                 data={csvData}
                 filename={csvFilename}
@@ -220,7 +220,7 @@ const Filters = memo(
           </div>
         </div>
         <div className='hidden lg:block'>
-          <div className='flex items-center justify-end gap-3 px-0 py-3'>
+          <div className='flex items-center justify-end gap-2 px-0 py-3'>
             <TabsGroup
               tabs={['Lend Incentive', 'Borrow Incentive', 'Total']}
               value={'Borrow Incentive'}

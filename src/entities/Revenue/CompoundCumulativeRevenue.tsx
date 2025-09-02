@@ -468,7 +468,7 @@ const Filters = ({
   return (
     <>
       <div className='hidden lg:block'>
-        <div className='hidden items-center justify-end gap-3 px-0 py-3 lg:flex'>
+        <div className='hidden items-center justify-end gap-2 px-0 py-3 lg:flex'>
           <div className='flex gap-2'>
             <MultiSelect
               options={chainOptions || []}
@@ -517,7 +517,7 @@ const Filters = ({
             filename={csvFilename}
           />
         </div>
-        <div className='flex flex-col items-end justify-end gap-3 px-0 py-3 lg:hidden'>
+        <div className='flex flex-col items-end justify-end gap-2 px-0 py-3 lg:hidden'>
           <div className='z-[1] flex items-center gap-2'>
             <MultiSelect
               options={chainOptions || []}
@@ -555,7 +555,7 @@ const Filters = ({
               disabled={isLoading}
             />
           </div>
-          <div className='flex items-center gap-3'>
+          <div className='flex items-center gap-2'>
             <TabsGroup
               tabs={['D', 'W', 'M']}
               value={barSize}

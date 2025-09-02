@@ -541,7 +541,7 @@ const Filters = memo(
     return (
       <>
         <div className='hidden lg:block'>
-          <div className='flex items-center justify-end gap-3 px-0 py-3'>
+          <div className='flex items-center justify-end gap-2 px-0 py-3'>
             <MultiSelect
               options={chainOptions || []}
               value={selectedOptions.chain}
