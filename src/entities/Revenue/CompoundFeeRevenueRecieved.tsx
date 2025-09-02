@@ -630,7 +630,7 @@ const Filters = memo(
                 >
                   <Icon
                     name='group-grid'
-                    className='h-[14px] w-[14px]'
+                    className='h-[14px] w-[14px] fill-none'
                   />
                   Group
                 </Button>
