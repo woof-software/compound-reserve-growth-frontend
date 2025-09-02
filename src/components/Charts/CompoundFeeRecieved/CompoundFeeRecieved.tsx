@@ -374,7 +374,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
         <div className='flex items-center gap-2'>
           <View.Condition if={Boolean(seriesData.length > 1)}>
             <ChartIconToggle
-              active={!areAllSeriesHidden}
+              active={areAllSeriesHidden}
               onClick={areAllSeriesHidden ? onSelectAll : onDeselectAll}
               onIcon='eye'
               offIcon='eye-closed'

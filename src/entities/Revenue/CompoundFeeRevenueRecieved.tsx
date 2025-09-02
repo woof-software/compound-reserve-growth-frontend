@@ -726,7 +726,7 @@ const Filters = memo(
               <View.Condition if={isShowEyeIcon}>
                 <div className='px-3 py-2'>
                   <ChartIconToggle
-                    active={!areAllSeriesHidden}
+                    active={areAllSeriesHidden}
                     onIcon='eye'
                     offIcon='eye-closed'
                     ariaLabel='Toggle all series visibility'

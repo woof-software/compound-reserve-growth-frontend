@@ -488,7 +488,7 @@ const LineChart: FC<LineChartProps> = ({
             if={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
           >
             <ChartIconToggle
-              active={!areAllSeriesHidden}
+              active={areAllSeriesHidden}
               onClick={areAllSeriesHidden ? onSelectAll : onDeselectAll}
               onIcon='eye'
               offIcon='eye-closed'
@@ -497,7 +497,7 @@ const LineChart: FC<LineChartProps> = ({
           </View.Condition>
           <View.Condition if={Boolean(eventsData.length > 0)}>
             <ChartIconToggle
-              active={showEvents}
+              active={!showEvents}
               onClick={() => onShowEvents(!showEvents)}
               onIcon='calendar-check'
               offIcon='calendar-uncheck'
