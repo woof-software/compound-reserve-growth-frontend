@@ -174,6 +174,10 @@ const LineChart: FC<LineChartProps> = ({
     });
   }, [data, barSize]);
 
+  const isLastActiveLegend = useMemo(() => {
+    return hiddenItems.size === aggregatedSeries.length - 1;
+  }, [aggregatedSeries, hiddenItems]);
+
   const highlightSeries = useCallback((name: string) => {
     const chart = chartRef.current?.chart;
 
@@ -206,37 +210,42 @@ const LineChart: FC<LineChartProps> = ({
     });
   }, []);
 
-  const toggleSeriesByName = useCallback((name: string) => {
-    const chart = chartRef.current?.chart;
+  const toggleSeriesByName = useCallback(
+    (name: string) => {
+      if (isLastActiveLegend && !hiddenItems.has(name)) return;
 
-    if (!chart) return;
+      const chart = chartRef.current?.chart;
 
-    const s = chart.series.find((sr) => sr.name === name);
+      if (!chart) return;
 
-    if (!s) return;
+      const s = chart.series.find((sr) => sr.name === name);
 
-    s.setVisible(!s.visible, false);
+      if (!s) return;
 
-    chart.redraw();
+      s.setVisible(!s.visible, false);
 
-    setHiddenItems((prev) => {
-      const next = new Set(prev);
+      chart.redraw();
 
-      if (s.visible) {
-        next.delete(name);
-      } else {
-        next.add(name);
-      }
+      setHiddenItems((prev) => {
+        const next = new Set(prev);
 
-      return next;
-    });
+        if (s.visible) {
+          next.delete(name);
+        } else {
+          next.add(name);
+        }
 
-    setTimeout(() => {
-      const anyVisible = chart.series.some((sr) => sr.visible);
+        return next;
+      });
 
-      onAllSeriesHidden(!anyVisible);
-    }, 0);
-  }, []);
+      setTimeout(() => {
+        const anyVisible = chart.series.some((sr) => sr.visible);
+
+        onAllSeriesHidden(!anyVisible);
+      }, 0);
+    },
+    [isLastActiveLegend]
+  );
 
   const options: Highcharts.Options = useMemo(() => {
     const yPositions = [40, 60, 80, 100, 120, 140, 160, 180];
@@ -571,9 +580,9 @@ const LineChart: FC<LineChartProps> = ({
         <div className='mx-5 block md:mx-0 lg:hidden'>
           <div
             className={cn(
-              'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit overflow-hidden rounded-[39px]',
-              'before:pointer-events-none before:absolute before:top-[1px] before:left-[1px] before:h-full before:w-20 before:rounded-[39px] before:opacity-0',
-              'after:pointer-events-none after:absolute after:top-[1px] after:right-[1px] after:h-full after:w-20 after:rounded-r-[39px] after:opacity-0',
+              'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit overflow-hidden rounded-lg',
+              'before:pointer-events-none before:absolute before:top-[1px] before:left-[1px] before:h-full before:w-20 before:rounded-sm before:opacity-0',
+              'after:pointer-events-none after:absolute after:top-[1px] after:right-[1px] after:h-full after:w-20 after:rounded-r-sm after:opacity-0',
               {
                 'before:max-h-[36px] before:rotate-180 before:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] before:opacity-100 dark:before:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
                   canScrollLeft,
@@ -585,7 +594,7 @@ const LineChart: FC<LineChartProps> = ({
             <View.Condition if={canScrollLeft}>
               <Button
                 className={cn(
-                  'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
+                  'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-sm'
                 )}
                 onClick={() => {
                   clearHighlight();
@@ -605,7 +614,7 @@ const LineChart: FC<LineChartProps> = ({
                 clearHighlight();
               }}
               className={cn(
-                'hide-scrollbar mx-0.5 flex h-full max-w-[99%] items-center gap-4 overflow-x-auto scroll-smooth p-1.5'
+                'hide-scrollbar mx-0.5 flex h-full max-w-[99%] items-center gap-4 overflow-x-auto scroll-smooth rounded-lg p-1.5'
               )}
             >
               <Each
@@ -615,7 +624,11 @@ const LineChart: FC<LineChartProps> = ({
                     key={s.name}
                     className={cn(
                       'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
-                      { 'line-through opacity-30': hiddenItems.has(s.name!) }
+                      {
+                        'line-through opacity-30': hiddenItems.has(s.name!),
+                        'cursor-not-allowed':
+                          isLastActiveLegend && !hiddenItems.has(s.name!)
+                      }
                     )}
                     onMouseEnter={() => highlightSeries(s.name!)}
                     onFocus={() => highlightSeries(s.name!)}
@@ -635,7 +648,7 @@ const LineChart: FC<LineChartProps> = ({
             <View.Condition if={canScrollRight}>
               <Button
                 className={cn(
-                  'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
+                  'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-sm'
                 )}
                 onClick={() => {
                   clearHighlight();
@@ -659,7 +672,11 @@ const LineChart: FC<LineChartProps> = ({
                   key={s.name}
                   className={cn(
                     'text-secondary-42 flex shrink-0 gap-2.5 text-[11px] leading-none font-normal',
-                    { 'line-through opacity-30': hiddenItems.has(s.name!) }
+                    {
+                      'line-through opacity-30': hiddenItems.has(s.name!),
+                      'cursor-not-allowed':
+                        isLastActiveLegend && !hiddenItems.has(s.name!)
+                    }
                   )}
                   onMouseEnter={() => highlightSeries(s.name!)}
                   onFocus={() => highlightSeries(s.name!)}

@@ -389,17 +389,17 @@ const TreasuryHoldingsBlock = ({
         <div className='flex flex-row items-center justify-end gap-2 px-5 py-3'>
           <Button
             onClick={onFilterOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto'
+            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
           >
             <Icon
               name='filters'
-              className='h-[14px] w-[14px]'
+              className='h-[14px] w-[14px] fill-none'
             />
             Filters
           </Button>
           <Button
             onClick={onSortOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto'
+            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
           >
             <Icon
               name='sort-icon'
@@ -409,7 +409,7 @@ const TreasuryHoldingsBlock = ({
           </Button>
           <Button
             onClick={onMoreOpen}
-            className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto lg:hidden'
+            className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
           >
             <Icon
               name='3-dots'
@@ -435,25 +435,35 @@ const TreasuryHoldingsBlock = ({
           isOpen={isMoreOpen}
           onClose={onMoreClose}
         >
-          <div className='flex flex-col gap-3'>
-            <CSVLink
-              data={tableData}
-              filename='Full Treasury Holdings'
-              onClick={onMoreClose}
-            >
-              <div className='flex items-center gap-1.5'>
-                <Icon
-                  name='download'
-                  className='h-6 w-6'
-                />
-                <Text
-                  size='11'
-                  weight='400'
-                >
-                  CSV with the entire historical data
-                </Text>
-              </div>
-            </CSVLink>
+          <Text
+            size='17'
+            weight='700'
+            align='center'
+            className='mb-5'
+          >
+            Actions
+          </Text>
+          <div className='flex flex-col gap-1.5'>
+            <div className='px-3 py-2'>
+              <CSVLink
+                data={tableData}
+                filename='Full Treasury Holdings'
+                onClick={onMoreClose}
+              >
+                <div className='flex items-center gap-1.5'>
+                  <Icon
+                    name='download'
+                    className='h-[26px] w-[26px]'
+                  />
+                  <Text
+                    size='14'
+                    weight='500'
+                  >
+                    CSV with the entire historical data
+                  </Text>
+                </div>
+              </CSVLink>
+            </div>
           </div>
         </Drawer>
       </div>

@@ -541,7 +541,13 @@ const Filters = memo(
     return (
       <>
         <div className='hidden lg:block'>
-          <div className='flex items-center justify-end gap-3 px-0 py-3'>
+          <div className='flex items-center justify-end gap-2 px-0 py-3'>
+            <TabsGroup
+              tabs={['D', 'W', 'M']}
+              value={barSize}
+              onTabChange={handleBarSizeChange}
+              disabled={isLoading}
+            />
             <MultiSelect
               options={chainOptions || []}
               value={selectedOptions.chain}
@@ -575,12 +581,6 @@ const Filters = memo(
               value={selectedOptions.symbol}
               onChange={onSelectSymbol}
               placeholder='Reserve Symbols'
-              disabled={isLoading}
-            />
-            <TabsGroup
-              tabs={['D', 'W', 'M']}
-              value={barSize}
-              onTabChange={handleBarSizeChange}
               disabled={isLoading}
             />
             <div className='flex items-center gap-1'>
@@ -626,11 +626,11 @@ const Filters = memo(
                 />
                 <Button
                   onClick={toggleSingle}
-                  className='bg-secondary-27 text-gray-11 shadow-13 flex w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto lg:hidden'
+                  className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
                 >
                   <Icon
                     name='group-grid'
-                    className='h-[14px] w-[14px]'
+                    className='h-[14px] w-[14px] fill-none'
                   />
                   Group
                 </Button>
@@ -638,17 +638,17 @@ const Filters = memo(
               <div className='flex w-full flex-row items-center gap-2 sm:w-auto'>
                 <Button
                   onClick={onOpenModal}
-                  className='bg-secondary-27 text-gray-11 shadow-13 flex w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto'
+                  className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
                 >
                   <Icon
                     name='filters'
-                    className='h-[14px] w-[14px]'
+                    className='h-[14px] w-[14px] fill-none'
                   />
                   Filters
                 </Button>
                 <Button
                   onClick={onMoreOpen}
-                  className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto lg:hidden'
+                  className='bg-secondary-27 shadow-13 md:miw-w-8 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 lg:hidden'
                 >
                   <Icon
                     name='3-dots'
@@ -675,41 +675,58 @@ const Filters = memo(
             isOpen={isMoreOpen}
             onClose={onMoreClose}
           >
-            <div className='flex flex-col gap-3'>
-              <CSVLink
-                data={csvData}
-                filename={csvFilename}
-                onClick={onMoreClose}
-              >
-                <div className='flex items-center gap-1.5'>
-                  <Icon
-                    name='download'
-                    className='h-6 w-6'
-                  />
-                  <Text
-                    size='11'
-                    weight='400'
-                  >
-                    CSV with the entire historical data
-                  </Text>
-                </div>
-              </CSVLink>
-              <View.Condition if={isShowEyeIcon}>
-                <ChartIconToggle
-                  active={!areAllSeriesHidden}
-                  onIcon='eye'
-                  offIcon='eye-closed'
-                  ariaLabel='Toggle all series visibility'
-                  className='flex items-center gap-1.5 bg-transparent p-0 !shadow-none'
-                  onClick={onEyeClick}
+            <Text
+              size='17'
+              weight='700'
+              align='center'
+              className='mb-5'
+            >
+              Actions
+            </Text>
+            <div className='flex flex-col gap-1.5'>
+              <div className='px-3 py-2'>
+                <CSVLink
+                  data={csvData}
+                  filename={csvFilename}
+                  onClick={onMoreClose}
                 >
-                  <Text
-                    size='11'
-                    weight='400'
+                  <div className='flex items-center gap-1.5'>
+                    <Icon
+                      name='download'
+                      className='h-[26px] w-[26px]'
+                    />
+                    <Text
+                      size='14'
+                      weight='500'
+                    >
+                      CSV with the entire historical data
+                    </Text>
+                  </div>
+                </CSVLink>
+              </div>
+              <View.Condition if={isShowEyeIcon}>
+                <div className='px-3 py-2'>
+                  <ChartIconToggle
+                    active={!areAllSeriesHidden}
+                    onIcon='eye'
+                    offIcon='eye-closed'
+                    ariaLabel='Toggle all series visibility'
+                    className={{
+                      container:
+                        'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
+                      icon: 'h-[26px] w-[26px]',
+                      iconContainer: 'h-[26px] w-[26px]'
+                    }}
+                    onClick={onEyeClick}
                   >
-                    EYE text text
-                  </Text>
-                </ChartIconToggle>
+                    <Text
+                      size='14'
+                      weight='500'
+                    >
+                      Unselect All
+                    </Text>
+                  </ChartIconToggle>
+                </div>
               </View.Condition>
             </div>
           </Drawer>

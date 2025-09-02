@@ -136,7 +136,15 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
     );
   }, [data, hiddenItems]);
 
+  const isLastActiveLegend = useMemo(() => {
+    const visibleLegends = chartData.filter((el) => el.visible);
+
+    return visibleLegends.length === 1;
+  }, [chartData]);
+
   const onLegendItemClick = (itemName: string) => {
+    if (isLastActiveLegend && !hiddenItems.has(itemName)) return;
+
     setHiddenItems((prev) => {
       const next = new Set(prev);
 
@@ -336,7 +344,9 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
                     className={cn(
                       'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
                       {
-                        'line-through opacity-30': hiddenItems.has(item.name)
+                        'line-through opacity-30': hiddenItems.has(item.name),
+                        'cursor-not-allowed':
+                          isLastActiveLegend && !hiddenItems.has(item.name)
                       }
                     )}
                     onMouseEnter={() => highlightPoint(item.name)}

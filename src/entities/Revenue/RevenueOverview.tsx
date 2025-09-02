@@ -200,13 +200,13 @@ const RevenueOverview = ({
 
     const footerContent = (
       <tr>
-        <td className='text-primary-14 px-[5px] py-[13px] text-left text-[11px] font-medium'>
+        <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
           Total
         </td>
         {primaryTabs.map((p) => (
           <td
             key={p}
-            className='text-primary-14 px-[5px] py-[13px] text-left text-[11px] font-medium'
+            className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'
           >
             {formatUSD(totals[p] || 0)}
           </td>
@@ -330,7 +330,7 @@ const RevenueOverview = ({
           />
           <Button
             onClick={onSortOpen}
-            className='bg-secondary-27 sm:w-auot text-gray-11 shadow-13 flex w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold lg:hidden'
+            className='bg-secondary-27 sm:w-auot text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
           >
             <Icon
               name='sort-icon'
