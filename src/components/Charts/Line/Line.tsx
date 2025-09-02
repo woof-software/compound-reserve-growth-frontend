@@ -580,9 +580,9 @@ const LineChart: FC<LineChartProps> = ({
         <div className='mx-5 block md:mx-0 lg:hidden'>
           <div
             className={cn(
-              'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit overflow-hidden rounded-[39px]',
-              'before:pointer-events-none before:absolute before:top-[1px] before:left-[1px] before:h-full before:w-20 before:rounded-[39px] before:opacity-0',
-              'after:pointer-events-none after:absolute after:top-[1px] after:right-[1px] after:h-full after:w-20 after:rounded-r-[39px] after:opacity-0',
+              'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit overflow-hidden rounded-lg',
+              'before:pointer-events-none before:absolute before:top-[1px] before:left-[1px] before:h-full before:w-20 before:rounded-sm before:opacity-0',
+              'after:pointer-events-none after:absolute after:top-[1px] after:right-[1px] after:h-full after:w-20 after:rounded-r-sm after:opacity-0',
               {
                 'before:max-h-[36px] before:rotate-180 before:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] before:opacity-100 dark:before:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
                   canScrollLeft,
@@ -594,7 +594,7 @@ const LineChart: FC<LineChartProps> = ({
             <View.Condition if={canScrollLeft}>
               <Button
                 className={cn(
-                  'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
+                  'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-sm'
                 )}
                 onClick={() => {
                   clearHighlight();
@@ -614,7 +614,7 @@ const LineChart: FC<LineChartProps> = ({
                 clearHighlight();
               }}
               className={cn(
-                'hide-scrollbar mx-0.5 flex h-full max-w-[99%] items-center gap-4 overflow-x-auto scroll-smooth p-1.5'
+                'hide-scrollbar mx-0.5 flex h-full max-w-[99%] items-center gap-4 overflow-x-auto scroll-smooth rounded-lg p-1.5'
               )}
             >
               <Each
@@ -648,7 +648,7 @@ const LineChart: FC<LineChartProps> = ({
             <View.Condition if={canScrollRight}>
               <Button
                 className={cn(
-                  'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-[29px]'
+                  'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-sm'
                 )}
                 onClick={() => {
                   clearHighlight();
