@@ -4,6 +4,7 @@ import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { capitalizeFirstLetter, formatUSD } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
+import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
@@ -111,15 +112,24 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                       >
                         {column.header as string}
                       </Text>
-                      <Text
-                        size='13'
-                        lineHeight='21'
-                        className='truncate'
-                      >
-                        {key === 'chain'
-                          ? capitalizeFirstLetter(cellValue as string)
-                          : formatUSD(cellValue as number)}
-                      </Text>
+                      <div className='flex items-center gap-2'>
+                        <View.Condition if={Boolean(key === 'chain')}>
+                          <Icon
+                            name={(cellValue as string) || 'not-found-icon'}
+                            className='h-4 w-4'
+                            folder='network'
+                          />
+                        </View.Condition>
+                        <Text
+                          size='13'
+                          lineHeight='21'
+                          className='truncate'
+                        >
+                          {key === 'chain'
+                            ? capitalizeFirstLetter(cellValue as string)
+                            : formatUSD(cellValue as number)}
+                        </Text>
+                      </div>
                     </div>
                   );
                 })}

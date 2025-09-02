@@ -8,7 +8,9 @@ import {
   formatNumber
 } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
+import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 export interface ProcessedRevenueData {
   chain: string;
@@ -117,30 +119,43 @@ const CompoundFeeRevenuebyChain = ({
                   }
                 )}
               >
-                {Object.entries(rowObj).map(([key, value], colIndex) => (
-                  <div
-                    key={colIndex}
-                    className='grid w-full max-w-[100px]'
-                  >
-                    <Text
-                      size='13'
-                      lineHeight='18'
-                      weight='500'
-                      className='text-primary-14'
+                {Object.entries(rowObj).map(([key, value], colIndex) => {
+                  return (
+                    <div
+                      key={colIndex}
+                      className='grid w-full max-w-[100px]'
                     >
-                      {capitalizeFirstLetter(key)}
-                    </Text>
-                    <Text
-                      size='13'
-                      lineHeight='21'
-                      className='truncate'
-                    >
-                      {key === 'chain'
-                        ? value
-                        : formatCurrencyValue(value || 0)}
-                    </Text>
-                  </div>
-                ))}
+                      <Text
+                        size='13'
+                        lineHeight='18'
+                        weight='500'
+                        className='text-primary-14'
+                      >
+                        {capitalizeFirstLetter(key)}
+                      </Text>
+                      <div className='flex items-center gap-2'>
+                        <View.Condition if={Boolean(key === 'chain')}>
+                          <Icon
+                            name={
+                              value.toString().toLowerCase() || 'not-found-icon'
+                            }
+                            className='h-4 w-4'
+                            folder='network'
+                          />
+                        </View.Condition>
+                        <Text
+                          size='13'
+                          lineHeight='21'
+                          className='truncate'
+                        >
+                          {key === 'chain'
+                            ? value
+                            : formatCurrencyValue(value || 0)}
+                        </Text>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             ))}
             <div
