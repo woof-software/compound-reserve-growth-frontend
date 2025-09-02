@@ -1,6 +1,5 @@
 import React, { memo, useCallback, useMemo, useReducer } from 'react';
 
-import LineChart from '@/components/Charts/Line/Line';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
@@ -173,12 +172,13 @@ const HistoricalExpencesByNetworks = ({
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder onButtonClick={onClearAll} />
       ) : (
-        <LineChart
-          data={correctedChartSeries}
-          groupBy={'None'}
-          className='max-h-fit'
-          barSize={barSize}
-        />
+        <div />
+        // <LineChart
+        //   data={correctedChartSeries}
+        //   groupBy={'None'}
+        //   className='max-h-fit'
+        //   barSize={barSize}
+        // />
       )}
     </Card>
   );

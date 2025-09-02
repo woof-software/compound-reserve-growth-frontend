@@ -1,6 +1,5 @@
 import React, { memo, useCallback, useMemo, useReducer } from 'react';
 
-import LineChart from '@/components/Charts/Line/Line';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
@@ -281,13 +280,14 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder onButtonClick={onClearAll} />
       ) : (
-        <LineChart
-          key={groupBy}
-          data={correctedChartSeries}
-          groupBy={groupBy}
-          className='max-h-fit'
-          barSize={barSize}
-        />
+        <div />
+        // <LineChart
+        //   key={groupBy}
+        //   data={correctedChartSeries}
+        //   groupBy={groupBy}
+        //   className='max-h-fit'
+        //   barSize={barSize}
+        // />
       )}
     </Card>
   );
