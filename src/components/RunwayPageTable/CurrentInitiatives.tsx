@@ -252,6 +252,7 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
                 <Text
                   size='13'
                   lineHeight='21'
+                  weight='500'
                   className='truncate'
                 ></Text>
               </div>
@@ -267,6 +268,7 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
                 <Text
                   size='13'
                   lineHeight='21'
+                  weight='500'
                   className='truncate'
                 >{`$${formatLargeNumber(footerData.totalValue, 2)}`}</Text>
               </div>

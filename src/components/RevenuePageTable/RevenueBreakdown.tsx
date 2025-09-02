@@ -200,6 +200,7 @@ const RevenueBreakdown = ({
                       <Text
                         size='13'
                         lineHeight='21'
+                        weight='500'
                         className='truncate'
                       >
                         {display}
