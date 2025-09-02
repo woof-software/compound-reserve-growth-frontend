@@ -510,9 +510,6 @@ const Filters = memo(
       onMoreClose();
     };
 
-    console.log('areAllSeriesHidden=>', areAllSeriesHidden);
-    console.log('showEvents=>', showEvents);
-
     return (
       <>
         <div className='block lg:hidden'>
@@ -659,7 +656,7 @@ const Filters = memo(
           </Drawer>
         </div>
         <div className='hidden lg:block'>
-          <div className='flex items-center justify-end gap-3 px-0 py-3'>
+          <div className='flex items-center justify-end gap-2 px-0 py-3'>
             <TabsGroup
               tabs={['D', 'W', 'M']}
               value={barSize}
