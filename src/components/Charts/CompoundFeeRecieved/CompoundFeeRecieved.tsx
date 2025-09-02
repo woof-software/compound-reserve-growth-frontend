@@ -2,6 +2,7 @@ import React, {
   RefObject,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState
 } from 'react';
@@ -81,6 +82,10 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
 
   const [canScrollRight, setCanScrollRight] = useState(false);
 
+  const isLastActiveLegend = useMemo(() => {
+    return hiddenItems.size === seriesData.length - 1;
+  }, [seriesData, hiddenItems]);
+
   const updateArrows = useCallback(() => {
     const el = viewportRef.current;
 
@@ -149,6 +154,15 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       (s as any).dataLabelsGroup?.attr?.({ opacity: 1 });
     });
   }, []);
+
+  const onSelectLegend = useCallback(
+    (name: string) => {
+      if (isLastActiveLegend && !hiddenItems.has(name)) return;
+
+      toggleSeriesByName(name);
+    },
+    [toggleSeriesByName, isLastActiveLegend, hiddenItems]
+  );
 
   let xAxisLabelFormat: string;
   switch (barSize) {
@@ -423,13 +437,17 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
                     key={s.name}
                     className={cn(
                       'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
-                      { 'line-through opacity-30': hiddenItems.has(s.name!) }
+                      {
+                        'line-through opacity-30': hiddenItems.has(s.name!),
+                        'cursor-not-allowed':
+                          isLastActiveLegend && !hiddenItems.has(s.name!)
+                      }
                     )}
                     onMouseEnter={() => highlightSeries(s.name!)}
                     onFocus={() => highlightSeries(s.name!)}
                     onMouseLeave={clearHighlight}
                     onBlur={clearHighlight}
-                    onClick={() => toggleSeriesByName(s.name!)}
+                    onClick={() => onSelectLegend(s.name!)}
                   >
                     <span
                       className='inline-block h-3 w-3 rounded-full'
@@ -467,13 +485,17 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
                   key={s.name}
                   className={cn(
                     'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
-                    { 'line-through opacity-30': hiddenItems.has(s.name!) }
+                    {
+                      'line-through opacity-30': hiddenItems.has(s.name!),
+                      'cursor-not-allowed':
+                        isLastActiveLegend && !hiddenItems.has(s.name!)
+                    }
                   )}
                   onMouseEnter={() => highlightSeries(s.name!)}
                   onFocus={() => highlightSeries(s.name!)}
                   onMouseLeave={clearHighlight}
                   onBlur={clearHighlight}
-                  onClick={() => toggleSeriesByName(s.name!)}
+                  onClick={() => onSelectLegend(s.name!)}
                 >
                   <span
                     className='inline-block h-3 w-3 rounded-full'

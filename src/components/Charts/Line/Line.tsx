@@ -174,6 +174,10 @@ const LineChart: FC<LineChartProps> = ({
     });
   }, [data, barSize]);
 
+  const isLastActiveLegend = useMemo(() => {
+    return hiddenItems.size === aggregatedSeries.length - 1;
+  }, [aggregatedSeries, hiddenItems]);
+
   const highlightSeries = useCallback((name: string) => {
     const chart = chartRef.current?.chart;
 
@@ -206,37 +210,42 @@ const LineChart: FC<LineChartProps> = ({
     });
   }, []);
 
-  const toggleSeriesByName = useCallback((name: string) => {
-    const chart = chartRef.current?.chart;
+  const toggleSeriesByName = useCallback(
+    (name: string) => {
+      if (isLastActiveLegend && !hiddenItems.has(name)) return;
 
-    if (!chart) return;
+      const chart = chartRef.current?.chart;
 
-    const s = chart.series.find((sr) => sr.name === name);
+      if (!chart) return;
 
-    if (!s) return;
+      const s = chart.series.find((sr) => sr.name === name);
 
-    s.setVisible(!s.visible, false);
+      if (!s) return;
 
-    chart.redraw();
+      s.setVisible(!s.visible, false);
 
-    setHiddenItems((prev) => {
-      const next = new Set(prev);
+      chart.redraw();
 
-      if (s.visible) {
-        next.delete(name);
-      } else {
-        next.add(name);
-      }
+      setHiddenItems((prev) => {
+        const next = new Set(prev);
 
-      return next;
-    });
+        if (s.visible) {
+          next.delete(name);
+        } else {
+          next.add(name);
+        }
 
-    setTimeout(() => {
-      const anyVisible = chart.series.some((sr) => sr.visible);
+        return next;
+      });
 
-      onAllSeriesHidden(!anyVisible);
-    }, 0);
-  }, []);
+      setTimeout(() => {
+        const anyVisible = chart.series.some((sr) => sr.visible);
+
+        onAllSeriesHidden(!anyVisible);
+      }, 0);
+    },
+    [isLastActiveLegend]
+  );
 
   const options: Highcharts.Options = useMemo(() => {
     const yPositions = [40, 60, 80, 100, 120, 140, 160, 180];
@@ -615,7 +624,11 @@ const LineChart: FC<LineChartProps> = ({
                     key={s.name}
                     className={cn(
                       'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
-                      { 'line-through opacity-30': hiddenItems.has(s.name!) }
+                      {
+                        'line-through opacity-30': hiddenItems.has(s.name!),
+                        'cursor-not-allowed':
+                          isLastActiveLegend && !hiddenItems.has(s.name!)
+                      }
                     )}
                     onMouseEnter={() => highlightSeries(s.name!)}
                     onFocus={() => highlightSeries(s.name!)}
@@ -659,7 +672,11 @@ const LineChart: FC<LineChartProps> = ({
                   key={s.name}
                   className={cn(
                     'text-secondary-42 flex shrink-0 gap-2.5 text-[11px] leading-none font-normal',
-                    { 'line-through opacity-30': hiddenItems.has(s.name!) }
+                    {
+                      'line-through opacity-30': hiddenItems.has(s.name!),
+                      'cursor-not-allowed':
+                        isLastActiveLegend && !hiddenItems.has(s.name!)
+                    }
                   )}
                   onMouseEnter={() => highlightSeries(s.name!)}
                   onFocus={() => highlightSeries(s.name!)}
