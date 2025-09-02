@@ -423,7 +423,6 @@ const CompoundFeeRevenueRecieved = ({
           chartRef={chartRef}
           hiddenItems={hiddenItems}
           areAllSeriesHidden={areAllSeriesHidden}
-          data={chartData}
           groupBy={groupBy}
           barSize={barSize}
           seriesData={seriesData}
