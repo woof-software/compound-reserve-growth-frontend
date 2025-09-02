@@ -552,7 +552,7 @@ const Filters = memo(
                 >
                   <Icon
                     name='3-dots'
-                    className='h-6 w-6'
+                    className='h-6 w-6 fill-none'
                   />
                 </Button>
               </div>
