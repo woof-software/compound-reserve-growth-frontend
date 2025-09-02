@@ -48,12 +48,12 @@ const GroupDrawer: FC<GroupDrawerProps> = ({
   }, [onSelect, radioValue, onClose]);
 
   const onClearAll = useCallback(() => {
-    setRadioValue('');
+    setRadioValue(options[0].accessorKey);
 
-    onSelect('');
+    onSelect(options[0].accessorKey);
 
     onClose();
-  }, [onClose, onSelect]);
+  }, [onClose, onSelect, options]);
 
   const onDrawerClose = useCallback(() => {
     setRadioValue(selectedOption);
