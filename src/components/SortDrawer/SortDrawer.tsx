@@ -34,7 +34,9 @@ const SortDrawer: FC<SortDrawerProps> = ({
   onKeySelect,
   onTypeSelect
 }) => {
-  const [tabValue, setTabValue] = useState<string>('Ascending');
+  const [tabValue, setTabValue] = useState<string>(
+    sortType?.type === 'asc' ? 'Ascending' : 'Descending'
+  );
 
   const [radioValue, setRadioValue] = useState<string>(sortType?.key || '');
 
@@ -85,10 +87,22 @@ const SortDrawer: FC<SortDrawerProps> = ({
     onClose();
   }, [onClose, onKeySelect, onTypeSelect]);
 
+  const onDrawerClose = useCallback(() => {
+    setRadioValue(sortType?.key);
+
+    setTabValue(sortType?.type === 'asc' ? 'Ascending' : 'Descending');
+
+    onKeySelect(sortType?.key);
+
+    onTypeSelect(sortType?.type);
+
+    onClose();
+  }, [onClose, onKeySelect, onTypeSelect, sortType]);
+
   return (
     <Drawer
       isOpen={isOpen}
-      onClose={onClearAll}
+      onClose={onDrawerClose}
     >
       <Text
         size='17'
