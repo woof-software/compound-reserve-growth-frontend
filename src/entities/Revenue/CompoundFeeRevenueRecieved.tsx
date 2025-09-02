@@ -615,7 +615,7 @@ const Filters = memo(
               <div className='flex w-full flex-row items-center gap-2 sm:w-auto'>
                 <TabsGroup
                   className={{
-                    container: 'w-1/2 sm:w-auto',
+                    container: 'hidden w-1/2 sm:block sm:w-auto',
                     list: 'w-full sm:w-auto'
                   }}
                   tabs={['D', 'W', 'M']}
@@ -633,11 +633,9 @@ const Filters = memo(
                   />
                   Group
                 </Button>
-              </div>
-              <div className='flex w-full flex-row items-center gap-2 sm:w-auto'>
                 <Button
                   onClick={onOpenModal}
-                  className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
+                  className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:hidden sm:w-auto md:h-8'
                 >
                   <Icon
                     name='filters'
@@ -645,6 +643,28 @@ const Filters = memo(
                   />
                   Filters
                 </Button>
+              </div>
+              <div className='flex w-full flex-row items-center gap-2 sm:w-auto'>
+                <Button
+                  onClick={onOpenModal}
+                  className='bg-secondary-27 text-gray-11 shadow-13 hidden h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:flex sm:w-auto md:h-8'
+                >
+                  <Icon
+                    name='filters'
+                    className='h-[14px] w-[14px] fill-none'
+                  />
+                  Filters
+                </Button>
+                <TabsGroup
+                  className={{
+                    container: 'block w-full sm:hidden sm:w-auto',
+                    list: 'w-full sm:w-auto'
+                  }}
+                  tabs={['D', 'W', 'M']}
+                  value={barSize}
+                  onTabChange={handleBarSizeChange}
+                  disabled={isLoading}
+                />
                 <Button
                   onClick={onMoreOpen}
                   className='bg-secondary-27 shadow-13 md:miw-w-8 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 lg:hidden'
@@ -706,7 +726,7 @@ const Filters = memo(
               <View.Condition if={isShowEyeIcon}>
                 <div className='px-3 py-2'>
                   <ChartIconToggle
-                    active={!areAllSeriesHidden}
+                    active={areAllSeriesHidden}
                     onIcon='eye'
                     offIcon='eye-closed'
                     ariaLabel='Toggle all series visibility'

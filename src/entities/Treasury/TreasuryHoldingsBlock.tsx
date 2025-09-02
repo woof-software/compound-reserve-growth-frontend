@@ -346,7 +346,7 @@ const TreasuryHoldingsBlock = ({
         header: 'rounded-t-lg'
       }}
     >
-      <div className='hidden items-center justify-end gap-3 px-10 py-3 lg:flex lg:px-0'>
+      <div className='hidden items-center justify-end gap-2 px-10 py-3 lg:flex lg:px-0'>
         <MultiSelect
           options={chainOptions || []}
           value={selectedOptions.chain}

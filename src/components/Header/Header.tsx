@@ -24,7 +24,8 @@ const navLinks = [
   {
     to: commonRoutes.INCENTIVES,
     title: routeTitles.INCENTIVES,
-    icon: 'diamond'
+    icon: 'diamond',
+    isComingSoon: true
   },
   {
     to: commonRoutes.OEV,
@@ -189,25 +190,42 @@ const Header = () => {
           <div className='flex h-full flex-col justify-center gap-2'>
             <Each
               data={navLinks}
-              render={(link, index) => (
-                <NavLink
-                  key={index}
-                  to={link.to}
-                  isActive={isActive(link.to)}
-                  onClick={onToggle}
-                >
-                  <Text
-                    className={cn('text-secondary-25 w-fit', {
-                      'text-success-11': isActive(link.to)
-                    })}
-                    size='32'
-                    lineHeight='36'
-                    weight='500'
+              render={(link, index) =>
+                link.isComingSoon ? (
+                  <div
+                    key={index}
+                    className='flex w-fit cursor-not-allowed opacity-60'
+                    onClick={(e) => e.preventDefault()}
                   >
-                    {link.title}
-                  </Text>
-                </NavLink>
-              )}
+                    <Text
+                      className='text-secondary-29 w-fit'
+                      size='32'
+                      lineHeight='36'
+                      weight='500'
+                    >
+                      {link.title}
+                    </Text>
+                  </div>
+                ) : (
+                  <NavLink
+                    key={index}
+                    to={link.to}
+                    isActive={isActive(link.to)}
+                    onClick={onToggle}
+                  >
+                    <Text
+                      className={cn('text-secondary-25 w-fit', {
+                        'text-success-11': isActive(link.to)
+                      })}
+                      size='32'
+                      lineHeight='36'
+                      weight='500'
+                    >
+                      {link.title}
+                    </Text>
+                  </NavLink>
+                )
+              }
             />
           </div>
         </aside>

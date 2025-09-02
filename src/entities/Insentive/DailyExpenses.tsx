@@ -273,7 +273,7 @@ const DailyExpenses = ({
         header: 'rounded-t-lg'
       }}
     >
-      <div className='hidden items-center justify-end gap-3 px-10 py-3 lg:flex lg:px-0'>
+      <div className='hidden items-center justify-end gap-2 px-10 py-3 lg:flex lg:px-0'>
         <TabsGroup
           tabs={['COMP', 'USD']}
           value={'COMP'}
@@ -299,7 +299,7 @@ const DailyExpenses = ({
         />
       </div>
       <div className='block lg:hidden'>
-        <div className='flex flex-wrap items-center justify-end gap-3 px-5 py-3'>
+        <div className='flex flex-wrap items-center justify-end gap-2 px-5 py-3'>
           <Button
             onClick={onFilterOpen}
             className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'

@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
@@ -62,6 +62,10 @@ const GroupDrawer: FC<GroupDrawerProps> = ({
 
     onClose();
   }, [onClose, onSelect, selectedOption]);
+
+  useEffect(() => {
+    setRadioValue(selectedOption);
+  }, [isOpen]);
 
   return (
     <Drawer

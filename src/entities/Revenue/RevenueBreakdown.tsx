@@ -440,9 +440,9 @@ const RevenueBreakDownBlock = ({
           </div>
         </div>
       </div>
-      <div className='hidden justify-end gap-3 px-10 py-3 lg:flex lg:px-0'>
-        <div className='flex items-center gap-5'>
-          <div className='flex items-center gap-1'>
+      <div className='hidden justify-end gap-2 px-10 py-3 lg:flex lg:px-0'>
+        <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-2'>
             <MultiSelect
               options={chainOptions || []}
               value={selectedOptions.chain}

@@ -598,7 +598,7 @@ const Filters = ({
               disabled={isLoading}
             />
           </div>
-          <div className='flex items-center gap-3'>
+          <div className='flex items-center gap-2'>
             <TabsGroup
               tabs={['D', 'W', 'M']}
               value={barSize}

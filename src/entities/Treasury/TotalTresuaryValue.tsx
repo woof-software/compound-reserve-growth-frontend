@@ -396,8 +396,8 @@ const TotalTresuaryValue = ({
           key={groupBy}
           data={correctedChartSeries}
           groupBy={groupBy}
+          aggregatedSeries={aggregatedSeries}
           className='max-h-fit'
-          barSize={barSize}
           chartRef={chartRef}
           isLegendEnabled={isLegendEnabled}
           eventsData={eventsData}
@@ -607,7 +607,7 @@ const Filters = memo(
               <View.Condition if={isShowEyeIcon}>
                 <div className='px-3 py-2'>
                   <ChartIconToggle
-                    active={!areAllSeriesHidden}
+                    active={areAllSeriesHidden}
                     onIcon='eye'
                     offIcon='eye-closed'
                     ariaLabel='Toggle all series visibility'
@@ -631,7 +631,7 @@ const Filters = memo(
               <View.Condition if={isShowCalendarIcon}>
                 <div className='px-3 py-2'>
                   <ChartIconToggle
-                    active={showEvents}
+                    active={!showEvents}
                     onIcon='calendar-check'
                     offIcon='calendar-uncheck'
                     ariaLabel='Toggle events'
@@ -656,7 +656,7 @@ const Filters = memo(
           </Drawer>
         </div>
         <div className='hidden lg:block'>
-          <div className='flex items-center justify-end gap-3 px-0 py-3'>
+          <div className='flex items-center justify-end gap-2 px-0 py-3'>
             <TabsGroup
               tabs={['D', 'W', 'M']}
               value={barSize}
