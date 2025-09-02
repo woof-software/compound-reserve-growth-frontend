@@ -34,13 +34,11 @@ const GroupDrawer: FC<GroupDrawerProps> = ({
   );
 
   const initApplyButtonValues = useMemo(() => {
-    return {
-      radioValue
-    };
+    return radioValue;
   }, [isOpen]);
 
   const isApplyButtonChanged = useMemo(() => {
-    return initApplyButtonValues.radioValue !== radioValue;
+    return initApplyButtonValues !== radioValue;
   }, [initApplyButtonValues, radioValue]);
 
   const onApply = useCallback(() => {
@@ -57,10 +55,18 @@ const GroupDrawer: FC<GroupDrawerProps> = ({
     onClose();
   }, [onClose, onSelect]);
 
+  const onDrawerClose = useCallback(() => {
+    setRadioValue(selectedOption);
+
+    onSelect(selectedOption);
+
+    onClose();
+  }, [onClose, onSelect, selectedOption]);
+
   return (
     <Drawer
       isOpen={isOpen}
-      onClose={onClearAll}
+      onClose={onDrawerClose}
     >
       <Text
         size='17'
