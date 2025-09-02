@@ -511,26 +511,28 @@ const CompoundFeeRevenueByChain = ({
             />
           </div>
         </div>
-        <Button
-          onClick={onGroupByOpen}
-          className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
-        >
-          <Icon
-            name='group-grid'
-            className='h-[14px] w-[14px] fill-none'
-          />
-          Group
-        </Button>
-        <Button
-          onClick={onSortOpen}
-          className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
-        >
-          <Icon
-            name='sort-icon'
-            className='h-[14px] w-[14px]'
-          />
-          Sort
-        </Button>
+        <div className='flex w-full items-center justify-end gap-2 lg:hidden'>
+          <Button
+            onClick={onGroupByOpen}
+            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
+          >
+            <Icon
+              name='group-grid'
+              className='h-[14px] w-[14px] fill-none'
+            />
+            Group
+          </Button>
+          <Button
+            onClick={onSortOpen}
+            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
+          >
+            <Icon
+              name='sort-icon'
+              className='h-[14px] w-[14px]'
+            />
+            Sort
+          </Button>
+        </div>
       </div>
       {!isLoading && !isError && !hasData ? (
         <div className='flex h-[400px] items-center justify-center'>
