@@ -234,7 +234,7 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
             <div className='border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-t p-5 md:gap-x-[63px] md:px-10'>
               <div className='grid min-h-[39px] w-full max-w-[100px]'>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -244,7 +244,7 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
               </div>
               <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -257,7 +257,7 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
               </div>
               <div className='grid w-full max-w-[100px]'>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'

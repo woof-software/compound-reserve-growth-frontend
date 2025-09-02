@@ -123,7 +123,7 @@ const CompoundFeeRevenuebyChain = ({
                     className='grid w-full max-w-[100px]'
                   >
                     <Text
-                      size='11'
+                      size='13'
                       lineHeight='18'
                       weight='500'
                       className='text-primary-14'
@@ -153,7 +153,7 @@ const CompoundFeeRevenuebyChain = ({
             >
               <div className='grid min-h-[39px] w-full max-w-[100px]'>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -186,7 +186,7 @@ const CompoundFeeRevenuebyChain = ({
                         {columnKey}
                       </Text>
                       <Text
-                        size='11'
+                        size='13'
                         lineHeight='21'
                         weight='500'
                       >
@@ -207,7 +207,7 @@ const CompoundFeeRevenuebyChain = ({
                     className='grid min-h-[39px] w-full max-w-[100px]'
                   >
                     <Text
-                      size='11'
+                      size='13'
                       lineHeight='18'
                       weight='500'
                       className='text-primary-14'
