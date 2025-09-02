@@ -232,7 +232,7 @@ const CurrentSpendingByChain = ({
           headerCellClassName='py-[13px] px-[5px]'
           cellClassName='py-3 px-[5px]'
           headerTextClassName='text-primary-14 font-medium'
-          paginationClassName='py-[13px] px-[5px]'
+          paginationClassName='py-0 px-[5px]'
         />
       </div>
     </>
