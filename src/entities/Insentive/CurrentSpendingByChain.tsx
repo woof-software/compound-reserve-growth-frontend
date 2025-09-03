@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useReducer, useState } from 'react';
+import { CSVLink } from 'react-csv';
 
 import CryptoChart from '@/components/Charts/Bar/Bar';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
@@ -18,8 +19,10 @@ import { TokenData } from '@/shared/types/Treasury/types';
 import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
 interface CurrentSpendingByChainBlockProps {
@@ -83,6 +86,12 @@ const CurrentSpendingByChainBlock = ({
     isOpen: isSortOpen,
     onOpenModal: onSortOpen,
     onCloseModal: onSortClose
+  } = useModal();
+
+  const {
+    isOpen: isMoreOpen,
+    onOpenModal: onMoreOpen,
+    onCloseModal: onMoreClose
   } = useModal();
 
   const [tabValue, setTabValue] = useState<string>('Borrow Incentive');
@@ -355,12 +364,10 @@ const CurrentSpendingByChainBlock = ({
       }}
     >
       <div className='hidden items-center justify-end gap-2 px-10 py-3 lg:flex lg:px-0'>
-        <MultiSelect
-          options={deploymentOptionsFilter}
-          value={selectedOptions.deployment}
-          onChange={onSelectMarket}
-          placeholder='Source'
-          disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
+        <TabsGroup
+          tabs={['Lend', 'Borrow', 'Total']}
+          value={tabValue}
+          onTabChange={onTabsChange}
         />
         <MultiSelect
           options={chainOptions || []}
@@ -369,10 +376,12 @@ const CurrentSpendingByChainBlock = ({
           placeholder='Chain'
           disabled={isLoading}
         />
-        <TabsGroup
-          tabs={['Lend Incentive', 'Borrow Incentive', 'Total']}
-          value={tabValue}
-          onTabChange={onTabsChange}
+        <MultiSelect
+          options={deploymentOptionsFilter}
+          value={selectedOptions.deployment}
+          onChange={onSelectMarket}
+          placeholder='Market'
+          disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
         />
         <CSVDownloadButton
           data={tableData}
@@ -380,27 +389,57 @@ const CurrentSpendingByChainBlock = ({
         />
       </div>
       <div className='block px-5 py-3 lg:hidden'>
-        <div className='flex flex-wrap items-center justify-end gap-2'>
-          <Button
-            onClick={onFilterOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
-          >
-            <Icon
-              name='filters'
-              className='h-[14px] w-[14px] fill-none'
+        <div className='flex flex-col items-center justify-end gap-2 sm:flex-row'>
+          <TabsGroup
+            className={{
+              container: 'hidden sm:block'
+            }}
+            tabs={['Lend', 'Borrow', 'Total']}
+            value={tabValue}
+            onTabChange={onTabsChange}
+          />
+          <div className='flex w-full items-center gap-2 sm:w-auto'>
+            <Button
+              onClick={onFilterOpen}
+              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
+            >
+              <Icon
+                name='filters'
+                className='h-[14px] w-[14px] fill-none'
+              />
+              Filters
+            </Button>
+            <Button
+              onClick={onSortOpen}
+              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
+            >
+              <Icon
+                name='sort-icon'
+                className='h-[14px] w-[14px]'
+              />
+              Sort
+            </Button>
+          </div>
+          <div className='flex w-full items-center gap-2 sm:w-auto'>
+            <TabsGroup
+              className={{
+                container: 'block w-full sm:hidden sm:w-auto',
+                list: 'w-full sm:w-auto'
+              }}
+              tabs={['Lend', 'Borrow', 'Total']}
+              value={tabValue}
+              onTabChange={onTabsChange}
             />
-            Filters
-          </Button>
-          <Button
-            onClick={onSortOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
-          >
-            <Icon
-              name='sort-icon'
-              className='h-[14px] w-[14px]'
-            />
-            Sort
-          </Button>
+            <Button
+              onClick={onMoreOpen}
+              className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
+            >
+              <Icon
+                name='3-dots'
+                className='h-6 w-6 fill-none'
+              />
+            </Button>
+          </div>
         </div>
         <SortDrawer
           isOpen={isSortOpen}
@@ -416,6 +455,41 @@ const CurrentSpendingByChainBlock = ({
           onClose={onFilterClose}
           onClearAll={onClearFilters}
         />
+        <Drawer
+          isOpen={isMoreOpen}
+          onClose={onMoreClose}
+        >
+          <Text
+            size='17'
+            weight='700'
+            align='center'
+            className='mb-5'
+          >
+            Actions
+          </Text>
+          <div className='flex flex-col gap-1.5'>
+            <div className='px-3 py-2'>
+              <CSVLink
+                data={tableData}
+                filename='Full Treasury Holdings'
+                onClick={onMoreClose}
+              >
+                <div className='flex items-center gap-1.5'>
+                  <Icon
+                    name='download'
+                    className='h-[26px] w-[26px]'
+                  />
+                  <Text
+                    size='14'
+                    weight='500'
+                  >
+                    CSV with the entire historical data
+                  </Text>
+                </div>
+              </CSVLink>
+            </div>
+          </div>
+        </Drawer>
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
