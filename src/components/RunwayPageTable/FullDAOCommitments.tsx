@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
+import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
+  capitalizeFirstLetter,
   formatDateWithOrdinal,
   formatLargeNumber
 } from '@/shared/lib/utils/utils';
@@ -28,6 +30,8 @@ export interface FullDAOCommitmentRow {
 
 interface FullDAOCommitmentsProps {
   data: FullDAOCommitmentRow[];
+
+  sortType: { key: string; type: string };
 }
 
 const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
@@ -49,7 +53,14 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
         );
       }
 
-      return <Text size='13'>{initiative}</Text>;
+      return (
+        <Text
+          size='13'
+          weight='500'
+        >
+          {initiative}
+        </Text>
+      );
     }
   },
   {
@@ -163,24 +174,230 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
   }
 ];
 
-const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({ data }) => {
+const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
+  data,
+  sortType
+}) => {
+  const mobileTableData = useMemo(() => {
+    if (!sortType?.key) {
+      return data;
+    }
+
+    const key = sortType.key as keyof FullDAOCommitmentRow;
+    return [...data].sort((a, b) => {
+      const aVal = a[key];
+      const bVal = b[key];
+
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortType.type === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortType.type === 'asc'
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+
+      return 0;
+    });
+  }, [data, sortType]);
+
   return (
-    <DataTable
-      data={data}
-      columns={columns}
-      pageSize={10}
-      className={cn('flex flex-col justify-between', {
-        'min-h-[565px]': data.length > 10
-      })}
-      containerTableClassName='min-h-[473px]'
-      headerCellClassName='py-[13px] px-[5px]'
-      cellClassName='py-3 px-[5px]'
-      headerTextClassName='text-primary-14 font-medium'
-      enableSorting
-      enablePagination
-      paginationClassName='py-[13px] px-[5px]'
-      initialSort={{ id: 'startDate', desc: true }}
-    />
+    <>
+      <MobileDataTable tableData={mobileTableData}>
+        {(dataRows) =>
+          dataRows.map((row, index) => (
+            <div
+              key={row.token + index}
+              className={cn(
+                'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                {
+                  'border-none': index === dataRows.length - 1
+                }
+              )}
+            >
+              <div className='grid w-full max-w-[100px]'>
+                <Text
+                  size='11'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  Recipient
+                </Text>
+                <Text
+                  size='13'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {row.recipient}
+                </Text>
+              </div>
+              <div className='grid w-full max-w-[100px]'>
+                <Text
+                  size='11'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  Discipline
+                </Text>
+                <Text
+                  size='13'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {row.discipline}
+                </Text>
+              </div>
+              <div className='grid w-full max-w-[100px]'>
+                <Text
+                  size='11'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  Status
+                </Text>
+                <Text
+                  size='13'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {capitalizeFirstLetter(row.status, '-')}
+                </Text>
+              </div>
+              <div className='grid w-full max-w-[100px]'>
+                <Text
+                  size='11'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  Total Amount
+                </Text>
+                <Text
+                  size='13'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {row.amount ? `$${formatLargeNumber(row.amount, 2)}` : '-'}
+                </Text>
+              </div>
+              <div className='grid w-full max-w-[100px]'>
+                <Text
+                  size='11'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  Paid Amount
+                </Text>
+                <Text
+                  size='13'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {row.amount
+                    ? `$${formatLargeNumber(row.paidAmount, 2)}`
+                    : '-'}
+                </Text>
+              </div>
+              <div className='grid w-full max-w-[100px]'>
+                <Text
+                  size='11'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  % Paid
+                </Text>
+                <Text
+                  size='13'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {row.percentagePaid
+                    ? `${(row.percentagePaid * 100).toFixed(2)}%`
+                    : '-'}
+                </Text>
+              </div>
+              <div className='grid w-full max-w-[100px]'>
+                <Text
+                  size='11'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  Payment Type
+                </Text>
+                <Text
+                  size='13'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {row.paymentType}
+                </Text>
+              </div>
+              <div className='grid w-full max-w-[100px]'>
+                <Text
+                  size='11'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  Start Date
+                </Text>
+                <Text
+                  size='13'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {row.startDate ? formatDateWithOrdinal(row.startDate) : '-'}
+                </Text>
+              </div>
+              <div className='grid w-full max-w-[100px]'>
+                <Text
+                  size='11'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  End Date
+                </Text>
+                <Text
+                  size='13'
+                  lineHeight='21'
+                  className='truncate'
+                >
+                  {row.streamEndDate
+                    ? formatDateWithOrdinal(row.streamEndDate)
+                    : '-'}
+                </Text>
+              </div>
+            </div>
+          ))
+        }
+      </MobileDataTable>
+      <div className='hidden w-full max-w-full lg:block'>
+        <DataTable
+          data={data}
+          columns={columns}
+          pageSize={10}
+          className={cn('flex flex-col justify-between', {
+            'min-h-[505px]': data.length > 10
+          })}
+          containerTableClassName='min-h-[473px]'
+          headerCellClassName='py-[13px] px-[5px]'
+          cellClassName='py-3 px-[5px]'
+          headerTextClassName='text-primary-14 font-medium'
+          enableSorting
+          enablePagination={data.length > 10}
+          paginationClassName='py-0 px-[5px]'
+          initialSort={{ id: 'startDate', desc: true }}
+        />
+      </div>
+    </>
   );
 };
 

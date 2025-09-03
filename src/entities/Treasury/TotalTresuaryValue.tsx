@@ -1,20 +1,34 @@
-import React, { useCallback, useMemo, useReducer } from 'react';
+import React, { memo, useCallback, useMemo, useReducer } from 'react';
+import { CSVLink } from 'react-csv';
 
+import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import LineChart from '@/components/Charts/Line/Line';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
+import Filter from '@/components/Filter/Filter';
+import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
-import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
+import { useLineChart } from '@/shared/hooks/useLineChart';
+import { useModal } from '@/shared/hooks/useModal';
+import {
+  ChartDataItem,
+  extractFilterOptions,
+  groupOptionsDto
+} from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
-import { OptionType } from '@/shared/types/types';
+import { BarSize, OptionType } from '@/shared/types/types';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
+import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
 
@@ -29,6 +43,72 @@ interface TotalTreasuryValueProps {
   isError?: boolean;
   data?: TokenData[];
   onCopyLink?: (id: string) => void;
+}
+
+interface FiltersProps {
+  chainOptions: OptionType[];
+
+  deploymentOptionsFilter: OptionType[];
+
+  assetTypeOptions: OptionType[];
+
+  symbolOptions: OptionType[];
+
+  barSize: BarSize;
+
+  showEvents: boolean;
+
+  isLoading: boolean;
+
+  isOpenSingle: boolean;
+
+  groupBy: string;
+
+  csvFilename: string;
+
+  isShowEyeIcon: boolean;
+
+  isShowCalendarIcon: boolean;
+
+  csvData: Record<string, string | number>[];
+
+  areAllSeriesHidden: boolean;
+
+  selectedOptions: {
+    chain: OptionType[];
+
+    assetType: OptionType[];
+
+    deployment: OptionType[];
+
+    symbol: OptionType[];
+  };
+
+  onSelectChain: (chain: OptionType[]) => void;
+
+  onSelectAssetType: (assetType: OptionType[]) => void;
+
+  onSelectMarket: (deployment: OptionType[]) => void;
+
+  onSelectSymbol: (symbol: OptionType[]) => void;
+
+  handleBarSizeChange: (value: string) => void;
+
+  openSingleDropdown: () => void;
+
+  closeSingle: () => void;
+
+  onClearAll: () => void;
+
+  onSelectAll: () => void;
+
+  onDeselectAll: () => void;
+
+  selectSingle: (value: string) => void;
+
+  selectSingleClose: (value: string) => void;
+
+  onShowEvents: (value: boolean) => void;
 }
 
 const TotalTresuaryValue = ({
@@ -50,22 +130,15 @@ const TotalTresuaryValue = ({
   );
 
   const {
-    open: openSingle,
+    isOpen: isOpenSingle,
     selectedValue: selectedSingle,
-    toggle: toggleSingle,
     close: closeSingle,
-    select: selectSingle
+    open: openSingleDropdown,
+    select: selectSingle,
+    selectClose: selectSingleClose
   } = useDropdown('single');
 
-  const {
-    activeTab,
-    barSize,
-    barCount,
-    handleTabChange,
-    handleResetActiveTab,
-    handleBarSizeChange
-  } = useChartControls({
-    initialTimeRange: '7B',
+  const { barSize, handleBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
 
@@ -209,6 +282,24 @@ const TotalTresuaryValue = ({
     );
   }, [correctedChartSeries]);
 
+  const {
+    chartRef,
+    eventsData,
+    showEvents,
+    isLegendEnabled,
+    aggregatedSeries,
+    areAllSeriesHidden,
+    onAllSeriesHidden,
+    onEventsData,
+    onShowEvents,
+    onSelectAll,
+    onDeselectAll
+  } = useLineChart({
+    groupBy,
+    data: correctedChartSeries,
+    barSize
+  });
+
   const onSelectChain = useCallback(
     (chain: OptionType[]) => {
       const selectedChainIds = chain.map((o) => o.id);
@@ -264,82 +355,40 @@ const TotalTresuaryValue = ({
       id='total-treasury-value'
       className={{
         loading: 'min-h-[inherit]',
-        container: 'min-h-[571px]',
-        content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
+        container: 'min-h-[571px] rounded-lg',
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-5 lg:px-10 lg:pb-10'
       }}
     >
-      <div className='flex items-center justify-end gap-3 px-0 py-3'>
-        <MultiSelect
-          options={chainOptions || []}
-          value={selectedOptions.chain}
-          onChange={onSelectChain}
-          placeholder='Chain'
-          disabled={isLoading}
-        />
-        <MultiSelect
-          options={deploymentOptionsFilter}
-          value={selectedOptions.deployment}
-          onChange={onSelectMarket}
-          placeholder='Market'
-          disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-        />
-        <MultiSelect
-          options={
-            assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-            []
-          }
-          value={selectedOptions.assetType}
-          onChange={onSelectAssetType}
-          placeholder='Asset Type'
-          disabled={isLoading}
-        />
-        <MultiSelect
-          options={
-            symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || []
-          }
-          value={selectedOptions.symbol}
-          onChange={onSelectSymbol}
-          placeholder='Reserve Symbols'
-          disabled={isLoading}
-        />
-        <TabsGroup
-          tabs={['D', 'W', 'M']}
-          value={barSize}
-          onTabChange={handleBarSizeChange}
-          disabled={isLoading}
-        />
-        <TabsGroup
-          tabs={['7B', '30B', '90B', '180B']}
-          value={activeTab}
-          onTabChange={handleTabChange}
-          disabled={isLoading}
-        />
-        <div className='flex items-center gap-1'>
-          <Text
-            tag='span'
-            size='11'
-            weight='600'
-            lineHeight='16'
-            className='text-primary-14'
-          >
-            Group by
-          </Text>
-          <SingleDropdown
-            options={groupByOptions}
-            isOpen={openSingle}
-            selectedValue={groupBy}
-            onToggle={toggleSingle}
-            onClose={closeSingle}
-            onSelect={selectSingle}
-            disabled={isLoading}
-            triggerContentClassName='p-[5px]'
-          />
-        </div>
-        <CSVDownloadButton
-          data={csvData}
-          filename={csvFilename}
-        />
-      </div>
+      <Filters
+        groupBy={groupBy}
+        showEvents={showEvents}
+        areAllSeriesHidden={areAllSeriesHidden}
+        isShowCalendarIcon={Boolean(eventsData.length > 0)}
+        isShowEyeIcon={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
+        assetTypeOptions={assetTypeOptions}
+        selectedOptions={selectedOptions}
+        chainOptions={chainOptions}
+        symbolOptions={symbolOptions}
+        deploymentOptionsFilter={deploymentOptionsFilter}
+        isLoading={isLoading || false}
+        barSize={barSize}
+        csvData={csvData}
+        csvFilename={csvFilename}
+        isOpenSingle={isOpenSingle}
+        onSelectChain={onSelectChain}
+        onSelectAssetType={onSelectAssetType}
+        onSelectMarket={onSelectMarket}
+        onSelectSymbol={onSelectSymbol}
+        handleBarSizeChange={handleBarSizeChange}
+        openSingleDropdown={openSingleDropdown}
+        closeSingle={closeSingle}
+        selectSingle={selectSingle}
+        selectSingleClose={selectSingleClose}
+        onClearAll={onClearAll}
+        onSelectAll={onSelectAll}
+        onDeselectAll={onDeselectAll}
+        onShowEvents={onShowEvents}
+      />
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder onButtonClick={onClearAll} />
       ) : (
@@ -347,14 +396,340 @@ const TotalTresuaryValue = ({
           key={groupBy}
           data={correctedChartSeries}
           groupBy={groupBy}
-          className='max-h-[400px]'
-          barSize={barSize}
-          barCountToSet={barCount}
-          onZoom={handleResetActiveTab}
+          aggregatedSeries={aggregatedSeries}
+          className='max-h-fit'
+          chartRef={chartRef}
+          isLegendEnabled={isLegendEnabled}
+          eventsData={eventsData}
+          showEvents={showEvents}
+          areAllSeriesHidden={areAllSeriesHidden}
+          onAllSeriesHidden={onAllSeriesHidden}
+          onSelectAll={onSelectAll}
+          onDeselectAll={onDeselectAll}
+          onShowEvents={onShowEvents}
+          onEventsData={onEventsData}
         />
       )}
     </Card>
   );
 };
+
+const Filters = memo(
+  ({
+    barSize,
+    isOpenSingle,
+    isShowEyeIcon,
+    isShowCalendarIcon,
+    showEvents,
+    groupBy,
+    csvData,
+    csvFilename,
+    areAllSeriesHidden,
+    chainOptions,
+    selectedOptions,
+    deploymentOptionsFilter,
+    assetTypeOptions,
+    symbolOptions,
+    isLoading,
+    onSelectChain,
+    onSelectAssetType,
+    onSelectMarket,
+    onSelectSymbol,
+    handleBarSizeChange,
+    openSingleDropdown,
+    closeSingle,
+    selectSingle,
+    selectSingleClose,
+    onClearAll,
+    onSelectAll,
+    onDeselectAll,
+    onShowEvents
+  }: FiltersProps) => {
+    const { isOpen, onOpenModal, onCloseModal } = useModal();
+
+    const {
+      isOpen: isMoreOpen,
+      onOpenModal: onMoreOpen,
+      onCloseModal: onMoreClose
+    } = useModal();
+
+    const filterOptions = useMemo(() => {
+      const chainFilterOptions = {
+        id: 'chain',
+        placeholder: 'Chain',
+        total: selectedOptions.chain.length,
+        selectedOptions: selectedOptions.chain,
+        options: chainOptions || [],
+        onChange: onSelectChain
+      };
+
+      const marketFilterOptions = {
+        id: 'market',
+        placeholder: 'Market',
+        total: selectedOptions.deployment.length,
+        selectedOptions: selectedOptions.deployment,
+        options: deploymentOptionsFilter || [],
+        onChange: onSelectMarket
+      };
+
+      const assetTypeFilterOptions = {
+        id: 'assetType',
+        placeholder: 'Asset Type',
+        total: selectedOptions.assetType.length,
+        selectedOptions: selectedOptions.assetType,
+        options:
+          assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+          [],
+        onChange: onSelectAssetType
+      };
+
+      return [chainFilterOptions, marketFilterOptions, assetTypeFilterOptions];
+    }, [
+      assetTypeOptions,
+      chainOptions,
+      deploymentOptionsFilter,
+      onSelectAssetType,
+      onSelectChain,
+      onSelectMarket,
+      selectedOptions
+    ]);
+
+    const onEyeClick = () => {
+      if (areAllSeriesHidden) {
+        onSelectAll();
+      } else {
+        onDeselectAll();
+      }
+
+      onMoreClose();
+    };
+
+    const onCalendarClick = () => {
+      onShowEvents(!showEvents);
+
+      onMoreClose();
+    };
+
+    return (
+      <>
+        <div className='block lg:hidden'>
+          <div className='flex flex-col justify-end gap-2 px-5 py-3 md:px-0 lg:px-5'>
+            <div className='flex flex-col-reverse items-center justify-end gap-2 sm:flex-row'>
+              <TabsGroup
+                className={{
+                  container: 'w-full sm:w-auto',
+                  list: 'w-full sm:w-auto'
+                }}
+                tabs={['D', 'W', 'M']}
+                value={barSize}
+                onTabChange={handleBarSizeChange}
+                disabled={isLoading}
+              />
+              <div className='flex w-full items-center gap-2 sm:w-auto'>
+                <Button
+                  onClick={openSingleDropdown}
+                  className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
+                >
+                  <Icon
+                    name='group-grid'
+                    className='h-[14px] w-[14px] fill-none'
+                  />
+                  Group
+                </Button>
+                <Button
+                  onClick={onOpenModal}
+                  className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
+                >
+                  <Icon
+                    name='filters'
+                    className='h-[14px] w-[14px] fill-none'
+                  />
+                  Filters
+                </Button>
+                <Button
+                  onClick={onMoreOpen}
+                  className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
+                >
+                  <Icon
+                    name='3-dots'
+                    className='h-6 w-6 fill-none'
+                  />
+                </Button>
+              </div>
+            </div>
+          </div>
+          <Filter
+            isOpen={isOpen}
+            filterOptions={filterOptions}
+            onClose={onCloseModal}
+            onClearAll={onClearAll}
+          />
+          <GroupDrawer
+            isOpen={isOpenSingle}
+            selectedOption={groupBy}
+            options={groupOptionsDto(groupByOptions)}
+            onClose={closeSingle}
+            onSelect={selectSingle}
+          />
+          <Drawer
+            isOpen={isMoreOpen}
+            onClose={onMoreClose}
+          >
+            <Text
+              size='17'
+              weight='700'
+              align='center'
+              className='mb-5'
+            >
+              Actions
+            </Text>
+            <div className='flex flex-col gap-1.5'>
+              <div className='px-3 py-2'>
+                <CSVLink
+                  data={csvData}
+                  filename={csvFilename}
+                  onClick={onMoreClose}
+                >
+                  <div className='flex items-center gap-1.5'>
+                    <Icon
+                      name='download'
+                      className='h-[26px] w-[26px]'
+                    />
+                    <Text
+                      size='14'
+                      weight='500'
+                    >
+                      CSV with the entire historical data
+                    </Text>
+                  </div>
+                </CSVLink>
+              </div>
+              <View.Condition if={isShowEyeIcon}>
+                <div className='px-3 py-2'>
+                  <ChartIconToggle
+                    active={areAllSeriesHidden}
+                    onIcon='eye'
+                    offIcon='eye-closed'
+                    ariaLabel='Toggle all series visibility'
+                    className={{
+                      container:
+                        'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
+                      icon: 'h-[26px] w-[26px]',
+                      iconContainer: 'h-[26px] w-[26px]'
+                    }}
+                    onClick={onEyeClick}
+                  >
+                    <Text
+                      size='14'
+                      weight='500'
+                    >
+                      Unselect All
+                    </Text>
+                  </ChartIconToggle>
+                </div>
+              </View.Condition>
+              <View.Condition if={isShowCalendarIcon}>
+                <div className='px-3 py-2'>
+                  <ChartIconToggle
+                    active={!showEvents}
+                    onIcon='calendar-check'
+                    offIcon='calendar-uncheck'
+                    ariaLabel='Toggle events'
+                    className={{
+                      container:
+                        'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
+                      icon: 'h-[26px] w-[26px]',
+                      iconContainer: 'h-[26px] w-[26px]'
+                    }}
+                    onClick={onCalendarClick}
+                  >
+                    <Text
+                      size='14'
+                      weight='500'
+                    >
+                      Hide Events
+                    </Text>
+                  </ChartIconToggle>
+                </div>
+              </View.Condition>
+            </div>
+          </Drawer>
+        </div>
+        <div className='hidden lg:block'>
+          <div className='flex items-center justify-end gap-2 px-0 py-3'>
+            <TabsGroup
+              tabs={['D', 'W', 'M']}
+              value={barSize}
+              onTabChange={handleBarSizeChange}
+              disabled={isLoading}
+            />
+            <MultiSelect
+              options={chainOptions || []}
+              value={selectedOptions.chain}
+              onChange={onSelectChain}
+              placeholder='Chain'
+              disabled={isLoading}
+            />
+            <MultiSelect
+              options={deploymentOptionsFilter}
+              value={selectedOptions.deployment}
+              onChange={onSelectMarket}
+              placeholder='Market'
+              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
+            />
+            <MultiSelect
+              options={
+                assetTypeOptions?.sort((a, b) =>
+                  a.label.localeCompare(b.label)
+                ) || []
+              }
+              value={selectedOptions.assetType}
+              onChange={onSelectAssetType}
+              placeholder='Asset Type'
+              disabled={isLoading}
+            />
+            <MultiSelect
+              options={
+                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+                []
+              }
+              value={selectedOptions.symbol}
+              onChange={onSelectSymbol}
+              placeholder='Reserve Symbols'
+              disabled={isLoading}
+            />
+            <div className='flex items-center gap-1'>
+              <Text
+                tag='span'
+                size='11'
+                weight='600'
+                lineHeight='16'
+                className='text-primary-14'
+              >
+                Group by
+              </Text>
+              <SingleDropdown
+                options={groupByOptions}
+                isOpen={isOpenSingle}
+                selectedValue={groupBy}
+                onOpen={openSingleDropdown}
+                onClose={closeSingle}
+                onSelect={(value: string) => {
+                  selectSingleClose(value);
+                }}
+                disabled={isLoading}
+                triggerContentClassName='p-[5px]'
+              />
+            </div>
+            <CSVDownloadButton
+              data={csvData}
+              filename={csvFilename}
+            />
+          </div>
+        </div>
+      </>
+    );
+  }
+);
 
 export default TotalTresuaryValue;

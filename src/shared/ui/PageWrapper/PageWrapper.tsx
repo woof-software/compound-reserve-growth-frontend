@@ -1,10 +1,6 @@
 import { FC, HTMLAttributes, ReactNode } from 'react';
 
-import BreakPointBlock from '@/components/BreakPointBlock';
-import { useMediaWidth } from '@/shared/hooks/useMediaWidth';
 import { cn } from '@/shared/lib/classNames/classNames';
-
-import View from '../View/View';
 
 export interface PageWrapperProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
@@ -17,25 +13,16 @@ const PageWrapper: FC<PageWrapperProps> = ({
   maxWidth = 1084,
   ...props
 }) => {
-  const { width } = useMediaWidth();
-
   return (
-    <>
-      <View.Condition if={width < 1090}>
-        <BreakPointBlock />
-      </View.Condition>
-      <View.Condition if={width >= 1090}>
-        <div
-          className={cn(
-            `max-w-[${maxWidth}px] mx-auto flex min-h-screen flex-col`,
-            className
-          )}
-          {...props}
-        >
-          {children}
-        </div>
-      </View.Condition>
-    </>
+    <div
+      className={cn(
+        `hide-scrollbar mx-auto flex max-w-[${maxWidth}px] min-h-screen w-full flex-col px-1 md:px-4`,
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
   );
 };
 

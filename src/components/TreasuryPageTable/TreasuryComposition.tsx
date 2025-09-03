@@ -1,9 +1,13 @@
 import { useMemo } from 'react';
+import * as React from 'react';
 
+import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { cn } from '@/shared/lib/classNames/classNames';
 import { formatPrice } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 export interface TreasuryCompositionType {
   id: number;
@@ -17,6 +21,7 @@ interface TreasuryCompositionProps {
   tableData: TreasuryCompositionType[];
   totalBalance: number;
   activeFilter: 'Chain' | 'Asset Type' | 'Market';
+  sortType: { key: string; type: string };
 }
 
 const filterConfig = {
@@ -38,6 +43,7 @@ const filterConfig = {
 };
 
 const TreasuryComposition = ({
+  sortType,
   tableData,
   totalBalance,
   activeFilter
@@ -51,12 +57,19 @@ const TreasuryComposition = ({
         header: 'Asset',
         cell: ({ row }) => (
           <div className='flex items-center gap-3'>
-            <Icon
-              name={config.getIconName(row.original)}
-              className='h-6 w-6'
-              folder={config.folder}
-            />
-            <Text size='13'>{row.original.name}</Text>
+            <View.Condition if={activeFilter !== 'Market'}>
+              <Icon
+                name={config.getIconName(row.original)}
+                className='h-6 w-6'
+                folder={config.folder}
+              />
+            </View.Condition>
+            <Text
+              size='13'
+              weight='500'
+            >
+              {row.original.name}
+            </Text>
           </div>
         )
       },
@@ -77,32 +90,142 @@ const TreasuryComposition = ({
     ];
   }, [activeFilter]);
 
+  const mobileTableData = useMemo(() => {
+    if (!sortType?.key) {
+      return tableData;
+    }
+
+    const key = sortType.key as keyof TreasuryCompositionType;
+    return [...tableData].sort((a, b) => {
+      const aVal = a[key];
+      const bVal = b[key];
+
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortType.type === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortType.type === 'asc'
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+
+      return 0;
+    });
+  }, [tableData, sortType]);
+
   return (
-    <div className='max-h-[400px] w-full max-w-[522px] overflow-y-auto'>
-      <DataTable
-        data={tableData}
-        columns={columns}
-        pageSize={10}
-        enableSorting={true}
-        headerCellClassName='py-[13px] px-[5px]'
-        cellClassName='py-3 px-[5px]'
-        headerTextClassName='text-primary-14 font-medium'
-      />
-      <div className='flex items-center justify-between px-[5px] py-3'>
-        <Text
-          size='11'
-          className='text-primary-14'
-        >
-          Total Balance
-        </Text>
-        <Text
-          size='11'
-          className='text-primary-14'
-        >
-          {formatPrice(totalBalance, 1)}
-        </Text>
+    <>
+      <MobileDataTable
+        className='md:hidden'
+        tableData={mobileTableData}
+      >
+        {(dataRows) => (
+          <>
+            {dataRows.map((row, index) => (
+              <div
+                key={row.name + index}
+                className={cn(
+                  'border-secondary-23 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b p-5 md:gap-x-[63px]',
+                  {
+                    'pt-0': index === 0
+                  }
+                )}
+              >
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14 min-w-[100px]'
+                  >
+                    Asset
+                  </Text>
+                  <div className='flex items-center gap-1'>
+                    <View.Condition if={activeFilter !== 'Market'}>
+                      <Icon
+                        name={filterConfig[activeFilter].getIconName(row)}
+                        className='h-4 w-4'
+                        folder={filterConfig[activeFilter].folder}
+                      />
+                    </View.Condition>
+                    <Text
+                      size='13'
+                      lineHeight='21'
+                      className='truncate'
+                    >
+                      {row.name}
+                    </Text>
+                  </div>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Total Balance USD
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {formatPrice(row.balance, 1)}
+                  </Text>
+                </div>
+              </div>
+            ))}
+            <div className='flex w-full items-center justify-between px-6 py-5'>
+              <Text
+                size='13'
+                lineHeight='18'
+                weight='500'
+                className='text-primary-14 min-w-[100px]'
+              >
+                Total Balance
+              </Text>
+              <Text
+                size='13'
+                lineHeight='21'
+                weight='500'
+                className='text-primary-14 min-w-[100px] truncate'
+              >
+                {formatPrice(totalBalance, 1)}
+              </Text>
+            </div>
+          </>
+        )}
+      </MobileDataTable>
+      <div className='hide-scrollbar hidden max-h-[400px] w-full max-w-full overflow-y-auto md:block md:max-w-2/5 lg:max-w-[522px]'>
+        <DataTable
+          data={tableData}
+          columns={columns}
+          pageSize={10}
+          enableSorting={true}
+          headerCellClassName='py-[13px] px-[5px]'
+          cellClassName='py-3 px-[5px] !font-medium'
+          headerTextClassName='text-primary-14'
+        />
+        <div className='flex items-center justify-between px-[5px] py-3'>
+          <Text
+            size='13'
+            weight='500'
+            className='text-primary-14'
+          >
+            Total Balance
+          </Text>
+          <Text
+            size='13'
+            weight='500'
+            className='text-primary-14'
+          >
+            {formatPrice(totalBalance, 1)}
+          </Text>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

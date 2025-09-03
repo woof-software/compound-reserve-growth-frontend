@@ -1,18 +1,31 @@
-import { memo, useCallback, useMemo, useReducer, useState } from 'react';
+import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
+import { CSVLink } from 'react-csv';
 
+import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/CompoundFeeRecieved';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
+import Filter from '@/components/Filter/Filter';
+import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
 import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useCompoundReceivedBars } from '@/shared/hooks/useCompoundReceivedBars';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
+import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
-import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
-import { OptionType } from '@/shared/types/types';
+import {
+  capitalizeFirstLetter,
+  groupOptionsDto
+} from '@/shared/lib/utils/utils';
+import { BarSize, OptionType } from '@/shared/types/types';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Drawer from '@/shared/ui/Drawer/Drawer';
+import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 interface SelectedOptionsState {
   chain: OptionType[];
@@ -38,26 +51,82 @@ interface StackedChartData {
   [key: string]: string | number;
 }
 
+interface FiltersProps {
+  chainOptions: OptionType[];
+
+  deploymentOptionsFilter: OptionType[];
+
+  assetTypeOptions: OptionType[];
+
+  symbolOptions: OptionType[];
+
+  barSize: BarSize;
+
+  isShowEyeIcon: boolean;
+
+  isLoading: boolean;
+
+  openSingle: boolean;
+
+  groupBy: string;
+
+  csvFilename: string;
+
+  areAllSeriesHidden: boolean;
+
+  csvData: Record<string, string | number>[];
+
+  selectedOptions: {
+    chain: OptionType[];
+
+    assetType: OptionType[];
+
+    market: OptionType[];
+
+    symbol: OptionType[];
+  };
+
+  onSelectChain: (chain: OptionType[]) => void;
+
+  onSelectAssetType: (assetType: OptionType[]) => void;
+
+  onSelectMarket: (market: OptionType[]) => void;
+
+  onSelectSymbol: (symbol: OptionType[]) => void;
+
+  handleBarSizeChange: (value: string) => void;
+
+  toggleSingle: () => void;
+
+  closeSingle: () => void;
+
+  onClearAll: () => void;
+
+  onSelectAll: () => void;
+
+  onDeselectAll: () => void;
+
+  selectSingle: (value: string) => void;
+}
+
 const CompoundFeeRevenueRecieved = ({
   revenueData: rawData,
   isLoading,
   isError
 }: RevenuePageProps) => {
-  const {
-    activeTab,
-    barSize,
-    barCount,
-    handleTabChange,
-    handleBarSizeChange,
-    handleVisibleBarsChange
-  } = useChartControls({ initialTimeRange: '7B', initialBarSize: 'D' });
+  const { barSize, handleBarSizeChange } = useChartControls({
+    initialBarSize: 'D'
+  });
 
-  const initialState: SelectedOptionsState = {
-    chain: [],
-    market: [],
-    symbol: [],
-    assetType: []
-  };
+  const initialState: SelectedOptionsState = useMemo(
+    () => ({
+      chain: [],
+      market: [],
+      symbol: [],
+      assetType: []
+    }),
+    []
+  );
 
   const [selectedOptions, setSelectedOptions] = useReducer(
     (
@@ -71,19 +140,19 @@ const CompoundFeeRevenueRecieved = ({
   );
 
   const [groupBy, setGroupBy] = useState<string>('Chain');
-  const [isGroupByOpen, setIsGroupByOpen] = useState(false);
 
-  const toggleGroupBy = useCallback(
-    () => setIsGroupByOpen((prev) => !prev),
-    []
-  );
-  const closeGroupBy = useCallback(() => setIsGroupByOpen(false), []);
+  const {
+    isOpen: isGroupByOpen,
+    onOpenModal: onGroupByOpen,
+    onCloseModal: onGroupByClose
+  } = useModal();
+
   const handleSelectGroupBy = useCallback(
     (value: string) => {
       setGroupBy(value);
-      closeGroupBy();
+      onGroupByClose();
     },
-    [closeGroupBy]
+    [onGroupByClose]
   );
 
   const {
@@ -219,6 +288,20 @@ const CompoundFeeRevenueRecieved = ({
     getValueByPath
   });
 
+  const {
+    chartRef,
+    seriesData,
+    aggregatedData,
+    areAllSeriesHidden,
+    hiddenItems,
+    toggleSeriesByName,
+    onSelectAll,
+    onDeselectAll
+  } = useCompoundReceivedBars({
+    barSize,
+    data: chartData
+  });
+
   const deploymentOptionsFilter = useMemo(() => {
     const marketV2 =
       marketOptions
@@ -294,87 +377,42 @@ const CompoundFeeRevenueRecieved = ({
 
   return (
     <Card
-      title='Compound Fee Revenue Recieved'
+      title='Compound Fee Revenue Received'
       id='compound-fee-revenue-received'
       isLoading={isLoading}
       isError={isError}
       className={{
         loading: 'min-h-[inherit]',
-        container: 'min-h-[571px]',
-        content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
+        container: 'border-background min-h-[571px] border',
+        content: 'flex flex-col gap-3 p-0 pb-5 md:px-10 lg:pb-10'
       }}
     >
-      <div className='flex justify-end gap-3 px-0 py-3'>
-        <div className='flex gap-2'>
-          <MultiSelect
-            options={chainOptions}
-            value={selectedOptions.chain}
-            onChange={onSelectChain}
-            placeholder='Chain'
-            disabled={isLoading}
-          />
-          <MultiSelect
-            options={deploymentOptionsFilter || []}
-            value={selectedOptions.market}
-            onChange={onSelectMarket}
-            placeholder='Market'
-            disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-          />
-          <MultiSelect
-            options={assetTypeOptions.sort((a, b) =>
-              a.label.localeCompare(b.label)
-            )}
-            value={selectedOptions.assetType}
-            onChange={onSelectAssetType}
-            placeholder='Asset Type'
-            disabled={isLoading}
-          />
-          <MultiSelect
-            options={symbolOptions}
-            value={selectedOptions.symbol}
-            onChange={onSelectSymbol}
-            placeholder='Reserve Symbols'
-            disabled={isLoading}
-          />
-        </div>
-        <TabsGroup
-          tabs={['D', 'W', 'M']}
-          value={barSize}
-          onTabChange={handleBarSizeChange}
-          disabled={isLoading}
-        />
-        <TabsGroup
-          tabs={['7B', '30B', '90B', '180B']}
-          value={activeTab}
-          onTabChange={handleTabChange}
-          disabled={isLoading}
-        />
-        <div className='flex items-center gap-1'>
-          <Text
-            tag='span'
-            size='11'
-            weight='600'
-            lineHeight='16'
-            className='text-primary-14'
-          >
-            Group by
-          </Text>
-          <SingleDropdown
-            options={groupByOptions}
-            isOpen={isGroupByOpen}
-            selectedValue={groupBy}
-            onToggle={toggleGroupBy}
-            onClose={closeGroupBy}
-            onSelect={handleSelectGroupBy}
-            disabled={isLoading}
-            triggerContentClassName='p-[5px]'
-          />
-        </div>
-        <CSVDownloadButton
-          data={csvData}
-          filename={csvFilename}
-        />
-      </div>
+      <Filters
+        groupBy={groupBy}
+        areAllSeriesHidden={areAllSeriesHidden}
+        isShowEyeIcon={Boolean(seriesData.length > 1)}
+        assetTypeOptions={assetTypeOptions}
+        selectedOptions={selectedOptions}
+        chainOptions={chainOptions}
+        symbolOptions={symbolOptions}
+        deploymentOptionsFilter={deploymentOptionsFilter}
+        isLoading={isLoading || false}
+        barSize={barSize}
+        csvData={csvData}
+        csvFilename={csvFilename}
+        openSingle={isGroupByOpen}
+        onSelectChain={onSelectChain}
+        onSelectAssetType={onSelectAssetType}
+        onSelectMarket={onSelectMarket}
+        onSelectSymbol={onSelectSymbol}
+        handleBarSizeChange={handleBarSizeChange}
+        toggleSingle={onGroupByOpen}
+        closeSingle={onGroupByClose}
+        selectSingle={handleSelectGroupBy}
+        onClearAll={handleResetFilters}
+        onSelectAll={onSelectAll}
+        onDeselectAll={onDeselectAll}
+      />
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder
           onButtonClick={handleResetFilters}
@@ -382,15 +420,339 @@ const CompoundFeeRevenueRecieved = ({
         />
       ) : (
         <CompoundFeeRecieved
-          data={chartData}
+          chartRef={chartRef}
+          hiddenItems={hiddenItems}
+          areAllSeriesHidden={areAllSeriesHidden}
           groupBy={groupBy}
-          barCount={barCount}
           barSize={barSize}
-          onVisibleBarsChange={handleVisibleBarsChange}
+          seriesData={seriesData}
+          aggregatedData={aggregatedData}
+          toggleSeriesByName={toggleSeriesByName}
+          onSelectAll={onSelectAll}
+          onDeselectAll={onDeselectAll}
         />
       )}
     </Card>
   );
 };
+
+const Filters = memo(
+  ({
+    barSize,
+    openSingle,
+    groupBy,
+    csvData,
+    csvFilename,
+    chainOptions,
+    selectedOptions,
+    isShowEyeIcon,
+    areAllSeriesHidden,
+    deploymentOptionsFilter,
+    assetTypeOptions,
+    symbolOptions,
+    isLoading,
+    onSelectChain,
+    onSelectAssetType,
+    onSelectMarket,
+    onSelectSymbol,
+    handleBarSizeChange,
+    toggleSingle,
+    closeSingle,
+    selectSingle,
+    onClearAll,
+    onSelectAll,
+    onDeselectAll
+  }: FiltersProps) => {
+    const { isOpen, onOpenModal, onCloseModal } = useModal();
+
+    const {
+      isOpen: isMoreOpen,
+      onOpenModal: onMoreOpen,
+      onCloseModal: onMoreClose
+    } = useModal();
+
+    const filterOptions = useMemo(() => {
+      const chainFilterOptions = {
+        id: 'chain',
+        placeholder: 'Chain',
+        total: selectedOptions.chain.length,
+        selectedOptions: selectedOptions.chain,
+        options: chainOptions || [],
+        onChange: onSelectChain
+      };
+
+      const marketFilterOptions = {
+        id: 'market',
+        placeholder: 'Market',
+        total: selectedOptions.market.length,
+        selectedOptions: selectedOptions.market,
+        options: deploymentOptionsFilter || [],
+        onChange: onSelectMarket
+      };
+
+      const assetTypeFilterOptions = {
+        id: 'assetType',
+        placeholder: 'Asset Type',
+        total: selectedOptions.assetType.length,
+        selectedOptions: selectedOptions.assetType,
+        options:
+          assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+          [],
+        onChange: onSelectAssetType
+      };
+
+      const symbolFilterOptions = {
+        id: 'reserveSymbol',
+        placeholder: 'Reserve Symbols',
+        total: selectedOptions.symbol.length,
+        selectedOptions: selectedOptions.symbol,
+        options:
+          symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
+        onChange: onSelectSymbol
+      };
+
+      return [
+        chainFilterOptions,
+        marketFilterOptions,
+        assetTypeFilterOptions,
+        symbolFilterOptions
+      ];
+    }, [
+      assetTypeOptions,
+      chainOptions,
+      deploymentOptionsFilter,
+      onSelectAssetType,
+      onSelectChain,
+      onSelectMarket,
+      selectedOptions
+    ]);
+
+    const onEyeClick = () => {
+      if (areAllSeriesHidden) {
+        onSelectAll();
+      } else {
+        onDeselectAll();
+      }
+
+      onMoreClose();
+    };
+
+    return (
+      <>
+        <div className='hidden lg:block'>
+          <div className='flex items-center justify-end gap-2 px-0 py-3'>
+            <TabsGroup
+              tabs={['D', 'W', 'M']}
+              value={barSize}
+              onTabChange={handleBarSizeChange}
+              disabled={isLoading}
+            />
+            <MultiSelect
+              options={chainOptions || []}
+              value={selectedOptions.chain}
+              onChange={onSelectChain}
+              placeholder='Chain'
+              disabled={isLoading}
+            />
+            <MultiSelect
+              options={deploymentOptionsFilter}
+              value={selectedOptions.market}
+              onChange={onSelectMarket}
+              placeholder='Market'
+              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
+            />
+            <MultiSelect
+              options={
+                assetTypeOptions?.sort((a, b) =>
+                  a.label.localeCompare(b.label)
+                ) || []
+              }
+              value={selectedOptions.assetType}
+              onChange={onSelectAssetType}
+              placeholder='Asset Type'
+              disabled={isLoading}
+            />
+            <MultiSelect
+              options={
+                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+                []
+              }
+              value={selectedOptions.symbol}
+              onChange={onSelectSymbol}
+              placeholder='Reserve Symbols'
+              disabled={isLoading}
+            />
+            <div className='flex items-center gap-1'>
+              <Text
+                tag='span'
+                size='11'
+                weight='600'
+                lineHeight='16'
+                className='text-primary-14'
+              >
+                Group by
+              </Text>
+              <SingleDropdown
+                options={groupByOptions}
+                isOpen={openSingle}
+                selectedValue={groupBy}
+                onOpen={toggleSingle}
+                onClose={closeSingle}
+                onSelect={selectSingle}
+                disabled={isLoading}
+                triggerContentClassName='p-[5px]'
+              />
+            </div>
+            <CSVDownloadButton
+              data={csvData}
+              filename={csvFilename}
+            />
+          </div>
+        </div>
+        <div className='block lg:hidden'>
+          <div className='flex flex-col justify-end gap-2 px-5 py-3'>
+            <div className='flex flex-col items-center justify-end gap-2 sm:flex-row'>
+              <div className='flex w-full flex-row items-center gap-2 sm:w-auto'>
+                <TabsGroup
+                  className={{
+                    container: 'hidden w-1/2 sm:block sm:w-auto',
+                    list: 'w-full sm:w-auto'
+                  }}
+                  tabs={['D', 'W', 'M']}
+                  value={barSize}
+                  onTabChange={handleBarSizeChange}
+                  disabled={isLoading}
+                />
+                <Button
+                  onClick={toggleSingle}
+                  className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
+                >
+                  <Icon
+                    name='group-grid'
+                    className='h-[14px] w-[14px] fill-none'
+                  />
+                  Group
+                </Button>
+                <Button
+                  onClick={onOpenModal}
+                  className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:hidden sm:w-auto md:h-8'
+                >
+                  <Icon
+                    name='filters'
+                    className='h-[14px] w-[14px] fill-none'
+                  />
+                  Filters
+                </Button>
+              </div>
+              <div className='flex w-full flex-row items-center gap-2 sm:w-auto'>
+                <Button
+                  onClick={onOpenModal}
+                  className='bg-secondary-27 text-gray-11 shadow-13 hidden h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:flex sm:w-auto md:h-8'
+                >
+                  <Icon
+                    name='filters'
+                    className='h-[14px] w-[14px] fill-none'
+                  />
+                  Filters
+                </Button>
+                <TabsGroup
+                  className={{
+                    container: 'block w-full sm:hidden sm:w-auto',
+                    list: 'w-full sm:w-auto'
+                  }}
+                  tabs={['D', 'W', 'M']}
+                  value={barSize}
+                  onTabChange={handleBarSizeChange}
+                  disabled={isLoading}
+                />
+                <Button
+                  onClick={onMoreOpen}
+                  className='bg-secondary-27 shadow-13 md:miw-w-8 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 lg:hidden'
+                >
+                  <Icon
+                    name='3-dots'
+                    className='h-6 w-6 fill-none'
+                  />
+                </Button>
+              </div>
+            </div>
+          </div>
+          <Filter
+            isOpen={isOpen}
+            filterOptions={filterOptions}
+            onClose={onCloseModal}
+            onClearAll={onClearAll}
+          />
+          <GroupDrawer
+            isOpen={openSingle}
+            selectedOption={groupBy}
+            options={groupOptionsDto(groupByOptions)}
+            onClose={closeSingle}
+            onSelect={selectSingle}
+          />
+          <Drawer
+            isOpen={isMoreOpen}
+            onClose={onMoreClose}
+          >
+            <Text
+              size='17'
+              weight='700'
+              align='center'
+              className='mb-5'
+            >
+              Actions
+            </Text>
+            <div className='flex flex-col gap-1.5'>
+              <div className='px-3 py-2'>
+                <CSVLink
+                  data={csvData}
+                  filename={csvFilename}
+                  onClick={onMoreClose}
+                >
+                  <div className='flex items-center gap-1.5'>
+                    <Icon
+                      name='download'
+                      className='h-[26px] w-[26px]'
+                    />
+                    <Text
+                      size='14'
+                      weight='500'
+                    >
+                      CSV with the entire historical data
+                    </Text>
+                  </div>
+                </CSVLink>
+              </div>
+              <View.Condition if={isShowEyeIcon}>
+                <div className='px-3 py-2'>
+                  <ChartIconToggle
+                    active={areAllSeriesHidden}
+                    onIcon='eye'
+                    offIcon='eye-closed'
+                    ariaLabel='Toggle all series visibility'
+                    className={{
+                      container:
+                        'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
+                      icon: 'h-[26px] w-[26px]',
+                      iconContainer: 'h-[26px] w-[26px]'
+                    }}
+                    onClick={onEyeClick}
+                  >
+                    <Text
+                      size='14'
+                      weight='500'
+                    >
+                      Unselect All
+                    </Text>
+                  </ChartIconToggle>
+                </div>
+              </View.Condition>
+            </div>
+          </Drawer>
+        </div>
+      </>
+    );
+  }
+);
 
 export default memo(CompoundFeeRevenueRecieved);

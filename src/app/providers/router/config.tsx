@@ -1,5 +1,6 @@
 import { JSX } from 'react';
 
+import InsentivePage from '@/pages/InsentivePage/InsentivePage';
 import RevenuePage from '@/pages/RevenuePage/RevenuePage';
 import RunwayPage from '@/pages/RunwayPage/RunwayPage';
 import TreasuryPage from '@/pages/TreasuryPage/TreasuryPage';
@@ -49,7 +50,7 @@ export const routesConfig: Record<commonRoutes, RouteConfig> = {
   },
   [commonRoutes.INCENTIVES]: {
     path: commonRoutes.INCENTIVES,
-    element: <div>Incentives</div>
+    element: <InsentivePage />
   },
   [commonRoutes.OEV]: {
     path: commonRoutes.OEV,

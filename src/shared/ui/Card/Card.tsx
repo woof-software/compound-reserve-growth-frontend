@@ -44,7 +44,10 @@ const Card: FC<CardProps> = ({
     <div
       id={id}
       className={cn(
-        'bg-card-content w-full overflow-hidden rounded-lg shadow-md',
+        'bg-card-content w-full overflow-hidden rounded-sm shadow-md md:rounded-lg',
+        {
+          'justify-center': isLoading
+        },
         className?.container
       )}
     >
@@ -69,7 +72,7 @@ const Card: FC<CardProps> = ({
         <View.Condition if={Boolean(title)}>
           <div
             className={cn(
-              'bg-card-header flex items-center gap-3 px-10 py-4',
+              'bg-card-header flex items-center gap-3 px-5 py-4 md:px-10 md:py-4',
               className?.header
             )}
           >
@@ -92,7 +95,7 @@ const Card: FC<CardProps> = ({
                 ) : (
                   <Icon
                     name='link'
-                    color='color-primary-14'
+                    color='primary-14'
                     onClick={() => handleCopyLink?.(id)}
                   />
                 ))}

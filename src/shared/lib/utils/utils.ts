@@ -290,7 +290,11 @@ export function formatLargeNumber(
 }
 
 export const formatPrice = (price: number, decimals = 2): string => {
-  return `$${formatLargeNumber(price, decimals)}`;
+  const priceFormat = `$${formatLargeNumber(price, decimals)}`;
+
+  return priceFormat.startsWith('$-')
+    ? `-${priceFormat.replace('-', '')}`
+    : priceFormat;
 };
 
 export const groupByTypeLast30Days = <T extends ResponseDataType>(
@@ -336,8 +340,11 @@ export const getValueByPath = (obj: any, path: string): any => {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 };
 
-export const capitalizeFirstLetter = (str: string): string => {
-  if (!str) return 'Unknown';
+export const capitalizeFirstLetter = (
+  str: string,
+  replaceSymbol?: string
+): string => {
+  if (!str) return replaceSymbol || 'Unknown';
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
@@ -470,3 +477,65 @@ export const groupByKey = <T>(
 
 export const sumValues = (arr: TokenData[] = []): number =>
   arr.reduce((acc, item) => acc + item.value, 0);
+
+export const formatUSD = (num: number): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(num);
+};
+
+export const formatCurrencyValue = (value: unknown): string => {
+  const num = Number(value);
+
+  if (
+    value === null ||
+    typeof value === 'undefined' ||
+    isNaN(num) ||
+    num === 0
+  ) {
+    return '-';
+  }
+
+  const isNegative = num < 0;
+  const absValue = Math.abs(num);
+
+  const formattedNumber = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 0
+  }).format(absValue);
+
+  return isNegative ? `-$${formattedNumber}` : `$${formattedNumber}`;
+};
+
+export const groupOptionsDto = (options: string[]) => {
+  return options.map((option) => ({
+    header: option,
+    accessorKey: option
+  }));
+};
+
+export const formatValue = (value: number) => {
+  if (Math.abs(value) >= 1_000_000) {
+    return (value / 1_000_000).toFixed(1) + 'M';
+  }
+  if (Math.abs(value) >= 1_000) {
+    return (value / 1_000).toFixed(1) + 'K';
+  }
+  return value.toFixed(0);
+};
+
+export const removeDuplicates = <T>(array: T[], key: keyof T): T[] => {
+  const uniqueValues = new Set();
+
+  return array.filter((item) => {
+    const value = item[key];
+
+    if (uniqueValues.has(value)) return false;
+
+    uniqueValues.add(value);
+
+    return true;
+  });
+};

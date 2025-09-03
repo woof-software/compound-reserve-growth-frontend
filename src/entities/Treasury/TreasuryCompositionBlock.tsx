@@ -1,17 +1,24 @@
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
+import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
+import SortDrawer from '@/components/SortDrawer/SortDrawer';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
+import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
   formatPrice,
-  groupByKey
+  groupByKey,
+  groupOptionsDto,
+  removeDuplicates
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
+import Icon from '@/shared/ui/Icon/Icon';
 import Switch from '@/shared/ui/Switch/Switch';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
@@ -70,23 +77,54 @@ const mapTableData = (data: Record<string, TokenData[]>) => {
         icon: key.replace(/ /g, '-').toLowerCase(),
         name: capitalizeFirstLetter(key) || 'Unclassified',
         balance,
-        symbol: symbol
+        symbol
       };
     })
     .sort((a, b) => b.balance - a.balance);
 };
 
+export const treasuryCompositionColumns = [
+  {
+    accessorKey: 'name',
+    header: 'Asset'
+  },
+  {
+    accessorKey: 'balance',
+    header: 'Total Balance USD'
+  }
+];
+
 const TreasuryCompositionBlock = memo(
   ({ isLoading, data }: TreasuryCompositionBlockProps) => {
     const {
-      open: openSingle,
+      isOpen: isOpenSingle,
       selectedValue: selectedSingle,
-      toggle: toggleSingle,
       close: closeSingle,
+      open: openSingle,
       select: selectSingle
     } = useDropdown('single');
 
-    const [includeComp, setIncludeComp] = useState(true);
+    const [includeComp, setIncludeComp] = useState<boolean>(true);
+
+    const [sortType, setSortType] = useReducer(
+      (prev, next) => ({
+        ...prev,
+        ...next
+      }),
+      { key: '', type: 'asc' }
+    );
+
+    const {
+      isOpen: isSortOpen,
+      onOpenModal: onSortOpen,
+      onCloseModal: onSortClose
+    } = useModal();
+
+    const {
+      isOpen: isGroupOpen,
+      onOpenModal: onGroupOpen,
+      onCloseModal: onGroupClose
+    } = useModal();
 
     const filteredData = useMemo(() => {
       if (includeComp || !data.uniqDataByCategory.COMP) {
@@ -156,7 +194,19 @@ const TreasuryCompositionBlock = memo(
           uniqData,
           (item) => item.source.market || 'no market'
         );
-        return mapTableData(markets);
+
+        const marketsDto = mapTableData(markets);
+
+        const result = marketsDto.map((el) => ({
+          ...el,
+          name: el.name.replace(/\s+/g, '')
+        }));
+
+        const filteredResult = removeDuplicates(result, 'name');
+
+        return marketsDto.filter((market) =>
+          filteredResult.some((item) => item.id === market.id)
+        );
       }
 
       return mapTableData(uniqDataByCategory);
@@ -171,11 +221,31 @@ const TreasuryCompositionBlock = memo(
       return tableData.length > 0 && chartData.length > 0;
     }, [tableData, chartData]);
 
+    const onSortKeySelect = useCallback((value: string) => {
+      setSortType({
+        key: value
+      });
+    }, []);
+
+    const onSortTypeSelect = useCallback((value: string) => {
+      setSortType({
+        type: value
+      });
+    }, []);
+
+    const onGroupSelect = (value: string) => {
+      selectSingle(value);
+
+      closeSingle();
+    };
+
     const onClearAll = () => {
       selectSingle('Asset Type');
 
       setIncludeComp(true);
     };
+
+    console.log('isOpenSingle=>', isOpenSingle);
 
     return (
       <Card
@@ -184,55 +254,95 @@ const TreasuryCompositionBlock = memo(
         title='Treasury Composition'
         className={{
           loading: 'min-h-[inherit]',
-          container: 'min-h-[571px]',
-          content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
+          container: 'min-h-[520px] rounded-lg',
+          content: 'flex flex-col gap-3 px-0 py-0 md:px-5 md:pb-5 lg:pb-10'
         }}
       >
-        <div className='flex items-center justify-end gap-4 py-3'>
-          <Switch
-            label='Include COMP Holdings'
-            positionLabel='left'
-            checked={includeComp}
-            onCheckedChange={setIncludeComp}
-            classNameTitle='!text-[12px]'
-          />
-          <div className='flex items-center gap-1'>
-            <Text
-              tag='span'
-              size='11'
-              weight='600'
-              lineHeight='16'
-              className='text-primary-14'
-            >
-              Group by
-            </Text>
-            <SingleDropdown
-              options={options}
-              isOpen={openSingle}
-              selectedValue={selectedGroup}
-              onToggle={toggleSingle}
-              onClose={closeSingle}
-              onSelect={selectSingle}
-              triggerContentClassName='p-[5px]'
+        <div className='flex flex-col-reverse items-center justify-end gap-2 px-5 py-3 sm:flex-row md:px-0 md:py-3'>
+          <div className='flex w-full justify-end sm:w-auto'>
+            <Switch
+              label='Include COMP Holdings'
+              positionLabel='left'
+              checked={includeComp}
+              onCheckedChange={setIncludeComp}
+              classNameTitle='!text-[12px]'
             />
           </div>
+          <div className='flex w-full items-center gap-2 sm:w-auto'>
+            <Button
+              onClick={onGroupOpen}
+              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
+            >
+              <Icon
+                name='group-grid'
+                className='h-[14px] w-[14px] fill-none'
+              />
+              Group
+            </Button>
+            <div className='hidden items-center gap-1 lg:flex'>
+              <Text
+                tag='span'
+                size='11'
+                weight='600'
+                lineHeight='16'
+                className='text-primary-14'
+              >
+                Group by
+              </Text>
+              <SingleDropdown
+                options={options}
+                isOpen={isOpenSingle}
+                selectedValue={selectedGroup}
+                onOpen={openSingle}
+                onClose={closeSingle}
+                onSelect={onGroupSelect}
+                triggerContentClassName='p-[5px]'
+              />
+            </div>
+            <Button
+              onClick={onSortOpen}
+              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:hidden md:h-8'
+            >
+              <Icon
+                name='sort-icon'
+                className='h-[14px] w-[14px]'
+              />
+              Sort
+            </Button>
+          </div>
         </div>
-        <div className='flex justify-between'>
+        <div className='flex flex-col justify-between gap-8 md:flex-row'>
           <View.Condition if={!hasData}>
             <NoDataPlaceholder onButtonClick={onClearAll} />
           </View.Condition>
           <View.Condition if={hasData}>
             <PieChart
-              className='max-h-[400px] max-w-[336.5px]'
+              className='max-w-full md:max-w-1/2 lg:max-w-[336.5px]'
               data={chartData}
             />
             <TreasuryComposition
+              sortType={sortType}
               tableData={tableData}
               totalBalance={totalBalance}
               activeFilter={selectedGroup as 'Chain' | 'Asset Type' | 'Market'}
             />
           </View.Condition>
         </div>
+        <SortDrawer
+          isOpen={isSortOpen}
+          sortType={sortType}
+          columns={treasuryCompositionColumns}
+          onClose={onSortClose}
+          onKeySelect={onSortKeySelect}
+          onTypeSelect={onSortTypeSelect}
+        />
+        <GroupDrawer
+          isOpen={isGroupOpen}
+          selectedOption={selectedGroup}
+          options={groupOptionsDto(options)}
+          onClose={onGroupClose}
+          onSelect={selectSingle}
+        />
       </Card>
     );
   }

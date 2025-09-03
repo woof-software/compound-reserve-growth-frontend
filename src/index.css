@@ -46,7 +46,7 @@
   --primary-16: #D6DFE8;
   --primary-17: #CED1D4;
   --primary-18: #F0F2F5;
-  --primary-20: #e4e5e9;
+  --primary-20: #F0F2F5;
 
   /*=======================*/
   /* Card Colors */
@@ -68,12 +68,36 @@
   --secondary-20: #6D7E8F;
   --secondary-21: #CDD3D9;
   --secondary-22: #F0F2F5;
+  --secondary-23: #17212B24;
+  --secondary-24: #D8DFE5;
+  --secondary-25: #19232E;
+  --secondary-26: #AFBBC780;
+  --secondary-27: #F0F2F5;
+  --secondary-28: #516070;
+  --secondary-29: #17212B26;
+  --secondary-30: #AFBBC780;
+  --secondary-31: #F0F2F5;
+  --secondary-32: #BABBCB;
+  --secondary-33: #7A8A99;
+  --secondary-35: #17212B08;
+  --secondary-36: #FFFFFF;
+  --secondary-37: #CCCCCC;
+  --secondary-38: #F0F2F5;
+  --secondary-39: #17212B26;
+  --secondary-40: #CACED3;
+  --secondary-41: #516070;
+  --secondary-42: #17212B;
+  --secondary-43: #FFFFFF;
+  --secondary-44: #F1F2F6;
+  --secondary-45: #F1F2F6;
+  --secondary-46: #7A8A99;
 
   /*=======================*/
   /* Success Colors */
   --success-10: #00C088;
   --success-11: #00C289;
   --success-12: #00C2891A;
+  --success-13: #00AD79;
 
   /*=======================*/
   /* Error Colors */
@@ -89,6 +113,8 @@
   /*=======================*/
   /* Layout */
   --background: #0D131A;
+
+  --blur-background: #AFBBC780;
 
   /*=======================*/
   /* Primary Colors */
@@ -124,12 +150,36 @@
   --secondary-20: #FFFFFF;
   --secondary-21: #32404D;
   --secondary-22: #151E27;
+  --secondary-23: #FFFFFF24;
+  --secondary-24: #2B3947;
+  --secondary-25: #FFF;
+  --secondary-26: #AFBBC780;
+  --secondary-27: #17212B;
+  --secondary-28: #FFF;
+  --secondary-29: #2B3947;
+  --secondary-30: #1D283380;
+  --secondary-31: #17212B80;
+  --secondary-32: #516070;
+  --secondary-33: #516070;
+  --secondary-35: #17212B;
+  --secondary-36: #1D2833;
+  --secondary-37: #7A8A99;
+  --secondary-38: #151E27;
+  --secondary-39: #FFFFFF26;
+  --secondary-40: #0D131A;
+  --secondary-41: #FFFFFF;
+  --secondary-42: #FFFFFF;
+  --secondary-43: #7A8A99;
+  --secondary-44: #2B3947;
+  --secondary-45: #222E3A;
+  --secondary-46: #7A8A99;
 
   /*=======================*/
   /* Success Colors */
   --success-10: #00C088;
   --success-11: #00C289;
   --success-12: #00C2891A;
+  --success-13: #00AD79;
 
   /*=======================*/
   /* Error Colors */
@@ -149,6 +199,9 @@
   --shadow-12: 0px 8px 20px 0px #0D131A0A, 0px 2px 12px 0px #0D131A05;
   --shadow-13: inset 0 0 0 0.25px #F9FAFB26;
   --shadow-14: inset 0 0 0 0.25px #0C131A26;
+  --shadow-15: inset 0 0px 0 0.25px var(--secondary-39);
+  --shadow-16: inset 0 0 0 0.25px #17212B26;
+  --shadow-17: 0px 2px 9px 0px #00000040;
 
   /*=======================*/
   /* Layout */
@@ -188,12 +241,36 @@
   --color-secondary-20: var(--secondary-20);
   --color-secondary-21: var(--secondary-21);
   --color-secondary-22: var(--secondary-22);
+  --color-secondary-23: var(--secondary-23);
+  --color-secondary-24: var(--secondary-24);
+  --color-secondary-25: var(--secondary-25);
+  --color-secondary-26: var(--secondary-26);
+  --color-secondary-27: var(--secondary-27);
+  --color-secondary-28: var(--secondary-28);
+  --color-secondary-29: var(--secondary-29);
+  --color-secondary-30: var(--secondary-30);
+  --color-secondary-31: var(--secondary-31);
+  --color-secondary-32: var(--secondary-32);
+  --color-secondary-33: var(--secondary-33);
+  --color-secondary-35: var(--secondary-35);
+  --color-secondary-36: var(--secondary-36);
+  --color-secondary-37: var(--secondary-37);
+  --color-secondary-38: var(--secondary-38);
+  --color-secondary-39: var(--secondary-39);
+  --color-secondary-40: var(--secondary-40);
+  --color-secondary-41: var(--secondary-41);
+  --color-secondary-42: var(--secondary-42);
+  --color-secondary-43: var(--secondary-43);
+  --color-secondary-44: var(--secondary-44);
+  --color-secondary-45: var(--secondary-45);
+  --color-secondary-46: var(--secondary-46);
 
   /*=======================*/
   /* Success Colors */
   --color-success-10: var(--success-10);
   --color-success-11: var(--success-11);
   --color-success-12: var(--success-12);
+  --color-success-13: var(--success-13);
 
   /*=======================*/
   /* Error Colors */
@@ -211,6 +288,7 @@
   --color-gray-10: #2B3947;
   --color-gray-11: #516070;
   --color-gray-12: #17212B;
+  --color-gray-13: #1D2833;
 
   /*=======================*/
   /* Decorative Colors */
@@ -254,8 +332,39 @@
 
 /*=======================*/
 /* Scrollbar Styles */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.highcharts-container .highcharts-background  {
+  fill: transparent;
+}
+
+.disable-scroll-vertical {
+  overflow: hidden !important;
+
+  overscroll-behavior: none;
+
+  touch-action: none;
+}
+
+html, body {
+  -ms-overflow-style: none;      /* IE и Edge */
+  scrollbar-width: none;         /* Firefox */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;                 /* Chrome, Safari, Opera */
+}
+
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 
 ::-webkit-scrollbar-track {
@@ -268,17 +377,4 @@
   @apply bg-primary-12;
 
   border-radius: 18px;
-}
-
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-.highcharts-container .highcharts-background  {
-  fill: transparent;
 }

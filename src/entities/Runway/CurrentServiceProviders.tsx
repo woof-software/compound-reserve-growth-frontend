@@ -5,16 +5,57 @@ Calculation logic for the "Current Service Providers" block:
 3. Pie Chart Data: The total values (`item.value`) are grouped and summed by the provider's name to show the total expense per provider.
 4. Values Used: The full contract values (`item.value` and `item.amount`) are used, not the annualised equivalents.
 */
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import CurrentServiceProviders from '@/components/RunwayPageTable/CurrentServiceProviders';
+import SortDrawer from '@/components/SortDrawer/SortDrawer';
+import { useModal } from '@/shared/hooks/useModal';
 import type { RunwayItem } from '@/shared/hooks/useRunway';
 import { useRunway } from '@/shared/hooks/useRunway';
 import { formatPrice } from '@/shared/lib/utils/utils';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Icon from '@/shared/ui/Icon/Icon';
+
+export const currentServiceProvidersColumns = [
+  {
+    accessorKey: 'provider',
+    header: 'Provider'
+  },
+  {
+    accessorKey: 'discipline',
+    header: 'Discipline'
+  },
+  {
+    accessorKey: 'token',
+    header: 'Token'
+  },
+  {
+    accessorKey: 'amount',
+    header: 'Amount (Qty)'
+  },
+  {
+    accessorKey: 'value',
+    header: 'Value ($)'
+  }
+];
 
 const CurrentServiceProvidersBlock = () => {
+  const [sortType, setSortType] = useReducer(
+    (prev, next) => ({
+      ...prev,
+      ...next
+    }),
+    { key: '', type: 'asc' }
+  );
+
+  const {
+    isOpen: isSortOpen,
+    onOpenModal: onSortOpen,
+    onCloseModal: onSortClose
+  } = useModal();
+
   const { data: runwayResponse, isLoading, isError } = useRunway();
 
   const processedData = useMemo(() => {
@@ -84,6 +125,18 @@ const CurrentServiceProvidersBlock = () => {
     return { tableData, footerData, pieData };
   }, [runwayResponse]);
 
+  const onKeySelect = useCallback((value: string) => {
+    setSortType({
+      key: value
+    });
+  }, []);
+
+  const onTypeSelect = useCallback((value: string) => {
+    setSortType({
+      type: value
+    });
+  }, []);
+
   return (
     <Card
       title='Current Service Providers'
@@ -91,15 +144,40 @@ const CurrentServiceProvidersBlock = () => {
       isLoading={isLoading}
       isError={isError}
       className={{
-        loading: 'min-h-[571px]'
+        loading: 'min-h-[571px]',
+        content: 'px-0 py-0 lg:px-10 lg:py-10',
+        container: 'border-background border'
       }}
     >
-      <div className='flex justify-between gap-10'>
+      <div className='block px-5 py-3 lg:hidden'>
+        <div className='flex flex-wrap items-center justify-end gap-2'>
+          <Button
+            onClick={onSortOpen}
+            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8'
+          >
+            <Icon
+              name='sort-icon'
+              className='h-[14px] w-[14px]'
+            />
+            Sort
+          </Button>
+        </div>
+        <SortDrawer
+          isOpen={isSortOpen}
+          sortType={sortType}
+          columns={currentServiceProvidersColumns}
+          onClose={onSortClose}
+          onKeySelect={onKeySelect}
+          onTypeSelect={onTypeSelect}
+        />
+      </div>
+      <div className='flex flex-col justify-between gap-8 lg:flex-row lg:gap-10'>
         <PieChart
-          className='max-h-[400px] max-w-[336.5px]'
+          className='max-w-full lg:max-h-[400px] lg:max-w-[336.5px]'
           data={processedData.pieData}
         />
         <CurrentServiceProviders
+          sortType={sortType}
           data={processedData.tableData}
           footerData={processedData.footerData}
         />

@@ -19,6 +19,7 @@ import Text from '../Text/Text';
 
 export type ExtendedColumnDef<T> = ColumnDef<T> & {
   align?: 'left' | 'center' | 'right';
+  accessorKey?: keyof T;
 };
 
 interface DataTableProps<T> {
@@ -130,7 +131,7 @@ const DataTable = <T,>({
   }
 
   return (
-    <div className={cn('w-full', className)}>
+    <div className={cn('w-full gap-[26px]', className)}>
       <div className={cn('overflow-x-auto', containerTableClassName)}>
         <table className={cn('min-w-full', tableClassName)}>
           <thead className={cn('bg-transparent', headerClassName)}>
@@ -171,6 +172,7 @@ const DataTable = <T,>({
                         {header.isPlaceholder ? null : (
                           <Text
                             size='11'
+                            weight='500'
                             className={headerTextClassName}
                           >
                             {flexRender(
@@ -223,7 +225,7 @@ const DataTable = <T,>({
                   className={cn(onRowClick && 'cursor-pointer', rowClassName)}
                   onClick={() => onRowClick?.(row.original)}
                 >
-                  {row.getVisibleCells().map((cell) => {
+                  {row.getVisibleCells().map((cell, index) => {
                     const columnAlign = (
                       cell.column.columnDef as ExtendedColumnDef<T>
                     ).align;
@@ -233,6 +235,7 @@ const DataTable = <T,>({
                         key={cell.id}
                         className={cn(
                           'text-[13px] whitespace-nowrap',
+                          { 'font-medium': index === 0 },
                           getAlignmentClass(columnAlign),
                           cellClassName
                         )}

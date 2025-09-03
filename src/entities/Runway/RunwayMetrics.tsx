@@ -85,13 +85,14 @@ const RunwayMetrics = () => {
   }, [runwayResponse]);
 
   return (
-    <div className='flex flex-row gap-5'>
+    <div className='flex flex-col gap-0 md:flex-row md:gap-2.5 lg:gap-5'>
       <Card
         isLoading={isLoading}
         isError={isError}
         className={{
-          loading: 'min-h-[153px]',
-          container: 'flex-1'
+          loading: 'min-h-[130px] md:min-h-[153px]',
+          container: 'min-w-[343px] flex-1 rounded-b-none md:min-w-auto',
+          content: 'px-5 py-8 md:p-10'
         }}
       >
         <ValueMetricField
@@ -103,8 +104,10 @@ const RunwayMetrics = () => {
         isLoading={isLoading}
         isError={isError}
         className={{
-          loading: 'min-h-[153px]',
-          container: 'flex-1'
+          loading: 'min-h-[130px] md:min-h-[153px]',
+          container:
+            'border-secondary-26 min-w-[343px] flex-1 rounded-none border-t-1 border-b-1 md:min-w-auto md:border-none',
+          content: 'px-5 py-8 md:p-10'
         }}
       >
         <ValueMetricField
@@ -116,8 +119,9 @@ const RunwayMetrics = () => {
         isLoading={isLoading}
         isError={isError}
         className={{
-          loading: 'min-h-[153px]',
-          container: 'flex-1'
+          loading: 'min-h-[130px] md:min-h-[153px]',
+          container: 'min-w-[343px] flex-1 rounded-b-sm md:min-w-auto',
+          content: 'px-5 py-8 md:p-10'
         }}
       >
         <ValueMetricField

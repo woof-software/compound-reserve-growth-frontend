@@ -1,22 +1,31 @@
-import { useCallback, useMemo, useReducer } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
+import { CSVLink } from 'react-csv';
 
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
+import Filter from '@/components/Filter/Filter';
+import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import RevenueBreakdown, {
   FormattedRevenueData
 } from '@/components/RevenuePageTable/RevenueBreakdown';
 import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
+import SortDrawer from '@/components/SortDrawer/SortDrawer';
+import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
   capitalizeFirstLetter,
   extractFilterOptions,
-  formatNumber
+  formatNumber,
+  groupOptionsDto
 } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
+import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
@@ -39,6 +48,32 @@ const RevenueBreakDownBlock = ({
     symbol: []
   };
 
+  const [sortType, setSortType] = useReducer(
+    (prev, next) => ({
+      ...prev,
+      ...next
+    }),
+    { key: '', type: 'asc' }
+  );
+
+  const {
+    isOpen: isFilterOpen,
+    onOpenModal: onFilterOpen,
+    onCloseModal: onFilterClose
+  } = useModal();
+
+  const {
+    isOpen: isSortOpen,
+    onOpenModal: onSortOpen,
+    onCloseModal: onSortClose
+  } = useModal();
+
+  const {
+    isOpen: isMoreOpen,
+    onOpenModal: onMoreOpen,
+    onCloseModal: onMoreClose
+  } = useModal();
+
   const [selectedOptions, setSelectedOptions] = useReducer(
     (
       prev: SelectedFiltersState,
@@ -51,11 +86,12 @@ const RevenueBreakDownBlock = ({
   );
 
   const {
-    open: yearOpen,
+    isOpen: yearOpen,
     selectedValue: selectedYear,
-    toggle: toggleYear,
+    open: openYear,
     close: closeYear,
-    select: selectYear
+    select: selectYear,
+    selectClose: selectYearClose
   } = useDropdown('single');
 
   const onSelectChain = useCallback(
@@ -255,8 +291,27 @@ const RevenueBreakDownBlock = ({
     return { tableData: finalData, dynamicColumns: columns };
   }, [filteredData, selectedYear, yearOptions, selectedOptions]);
 
+  const revenueBreakdownColumns = useMemo(() => {
+    return dynamicColumns.map((column) => ({
+      accessorKey: String(column.accessorKey),
+      header: typeof column.header === 'string' ? column.header : ''
+    }));
+  }, [dynamicColumns]);
+
   const handleResetFilters = useCallback(() => {
     setSelectedOptions(initialState);
+  }, []);
+
+  const onKeySelect = useCallback((value: string) => {
+    setSortType({
+      key: value
+    });
+  }, []);
+
+  const onTypeSelect = useCallback((value: string) => {
+    setSortType({
+      type: value
+    });
   }, []);
 
   const hasData = tableData.length > 0;
@@ -269,20 +324,125 @@ const RevenueBreakDownBlock = ({
       ? 'No data for selected filters'
       : 'No data available';
 
+  const filterOptions = useMemo(() => {
+    const chainFilterOptions = {
+      id: 'chain',
+      placeholder: 'Chain',
+      total: selectedOptions.chain.length,
+      selectedOptions: selectedOptions.chain,
+      options: chainOptions || [],
+      onChange: onSelectChain
+    };
+
+    const marketFilterOptions = {
+      id: 'market',
+      placeholder: 'Market',
+      total: selectedOptions.market.length,
+      selectedOptions: selectedOptions.market,
+      options: marketOptions || [],
+      onChange: onSelectMarket
+    };
+
+    const sourceFilterOptions = {
+      id: 'source',
+      placeholder: 'Source',
+      total: selectedOptions.source.length,
+      selectedOptions: selectedOptions.source,
+      options:
+        sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
+      onChange: onSelectSource
+    };
+
+    const symbolFilterOptions = {
+      id: 'reserveSymbol',
+      placeholder: 'Reserve Symbols',
+      total: selectedOptions.symbol.length,
+      selectedOptions: selectedOptions.symbol,
+      options:
+        symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
+      onChange: onSelectSymbol
+    };
+
+    return [
+      chainFilterOptions,
+      marketFilterOptions,
+      sourceFilterOptions,
+      symbolFilterOptions
+    ];
+  }, [
+    chainOptions,
+    marketOptions,
+    onSelectChain,
+    onSelectMarket,
+    onSelectSource,
+    onSelectSymbol,
+    selectedOptions,
+    sourceOptions,
+    symbolOptions
+  ]);
+
   return (
     <Card
       title='Revenue Breakdown'
+      id='revenue-breakdown'
       isLoading={isLoading}
       isError={isError}
       className={{
         loading: 'min-h-[inherit]',
-        container: 'min-h-[571px]',
-        content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
+        container: 'border-background min-h-[571px] border',
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-0 lg:px-10 lg:pb-10'
       }}
     >
-      <div className='flex justify-end gap-3 px-0 py-3'>
-        <div className='flex items-center gap-5'>
-          <div className='flex items-center gap-1'>
+      <div className='flex justify-end gap-2 px-5 py-3 lg:hidden'>
+        <div className='flex w-full flex-col items-center justify-end gap-2 sm:flex-row'>
+          <div className='flex w-full items-center gap-2 sm:w-auto'>
+            <Button
+              onClick={openYear}
+              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
+            >
+              <Icon
+                name='group-grid'
+                className='h-[14px] w-[14px] fill-none'
+              />
+              Group
+            </Button>
+            <Button
+              onClick={onFilterOpen}
+              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
+            >
+              <Icon
+                name='filters'
+                className='h-[14px] w-[14px] fill-none'
+              />
+              Filters
+            </Button>
+          </div>
+          <div className='flex w-full items-center gap-2 sm:w-auto'>
+            <Button
+              onClick={onSortOpen}
+              className='bg-secondary-27 text-gray-11 sm:auto shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8'
+            >
+              <Icon
+                name='sort-icon'
+                className='h-[14px] w-[14px]'
+              />
+              Sort
+            </Button>
+            <Button
+              onClick={onMoreOpen}
+              className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
+            >
+              <Icon
+                name='3-dots'
+                className='h-6 w-6 fill-none'
+              />
+            </Button>
+          </div>
+        </div>
+      </div>
+      <div className='hidden justify-end gap-2 px-10 py-3 lg:flex lg:px-0'>
+        <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-2'>
             <MultiSelect
               options={chainOptions || []}
               value={selectedOptions.chain}
@@ -332,9 +492,9 @@ const RevenueBreakDownBlock = ({
               options={yearOptions}
               isOpen={yearOpen}
               selectedValue={selectedYear?.[0] || yearOptions[0] || ''}
-              onToggle={toggleYear}
+              onOpen={openYear}
               onClose={closeYear}
-              onSelect={selectYear}
+              onSelect={selectYearClose}
               // contentClassName='p-[5px]'
               triggerContentClassName='p-[5px]'
               disabled={isLoading}
@@ -350,6 +510,7 @@ const RevenueBreakDownBlock = ({
         <RevenueBreakdown
           data={tableData}
           columns={dynamicColumns}
+          sortType={sortType}
         />
       </View.Condition>
       <View.Condition if={!hasData}>
@@ -358,6 +519,62 @@ const RevenueBreakDownBlock = ({
           text={noDataMessage}
         />
       </View.Condition>
+      <SortDrawer
+        isOpen={isSortOpen}
+        sortType={sortType}
+        columns={revenueBreakdownColumns}
+        onClose={onSortClose}
+        onKeySelect={onKeySelect}
+        onTypeSelect={onTypeSelect}
+      />
+      <Filter
+        isOpen={isFilterOpen}
+        filterOptions={filterOptions}
+        onClose={onFilterClose}
+        onClearAll={handleResetFilters}
+      />
+      <GroupDrawer
+        isOpen={yearOpen}
+        selectedOption={selectedYear?.[0] || yearOptions[0] || ''}
+        options={groupOptionsDto(yearOptions)}
+        onClose={closeYear}
+        onSelect={selectYear}
+      />
+      <Drawer
+        isOpen={isMoreOpen}
+        onClose={onMoreClose}
+      >
+        <Text
+          size='17'
+          weight='700'
+          align='center'
+          className='mb-5'
+        >
+          Actions
+        </Text>
+        <div className='flex flex-col gap-1.5'>
+          <div className='px-3 py-2'>
+            <CSVLink
+              data={tableData}
+              filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
+              onClick={onMoreClose}
+            >
+              <div className='flex items-center gap-1.5'>
+                <Icon
+                  name='download'
+                  className='h-[26px] w-[26px]'
+                />
+                <Text
+                  size='14'
+                  weight='500'
+                >
+                  CSV with the entire historical data
+                </Text>
+              </div>
+            </CSVLink>
+          </div>
+        </div>
+      </Drawer>
     </Card>
   );
 };

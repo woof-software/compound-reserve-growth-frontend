@@ -1,19 +1,57 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import AnnualisedExpenses from '@/components/RunwayPageTable/AnnualisedExpenses';
+import SortDrawer from '@/components/SortDrawer/SortDrawer';
+import { useModal } from '@/shared/hooks/useModal';
 import type { RunwayItem } from '@/shared/hooks/useRunway';
 import { useRunway } from '@/shared/hooks/useRunway';
 import { formatLargeNumber } from '@/shared/lib/utils/utils';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Icon from '@/shared/ui/Icon/Icon';
 
 const useCurrentYear = () => {
   return useMemo(() => new Date().getFullYear(), []);
 };
 
+export const annualisedExpensesColumns = [
+  {
+    accessorKey: 'discipline',
+    header: 'Discipline'
+  },
+  {
+    accessorKey: 'token',
+    header: 'Token'
+  },
+  {
+    accessorKey: 'amount',
+    header: 'Amount (Qty)'
+  },
+  {
+    accessorKey: 'value',
+    header: 'Value ($)'
+  }
+];
+
 const AnnualisedExpensesBlock = () => {
+  const [sortType, setSortType] = useReducer(
+    (prev, next) => ({
+      ...prev,
+      ...next
+    }),
+    { key: '', type: 'asc' }
+  );
+
   const { data: runwayResponse, isLoading, isError } = useRunway();
+
   const currentYear = useCurrentYear();
+
+  const {
+    isOpen: isSortOpen,
+    onOpenModal: onSortOpen,
+    onCloseModal: onSortClose
+  } = useModal();
 
   const processedData = useMemo(() => {
     const data = runwayResponse?.data || [];
@@ -133,6 +171,18 @@ const AnnualisedExpensesBlock = () => {
     };
   }, [runwayResponse, currentYear]);
 
+  const onKeySelect = useCallback((value: string) => {
+    setSortType({
+      key: value
+    });
+  }, []);
+
+  const onTypeSelect = useCallback((value: string) => {
+    setSortType({
+      type: value
+    });
+  }, []);
+
   return (
     <Card
       title='Annualised Expenses'
@@ -140,16 +190,41 @@ const AnnualisedExpensesBlock = () => {
       isLoading={isLoading}
       isError={isError}
       className={{
-        loading: 'min-h-[571px]'
+        loading: 'min-h-[571px]',
+        content: 'p-0 lg:p-10',
+        container: 'border-background border'
       }}
     >
-      <div className='flex justify-between gap-10'>
+      <div className='block px-5 py-3 lg:hidden'>
+        <div className='flex flex-wrap items-center justify-end gap-2'>
+          <Button
+            onClick={onSortOpen}
+            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8'
+          >
+            <Icon
+              name='sort-icon'
+              className='h-[14px] w-[14px]'
+            />
+            Sort
+          </Button>
+        </div>
+        <SortDrawer
+          isOpen={isSortOpen}
+          sortType={sortType}
+          columns={annualisedExpensesColumns}
+          onClose={onSortClose}
+          onKeySelect={onKeySelect}
+          onTypeSelect={onTypeSelect}
+        />
+      </div>
+      <div className='flex flex-col-reverse justify-between gap-8 lg:flex-row lg:gap-10'>
         <AnnualisedExpenses
+          sortType={sortType}
           data={processedData.tableData}
           footerData={processedData.footerData}
         />
         <PieChart
-          className='max-h-[400px] max-w-[336.5px]'
+          className='max-w-full lg:max-h-[400px] lg:max-w-[336.5px]'
           data={processedData.pieData}
         />
       </div>

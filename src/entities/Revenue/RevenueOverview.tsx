@@ -1,29 +1,38 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState
+} from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import RevenueOverviewUSD, {
-  TableRowData
+  DATE_TYPE_TABS,
+  DateType,
+  Period,
+  PeriodMap,
+  ROLLING_TABS,
+  TableRowData,
+  TO_DATE_TABS,
+  toDateHeaderMap,
+  ToDateTab
 } from '@/components/RevenuePageTable/RevenueOverviewUSD';
+import SortDrawer from '@/components/SortDrawer/SortDrawer';
+import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
   capitalizeFirstLetter,
   formatPrice,
+  formatUSD,
   networkColorMap
 } from '@/shared/lib/utils/utils';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
-
-const formatUSD = (num: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(num);
-};
 
 const getStartDateForPeriod = (
   period: string,
@@ -60,21 +69,6 @@ const getStartDateForPeriod = (
   return now;
 };
 
-const ROLLING_TABS = ['7D', '30D', '90D', '180D', '365D'] as const;
-const TO_DATE_TABS = ['WTD', 'MTD', 'YTD'] as const;
-const DATE_TYPE_TABS = ['Rolling', 'To Date'] as const;
-
-type RollingTab = (typeof ROLLING_TABS)[number];
-type ToDateTab = (typeof TO_DATE_TABS)[number];
-type DateType = (typeof DATE_TYPE_TABS)[number];
-type Period = RollingTab | ToDateTab;
-
-const toDateHeaderMap: Record<ToDateTab, string> = {
-  WTD: 'Week to Date',
-  MTD: 'Month to Date',
-  YTD: 'Year to Date'
-};
-
 const createTableColumns = (
   periods: readonly string[],
   dateType: 'Rolling' | 'To Date'
@@ -101,7 +95,12 @@ const createTableColumns = (
             className='h-6 w-6'
             folder='network'
           />
-          <Text size='13'>{capitalizeFirstLetter(row.original.chain)}</Text>
+          <Text
+            size='13'
+            weight='500'
+          >
+            {capitalizeFirstLetter(row.original.chain)}
+          </Text>
         </div>
       )
     },
@@ -118,23 +117,35 @@ function isPeriod(value: string): value is Period {
   return allPeriods.includes(value);
 }
 
+const NO_DATA_AVAILABLE = 'No data available';
+
 const RevenueOverview = ({
   revenueData: rawData,
   isLoading,
   isError
 }: RevenuePageProps) => {
+  const [sortType, setSortType] = useReducer(
+    (prev, next) => ({
+      ...prev,
+      ...next
+    }),
+    { key: '', type: 'asc' }
+  );
+
   const [dateType, setDateType] = useState<DateType>('Rolling');
   const [period, setPeriod] = useState<Period>('7D');
 
-  const primaryTabs = dateType === 'Rolling' ? ROLLING_TABS : TO_DATE_TABS;
+  const [totalFooterData, setTotalFooterData] = useState<PeriodMap | null>(
+    null
+  );
 
-  useEffect(() => {
-    if (dateType === 'To Date') {
-      setPeriod(TO_DATE_TABS[0]);
-    } else {
-      setPeriod(ROLLING_TABS[0]);
-    }
-  }, [dateType]);
+  const {
+    isOpen: isSortOpen,
+    onOpenModal: onSortOpen,
+    onCloseModal: onSortClose
+  } = useModal();
+
+  const primaryTabs = dateType === 'Rolling' ? ROLLING_TABS : TO_DATE_TABS;
 
   const stableTableColumns = useMemo(() => {
     return createTableColumns(primaryTabs, dateType);
@@ -183,17 +194,19 @@ const RevenueOverview = ({
       });
     }
 
+    setTotalFooterData(totals);
+
     const tableData: TableRowData[] = Array.from(tableDataMap.values());
 
     const footerContent = (
       <tr>
-        <td className='text-primary-14 px-[5px] py-[13px] text-left text-[11px]'>
+        <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
           Total
         </td>
         {primaryTabs.map((p) => (
           <td
             key={p}
-            className='text-primary-14 px-[5px] py-[13px] text-left text-[11px]'
+            className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'
           >
             {formatUSD(totals[p] || 0)}
           </td>
@@ -226,6 +239,28 @@ const RevenueOverview = ({
     return { tableData, pieData, footerContent };
   }, [rawData, dateType, period, primaryTabs]);
 
+  const revenueOverviewColumns = useMemo(() => {
+    const periodColumns = primaryTabs.map((period) => ({
+      accessorKey: period,
+      header:
+        dateType === 'Rolling'
+          ? `Rolling ${period.toLowerCase()}`
+          : toDateHeaderMap[period as ToDateTab] || period
+    }));
+
+    return [
+      {
+        accessorKey: 'chain',
+        header: 'Chain'
+      },
+      ...periodColumns
+    ];
+  }, [primaryTabs, dateType]);
+
+  const hasData = processedData.tableData.length > 0;
+
+  const tableKey = `${dateType}-${primaryTabs.join('-')}`;
+
   const handleDateTypeChange = useCallback(
     (newType: string) => {
       if (isDateType(newType) && newType !== dateType) {
@@ -241,10 +276,25 @@ const RevenueOverview = ({
     }
   }, []);
 
-  const hasData = processedData.tableData.length > 0;
-  const noDataMessage = 'No data available';
+  const onKeySelect = useCallback((value: string) => {
+    setSortType({
+      key: value
+    });
+  }, []);
 
-  const tableKey = `${dateType}-${primaryTabs.join('-')}`;
+  const onTypeSelect = useCallback((value: string) => {
+    setSortType({
+      type: value
+    });
+  }, []);
+
+  useEffect(() => {
+    if (dateType === 'To Date') {
+      setPeriod(TO_DATE_TABS[0]);
+    } else {
+      setPeriod(ROLLING_TABS[0]);
+    }
+  }, [dateType]);
 
   return (
     <Card
@@ -254,22 +304,41 @@ const RevenueOverview = ({
       isError={isError}
       className={{
         loading: 'min-h-[inherit]',
-        container: 'min-h-[571px]',
-        content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
+        container: 'border-background min-h-[571px] border',
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-0 lg:px-10 lg:pb-10'
       }}
     >
-      <div className='flex justify-end gap-3 px-0 py-3'>
+      <div className='flex flex-col-reverse justify-end gap-2 px-5 py-3 sm:flex-row lg:px-0'>
         <TabsGroup
+          className={{
+            list: 'w-full sm:w-auto'
+          }}
           key={dateType}
           tabs={[...primaryTabs]}
           value={period}
           onTabChange={handlePeriodChange}
         />
-        <TabsGroup
-          tabs={[...DATE_TYPE_TABS]}
-          value={dateType}
-          onTabChange={handleDateTypeChange}
-        />
+        <div className='flex gap-2'>
+          <TabsGroup
+            className={{
+              container: 'w-1/2 sm:w-auto',
+              list: 'w-full sm:w-auto'
+            }}
+            tabs={[...DATE_TYPE_TABS]}
+            value={dateType}
+            onTabChange={handleDateTypeChange}
+          />
+          <Button
+            onClick={onSortOpen}
+            className='bg-secondary-27 sm:w-auot text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
+          >
+            <Icon
+              name='sort-icon'
+              className='h-[14px] w-[14px]'
+            />
+            Sort
+          </Button>
+        </div>
       </div>
       {!isLoading && !isError && !hasData ? (
         <div className='flex h-[400px] items-center justify-center'>
@@ -277,23 +346,34 @@ const RevenueOverview = ({
             size='12'
             className='text-primary-14'
           >
-            {noDataMessage}
+            {NO_DATA_AVAILABLE}
           </Text>
         </div>
       ) : (
-        <div className='flex items-start justify-between'>
+        <div className='flex flex-col-reverse items-start justify-between gap-8 lg:flex-row'>
           <RevenueOverviewUSD
             key={tableKey}
             data={processedData.tableData}
             columns={stableTableColumns}
             footerContent={processedData.footerContent}
+            dateType={dateType}
+            totalFooterData={totalFooterData}
+            sortType={sortType}
           />
           <PieChart
-            className='max-h-[400px] max-w-[336.5px]'
+            className='max-h-[400px] w-full max-w-full lg:max-w-[336.5px]'
             data={processedData.pieData}
           />
         </div>
       )}
+      <SortDrawer
+        isOpen={isSortOpen}
+        onClose={onSortClose}
+        sortType={sortType}
+        columns={revenueOverviewColumns}
+        onTypeSelect={onTypeSelect}
+        onKeySelect={onKeySelect}
+      />
     </Card>
   );
 };

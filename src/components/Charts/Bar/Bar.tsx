@@ -1,6 +1,10 @@
-import React, { FC, useEffect, useRef } from 'react';
+import React, { FC, useEffect, useMemo, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+
+import Button from '@/shared/ui/Button/Button';
+import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 interface ChartData {
   name: string;
@@ -10,10 +14,17 @@ interface ChartData {
 
 interface CryptoChartProps {
   data: ChartData[];
+
+  onClear: () => void;
 }
 
-const CryptoChart: FC<CryptoChartProps> = ({ data }) => {
+const CryptoChart: FC<CryptoChartProps> = ({ data, onClear }) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
+
+  const maxValue = useMemo(
+    () => (data.length ? Math.max(...data.map((item) => item.value)) : 0),
+    [data]
+  );
 
   const chartOptions: Highcharts.Options = {
     chart: {
@@ -45,12 +56,15 @@ const CryptoChart: FC<CryptoChartProps> = ({ data }) => {
     },
     yAxis: {
       type: 'logarithmic',
+      max: maxValue,
+      endOnTick: true,
+      maxPadding: 0,
       title: {
         text: undefined
       },
       gridLineDashStyle: 'Dash',
-      gridLineColor: '#7a8a99',
-      gridLineWidth: 0.5,
+      gridLineColor: 'var(--color-secondary-13)',
+      gridLineWidth: 1,
       labels: {
         style: {
           fontSize: '11px',
@@ -169,11 +183,32 @@ const CryptoChart: FC<CryptoChartProps> = ({ data }) => {
   }, [data]);
 
   return (
-    <HighchartsReact
-      ref={chartRef}
-      highcharts={Highcharts}
-      options={chartOptions}
-    />
+    <>
+      <View.Condition if={Boolean(data.length > 1)}>
+        <HighchartsReact
+          ref={chartRef}
+          highcharts={Highcharts}
+          options={chartOptions}
+        />
+      </View.Condition>
+      <View.Condition if={Boolean(data.length <= 1)}>
+        <div className='flex min-w-[400px] flex-col items-center justify-center gap-3.5'>
+          <Text
+            size='11'
+            weight='500'
+            className='text-secondary-32'
+          >
+            Select more options in order to see the Graph comparison
+          </Text>
+          <Button
+            className='bg-aqua-green h-[36px] w-[108px] rounded-lg text-[11px] font-semibold'
+            onClick={onClear}
+          >
+            Reset Filters
+          </Button>
+        </div>
+      </View.Condition>
+    </>
   );
 };
 

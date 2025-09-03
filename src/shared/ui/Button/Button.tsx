@@ -12,11 +12,17 @@ const Button: FC<ButtonProps> = ({
   rightIcon,
   children,
   className,
+  disabled,
   ...props
 }) => {
   return (
     <button
-      className={cn('flex items-center justify-center', className)}
+      disabled={disabled}
+      className={cn(
+        'flex cursor-pointer items-center justify-center transition',
+        { 'cursor-not-allowed': disabled },
+        className
+      )}
       {...props}
     >
       {leftIcon}

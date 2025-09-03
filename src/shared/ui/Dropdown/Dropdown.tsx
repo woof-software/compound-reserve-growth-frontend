@@ -4,6 +4,7 @@ import {
   PropsWithChildren,
   ReactNode,
   RefObject,
+  useEffect,
   useRef,
   useState
 } from 'react';
@@ -18,9 +19,15 @@ import CheckStroke from '@/assets/svg/check-stroke.svg';
 
 interface DropdownProps extends PropsWithChildren {
   triggerContent: ReactNode;
+
   open: boolean;
-  onToggle: () => void;
+
+  isDisabled?: boolean;
+
+  onOpen: () => void;
+
   onClose: () => void;
+
   contentClassName?: string;
 }
 
@@ -41,18 +48,31 @@ interface TriggerContentProps {
 }
 
 const useDropdown = (type: 'single' | 'multiple') => {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const [selectedValue, setSelectedValue] = useState<string[] | null>(null);
 
-  const toggle = () => setOpen((prev) => !prev);
-  const close = () => setOpen(false);
+  const toggle = () => setIsOpen((prev) => !prev);
+  const close = () => setIsOpen(false);
+  const open = () => setIsOpen(true);
 
   const select = (value: string) => {
     if (type === 'single') {
       setSelectedValue([value]);
+    } else {
+      const newValues = selectedValue?.includes(value)
+        ? selectedValue?.filter((v) => v !== value)
+        : [...(selectedValue || []), value];
 
-      setOpen(false);
+      setSelectedValue(newValues);
+    }
+  };
+
+  const selectClose = (value: string) => {
+    if (type === 'single') {
+      setSelectedValue([value]);
+
+      setIsOpen(false);
     } else {
       const newValues = selectedValue?.includes(value)
         ? selectedValue?.filter((v) => v !== value)
@@ -63,17 +83,20 @@ const useDropdown = (type: 'single' | 'multiple') => {
   };
 
   return {
-    open,
+    isOpen,
     selectedValue,
     toggle,
+    open,
     close,
-    select
+    select,
+    selectClose
   };
 };
 
 const Dropdown: FC<DropdownProps> = ({
   open,
-  onToggle,
+  isDisabled,
+  onOpen,
   onClose,
   triggerContent,
   children,
@@ -81,26 +104,55 @@ const Dropdown: FC<DropdownProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const onTriggerClick = () => {
+    if (open) {
+      onClose();
+    } else {
+      onOpen();
+    }
+  };
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open, onClose]);
+
   useClickOutside(containerRef as RefObject<HTMLDivElement>, onClose);
 
   return (
     <div
-      className='relative z-10 w-fit'
       ref={containerRef}
+      className={cn('relative z-10 w-fit', {
+        'pointer-events-none': isDisabled
+      })}
     >
       <div>
         <div
           className='cursor-pointer'
-          onClick={onToggle}
+          onClick={onTriggerClick}
+          onMouseDown={(e) => e.preventDefault()}
         >
           {triggerContent}
         </div>
         <View.Condition if={open}>
           <div
             className={cn(
-              'hide-scrollbar shadow-10 border-secondary-18 bg-primary-15 absolute top-10 right-0 grid max-h-[234px] min-w-[168px] gap-0.5 overflow-y-auto rounded-lg border border-solid p-2',
+              'hide-scrollbar shadow-10 border-secondary-18 bg-primary-15 hide-scrollbar absolute top-10 right-0 grid max-h-[234px] min-w-[168px] gap-0.5 overflow-y-auto rounded-lg border border-solid p-2',
               contentClassName
             )}
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
           >
             {children}
           </div>
@@ -123,7 +175,9 @@ const DropdownItem: FC<DropdownItemProps> = ({
           'bg-secondary-12': isSelected
         }
       )}
-      onClick={() => onSelect(asset)}
+      onClick={() => {
+        onSelect(asset);
+      }}
     >
       <Text
         size='11'

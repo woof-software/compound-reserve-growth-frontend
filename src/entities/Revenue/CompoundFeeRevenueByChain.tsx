@@ -1,21 +1,39 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState
+} from 'react';
 
 import CompoundFeeRevenuebyChainComponent, {
+  Interval,
   ProcessedRevenueData as TableData
 } from '@/components/RevenuePageTable/CompoundFeeRevenuebyChain';
-import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
+import SingleDropdown, {
+  SingleDrawer
+} from '@/components/SingleDropdown/SingleDropdown';
+import SortDrawer from '@/components/SortDrawer/SortDrawer';
+import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
+import { cn } from '@/shared/lib/classNames/classNames';
 import {
   capitalizeFirstLetter,
   ChartDataItem,
+  formatCurrencyValue,
   longMonthNames,
   shortMonthNames
 } from '@/shared/lib/utils/utils';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
+import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
+import { Radio } from '@/shared/ui/RadioButton/RadioButton';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 export interface ProcessedRevenueData {
   chain: string;
@@ -34,29 +52,35 @@ export interface PrecomputedViews {
   weekly: Record<string, View>;
 }
 
-const intervalOptions = ['Quarterly', 'Monthly', 'Weekly'];
+interface GroupDrawerProps {
+  isOpen: boolean;
 
-const formatCurrencyValue = (value: unknown): string => {
-  const num = Number(value);
+  onClose: () => void;
 
-  if (
-    value === null ||
-    typeof value === 'undefined' ||
-    isNaN(num) ||
-    num === 0
-  ) {
-    return '-';
-  }
+  interval: {
+    label: string;
 
-  const isNegative = num < 0;
-  const absValue = Math.abs(num);
+    options: Interval[];
 
-  const formattedNumber = new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 0
-  }).format(absValue);
+    selectedValue: Interval;
+  };
 
-  return isNegative ? `-$${formattedNumber}` : `$${formattedNumber}`;
-};
+  groupDynamic: {
+    label: string;
+
+    options: string[];
+
+    selectedValue: string;
+  };
+
+  onIntervalSelect: (value: Interval) => void;
+
+  onDynamicSelect: (value: string) => void;
+}
+
+const intervalOptions: Interval[] = ['Quarterly', 'Monthly', 'Weekly'];
+
+const NO_DATA_AVAILABLE = 'No data available';
 
 export function precomputeViews(
   rawData: ChartDataItem[]
@@ -236,8 +260,39 @@ const CompoundFeeRevenueByChain = ({
   const intervalDropdown = useDropdown('single');
   const periodDropdown = useDropdown('single');
 
-  const [selectedInterval, setSelectedInterval] = useState(intervalOptions[0]);
+  const [selectedInterval, setSelectedInterval] = useState<Interval>(
+    intervalOptions[0]
+  );
+
   const [selectedPeriod, setSelectedPeriod] = useState<string | undefined>();
+
+  const [sortType, setSortType] = useReducer(
+    (prev, next) => ({
+      ...prev,
+      ...next
+    }),
+    { key: '', type: 'asc' }
+  );
+
+  const {
+    isOpen: isSortOpen,
+    onOpenModal: onSortOpen,
+    onCloseModal: onSortClose
+  } = useModal();
+
+  const {
+    isOpen: isGroupByOpen,
+    onOpenModal: onGroupByOpen,
+    onCloseModal: onGroupByClose
+  } = useModal();
+
+  const groupInterval = useMemo(() => {
+    return {
+      label: 'Interval',
+      options: intervalOptions,
+      selectedValue: selectedInterval
+    };
+  }, [selectedInterval]);
 
   const precomputedViews = useMemo(
     () => precomputeViews(revenueData || []),
@@ -249,17 +304,13 @@ const CompoundFeeRevenueByChain = ({
     [precomputedViews, selectedInterval]
   );
 
-  useEffect(() => {
-    if (precomputedViews && !selectedPeriod) {
-      const initialOptions = generateOptions(
-        precomputedViews,
-        selectedInterval
-      );
-      if (initialOptions.options.length > 0) {
-        setSelectedPeriod(initialOptions.options[0]);
-      }
-    }
-  }, [precomputedViews, selectedPeriod, selectedInterval]);
+  const groupDynamic = useMemo(() => {
+    return {
+      label: dynamicOptions.label,
+      options: dynamicOptions.options,
+      selectedValue: selectedPeriod || ''
+    };
+  }, [dynamicOptions, selectedPeriod]);
 
   const currentView = useMemo(() => {
     if (!precomputedViews || !selectedPeriod) {
@@ -286,7 +337,12 @@ const CompoundFeeRevenueByChain = ({
               className='h-6 w-6'
               folder='network'
             />
-            <Text size='13'>{capitalizeFirstLetter(row.original.chain)}</Text>
+            <Text
+              size='13'
+              weight='500'
+            >
+              {capitalizeFirstLetter(row.original.chain)}
+            </Text>
           </div>
         )
       },
@@ -296,12 +352,51 @@ const CompoundFeeRevenueByChain = ({
     return { ...viewData, columns: finalColumns };
   }, [precomputedViews, selectedInterval, selectedPeriod]);
 
+  const compoundFeeRevenueByCainColumns = useMemo(() => {
+    if (!precomputedViews || !selectedPeriod) {
+      return [
+        {
+          accessorKey: 'chain',
+          header: 'Chain'
+        }
+      ];
+    }
+
+    const viewData: View | undefined =
+      precomputedViews[
+        selectedInterval.toLowerCase() as keyof PrecomputedViews
+      ]?.[selectedPeriod];
+
+    const columns =
+      viewData?.columns?.map((el) => ({
+        accessorKey: el.accessorKey,
+        header: el.header
+      })) || [];
+
+    return [
+      {
+        accessorKey: 'chain',
+        header: 'Chain'
+      },
+      ...columns
+    ];
+  }, [precomputedViews, selectedPeriod, selectedInterval]);
+
+  const hasData = currentView.tableData.length > 0;
+
+  const sortColumns = useMemo(() => {
+    return compoundFeeRevenueByCainColumns.map((col) => ({
+      accessorKey: String(col.accessorKey),
+      header: typeof col.header === 'string' ? col.header : ''
+    }));
+  }, [compoundFeeRevenueByCainColumns]);
+
   const handleIntervalSelect = (newInterval: string) => {
     const newOptions = generateOptions(precomputedViews, newInterval);
     const newDefaultPeriod =
       newOptions.options.length > 0 ? newOptions.options[0] : undefined;
 
-    setSelectedInterval(newInterval);
+    setSelectedInterval(newInterval as Interval);
     setSelectedPeriod(newDefaultPeriod);
     intervalDropdown.close();
   };
@@ -311,8 +406,29 @@ const CompoundFeeRevenueByChain = ({
     periodDropdown.close();
   };
 
-  const hasData = currentView.tableData.length > 0;
-  const noDataMessage = 'No data available';
+  const onKeySelect = useCallback((value: string) => {
+    setSortType({
+      key: value
+    });
+  }, []);
+
+  const onTypeSelect = useCallback((value: string) => {
+    setSortType({
+      type: value
+    });
+  }, []);
+
+  useEffect(() => {
+    if (precomputedViews && !selectedPeriod) {
+      const initialOptions = generateOptions(
+        precomputedViews,
+        selectedInterval
+      );
+      if (initialOptions.options.length > 0) {
+        setSelectedPeriod(initialOptions.options[0]);
+      }
+    }
+  }, [precomputedViews, selectedPeriod, selectedInterval]);
 
   return (
     <Card
@@ -321,12 +437,13 @@ const CompoundFeeRevenueByChain = ({
       isLoading={isLoading}
       isError={isError}
       className={{
+        container: 'border-background border',
         loading: 'min-h-[571px]',
-        content: 'flex flex-col gap-3 px-10 pt-0 pb-10'
+        content: 'flex flex-col px-0 pt-0 pb-0 md:gap-3 lg:px-10 lg:pb-10'
       }}
     >
-      <div className='flex justify-end gap-3 px-0 py-3'>
-        <div className='flex items-center gap-1'>
+      <div className='flex flex-wrap justify-end gap-2 px-5 py-3 md:px-10 lg:px-0'>
+        <div className='hidden items-center gap-1 lg:flex'>
           <Text
             tag='span'
             size='11'
@@ -336,17 +453,31 @@ const CompoundFeeRevenueByChain = ({
           >
             Interval
           </Text>
-          <SingleDropdown
-            options={intervalOptions}
-            isOpen={intervalDropdown.open}
-            onToggle={intervalDropdown.toggle}
-            onClose={intervalDropdown.close}
-            onSelect={handleIntervalSelect}
-            selectedValue={selectedInterval}
-            triggerContentClassName='p-[5px]'
-          />
+          <div className='hidden lg:block'>
+            <SingleDropdown
+              options={intervalOptions}
+              isOpen={intervalDropdown.isOpen}
+              onOpen={intervalDropdown.open}
+              onClose={intervalDropdown.close}
+              onSelect={handleIntervalSelect}
+              selectedValue={selectedInterval}
+              triggerContentClassName='p-[5px]'
+            />
+          </div>
+          <div className='block lg:hidden'>
+            <SingleDrawer
+              placeholder='Interval'
+              options={intervalOptions}
+              isOpen={intervalDropdown.isOpen}
+              onOpen={intervalDropdown.open}
+              onClose={intervalDropdown.close}
+              onSelect={handleIntervalSelect}
+              selectedValue={selectedInterval}
+              triggerContentClassName='p-[5px]'
+            />
+          </div>
         </div>
-        <div className='flex items-center gap-1'>
+        <div className='hidden items-center gap-1 lg:flex'>
           <Text
             tag='span'
             size='11'
@@ -356,15 +487,51 @@ const CompoundFeeRevenueByChain = ({
           >
             {dynamicOptions.label}
           </Text>
-          <SingleDropdown
-            options={dynamicOptions.options}
-            isOpen={periodDropdown.open}
-            onToggle={periodDropdown.toggle}
-            onClose={periodDropdown.close}
-            onSelect={handlePeriodSelect}
-            selectedValue={selectedPeriod}
-            triggerContentClassName='p-[5px]'
-          />
+          <div className='hidden lg:block'>
+            <SingleDropdown
+              options={dynamicOptions.options}
+              isOpen={periodDropdown.isOpen}
+              onOpen={periodDropdown.open}
+              onClose={periodDropdown.close}
+              onSelect={handlePeriodSelect}
+              selectedValue={selectedPeriod}
+              triggerContentClassName='p-[5px]'
+            />
+          </div>
+          <div className='block lg:hidden'>
+            <SingleDrawer
+              placeholder={dynamicOptions.label}
+              options={dynamicOptions.options}
+              isOpen={periodDropdown.isOpen}
+              onOpen={periodDropdown.open}
+              onClose={periodDropdown.close}
+              onSelect={handlePeriodSelect}
+              selectedValue={selectedPeriod}
+              triggerContentClassName='p-[5px]'
+            />
+          </div>
+        </div>
+        <div className='flex w-full items-center justify-end gap-2 lg:hidden'>
+          <Button
+            onClick={onGroupByOpen}
+            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
+          >
+            <Icon
+              name='group-grid'
+              className='h-[14px] w-[14px] fill-none'
+            />
+            Group
+          </Button>
+          <Button
+            onClick={onSortOpen}
+            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
+          >
+            <Icon
+              name='sort-icon'
+              className='h-[14px] w-[14px]'
+            />
+            Sort
+          </Button>
         </div>
       </div>
       {!isLoading && !isError && !hasData ? (
@@ -373,17 +540,250 @@ const CompoundFeeRevenueByChain = ({
             size='12'
             className='text-primary-14'
           >
-            {noDataMessage}
+            {NO_DATA_AVAILABLE}
           </Text>
         </div>
       ) : (
         <CompoundFeeRevenuebyChainComponent
+          sortType={sortType}
           data={currentView.tableData}
           columns={currentView.columns}
           totals={currentView.totals}
+          selectedInterval={selectedInterval}
         />
       )}
+      <SortDrawer
+        isOpen={isSortOpen}
+        sortType={sortType}
+        columns={sortColumns}
+        onClose={onSortClose}
+        onKeySelect={onKeySelect}
+        onTypeSelect={onTypeSelect}
+      />
+      <GroupDrawer
+        isOpen={isGroupByOpen}
+        onClose={onGroupByClose}
+        interval={groupInterval}
+        groupDynamic={groupDynamic}
+        onIntervalSelect={handleIntervalSelect}
+        onDynamicSelect={handlePeriodSelect}
+      />
     </Card>
+  );
+};
+
+const GroupDrawer = ({
+  isOpen,
+  interval,
+  groupDynamic,
+  onIntervalSelect,
+  onDynamicSelect,
+  onClose
+}: GroupDrawerProps) => {
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+
+  const onSelectedFilterClose = useCallback(() => {
+    setSelectedKey(null);
+  }, []);
+
+  const onSelectFilter = useCallback((selectedFilter: string) => {
+    setSelectedKey(selectedFilter);
+  }, []);
+
+  const onIntervalSelectClick = useCallback(
+    (selectedInterval: Interval) => {
+      onIntervalSelect(selectedInterval);
+
+      onClose();
+
+      setSelectedKey(null);
+    },
+    [onClose, onIntervalSelect]
+  );
+
+  const onDynamicSelectClick = useCallback(
+    (selectedInterval: string) => {
+      onDynamicSelect(selectedInterval);
+
+      onClose();
+
+      setSelectedKey(null);
+    },
+    [onClose, onDynamicSelect]
+  );
+
+  const onDrawerClose = useCallback(() => {
+    onClose();
+
+    setSelectedKey(null);
+  }, [onClose]);
+
+  return (
+    <Drawer
+      isOpen={isOpen}
+      onClose={onDrawerClose}
+    >
+      <View.Condition if={!Boolean(selectedKey)}>
+        <Text
+          size='17'
+          weight='700'
+          lineHeight='140'
+          align='center'
+          className='mb-5 w-full'
+        >
+          Group
+        </Text>
+        <div className='grid gap-3'>
+          <div
+            className='flex h-[42px] cursor-pointer items-center justify-between px-3 py-2.5'
+            onClick={() => onSelectFilter(interval.label)}
+          >
+            <div className='flex items-center gap-1.5'>
+              <Icon
+                name='plus'
+                className='h-2.5 w-2.5'
+                color={cn('primary-14', {
+                  'secondary-41': Boolean(interval.selectedValue)
+                })}
+              />
+              <Text
+                size='14'
+                weight='500'
+                className={cn('text-primary-14 text-sm font-medium', {
+                  'text-secondary-41': Boolean(interval.selectedValue)
+                })}
+              >
+                {interval.label}
+              </Text>
+            </div>
+          </div>
+          <div
+            className='flex h-[42px] cursor-pointer items-center justify-between px-3 py-2.5'
+            onClick={() => onSelectFilter(groupDynamic.label)}
+          >
+            <div className='flex items-center gap-1.5'>
+              <Icon
+                name='plus'
+                className='h-2.5 w-2.5'
+                color={cn('primary-14', {
+                  'secondary-41': Boolean(groupDynamic.selectedValue)
+                })}
+              />
+              <Text
+                size='14'
+                weight='500'
+                className={cn('text-primary-14 text-sm font-medium', {
+                  'text-secondary-41': Boolean(groupDynamic.selectedValue)
+                })}
+              >
+                {groupDynamic.label}
+              </Text>
+            </div>
+          </div>
+        </div>
+      </View.Condition>
+      <View.Condition if={Boolean(selectedKey)}>
+        <View.Condition if={selectedKey === interval.label}>
+          <div className='mb-8 flex items-center'>
+            <Button onClick={onSelectedFilterClose}>
+              <Icon
+                name='arrow-line'
+                className='h-6 w-6'
+              />
+            </Button>
+            <Text
+              size='17'
+              weight='700'
+              lineHeight='140'
+              align='center'
+              className='w-[calc(100%-24px)]'
+            >
+              {interval.label}
+            </Text>
+          </div>
+          <div className='hide-scrollbar mt-8 max-h-[450px] overflow-y-auto'>
+            <Radio.Group
+              className='gap-1.5'
+              direction='vertical'
+              value={interval.selectedValue}
+              onChange={(v) => onIntervalSelectClick(v as any)}
+            >
+              <Each
+                data={interval.options}
+                render={(option, index) => (
+                  <Radio.Item
+                    key={index}
+                    className={cn('p-3', {
+                      'bg-secondary-38 rounded-lg':
+                        interval.selectedValue === option
+                    })}
+                    value={option}
+                    label={
+                      <Radio.Label
+                        className={cn({
+                          'text-secondary-28': interval.selectedValue === option
+                        })}
+                        label={option}
+                      />
+                    }
+                  />
+                )}
+              />
+            </Radio.Group>
+          </div>
+        </View.Condition>
+        <View.Condition if={selectedKey === groupDynamic.label}>
+          <div className='mb-8 flex items-center'>
+            <Button onClick={onSelectedFilterClose}>
+              <Icon
+                name='arrow-line'
+                className='h-6 w-6'
+              />
+            </Button>
+            <Text
+              size='17'
+              weight='700'
+              lineHeight='140'
+              align='center'
+              className='w-[calc(100%-24px)]'
+            >
+              {groupDynamic.label}
+            </Text>
+          </div>
+          <div className='hide-scrollbar mt-8 max-h-[450px] overflow-y-auto'>
+            <Radio.Group
+              className='gap-1.5'
+              direction='vertical'
+              value={groupDynamic.selectedValue}
+              onChange={(v) => onDynamicSelectClick(v as any)}
+            >
+              <Each
+                data={groupDynamic.options}
+                render={(option, index) => (
+                  <Radio.Item
+                    key={index}
+                    className={cn('p-3', {
+                      'bg-secondary-38 rounded-lg':
+                        groupDynamic.selectedValue === option
+                    })}
+                    value={option}
+                    label={
+                      <Radio.Label
+                        className={cn({
+                          'text-secondary-28':
+                            groupDynamic.selectedValue === option
+                        })}
+                        label={option}
+                      />
+                    }
+                  />
+                )}
+              />
+            </Radio.Group>
+          </div>
+        </View.Condition>
+      </View.Condition>
+    </Drawer>
   );
 };
 

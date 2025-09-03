@@ -38,9 +38,6 @@ const ValueMetricField = ({
     negative: 'text-red-11 bg-red-10'
   };
 
-  const formattedBadge =
-    badge && badge.startsWith('$-') ? `-${badge.replace('-', '')}` : badge;
-
   return (
     <div className={cn('flex flex-col gap-3.5', className?.container)}>
       <View.Condition if={Boolean(icon || iconText)}>
@@ -60,12 +57,12 @@ const ValueMetricField = ({
           </View.Condition>
         </div>
       </View.Condition>
-      <div className={cn('flex flex-col gap-2', className?.content)}>
-        <div className='flex items-center gap-3.5'>
+      <div className={cn('flex flex-col gap-5 lg:gap-2', className?.content)}>
+        <div className='flex flex-col flex-wrap items-start gap-2.5 md:flex-row md:items-center md:gap-3.5'>
           <Text
             size='32'
             weight='700'
-            lineHeight='38'
+            lineHeight='35'
             className={cn(className?.value)}
           >
             {value}
@@ -79,7 +76,7 @@ const ValueMetricField = ({
                   className?.badge
                 )}
               >
-                {formattedBadge}
+                {badge}
               </div>
             </Tooltip>
           </View.Condition>
@@ -87,8 +84,7 @@ const ValueMetricField = ({
         <Text
           size='11'
           weight='500'
-          lineHeight='27'
-          className={cn('text-primary-13', className?.label)}
+          className={cn('text-primary-13 leading-none', className?.label)}
         >
           {label}
         </Text>

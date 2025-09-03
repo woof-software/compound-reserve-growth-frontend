@@ -5,17 +5,58 @@ Calculation logic for the "Current Initiatives" block:
 3. Pie Chart Data: The total values (`item.value`) are grouped and summed by the initiative's discipline to show the total expense per discipline.
 4. Values Used: The full contract values (`item.value` and `item.amount`) are used, not the annualised equivalents.
 */
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import CurrentInitiatives from '@/components/RunwayPageTable/CurrentInitiatives';
+import SortDrawer from '@/components/SortDrawer/SortDrawer';
+import { useModal } from '@/shared/hooks/useModal';
 import type { RunwayItem } from '@/shared/hooks/useRunway';
 import { useRunway } from '@/shared/hooks/useRunway';
 import { formatPrice } from '@/shared/lib/utils/utils';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Icon from '@/shared/ui/Icon/Icon';
+
+export const currentInitiativesColumns = [
+  {
+    accessorKey: 'initiative',
+    header: 'Initiative'
+  },
+  {
+    accessorKey: 'discipline',
+    header: 'discipline'
+  },
+  {
+    accessorKey: 'token',
+    header: 'Token'
+  },
+  {
+    accessorKey: 'amount',
+    header: 'Amount (Qty)'
+  },
+  {
+    accessorKey: 'value',
+    header: 'Value ($)'
+  }
+];
 
 const CurrentInitiativesBlock = () => {
+  const [sortType, setSortType] = useReducer(
+    (prev, next) => ({
+      ...prev,
+      ...next
+    }),
+    { key: '', type: 'asc' }
+  );
+
   const { data: apiResponse, isLoading, isError } = useRunway();
+
+  const {
+    isOpen: isSortOpen,
+    onOpenModal: onSortOpen,
+    onCloseModal: onSortClose
+  } = useModal();
 
   const processedData = useMemo(() => {
     const data = apiResponse?.data || [];
@@ -80,6 +121,18 @@ const CurrentInitiativesBlock = () => {
     return { tableData, footerData, pieData };
   }, [apiResponse]);
 
+  const onKeySelect = useCallback((value: string) => {
+    setSortType({
+      key: value
+    });
+  }, []);
+
+  const onTypeSelect = useCallback((value: string) => {
+    setSortType({
+      type: value
+    });
+  }, []);
+
   return (
     <Card
       title='Current Initiatives'
@@ -87,16 +140,41 @@ const CurrentInitiativesBlock = () => {
       isLoading={isLoading}
       isError={isError}
       className={{
-        loading: 'min-h-[571px]'
+        loading: 'min-h-[571px]',
+        content: 'p-0 lg:px-10 lg:py-10',
+        container: 'border-background border'
       }}
     >
-      <div className='flex justify-between gap-10'>
+      <div className='block px-5 py-3 lg:hidden'>
+        <div className='flex flex-wrap items-center justify-end gap-2'>
+          <Button
+            onClick={onSortOpen}
+            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8'
+          >
+            <Icon
+              name='sort-icon'
+              className='h-[14px] w-[14px]'
+            />
+            Sort
+          </Button>
+        </div>
+        <SortDrawer
+          isOpen={isSortOpen}
+          sortType={sortType}
+          columns={currentInitiativesColumns}
+          onClose={onSortClose}
+          onKeySelect={onKeySelect}
+          onTypeSelect={onTypeSelect}
+        />
+      </div>
+      <div className='flex flex-col-reverse justify-between gap-8 lg:flex-row lg:gap-10'>
         <CurrentInitiatives
+          sortType={sortType}
           data={processedData.tableData}
           footerData={processedData.footerData}
         />
         <PieChart
-          className='max-h-[400px] max-w-[336.5px]'
+          className='max-w-full lg:max-h-[400px] lg:max-w-[336.5px]'
           data={processedData.pieData}
         />
       </div>
