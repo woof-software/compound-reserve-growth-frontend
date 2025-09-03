@@ -54,7 +54,7 @@ const TreasuryComposition = ({
     return [
       {
         accessorKey: 'name',
-        header: 'Asset',
+        header: activeFilter === 'Asset Type' ? 'Asset' : activeFilter,
         cell: ({ row }) => (
           <div className='flex items-center gap-3'>
             <View.Condition if={activeFilter !== 'Market'}>
