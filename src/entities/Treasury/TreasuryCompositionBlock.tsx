@@ -245,8 +245,6 @@ const TreasuryCompositionBlock = memo(
       setIncludeComp(true);
     };
 
-    console.log('isOpenSingle=>', isOpenSingle);
-
     return (
       <Card
         isLoading={isLoading}
