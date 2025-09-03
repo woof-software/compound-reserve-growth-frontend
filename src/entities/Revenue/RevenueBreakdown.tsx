@@ -74,6 +74,12 @@ const RevenueBreakDownBlock = ({
     onCloseModal: onMoreClose
   } = useModal();
 
+  const {
+    isOpen: isGroupOpen,
+    onOpenModal: onGroupOpen,
+    onCloseModal: onGroupClose
+  } = useModal();
+
   const [selectedOptions, setSelectedOptions] = useReducer(
     (
       prev: SelectedFiltersState,
@@ -397,7 +403,7 @@ const RevenueBreakDownBlock = ({
         <div className='flex w-full flex-col items-center justify-end gap-2 sm:flex-row'>
           <div className='flex w-full items-center gap-2 sm:w-auto'>
             <Button
-              onClick={openYear}
+              onClick={onGroupOpen}
               className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
             >
               <Icon
@@ -534,10 +540,10 @@ const RevenueBreakDownBlock = ({
         onClearAll={handleResetFilters}
       />
       <GroupDrawer
-        isOpen={yearOpen}
+        isOpen={isGroupOpen}
         selectedOption={selectedYear?.[0] || yearOptions[0] || ''}
         options={groupOptionsDto(yearOptions)}
-        onClose={closeYear}
+        onClose={onGroupClose}
         onSelect={selectYear}
       />
       <Drawer

@@ -22,9 +22,9 @@ export enum commonRoutes {
 export const VALID_NAVIGATION_ROUTES = [
   commonRoutes.TREASURY,
   commonRoutes.RUNWAY,
-  commonRoutes.REVENUE,
-  commonRoutes.INCENTIVES,
-  commonRoutes.OEV
+  commonRoutes.REVENUE
+  // commonRoutes.INCENTIVES,
+  // commonRoutes.OEV
 ] as const;
 
 export const enum routeTitles {
