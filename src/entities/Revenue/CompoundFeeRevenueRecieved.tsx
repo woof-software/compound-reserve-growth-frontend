@@ -471,6 +471,12 @@ const Filters = memo(
       onCloseModal: onMoreClose
     } = useModal();
 
+    const {
+      isOpen: isGroupOpen,
+      onOpenModal: onGroupOpen,
+      onCloseModal: onGroupClose
+    } = useModal();
+
     const filterOptions = useMemo(() => {
       const chainFilterOptions = {
         id: 'chain',
@@ -624,7 +630,7 @@ const Filters = memo(
                   disabled={isLoading}
                 />
                 <Button
-                  onClick={toggleSingle}
+                  onClick={onGroupOpen}
                   className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
                 >
                   <Icon
@@ -684,10 +690,10 @@ const Filters = memo(
             onClearAll={onClearAll}
           />
           <GroupDrawer
-            isOpen={openSingle}
+            isOpen={isGroupOpen}
             selectedOption={groupBy}
             options={groupOptionsDto(groupByOptions)}
-            onClose={closeSingle}
+            onClose={onGroupClose}
             onSelect={selectSingle}
           />
           <Drawer
