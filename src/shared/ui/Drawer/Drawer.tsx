@@ -16,20 +16,16 @@ import {
 
 interface DrawerProps extends PropsWithChildren {
   className?: string;
+
   lazy?: boolean;
+
   isOpen?: boolean;
+
   onClose?: () => void;
-  isOverlay?: boolean;
 }
 
 const DrawerContent = memo(
-  ({
-    className,
-    children,
-    onClose,
-    isOpen = false,
-    isOverlay = true
-  }: DrawerProps) => {
+  ({ className, children, onClose, isOpen = false }: DrawerProps) => {
     const { Spring, Gesture } = useAnimationLibs();
 
     const DURATION_OPEN = 250;
@@ -49,23 +45,20 @@ const DrawerContent = memo(
 
     const measurePanel = useCallback(() => {
       const el = panelRef.current;
-
       if (!el) return;
 
       const h = Math.max(1, el.getBoundingClientRect().height);
-
       panelHeightRef.current = h;
-
-      api.start({ y: h, immediate: true });
-
       setMeasured(true);
-    }, [api]);
+    }, []);
 
     const animateOpen = useCallback(() => {
       closingRef.current = false;
+      const h = panelHeightRef.current || 1;
 
       api.start({
-        y: 0,
+        from: { y: h },
+        to: { y: 0 },
         config: { duration: DURATION_OPEN, easing: EASE_OPEN }
       });
     }, [api]);
@@ -138,8 +131,14 @@ const DrawerContent = memo(
         if (last) {
           const shouldClose = my > h * 0.4 || (vy > 0.5 && dy > 0);
 
-          if (shouldClose) animateClose(true);
-          else animateOpen();
+          if (shouldClose) {
+            animateClose(true);
+          } else {
+            api.start({
+              to: { y: 0 },
+              config: { duration: DURATION_OPEN, easing: EASE_OPEN }
+            });
+          }
         } else {
           const next = Math.min(Math.max(my, 0), h);
 
@@ -176,29 +175,21 @@ const DrawerContent = memo(
           )}
         >
           <Spring.a.div
-            className={cn(
-              'bg-secondary-30 pointer-events-auto fixed inset-0 backdrop-blur-lg',
-              { 'backdrop-blur-xs': !isOverlay }
-            )}
-            style={{
-              opacity: overlayOpacity,
-              pointerEvents: overlayOpacity.to((o) =>
-                o > 0.01 ? 'auto' : 'none'
-              )
-            }}
+            className='bg-secondary-30 pointer-events-auto fixed inset-0 backdrop-blur-lg'
+            style={{ opacity: overlayOpacity }}
             onClick={() => animateClose(true)}
           />
           <Spring.a.div
             {...bind()}
             ref={panelRef}
-            className='bg-card-content pointer-events-auto fixed right-0 bottom-0 left-0 z-50 w-full touch-none rounded-t-3xl px-5 pt-10 pb-5 will-change-transform'
+            className={cn(
+              'bg-card-content pointer-events-auto fixed right-0 bottom-0 left-0 z-50 w-full touch-none rounded-t-3xl px-5 pt-10 pb-5 will-change-transform',
+              isOpen ? 'animate-drawer-in' : 'animate-drawer-out'
+            )}
             style={{
               transform: y.to((py) => `translateY(${py}px)`),
               visibility: measured ? 'visible' : 'hidden'
             }}
-            onClick={(e: any) => e.stopPropagation()}
-            onMouseDown={(e: any) => e.stopPropagation()}
-            onTouchStart={(e: any) => e.stopPropagation()}
           >
             {children}
           </Spring.a.div>

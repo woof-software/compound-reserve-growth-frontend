@@ -378,3 +378,19 @@ body::-webkit-scrollbar {
 
   border-radius: 18px;
 }
+
+@keyframes drawer-in {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0%); }
+}
+@keyframes drawer-out {
+  from { transform: translateY(0%); }
+  to { transform: translateY(100%); }
+}
+
+.animate-drawer-in {
+  animation: drawer-in 0.25s cubic-bezier(0.16,1,0.3,1);
+}
+.animate-drawer-out {
+  animation: drawer-out 0.2s cubic-bezier(0.7,0,0.84,0);
+}
