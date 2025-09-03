@@ -233,11 +233,19 @@ const TreasuryCompositionBlock = memo(
       });
     }, []);
 
+    const onGroupSelect = (value: string) => {
+      selectSingle(value);
+
+      closeSingle();
+    };
+
     const onClearAll = () => {
       selectSingle('Asset Type');
 
       setIncludeComp(true);
     };
+
+    console.log('isOpenSingle=>', isOpenSingle);
 
     return (
       <Card
@@ -287,7 +295,7 @@ const TreasuryCompositionBlock = memo(
                 selectedValue={selectedGroup}
                 onOpen={openSingle}
                 onClose={closeSingle}
-                onSelect={selectSingle}
+                onSelect={onGroupSelect}
                 triggerContentClassName='p-[5px]'
               />
             </div>
