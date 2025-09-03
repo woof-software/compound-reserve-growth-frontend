@@ -7,6 +7,7 @@ import { formatPrice } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 export interface TreasuryCompositionType {
   id: number;
@@ -56,11 +57,13 @@ const TreasuryComposition = ({
         header: 'Asset',
         cell: ({ row }) => (
           <div className='flex items-center gap-3'>
-            <Icon
-              name={config.getIconName(row.original)}
-              className='h-6 w-6'
-              folder={config.folder}
-            />
+            <View.Condition if={activeFilter !== 'Market'}>
+              <Icon
+                name={config.getIconName(row.original)}
+                className='h-6 w-6'
+                folder={config.folder}
+              />
+            </View.Condition>
             <Text
               size='13'
               weight='500'
@@ -139,11 +142,13 @@ const TreasuryComposition = ({
                     Asset
                   </Text>
                   <div className='flex items-center gap-1'>
-                    <Icon
-                      name={filterConfig[activeFilter].getIconName(row)}
-                      className='h-4 w-4'
-                      folder={filterConfig[activeFilter].folder}
-                    />
+                    <View.Condition if={activeFilter !== 'Market'}>
+                      <Icon
+                        name={filterConfig[activeFilter].getIconName(row)}
+                        className='h-4 w-4'
+                        folder={filterConfig[activeFilter].folder}
+                      />
+                    </View.Condition>
                     <Text
                       size='13'
                       lineHeight='21'

@@ -11,7 +11,8 @@ import {
   capitalizeFirstLetter,
   formatPrice,
   groupByKey,
-  groupOptionsDto
+  groupOptionsDto,
+  removeDuplicates
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Button from '@/shared/ui/Button/Button';
@@ -76,7 +77,7 @@ const mapTableData = (data: Record<string, TokenData[]>) => {
         icon: key.replace(/ /g, '-').toLowerCase(),
         name: capitalizeFirstLetter(key) || 'Unclassified',
         balance,
-        symbol: symbol
+        symbol
       };
     })
     .sort((a, b) => b.balance - a.balance);
@@ -193,7 +194,19 @@ const TreasuryCompositionBlock = memo(
           uniqData,
           (item) => item.source.market || 'no market'
         );
-        return mapTableData(markets);
+
+        const marketsDto = mapTableData(markets);
+
+        const result = marketsDto.map((el) => ({
+          ...el,
+          name: el.name.replace(/\s+/g, '')
+        }));
+
+        const filteredResult = removeDuplicates(result, 'name');
+
+        return marketsDto.filter((market) =>
+          filteredResult.some((item) => item.id === market.id)
+        );
       }
 
       return mapTableData(uniqDataByCategory);

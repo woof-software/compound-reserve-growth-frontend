@@ -525,3 +525,17 @@ export const formatValue = (value: number) => {
   }
   return value.toFixed(0);
 };
+
+export const removeDuplicates = <T>(array: T[], key: keyof T): T[] => {
+  const uniqueValues = new Set();
+
+  return array.filter((item) => {
+    const value = item[key];
+
+    if (uniqueValues.has(value)) return false;
+
+    uniqueValues.add(value);
+
+    return true;
+  });
+};
