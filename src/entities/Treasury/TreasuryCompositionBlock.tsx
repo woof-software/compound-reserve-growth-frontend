@@ -83,17 +83,6 @@ const mapTableData = (data: Record<string, TokenData[]>) => {
     .sort((a, b) => b.balance - a.balance);
 };
 
-export const treasuryCompositionColumns = [
-  {
-    accessorKey: 'name',
-    header: 'Asset'
-  },
-  {
-    accessorKey: 'balance',
-    header: 'Total Balance USD'
-  }
-];
-
 const TreasuryCompositionBlock = memo(
   ({ isLoading, data }: TreasuryCompositionBlockProps) => {
     const {
@@ -220,6 +209,20 @@ const TreasuryCompositionBlock = memo(
     const hasData = useMemo(() => {
       return tableData.length > 0 && chartData.length > 0;
     }, [tableData, chartData]);
+
+    const treasuryCompositionColumns = useMemo(
+      () => [
+        {
+          accessorKey: 'name',
+          header: selectedGroup !== 'Asset Type' ? selectedGroup : 'Asset'
+        },
+        {
+          accessorKey: 'balance',
+          header: 'Total Balance USD'
+        }
+      ],
+      [selectedGroup]
+    );
 
     const onSortKeySelect = useCallback((value: string) => {
       setSortType({

@@ -158,14 +158,6 @@ const DrawerContent = memo(
 
     if (!mounted) return null;
 
-    const overlayOpacity = y.to((py) => {
-      const h = panelHeightRef.current || 1;
-
-      const t = Math.max(0, Math.min(py / h, 1));
-
-      return 1 - t;
-    });
-
     return (
       <Portal element={document.getElementById('drawer') ?? document.body}>
         <div
@@ -176,7 +168,6 @@ const DrawerContent = memo(
         >
           <Spring.a.div
             className='bg-secondary-30 pointer-events-auto fixed inset-0 backdrop-blur-lg'
-            style={{ opacity: overlayOpacity }}
             onClick={() => animateClose(true)}
           />
           <Spring.a.div

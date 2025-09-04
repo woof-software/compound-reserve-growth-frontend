@@ -139,7 +139,7 @@ const TreasuryComposition = ({
                     weight='500'
                     className='text-primary-14 min-w-[100px]'
                   >
-                    Asset
+                    {activeFilter === 'Asset Type' ? 'Asset' : activeFilter}
                   </Text>
                   <div className='flex items-center gap-1'>
                     <View.Condition if={activeFilter !== 'Market'}>
