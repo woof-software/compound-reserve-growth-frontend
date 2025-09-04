@@ -119,7 +119,7 @@ const HistoricalExpencesByNetworks = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-10 lg:pb-10'
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-5 lg:px-10 lg:pb-10'
       }}
     >
       <Filters
@@ -161,7 +161,7 @@ const Filters = memo(
     return (
       <>
         <div className='block lg:hidden'>
-          <div className='flex flex-col justify-end gap-2 px-5 py-3 sm:flex-row'>
+          <div className='flex flex-col justify-end gap-2 px-5 py-3 sm:flex-row md:px-0'>
             <div className='flex justify-end gap-2'>
               <TabsGroup
                 className={{
