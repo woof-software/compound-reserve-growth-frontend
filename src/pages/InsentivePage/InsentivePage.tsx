@@ -3,8 +3,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import MetricIncentivesBlock from '@/components/TreasuryPageTable/MetricIncentives';
 import CurrentSpendingByChainBlock from '@/entities/Insentive/CurrentSpendingByChain';
 import DailyExpenses from '@/entities/Insentive/DailyExpenses';
+import FeesGeneratedVsIncentives from '@/entities/Insentive/FeesGeneratedVsIncentives';
 import HistoricalExpencesByNetworks from '@/entities/Insentive/HistoricalExpencesByNetworks';
-import IncomeVsExpensesOnChainsAndMarkets from '@/entities/Insentive/IncomeVsExpensesOnChainsAndMarkets';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
 import {
@@ -77,7 +77,7 @@ const InsentivePage = () => {
       </div>
       <div className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
         <div className='grid gap-3'>
-          <div className='flex items-center justify-between'>
+          <div className='flex items-center justify-between px-3'>
             <Text
               size='17'
               weight='500'
@@ -108,7 +108,7 @@ const InsentivePage = () => {
           isError={isError}
           data={treasuryData}
         />
-        <IncomeVsExpensesOnChainsAndMarkets
+        <FeesGeneratedVsIncentives
           isLoading={isLoading}
           isError={isError}
           data={treasuryData}

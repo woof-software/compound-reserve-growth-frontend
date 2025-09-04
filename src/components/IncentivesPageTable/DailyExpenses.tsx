@@ -150,31 +150,7 @@ const DailyExpensesTable = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                   weight='500'
                   className='text-primary-14'
                 >
-                  Symbol
-                </Text>
-                <div className='flex items-center gap-1'>
-                  <Icon
-                    name={row.symbol || 'not-found-icon'}
-                    className='h-4 w-4'
-                    folder='collaterals'
-                  />
-                  <Text
-                    size='13'
-                    lineHeight='21'
-                    className='truncate'
-                  >
-                    {row.symbol}
-                  </Text>
-                </div>
-              </div>
-              <div className='grid w-full'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Chain
+                  Network
                 </Text>
                 <Text
                   size='13'
@@ -208,7 +184,7 @@ const DailyExpensesTable = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                   weight='500'
                   className='text-primary-14'
                 >
-                  QTY
+                  Lend Incentive
                 </Text>
                 <Text
                   size='13'
@@ -225,7 +201,7 @@ const DailyExpensesTable = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                   weight='500'
                   className='text-primary-14'
                 >
-                  Value
+                  Borrow Incentive
                 </Text>
                 <Text
                   size='13'
@@ -242,7 +218,7 @@ const DailyExpensesTable = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                   weight='500'
                   className='text-primary-14'
                 >
-                  Price
+                  Total
                 </Text>
                 <Text
                   size='13'

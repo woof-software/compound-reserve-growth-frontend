@@ -1,5 +1,7 @@
 import React, { memo, useCallback, useMemo, useReducer } from 'react';
+import { CSVLink } from 'react-csv';
 
+import LineChart from '@/components/Charts/Line/Line';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
 import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
@@ -7,26 +9,32 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
+import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
 import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { BarSize, OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import Switch from '@/shared/ui/Switch/Switch';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import Text from '@/shared/ui/Text/Text';
 
 const groupByMapping: Record<string, string> = {
-  'Asset Type': 'assetType',
   Chain: 'chain',
+
   Market: 'deployment'
 };
 
-interface TotalTreasuryValueProps {
+interface FeesGeneratedVsIncentivesProps {
   isLoading?: boolean;
+
   isError?: boolean;
+
   data?: TokenData[];
+
   onCopyLink?: (id: string) => void;
 }
 
@@ -58,11 +66,11 @@ interface FiltersProps {
   onClearAll: () => void;
 }
 
-const IncomeVsExpensesOnChainsAndMarkets = ({
+const FeesGeneratedVsIncentives = ({
   isLoading,
   isError,
   data: treasuryApiResponse
-}: TotalTreasuryValueProps) => {
+}: FeesGeneratedVsIncentivesProps) => {
   const [selectedOptions, setSelectedOptions] = useReducer(
     (prev, next) => ({
       ...prev,
@@ -70,9 +78,7 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
     }),
     {
       chain: [] as OptionType[],
-      assetType: [] as OptionType[],
-      deployment: [] as OptionType[],
-      symbol: [] as OptionType[]
+      deployment: [] as OptionType[]
     }
   );
 
@@ -90,9 +96,7 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
   const filterOptionsConfig = useMemo(
     () => ({
       chain: { path: 'source.network' },
-      assetType: { path: 'source.asset.type' },
-      deployment: { path: 'source.market' },
-      symbol: { path: 'source.asset.symbol' }
+      deployment: { path: 'source.market' }
     }),
     []
   );
@@ -134,7 +138,7 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
     return allMarkets;
   }, [deploymentOptions, selectedOptions]);
 
-  const groupBy = 'None';
+  const groupBy: 'Chain' | 'Market' = 'Chain';
 
   const activeFilters = useMemo(
     () =>
@@ -153,17 +157,13 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
     filters: activeFilters,
     filterPaths: {
       chain: 'source.network',
-      assetType: 'source.asset.type',
-      deployment: 'source.market',
-      symbol: 'source.asset.symbol'
+      deployment: 'source.market'
     },
     groupBy,
     groupByKeyPath:
-      groupBy === 'None'
-        ? null
-        : filterOptionsConfig[
-            groupByMapping[groupBy] as keyof typeof filterOptionsConfig
-          ].path,
+      filterOptionsConfig[
+        groupByMapping[groupBy] as keyof typeof filterOptionsConfig
+      ].path,
     defaultSeriesName: 'Treasury Value'
   });
 
@@ -212,6 +212,24 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
     aggregationType: 'sum'
   });
 
+  const {
+    chartRef,
+    eventsData,
+    showEvents,
+    isLegendEnabled,
+    aggregatedSeries,
+    areAllSeriesHidden,
+    onAllSeriesHidden,
+    onEventsData,
+    onShowEvents,
+    onSelectAll,
+    onDeselectAll
+  } = useLineChart({
+    groupBy,
+    data: correctedChartSeries,
+    barSize
+  });
+
   const hasData = useMemo(() => {
     return (
       correctedChartSeries.length > 0 &&
@@ -242,9 +260,7 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
   const onClearSelectedOptions = useCallback(() => {
     setSelectedOptions({
       chain: [],
-      assetType: [],
-      deployment: [],
-      symbol: []
+      deployment: []
     });
   }, []);
 
@@ -256,12 +272,12 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
     <Card
       isLoading={isLoading}
       isError={isError}
-      title='Income vs Expenses on chains and markets'
-      id='income-vs-expenses-on-chains-and-markets'
+      title='Fees Generated vs Incentives'
+      id='fees-generated-vs-incentives'
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-10 lg:pb-10'
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-5 lg:px-10 lg:pb-10'
       }}
     >
       <Filters
@@ -280,14 +296,23 @@ const IncomeVsExpensesOnChainsAndMarkets = ({
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder onButtonClick={onClearAll} />
       ) : (
-        <div />
-        // <LineChart
-        //   key={groupBy}
-        //   data={correctedChartSeries}
-        //   groupBy={groupBy}
-        //   className='max-h-fit'
-        //   barSize={barSize}
-        // />
+        <LineChart
+          className='max-h-fit'
+          key={groupBy}
+          data={correctedChartSeries}
+          groupBy={groupBy}
+          chartRef={chartRef}
+          isLegendEnabled={isLegendEnabled}
+          eventsData={eventsData}
+          aggregatedSeries={aggregatedSeries}
+          showEvents={showEvents}
+          areAllSeriesHidden={areAllSeriesHidden}
+          onAllSeriesHidden={onAllSeriesHidden}
+          onSelectAll={onSelectAll}
+          onDeselectAll={onDeselectAll}
+          onShowEvents={onShowEvents}
+          onEventsData={onEventsData}
+        />
       )}
     </Card>
   );
@@ -308,6 +333,12 @@ const Filters = memo(
     onClearAll
   }: FiltersProps) => {
     const { isOpen, onOpenModal, onCloseModal } = useModal();
+
+    const {
+      isOpen: isMoreOpen,
+      onOpenModal: onMoreOpen,
+      onCloseModal: onMoreClose
+    } = useModal();
 
     const filterOptions = useMemo(() => {
       const chainFilterOptions = {
@@ -340,26 +371,21 @@ const Filters = memo(
     return (
       <>
         <div className='block lg:hidden'>
-          <div className='flex flex-col justify-end gap-2 px-5 py-3'>
-            <div className='flex flex-wrap justify-end gap-2'>
+          <div className='flex flex-col justify-end gap-2 px-5 py-3 sm:flex-row'>
+            <div className='flex flex-row justify-end gap-2'>
               <TabsGroup
+                className={{
+                  container: 'w-full sm:w-auto',
+                  list: 'w-full sm:w-auto'
+                }}
                 tabs={['D', 'W', 'M']}
                 value={barSize}
                 onTabChange={handleBarSizeChange}
                 disabled={isLoading}
               />
-              <Switch
-                label='Fees Only'
-                positionLabel='left'
-                checked={false}
-                onCheckedChange={() => {}}
-                classNameTitle='!text-[11px]'
-              />
-            </div>
-            <div className='flex flex-wrap items-center justify-end gap-2'>
               <Button
                 onClick={onOpenModal}
-                className='bg-secondary-27 text-gray-11 shadow-13 flex min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold'
+                className='bg-secondary-27 text-gray-11 shadow-13 hidden h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:flex sm:w-auto md:h-8'
               >
                 <Icon
                   name='filters'
@@ -367,11 +393,36 @@ const Filters = memo(
                 />
                 Filters
               </Button>
-              <CSVDownloadButton
-                data={csvData}
-                filename={csvFilename}
-                tooltipContent='CSV with the entire historical data can be downloaded'
-              />
+            </div>
+            <div className='flex flex-row items-center justify-end gap-2'>
+              <div className='flex w-full flex-row-reverse items-center gap-2 sm:w-auto sm:flex-row'>
+                <Button
+                  onClick={onOpenModal}
+                  className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:hidden sm:w-auto md:h-8'
+                >
+                  <Icon
+                    name='filters'
+                    className='h-[14px] w-[14px] fill-none'
+                  />
+                  Filters
+                </Button>
+                <Switch
+                  label='Fees Only'
+                  positionLabel='left'
+                  checked={false}
+                  onCheckedChange={() => {}}
+                  className={{ title: '!text-[11px]' }}
+                />
+              </div>
+              <Button
+                onClick={onMoreOpen}
+                className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
+              >
+                <Icon
+                  name='3-dots'
+                  className='h-6 w-6 fill-none'
+                />
+              </Button>
             </div>
           </div>
           <Filter
@@ -380,6 +431,41 @@ const Filters = memo(
             onClose={onCloseModal}
             onClearAll={onClearAll}
           />
+          <Drawer
+            isOpen={isMoreOpen}
+            onClose={onMoreClose}
+          >
+            <Text
+              size='17'
+              weight='700'
+              align='center'
+              className='mb-5'
+            >
+              Actions
+            </Text>
+            <div className='flex flex-col gap-1.5'>
+              <div className='px-3 py-2'>
+                <CSVLink
+                  data={csvData}
+                  filename={csvFilename}
+                  onClick={onMoreClose}
+                >
+                  <div className='flex items-center gap-1.5'>
+                    <Icon
+                      name='download'
+                      className='h-[26px] w-[26px]'
+                    />
+                    <Text
+                      size='14'
+                      weight='500'
+                    >
+                      CSV with the entire historical data
+                    </Text>
+                  </div>
+                </CSVLink>
+              </div>
+            </div>
+          </Drawer>
         </div>
         <div className='hidden lg:block'>
           <div className='flex items-center justify-end gap-2 px-0 py-3'>
@@ -388,13 +474,6 @@ const Filters = memo(
               value={barSize}
               onTabChange={handleBarSizeChange}
               disabled={isLoading}
-            />
-            <Switch
-              label='Fees Only'
-              positionLabel='left'
-              checked={false}
-              onCheckedChange={() => {}}
-              classNameTitle='!text-[11px]'
             />
             <MultiSelect
               options={chainOptions || []}
@@ -410,6 +489,13 @@ const Filters = memo(
               placeholder='Market'
               disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
             />
+            <Switch
+              label='Fees Only'
+              positionLabel='left'
+              checked={false}
+              onCheckedChange={() => {}}
+              className={{ title: '!text-[11px]' }}
+            />
             <CSVDownloadButton
               data={csvData}
               filename={csvFilename}
@@ -422,4 +508,4 @@ const Filters = memo(
   }
 );
 
-export default IncomeVsExpensesOnChainsAndMarkets;
+export default FeesGeneratedVsIncentives;

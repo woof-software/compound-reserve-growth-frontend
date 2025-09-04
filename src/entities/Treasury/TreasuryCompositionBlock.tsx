@@ -266,7 +266,9 @@ const TreasuryCompositionBlock = memo(
               positionLabel='left'
               checked={includeComp}
               onCheckedChange={setIncludeComp}
-              classNameTitle='!text-[12px]'
+              className={{
+                title: '!text-[12px]'
+              }}
             />
           </div>
           <div className='flex w-full items-center gap-2 sm:w-auto'>

@@ -1,13 +1,13 @@
-import React, { memo, useCallback, useMemo, useReducer } from 'react';
+import React, { memo, useMemo } from 'react';
 
+import LineChart from '@/components/Charts/Line/Line';
 import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
-import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
-import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
+import { useLineChart } from '@/shared/hooks/useLineChart';
 import { ChartDataItem } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
-import { BarSize, OptionType } from '@/shared/types/types';
+import { BarSize } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
@@ -35,18 +35,7 @@ const HistoricalExpencesByNetworks = ({
   isError,
   data: treasuryApiResponse
 }: TotalTreasuryValueProps) => {
-  const [selectedOptions, setSelectedOptions] = useReducer(
-    (prev, next) => ({
-      ...prev,
-      ...next
-    }),
-    {
-      chain: [] as OptionType[],
-      assetType: [] as OptionType[],
-      deployment: [] as OptionType[],
-      symbol: [] as OptionType[]
-    }
-  );
+  const groupBy = 'Network';
 
   const { barSize, handleBarSizeChange } = useChartControls({
     initialBarSize: 'D'
@@ -59,68 +48,59 @@ const HistoricalExpencesByNetworks = ({
     return [...treasuryApiResponse].sort((a, b) => a.date - b.date);
   }, [treasuryApiResponse]);
 
-  const activeFilters = useMemo(
-    () =>
-      Object.entries(selectedOptions).reduce(
-        (acc, [key, options]) => {
-          acc[key] = options.map((option: OptionType) => option.id);
-          return acc;
-        },
-        {} as Record<string, string[]>
-      ),
-    [selectedOptions]
-  );
-
-  const { chartSeries } = useChartDataProcessor({
-    rawData,
-    filters: activeFilters,
-    filterPaths: {
-      chain: 'source.network',
-      assetType: 'source.asset.type',
-      deployment: 'source.market',
-      symbol: 'source.asset.symbol'
-    },
-    groupBy: 'None',
-    groupByKeyPath: null,
-    defaultSeriesName: 'Treasury Value'
-  });
-
   const correctedChartSeries = useMemo(() => {
-    if (!chartSeries || chartSeries.length === 0) {
+    if (!rawData || rawData.length === 0) {
       return [];
     }
 
-    return chartSeries.map((series) => {
-      if (!series.data || series.data.length === 0) {
-        return series;
+    const networkTotals = new Map<string, Map<number, number>>();
+
+    for (const point of rawData) {
+      const network = point.source?.network || 'unknown';
+      const date = new Date(point.date);
+      date.setUTCHours(0, 0, 0, 0);
+      const dayStartTimestamp = date.getTime();
+
+      if (!networkTotals.has(network)) {
+        networkTotals.set(network, new Map());
       }
 
-      const dailyTotals = new Map<number, number>();
+      const dailyTotals = networkTotals.get(network)!;
+      const currentTotal = dailyTotals.get(dayStartTimestamp) || 0;
+      dailyTotals.set(dayStartTimestamp, currentTotal + point.value);
+    }
 
-      for (const point of series.data) {
-        const date = new Date(point.x);
-        date.setUTCHours(0, 0, 0, 0);
-        const dayStartTimestamp = date.getTime();
-
-        const currentTotal = dailyTotals.get(dayStartTimestamp) || 0;
-        dailyTotals.set(dayStartTimestamp, currentTotal + point.y);
-      }
-
+    return Array.from(networkTotals.entries()).map(([network, dailyTotals]) => {
       const aggregatedData = Array.from(dailyTotals.entries()).map(
-        ([x, y]) => ({
-          x,
-          y
-        })
+        ([x, y]) => ({ x, y })
       );
 
       aggregatedData.sort((a, b) => a.x - b.x);
 
       return {
-        ...series,
+        name: network,
         data: aggregatedData
       };
     });
-  }, [chartSeries]);
+  }, [rawData]);
+
+  const {
+    chartRef,
+    eventsData,
+    showEvents,
+    isLegendEnabled,
+    aggregatedSeries,
+    areAllSeriesHidden,
+    onAllSeriesHidden,
+    onEventsData,
+    onShowEvents,
+    onSelectAll,
+    onDeselectAll
+  } = useLineChart({
+    groupBy,
+    data: correctedChartSeries,
+    barSize
+  });
 
   const { csvData, csvFilename } = useCSVExport({
     chartSeries: correctedChartSeries,
@@ -129,26 +109,6 @@ const HistoricalExpencesByNetworks = ({
     filePrefix: 'Total_Treasury_Value',
     aggregationType: 'sum'
   });
-
-  const hasData = useMemo(() => {
-    return (
-      correctedChartSeries.length > 0 &&
-      correctedChartSeries.some((s) => s.data.length > 0)
-    );
-  }, [correctedChartSeries]);
-
-  const onClearSelectedOptions = useCallback(() => {
-    setSelectedOptions({
-      chain: [],
-      assetType: [],
-      deployment: [],
-      symbol: []
-    });
-  }, []);
-
-  const onClearAll = useCallback(() => {
-    onClearSelectedOptions();
-  }, [onClearSelectedOptions]);
 
   return (
     <Card
@@ -159,7 +119,7 @@ const HistoricalExpencesByNetworks = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-10 lg:pb-10'
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-5 lg:px-10 lg:pb-10'
       }}
     >
       <Filters
@@ -169,17 +129,23 @@ const HistoricalExpencesByNetworks = ({
         csvFilename={csvFilename}
         handleBarSizeChange={handleBarSizeChange}
       />
-      {!isLoading && !isError && !hasData ? (
-        <NoDataPlaceholder onButtonClick={onClearAll} />
-      ) : (
-        <div />
-        // <LineChart
-        //   data={correctedChartSeries}
-        //   groupBy={'None'}
-        //   className='max-h-fit'
-        //   barSize={barSize}
-        // />
-      )}
+      <LineChart
+        className='max-h-fit'
+        key={groupBy}
+        data={correctedChartSeries}
+        groupBy={groupBy}
+        chartRef={chartRef}
+        isLegendEnabled={isLegendEnabled}
+        eventsData={eventsData}
+        aggregatedSeries={aggregatedSeries}
+        showEvents={showEvents}
+        areAllSeriesHidden={areAllSeriesHidden}
+        onAllSeriesHidden={onAllSeriesHidden}
+        onSelectAll={onSelectAll}
+        onDeselectAll={onDeselectAll}
+        onShowEvents={onShowEvents}
+        onEventsData={onEventsData}
+      />
     </Card>
   );
 };
@@ -195,22 +161,58 @@ const Filters = memo(
     return (
       <>
         <div className='block lg:hidden'>
-          <div className='flex flex-col justify-end gap-2 px-5 py-3'>
-            <div className='flex flex-wrap justify-end gap-2'>
+          <div className='flex flex-col justify-end gap-2 px-5 py-3 sm:flex-row md:px-0'>
+            <div className='flex justify-end gap-2'>
               <TabsGroup
-                tabs={['Lend Incentive', 'Borrow Incentive', 'Total']}
-                value={'Borrow Incentive'}
+                className={{
+                  container: 'hidden w-full sm:block sm:w-auto',
+                  list: 'w-auto'
+                }}
+                tabs={['COMP', 'USD']}
+                value={'COMP'}
+                onTabChange={() => {}}
+              />
+              <TabsGroup
+                className={{
+                  container: 'w-full sm:w-auto',
+                  list: 'w-full sm:w-auto'
+                }}
+                tabs={['Lend', 'Borrow', 'Total']}
+                value={'Borrow'}
                 onTabChange={() => {}}
                 disabled={isLoading}
               />
               <TabsGroup
+                className={{
+                  container: 'hidden w-full sm:block sm:w-auto',
+                  list: 'w-auto'
+                }}
                 tabs={['D', 'W', 'M']}
                 value={barSize}
                 onTabChange={handleBarSizeChange}
                 disabled={isLoading}
               />
             </div>
-            <div className='flex flex-wrap items-center justify-end gap-2'>
+            <div className='flex flex-row items-center justify-end gap-2'>
+              <TabsGroup
+                className={{
+                  container: 'block w-full sm:hidden',
+                  list: 'w-full'
+                }}
+                tabs={['COMP', 'USD']}
+                value={'COMP'}
+                onTabChange={() => {}}
+              />
+              <TabsGroup
+                className={{
+                  container: 'block w-full sm:hidden',
+                  list: 'w-full'
+                }}
+                tabs={['D', 'W', 'M']}
+                value={barSize}
+                onTabChange={handleBarSizeChange}
+                disabled={isLoading}
+              />
               <CSVDownloadButton
                 data={csvData}
                 filename={csvFilename}
@@ -222,8 +224,13 @@ const Filters = memo(
         <div className='hidden lg:block'>
           <div className='flex items-center justify-end gap-2 px-0 py-3'>
             <TabsGroup
-              tabs={['Lend Incentive', 'Borrow Incentive', 'Total']}
-              value={'Borrow Incentive'}
+              tabs={['COMP', 'USD']}
+              value={'COMP'}
+              onTabChange={() => {}}
+            />
+            <TabsGroup
+              tabs={['Lend', 'Borrow', 'Total']}
+              value={'Borrow'}
               onTabChange={() => {}}
               disabled={isLoading}
             />
