@@ -94,7 +94,7 @@ const CurrentSpendingByChainBlock = ({
     onCloseModal: onMoreClose
   } = useModal();
 
-  const [tabValue, setTabValue] = useState<string>('Borrow Incentive');
+  const [tabValue, setTabValue] = useState<string>('Lend');
 
   const [selectedOptions, setSelectedOptions] = useReducer(
     (prev, next) => ({
@@ -471,7 +471,7 @@ const CurrentSpendingByChainBlock = ({
             <div className='px-3 py-2'>
               <CSVLink
                 data={tableData}
-                filename='Full Treasury Holdings'
+                filename='Current spending by chain'
                 onClick={onMoreClose}
               >
                 <div className='flex items-center gap-1.5'>
