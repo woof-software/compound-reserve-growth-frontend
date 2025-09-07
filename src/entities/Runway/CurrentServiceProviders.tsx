@@ -9,7 +9,6 @@ import React, { useCallback, useMemo, useReducer } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import CurrentServiceProviders from '@/components/RunwayPageTable/CurrentServiceProviders';
-import SortDrawer from '@/components/SortDrawer/SortDrawer';
 import { useModal } from '@/shared/hooks/useModal';
 import type { RunwayItem } from '@/shared/hooks/useRunway';
 import { useRunway } from '@/shared/hooks/useRunway';
@@ -17,6 +16,7 @@ import { formatPrice } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
+import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 
 export const currentServiceProvidersColumns = [
   {

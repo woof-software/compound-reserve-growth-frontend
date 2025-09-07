@@ -2,7 +2,7 @@ import React from 'react';
 
 import Text from '@/shared/ui/Text/Text';
 
-import HoverCard from '../HoverCard/HoverCard';
+import HoverCard from '../../../components/HoverCard/HoverCard';
 
 interface TextTooltipProps {
   text: string;

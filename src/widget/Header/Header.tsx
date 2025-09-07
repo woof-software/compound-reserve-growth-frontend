@@ -7,15 +7,14 @@ import {
   routeTitles,
   VALID_NAVIGATION_ROUTES
 } from '@/app/providers/router/config';
-import Portal from '@/components/Portal/Portal';
 import { cn } from '@/shared/lib/classNames/classNames';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import Link from '@/shared/ui/Link/Link';
 import NavLink from '@/shared/ui/NavLink/NavLink';
+import Portal from '@/shared/ui/Portal/Portal';
 import Text from '@/shared/ui/Text/Text';
-
-import { Tooltip } from '../Tooltip/Tooltip';
+import { Tooltip } from '@/shared/ui/Tooltip/Tooltip';
 
 const navLinks = [
   { to: commonRoutes.TREASURY, title: routeTitles.TREASURY, icon: 'wallet' },
@@ -31,6 +30,11 @@ const navLinks = [
     title: routeTitles.OEV,
     icon: 'search',
     isComingSoon: true
+  },
+  {
+    to: commonRoutes.CAPO,
+    title: routeTitles.CAPO,
+    icon: 'capo'
   }
 ];
 

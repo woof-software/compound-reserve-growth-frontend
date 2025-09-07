@@ -1,7 +1,7 @@
 import { AppRouter } from '@/app/providers/router/AppRouter';
-import Footer from '@/components/Footer/Footer';
-import Header from '@/components/Header/Header';
 import PageWrapper from '@/shared/ui/PageWrapper/PageWrapper';
+import Footer from '@/widget/Footer/Footer';
+import Header from '@/widget/Header/Header';
 
 import { withTheme } from './app/providers/ThemeProvider/theme-provider';
 

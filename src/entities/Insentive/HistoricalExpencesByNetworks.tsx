@@ -1,7 +1,6 @@
 import React, { memo, useMemo } from 'react';
 
 import LineChart from '@/components/Charts/Line/Line';
-import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useLineChart } from '@/shared/hooks/useLineChart';
@@ -9,6 +8,7 @@ import { ChartDataItem } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { BarSize } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
+import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
 interface TotalTreasuryValueProps {

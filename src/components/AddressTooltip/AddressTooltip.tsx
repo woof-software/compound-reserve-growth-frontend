@@ -5,10 +5,10 @@ import {
   explorers,
   sliceAddress
 } from '@/shared/lib/utils/utils';
+import { ClipboardButton } from '@/shared/ui/AnimationProvider/CopyButton/CopyButton';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
-import { ClipboardButton } from '../CopyButton/CopyButton';
 import HoverCard from '../HoverCard/HoverCard';
 
 interface AddressTooltipProps {
@@ -30,6 +30,7 @@ export const AddressTooltip: React.FC<AddressTooltipProps> = ({
 }) => {
   const explorerUrl =
     (chain && explorers[chain.toLowerCase()]) || defaultExplorer;
+
   const fullExplorerLink = `${explorerUrl}${address}`;
 
   const triggerContent = (
@@ -45,11 +46,12 @@ export const AddressTooltip: React.FC<AddressTooltipProps> = ({
       </Text>
     </div>
   );
+
   const tooltipContent = (
     <div className='flex w-50 flex-col items-start gap-2'>
       <Text
         size='12'
-        className='text-primary-11'
+        className='text-primary-11 break-all'
       >
         {text}
       </Text>

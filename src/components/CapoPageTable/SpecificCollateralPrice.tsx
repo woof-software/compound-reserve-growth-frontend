@@ -4,18 +4,13 @@ import { CSVLink } from 'react-csv';
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import LineChart from '@/components/Charts/Line/Line';
 import Filter from '@/components/Filter/Filter';
-import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
-import {
-  ChartDataItem,
-  extractFilterOptions,
-  groupOptionsDto
-} from '@/shared/lib/utils/utils';
+import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { BarSize, OptionType } from '@/shared/types/types';
 import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
@@ -23,22 +18,12 @@ import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import Drawer from '@/shared/ui/Drawer/Drawer';
-import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
-import SingleDropdown from '@/shared/ui/SingleDropdown/SingleDropdown';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
-
-const groupByMapping: Record<string, string> = {
-  'Asset Type': 'assetType',
-  Chain: 'chain',
-  Market: 'deployment'
-};
-
-interface TotalTreasuryValueProps {
+interface SpecificCollateralPriceProps {
   isLoading?: boolean;
   isError?: boolean;
   data?: TokenData[];
@@ -48,21 +33,15 @@ interface TotalTreasuryValueProps {
 interface FiltersProps {
   chainOptions: OptionType[];
 
-  deploymentOptionsFilter: OptionType[];
+  marketOptionsFilter: OptionType[];
 
-  assetTypeOptions: OptionType[];
-
-  symbolOptions: OptionType[];
+  collateralOptions: OptionType[];
 
   barSize: BarSize;
 
   showEvents: boolean;
 
   isLoading: boolean;
-
-  isOpenSingle: boolean;
-
-  groupBy: string;
 
   csvFilename: string;
 
@@ -77,26 +56,18 @@ interface FiltersProps {
   selectedOptions: {
     chain: OptionType[];
 
-    assetType: OptionType[];
+    market: OptionType[];
 
-    deployment: OptionType[];
-
-    symbol: OptionType[];
+    collateral: OptionType[];
   };
 
   onSelectChain: (chain: OptionType[]) => void;
 
-  onSelectAssetType: (assetType: OptionType[]) => void;
+  onSelectMarket: (market: OptionType[]) => void;
 
-  onSelectMarket: (deployment: OptionType[]) => void;
-
-  onSelectSymbol: (symbol: OptionType[]) => void;
+  onSelectCollateral: (collateral: OptionType[]) => void;
 
   handleBarSizeChange: (value: string) => void;
-
-  openSingleDropdown: () => void;
-
-  closeSingle: () => void;
 
   onClearAll: () => void;
 
@@ -104,18 +75,22 @@ interface FiltersProps {
 
   onDeselectAll: () => void;
 
-  selectSingle: (value: string) => void;
-
-  selectSingleClose: (value: string) => void;
-
   onShowEvents: (value: boolean) => void;
 }
 
-const TotalTresuaryValue = ({
+const groupByMapping: Record<string, string> = {
+  chain: 'chain',
+
+  market: 'market',
+
+  collateral: 'collateral'
+};
+
+const SpecificCollateralPrice = ({
   isLoading,
   isError,
   data: treasuryApiResponse
-}: TotalTreasuryValueProps) => {
+}: SpecificCollateralPriceProps) => {
   const [selectedOptions, setSelectedOptions] = useReducer(
     (prev, next) => ({
       ...prev,
@@ -123,20 +98,10 @@ const TotalTresuaryValue = ({
     }),
     {
       chain: [] as OptionType[],
-      assetType: [] as OptionType[],
-      deployment: [] as OptionType[],
-      symbol: [] as OptionType[]
+      market: [] as OptionType[],
+      collateral: [] as OptionType[]
     }
   );
-
-  const {
-    isOpen: isOpenSingle,
-    selectedValue: selectedSingle,
-    close: closeSingle,
-    open: openSingleDropdown,
-    select: selectSingle,
-    selectClose: selectSingleClose
-  } = useDropdown('single');
 
   const { barSize, handleBarSizeChange } = useChartControls({
     initialBarSize: 'D'
@@ -152,31 +117,29 @@ const TotalTresuaryValue = ({
   const filterOptionsConfig = useMemo(
     () => ({
       chain: { path: 'source.network' },
-      assetType: { path: 'source.asset.type' },
-      deployment: { path: 'source.market' },
-      symbol: { path: 'source.asset.symbol' }
+      market: { path: 'source.market' },
+      collateral: { path: 'source.asset.type' }
     }),
     []
   );
 
-  const { chainOptions, assetTypeOptions, symbolOptions, deploymentOptions } =
-    useMemo(
-      () => extractFilterOptions(rawData, filterOptionsConfig),
-      [rawData, filterOptionsConfig]
-    );
+  const { chainOptions, collateralOptions, marketOptions } = useMemo(
+    () => extractFilterOptions(rawData, filterOptionsConfig),
+    [rawData, filterOptionsConfig]
+  );
 
-  const deploymentOptionsFilter = useMemo(() => {
+  const marketOptionsFilter = useMemo(() => {
     const marketV2 =
-      deploymentOptions
+      marketOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
         .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const marketV3 =
-      deploymentOptions
+      marketOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
         .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
-    const noMarkets = deploymentOptions?.find(
+    const noMarkets = marketOptions?.find(
       (el) => el.id.toLowerCase() === 'no name'
     );
 
@@ -195,9 +158,9 @@ const TotalTresuaryValue = ({
     }
 
     return allMarkets;
-  }, [deploymentOptions, selectedOptions]);
+  }, [marketOptions, selectedOptions]);
 
-  const groupBy = selectedSingle?.[0] || 'None';
+  const groupBy = 'chain';
 
   const activeFilters = useMemo(
     () =>
@@ -216,17 +179,14 @@ const TotalTresuaryValue = ({
     filters: activeFilters,
     filterPaths: {
       chain: 'source.network',
-      assetType: 'source.asset.type',
-      deployment: 'source.market',
-      symbol: 'source.asset.symbol'
+      market: 'source.market',
+      collateral: 'source.asset.type'
     },
     groupBy,
     groupByKeyPath:
-      groupBy === 'None'
-        ? null
-        : filterOptionsConfig[
-            groupByMapping[groupBy] as keyof typeof filterOptionsConfig
-          ].path,
+      filterOptionsConfig[
+        groupByMapping[groupBy] as keyof typeof filterOptionsConfig
+      ].path,
     defaultSeriesName: 'Treasury Value'
   });
 
@@ -304,55 +264,46 @@ const TotalTresuaryValue = ({
     (chain: OptionType[]) => {
       const selectedChainIds = chain.map((o) => o.id);
 
-      const filteredDeployment = selectedOptions.deployment.filter((el) =>
+      const filteredDeployment = selectedOptions.market.filter((el) =>
         selectedChainIds.length === 0
           ? true
           : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
       );
       setSelectedOptions({ chain, deployment: filteredDeployment });
     },
-    [selectedOptions.deployment]
+    [selectedOptions.market]
   );
-
-  const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      assetType: selectedOptions
-    });
-  }, []);
 
   const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
-      deployment: selectedOptions
+      market: selectedOptions
     });
   }, []);
 
-  const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
+  const onSelectCollateral = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
-      symbol: selectedOptions
+      collateral: selectedOptions
     });
   }, []);
 
   const onClearSelectedOptions = useCallback(() => {
     setSelectedOptions({
       chain: [],
-      assetType: [],
-      deployment: [],
-      symbol: []
+      market: [],
+      collateral: []
     });
   }, []);
 
   const onClearAll = useCallback(() => {
     onClearSelectedOptions();
-
-    selectSingle('None');
-  }, [onClearSelectedOptions, selectSingle]);
+  }, [onClearSelectedOptions]);
 
   return (
     <Card
       isLoading={isLoading}
       isError={isError}
-      title='Total Treasury Value'
-      id='total-treasury-value'
+      title='Specific Collateral Price against Price Restriction'
+      id='specific-collateral-price-against-price-restriction'
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',
@@ -360,30 +311,22 @@ const TotalTresuaryValue = ({
       }}
     >
       <Filters
-        groupBy={groupBy}
         showEvents={showEvents}
         areAllSeriesHidden={areAllSeriesHidden}
         isShowCalendarIcon={Boolean(eventsData.length > 0)}
         isShowEyeIcon={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
-        assetTypeOptions={assetTypeOptions}
+        collateralOptions={collateralOptions}
         selectedOptions={selectedOptions}
         chainOptions={chainOptions}
-        symbolOptions={symbolOptions}
-        deploymentOptionsFilter={deploymentOptionsFilter}
+        marketOptionsFilter={marketOptionsFilter}
         isLoading={isLoading || false}
         barSize={barSize}
         csvData={csvData}
         csvFilename={csvFilename}
-        isOpenSingle={isOpenSingle}
         onSelectChain={onSelectChain}
-        onSelectAssetType={onSelectAssetType}
+        onSelectCollateral={onSelectCollateral}
         onSelectMarket={onSelectMarket}
-        onSelectSymbol={onSelectSymbol}
         handleBarSizeChange={handleBarSizeChange}
-        openSingleDropdown={openSingleDropdown}
-        closeSingle={closeSingle}
-        selectSingle={selectSingle}
-        selectSingleClose={selectSingleClose}
         onClearAll={onClearAll}
         onSelectAll={onSelectAll}
         onDeselectAll={onDeselectAll}
@@ -417,29 +360,21 @@ const TotalTresuaryValue = ({
 const Filters = memo(
   ({
     barSize,
-    isOpenSingle,
     isShowEyeIcon,
     isShowCalendarIcon,
     showEvents,
-    groupBy,
     csvData,
     csvFilename,
     areAllSeriesHidden,
     chainOptions,
     selectedOptions,
-    deploymentOptionsFilter,
-    assetTypeOptions,
-    symbolOptions,
+    marketOptionsFilter,
+    collateralOptions,
     isLoading,
     onSelectChain,
-    onSelectAssetType,
+    onSelectCollateral,
     onSelectMarket,
-    onSelectSymbol,
     handleBarSizeChange,
-    openSingleDropdown,
-    closeSingle,
-    selectSingle,
-    selectSingleClose,
     onClearAll,
     onSelectAll,
     onDeselectAll,
@@ -451,12 +386,6 @@ const Filters = memo(
       isOpen: isMoreOpen,
       onOpenModal: onMoreOpen,
       onCloseModal: onMoreClose
-    } = useModal();
-
-    const {
-      isOpen: isGroupOpen,
-      onOpenModal: onGroupOpen,
-      onCloseModal: onGroupClose
     } = useModal();
 
     const filterOptions = useMemo(() => {
@@ -472,29 +401,29 @@ const Filters = memo(
       const marketFilterOptions = {
         id: 'market',
         placeholder: 'Market',
-        total: selectedOptions.deployment.length,
-        selectedOptions: selectedOptions.deployment,
-        options: deploymentOptionsFilter || [],
+        total: selectedOptions.market.length,
+        selectedOptions: selectedOptions.market,
+        options: marketOptionsFilter || [],
         onChange: onSelectMarket
       };
 
       const assetTypeFilterOptions = {
-        id: 'assetType',
-        placeholder: 'Asset Type',
-        total: selectedOptions.assetType.length,
-        selectedOptions: selectedOptions.assetType,
+        id: 'collateral',
+        placeholder: 'Collateral',
+        total: selectedOptions.collateral.length,
+        selectedOptions: selectedOptions.collateral,
         options:
-          assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
+          collateralOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
           [],
-        onChange: onSelectAssetType
+        onChange: onSelectCollateral
       };
 
       return [chainFilterOptions, marketFilterOptions, assetTypeFilterOptions];
     }, [
-      assetTypeOptions,
+      collateralOptions,
       chainOptions,
-      deploymentOptionsFilter,
-      onSelectAssetType,
+      marketOptionsFilter,
+      onSelectCollateral,
       onSelectChain,
       onSelectMarket,
       selectedOptions
@@ -533,16 +462,6 @@ const Filters = memo(
               />
               <div className='flex w-full items-center gap-2 sm:w-auto'>
                 <Button
-                  onClick={onGroupOpen}
-                  className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
-                >
-                  <Icon
-                    name='group-grid'
-                    className='h-[14px] w-[14px] fill-none'
-                  />
-                  Group
-                </Button>
-                <Button
                   onClick={onOpenModal}
                   className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
                 >
@@ -569,13 +488,6 @@ const Filters = memo(
             filterOptions={filterOptions}
             onClose={onCloseModal}
             onClearAll={onClearAll}
-          />
-          <GroupDrawer
-            isOpen={isGroupOpen}
-            selectedOption={groupBy}
-            options={groupOptionsDto(groupByOptions)}
-            onClose={onGroupClose}
-            onSelect={selectSingle}
           />
           <Drawer
             isOpen={isMoreOpen}
@@ -670,6 +582,7 @@ const Filters = memo(
               disabled={isLoading}
             />
             <MultiSelect
+              type='valueInTrigger'
               options={chainOptions || []}
               value={selectedOptions.chain}
               onChange={onSelectChain}
@@ -677,56 +590,25 @@ const Filters = memo(
               disabled={isLoading}
             />
             <MultiSelect
-              options={deploymentOptionsFilter}
-              value={selectedOptions.deployment}
+              type='valueInTrigger'
+              options={marketOptionsFilter}
+              value={selectedOptions.market}
               onChange={onSelectMarket}
               placeholder='Market'
-              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
+              disabled={isLoading || !Boolean(marketOptionsFilter.length)}
             />
             <MultiSelect
+              type='valueInTrigger'
               options={
-                assetTypeOptions?.sort((a, b) =>
+                collateralOptions?.sort((a, b) =>
                   a.label.localeCompare(b.label)
                 ) || []
               }
-              value={selectedOptions.assetType}
-              onChange={onSelectAssetType}
+              value={selectedOptions.collateral}
+              onChange={onSelectCollateral}
               placeholder='Asset Type'
               disabled={isLoading}
             />
-            <MultiSelect
-              options={
-                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-                []
-              }
-              value={selectedOptions.symbol}
-              onChange={onSelectSymbol}
-              placeholder='Reserve Symbols'
-              disabled={isLoading}
-            />
-            <div className='flex items-center gap-1'>
-              <Text
-                tag='span'
-                size='11'
-                weight='600'
-                lineHeight='16'
-                className='text-primary-14'
-              >
-                Group by
-              </Text>
-              <SingleDropdown
-                options={groupByOptions}
-                isOpen={isOpenSingle}
-                selectedValue={groupBy}
-                onOpen={openSingleDropdown}
-                onClose={closeSingle}
-                onSelect={(value: string) => {
-                  selectSingleClose(value);
-                }}
-                disabled={isLoading}
-                triggerContentClassName='p-[5px]'
-              />
-            </div>
             <CSVDownloadButton
               data={csvData}
               filename={csvFilename}
@@ -738,4 +620,4 @@ const Filters = memo(
   }
 );
 
-export default TotalTresuaryValue;
+export default SpecificCollateralPrice;

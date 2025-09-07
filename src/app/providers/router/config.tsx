@@ -1,5 +1,6 @@
 import { JSX } from 'react';
 
+import CapoPage from '@/pages/CapoPage/CapoPage';
 import InsentivePage from '@/pages/InsentivePage/InsentivePage';
 import RevenuePage from '@/pages/RevenuePage/RevenuePage';
 import RunwayPage from '@/pages/RunwayPage/RunwayPage';
@@ -16,6 +17,7 @@ export enum commonRoutes {
   TREASURY = '/treasury',
   INCENTIVES = '/incentives',
   OEV = '/oev',
+  CAPO = '/capo',
   NOT_FOUND = '*'
 }
 
@@ -24,7 +26,8 @@ export const VALID_NAVIGATION_ROUTES = [
   commonRoutes.RUNWAY,
   commonRoutes.REVENUE,
   commonRoutes.INCENTIVES,
-  commonRoutes.OEV
+  commonRoutes.OEV,
+  commonRoutes.CAPO
 ] as const;
 
 export const enum routeTitles {
@@ -32,6 +35,7 @@ export const enum routeTitles {
   RUNWAY = 'Runway',
   REVENUE = 'Revenue',
   INCENTIVES = 'Incentives',
+  CAPO = 'Capo',
   OEV = 'OEV'
 }
 
@@ -55,6 +59,10 @@ export const routesConfig: Record<commonRoutes, RouteConfig> = {
   [commonRoutes.OEV]: {
     path: commonRoutes.OEV,
     element: <div>OEV</div>
+  },
+  [commonRoutes.CAPO]: {
+    path: commonRoutes.CAPO,
+    element: <CapoPage />
   },
   [commonRoutes.NOT_FOUND]: {
     path: commonRoutes.NOT_FOUND,

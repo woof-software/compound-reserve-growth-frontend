@@ -20,6 +20,8 @@ import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
 export interface MultiSelectProps {
+  type?: 'default' | 'valueInTrigger';
+
   options: OptionType[];
 
   placeholder?: string;
@@ -48,6 +50,8 @@ interface CustomDropdownProps {
 }
 
 interface MultiSelectDrawerProps {
+  type?: 'default' | 'valueInTrigger';
+
   value: OptionType[];
 
   placeholder?: string;
@@ -92,6 +96,7 @@ const CustomDropdownItem: FC<CustomDropdownProps> = ({
 };
 
 const MultiSelectTrigger: FC<MultiSelectDrawerProps> = ({
+  type,
   value,
   placeholder,
   className
@@ -104,15 +109,28 @@ const MultiSelectTrigger: FC<MultiSelectDrawerProps> = ({
       )}
     >
       <View.Condition if={Boolean(value.length > 0)}>
-        <div className='bg-secondary-46 flex h-5 w-5 items-center justify-center rounded-sm'>
-          <Text
-            size='11'
-            weight='500'
-            className='text-primary-18 leading-none tabular-nums'
-          >
-            {value.length}
-          </Text>
-        </div>
+        <View.Condition if={type === 'default'}>
+          <div className='bg-secondary-46 flex h-5 w-5 items-center justify-center rounded-sm'>
+            <Text
+              size='11'
+              weight='500'
+              className='text-primary-18 leading-none tabular-nums'
+            >
+              {value.length}
+            </Text>
+          </div>
+        </View.Condition>
+        <View.Condition if={type === 'valueInTrigger'}>
+          <div className='bg-secondary-46 flex h-5 items-center justify-center rounded-sm px-2.5 py-[2.5px]'>
+            <Text
+              size='11'
+              weight='500'
+              className='text-primary-18 leading-none tabular-nums'
+            >
+              {value[0]?.label || ''}
+            </Text>
+          </div>
+        </View.Condition>
       </View.Condition>
       <View.Condition if={!Boolean(value.length > 0)}>
         <div className='p-0.5'>
@@ -139,6 +157,7 @@ const MultiSelectTrigger: FC<MultiSelectDrawerProps> = ({
 };
 
 export const MultiSelect: FC<MultiSelectProps> = ({
+  type = 'default',
   options,
   placeholder = 'Chain',
   onChange,
@@ -257,6 +276,7 @@ export const MultiSelect: FC<MultiSelectProps> = ({
         onClose={onCloseDropdown}
         triggerContent={
           <MultiSelectTrigger
+            type={type}
             value={value}
             placeholder={placeholder}
             className={className}

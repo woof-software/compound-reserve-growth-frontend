@@ -30,13 +30,13 @@ const Icon = ({
     let importPromise;
 
     if (folder === 'token') {
-      importPromise = import(`@/assets/svg/token/${name}.svg`);
+      importPromise = import(`@/shared/assets/svg/token/${name}.svg`);
     } else if (folder === 'collaterals') {
-      importPromise = import(`@/assets/svg/collaterals/${name}.svg`);
+      importPromise = import(`@/shared/assets/svg/collaterals/${name}.svg`);
     } else if (folder === 'network') {
-      importPromise = import(`@/assets/svg/network/${name}.svg`);
+      importPromise = import(`@/shared/assets/svg/network/${name}.svg`);
     } else {
-      importPromise = import(`@/assets/svg/${name}.svg`);
+      importPromise = import(`@/shared/assets/svg/${name}.svg`);
     }
 
     importPromise
@@ -48,7 +48,7 @@ const Icon = ({
         }
       })
       .catch(() => {
-        import('@/assets/svg/not-found-icon.svg').then((module) => {
+        import('@/shared/assets/svg/not-found-icon.svg').then((module) => {
           setSvgComponent(() => module.default);
         });
       });

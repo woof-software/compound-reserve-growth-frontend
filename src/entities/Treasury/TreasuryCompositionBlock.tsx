@@ -3,8 +3,6 @@ import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
 import PieChart from '@/components/Charts/Pie/Pie';
 import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
-import SortDrawer from '@/components/SortDrawer/SortDrawer';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import { useModal } from '@/shared/hooks/useModal';
 import {
@@ -19,6 +17,8 @@ import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
+import SingleDropdown from '@/shared/ui/SingleDropdown/SingleDropdown';
+import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Switch from '@/shared/ui/Switch/Switch';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';

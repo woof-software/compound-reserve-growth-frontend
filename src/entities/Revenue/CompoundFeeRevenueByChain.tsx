@@ -10,10 +10,6 @@ import CompoundFeeRevenuebyChainComponent, {
   Interval,
   ProcessedRevenueData as TableData
 } from '@/components/RevenuePageTable/CompoundFeeRevenuebyChain';
-import SingleDropdown, {
-  SingleDrawer
-} from '@/components/SingleDropdown/SingleDropdown';
-import SortDrawer from '@/components/SortDrawer/SortDrawer';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { cn } from '@/shared/lib/classNames/classNames';
@@ -32,6 +28,10 @@ import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import { Radio } from '@/shared/ui/RadioButton/RadioButton';
+import SingleDropdown, {
+  SingleDrawer
+} from '@/shared/ui/SingleDropdown/SingleDropdown';
+import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 

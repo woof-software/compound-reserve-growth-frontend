@@ -1,9 +1,9 @@
 import React, { FC } from 'react';
 import { CSVLink } from 'react-csv';
 
-import { Tooltip } from '@/components/Tooltip/Tooltip';
 import { cn } from '@/shared/lib/classNames/classNames';
 import Icon from '@/shared/ui/Icon/Icon';
+import { Tooltip } from '@/shared/ui/Tooltip/Tooltip';
 
 interface CSVDownloadButtonProps {
   data: Array<Record<string, string | number | boolean | null | undefined>>;

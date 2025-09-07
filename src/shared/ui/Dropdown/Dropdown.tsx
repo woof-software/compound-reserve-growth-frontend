@@ -14,8 +14,8 @@ import { cn } from '@/shared/lib/classNames/classNames';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-import ArrowDown from '@/assets/svg/arrow-down.svg';
-import CheckStroke from '@/assets/svg/check-stroke.svg';
+import ArrowDown from '@/shared/assets/svg/arrow-down.svg';
+import CheckStroke from '@/shared/assets/svg/check-stroke.svg';
 
 interface DropdownProps extends PropsWithChildren {
   triggerContent: ReactNode;

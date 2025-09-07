@@ -7,12 +7,12 @@ import {
   useState
 } from 'react';
 
-import Portal from '@/components/Portal/Portal';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
   AnimationProvider,
   useAnimationLibs
 } from '@/shared/ui/AnimationProvider/AnimationProvider';
+import Portal from '@/shared/ui/Portal/Portal';
 
 interface DrawerProps extends PropsWithChildren {
   className?: string;

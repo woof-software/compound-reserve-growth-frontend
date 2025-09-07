@@ -3,8 +3,8 @@ import Card from '@/shared/ui/Card/Card';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-import BreakPointDark from '@/assets/svg/break-point-dark.svg';
-import BreakPointLight from '@/assets/svg/break-point-light.svg';
+import BreakPointDark from '@/shared/assets/svg/break-point-dark.svg';
+import BreakPointLight from '@/shared/assets/svg/break-point-light.svg';
 
 const BreakPointBlock = () => {
   const { theme } = useTheme();

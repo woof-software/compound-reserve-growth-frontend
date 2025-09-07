@@ -9,8 +9,8 @@ import {
 } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Text from '@/shared/ui/Text/Text';
+import { TextTooltip } from '@/shared/ui/TextTooltip/TextTooltip';
 
-import { TextTooltip } from '../TextTooltip/TextTooltip';
 import { UrlTooltip } from '../UrlTooltip/UrlTooltip';
 
 export interface FullDAOCommitmentRow {
