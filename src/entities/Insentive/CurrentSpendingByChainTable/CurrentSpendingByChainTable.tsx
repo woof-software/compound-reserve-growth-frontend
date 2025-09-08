@@ -3,7 +3,12 @@ import { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { formatLargeNumber, formatPrice } from '@/shared/lib/utils/utils';
+import {
+  formatLargeNumber,
+  formatNumber,
+  formatPrice,
+  formatQuantity
+} from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -86,6 +91,20 @@ const CurrentSpendingByChainTable = ({
   sortType,
   tableData
 }: TreasuryBalanceByNetworkProps) => {
+  const footerRow = (
+    <tr key='footer-total-row'>
+      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
+        Total
+      </td>
+      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
+        {formatQuantity(41680359)}
+      </td>
+      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
+        {formatNumber(54448945)}
+      </td>
+    </tr>
+  );
+
   const mobileTableData = useMemo(() => {
     if (!sortType?.key) {
       return tableData;
@@ -113,117 +132,170 @@ const CurrentSpendingByChainTable = ({
   return (
     <>
       <MobileDataTable tableData={mobileTableData}>
-        {(dataRows) =>
-          dataRows.map((row, index) => (
-            <div
-              key={row.symbol + index}
-              className={cn(
-                'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
-                {
-                  'border-none': dataRows.length - 1 === index
-                }
-              )}
-            >
-              <div className='grid w-full'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Symbol
-                </Text>
-                <div className='flex items-center gap-1'>
-                  <Icon
-                    name={row.symbol || 'not-found-icon'}
-                    className='h-4 w-4'
-                    folder='collaterals'
-                  />
+        {(dataRows) => (
+          <>
+            {dataRows.map((row, index) => (
+              <div
+                key={row.symbol + index}
+                className={cn(
+                  'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                  {
+                    'border-none': dataRows.length - 1 === index
+                  }
+                )}
+              >
+                <div className='grid w-full'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Symbol
+                  </Text>
+                  <div className='flex items-center gap-1'>
+                    <Icon
+                      name={row.symbol || 'not-found-icon'}
+                      className='h-4 w-4'
+                      folder='collaterals'
+                    />
+                    <Text
+                      size='13'
+                      lineHeight='21'
+                      className='truncate'
+                    >
+                      {row.symbol}
+                    </Text>
+                  </div>
+                </div>
+                <div className='grid w-full'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    QTY
+                  </Text>
                   <Text
                     size='13'
                     lineHeight='21'
                     className='truncate'
                   >
-                    {row.symbol}
+                    {formatLargeNumber(row.qty, 1)}
+                  </Text>
+                </div>
+                <div className='grid w-full'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Value
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {formatPrice(row.value, 1)}
+                  </Text>
+                </div>
+                <div className='grid w-full'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Market
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.market === 'no market' ? ' - ' : row.market}
+                  </Text>
+                </div>
+                <div className='grid w-full'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Source
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.source}
                   </Text>
                 </div>
               </div>
-              <div className='grid w-full'>
+            ))}
+            <div
+              className={cn(
+                'grid grid-cols-3 gap-x-10 gap-y-3 p-5 md:gap-x-[63px] md:px-10'
+              )}
+            >
+              <div className='grid min-h-[39px] w-full max-w-[100px]'>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
                 >
-                  QTY
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {formatLargeNumber(row.qty, 1)}
+                  Total
                 </Text>
               </div>
-              <div className='grid w-full'>
+              <div className='grid min-h-[39px] w-full max-w-[100px]'>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
                 >
-                  Value
+                  Value COMP
                 </Text>
                 <Text
                   size='13'
-                  lineHeight='21'
-                  className='truncate'
+                  lineHeight='18'
+                  weight='500'
                 >
-                  {formatPrice(row.value, 1)}
+                  {formatQuantity(41680359)}
                 </Text>
               </div>
-              <div className='grid w-full'>
+              <div className='grid min-h-[39px] w-full max-w-[100px]'>
                 <Text
-                  size='11'
+                  size='13'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
                 >
-                  Market
+                  Value USDC
                 </Text>
                 <Text
                   size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.market === 'no market' ? ' - ' : row.market}
-                </Text>
-              </div>
-              <div className='grid w-full'>
-                <Text
-                  size='11'
                   lineHeight='18'
                   weight='500'
-                  className='text-primary-14'
                 >
-                  Source
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.source}
+                  {formatNumber(54448945)}
                 </Text>
               </div>
             </div>
-          ))
-        }
+          </>
+        )}
       </MobileDataTable>
       <div className='hidden w-full max-w-full lg:block lg:max-w-[522px]'>
         <DataTable
           data={tableData}
           columns={treasuryColumns}
+          footerContent={footerRow}
           enableSorting
           enablePagination
           pageSize={10}
