@@ -36,7 +36,7 @@ export const enum routeTitles {
   RUNWAY = 'Runway',
   REVENUE = 'Revenue',
   INCENTIVES = 'Incentives',
-  CAPO = 'Capo',
+  CAPO = 'CAPO',
   OEV = 'OEV'
 }
 
