@@ -13,8 +13,6 @@ import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
-import { AddressTooltip } from '../../../components/AddressTooltip/AddressTooltip';
-
 export type TreasuryBalanceByNetworkType = {
   symbol: string;
   qty: number;
@@ -74,15 +72,9 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     enableSorting: true,
     size: 120,
     cell: ({ row }) => {
-      const { source, address, chain } = row.original;
+      const { source } = row.original;
 
-      return (
-        <AddressTooltip
-          text={source}
-          address={address}
-          chain={chain}
-        />
-      );
+      return <Text size='13'>{source}</Text>;
     }
   }
 ];
