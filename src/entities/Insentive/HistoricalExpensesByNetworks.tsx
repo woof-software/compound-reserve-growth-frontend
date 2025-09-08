@@ -27,17 +27,17 @@ interface FiltersProps {
 
   csvData: Record<string, string | number>[];
 
-  handleBarSizeChange: (value: string) => void;
+  onBarSizeChange: (value: string) => void;
 }
 
-const HistoricalExpencesByNetworks = ({
+const HistoricalExpensesByNetworks = ({
   isLoading,
   isError,
   data: treasuryApiResponse
 }: TotalTreasuryValueProps) => {
   const groupBy = 'Network';
 
-  const { barSize, handleBarSizeChange } = useChartControls({
+  const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
 
@@ -86,7 +86,6 @@ const HistoricalExpencesByNetworks = ({
 
   const {
     chartRef,
-    eventsData,
     showEvents,
     isLegendEnabled,
     aggregatedSeries,
@@ -127,7 +126,7 @@ const HistoricalExpencesByNetworks = ({
         barSize={barSize}
         csvData={csvData}
         csvFilename={csvFilename}
-        handleBarSizeChange={handleBarSizeChange}
+        onBarSizeChange={onBarSizeChange}
       />
       <LineChart
         className='max-h-fit'
@@ -136,7 +135,6 @@ const HistoricalExpencesByNetworks = ({
         groupBy={groupBy}
         chartRef={chartRef}
         isLegendEnabled={isLegendEnabled}
-        eventsData={eventsData}
         aggregatedSeries={aggregatedSeries}
         showEvents={showEvents}
         areAllSeriesHidden={areAllSeriesHidden}
@@ -156,7 +154,7 @@ const Filters = memo(
     csvData,
     csvFilename,
     isLoading,
-    handleBarSizeChange
+    onBarSizeChange
   }: FiltersProps) => {
     return (
       <>
@@ -189,7 +187,7 @@ const Filters = memo(
                 }}
                 tabs={['D', 'W', 'M']}
                 value={barSize}
-                onTabChange={handleBarSizeChange}
+                onTabChange={onBarSizeChange}
                 disabled={isLoading}
               />
             </div>
@@ -210,7 +208,7 @@ const Filters = memo(
                 }}
                 tabs={['D', 'W', 'M']}
                 value={barSize}
-                onTabChange={handleBarSizeChange}
+                onTabChange={onBarSizeChange}
                 disabled={isLoading}
               />
               <CSVDownloadButton
@@ -237,7 +235,7 @@ const Filters = memo(
             <TabsGroup
               tabs={['D', 'W', 'M']}
               value={barSize}
-              onTabChange={handleBarSizeChange}
+              onTabChange={onBarSizeChange}
               disabled={isLoading}
             />
             <CSVDownloadButton
@@ -252,4 +250,4 @@ const Filters = memo(
   }
 );
 
-export default HistoricalExpencesByNetworks;
+export default HistoricalExpensesByNetworks;

@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
-import CurrentSpendingByChainBlock from '@/entities/Insentive/CurrentSpendingByChain';
 import DailyExpenses from '@/entities/Insentive/DailyExpenses';
 import FeesGeneratedVsIncentives from '@/entities/Insentive/FeesGeneratedVsIncentives';
-import HistoricalExpencesByNetworks from '@/entities/Insentive/HistoricalExpencesByNetworks';
+import HistoricalExpensesByNetworks from '@/entities/Insentive/HistoricalExpensesByNetworks';
 import MetricBlock from '@/entities/Insentive/MetricBlock';
+import CurrentSpendingByChainBlock from '@/features/Insentive/CurrentSpendingByChain';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
 import {
@@ -103,7 +103,7 @@ const InsentivePage = () => {
           isError={isError}
           isLoading={isLoading}
         />
-        <HistoricalExpencesByNetworks
+        <HistoricalExpensesByNetworks
           isLoading={isLoading}
           isError={isError}
           data={treasuryData}

@@ -8,7 +8,7 @@ import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
-import { AddressTooltip } from '../AddressTooltip/AddressTooltip';
+import { AddressTooltip } from '../../../components/AddressTooltip/AddressTooltip';
 
 export type TreasuryBalanceByNetworkType = {
   symbol: string;
@@ -82,7 +82,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
   }
 ];
 
-const CurrentSpendingByChain = ({
+const CurrentSpendingByChainTable = ({
   sortType,
   tableData
 }: TreasuryBalanceByNetworkProps) => {
@@ -239,4 +239,4 @@ const CurrentSpendingByChain = ({
   );
 };
 
-export default CurrentSpendingByChain;
+export default CurrentSpendingByChainTable;

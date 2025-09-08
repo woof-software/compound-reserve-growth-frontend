@@ -67,7 +67,7 @@ interface FiltersProps {
 
   onSelectCollateral: (collateral: OptionType[]) => void;
 
-  handleBarSizeChange: (value: string) => void;
+  onBarSizeChange: (value: string) => void;
 
   onClearAll: () => void;
 
@@ -103,7 +103,7 @@ const SpecificCollateralPrice = ({
     }
   );
 
-  const { barSize, handleBarSizeChange } = useChartControls({
+  const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
 
@@ -326,7 +326,7 @@ const SpecificCollateralPrice = ({
         onSelectChain={onSelectChain}
         onSelectCollateral={onSelectCollateral}
         onSelectMarket={onSelectMarket}
-        handleBarSizeChange={handleBarSizeChange}
+        onBarSizeChange={onBarSizeChange}
         onClearAll={onClearAll}
         onSelectAll={onSelectAll}
         onDeselectAll={onDeselectAll}
@@ -374,7 +374,7 @@ const Filters = memo(
     onSelectChain,
     onSelectCollateral,
     onSelectMarket,
-    handleBarSizeChange,
+    onBarSizeChange,
     onClearAll,
     onSelectAll,
     onDeselectAll,
@@ -457,7 +457,7 @@ const Filters = memo(
                 }}
                 tabs={['D', 'W', 'M']}
                 value={barSize}
-                onTabChange={handleBarSizeChange}
+                onTabChange={onBarSizeChange}
                 disabled={isLoading}
               />
               <div className='flex w-full items-center gap-2 sm:w-auto'>
@@ -578,7 +578,7 @@ const Filters = memo(
             <TabsGroup
               tabs={['D', 'W', 'M']}
               value={barSize}
-              onTabChange={handleBarSizeChange}
+              onTabChange={onBarSizeChange}
               disabled={isLoading}
             />
             <MultiSelect

@@ -94,7 +94,7 @@ interface FiltersProps {
 
   onSelectSymbol: (symbol: OptionType[]) => void;
 
-  handleBarSizeChange: (value: string) => void;
+  onBarSizeChange: (value: string) => void;
 
   toggleSingle: () => void;
 
@@ -114,7 +114,7 @@ const CompoundFeeRevenueRecieved = ({
   isLoading,
   isError
 }: RevenuePageProps) => {
-  const { barSize, handleBarSizeChange } = useChartControls({
+  const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
 
@@ -405,7 +405,7 @@ const CompoundFeeRevenueRecieved = ({
         onSelectAssetType={onSelectAssetType}
         onSelectMarket={onSelectMarket}
         onSelectSymbol={onSelectSymbol}
-        handleBarSizeChange={handleBarSizeChange}
+        onBarSizeChange={onBarSizeChange}
         toggleSingle={onGroupByOpen}
         closeSingle={onGroupByClose}
         selectSingle={handleSelectGroupBy}
@@ -455,7 +455,7 @@ const Filters = memo(
     onSelectAssetType,
     onSelectMarket,
     onSelectSymbol,
-    handleBarSizeChange,
+    onBarSizeChange,
     toggleSingle,
     closeSingle,
     selectSingle,
@@ -550,7 +550,7 @@ const Filters = memo(
             <TabsGroup
               tabs={['D', 'W', 'M']}
               value={barSize}
-              onTabChange={handleBarSizeChange}
+              onTabChange={onBarSizeChange}
               disabled={isLoading}
             />
             <MultiSelect
@@ -626,7 +626,7 @@ const Filters = memo(
                   }}
                   tabs={['D', 'W', 'M']}
                   value={barSize}
-                  onTabChange={handleBarSizeChange}
+                  onTabChange={onBarSizeChange}
                   disabled={isLoading}
                 />
                 <Button
@@ -668,7 +668,7 @@ const Filters = memo(
                   }}
                   tabs={['D', 'W', 'M']}
                   value={barSize}
-                  onTabChange={handleBarSizeChange}
+                  onTabChange={onBarSizeChange}
                   disabled={isLoading}
                 />
                 <Button

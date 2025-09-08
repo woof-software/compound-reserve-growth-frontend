@@ -66,7 +66,7 @@ interface FiltersProps {
 
   onSelectSymbol: (symbol: OptionType[]) => void;
 
-  handleBarSizeChange: (value: string) => void;
+  onBarSizeChange: (value: string) => void;
 
   onClearAll: () => void;
 
@@ -95,7 +95,7 @@ const CompoundCumulativeRevenue = ({
     }
   );
 
-  const { barSize, handleBarSizeChange } = useChartControls({
+  const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
 
@@ -354,7 +354,7 @@ const CompoundCumulativeRevenue = ({
         onSelectAssetType={onSelectAssetType}
         onSelectMarket={onSelectMarket}
         onSelectSymbol={onSelectSymbol}
-        handleBarSizeChange={handleBarSizeChange}
+        onBarSizeChange={onBarSizeChange}
         onClearAll={onClearSelectedOptions}
         onShowEvents={onShowEvents}
         onSelectAll={onSelectAll}
@@ -405,7 +405,7 @@ const Filters = ({
   onSelectAssetType,
   onSelectMarket,
   onSelectSymbol,
-  handleBarSizeChange,
+  onBarSizeChange,
   onClearAll,
   onShowEvents,
   onSelectAll,
@@ -499,7 +499,7 @@ const Filters = ({
           <TabsGroup
             tabs={['D', 'W', 'M']}
             value={barSize}
-            onTabChange={handleBarSizeChange}
+            onTabChange={onBarSizeChange}
             disabled={isLoading}
           />
           <div className='flex gap-2'>
@@ -586,7 +586,7 @@ const Filters = ({
             <TabsGroup
               tabs={['D', 'W', 'M']}
               value={barSize}
-              onTabChange={handleBarSizeChange}
+              onTabChange={onBarSizeChange}
               disabled={isLoading}
             />
             <CSVDownloadButton
@@ -606,7 +606,7 @@ const Filters = ({
               }}
               tabs={['D', 'W', 'M']}
               value={barSize}
-              onTabChange={handleBarSizeChange}
+              onTabChange={onBarSizeChange}
               disabled={isLoading}
             />
             <Button

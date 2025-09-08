@@ -13,7 +13,7 @@ export const useChartControls = ({
 }: UseChartControlsProps = {}) => {
   const [barSize, setBarSize] = useState<BarSize>(initialBarSize);
 
-  const handleBarSizeChange = useCallback((value: string) => {
+  const onBarSizeChange = useCallback((value: string) => {
     if (VALID_BAR_SIZES.includes(value as BarSize)) {
       setBarSize(value as BarSize);
     }
@@ -21,6 +21,6 @@ export const useChartControls = ({
 
   return {
     barSize,
-    handleBarSizeChange
+    onBarSizeChange
   };
 };

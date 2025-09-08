@@ -61,7 +61,7 @@ interface FiltersProps {
 
   onSelectMarket: (deployment: OptionType[]) => void;
 
-  handleBarSizeChange: (value: string) => void;
+  onBarSizeChange: (value: string) => void;
 
   onClearAll: () => void;
 }
@@ -82,7 +82,7 @@ const FeesGeneratedVsIncentives = ({
     }
   );
 
-  const { barSize, handleBarSizeChange } = useChartControls({
+  const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
 
@@ -214,7 +214,6 @@ const FeesGeneratedVsIncentives = ({
 
   const {
     chartRef,
-    eventsData,
     showEvents,
     isLegendEnabled,
     aggregatedSeries,
@@ -290,7 +289,7 @@ const FeesGeneratedVsIncentives = ({
         csvFilename={csvFilename}
         onSelectChain={onSelectChain}
         onSelectMarket={onSelectMarket}
-        handleBarSizeChange={handleBarSizeChange}
+        onBarSizeChange={onBarSizeChange}
         onClearAll={onClearAll}
       />
       {!isLoading && !isError && !hasData ? (
@@ -303,7 +302,6 @@ const FeesGeneratedVsIncentives = ({
           groupBy={groupBy}
           chartRef={chartRef}
           isLegendEnabled={isLegendEnabled}
-          eventsData={eventsData}
           aggregatedSeries={aggregatedSeries}
           showEvents={showEvents}
           areAllSeriesHidden={areAllSeriesHidden}
@@ -329,7 +327,7 @@ const Filters = memo(
     isLoading,
     onSelectChain,
     onSelectMarket,
-    handleBarSizeChange,
+    onBarSizeChange,
     onClearAll
   }: FiltersProps) => {
     const { isOpen, onOpenModal, onCloseModal } = useModal();
@@ -380,7 +378,7 @@ const Filters = memo(
                 }}
                 tabs={['D', 'W', 'M']}
                 value={barSize}
-                onTabChange={handleBarSizeChange}
+                onTabChange={onBarSizeChange}
                 disabled={isLoading}
               />
               <Button
@@ -472,7 +470,7 @@ const Filters = memo(
             <TabsGroup
               tabs={['D', 'W', 'M']}
               value={barSize}
-              onTabChange={handleBarSizeChange}
+              onTabChange={onBarSizeChange}
               disabled={isLoading}
             />
             <MultiSelect

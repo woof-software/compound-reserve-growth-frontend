@@ -92,7 +92,7 @@ interface FiltersProps {
 
   onSelectSymbol: (symbol: OptionType[]) => void;
 
-  handleBarSizeChange: (value: string) => void;
+  onBarSizeChange: (value: string) => void;
 
   openSingleDropdown: () => void;
 
@@ -138,7 +138,7 @@ const TotalTresuaryValue = ({
     selectClose: selectSingleClose
   } = useDropdown('single');
 
-  const { barSize, handleBarSizeChange } = useChartControls({
+  const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
 
@@ -379,7 +379,7 @@ const TotalTresuaryValue = ({
         onSelectAssetType={onSelectAssetType}
         onSelectMarket={onSelectMarket}
         onSelectSymbol={onSelectSymbol}
-        handleBarSizeChange={handleBarSizeChange}
+        onBarSizeChange={onBarSizeChange}
         openSingleDropdown={openSingleDropdown}
         closeSingle={closeSingle}
         selectSingle={selectSingle}
@@ -435,7 +435,7 @@ const Filters = memo(
     onSelectAssetType,
     onSelectMarket,
     onSelectSymbol,
-    handleBarSizeChange,
+    onBarSizeChange,
     openSingleDropdown,
     closeSingle,
     selectSingle,
@@ -528,7 +528,7 @@ const Filters = memo(
                 }}
                 tabs={['D', 'W', 'M']}
                 value={barSize}
-                onTabChange={handleBarSizeChange}
+                onTabChange={onBarSizeChange}
                 disabled={isLoading}
               />
               <div className='flex w-full items-center gap-2 sm:w-auto'>
@@ -666,7 +666,7 @@ const Filters = memo(
             <TabsGroup
               tabs={['D', 'W', 'M']}
               value={barSize}
-              onTabChange={handleBarSizeChange}
+              onTabChange={onBarSizeChange}
               disabled={isLoading}
             />
             <MultiSelect

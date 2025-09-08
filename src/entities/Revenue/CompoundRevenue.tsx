@@ -78,7 +78,7 @@ interface FiltersProps {
 
   onSelectSymbol: (symbol: OptionType[]) => void;
 
-  handleBarSizeChange: (value: string) => void;
+  onBarSizeChange: (value: string) => void;
 
   onClearAll: () => void;
 }
@@ -199,7 +199,7 @@ const CompoundRevenueBlock = ({
     }
   );
 
-  const { barSize, handleBarSizeChange } = useChartControls({
+  const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
 
@@ -409,7 +409,7 @@ const CompoundRevenueBlock = ({
         onSelectSource={onSelectSource}
         onSelectMarket={onSelectMarket}
         onSelectSymbol={onSelectSymbol}
-        handleBarSizeChange={handleBarSizeChange}
+        onBarSizeChange={onBarSizeChange}
         onClearAll={onClearSelectedOptions}
       />
       <View.Condition if={!isLoading && !isError && hasData}>
@@ -444,7 +444,7 @@ const Filters = ({
   onSelectSource,
   onSelectMarket,
   onSelectSymbol,
-  handleBarSizeChange,
+  onBarSizeChange,
   onClearAll
 }: FiltersProps) => {
   const { isOpen, onOpenModal, onCloseModal } = useModal();
@@ -517,7 +517,7 @@ const Filters = ({
           <TabsGroup
             tabs={['D', 'W', 'M']}
             value={barSize}
-            onTabChange={handleBarSizeChange}
+            onTabChange={onBarSizeChange}
             disabled={isLoading}
           />
           <div className='flex gap-2'>
@@ -602,7 +602,7 @@ const Filters = ({
             <TabsGroup
               tabs={['D', 'W', 'M']}
               value={barSize}
-              onTabChange={handleBarSizeChange}
+              onTabChange={onBarSizeChange}
               disabled={isLoading}
             />
             <CSVDownloadButton
@@ -622,7 +622,7 @@ const Filters = ({
               }}
               tabs={['D', 'W', 'M']}
               value={barSize}
-              onTabChange={handleBarSizeChange}
+              onTabChange={onBarSizeChange}
               disabled={isLoading}
             />
             <Button
