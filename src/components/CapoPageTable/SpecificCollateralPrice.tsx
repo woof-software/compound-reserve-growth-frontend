@@ -606,7 +606,7 @@ const Filters = memo(
               }
               value={selectedOptions.collateral}
               onChange={onSelectCollateral}
-              placeholder='Asset Type'
+              placeholder='Collateral'
               disabled={isLoading}
             />
             <CSVDownloadButton
