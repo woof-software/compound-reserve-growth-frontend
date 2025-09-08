@@ -1,11 +1,10 @@
-import React, { useCallback, useMemo, useReducer, useState } from 'react';
+import { FC, useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
+import { TreasuryBalanceByNetworkType } from '@/components/CapoPageTable/CollateralsPrice';
 import CryptoChart from '@/components/Charts/Bar/Bar';
 import Filter from '@/components/Filter/Filter';
-import CurrentSpendingByChain from '@/components/IncentivesPageTable/CurrentSpendingByChain';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import { TreasuryBalanceByNetworkType } from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
@@ -21,11 +20,10 @@ import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
-import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-interface CurrentSpendingByChainBlockProps {
+interface CapturedFeesByNetworkMarketProps {
   isLoading?: boolean;
 
   isError?: boolean;
@@ -52,7 +50,7 @@ const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
   });
 };
 
-export const treasuryBalanceByNetworkColumns = [
+const treasuryBalanceByNetworkColumns = [
   {
     accessorKey: 'symbol',
     header: 'Network'
@@ -71,11 +69,11 @@ export const treasuryBalanceByNetworkColumns = [
   }
 ];
 
-const CurrentSpendingByChainBlock = ({
+const CapturedFeesByNetworkMarket: FC<CapturedFeesByNetworkMarketProps> = ({
   isLoading,
   isError,
   data
-}: CurrentSpendingByChainBlockProps) => {
+}) => {
   const {
     isOpen: isFilterOpen,
     onOpenModal: onFilterOpen,
@@ -94,8 +92,6 @@ const CurrentSpendingByChainBlock = ({
     onCloseModal: onMoreClose
   } = useModal();
 
-  const [tabValue, setTabValue] = useState<string>('Lend');
-
   const [selectedOptions, setSelectedOptions] = useReducer(
     (prev, next) => ({
       ...prev,
@@ -103,9 +99,7 @@ const CurrentSpendingByChainBlock = ({
     }),
     {
       chain: [{ id: 'mainnet', label: 'Mainnet' }] as OptionType[],
-      assetType: [] as OptionType[],
-      deployment: [] as OptionType[],
-      symbol: [] as OptionType[]
+      market: [] as OptionType[]
     }
   );
 
@@ -120,31 +114,28 @@ const CurrentSpendingByChainBlock = ({
   const filterOptionsConfig = useMemo(
     () => ({
       chain: { path: 'source.network' },
-      assetType: { path: 'source.asset.type' },
-      deployment: { path: 'source.market' },
-      symbol: { path: 'source.asset.symbol' }
+      market: { path: 'source.market' }
     }),
     []
   );
 
-  const { chainOptions, assetTypeOptions, deploymentOptions, symbolOptions } =
-    useMemo(
-      () => extractFilterOptions(data, filterOptionsConfig),
-      [data, filterOptionsConfig]
-    );
+  const { chainOptions, marketOptions } = useMemo(
+    () => extractFilterOptions(data, filterOptionsConfig),
+    [data, filterOptionsConfig]
+  );
 
   const deploymentOptionsFilter = useMemo(() => {
     const marketV2 =
-      deploymentOptions
+      marketOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
         .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const marketV3 =
-      deploymentOptions
+      marketOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
         .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
-    const noMarkets = deploymentOptions?.find(
+    const noMarkets = marketOptions?.find(
       (el) => el.id.toLowerCase() === 'no name'
     );
 
@@ -163,7 +154,7 @@ const CurrentSpendingByChainBlock = ({
     }
 
     return allMarkets;
-  }, [deploymentOptions, selectedOptions]);
+  }, [marketOptions, selectedOptions]);
 
   const tableData = useMemo<TreasuryBalanceByNetworkType[]>(() => {
     const filtered = data.filter((item) => {
@@ -176,30 +167,12 @@ const CurrentSpendingByChainBlock = ({
         return false;
       }
 
-      if (
-        selectedOptions.assetType.length > 0 &&
-        !selectedOptions.assetType.some(
-          (o: OptionType) => o.id === item.source.asset.type
-        )
-      ) {
-        return false;
-      }
-
       const market = item.source.market ?? 'no market';
 
       if (
-        selectedOptions.deployment.length > 0 &&
-        !selectedOptions.deployment.some((o: OptionType) =>
+        selectedOptions.market.length > 0 &&
+        !selectedOptions.market.some((o: OptionType) =>
           o.id === 'no name' ? market === 'no market' : o.id === market
-        )
-      ) {
-        return false;
-      }
-
-      if (
-        selectedOptions.symbol.length > 0 &&
-        !selectedOptions.symbol.some(
-          (o: OptionType) => o.id === item.source.asset.symbol
         )
       ) {
         return false;
@@ -225,31 +198,19 @@ const CurrentSpendingByChainBlock = ({
     (chain: OptionType[]) => {
       const selectedChainIds = chain.map((o) => o.id);
 
-      const filteredDeployment = selectedOptions.deployment.filter((el) =>
+      const filteredDeployment = selectedOptions.market.filter((el) =>
         selectedChainIds.length === 0
           ? true
           : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
       );
       setSelectedOptions({ chain, deployment: filteredDeployment });
     },
-    [selectedOptions.deployment]
+    [selectedOptions.market]
   );
-
-  const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      assetType: selectedOptions
-    });
-  }, []);
 
   const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
       deployment: selectedOptions
-    });
-  }, []);
-
-  const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      symbol: selectedOptions
     });
   }, []);
 
@@ -263,10 +224,6 @@ const CurrentSpendingByChainBlock = ({
     setSortType({
       type: value
     });
-  }, []);
-
-  const onTabsChange = useCallback((value: string) => {
-    setTabValue(value);
   }, []);
 
   const onClearSelectedOptions = useCallback(() => {
@@ -304,48 +261,19 @@ const CurrentSpendingByChainBlock = ({
     const marketFilterOptions = {
       id: 'market',
       placeholder: 'Market',
-      total: selectedOptions.deployment.length,
-      selectedOptions: selectedOptions.deployment,
+      total: selectedOptions.market.length,
+      selectedOptions: selectedOptions.market,
       options: deploymentOptionsFilter || [],
       onChange: onSelectMarket
     };
 
-    const assetTypeFilterOptions = {
-      id: 'assetType',
-      placeholder: 'Asset Type',
-      total: selectedOptions.assetType.length,
-      selectedOptions: selectedOptions.assetType,
-      options:
-        assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
-      onChange: onSelectAssetType
-    };
-
-    const symbolFilterOptions = {
-      id: 'reserveSymbol',
-      placeholder: 'Reserve Symbols',
-      total: selectedOptions.symbol.length,
-      selectedOptions: selectedOptions.symbol,
-      options:
-        symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
-      onChange: onSelectSymbol
-    };
-
-    return [
-      chainFilterOptions,
-      marketFilterOptions,
-      assetTypeFilterOptions,
-      symbolFilterOptions
-    ];
+    return [chainFilterOptions, marketFilterOptions];
   }, [
-    assetTypeOptions,
     chainOptions,
     deploymentOptionsFilter,
-    onSelectAssetType,
     onSelectChain,
     onSelectMarket,
-    onSelectSymbol,
-    selectedOptions,
-    symbolOptions
+    selectedOptions
   ]);
 
   return (
@@ -364,11 +292,6 @@ const CurrentSpendingByChainBlock = ({
       }}
     >
       <div className='hidden items-center justify-end gap-2 px-10 py-3 lg:flex lg:px-0'>
-        <TabsGroup
-          tabs={['Lend', 'Borrow', 'Total']}
-          value={tabValue}
-          onTabChange={onTabsChange}
-        />
         <MultiSelect
           options={chainOptions || []}
           value={selectedOptions.chain}
@@ -378,26 +301,18 @@ const CurrentSpendingByChainBlock = ({
         />
         <MultiSelect
           options={deploymentOptionsFilter}
-          value={selectedOptions.deployment}
+          value={selectedOptions.market}
           onChange={onSelectMarket}
           placeholder='Market'
           disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
         />
         <CSVDownloadButton
           data={tableData}
-          filename='Current spending by chain'
+          filename='Full Treasury Holdings'
         />
       </div>
       <div className='block px-5 py-3 lg:hidden'>
         <div className='flex flex-col items-center justify-end gap-2 sm:flex-row'>
-          <TabsGroup
-            className={{
-              container: 'hidden sm:block'
-            }}
-            tabs={['Lend', 'Borrow', 'Total']}
-            value={tabValue}
-            onTabChange={onTabsChange}
-          />
           <div className='flex w-full items-center gap-2 sm:w-auto'>
             <Button
               onClick={onFilterOpen}
@@ -421,15 +336,6 @@ const CurrentSpendingByChainBlock = ({
             </Button>
           </div>
           <div className='flex w-full items-center gap-2 sm:w-auto'>
-            <TabsGroup
-              className={{
-                container: 'block w-full sm:hidden sm:w-auto',
-                list: 'w-full sm:w-auto'
-              }}
-              tabs={['Lend', 'Borrow', 'Total']}
-              value={tabValue}
-              onTabChange={onTabsChange}
-            />
             <Button
               onClick={onMoreOpen}
               className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
@@ -497,10 +403,10 @@ const CurrentSpendingByChainBlock = ({
             data={chartData}
             onClear={onClearFilters}
           />
-          <CurrentSpendingByChain
-            sortType={sortType}
-            tableData={tableData}
-          />
+          {/*<CurrentSpendingByChain*/}
+          {/*  sortType={sortType}*/}
+          {/*  tableData={tableData}*/}
+          {/*/>*/}
         </div>
       </View.Condition>
       <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
@@ -510,4 +416,4 @@ const CurrentSpendingByChainBlock = ({
   );
 };
 
-export default CurrentSpendingByChainBlock;
+export default CapturedFeesByNetworkMarket;

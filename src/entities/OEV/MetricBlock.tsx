@@ -81,16 +81,16 @@ const mapMetricData = ({
   };
 };
 
-const MetricIncentivesBlock = memo(({ data, isLoading }: MetricBlockProps) => {
+const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
   const { theme } = useTheme();
 
-  const { totalValue, totalLastValue } = mapMetricData(data);
+  const { totalValue } = mapMetricData(data);
 
   return (
     <div className='flex flex-col gap-2.5 lg:gap-5'>
       <div className='flex flex-col gap-2.5 md:flex-row lg:gap-5'>
         <Card
-          title='Total lend incentives'
+          title='BTC corellated'
           isLoading={isLoading}
           className={{
             container: 'max-w-full min-w-64',
@@ -112,17 +112,10 @@ const MetricIncentivesBlock = memo(({ data, isLoading }: MetricBlockProps) => {
                 {formatPrice(totalValue, 1)}
               </Text>
             </div>
-            <Text
-              weight='500'
-              size='13'
-              className='text-primary-14'
-            >
-              {formatPrice(totalLastValue, 1)}
-            </Text>
           </div>
         </Card>
         <Card
-          title='Total lend incentives'
+          title='Stablecoin corellated'
           isLoading={isLoading}
           className={{
             container: 'max-w-full min-w-64',
@@ -144,19 +137,12 @@ const MetricIncentivesBlock = memo(({ data, isLoading }: MetricBlockProps) => {
                 {formatPrice(totalValue, 1)}
               </Text>
             </div>
-            <Text
-              weight='500'
-              size='13'
-              className='text-primary-14'
-            >
-              {formatPrice(totalLastValue, 1)}
-            </Text>
           </div>
         </Card>
       </div>
       <div className='flex flex-col gap-2.5 md:flex-row lg:gap-5'>
         <Card
-          title='Total lend incentives'
+          title='ETH corellated'
           isLoading={isLoading}
           className={{
             container: 'max-w-full min-w-64',
@@ -178,17 +164,10 @@ const MetricIncentivesBlock = memo(({ data, isLoading }: MetricBlockProps) => {
                 {formatPrice(totalValue, 1)}
               </Text>
             </div>
-            <Text
-              weight='500'
-              size='13'
-              className='text-primary-14'
-            >
-              {formatPrice(totalLastValue, 1)}
-            </Text>
           </div>
         </Card>
         <Card
-          title='Total lend incentives'
+          title='Total OEV fees captured'
           isLoading={isLoading}
           className={{
             container: 'max-w-full min-w-64',
@@ -211,13 +190,6 @@ const MetricIncentivesBlock = memo(({ data, isLoading }: MetricBlockProps) => {
                 {formatPrice(totalValue, 1)}
               </Text>
             </div>
-            <Text
-              weight='500'
-              size='13'
-              className='text-primary-14'
-            >
-              {formatPrice(totalLastValue, 1)}
-            </Text>
           </div>
           <Icon
             name={
@@ -231,4 +203,4 @@ const MetricIncentivesBlock = memo(({ data, isLoading }: MetricBlockProps) => {
   );
 });
 
-export default MetricIncentivesBlock;
+export default MetricBlock;

@@ -1,12 +1,12 @@
 import { memo } from 'react';
 
-import { cn } from '@/shared/lib/classNames/classNames';
+import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { formatPrice, sumValues } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { AssetType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
-import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
+import Text from '@/shared/ui/Text/Text';
 
 type MetricData = {
   uniqDataByCategory: Record<string, TokenData[]>;
@@ -16,6 +16,7 @@ type MetricData = {
 
 interface MetricBlockProps {
   isLoading?: boolean;
+
   data: MetricData;
 }
 
@@ -82,169 +83,169 @@ const mapMetricData = ({
 };
 
 const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
-  const {
-    totalValue,
-    totalLastValue,
+  const { theme } = useTheme();
 
-    compTotalValue,
-    compLastValue,
-
-    nonCompTotalValue,
-    nonCompLastValue,
-
-    stablecoinTotalValue,
-    stablecoinLastValue,
-
-    ethCorrelatedHoldingTotalValue,
-    ethCorrelatedHoldingLastValue
-  } = mapMetricData(data);
+  const { totalValue, totalLastValue } = mapMetricData(data);
 
   return (
-    <div className='flex flex-col gap-0 md:gap-2.5 lg:gap-5'>
-      <div className='flex flex-col gap-0 md:flex-row md:gap-2.5 lg:gap-5'>
+    <div className='flex flex-col gap-2.5 lg:gap-5'>
+      <div className='flex flex-col gap-2.5 md:flex-row lg:gap-5'>
         <Card
+          title='Total lend incentives'
           isLoading={isLoading}
           className={{
-            container: cn(
-              'flex h-auto min-h-auto min-w-[343px] flex-1 items-center rounded-b-none md:min-w-auto',
-              {
-                'min-h-[180px]': isLoading
-              }
-            ),
-            content: 'w-full p-5 md:p-10'
+            container: 'max-w-full min-w-64',
+            loading: 'h-[200px]',
+            header: 'px-5 py-4',
+            content:
+              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#B9E6D9_2.63%,#FFFFFF_100%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#154F48_2.63%,#1D2833_100%)]'
           }}
         >
-          <ValueMetricField
-            className={{
-              container: 'flex-wrap',
-              content: ''
-            }}
-            label='Total Treasury Value'
-            value={formatPrice(totalValue, 1)}
-            badge={formatPrice(totalLastValue, 1)}
-            badgeType={totalLastValue > 0 ? 'positive' : 'negative'}
-            icon={
-              <Icon
-                name='wallet'
-                className='h-8 w-8'
-                isRound={false}
-              />
-            }
-          />
-        </Card>
-        <Card
-          isLoading={isLoading}
-          className={{
-            container: cn(
-              'border-secondary-26 flex h-auto min-h-auto min-w-[343px] flex-1 items-center rounded-none border-t-1 border-b-1 md:min-w-auto md:border-none',
-              {
-                'min-h-[180px]': isLoading
-              }
-            ),
-            content: 'w-full p-5 md:p-10'
-          }}
-        >
-          <ValueMetricField
-            label='Total COMP Value'
-            value={formatPrice(compTotalValue, 1)}
-            badge={formatPrice(compLastValue, 1)}
-            badgeType={compLastValue > 0 ? 'positive' : 'negative'}
-            icon={
+          <div className='grid gap-3'>
+            <div className='flex items-center gap-2.5'>
               <Icon
                 name='comp-metric'
                 className='h-8 w-8'
               />
+              <Text
+                weight='700'
+                size='32'
+              >
+                {formatPrice(totalValue, 1)}
+              </Text>
+            </div>
+            <Text
+              weight='500'
+              size='13'
+              className='text-primary-14'
+            >
+              {formatPrice(totalLastValue, 1)}
+            </Text>
+          </div>
+          <Icon
+            name={
+              theme === 'dark' ? 'compound-metric-logo' : 'comp-metric-light'
             }
+            className='absolute top-[-25px] right-5 z-[1] h-[190px] w-[150px]'
           />
         </Card>
         <Card
+          title='Total borrow incentives'
           isLoading={isLoading}
           className={{
-            container: cn(
-              'border-b-secondary-26 flex h-auto min-h-auto min-w-[343px] flex-1 items-center rounded-b-none border-b-1 md:min-w-auto md:border-none',
-              {
-                'min-h-[180px]': isLoading
-              }
-            ),
-            content: 'w-full p-5 md:p-10'
+            container: 'max-w-full min-w-64',
+            loading: 'h-[200px]',
+            header: 'px-5 py-4',
+            content:
+              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#B9E6D9_2.63%,#FFFFFF_100%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#154F48_2.63%,#1D2833_100%)]'
           }}
         >
-          <ValueMetricField
-            label='Total Non-Comp Value'
-            value={formatPrice(nonCompTotalValue)}
-            badge={formatPrice(nonCompLastValue, 1)}
-            badgeType={nonCompLastValue > 0 ? 'positive' : 'negative'}
-            icon={
+          <div className='grid gap-3'>
+            <div className='flex items-center gap-2.5'>
               <Icon
-                name='total-non-comp-value'
+                name='comp-metric'
                 className='h-8 w-8'
               />
+              <Text
+                weight='700'
+                size='32'
+              >
+                {formatPrice(totalValue, 1)}
+              </Text>
+            </div>
+            <Text
+              weight='500'
+              size='13'
+              className='text-primary-14'
+            >
+              {formatPrice(totalLastValue, 1)}
+            </Text>
+          </div>
+          <Icon
+            name={
+              theme === 'dark' ? 'compound-metric-logo' : 'comp-metric-light'
             }
+            className='absolute top-[-25px] right-5 z-[1] h-[190px] w-[150px]'
           />
         </Card>
       </div>
-      <div className='flex flex-col gap-0 md:flex-row md:gap-2.5 lg:gap-5'>
+      <div className='flex flex-col gap-2.5 md:flex-row lg:gap-5'>
         <Card
+          title='Total incentives'
           isLoading={isLoading}
           className={{
-            container: cn(
-              'border-b-secondary-26 flex h-auto min-h-auto min-w-[343px] flex-1 items-center rounded-t-none rounded-b-none border-b-1 md:min-w-auto md:border-none',
-              {
-                'min-h-[180px]': isLoading
-              }
-            ),
-            content: 'w-full p-5 md:p-10'
+            container: 'max-w-full min-w-64',
+            loading: 'h-[200px]',
+            header: 'px-5 py-4',
+            content:
+              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#B9E6D9_2.63%,#FFFFFF_100%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#154F48_2.63%,#1D2833_100%)]'
           }}
         >
-          <ValueMetricField
-            className={{
-              container: 'gap-10',
-              value: '!text-[23px]'
-            }}
-            iconText='Stablecoin Holdings'
-            label='Total Stablecoin Holdings'
-            value={formatPrice(stablecoinTotalValue)}
-            badge={formatPrice(stablecoinLastValue, 1)}
-            badgeType={stablecoinLastValue > 0 ? 'positive' : 'negative'}
-            icon={
+          <div className='grid gap-3'>
+            <div className='flex items-center gap-2.5'>
               <Icon
-                name='stablecoin'
+                name='comp-metric'
                 className='h-8 w-8'
-                folder='token'
               />
+              <Text
+                weight='700'
+                size='32'
+              >
+                {formatPrice(totalValue, 1)}
+              </Text>
+            </div>
+            <Text
+              weight='500'
+              size='13'
+              className='text-primary-14'
+            >
+              {formatPrice(totalLastValue, 1)}
+            </Text>
+          </div>
+          <Icon
+            name={
+              theme === 'dark' ? 'compound-metric-logo' : 'comp-metric-light'
             }
+            className='absolute top-[-25px] right-5 z-[1] h-[190px] w-[150px]'
           />
         </Card>
         <Card
+          title='Total fees incentives'
           isLoading={isLoading}
           className={{
-            container: cn(
-              'flex h-auto min-h-auto min-w-[343px] flex-1 items-center rounded-t-none md:min-w-auto',
-              {
-                'min-h-[180px]': isLoading
-              }
-            ),
-            content: 'w-full p-5 md:p-10'
+            container: 'max-w-full min-w-64',
+            loading: 'h-[200px]',
+            header: 'px-5 py-4',
+            content:
+              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#B9E6D9_2.63%,#FFFFFF_100%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#154F48_2.63%,#1D2833_100%)]'
           }}
         >
-          <ValueMetricField
-            className={{
-              container: 'gap-10',
-              value: '!text-[23px]'
-            }}
-            iconText='ETH Correlated Holdings'
-            label='Total ETH Correlated Holdings'
-            value={formatPrice(ethCorrelatedHoldingTotalValue)}
-            badge={formatPrice(ethCorrelatedHoldingLastValue, 1)}
-            badgeType={
-              ethCorrelatedHoldingLastValue > 0 ? 'positive' : 'negative'
-            }
-            icon={
+          <div className='grid gap-3'>
+            <div className='flex items-center gap-2.5'>
               <Icon
-                name='eth-metric'
+                name='comp-metric'
                 className='h-8 w-8'
               />
+              <Text
+                weight='700'
+                size='32'
+              >
+                {formatPrice(totalValue, 1)}
+              </Text>
+            </div>
+            <Text
+              weight='500'
+              size='13'
+              className='text-primary-14'
+            >
+              {formatPrice(totalLastValue, 1)}
+            </Text>
+          </div>
+          <Icon
+            name={
+              theme === 'dark' ? 'compound-metric-logo' : 'comp-metric-light'
             }
+            className='absolute top-[-25px] right-5 z-[1] h-[190px] w-[150px]'
           />
         </Card>
       </div>

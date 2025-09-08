@@ -1,10 +1,8 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
-import CurrentSpendingByChainBlock from '@/entities/Insentive/CurrentSpendingByChain';
-import DailyExpenses from '@/entities/Insentive/DailyExpenses';
-import FeesGeneratedVsIncentives from '@/entities/Insentive/FeesGeneratedVsIncentives';
-import HistoricalExpencesByNetworks from '@/entities/Insentive/HistoricalExpencesByNetworks';
-import MetricBlock from '@/entities/Insentive/MetricBlock';
+import SpecificCollateralPrice from '@/components/CapoPageTable/SpecificCollateralPrice';
+import CollateralsPriceBlock from '@/entities/Capo/CollateralsPriceBlock';
+import MetricBlock from '@/entities/OEV/MetricBlock';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
 import {
@@ -13,10 +11,9 @@ import {
   uniqByNestedAddresses
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
-import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 
-const InsentivePage = () => {
+const OEVPage = () => {
   const {
     data: treasuryApiResponse,
     isLoading,
@@ -24,8 +21,6 @@ const InsentivePage = () => {
   } = useTreasuryHistory({
     params: { order: 'DESC' }
   });
-
-  const [tabValue, setTabValue] = useState<string>('Days');
 
   const treasuryData = useMemo<TokenData[]>(
     () => treasuryApiResponse || [],
@@ -50,21 +45,17 @@ const InsentivePage = () => {
     [uniqData30DaysOld]
   );
 
-  const onTabsChange = useCallback((value: string) => {
-    setTabValue(value);
-  }, []);
-
   useScrollToHash(!isLoading);
 
   return (
     <div className='flex flex-col gap-6 md:gap-[40px] xl:gap-[50px]'>
-      <div className='mt-5 flex flex-col gap-[15px] px-3 md:mt-0 md:px-0'>
+      <section className='mt-5 flex flex-col gap-[15px] px-3 md:mt-0 md:px-0'>
         <Text
           tag='h1'
           size='32'
           weight='500'
         >
-          Incentives
+          OEV
         </Text>
         <Text
           size='15'
@@ -74,22 +65,9 @@ const InsentivePage = () => {
           Track Compound DAO&apos;s treasury portfolio including asset
           allocation, strategic holdings, and investment returns.
         </Text>
-      </div>
-      <div className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
+      </section>
+      <section className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
         <div className='grid gap-3'>
-          <div className='flex items-center justify-between px-3'>
-            <Text
-              size='17'
-              weight='500'
-            >
-              Daily Incentives
-            </Text>
-            <TabsGroup
-              tabs={['Days', 'Year']}
-              value={tabValue}
-              onTabChange={onTabsChange}
-            />
-          </div>
           <MetricBlock
             isLoading={isLoading}
             data={{
@@ -97,30 +75,20 @@ const InsentivePage = () => {
               uniqData30DaysOldByCategory
             }}
           />
+          <CollateralsPriceBlock
+            data={uniqData}
+            isError={isError}
+            isLoading={isLoading}
+          />
+          <SpecificCollateralPrice
+            isLoading={isLoading}
+            isError={isError}
+            data={treasuryData}
+          />
         </div>
-        <CurrentSpendingByChainBlock
-          data={uniqData}
-          isError={isError}
-          isLoading={isLoading}
-        />
-        <HistoricalExpencesByNetworks
-          isLoading={isLoading}
-          isError={isError}
-          data={treasuryData}
-        />
-        <FeesGeneratedVsIncentives
-          isLoading={isLoading}
-          isError={isError}
-          data={treasuryData}
-        />
-        <DailyExpenses
-          data={uniqData}
-          isError={isError}
-          isLoading={isLoading}
-        />
-      </div>
+      </section>
     </div>
   );
 };
 
-export default InsentivePage;
+export default OEVPage;
