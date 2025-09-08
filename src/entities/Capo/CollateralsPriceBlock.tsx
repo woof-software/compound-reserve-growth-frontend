@@ -240,8 +240,8 @@ const CollateralsPriceBlock = ({
     <Card
       isError={isError}
       isLoading={isLoading}
-      title='Specific Collateral Price against Price Restriction'
-      id='specific-collateral-price-against-price-restriction'
+      title='Collaterals Price against Price Restriction'
+      id='collaterals-price-against-price-restriction'
       className={{
         loading: 'min-h-[inherit]',
         container:
