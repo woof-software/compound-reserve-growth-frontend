@@ -42,7 +42,7 @@ interface LineChartProps {
 
   isLegendEnabled: boolean;
 
-  eventsData: EventDataItem[];
+  eventsData?: EventDataItem[];
 
   aggregatedSeries: SeriesAreaOptions[];
 
@@ -68,7 +68,7 @@ const LineChart: FC<LineChartProps> = ({
   groupBy,
   chartRef,
   isLegendEnabled,
-  eventsData,
+  eventsData = [],
   showEvents,
   aggregatedSeries,
   areAllSeriesHidden,
@@ -182,7 +182,7 @@ const LineChart: FC<LineChartProps> = ({
   const options: Highcharts.Options = useMemo(() => {
     const yPositions = [40, 60, 80, 100, 120, 140, 160, 180];
     const eventPlotLines = showEvents
-      ? eventsData.map((event, index) => ({
+      ? eventsData?.map((event, index) => ({
           color: '#7A8A99',
           width: 1,
           value: event.x,
@@ -495,7 +495,7 @@ const LineChart: FC<LineChartProps> = ({
               ariaLabel='Toggle all series visibility'
             />
           </View.Condition>
-          <View.Condition if={Boolean(eventsData.length > 0)}>
+          <View.Condition if={Boolean(eventsData?.length > 0)}>
             <ChartIconToggle
               active={!showEvents}
               onClick={() => onShowEvents(!showEvents)}

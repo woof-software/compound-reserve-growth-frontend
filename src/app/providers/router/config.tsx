@@ -2,6 +2,7 @@ import { JSX } from 'react';
 
 import CapoPage from '@/pages/CapoPage/CapoPage';
 import InsentivePage from '@/pages/InsentivePage/InsentivePage';
+import OEVPage from '@/pages/OEVPage/OEVPage';
 import RevenuePage from '@/pages/RevenuePage/RevenuePage';
 import RunwayPage from '@/pages/RunwayPage/RunwayPage';
 import TreasuryPage from '@/pages/TreasuryPage/TreasuryPage';
@@ -35,7 +36,7 @@ export const enum routeTitles {
   RUNWAY = 'Runway',
   REVENUE = 'Revenue',
   INCENTIVES = 'Incentives',
-  CAPO = 'Capo',
+  CAPO = 'CAPO',
   OEV = 'OEV'
 }
 
@@ -58,7 +59,7 @@ export const routesConfig: Record<commonRoutes, RouteConfig> = {
   },
   [commonRoutes.OEV]: {
     path: commonRoutes.OEV,
-    element: <div>OEV</div>
+    element: <OEVPage />
   },
   [commonRoutes.CAPO]: {
     path: commonRoutes.CAPO,

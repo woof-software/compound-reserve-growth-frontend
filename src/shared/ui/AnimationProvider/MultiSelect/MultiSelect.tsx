@@ -3,6 +3,7 @@ import React, {
   FC,
   KeyboardEvent,
   Ref,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -190,17 +191,29 @@ export const MultiSelect: FC<MultiSelectProps> = ({
     setHighlightedIndex(-1);
   };
 
-  const onSelect = (optionToToggle: OptionType) => {
-    if (!onChange) return;
+  const onSelect = useCallback(
+    (optionToToggle: OptionType) => {
+      if (!onChange) return;
 
-    const isSelected = value.some((v) => v.id === optionToToggle.id);
+      const isSelected = value.some((v) => v.id === optionToToggle.id);
 
-    const newSelectedValue = isSelected
-      ? value.filter((v) => v.id !== optionToToggle.id)
-      : [...value, optionToToggle];
+      if (type === 'valueInTrigger') {
+        if (isSelected) {
+          onChange([]);
+        } else {
+          onChange([optionToToggle]);
+        }
+        return;
+      }
 
-    onChange(newSelectedValue);
-  };
+      const newSelectedValue = isSelected
+        ? value.filter((v) => v.id !== optionToToggle.id)
+        : [...value, optionToToggle];
+
+      onChange(newSelectedValue);
+    },
+    [onChange, type, value]
+  );
 
   const onClearFilters = () => {
     if (onChange) onChange([]);

@@ -3,9 +3,9 @@ import { CSVLink } from 'react-csv';
 
 import CryptoChart from '@/components/Charts/Bar/Bar';
 import Filter from '@/components/Filter/Filter';
-import CurrentSpendingByChain from '@/components/IncentivesPageTable/CurrentSpendingByChain';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { TreasuryBalanceByNetworkType } from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
+import CurrentSpendingByChainTable from '@/entities/Insentive/CurrentSpendingByChainTable/CurrentSpendingByChainTable';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
@@ -385,7 +385,7 @@ const CurrentSpendingByChainBlock = ({
         />
         <CSVDownloadButton
           data={tableData}
-          filename='Full Treasury Holdings'
+          filename='Current spending by chain'
         />
       </div>
       <div className='block px-5 py-3 lg:hidden'>
@@ -497,7 +497,7 @@ const CurrentSpendingByChainBlock = ({
             data={chartData}
             onClear={onClearFilters}
           />
-          <CurrentSpendingByChain
+          <CurrentSpendingByChainTable
             sortType={sortType}
             tableData={tableData}
           />

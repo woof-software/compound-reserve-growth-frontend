@@ -1,14 +1,14 @@
-import React, { useCallback, useMemo, useReducer } from 'react';
+import { FC, useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
-import CollateralsPrice from '@/components/CapoPageTable/CollateralsPrice';
+import { TreasuryBalanceByNetworkType } from '@/components/CapoPageTable/CollateralsPrice';
+import CryptoChart from '@/components/Charts/Bar/Bar';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import { TreasuryBalanceByNetworkType } from '@/components/TreasuryPageTable/TreasuryHoldings';
-import { treasuryBalanceByNetworkColumns } from '@/entities/Treasury/TreasuryBalanceByNetwork';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
+  colorPicker,
   extractFilterOptions
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
@@ -23,13 +23,15 @@ import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-interface SpecificCollateralPriceProps {
+interface CapturedFeesByNetworkMarketProps {
   isLoading?: boolean;
+
   isError?: boolean;
+
   data: TokenData[];
 }
 
-const mapTableData = (data: TokenData[]) => {
+const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
   return data.map((el) => {
     const decimals = el.source.asset.decimals || 0;
     const rawQuantity = Number(el.quantity) || 0;
@@ -48,11 +50,30 @@ const mapTableData = (data: TokenData[]) => {
   });
 };
 
-const CollateralsPriceBlock = ({
+const treasuryBalanceByNetworkColumns = [
+  {
+    accessorKey: 'symbol',
+    header: 'Network'
+  },
+  {
+    accessorKey: 'qty',
+    header: 'Value COMP'
+  },
+  {
+    accessorKey: 'value',
+    header: 'Value USDC'
+  },
+  {
+    accessorKey: 'source',
+    header: 'Source'
+  }
+];
+
+const CapturedFeesByNetworkMarket: FC<CapturedFeesByNetworkMarketProps> = ({
   isLoading,
   isError,
   data
-}: SpecificCollateralPriceProps) => {
+}) => {
   const {
     isOpen: isFilterOpen,
     onOpenModal: onFilterOpen,
@@ -77,8 +98,8 @@ const CollateralsPriceBlock = ({
       ...next
     }),
     {
-      chain: [] as OptionType[],
-      deployment: [] as OptionType[]
+      chain: [{ id: 'mainnet', label: 'Mainnet' }] as OptionType[],
+      market: [] as OptionType[]
     }
   );
 
@@ -93,28 +114,28 @@ const CollateralsPriceBlock = ({
   const filterOptionsConfig = useMemo(
     () => ({
       chain: { path: 'source.network' },
-      deployment: { path: 'source.market' }
+      market: { path: 'source.market' }
     }),
     []
   );
 
-  const { chainOptions, deploymentOptions } = useMemo(
+  const { chainOptions, marketOptions } = useMemo(
     () => extractFilterOptions(data, filterOptionsConfig),
     [data, filterOptionsConfig]
   );
 
   const deploymentOptionsFilter = useMemo(() => {
     const marketV2 =
-      deploymentOptions
+      marketOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
         .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const marketV3 =
-      deploymentOptions
+      marketOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
         .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
-    const noMarkets = deploymentOptions?.find(
+    const noMarkets = marketOptions?.find(
       (el) => el.id.toLowerCase() === 'no name'
     );
 
@@ -133,7 +154,7 @@ const CollateralsPriceBlock = ({
     }
 
     return allMarkets;
-  }, [deploymentOptions, selectedOptions]);
+  }, [marketOptions, selectedOptions]);
 
   const tableData = useMemo<TreasuryBalanceByNetworkType[]>(() => {
     const filtered = data.filter((item) => {
@@ -149,8 +170,8 @@ const CollateralsPriceBlock = ({
       const market = item.source.market ?? 'no market';
 
       if (
-        selectedOptions.deployment.length > 0 &&
-        !selectedOptions.deployment.some((o: OptionType) =>
+        selectedOptions.market.length > 0 &&
+        !selectedOptions.market.some((o: OptionType) =>
           o.id === 'no name' ? market === 'no market' : o.id === market
         )
       ) {
@@ -163,18 +184,28 @@ const CollateralsPriceBlock = ({
     return mapTableData(filtered).sort((a, b) => b.value - a.value);
   }, [data, selectedOptions]);
 
+  const chartData = useMemo(() => {
+    return tableData
+      .map((item, index) => ({
+        name: item.symbol,
+        value: item.value,
+        color: colorPicker(index)
+      }))
+      .filter((el) => el.value > 0);
+  }, [tableData]);
+
   const onSelectChain = useCallback(
     (chain: OptionType[]) => {
       const selectedChainIds = chain.map((o) => o.id);
 
-      const filteredDeployment = selectedOptions.deployment.filter((el) =>
+      const filteredDeployment = selectedOptions.market.filter((el) =>
         selectedChainIds.length === 0
           ? true
           : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
       );
       setSelectedOptions({ chain, deployment: filteredDeployment });
     },
-    [selectedOptions.deployment]
+    [selectedOptions.market]
   );
 
   const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
@@ -208,6 +239,15 @@ const CollateralsPriceBlock = ({
     onClearSelectedOptions();
   }, [onClearSelectedOptions]);
 
+  const onClearFilters = useCallback(() => {
+    setSelectedOptions({
+      chain: [{ id: 'mainnet', label: 'Mainnet' }],
+      assetType: [],
+      deployment: [],
+      symbol: []
+    });
+  }, []);
+
   const filterOptions = useMemo(() => {
     const chainFilterOptions = {
       id: 'chain',
@@ -221,8 +261,8 @@ const CollateralsPriceBlock = ({
     const marketFilterOptions = {
       id: 'market',
       placeholder: 'Market',
-      total: selectedOptions.deployment.length,
-      selectedOptions: selectedOptions.deployment,
+      total: selectedOptions.market.length,
+      selectedOptions: selectedOptions.market,
       options: deploymentOptionsFilter || [],
       onChange: onSelectMarket
     };
@@ -238,16 +278,17 @@ const CollateralsPriceBlock = ({
 
   return (
     <Card
-      isError={isError}
       isLoading={isLoading}
-      title='Collaterals Price against Price Restriction'
-      id='collaterals-price-against-price-restriction'
+      isError={isError}
+      title='Current spending by chain'
+      id='current-spending-by-chain'
       className={{
         loading: 'min-h-[inherit]',
         container:
           'min-h-[427px] overflow-visible rounded-lg lg:min-h-[458.5px]',
-        content: 'rounded-b-lg px-0 pt-0 pb-0 lg:px-10 lg:pb-10',
-        header: 'rounded-t-lg'
+        header: 'rounded-t-lg',
+        content:
+          'flex flex-col gap-3 rounded-b-lg px-0 pt-0 pb-0 lg:px-10 lg:pb-10'
       }}
     >
       <div className='hidden items-center justify-end gap-2 px-10 py-3 lg:flex lg:px-0'>
@@ -259,26 +300,19 @@ const CollateralsPriceBlock = ({
           disabled={isLoading}
         />
         <MultiSelect
-          options={deploymentOptionsFilter || []}
-          value={selectedOptions.deployment}
+          options={deploymentOptionsFilter}
+          value={selectedOptions.market}
           onChange={onSelectMarket}
           placeholder='Market'
           disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
         />
-        <MultiSelect
-          options={deploymentOptionsFilter || []}
-          value={selectedOptions.deployment}
-          onChange={onSelectMarket}
-          placeholder='Collateral'
-          disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-        />
         <CSVDownloadButton
           data={tableData}
-          filename='Specific Collateral Price against Price Restriction'
+          filename='Full Treasury Holdings'
         />
       </div>
-      <div className='block lg:hidden'>
-        <div className='flex flex-col items-center justify-end gap-2 px-5 py-3 sm:flex-row'>
+      <div className='block px-5 py-3 lg:hidden'>
+        <div className='flex flex-col items-center justify-end gap-2 sm:flex-row'>
           <div className='flex w-full items-center gap-2 sm:w-auto'>
             <Button
               onClick={onFilterOpen}
@@ -300,6 +334,8 @@ const CollateralsPriceBlock = ({
               />
               Sort
             </Button>
+          </div>
+          <div className='flex w-full items-center gap-2 sm:w-auto'>
             <Button
               onClick={onMoreOpen}
               className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
@@ -323,7 +359,7 @@ const CollateralsPriceBlock = ({
           isOpen={isFilterOpen}
           filterOptions={filterOptions}
           onClose={onFilterClose}
-          onClearAll={onClearAll}
+          onClearAll={onClearFilters}
         />
         <Drawer
           isOpen={isMoreOpen}
@@ -341,7 +377,7 @@ const CollateralsPriceBlock = ({
             <div className='px-3 py-2'>
               <CSVLink
                 data={tableData}
-                filename='Specific Collateral Price against Price Restriction'
+                filename='Current spending by chain'
                 onClick={onMoreClose}
               >
                 <div className='flex items-center gap-1.5'>
@@ -362,10 +398,16 @@ const CollateralsPriceBlock = ({
         </Drawer>
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
-        <CollateralsPrice
-          sortType={sortType}
-          tableData={tableData}
-        />
+        <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
+          <CryptoChart
+            data={chartData}
+            onClear={onClearFilters}
+          />
+          {/*<CurrentSpendingByChain*/}
+          {/*  sortType={sortType}*/}
+          {/*  tableData={tableData}*/}
+          {/*/>*/}
+        </div>
       </View.Condition>
       <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
         <NoDataPlaceholder onButtonClick={onClearAll} />
@@ -374,4 +416,4 @@ const CollateralsPriceBlock = ({
   );
 };
 
-export default CollateralsPriceBlock;
+export default CapturedFeesByNetworkMarket;

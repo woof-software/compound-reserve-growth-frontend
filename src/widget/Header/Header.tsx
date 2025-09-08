@@ -16,25 +16,31 @@ import Portal from '@/shared/ui/Portal/Portal';
 import Text from '@/shared/ui/Text/Text';
 import { Tooltip } from '@/shared/ui/Tooltip/Tooltip';
 
-const navLinks = [
+type NavLinkProps = {
+  to: commonRoutes;
+  title: string;
+  icon: string;
+  isComingSoon?: boolean;
+};
+
+const navLinks: NavLinkProps[] = [
   { to: commonRoutes.TREASURY, title: routeTitles.TREASURY, icon: 'wallet' },
   { to: commonRoutes.RUNWAY, title: routeTitles.RUNWAY, icon: 'lightning' },
   { to: commonRoutes.REVENUE, title: routeTitles.REVENUE, icon: 'storage' },
   {
     to: commonRoutes.INCENTIVES,
     title: routeTitles.INCENTIVES,
-    icon: 'diamond'
+    icon: 'incentives-header-icon'
   },
   {
     to: commonRoutes.OEV,
     title: routeTitles.OEV,
-    icon: 'search',
-    isComingSoon: true
+    icon: 'oev-header-icon'
   },
   {
     to: commonRoutes.CAPO,
     title: routeTitles.CAPO,
-    icon: 'capo'
+    icon: 'capo-header-icon'
   }
 ];
 
