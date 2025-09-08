@@ -96,13 +96,14 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             container: 'max-w-full min-w-64',
             loading: 'h-[200px]',
             header: 'px-5 py-4',
-            content: 'flex items-center px-5 py-10 md:p-10'
+            content:
+              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#F7931A_-56.86%,#1D2833_88.01%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#F7931A_-56.86%,#1D2833_88.01%)]'
           }}
         >
           <div className='grid gap-3'>
             <div className='flex items-center gap-2.5'>
               <Icon
-                name='comp-metric'
+                name='btc-corellated-icon'
                 className='h-8 w-8'
               />
               <Text
@@ -113,6 +114,10 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
               </Text>
             </div>
           </div>
+          <Icon
+            name={theme === 'dark' ? 'BTC-corellated-bg' : 'BTC-corellated-bg'}
+            className='absolute right-0 z-[1] h-[110px] w-[203px] scale-110'
+          />
         </Card>
         <Card
           title='Stablecoin corellated'
@@ -121,66 +126,14 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             container: 'max-w-full min-w-64',
             loading: 'h-[200px]',
             header: 'px-5 py-4',
-            content: 'flex items-center px-5 py-10 md:p-10'
-          }}
-        >
-          <div className='grid gap-3'>
-            <div className='flex items-center gap-2.5'>
-              <Icon
-                name='comp-metric'
-                className='h-8 w-8'
-              />
-              <Text
-                weight='700'
-                size='32'
-              >
-                {formatPrice(totalValue, 1)}
-              </Text>
-            </div>
-          </div>
-        </Card>
-      </div>
-      <div className='flex flex-col gap-2.5 md:flex-row lg:gap-5'>
-        <Card
-          title='ETH corellated'
-          isLoading={isLoading}
-          className={{
-            container: 'max-w-full min-w-64',
-            loading: 'h-[200px]',
-            header: 'px-5 py-4',
-            content: 'flex items-center px-5 py-10 md:p-10'
-          }}
-        >
-          <div className='grid gap-3'>
-            <div className='flex items-center gap-2.5'>
-              <Icon
-                name='comp-metric'
-                className='h-8 w-8'
-              />
-              <Text
-                weight='700'
-                size='32'
-              >
-                {formatPrice(totalValue, 1)}
-              </Text>
-            </div>
-          </div>
-        </Card>
-        <Card
-          title='Total OEV fees captured'
-          isLoading={isLoading}
-          className={{
-            container: 'max-w-full min-w-64',
-            loading: 'h-[200px]',
-            header: 'px-5 py-4',
             content:
-              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#B9E6D9_2.63%,#FFFFFF_100%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#154F48_2.63%,#1D2833_100%)]'
+              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#0F7A62_0%,#1D2833_100%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#0F7A62_0%,#1D2833_100%)]'
           }}
         >
           <div className='grid gap-3'>
             <div className='flex items-center gap-2.5'>
               <Icon
-                name='comp-metric'
+                name='stablecoin-corellated-icon'
                 className='h-8 w-8'
               />
               <Text
@@ -193,9 +146,77 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           </div>
           <Icon
             name={
-              theme === 'dark' ? 'compound-metric-logo' : 'comp-metric-light'
+              theme === 'dark'
+                ? 'stablecoin-corellated-bg'
+                : 'stablecoin-corellated-bg'
             }
-            className='absolute top-[-25px] right-5 z-[1] h-[190px] w-[150px]'
+            className='absolute right-2.5 z-[1] h-[110px] w-[170px] scale-110'
+          />
+        </Card>
+      </div>
+      <div className='flex flex-col gap-2.5 md:flex-row lg:gap-5'>
+        <Card
+          title='ETH corellated'
+          isLoading={isLoading}
+          className={{
+            container: 'max-w-full min-w-64',
+            loading: 'h-[200px]',
+            header: 'px-5 py-4',
+            content:
+              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#5168BC_0%,#1D2833_100%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#5168BC_0%,#1D2833_100%)]'
+          }}
+        >
+          <div className='grid gap-3'>
+            <div className='flex items-center gap-2.5'>
+              <Icon
+                name='eth-corellated-icon'
+                className='h-8 w-8'
+              />
+              <Text
+                weight='700'
+                size='32'
+              >
+                {formatPrice(totalValue, 1)}
+              </Text>
+            </div>
+          </div>
+          <Icon
+            name={theme === 'dark' ? 'eth-corellated-bg' : 'eth-corellated-bg'}
+            className='absolute right-5 z-[1] h-[110px] w-[170px] scale-110'
+          />
+        </Card>
+        <Card
+          title='Total OEV fees captured'
+          isLoading={isLoading}
+          className={{
+            container: 'max-w-full min-w-64',
+            loading: 'h-[200px]',
+            header: 'px-5 py-4',
+            content:
+              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#00AAFF_0%,#1D2833_88.01%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#00AAFF_0%,#1D2833_88.01%)]'
+          }}
+        >
+          <div className='grid gap-3'>
+            <div className='flex items-center gap-2.5'>
+              <Icon
+                name='fees-captured-icon'
+                className='h-8 w-8'
+              />
+              <Text
+                weight='700'
+                size='32'
+              >
+                {formatPrice(totalValue, 1)}
+              </Text>
+            </div>
+          </div>
+          <Icon
+            name={
+              theme === 'dark'
+                ? 'total-OEV-fees-captured'
+                : 'total-OEV-fees-captured'
+            }
+            className='absolute right-5 z-[1] h-[110px] w-[170px] scale-110'
           />
         </Card>
       </div>

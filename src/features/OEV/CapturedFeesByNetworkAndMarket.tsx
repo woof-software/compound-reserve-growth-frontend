@@ -1,10 +1,11 @@
-import { FC, useCallback, useMemo, useReducer } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
-import { TreasuryBalanceByNetworkType } from '@/components/CapoPageTable/CollateralsPrice';
 import CryptoChart from '@/components/Charts/Bar/Bar';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
+import { TreasuryBalanceByNetworkType } from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
+import CapturedFeesByNetworkAndMarketTable from '@/entities/OEV/CapturedFeesByNetworkAndMarketTable';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
@@ -23,7 +24,7 @@ import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-interface CapturedFeesByNetworkMarketProps {
+interface CapturedFeesByNetworkAndMarketProps {
   isLoading?: boolean;
 
   isError?: boolean;
@@ -50,7 +51,7 @@ const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
   });
 };
 
-const treasuryBalanceByNetworkColumns = [
+export const treasuryBalanceByNetworkColumns = [
   {
     accessorKey: 'symbol',
     header: 'Network'
@@ -69,11 +70,11 @@ const treasuryBalanceByNetworkColumns = [
   }
 ];
 
-const CapturedFeesByNetworkMarket: FC<CapturedFeesByNetworkMarketProps> = ({
+const CapturedFeesByNetworkAndMarket = ({
   isLoading,
   isError,
   data
-}) => {
+}: CapturedFeesByNetworkAndMarketProps) => {
   const {
     isOpen: isFilterOpen,
     onOpenModal: onFilterOpen,
@@ -98,7 +99,7 @@ const CapturedFeesByNetworkMarket: FC<CapturedFeesByNetworkMarketProps> = ({
       ...next
     }),
     {
-      chain: [{ id: 'mainnet', label: 'Mainnet' }] as OptionType[],
+      chain: [] as OptionType[],
       market: [] as OptionType[]
     }
   );
@@ -124,7 +125,7 @@ const CapturedFeesByNetworkMarket: FC<CapturedFeesByNetworkMarketProps> = ({
     [data, filterOptionsConfig]
   );
 
-  const deploymentOptionsFilter = useMemo(() => {
+  const marketOptionsFilter = useMemo(() => {
     const marketV2 =
       marketOptions
         ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
@@ -229,9 +230,7 @@ const CapturedFeesByNetworkMarket: FC<CapturedFeesByNetworkMarketProps> = ({
   const onClearSelectedOptions = useCallback(() => {
     setSelectedOptions({
       chain: [],
-      assetType: [],
-      deployment: [],
-      symbol: []
+      market: []
     });
   }, []);
 
@@ -241,10 +240,8 @@ const CapturedFeesByNetworkMarket: FC<CapturedFeesByNetworkMarketProps> = ({
 
   const onClearFilters = useCallback(() => {
     setSelectedOptions({
-      chain: [{ id: 'mainnet', label: 'Mainnet' }],
-      assetType: [],
-      deployment: [],
-      symbol: []
+      chain: [],
+      market: []
     });
   }, []);
 
@@ -263,17 +260,18 @@ const CapturedFeesByNetworkMarket: FC<CapturedFeesByNetworkMarketProps> = ({
       placeholder: 'Market',
       total: selectedOptions.market.length,
       selectedOptions: selectedOptions.market,
-      options: deploymentOptionsFilter || [],
+      options: marketOptionsFilter || [],
       onChange: onSelectMarket
     };
 
     return [chainFilterOptions, marketFilterOptions];
   }, [
     chainOptions,
-    deploymentOptionsFilter,
+    marketOptionsFilter,
     onSelectChain,
     onSelectMarket,
-    selectedOptions
+    selectedOptions.chain,
+    selectedOptions.market
   ]);
 
   return (
@@ -300,15 +298,15 @@ const CapturedFeesByNetworkMarket: FC<CapturedFeesByNetworkMarketProps> = ({
           disabled={isLoading}
         />
         <MultiSelect
-          options={deploymentOptionsFilter}
+          options={marketOptions}
           value={selectedOptions.market}
           onChange={onSelectMarket}
           placeholder='Market'
-          disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
+          disabled={isLoading || !Boolean(marketOptionsFilter.length)}
         />
         <CSVDownloadButton
           data={tableData}
-          filename='Full Treasury Holdings'
+          filename='Data can be downloaded in CSV'
         />
       </div>
       <div className='block px-5 py-3 lg:hidden'>
@@ -334,8 +332,6 @@ const CapturedFeesByNetworkMarket: FC<CapturedFeesByNetworkMarketProps> = ({
               />
               Sort
             </Button>
-          </div>
-          <div className='flex w-full items-center gap-2 sm:w-auto'>
             <Button
               onClick={onMoreOpen}
               className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
@@ -389,7 +385,7 @@ const CapturedFeesByNetworkMarket: FC<CapturedFeesByNetworkMarketProps> = ({
                     size='14'
                     weight='500'
                   >
-                    CSV with the entire historical data
+                    Data can be downloaded in CSV
                   </Text>
                 </div>
               </CSVLink>
@@ -403,10 +399,10 @@ const CapturedFeesByNetworkMarket: FC<CapturedFeesByNetworkMarketProps> = ({
             data={chartData}
             onClear={onClearFilters}
           />
-          {/*<CurrentSpendingByChain*/}
-          {/*  sortType={sortType}*/}
-          {/*  tableData={tableData}*/}
-          {/*/>*/}
+          <CapturedFeesByNetworkAndMarketTable
+            sortType={sortType}
+            tableData={tableData}
+          />
         </div>
       </View.Condition>
       <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
@@ -416,4 +412,4 @@ const CapturedFeesByNetworkMarket: FC<CapturedFeesByNetworkMarketProps> = ({
   );
 };
 
-export default CapturedFeesByNetworkMarket;
+export default CapturedFeesByNetworkAndMarket;

@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
 
-import SpecificCollateralPrice from '@/components/CapoPageTable/SpecificCollateralPrice';
-import CollateralsPriceBlock from '@/entities/Capo/CollateralsPriceBlock';
 import MetricBlock from '@/entities/OEV/MetricBlock';
+import CapturedFeesByNetworkAndMarket from '@/features/OEV/CapturedFeesByNetworkAndMarket';
+import PresenceByMarketAndCollateral from '@/features/OEV/PresenceByMarketAndCollateral';
+import ReturnedFeesToTheCompoundProtocol from '@/features/OEV/ReturnedFeesToTheCompoundProtocol';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
 import {
@@ -75,15 +76,20 @@ const OEVPage = () => {
               uniqData30DaysOldByCategory
             }}
           />
-          <CollateralsPriceBlock
+          <PresenceByMarketAndCollateral
             data={uniqData}
             isError={isError}
             isLoading={isLoading}
           />
-          <SpecificCollateralPrice
-            isLoading={isLoading}
+          <CapturedFeesByNetworkAndMarket
+            data={uniqData}
             isError={isError}
-            data={treasuryData}
+            isLoading={isLoading}
+          />
+          <ReturnedFeesToTheCompoundProtocol
+            data={uniqData}
+            isError={isError}
+            isLoading={isLoading}
           />
         </div>
       </section>

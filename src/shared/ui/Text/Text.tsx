@@ -68,10 +68,14 @@ const Text = ({
   lineHeight,
   align,
   tag: Tag = 'p',
-  children
+  children,
+  ...props
 }: TextProps) => {
   return (
-    <Tag className={text({ size, weight, lineHeight, align, className })}>
+    <Tag
+      className={text({ size, weight, lineHeight, align, className })}
+      {...props}
+    >
       {children}
     </Tag>
   );
