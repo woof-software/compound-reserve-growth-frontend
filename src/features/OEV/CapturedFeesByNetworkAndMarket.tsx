@@ -278,8 +278,8 @@ const CapturedFeesByNetworkAndMarket = ({
     <Card
       isLoading={isLoading}
       isError={isError}
-      title='Current spending by chain'
-      id='current-spending-by-chain'
+      title='OEV captured fees by network and market'
+      id='OEV captured fees by network and market'
       className={{
         loading: 'min-h-[inherit]',
         container:
