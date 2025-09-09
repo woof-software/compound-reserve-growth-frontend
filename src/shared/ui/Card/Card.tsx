@@ -1,4 +1,4 @@
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, useMemo } from 'react';
 
 import { useClipboard } from '@/shared/hooks/useClipboard';
 import { cn } from '@/shared/lib/classNames/classNames';
@@ -32,17 +32,26 @@ const Card: FC<CardProps> = ({
   id
 }) => {
   const [isCopied, copy] = useClipboard();
+
   const showPlaceholder = isLoading || isError;
 
-  const handleCopyLink = (id: string) => {
+  const blockId = useMemo(() => {
+    if (!id) return Math.random().toString();
+
+    return id?.toLowerCase().split(' ').join('-');
+  }, [id]);
+
+  const onCopyLink = (id: string) => {
     if (!id) return;
+
     const link = `${window.location.origin}${window.location.pathname}#${id}`;
+
     copy(link);
   };
 
   return (
     <div
-      id={id}
+      id={blockId}
       className={cn(
         'bg-card-content w-full overflow-hidden rounded-sm shadow-md md:rounded-lg',
         {
@@ -86,19 +95,21 @@ const Card: FC<CardProps> = ({
               {title}
             </Text>
             <div className='flex h-6 w-6 cursor-pointer items-center justify-center'>
-              {id &&
-                (isCopied ? (
+              <View.Condition if={Boolean(id)}>
+                <View.Condition if={isCopied}>
                   <Icon
                     name='сheck-сopy-icon'
                     className='text-green-500'
                   />
-                ) : (
+                </View.Condition>
+                <View.Condition if={!isCopied}>
                   <Icon
                     name='link'
                     color='primary-14'
-                    onClick={() => handleCopyLink?.(id)}
+                    onClick={() => onCopyLink?.(blockId)}
                   />
-                ))}
+                </View.Condition>
+              </View.Condition>
             </div>
           </div>
         </View.Condition>

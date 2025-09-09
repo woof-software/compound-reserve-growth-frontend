@@ -3,8 +3,9 @@ import { CSVLink } from 'react-csv';
 
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import type { TreasuryBalanceByNetworkType } from '@/entities/OEV/PresenceByMarketAndCollateralTable';
-import PresenceByMarketAndCollateralTable from '@/entities/OEV/PresenceByMarketAndCollateralTable';
+import PresenceByMarketAndCollateralTable, {
+  TreasuryBalanceByNetworkType
+} from '@/entities/OEV/PresenceByMarketAndCollateralTable';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
@@ -22,7 +23,7 @@ import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-interface PresenceByMarketAndCollateralProps {
+interface CurrentSpendingByChainProps {
   isLoading?: boolean;
 
   isError?: boolean;
@@ -67,7 +68,7 @@ const treasuryBalanceByNetworkColumns = [
   }
 ];
 
-const PresenceByMarketAndCollateral: FC<PresenceByMarketAndCollateralProps> = ({
+const PresenceByMarketAndCollateral: FC<CurrentSpendingByChainProps> = ({
   isLoading,
   isError,
   data
@@ -295,8 +296,8 @@ const PresenceByMarketAndCollateral: FC<PresenceByMarketAndCollateralProps> = ({
     <Card
       isLoading={isLoading}
       isError={isError}
-      title='Current spending by chain'
-      id='current-spending-by-chain'
+      title='OEV presence by market and collateral'
+      id='oev-presence-by-market-and-collateral'
       className={{
         loading: 'min-h-[inherit]',
         container:

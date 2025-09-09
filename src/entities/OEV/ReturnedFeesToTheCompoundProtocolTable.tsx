@@ -30,13 +30,13 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     accessorFn: (row) => row.chain,
     header: 'TX Hash',
     enableSorting: true,
-    size: 168,
+    size: 195,
     cell: () => (
       <div className='flex items-center gap-1'>
         <Text size='13'>0xA2...14B4</Text>
         <Icon
           name='external-link'
-          className='h-6 w-6'
+          className='h-4 w-4'
         />
       </div>
     )
@@ -46,7 +46,6 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     accessorFn: (row) => row.symbol,
     header: 'Event Data',
     enableSorting: true,
-    size: 168,
     cell: () => <Text size='13'>18.08.2025 at 09:43:35</Text>
   },
   {
@@ -54,7 +53,6 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     accessorFn: (row) => row.source,
     header: 'Source',
     enableSorting: true,
-    size: 168,
     cell: () => <Text size='13'>18.08.2025 at 09:43:35</Text>
   },
   {
@@ -62,7 +60,6 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     accessorFn: (row) => row.address,
     header: 'Compound Pay out',
     enableSorting: true,
-    size: 168,
     cell: () => <Text size='13'>$9999.99</Text>
   },
   {
@@ -70,13 +67,13 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     accessorFn: (row) => row.chain,
     header: 'Liquidator',
     enableSorting: true,
-    size: 168,
+    size: 100,
     cell: () => (
       <div className='flex items-center gap-1'>
         <Text size='13'>0xA2...14B4</Text>
         <Icon
           name='external-link'
-          className='h-6 w-6'
+          className='h-4 w-4'
         />
       </div>
     )
