@@ -69,6 +69,12 @@ const OEVPage = () => {
       </section>
       <section className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
         <div className='grid gap-3'>
+          <Text
+            size='17'
+            weight='500'
+          >
+            Annual OEV fees
+          </Text>
           <MetricBlock
             isLoading={isLoading}
             data={{
