@@ -597,7 +597,7 @@ const Filters = ({
         </div>
       </div>
       <div className='block lg:hidden'>
-        <div className='flex flex-wrap justify-end gap-2 px-5 py-3'>
+        <div className='flex flex-wrap justify-end gap-2 px-5 py-3 md:px-0'>
           <div className='flex w-full flex-row items-center justify-end gap-2 sm:w-auto'>
             <TabsGroup
               className={{
