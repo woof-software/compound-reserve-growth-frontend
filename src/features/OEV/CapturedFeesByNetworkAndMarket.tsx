@@ -54,19 +54,19 @@ const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
 export const treasuryBalanceByNetworkColumns = [
   {
     accessorKey: 'symbol',
-    header: 'Network'
+    header: 'Chain'
   },
   {
     accessorKey: 'qty',
-    header: 'Value COMP'
+    header: 'Fees by network'
   },
   {
     accessorKey: 'value',
-    header: 'Value USDC'
+    header: 'Market'
   },
   {
     accessorKey: 'source',
-    header: 'Source'
+    header: 'Fees by market'
   }
 ];
 
@@ -99,7 +99,7 @@ const CapturedFeesByNetworkAndMarket = ({
       ...next
     }),
     {
-      chain: [] as OptionType[],
+      chain: [{ id: 'mainnet', label: 'Mainnet' }] as OptionType[],
       market: [] as OptionType[]
     }
   );
@@ -204,14 +204,14 @@ const CapturedFeesByNetworkAndMarket = ({
           ? true
           : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
       );
-      setSelectedOptions({ chain, deployment: filteredDeployment });
+      setSelectedOptions({ chain, market: filteredDeployment });
     },
     [selectedOptions.market]
   );
 
   const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
-      deployment: selectedOptions
+      market: selectedOptions
     });
   }, []);
 
@@ -278,8 +278,8 @@ const CapturedFeesByNetworkAndMarket = ({
     <Card
       isLoading={isLoading}
       isError={isError}
-      title='Current spending by chain'
-      id='current-spending-by-chain'
+      title='OEV captured fees by network and market'
+      id='OEV captured fees by network and market'
       className={{
         loading: 'min-h-[inherit]',
         container:
@@ -302,7 +302,7 @@ const CapturedFeesByNetworkAndMarket = ({
           value={selectedOptions.market}
           onChange={onSelectMarket}
           placeholder='Market'
-          disabled={isLoading || !Boolean(marketOptionsFilter.length)}
+          disabled={isLoading}
         />
         <CSVDownloadButton
           data={tableData}

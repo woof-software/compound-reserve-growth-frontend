@@ -204,158 +204,172 @@ const CollateralsPrice = ({ tableData, sortType }: CollateralsPriceProps) => {
     <>
       <MobileDataTable tableData={mobileTableData}>
         {(dataRows) =>
-          dataRows.map((row, index) => (
-            <div
-              key={row.symbol + index}
-              className={cn(
-                'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
-                {
-                  'border-none': dataRows.length - 1 === index
-                }
-              )}
-            >
-              <div className='grid w-full'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Source
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  Market V2
-                </Text>
-              </div>
-              <div className='grid w-full'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Network
-                </Text>
-                <div className='flex items-center gap-1'>
-                  <Icon
-                    name={row.chain.toLowerCase() || 'not-found-icon'}
-                    className='h-4 w-4'
-                    folder='collaterals'
-                  />
+          dataRows.map((row, index) => {
+            const explorerUrl =
+              (row.chain && explorers[row.chain.toLowerCase()]) ||
+              defaultExplorer;
+
+            const fullExplorerLink = `${explorerUrl}${row.address}`;
+
+            return (
+              <div
+                key={row.symbol + index}
+                className={cn(
+                  'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                  {
+                    'border-none': dataRows.length - 1 === index
+                  }
+                )}
+              >
+                <div className='grid w-full'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Source
+                  </Text>
                   <Text
                     size='13'
                     lineHeight='21'
                     className='truncate'
                   >
-                    {row.chain}
+                    Market V2
                   </Text>
                 </div>
-              </div>
-              <div className='grid w-full'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Market
-                </Text>
-                <div className='flex items-center gap-1'>
-                  <Icon
-                    name={row.market || 'not-found-icon'}
-                    className='h-4 w-4'
-                    folder='collaterals'
-                  />
+                <div className='grid w-full'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Network
+                  </Text>
+                  <div className='flex items-center gap-1'>
+                    <Icon
+                      name={row.chain.toLowerCase() || 'not-found-icon'}
+                      className='h-4 w-4'
+                      folder='collaterals'
+                    />
+                    <Text
+                      size='13'
+                      lineHeight='21'
+                      className='truncate'
+                    >
+                      {row.chain}
+                    </Text>
+                  </div>
+                </div>
+                <div className='grid w-full'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Market
+                  </Text>
+                  <div className='flex items-center gap-1'>
+                    <Icon
+                      name={row.market || 'not-found-icon'}
+                      className='h-4 w-4'
+                      folder='collaterals'
+                    />
+                    <Text
+                      size='13'
+                      lineHeight='21'
+                      className='truncate'
+                    >
+                      {row.market === 'no market' ? ' - ' : row.market}
+                    </Text>
+                  </div>
+                </div>
+                <div className='grid w-full'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Collateral
+                  </Text>
+                  <div className='flex items-center gap-1'>
+                    <Icon
+                      name={row.market || 'not-found-icon'}
+                      className='h-4 w-4'
+                      folder='collaterals'
+                    />
+                    <Text
+                      size='13'
+                      lineHeight='21'
+                      className='truncate'
+                    >
+                      {row.market === 'no market' ? ' - ' : row.market}
+                    </Text>
+                  </div>
+                </div>
+                <div className='grid w-full'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Collateral Price
+                  </Text>
                   <Text
                     size='13'
                     lineHeight='21'
                     className='truncate'
                   >
-                    {row.market === 'no market' ? ' - ' : row.market}
+                    {formatLargeNumber(row.qty, 1)}
                   </Text>
                 </div>
-              </div>
-              <div className='grid w-full'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Collateral
-                </Text>
-                <div className='flex items-center gap-1'>
-                  <Icon
-                    name={row.market || 'not-found-icon'}
-                    className='h-4 w-4'
-                    folder='collaterals'
-                  />
+                <div className='grid w-full'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Price Restriction
+                  </Text>
                   <Text
                     size='13'
                     lineHeight='21'
                     className='truncate'
                   >
-                    {row.market === 'no market' ? ' - ' : row.market}
+                    {formatPrice(row.value, 1)}
                   </Text>
                 </div>
+                <div className='grid w-full'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Price Feed
+                  </Text>
+                  <a
+                    href={fullExplorerLink}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                  >
+                    <Text
+                      size='13'
+                      lineHeight='21'
+                      className='w-fit truncate border-b border-dotted border-gray-500'
+                    >
+                      {`${row.address.slice(0, 4)}...${row.address.slice(-4)}`}
+                    </Text>
+                  </a>
+                </div>
               </div>
-              <div className='grid w-full'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Collateral Price
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {formatLargeNumber(row.qty, 1)}
-                </Text>
-              </div>
-              <div className='grid w-full'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Price Restriction
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {formatPrice(row.value, 1)}
-                </Text>
-              </div>
-              <div className='grid w-full'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Price feed
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {formatPrice(row.price, 1)}
-                </Text>
-              </div>
-            </div>
-          ))
+            );
+          })
         }
       </MobileDataTable>
       <DataTable

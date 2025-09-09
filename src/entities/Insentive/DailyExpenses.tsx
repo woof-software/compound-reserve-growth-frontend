@@ -5,7 +5,6 @@ import Filter from '@/components/Filter/Filter';
 import DailyExpensesTable from '@/components/IncentivesPageTable/DailyExpenses';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { TreasuryBalanceByNetworkType } from '@/components/TreasuryPageTable/TreasuryHoldings';
-import { treasuryBalanceByNetworkColumns } from '@/entities/Treasury/TreasuryBalanceByNetwork';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
@@ -49,30 +48,26 @@ const mapTableData = (data: TokenData[]) => {
   });
 };
 
-export const treasuryHoldingsColumns = [
+const sortColumns = [
   {
     accessorKey: 'symbol',
-    header: 'Symbol'
+    header: 'Network'
   },
   {
     accessorKey: 'chain',
-    header: 'Chain'
-  },
-  {
-    accessorKey: 'market',
     header: 'Market'
   },
   {
+    accessorKey: 'market',
+    header: 'Lend Incentive'
+  },
+  {
     accessorKey: 'qty',
-    header: 'qty'
+    header: 'Borrow Incentive'
   },
   {
     accessorKey: 'value',
-    header: 'Value'
-  },
-  {
-    accessorKey: 'price',
-    header: 'Price'
+    header: 'Total'
   },
   {
     accessorKey: 'source',
@@ -364,7 +359,7 @@ const DailyExpenses = ({
         <SortDrawer
           isOpen={isSortOpen}
           sortType={sortType}
-          columns={treasuryBalanceByNetworkColumns}
+          columns={sortColumns}
           onClose={onSortClose}
           onKeySelect={onKeySelect}
           onTypeSelect={onTypeSelect}

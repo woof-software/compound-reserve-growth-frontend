@@ -126,7 +126,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             name={
               theme === 'dark' ? 'compound-metric-logo' : 'comp-metric-light'
             }
-            className='absolute top-[-25px] right-5 z-[1] h-[190px] w-[150px]'
+            className='absolute top-[-25px] right-5 z-[1] h-[190px] w-[180px]'
           />
         </Card>
         <Card
@@ -165,7 +165,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             name={
               theme === 'dark' ? 'compound-metric-logo' : 'comp-metric-light'
             }
-            className='absolute top-[-25px] right-5 z-[1] h-[190px] w-[150px]'
+            className='absolute top-[-25px] right-[5px] z-[1] h-[190px] w-[180px] lg:right-5'
           />
         </Card>
       </div>
@@ -206,7 +206,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             name={
               theme === 'dark' ? 'compound-metric-logo' : 'comp-metric-light'
             }
-            className='absolute top-[-25px] right-5 z-[1] h-[190px] w-[150px]'
+            className='absolute top-[-25px] right-5 z-[1] h-[190px] w-[180px]'
           />
         </Card>
         <Card
@@ -245,7 +245,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             name={
               theme === 'dark' ? 'compound-metric-logo' : 'comp-metric-light'
             }
-            className='absolute top-[-25px] right-5 z-[1] h-[190px] w-[150px]'
+            className='absolute top-[-25px] right-5 z-[1] h-[190px] w-[180px]'
           />
         </Card>
       </div>

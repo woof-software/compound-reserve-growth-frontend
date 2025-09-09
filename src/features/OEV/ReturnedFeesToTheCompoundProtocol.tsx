@@ -6,7 +6,6 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import ReturnedFeesToTheCompoundProtocolTable, {
   TreasuryBalanceByNetworkType
 } from '@/entities/OEV/ReturnedFeesToTheCompoundProtocolTable';
-import { treasuryBalanceByNetworkColumns } from '@/features/Insentive/CurrentSpendingByChain';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
@@ -48,6 +47,29 @@ const mapTableData = (data: TokenData[]) => {
     };
   });
 };
+
+const sortColumns = [
+  {
+    accessorKey: 'symbol',
+    header: 'TX Hash'
+  },
+  {
+    accessorKey: 'qty',
+    header: 'Event Data'
+  },
+  {
+    accessorKey: 'value',
+    header: 'Source'
+  },
+  {
+    accessorKey: 'source',
+    header: 'Compound Pay out'
+  },
+  {
+    accessorKey: 'source',
+    header: 'Liquidator'
+  }
+];
 
 const ReturnedFeesToTheCompoundProtocol = ({
   isLoading,
@@ -262,7 +284,7 @@ const ReturnedFeesToTheCompoundProtocol = ({
         <SortDrawer
           isOpen={isSortOpen}
           sortType={sortType}
-          columns={treasuryBalanceByNetworkColumns}
+          columns={sortColumns}
           onClose={onSortClose}
           onKeySelect={onKeySelect}
           onTypeSelect={onTypeSelect}

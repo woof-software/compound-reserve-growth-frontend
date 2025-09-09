@@ -68,30 +68,34 @@ const OEVPage = () => {
         </Text>
       </section>
       <section className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
-        <div className='grid gap-3'>
-          <MetricBlock
-            isLoading={isLoading}
-            data={{
-              uniqDataByCategory,
-              uniqData30DaysOldByCategory
-            }}
-          />
-          <PresenceByMarketAndCollateral
-            data={uniqData}
-            isError={isError}
-            isLoading={isLoading}
-          />
-          <CapturedFeesByNetworkAndMarket
-            data={uniqData}
-            isError={isError}
-            isLoading={isLoading}
-          />
-          <ReturnedFeesToTheCompoundProtocol
-            data={uniqData}
-            isError={isError}
-            isLoading={isLoading}
-          />
-        </div>
+        <Text
+          size='17'
+          weight='500'
+        >
+          Annual OEV fees
+        </Text>
+        <MetricBlock
+          isLoading={isLoading}
+          data={{
+            uniqDataByCategory,
+            uniqData30DaysOldByCategory
+          }}
+        />
+        <PresenceByMarketAndCollateral
+          data={uniqData}
+          isError={isError}
+          isLoading={isLoading}
+        />
+        <CapturedFeesByNetworkAndMarket
+          data={uniqData}
+          isError={isError}
+          isLoading={isLoading}
+        />
+        <ReturnedFeesToTheCompoundProtocol
+          data={uniqData}
+          isError={isError}
+          isLoading={isLoading}
+        />
       </section>
     </div>
   );

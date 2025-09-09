@@ -36,12 +36,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
           className='h-6 w-6'
           folder='collaterals'
         />
-        <Text
-          size='13'
-          weight='500'
-        >
-          {row.original.symbol}
-        </Text>
+        <Text size='13'>{row.original.symbol}</Text>
       </div>
     )
   },
@@ -66,12 +61,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
           className='h-6 w-6'
           folder='collaterals'
         />
-        <Text
-          size='13'
-          weight='500'
-        >
-          {row.original.symbol}
-        </Text>
+        <Text size='13'>{row.original.symbol}</Text>
       </div>
     )
   },
@@ -80,6 +70,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     accessorKey: 'value',
     header: 'Fees by market',
     enableSorting: true,
+    size: 100,
     cell: ({ row }) => (
       <Text size='13'>{formatPrice(row.original.value, 1)}</Text>
     )
@@ -228,14 +219,10 @@ const CapturedFeesByNetworkAndMarketTable = ({
                 </div>
               </div>
             ))}
-            <div
-              className={cn(
-                'grid grid-cols-3 gap-x-10 gap-y-3 p-5 md:gap-x-[63px] md:px-10'
-              )}
-            >
+            <div className='border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-t p-5 md:gap-x-[63px] md:px-10'>
               <div className='grid min-h-[39px] w-full max-w-[100px]'>
                 <Text
-                  size='13'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -245,7 +232,7 @@ const CapturedFeesByNetworkAndMarketTable = ({
               </div>
               <div className='grid min-h-[39px] w-full max-w-[100px]'>
                 <Text
-                  size='13'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'
@@ -262,7 +249,7 @@ const CapturedFeesByNetworkAndMarketTable = ({
               </div>
               <div className='grid min-h-[39px] w-full max-w-[100px]'>
                 <Text
-                  size='13'
+                  size='11'
                   lineHeight='18'
                   weight='500'
                   className='text-primary-14'

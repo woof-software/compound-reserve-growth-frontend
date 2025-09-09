@@ -1,15 +1,21 @@
 import React, { memo, useMemo } from 'react';
+import { CSVLink } from 'react-csv';
 
 import LineChart from '@/components/Charts/Line/Line';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useLineChart } from '@/shared/hooks/useLineChart';
+import { useModal } from '@/shared/hooks/useModal';
 import { ChartDataItem } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { BarSize } from '@/shared/types/types';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
+import Drawer from '@/shared/ui/Drawer/Drawer';
+import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import Text from '@/shared/ui/Text/Text';
 
 interface TotalTreasuryValueProps {
   isLoading?: boolean;
@@ -113,8 +119,8 @@ const HistoricalExpensesByNetworks = ({
     <Card
       isLoading={isLoading}
       isError={isError}
-      title='Historical expences by networks'
-      id='historical-expences-by-networks'
+      title='Historical expenses by networks'
+      id='historical-expenses-by-networks'
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',
@@ -156,6 +162,12 @@ const Filters = memo(
     isLoading,
     onBarSizeChange
   }: FiltersProps) => {
+    const {
+      isOpen: isMoreOpen,
+      onOpenModal: onMoreOpen,
+      onCloseModal: onMoreClose
+    } = useModal();
+
     return (
       <>
         <div className='block lg:hidden'>
@@ -211,11 +223,15 @@ const Filters = memo(
                 onTabChange={onBarSizeChange}
                 disabled={isLoading}
               />
-              <CSVDownloadButton
-                data={csvData}
-                filename={csvFilename}
-                tooltipContent='CSV with the entire historical data can be downloaded'
-              />
+              <Button
+                onClick={onMoreOpen}
+                className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
+              >
+                <Icon
+                  name='3-dots'
+                  className='h-6 w-6 fill-none'
+                />
+              </Button>
             </div>
           </div>
         </div>
@@ -245,6 +261,41 @@ const Filters = memo(
             />
           </div>
         </div>
+        <Drawer
+          isOpen={isMoreOpen}
+          onClose={onMoreClose}
+        >
+          <Text
+            size='17'
+            weight='700'
+            align='center'
+            className='mb-5'
+          >
+            Actions
+          </Text>
+          <div className='flex flex-col gap-1.5'>
+            <div className='px-3 py-2'>
+              <CSVLink
+                data={csvData}
+                filename={csvFilename}
+                onClick={onMoreClose}
+              >
+                <div className='flex items-center gap-1.5'>
+                  <Icon
+                    name='download'
+                    className='h-[26px] w-[26px]'
+                  />
+                  <Text
+                    size='14'
+                    weight='500'
+                  >
+                    CSV with the entire historical data
+                  </Text>
+                </div>
+              </CSVLink>
+            </div>
+          </div>
+        </Drawer>
       </>
     );
   }

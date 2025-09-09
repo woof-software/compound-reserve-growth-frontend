@@ -369,7 +369,7 @@ const Filters = memo(
     return (
       <>
         <div className='block lg:hidden'>
-          <div className='flex flex-col justify-end gap-2 px-5 py-3 sm:flex-row'>
+          <div className='flex flex-col justify-end gap-2 px-5 py-3 sm:flex-row md:px-0'>
             <div className='flex flex-row justify-end gap-2'>
               <TabsGroup
                 className={{
