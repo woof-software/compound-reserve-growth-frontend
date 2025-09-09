@@ -143,7 +143,7 @@ const CurrentSpendingByChainTable = ({
                     weight='500'
                     className='text-primary-14'
                   >
-                    Symbol
+                    Network
                   </Text>
                   <div className='flex items-center gap-1'>
                     <Icon
@@ -167,7 +167,7 @@ const CurrentSpendingByChainTable = ({
                     weight='500'
                     className='text-primary-14'
                   >
-                    QTY
+                    Value COMP
                   </Text>
                   <Text
                     size='13'
@@ -184,7 +184,7 @@ const CurrentSpendingByChainTable = ({
                     weight='500'
                     className='text-primary-14'
                   >
-                    Value
+                    Value USDC
                   </Text>
                   <Text
                     size='13'
@@ -192,23 +192,6 @@ const CurrentSpendingByChainTable = ({
                     className='truncate'
                   >
                     {formatPrice(row.value, 1)}
-                  </Text>
-                </div>
-                <div className='grid w-full'>
-                  <Text
-                    size='11'
-                    lineHeight='18'
-                    weight='500'
-                    className='text-primary-14'
-                  >
-                    Market
-                  </Text>
-                  <Text
-                    size='13'
-                    lineHeight='21'
-                    className='truncate'
-                  >
-                    {row.market === 'no market' ? ' - ' : row.market}
                   </Text>
                 </div>
                 <div className='grid w-full'>
