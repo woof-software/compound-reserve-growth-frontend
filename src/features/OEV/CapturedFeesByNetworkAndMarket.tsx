@@ -204,14 +204,14 @@ const CapturedFeesByNetworkAndMarket = ({
           ? true
           : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
       );
-      setSelectedOptions({ chain, deployment: filteredDeployment });
+      setSelectedOptions({ chain, market: filteredDeployment });
     },
     [selectedOptions.market]
   );
 
   const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
-      deployment: selectedOptions
+      market: selectedOptions
     });
   }, []);
 
@@ -302,7 +302,7 @@ const CapturedFeesByNetworkAndMarket = ({
           value={selectedOptions.market}
           onChange={onSelectMarket}
           placeholder='Market'
-          disabled={isLoading || !Boolean(marketOptionsFilter.length)}
+          disabled={isLoading}
         />
         <CSVDownloadButton
           data={tableData}
