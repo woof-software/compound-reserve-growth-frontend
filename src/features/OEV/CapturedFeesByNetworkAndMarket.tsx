@@ -99,7 +99,7 @@ const CapturedFeesByNetworkAndMarket = ({
       ...next
     }),
     {
-      chain: [] as OptionType[],
+      chain: [{ id: 'mainnet', label: 'Mainnet' }] as OptionType[],
       market: [] as OptionType[]
     }
   );
