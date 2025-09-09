@@ -257,7 +257,16 @@ const CollateralsPriceBlock = ({
       onChange: onSelectMarket
     };
 
-    return [chainFilterOptions, marketFilterOptions];
+    const collateralFilterOptions = {
+      id: 'market',
+      placeholder: 'Collateral',
+      total: selectedOptions.deployment.length,
+      selectedOptions: selectedOptions.deployment,
+      options: deploymentOptionsFilter || [],
+      onChange: onSelectMarket
+    };
+
+    return [chainFilterOptions, marketFilterOptions, collateralFilterOptions];
   }, [
     chainOptions,
     deploymentOptionsFilter,
