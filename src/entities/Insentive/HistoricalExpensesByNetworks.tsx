@@ -119,7 +119,7 @@ const HistoricalExpensesByNetworks = ({
     <Card
       isLoading={isLoading}
       isError={isError}
-      title='Historical expences by networks'
+      title='Historical expenses by networks'
       id='historical-expences-by-networks'
       className={{
         loading: 'min-h-[inherit]',
