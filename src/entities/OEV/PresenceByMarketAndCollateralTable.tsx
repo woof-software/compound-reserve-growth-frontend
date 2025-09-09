@@ -263,6 +263,14 @@ const PresenceByMarketAndCollateralTable = ({
                   </div>
                 </div>
                 <div className='grid w-full'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    OEV on Collateral
+                  </Text>
                   <CollateralAvatars collaterals={Array(17).fill(row.symbol)} />
                 </div>
                 <div className='grid w-full'>
