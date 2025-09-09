@@ -5,7 +5,6 @@ import CollateralsPrice from '@/components/CapoPageTable/CollateralsPrice';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { TreasuryBalanceByNetworkType } from '@/components/TreasuryPageTable/TreasuryHoldings';
-import { treasuryBalanceByNetworkColumns } from '@/entities/Treasury/TreasuryBalanceByNetwork';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
@@ -47,6 +46,37 @@ const mapTableData = (data: TokenData[]) => {
     };
   });
 };
+
+const sortColumns = [
+  {
+    accessorKey: 'source',
+    header: 'Source'
+  },
+  {
+    accessorKey: 'chain',
+    header: 'Network'
+  },
+  {
+    accessorKey: 'market',
+    header: 'Market'
+  },
+  {
+    accessorKey: 'collateral',
+    header: 'Collateral'
+  },
+  {
+    accessorKey: 'collateralPrice',
+    header: 'Collateral Price'
+  },
+  {
+    accessorKey: 'priceRestriction',
+    header: 'Price Restriction'
+  },
+  {
+    accessorKey: 'priceFeed',
+    header: 'Price Feed'
+  }
+];
 
 const CollateralsPriceBlock = ({
   isLoading,
@@ -314,7 +344,7 @@ const CollateralsPriceBlock = ({
         <SortDrawer
           isOpen={isSortOpen}
           sortType={sortType}
-          columns={treasuryBalanceByNetworkColumns}
+          columns={sortColumns}
           onClose={onSortClose}
           onKeySelect={onKeySelect}
           onTypeSelect={onTypeSelect}
