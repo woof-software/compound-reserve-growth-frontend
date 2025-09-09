@@ -120,7 +120,7 @@ const HistoricalExpensesByNetworks = ({
       isLoading={isLoading}
       isError={isError}
       title='Historical expenses by networks'
-      id='historical-expences-by-networks'
+      id='historical-expenses-by-networks'
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',
