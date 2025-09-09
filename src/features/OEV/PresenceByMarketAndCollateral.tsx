@@ -52,19 +52,23 @@ const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
 const treasuryBalanceByNetworkColumns = [
   {
     accessorKey: 'symbol',
-    header: 'Network'
+    header: 'Source'
   },
   {
     accessorKey: 'qty',
-    header: 'Value COMP'
+    header: 'Chain'
   },
   {
     accessorKey: 'value',
-    header: 'Value USDC'
+    header: 'Market'
   },
   {
     accessorKey: 'source',
-    header: 'Source'
+    header: 'OEV on Collateral'
+  },
+  {
+    accessorKey: 'source',
+    header: 'Price Feed'
   }
 ];
 

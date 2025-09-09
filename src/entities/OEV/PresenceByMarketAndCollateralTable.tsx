@@ -84,7 +84,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
   },
   {
     accessorKey: 'value',
-    header: 'Price feed',
+    header: 'Price Feed',
     enableSorting: true,
     size: 80,
     cell: ({ row }) => {
@@ -280,7 +280,7 @@ const PresenceByMarketAndCollateralTable = ({
                     weight='500'
                     className='text-primary-14'
                   >
-                    Price feed
+                    Price Feed
                   </Text>
                   <Text
                     size='13'
