@@ -166,7 +166,7 @@ const ReturnedFeesToTheCompoundProtocolTable = ({
                 <div
                   key={row.symbol + index}
                   className={cn(
-                    'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                    'border-secondary-23 grid grid-cols-3 gap-x-[26px] gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
                     {
                       'border-none': dataRows.length - 1 === index
                     }
@@ -272,7 +272,7 @@ const ReturnedFeesToTheCompoundProtocolTable = ({
                 </div>
               );
             })}
-            <div className='border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-t p-5 md:gap-x-[63px] md:px-10'>
+            <div className='border-secondary-23 grid grid-cols-3 gap-x-[26px] gap-y-3 border-t p-5 md:gap-x-[63px] md:px-10'>
               <div className='grid min-h-[39px] w-full max-w-[120px]'>
                 <Text
                   size='11'
