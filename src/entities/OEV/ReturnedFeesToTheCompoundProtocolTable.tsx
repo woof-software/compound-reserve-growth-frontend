@@ -166,108 +166,112 @@ const ReturnedFeesToTheCompoundProtocolTable = ({
                 <div
                   key={row.symbol + index}
                   className={cn(
-                    'border-secondary-23 grid grid-cols-3 gap-x-[26px] gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                    'border-secondary-23 flex flex-col gap-x-[26px] gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
                     {
                       'border-none': dataRows.length - 1 === index
                     }
                   )}
                 >
-                  <div className='grid w-full'>
-                    <Text
-                      size='11'
-                      lineHeight='18'
-                      weight='500'
-                      className='text-primary-14'
-                    >
-                      TX Hash
-                    </Text>
-                    <a
-                      href={txHashLink}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                    >
-                      <div className='flex items-center gap-1'>
-                        <Text size='13'>0xA2...14B4</Text>
-                        <Icon
-                          name='external-link'
-                          className='h-4 w-4'
-                        />
-                      </div>
-                    </a>
+                  <div className='flex justify-between gap-x-[26px] md:gap-x-[63px]'>
+                    <div className='grid w-fit'>
+                      <Text
+                        size='11'
+                        lineHeight='18'
+                        weight='500'
+                        className='text-primary-14'
+                      >
+                        TX Hash
+                      </Text>
+                      <a
+                        href={txHashLink}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        <div className='flex items-center gap-1'>
+                          <Text size='13'>0xA2...14B4</Text>
+                          <Icon
+                            name='external-link'
+                            className='h-4 w-4'
+                          />
+                        </div>
+                      </a>
+                    </div>
+                    <div className='grid w-fit'>
+                      <Text
+                        size='11'
+                        lineHeight='18'
+                        weight='500'
+                        className='text-primary-14'
+                      >
+                        Event Data
+                      </Text>
+                      <Text
+                        size='13'
+                        lineHeight='21'
+                        className='truncate'
+                      >
+                        18.08.2025 at 09:43:35
+                      </Text>
+                    </div>
                   </div>
-                  <div className='grid w-full'>
-                    <Text
-                      size='11'
-                      lineHeight='18'
-                      weight='500'
-                      className='text-primary-14'
-                    >
-                      Event Data
-                    </Text>
-                    <Text
-                      size='13'
-                      lineHeight='21'
-                      className='truncate'
-                    >
-                      18.08.2025 at 09:43:35
-                    </Text>
-                  </div>
-                  <div className='grid w-full'>
-                    <Text
-                      size='11'
-                      lineHeight='18'
-                      weight='500'
-                      className='text-primary-14'
-                    >
-                      Source
-                    </Text>
-                    <Text
-                      size='13'
-                      lineHeight='21'
-                      className='truncate'
-                    >
-                      Market V3
-                    </Text>
-                  </div>
-                  <div className='grid w-full'>
-                    <Text
-                      size='11'
-                      lineHeight='18'
-                      weight='500'
-                      className='text-primary-14'
-                    >
-                      Compound Pay out
-                    </Text>
-                    <Text
-                      size='13'
-                      lineHeight='21'
-                      className='truncate'
-                    >
-                      $9999.99
-                    </Text>
-                  </div>
-                  <div className='grid w-full'>
-                    <Text
-                      size='11'
-                      lineHeight='18'
-                      weight='500'
-                      className='text-primary-14'
-                    >
-                      Liquidator
-                    </Text>
-                    <a
-                      href={liquidatorLink}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                    >
-                      <div className='flex items-center gap-1'>
-                        <Text size='13'>0xA2...14B4</Text>
-                        <Icon
-                          name='external-link'
-                          className='h-4 w-4'
-                        />
-                      </div>
-                    </a>
+                  <div className='flex justify-between gap-x-[26px] md:gap-x-[63px]'>
+                    <div className='grid w-fit'>
+                      <Text
+                        size='11'
+                        lineHeight='18'
+                        weight='500'
+                        className='text-primary-14'
+                      >
+                        Source
+                      </Text>
+                      <Text
+                        size='13'
+                        lineHeight='21'
+                        className='truncate'
+                      >
+                        Market V3
+                      </Text>
+                    </div>
+                    <div className='grid w-fit'>
+                      <Text
+                        size='11'
+                        lineHeight='18'
+                        weight='500'
+                        className='text-primary-14'
+                      >
+                        Compound Pay out
+                      </Text>
+                      <Text
+                        size='13'
+                        lineHeight='21'
+                        className='truncate'
+                      >
+                        $9999.99
+                      </Text>
+                    </div>
+                    <div className='grid w-fit'>
+                      <Text
+                        size='11'
+                        lineHeight='18'
+                        weight='500'
+                        className='text-primary-14'
+                      >
+                        Liquidator
+                      </Text>
+                      <a
+                        href={liquidatorLink}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        <div className='flex items-center gap-1'>
+                          <Text size='13'>0xA2...14B4</Text>
+                          <Icon
+                            name='external-link'
+                            className='h-4 w-4'
+                          />
+                        </div>
+                      </a>
+                    </div>
                   </div>
                 </div>
               );
