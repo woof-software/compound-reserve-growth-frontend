@@ -275,7 +275,7 @@ const PresenceByMarketAndCollateral: FC<CurrentSpendingByChainProps> = ({
 
     const priceFeedFilterOptions = {
       id: 'market',
-      placeholder: 'Price feed',
+      placeholder: 'Price Feed',
       total: selectedOptions.market.length,
       selectedOptions: selectedOptions.market,
       options: deploymentOptionsFilter || [],
@@ -337,7 +337,7 @@ const PresenceByMarketAndCollateral: FC<CurrentSpendingByChainProps> = ({
           options={deploymentOptionsFilter}
           value={selectedOptions.market}
           onChange={onSelectMarket}
-          placeholder='Price feed'
+          placeholder='Price Feed'
           disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
         />
         <CSVDownloadButton

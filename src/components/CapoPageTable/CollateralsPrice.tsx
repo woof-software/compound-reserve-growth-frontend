@@ -251,7 +251,7 @@ const CollateralsPrice = ({ tableData, sortType }: CollateralsPriceProps) => {
                     <Icon
                       name={row.chain.toLowerCase() || 'not-found-icon'}
                       className='h-4 w-4'
-                      folder='collaterals'
+                      folder='network'
                     />
                     <Text
                       size='13'

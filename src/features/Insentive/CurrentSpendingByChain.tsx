@@ -127,11 +127,10 @@ const CurrentSpendingByChainBlock = ({
     []
   );
 
-  const { chainOptions, assetTypeOptions, deploymentOptions, symbolOptions } =
-    useMemo(
-      () => extractFilterOptions(data, filterOptionsConfig),
-      [data, filterOptionsConfig]
-    );
+  const { chainOptions, deploymentOptions } = useMemo(
+    () => extractFilterOptions(data, filterOptionsConfig),
+    [data, filterOptionsConfig]
+  );
 
   const deploymentOptionsFilter = useMemo(() => {
     const marketV2 =
@@ -235,21 +234,9 @@ const CurrentSpendingByChainBlock = ({
     [selectedOptions.deployment]
   );
 
-  const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      assetType: selectedOptions
-    });
-  }, []);
-
   const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
       deployment: selectedOptions
-    });
-  }, []);
-
-  const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      symbol: selectedOptions
     });
   }, []);
 
@@ -310,42 +297,13 @@ const CurrentSpendingByChainBlock = ({
       onChange: onSelectMarket
     };
 
-    const assetTypeFilterOptions = {
-      id: 'assetType',
-      placeholder: 'Asset Type',
-      total: selectedOptions.assetType.length,
-      selectedOptions: selectedOptions.assetType,
-      options:
-        assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
-      onChange: onSelectAssetType
-    };
-
-    const symbolFilterOptions = {
-      id: 'reserveSymbol',
-      placeholder: 'Reserve Symbols',
-      total: selectedOptions.symbol.length,
-      selectedOptions: selectedOptions.symbol,
-      options:
-        symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
-      onChange: onSelectSymbol
-    };
-
-    return [
-      chainFilterOptions,
-      marketFilterOptions,
-      assetTypeFilterOptions,
-      symbolFilterOptions
-    ];
+    return [chainFilterOptions, marketFilterOptions];
   }, [
-    assetTypeOptions,
     chainOptions,
     deploymentOptionsFilter,
-    onSelectAssetType,
     onSelectChain,
     onSelectMarket,
-    onSelectSymbol,
-    selectedOptions,
-    symbolOptions
+    selectedOptions
   ]);
 
   return (
