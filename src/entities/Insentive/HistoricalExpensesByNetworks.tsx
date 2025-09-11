@@ -1,6 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import { CSVLink } from 'react-csv';
 
+import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import LineChart from '@/components/Charts/Line/Line';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
@@ -30,6 +31,12 @@ interface FiltersProps {
   isLoading: boolean;
 
   csvFilename: string;
+
+  areAllSeriesHidden: boolean;
+
+  onSelectAll: () => void;
+
+  onDeselectAll: () => void;
 
   csvData: Record<string, string | number>[];
 
@@ -132,7 +139,10 @@ const HistoricalExpensesByNetworks = ({
         barSize={barSize}
         csvData={csvData}
         csvFilename={csvFilename}
+        areAllSeriesHidden={areAllSeriesHidden}
         onBarSizeChange={onBarSizeChange}
+        onSelectAll={onSelectAll}
+        onDeselectAll={onDeselectAll}
       />
       <LineChart
         className='max-h-fit'
@@ -160,13 +170,26 @@ const Filters = memo(
     csvData,
     csvFilename,
     isLoading,
-    onBarSizeChange
+    areAllSeriesHidden,
+    onBarSizeChange,
+    onSelectAll,
+    onDeselectAll
   }: FiltersProps) => {
     const {
       isOpen: isMoreOpen,
       onOpenModal: onMoreOpen,
       onCloseModal: onMoreClose
     } = useModal();
+
+    const onEyeClick = () => {
+      if (areAllSeriesHidden) {
+        onSelectAll();
+      } else {
+        onDeselectAll();
+      }
+
+      onMoreClose();
+    };
 
     return (
       <>
@@ -293,6 +316,28 @@ const Filters = memo(
                   </Text>
                 </div>
               </CSVLink>
+            </div>
+            <div className='px-3 py-2'>
+              <ChartIconToggle
+                active={areAllSeriesHidden}
+                onIcon='eye'
+                offIcon='eye-closed'
+                ariaLabel='Toggle all series visibility'
+                className={{
+                  container:
+                    'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
+                  icon: 'h-[26px] w-[26px]',
+                  iconContainer: 'h-[26px] w-[26px]'
+                }}
+                onClick={onEyeClick}
+              >
+                <Text
+                  size='14'
+                  weight='500'
+                >
+                  Unselect All
+                </Text>
+              </ChartIconToggle>
             </div>
           </div>
         </Drawer>
