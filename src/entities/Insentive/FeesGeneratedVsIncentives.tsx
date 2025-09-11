@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
+import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import LineChart from '@/components/Charts/Line/Line';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
@@ -57,6 +58,8 @@ interface FiltersProps {
     deployment: OptionType[];
   };
 
+  areAllSeriesHidden: boolean;
+
   onSelectChain: (chain: OptionType[]) => void;
 
   onSelectMarket: (deployment: OptionType[]) => void;
@@ -64,6 +67,10 @@ interface FiltersProps {
   onBarSizeChange: (value: string) => void;
 
   onClearAll: () => void;
+
+  onSelectAll: () => void;
+
+  onDeselectAll: () => void;
 }
 
 const FeesGeneratedVsIncentives = ({
@@ -286,11 +293,14 @@ const FeesGeneratedVsIncentives = ({
         isLoading={isLoading || false}
         barSize={barSize}
         csvData={csvData}
+        areAllSeriesHidden={areAllSeriesHidden}
         csvFilename={csvFilename}
         onSelectChain={onSelectChain}
         onSelectMarket={onSelectMarket}
         onBarSizeChange={onBarSizeChange}
         onClearAll={onClearAll}
+        onSelectAll={onSelectAll}
+        onDeselectAll={onDeselectAll}
       />
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder onButtonClick={onClearAll} />
@@ -323,12 +333,15 @@ const Filters = memo(
     csvFilename,
     chainOptions,
     selectedOptions,
+    areAllSeriesHidden,
     deploymentOptionsFilter,
     isLoading,
     onSelectChain,
     onSelectMarket,
     onBarSizeChange,
-    onClearAll
+    onClearAll,
+    onSelectAll,
+    onDeselectAll
   }: FiltersProps) => {
     const { isOpen, onOpenModal, onCloseModal } = useModal();
 
@@ -365,6 +378,16 @@ const Filters = memo(
       onSelectMarket,
       selectedOptions
     ]);
+
+    const onEyeClick = () => {
+      if (areAllSeriesHidden) {
+        onSelectAll();
+      } else {
+        onDeselectAll();
+      }
+
+      onMoreClose();
+    };
 
     return (
       <>
@@ -461,6 +484,28 @@ const Filters = memo(
                     </Text>
                   </div>
                 </CSVLink>
+              </div>
+              <div className='px-3 py-2'>
+                <ChartIconToggle
+                  active={areAllSeriesHidden}
+                  onIcon='eye'
+                  offIcon='eye-closed'
+                  ariaLabel='Toggle all series visibility'
+                  className={{
+                    container:
+                      'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
+                    icon: 'h-[26px] w-[26px]',
+                    iconContainer: 'h-[26px] w-[26px]'
+                  }}
+                  onClick={onEyeClick}
+                >
+                  <Text
+                    size='14'
+                    weight='500'
+                  >
+                    Unselect All
+                  </Text>
+                </ChartIconToggle>
               </div>
             </div>
           </Drawer>
