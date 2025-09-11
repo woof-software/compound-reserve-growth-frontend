@@ -1,14 +1,19 @@
 import * as React from 'react';
 import { useMemo } from 'react';
 
+import HoverCard from '@/components/HoverCard/HoverCard';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
+  defaultExplorer,
+  explorers,
   formatLargeNumber,
   formatNumber,
   formatPrice,
-  formatQuantity
+  formatQuantity,
+  sliceAddress
 } from '@/shared/lib/utils/utils';
+import { ClipboardButton } from '@/shared/ui/AnimationProvider/CopyButton/CopyButton';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -74,7 +79,69 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     cell: ({ row }) => {
       const { source } = row.original;
 
-      return <Text size='13'>{source}</Text>;
+      const explorerUrl =
+        (row.original.chain && explorers[row.original.chain.toLowerCase()]) ||
+        defaultExplorer;
+
+      const fullExplorerLink = `${explorerUrl}${row.original.address}`;
+
+      return (
+        <HoverCard
+          content={
+            <div className='flex w-50 flex-col items-start gap-3 py-2'>
+              <div className='flex w-full items-center justify-between'>
+                <Text
+                  size='11'
+                  weight='500'
+                >
+                  {source}
+                </Text>
+              </div>
+              <div className='flex w-full items-center justify-between'>
+                <Text
+                  size='12'
+                  className='text-primary-11'
+                >
+                  {sliceAddress(row.original.address, 7)}
+                </Text>
+                <ClipboardButton textToCopy={row.original.address} />
+              </div>
+              <div className='flex w-full items-center justify-between'>
+                <Text
+                  size='12'
+                  className='text-primary-11'
+                >
+                  View on Explorer
+                </Text>
+                <a
+                  href={fullExplorerLink}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='text-primary-11 flex h-4 w-4 items-center justify-center'
+                >
+                  <Icon
+                    name={'arrow-link'}
+                    className='h-4.5 w-3 text-[#7A8A99]'
+                  />
+                </a>
+              </div>
+            </div>
+          }
+          side='top'
+        >
+          <div
+            className='flex items-start'
+            style={{ width: `${120}px` }}
+          >
+            <Text
+              size='13'
+              className='text-primary-11 inline-block max-w-full cursor-pointer truncate border-b border-dotted border-gray-500 leading-none'
+            >
+              {source}
+            </Text>
+          </div>
+        </HoverCard>
+      );
     }
   }
 ];
@@ -126,93 +193,107 @@ const CurrentSpendingByChainTable = ({
       <MobileDataTable tableData={mobileTableData}>
         {(dataRows) => (
           <>
-            {dataRows.map((row, index) => (
-              <div
-                key={row.symbol + index}
-                className={cn(
-                  'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
-                  {
-                    'border-none': dataRows.length - 1 === index
-                  }
-                )}
-              >
-                <div className='grid w-full'>
-                  <Text
-                    size='11'
-                    lineHeight='18'
-                    weight='500'
-                    className='text-primary-14'
-                  >
-                    Network
-                  </Text>
-                  <div className='flex items-center gap-1'>
-                    <Icon
-                      name={row.symbol || 'not-found-icon'}
-                      className='h-4 w-4'
-                      folder='collaterals'
-                    />
+            {dataRows.map((row, index) => {
+              const explorerUrl =
+                (row.chain && explorers[row.chain.toLowerCase()]) ||
+                defaultExplorer;
+
+              const fullExplorerLink = `${explorerUrl}${row.address}`;
+
+              return (
+                <div
+                  key={row.symbol + index}
+                  className={cn(
+                    'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                    {
+                      'border-none': dataRows.length - 1 === index
+                    }
+                  )}
+                >
+                  <div className='grid w-full'>
+                    <Text
+                      size='11'
+                      lineHeight='18'
+                      weight='500'
+                      className='text-primary-14'
+                    >
+                      Network
+                    </Text>
+                    <div className='flex items-center gap-1'>
+                      <Icon
+                        name={row.symbol || 'not-found-icon'}
+                        className='h-4 w-4'
+                        folder='collaterals'
+                      />
+                      <Text
+                        size='13'
+                        lineHeight='21'
+                        className='truncate'
+                      >
+                        {row.symbol}
+                      </Text>
+                    </div>
+                  </div>
+                  <div className='grid w-full'>
+                    <Text
+                      size='11'
+                      lineHeight='18'
+                      weight='500'
+                      className='text-primary-14'
+                    >
+                      Value COMP
+                    </Text>
                     <Text
                       size='13'
                       lineHeight='21'
                       className='truncate'
                     >
-                      {row.symbol}
+                      {formatLargeNumber(row.qty, 1)}
                     </Text>
                   </div>
+                  <div className='grid w-full'>
+                    <Text
+                      size='11'
+                      lineHeight='18'
+                      weight='500'
+                      className='text-primary-14'
+                    >
+                      Value USDC
+                    </Text>
+                    <Text
+                      size='13'
+                      lineHeight='21'
+                      className='truncate'
+                    >
+                      {formatPrice(row.value, 1)}
+                    </Text>
+                  </div>
+                  <div className='grid w-full'>
+                    <Text
+                      size='11'
+                      lineHeight='18'
+                      weight='500'
+                      className='text-primary-14'
+                    >
+                      Source
+                    </Text>
+                    <a
+                      href={fullExplorerLink}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                    >
+                      <Text
+                        size='13'
+                        lineHeight='21'
+                        className='w-fit truncate border-b border-dashed border-gray-500'
+                      >
+                        {row.source}
+                      </Text>
+                    </a>
+                  </div>
                 </div>
-                <div className='grid w-full'>
-                  <Text
-                    size='11'
-                    lineHeight='18'
-                    weight='500'
-                    className='text-primary-14'
-                  >
-                    Value COMP
-                  </Text>
-                  <Text
-                    size='13'
-                    lineHeight='21'
-                    className='truncate'
-                  >
-                    {formatLargeNumber(row.qty, 1)}
-                  </Text>
-                </div>
-                <div className='grid w-full'>
-                  <Text
-                    size='11'
-                    lineHeight='18'
-                    weight='500'
-                    className='text-primary-14'
-                  >
-                    Value USDC
-                  </Text>
-                  <Text
-                    size='13'
-                    lineHeight='21'
-                    className='truncate'
-                  >
-                    {formatPrice(row.value, 1)}
-                  </Text>
-                </div>
-                <div className='grid w-full'>
-                  <Text
-                    size='11'
-                    lineHeight='18'
-                    weight='500'
-                    className='text-primary-14'
-                  >
-                    Source
-                  </Text>
-                  <Text
-                    size='13'
-                    lineHeight='21'
-                    className='truncate'
-                  >
-                    {row.source}
-                  </Text>
-                </div>
-              </div>
-            ))}
+              );
+            })}
             <div
               className={cn(
                 'grid grid-cols-3 gap-x-10 gap-y-3 p-5 md:gap-x-[63px] md:px-10'
