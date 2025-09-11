@@ -187,111 +187,127 @@ const PresenceByMarketAndCollateralTable = ({
       <MobileDataTable tableData={mobileTableData}>
         {(dataRows) => (
           <>
-            {dataRows.map((row, index) => (
-              <div
-                key={row.symbol + index}
-                className={cn(
-                  'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
-                  {
-                    'border-none': dataRows.length - 1 === index
-                  }
-                )}
-              >
-                <div className='grid w-full'>
-                  <Text
-                    size='11'
-                    lineHeight='18'
-                    weight='500'
-                    className='text-primary-14'
-                  >
-                    Source
-                  </Text>
-                  <Text
-                    size='13'
-                    lineHeight='21'
-                    className='truncate'
-                  >
-                    {row.source}
-                  </Text>
-                </div>
-                <div className='grid w-full'>
-                  <Text
-                    size='11'
-                    lineHeight='18'
-                    weight='500'
-                    className='text-primary-14'
-                  >
-                    Chain
-                  </Text>
-                  <div className='flex items-center gap-1'>
-                    <Icon
-                      name={row.chain || 'not-found-icon'}
-                      className='h-4 w-4'
-                      folder='collaterals'
-                    />
+            {dataRows.map((row, index) => {
+              const explorerUrl =
+                (row.chain && explorers[row.chain.toLowerCase()]) ||
+                defaultExplorer;
+
+              const fullExplorerLink = `${explorerUrl}${row.address}`;
+
+              return (
+                <div
+                  key={row.symbol + index}
+                  className={cn(
+                    'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                    {
+                      'border-none': dataRows.length - 1 === index
+                    }
+                  )}
+                >
+                  <div className='grid w-full'>
+                    <Text
+                      size='11'
+                      lineHeight='18'
+                      weight='500'
+                      className='text-primary-14'
+                    >
+                      Source
+                    </Text>
                     <Text
                       size='13'
                       lineHeight='21'
                       className='truncate'
                     >
-                      {row.chain}
+                      {row.source}
                     </Text>
                   </div>
-                </div>
-                <div className='grid w-full'>
-                  <Text
-                    size='11'
-                    lineHeight='18'
-                    weight='500'
-                    className='text-primary-14'
-                  >
-                    Market
-                  </Text>
-                  <div className='flex items-center gap-1'>
-                    <Icon
-                      name={row.market || 'not-found-icon'}
-                      className='h-4 w-4'
-                      folder='collaterals'
-                    />
+                  <div className='grid w-full'>
                     <Text
-                      size='13'
-                      lineHeight='21'
-                      className='truncate'
+                      size='11'
+                      lineHeight='18'
+                      weight='500'
+                      className='text-primary-14'
                     >
-                      {row.market}
+                      Chain
                     </Text>
+                    <div className='flex items-center gap-1'>
+                      <Icon
+                        name={row.chain || 'not-found-icon'}
+                        className='h-4 w-4'
+                        folder='collaterals'
+                      />
+                      <Text
+                        size='13'
+                        lineHeight='21'
+                        className='truncate'
+                      >
+                        {row.chain}
+                      </Text>
+                    </div>
+                  </div>
+                  <div className='grid w-full'>
+                    <Text
+                      size='11'
+                      lineHeight='18'
+                      weight='500'
+                      className='text-primary-14'
+                    >
+                      Market
+                    </Text>
+                    <div className='flex items-center gap-1'>
+                      <Icon
+                        name={row.market || 'not-found-icon'}
+                        className='h-4 w-4'
+                        folder='collaterals'
+                      />
+                      <Text
+                        size='13'
+                        lineHeight='21'
+                        className='truncate'
+                      >
+                        {row.market}
+                      </Text>
+                    </div>
+                  </div>
+                  <div className='grid w-full'>
+                    <Text
+                      size='11'
+                      lineHeight='18'
+                      weight='500'
+                      className='text-primary-14'
+                    >
+                      OEV on Collateral
+                    </Text>
+                    <CollateralAvatars
+                      collaterals={Array(17).fill(row.symbol)}
+                    />
+                  </div>
+                  <div className='grid w-full'>
+                    <Text
+                      size='11'
+                      lineHeight='18'
+                      weight='500'
+                      className='text-primary-14'
+                    >
+                      Price Feed
+                    </Text>
+                    <a
+                      href={fullExplorerLink}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                    >
+                      <Text
+                        size='13'
+                        lineHeight='21'
+                        className='w-fit truncate border-b border-dotted border-gray-500'
+                      >
+                        {row.source}
+                      </Text>
+                    </a>
                   </div>
                 </div>
-                <div className='grid w-full'>
-                  <Text
-                    size='11'
-                    lineHeight='18'
-                    weight='500'
-                    className='text-primary-14'
-                  >
-                    OEV on Collateral
-                  </Text>
-                  <CollateralAvatars collaterals={Array(17).fill(row.symbol)} />
-                </div>
-                <div className='grid w-full'>
-                  <Text
-                    size='11'
-                    lineHeight='18'
-                    weight='500'
-                    className='text-primary-14'
-                  >
-                    Price Feed
-                  </Text>
-                  <Text
-                    size='13'
-                    lineHeight='21'
-                    className='truncate'
-                  >
-                    {row.source}
-                  </Text>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </>
         )}
       </MobileDataTable>
