@@ -198,7 +198,7 @@ const TreasuryComposition = ({
           </>
         )}
       </MobileDataTable>
-      <div className='hide-scrollbar hidden max-h-[400px] w-full max-w-full overflow-y-auto md:block md:max-w-2/5 lg:max-w-[522px]'>
+      <div className='hide-scrollbar hidden max-h-[400px] w-full max-w-full overflow-y-auto md:block md:max-w-[100%] lg:max-w-[522px]'>
         <DataTable
           data={tableData}
           columns={columns}

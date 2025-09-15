@@ -320,7 +320,7 @@ const TreasuryCompositionBlock = memo(
           </View.Condition>
           <View.Condition if={hasData}>
             <PieChart
-              className='max-w-full md:max-w-1/2 lg:max-w-[336.5px]'
+              className='max-w-full md:max-w-1/2 lg:max-w-[450px]'
               data={chartData}
             />
             <TreasuryComposition
