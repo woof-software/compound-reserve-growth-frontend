@@ -1,8 +1,12 @@
 import { ChangeEvent, MouseEvent as ReactMouseEvent } from 'react';
 
-import { THIRTY_DAYS } from '@/shared/consts/consts';
-import { TokenData } from '@/shared/types/Treasury/types';
-import type { OptionType } from '@/shared/types/types';
+import { THIRTY_DAYS, units } from '@/shared/consts';
+import type {
+  ChartDataItem,
+  FilterOptionsConfig,
+  OptionType,
+  TokenData
+} from '@/shared/types/types';
 import { ResponseDataType } from '@/shared/types/types';
 
 export const preventEventBubbling = (
@@ -11,35 +15,6 @@ export const preventEventBubbling = (
   e.preventDefault();
   e.stopPropagation();
 };
-
-export const shortMonthNames = [
-  'JAN',
-  'FEB',
-  'MAR',
-  'APR',
-  'MAY',
-  'JUN',
-  'JUL',
-  'AUG',
-  'SEP',
-  'OCT',
-  'NOV',
-  'DEC'
-];
-export const longMonthNames = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December'
-];
 
 export const colorPicker = (index: number): string => {
   const colors = [
@@ -138,39 +113,6 @@ export const getStableColorForSeries = (
 
   return colorPicker(stableIndex + 1);
 };
-
-export const explorers: { [key: string]: string } = {
-  ethereum: 'https://etherscan.io/address/',
-  mainnet: 'https://etherscan.io/address/',
-  arbitrum: 'https://arbiscan.io/address/',
-  avalanche: 'https://snowtrace.io/address/',
-  base: 'https://basescan.org/address/',
-  optimism: 'https://optimistic.etherscan.io/address/',
-  polygon: 'https://polygonscan.com/address/',
-  sonic: 'https://explorer.sonic.game/address/',
-  linea: 'https://lineascan.build/address/',
-  mantle: 'https://explorer.mantle.xyz/address/',
-  ronin: 'https://app.roninchain.com/address/',
-  scroll: 'https://scrollscan.com/address/',
-  unichain: 'https://www.blockscout.com/search?q='
-  // defaul Etherscan
-};
-
-export const defaultExplorer = 'https://etherscan.io/address/';
-
-export const units = [
-  { value: 1e33, symbol: 'D' },
-  { value: 1e30, symbol: 'N' },
-  { value: 1e27, symbol: 'Oc' },
-  { value: 1e24, symbol: 'Sp' },
-  { value: 1e21, symbol: 'Sx' },
-  { value: 1e18, symbol: 'Qi' },
-  { value: 1e15, symbol: 'Q' },
-  { value: 1e12, symbol: 'T' },
-  { value: 1e9, symbol: 'B' },
-  { value: 1e6, symbol: 'M' },
-  { value: 1e3, symbol: 'K' }
-];
 
 const getOrdinalSuffix = (day: number) => {
   if (day > 3 && day < 21) return 'th';
@@ -323,19 +265,6 @@ export const groupByTypeLast30Days = <T extends ResponseDataType>(
 };
 
 // TotalTresuaryValue and CompoundCumulativeRevenue helpers
-export interface ChartDataItem {
-  date: number;
-  value: number;
-  source: Record<string, any>;
-}
-
-export interface FilterOptionsConfig {
-  [key: string]: {
-    path: string;
-    labelFormatter?: (value: string) => string;
-  };
-}
-
 export const getValueByPath = (obj: any, path: string): any => {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 };

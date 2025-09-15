@@ -2,28 +2,24 @@ import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
 import CryptoChart from '@/components/Charts/Bar/Bar';
-import Filter from '@/components/Filter/Filter';
-import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import { TreasuryBalanceByNetworkType } from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
 import CurrentSpendingByChainTable from '@/entities/Insentive/CurrentSpendingByChainTable/CurrentSpendingByChainTable';
-import { useModal } from '@/shared/hooks/useModal';
+import { TreasuryBalanceByNetworkType } from '@/entities/Treasury';
+import { useModal } from '@/shared/hooks';
 import {
   capitalizeFirstLetter,
   colorPicker,
   extractFilterOptions
 } from '@/shared/lib/utils/utils';
-import { TokenData } from '@/shared/types/Treasury/types';
-import { OptionType } from '@/shared/types/types';
-import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
-import Button from '@/shared/ui/Button/Button';
-import Card from '@/shared/ui/Card/Card';
-import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
-import Drawer from '@/shared/ui/Drawer/Drawer';
-import Icon from '@/shared/ui/Icon/Icon';
-import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
-import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
+import { OptionType, TokenData } from '@/shared/types/types';
+import { Button, Icon, Text, View } from '@/shared/ui/atoms';
+import {
+  Card,
+  Drawer,
+  NoDataPlaceholder,
+  TabsGroup
+} from '@/shared/ui/molecules';
+import { CSVDownloadButton, Filter, SortDrawer } from '@/shared/ui/organisms';
+import { MultiSelect } from '@/shared/ui/organisms/MultiSelect/MultiSelect';
 
 interface CurrentSpendingByChainBlockProps {
   isLoading?: boolean;
@@ -311,7 +307,7 @@ const CurrentSpendingByChainBlock = ({
       isLoading={isLoading}
       isError={isError}
       title='Current spending by chain'
-      id='current-spending-by-chain'
+      id='Current spending by chain'
       className={{
         loading: 'min-h-[inherit]',
         container:

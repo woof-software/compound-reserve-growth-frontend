@@ -7,14 +7,14 @@ import {
   routeTitles,
   VALID_NAVIGATION_ROUTES
 } from '@/app/providers/router/config';
-import { cn } from '@/shared/lib/classNames/classNames';
-import Each from '@/shared/ui/Each/Each';
-import Icon from '@/shared/ui/Icon/Icon';
-import Link from '@/shared/ui/Link/Link';
-import NavLink from '@/shared/ui/NavLink/NavLink';
-import Portal from '@/shared/ui/Portal/Portal';
-import Text from '@/shared/ui/Text/Text';
-import { Tooltip } from '@/shared/ui/Tooltip/Tooltip';
+import { cn } from '@/shared/lib/classNames';
+import Each from '@/shared/ui/atoms/Each/Each';
+import Icon from '@/shared/ui/atoms/Icon/Icon';
+import Link from '@/shared/ui/atoms/Link/Link';
+import NavLink from '@/shared/ui/atoms/NavLink/NavLink';
+import Portal from '@/shared/ui/atoms/Portal/Portal';
+import Text from '@/shared/ui/atoms/Text/Text';
+import { Tooltip } from '@/shared/ui/molecules/Tooltip/Tooltip';
 
 type NavLinkProps = {
   to: commonRoutes;
@@ -243,4 +243,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export { Header };

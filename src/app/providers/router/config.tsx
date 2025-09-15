@@ -3,9 +3,9 @@ import { JSX } from 'react';
 import CapoPage from '@/pages/CapoPage/CapoPage';
 import InsentivePage from '@/pages/InsentivePage/InsentivePage';
 import OEVPage from '@/pages/OEVPage/OEVPage';
-import RevenuePage from '@/pages/RevenuePage/RevenuePage';
-import RunwayPage from '@/pages/RunwayPage/RunwayPage';
-import TreasuryPage from '@/pages/TreasuryPage/TreasuryPage';
+import { RevenuePage } from '@/pages/RevenuePage';
+import { RunwayPage } from '@/pages/RunwayPage';
+import { TreasuryPage } from '@/pages/TreasuryPage';
 
 export interface RouteConfig {
   path: string;

@@ -1,9 +1,7 @@
 import * as React from 'react';
 import { useMemo } from 'react';
 
-import HoverCard from '@/components/HoverCard/HoverCard';
-import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
-import { cn } from '@/shared/lib/classNames/classNames';
+import { cn } from '@/shared/lib/classNames';
 import {
   defaultExplorer,
   explorers,
@@ -13,10 +11,14 @@ import {
   formatQuantity,
   sliceAddress
 } from '@/shared/lib/utils/utils';
-import { ClipboardButton } from '@/shared/ui/AnimationProvider/CopyButton/CopyButton';
-import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
-import Icon from '@/shared/ui/Icon/Icon';
-import Text from '@/shared/ui/Text/Text';
+import HoverCard from '@/shared/ui/atoms/HoverCard/HoverCard';
+import Icon from '@/shared/ui/atoms/Icon/Icon';
+import Text from '@/shared/ui/atoms/Text/Text';
+import { ClipboardButton } from '@/shared/ui/molecules/CopyButton/CopyButton';
+import DataTable, {
+  ExtendedColumnDef
+} from '@/shared/ui/molecules/DataTable/DataTable';
+import { MobileDataTable } from '@/shared/ui/molecules/MobileDataTable/MobileDataTable';
 
 export type TreasuryBalanceByNetworkType = {
   symbol: string;

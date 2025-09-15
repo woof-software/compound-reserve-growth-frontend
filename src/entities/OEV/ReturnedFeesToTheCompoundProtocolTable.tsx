@@ -1,12 +1,11 @@
 import * as React from 'react';
 import { useMemo } from 'react';
 
-import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
-import { cn } from '@/shared/lib/classNames/classNames';
-import { defaultExplorer, explorers } from '@/shared/lib/utils/utils';
-import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
-import Icon from '@/shared/ui/Icon/Icon';
-import Text from '@/shared/ui/Text/Text';
+import { defaultExplorer, explorers } from '@/shared/consts';
+import { cn } from '@/shared/lib/classNames';
+import { Icon, Text } from '@/shared/ui/atoms';
+import { DataTable, ExtendedColumnDef } from '@/shared/ui/molecules';
+import { MobileDataTable } from '@/shared/ui/molecules/MobileDataTable/MobileDataTable';
 
 export type TreasuryBalanceByNetworkType = {
   symbol: string;

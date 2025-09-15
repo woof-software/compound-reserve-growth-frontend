@@ -1,0 +1,248 @@
+import React, { useMemo } from 'react';
+
+import {
+  CompoundFeeRevenueByChainTableProps,
+  ProcessedRevenueData
+} from '@/entities/Revenue';
+import { cn } from '@/shared/lib/classNames';
+import {
+  capitalizeFirstLetter,
+  formatCurrencyValue,
+  formatNumber
+} from '@/shared/lib/utils/utils';
+import { Icon, Text, View } from '@/shared/ui/atoms';
+import { DataTable, MobileDataTable } from '@/shared/ui/molecules';
+
+const CompoundFeeRevenueByChainTable = ({
+  data,
+  columns,
+  totals,
+  selectedInterval,
+  sortType
+}: CompoundFeeRevenueByChainTableProps) => {
+  const footerRow = useMemo(
+    () => (
+      <tr key='footer-total-row'>
+        <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
+          Total
+        </td>
+        {columns.slice(1).map((col) => {
+          const columnKey =
+            'accessorKey' in col ? String(col.accessorKey) : col.id;
+          if (!columnKey) {
+            return null;
+          }
+
+          const totalValue = totals[columnKey];
+
+          if (typeof totalValue !== 'number' || isNaN(totalValue)) {
+            return (
+              <td
+                key={columnKey}
+                className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'
+              >
+                -
+              </td>
+            );
+          }
+
+          const formattedValue =
+            totalValue < 0
+              ? `-${formatNumber(Math.abs(totalValue))}`
+              : formatNumber(totalValue);
+
+          return (
+            <td
+              key={columnKey}
+              className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'
+            >
+              {formattedValue}
+            </td>
+          );
+        })}
+      </tr>
+    ),
+    [columns, totals]
+  );
+
+  const mobileTableData = useMemo(() => {
+    if (!sortType?.key) {
+      return data;
+    }
+
+    const key = sortType.key as keyof ProcessedRevenueData;
+    return [...data].sort((a, b) => {
+      const aVal = a[key];
+      const bVal = b[key];
+
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortType.type === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortType.type === 'asc'
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+
+      return 0;
+    });
+  }, [data, sortType]);
+
+  return (
+    <>
+      <MobileDataTable tableData={mobileTableData}>
+        {(dataRows) => (
+          <>
+            {dataRows.map((rowObj, rowIndex) => (
+              <div
+                key={rowObj.chain + rowIndex}
+                className={cn(
+                  'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                  {
+                    'justify-between': selectedInterval === 'Weekly'
+                  }
+                )}
+              >
+                {Object.entries(rowObj).map(([key, value], colIndex) => {
+                  return (
+                    <div
+                      key={colIndex}
+                      className='grid w-full max-w-[100px]'
+                    >
+                      <Text
+                        size='13'
+                        lineHeight='18'
+                        weight='500'
+                        className='text-primary-14'
+                      >
+                        {capitalizeFirstLetter(key)}
+                      </Text>
+                      <div className='flex items-center gap-2'>
+                        <View.Condition if={Boolean(key === 'chain')}>
+                          <Icon
+                            name={
+                              value.toString().toLowerCase() || 'not-found-icon'
+                            }
+                            className='h-4 w-4'
+                            folder='network'
+                          />
+                        </View.Condition>
+                        <Text
+                          size='13'
+                          lineHeight='21'
+                          className='truncate'
+                        >
+                          {key === 'chain'
+                            ? value
+                            : formatCurrencyValue(value || 0)}
+                        </Text>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+            <div
+              className={cn(
+                'grid grid-cols-3 gap-x-10 gap-y-3 p-5 md:gap-x-[63px] md:px-10',
+                {
+                  'justify-between': selectedInterval === 'Weekly'
+                }
+              )}
+            >
+              <div className='grid min-h-[39px] w-full max-w-[100px]'>
+                <Text
+                  size='13'
+                  lineHeight='18'
+                  weight='500'
+                  className='text-primary-14'
+                >
+                  Total
+                </Text>
+              </div>
+              {columns.slice(1).map((col) => {
+                const columnKey =
+                  'accessorKey' in col ? String(col.accessorKey) : col.id;
+
+                if (!columnKey) {
+                  return null;
+                }
+
+                const totalValue = totals[columnKey];
+
+                if (typeof totalValue !== 'number' || isNaN(totalValue)) {
+                  return (
+                    <div
+                      key={columnKey}
+                      className='grid min-h-[39px] w-full max-w-[100px]'
+                    >
+                      <Text
+                        size='13'
+                        lineHeight='18'
+                        weight='500'
+                        className='text-primary-14'
+                      >
+                        {columnKey}
+                      </Text>
+                      <Text
+                        size='13'
+                        lineHeight='21'
+                        weight='500'
+                      >
+                        -
+                      </Text>
+                    </div>
+                  );
+                }
+
+                const formattedValue =
+                  totalValue < 0
+                    ? `-${formatNumber(Math.abs(totalValue))}`
+                    : formatNumber(totalValue);
+
+                return (
+                  <div
+                    key={columnKey}
+                    className='grid min-h-[39px] w-full max-w-[100px]'
+                  >
+                    <Text
+                      size='13'
+                      lineHeight='18'
+                      weight='500'
+                      className='text-primary-14'
+                    >
+                      {columnKey}
+                    </Text>
+                    <Text
+                      size='13'
+                      lineHeight='18'
+                      weight='500'
+                    >
+                      {formattedValue}
+                    </Text>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </MobileDataTable>
+      <div className='hidden w-full max-w-full lg:block'>
+        <DataTable
+          data={data}
+          columns={columns}
+          pageSize={10}
+          enableSorting
+          footerContent={columns.length > 0 ? footerRow : null}
+          className='flex min-h-[565px] flex-col justify-between'
+          headerCellClassName='py-[13px] px-[5px]'
+          cellClassName='py-3 px-[5px]'
+          headerTextClassName='text-primary-14 font-medium'
+        />
+      </div>
+    </>
+  );
+};
+
+export { CompoundFeeRevenueByChainTable };

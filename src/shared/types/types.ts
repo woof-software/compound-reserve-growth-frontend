@@ -1,4 +1,39 @@
-import { Source } from '@/shared/types/Treasury/types';
+export interface TokenData {
+  id: number;
+  quantity: string;
+  price: number;
+  value: number;
+  date: number;
+  source: Source;
+}
+
+export interface Source {
+  id: number;
+  address: string;
+  network: string;
+  market: string | null;
+  type: string;
+  asset: Asset;
+}
+
+export interface Asset {
+  id: number;
+  address: string;
+  decimals: number;
+  symbol: string;
+  network: string;
+  type: string;
+}
+
+interface LineDataItem {
+  x: number;
+  y: number;
+}
+
+export interface LineChartSeries {
+  name: string;
+  data: LineDataItem[];
+}
 
 export type FilterItem = {
   id: string;
@@ -47,4 +82,17 @@ export enum SourceType {
   AVANTGARDE_TREASURY_GROWTH_PROPOSAL = 'Avantgarde Treasury Growth Proposal',
   AERA_COMPOUND_RESERVES = 'Aera Compound Reserves',
   AERA_VENDORS_VAULT = 'Aera Vendors Vault'
+}
+
+export interface ChartDataItem {
+  date: number;
+  value: number;
+  source: Record<string, any>;
+}
+
+export interface FilterOptionsConfig {
+  [key: string]: {
+    path: string;
+    labelFormatter?: (value: string) => string;
+  };
 }

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-export type BarSize = 'D' | 'W' | 'M';
+import { BarSize } from '@/shared/types';
 
 const VALID_BAR_SIZES: BarSize[] = ['D', 'W', 'M'];
 

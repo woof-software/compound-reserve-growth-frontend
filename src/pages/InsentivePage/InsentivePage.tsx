@@ -4,17 +4,17 @@ import DailyExpenses from '@/entities/Insentive/DailyExpenses';
 import FeesGeneratedVsIncentives from '@/entities/Insentive/FeesGeneratedVsIncentives';
 import HistoricalExpensesByNetworks from '@/entities/Insentive/HistoricalExpensesByNetworks';
 import MetricBlock from '@/entities/Insentive/MetricBlock';
+import { useTreasuryHistory } from '@/entities/Treasury';
 import CurrentSpendingByChainBlock from '@/features/Insentive/CurrentSpendingByChain';
-import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
-import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
+import { useScrollToHash } from '@/shared/hooks';
 import {
   groupByKey,
   pick30DaysOldRecords,
   uniqByNestedAddresses
 } from '@/shared/lib/utils/utils';
-import { TokenData } from '@/shared/types/Treasury/types';
-import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import Text from '@/shared/ui/Text/Text';
+import { TokenData } from '@/shared/types';
+import { Text } from '@/shared/ui/atoms';
+import { TabsGroup } from '@/shared/ui/molecules';
 
 const InsentivePage = () => {
   const {

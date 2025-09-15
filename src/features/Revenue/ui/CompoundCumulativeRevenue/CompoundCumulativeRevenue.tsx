@@ -1,0 +1,328 @@
+import React, { useCallback, useMemo, useReducer } from 'react';
+
+import {
+  CompoundCumulativeRevenueFilter,
+  CompoundCumulativeRevenueLineChart,
+  CompoundCumulativeRevenueProps
+} from '@/entities/Revenue';
+import {
+  useChartControls,
+  useChartDataProcessor,
+  useCSVExport,
+  useLineChart
+} from '@/shared/hooks';
+import { extractFilterOptions } from '@/shared/lib/utils';
+import { ChartDataItem, OptionType } from '@/shared/types/types';
+import { Card, NoDataPlaceholder } from '@/shared/ui/molecules';
+
+const CompoundCumulativeRevenue = ({
+  revenueData,
+  isLoading,
+  isError
+}: CompoundCumulativeRevenueProps) => {
+  const [selectedOptions, setSelectedOptions] = useReducer(
+    (prev, next) => ({
+      ...prev,
+      ...next
+    }),
+    {
+      chain: [] as OptionType[],
+      assetType: [] as OptionType[],
+      deployment: [] as OptionType[],
+      symbol: [] as OptionType[]
+    }
+  );
+
+  const { barSize, onBarSizeChange } = useChartControls({
+    initialBarSize: 'D'
+  });
+
+  const rawData: ChartDataItem[] = useMemo(() => {
+    return [...revenueData].sort((a, b) => a.date - b.date);
+  }, [revenueData]);
+
+  const filterOptionsConfig = useMemo(
+    () => ({
+      chain: { path: 'source.network' },
+      deployment: { path: 'source.market' },
+      symbol: { path: 'source.asset.symbol' },
+      assetType: { path: 'source.asset.type' }
+    }),
+    []
+  );
+
+  const { chainOptions, deploymentOptions, symbolOptions, assetTypeOptions } =
+    useMemo(
+      () => extractFilterOptions(rawData, filterOptionsConfig),
+      [rawData, filterOptionsConfig]
+    );
+
+  const deploymentOptionsFilter = useMemo(() => {
+    const marketV2 =
+      deploymentOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
+
+    const marketV3 =
+      deploymentOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
+
+    const noMarkets = deploymentOptions?.find(
+      (el) => el.id.toLowerCase() === 'no name'
+    );
+
+    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
+
+    let allMarkets = [...marketV3, ...marketV2];
+
+    if (noMarkets) {
+      allMarkets = [...allMarkets, noMarkets];
+    }
+
+    if (selectedChainIds.length) {
+      return allMarkets.filter(
+        (el) => el.chain?.some((c) => selectedChainIds.includes(c)) ?? false
+      );
+    }
+
+    return allMarkets;
+  }, [deploymentOptions, selectedOptions]);
+
+  const groupBy = useMemo(() => {
+    if (selectedOptions.deployment.length > 0) return 'market';
+    if (selectedOptions.chain.length > 0) return 'network';
+    return 'none';
+  }, [selectedOptions]);
+
+  const { chartSeries } = useChartDataProcessor({
+    rawData,
+    filters: {
+      network: selectedOptions.chain.map((opt) => opt.id),
+      market: selectedOptions.deployment.map((opt) => opt.id),
+      symbol: selectedOptions.symbol.map((opt) => opt.id),
+      assetType: selectedOptions.assetType.map((opt) => opt.id)
+    },
+    filterPaths: {
+      network: 'source.network',
+      market: 'source.market',
+      symbol: 'source.asset.symbol',
+      assetType: 'source.asset.type'
+    },
+    groupBy,
+    groupByKeyPath: groupBy === 'none' ? null : `source.${groupBy}`,
+    defaultSeriesName: 'Daily Revenue'
+  });
+
+  const cumulativeChartSeries = useMemo(() => {
+    if (!chartSeries || chartSeries.length === 0) {
+      return [];
+    }
+
+    return chartSeries.map((series) => {
+      if (!series.data || series.data.length === 0) {
+        return { ...series, data: [] };
+      }
+
+      const dailyTotals = new Map<number, number>();
+      for (const point of series.data) {
+        const date = new Date(point.x);
+        date.setUTCHours(0, 0, 0, 0);
+        const dayStartTimestamp = date.getTime();
+        const currentTotal = dailyTotals.get(dayStartTimestamp) || 0;
+        const valueToAdd = point.y < 0 ? 0 : point.y;
+        dailyTotals.set(dayStartTimestamp, currentTotal + valueToAdd);
+      }
+
+      const sortedDailyPoints = Array.from(dailyTotals.entries())
+        .map(([x, y]) => ({ x, y }))
+        .sort((a, b) => a.x - b.x);
+
+      if (sortedDailyPoints.length === 0) {
+        return { ...series, data: [] };
+      }
+
+      const cumulativeData: { x: number; y: number }[] = [];
+      const minDate = sortedDailyPoints[0].x;
+      const maxDate = sortedDailyPoints[sortedDailyPoints.length - 1].x;
+      const oneDay = 24 * 60 * 60 * 1000;
+
+      let cumulativeSum = 0;
+      let dataIndex = 0;
+
+      for (let d = minDate; d <= maxDate; d += oneDay) {
+        if (
+          dataIndex < sortedDailyPoints.length &&
+          sortedDailyPoints[dataIndex].x === d
+        ) {
+          cumulativeSum += sortedDailyPoints[dataIndex].y;
+          dataIndex++;
+        }
+        cumulativeData.push({ x: d, y: cumulativeSum });
+      }
+
+      return {
+        ...series,
+        name: series.name.replace('Daily', 'Cumulative'),
+        data: cumulativeData
+      };
+    });
+  }, [chartSeries]);
+
+  const { csvData, csvFilename } = useCSVExport({
+    chartSeries: cumulativeChartSeries,
+    barSize,
+    groupBy,
+    filePrefix: 'Compound_Cumulative_Revenue',
+    aggregationType: 'last'
+  });
+
+  const {
+    chartRef,
+    eventsData,
+    showEvents,
+    isLegendEnabled,
+    aggregatedSeries,
+    areAllSeriesHidden,
+    onAllSeriesHidden,
+    onEventsData,
+    onShowEvents,
+    onSelectAll,
+    onDeselectAll
+  } = useLineChart({
+    groupBy,
+    data: cumulativeChartSeries,
+    barSize
+  });
+
+  const hasData = useMemo(() => {
+    return (
+      cumulativeChartSeries.length > 0 &&
+      cumulativeChartSeries.some((s) => s.data.length > 0)
+    );
+  }, [cumulativeChartSeries]);
+
+  const noDataMessage =
+    selectedOptions.chain.length > 0 ||
+    selectedOptions.deployment.length > 0 ||
+    selectedOptions.symbol.length > 0 ||
+    selectedOptions.assetType.length > 0
+      ? 'No data for selected filters'
+      : 'No data available';
+
+  const getGroupByForChart = () => {
+    if (groupBy === 'none') {
+      return 'none';
+    }
+    return groupBy === 'market' ? 'Market' : 'Chain';
+  };
+
+  const onSelectChain = useCallback(
+    (chain: OptionType[]) => {
+      const selectedChainIds = chain.map((o) => o.id);
+
+      const filteredDeployment = selectedOptions.deployment.filter((el) =>
+        selectedChainIds.length === 0
+          ? true
+          : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
+      );
+
+      setSelectedOptions({
+        chain,
+        deploymentOptions: filteredDeployment
+      });
+    },
+    [selectedOptions]
+  );
+
+  const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedOptions({
+      assetType: selectedOptions
+    });
+  }, []);
+
+  const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedOptions({
+      deployment: selectedOptions
+    });
+  }, []);
+
+  const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedOptions({
+      symbol: selectedOptions
+    });
+  }, []);
+
+  const onClearSelectedOptions = useCallback(() => {
+    setSelectedOptions({
+      chain: [],
+      assetType: [],
+      deployment: [],
+      symbol: []
+    });
+  }, []);
+
+  return (
+    <Card
+      title='Compound Cumulative Revenue'
+      id='Compound Cumulative Revenue'
+      isLoading={isLoading}
+      isError={isError}
+      className={{
+        loading: 'min-h-[inherit]',
+        container: 'border-background min-h-[550px] border',
+        content: 'flex flex-col gap-3 p-0 pb-5 md:px-5 lg:px-10 lg:pb-10'
+      }}
+    >
+      <CompoundCumulativeRevenueFilter
+        barSize={barSize}
+        csvData={csvData}
+        areAllSeriesHidden={areAllSeriesHidden}
+        isShowEyeIcon={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
+        showEvents={showEvents}
+        csvFilename={csvFilename}
+        chainOptions={chainOptions}
+        selectedOptions={selectedOptions}
+        isShowCalendarIcon={Boolean(eventsData.length > 0)}
+        deploymentOptionsFilter={deploymentOptionsFilter}
+        assetTypeOptions={assetTypeOptions}
+        symbolOptions={symbolOptions}
+        isLoading={isLoading}
+        onSelectChain={onSelectChain}
+        onSelectAssetType={onSelectAssetType}
+        onSelectMarket={onSelectMarket}
+        onSelectSymbol={onSelectSymbol}
+        onBarSizeChange={onBarSizeChange}
+        onClearAll={onClearSelectedOptions}
+        onShowEvents={onShowEvents}
+        onSelectAll={onSelectAll}
+        onDeselectAll={onDeselectAll}
+      />
+      {!isLoading && !isError && !hasData ? (
+        <NoDataPlaceholder
+          onButtonClick={onClearSelectedOptions}
+          text={noDataMessage}
+        />
+      ) : (
+        <CompoundCumulativeRevenueLineChart
+          className='max-h-fit'
+          data={cumulativeChartSeries}
+          groupBy={getGroupByForChart()}
+          chartRef={chartRef}
+          aggregatedSeries={aggregatedSeries}
+          isLegendEnabled={isLegendEnabled}
+          eventsData={eventsData}
+          showEvents={showEvents}
+          areAllSeriesHidden={areAllSeriesHidden}
+          onAllSeriesHidden={onAllSeriesHidden}
+          onSelectAll={onSelectAll}
+          onDeselectAll={onDeselectAll}
+          onShowEvents={onShowEvents}
+          onEventsData={onEventsData}
+        />
+      )}
+    </Card>
+  );
+};
+
+export { CompoundCumulativeRevenue };

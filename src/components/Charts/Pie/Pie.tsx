@@ -9,13 +9,9 @@ import React, {
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-import { cn } from '@/shared/lib/classNames/classNames';
+import { cn } from '@/shared/lib/classNames';
 import { colorPicker } from '@/shared/lib/utils/utils';
-import Button from '@/shared/ui/Button/Button';
-import Each from '@/shared/ui/Each/Each';
-import Icon from '@/shared/ui/Icon/Icon';
-import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
+import { Button, Each, Icon, Text, View } from '@/shared/ui/atoms';
 
 interface PieDataItem {
   name: string;

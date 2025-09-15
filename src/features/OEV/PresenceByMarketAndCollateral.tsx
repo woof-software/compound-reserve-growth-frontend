@@ -1,27 +1,23 @@
 import { FC, useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
-import Filter from '@/components/Filter/Filter';
-import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import PresenceByMarketAndCollateralTable, {
   TreasuryBalanceByNetworkType
 } from '@/entities/OEV/PresenceByMarketAndCollateralTable';
-import { useModal } from '@/shared/hooks/useModal';
+import { useModal } from '@/shared/hooks';
 import {
   capitalizeFirstLetter,
   extractFilterOptions
 } from '@/shared/lib/utils/utils';
-import { TokenData } from '@/shared/types/Treasury/types';
-import { OptionType } from '@/shared/types/types';
-import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
-import Button from '@/shared/ui/Button/Button';
-import Card from '@/shared/ui/Card/Card';
-import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
-import Drawer from '@/shared/ui/Drawer/Drawer';
-import Icon from '@/shared/ui/Icon/Icon';
-import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
-import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
+import { OptionType, TokenData } from '@/shared/types';
+import { Button, Icon, Text, View } from '@/shared/ui/atoms';
+import { Card, Drawer, NoDataPlaceholder } from '@/shared/ui/molecules';
+import {
+  CSVDownloadButton,
+  Filter,
+  MultiSelect,
+  SortDrawer
+} from '@/shared/ui/organisms';
 
 interface CurrentSpendingByChainProps {
   isLoading?: boolean;
@@ -301,7 +297,7 @@ const PresenceByMarketAndCollateral: FC<CurrentSpendingByChainProps> = ({
       isLoading={isLoading}
       isError={isError}
       title='OEV presence by market and collateral'
-      id='oev-presence-by-market-and-collateral'
+      id='OEV presence by market and collateral'
       className={{
         loading: 'min-h-[inherit]',
         container:

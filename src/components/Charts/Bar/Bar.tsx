@@ -2,9 +2,7 @@ import React, { FC, useEffect, useMemo, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-import Button from '@/shared/ui/Button/Button';
-import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
+import { Button, Text, View } from '@/shared/ui/atoms';
 
 interface ChartData {
   name: string;

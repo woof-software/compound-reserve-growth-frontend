@@ -10,15 +10,11 @@ import React, {
 import Highcharts, { SeriesAreaOptions } from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
-import { EventDataItem } from '@/shared/hooks/useLineChart';
-import { cn } from '@/shared/lib/classNames/classNames';
+import { EventDataItem } from '@/shared/hooks';
+import { cn } from '@/shared/lib/classNames';
 import { formatValue } from '@/shared/lib/utils/utils';
-import Button from '@/shared/ui/Button/Button';
-import Each from '@/shared/ui/Each/Each';
-import Icon from '@/shared/ui/Icon/Icon';
-import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
+import { Button, Each, Icon, Text, View } from '@/shared/ui/atoms';
+import { ChartIconToggle } from '@/shared/ui/molecules';
 
 import 'highcharts/modules/stock';
 import 'highcharts/modules/mouse-wheel-zoom';

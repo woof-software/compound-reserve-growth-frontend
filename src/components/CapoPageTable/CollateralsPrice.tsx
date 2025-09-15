@@ -1,20 +1,20 @@
 import * as React from 'react';
 import { useMemo } from 'react';
 
-import HoverCard from '@/components/HoverCard/HoverCard';
-import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
-import { cn } from '@/shared/lib/classNames/classNames';
+import { defaultExplorer, explorers } from '@/shared/consts';
+import { cn } from '@/shared/lib/classNames';
 import {
-  defaultExplorer,
-  explorers,
   formatLargeNumber,
   formatPrice,
   sliceAddress
-} from '@/shared/lib/utils/utils';
-import { ClipboardButton } from '@/shared/ui/AnimationProvider/CopyButton/CopyButton';
-import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
-import Icon from '@/shared/ui/Icon/Icon';
-import Text from '@/shared/ui/Text/Text';
+} from '@/shared/lib/utils';
+import { HoverCard, Icon, Text } from '@/shared/ui/atoms';
+import {
+  ClipboardButton,
+  DataTable,
+  ExtendedColumnDef,
+  MobileDataTable
+} from '@/shared/ui/molecules';
 
 export type TreasuryBalanceByNetworkType = {
   symbol: string;

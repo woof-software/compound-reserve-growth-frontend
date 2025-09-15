@@ -1,18 +1,18 @@
 import React, { useMemo } from 'react';
 
 import MetricBlock from '@/entities/OEV/MetricBlock';
+import { useTreasuryHistory } from '@/entities/Treasury';
 import CapturedFeesByNetworkAndMarket from '@/features/OEV/CapturedFeesByNetworkAndMarket';
 import PresenceByMarketAndCollateral from '@/features/OEV/PresenceByMarketAndCollateral';
 import ReturnedFeesToTheCompoundProtocol from '@/features/OEV/ReturnedFeesToTheCompoundProtocol';
-import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
-import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
+import { useScrollToHash } from '@/shared/hooks';
 import {
   groupByKey,
   pick30DaysOldRecords,
   uniqByNestedAddresses
 } from '@/shared/lib/utils/utils';
-import { TokenData } from '@/shared/types/Treasury/types';
-import Text from '@/shared/ui/Text/Text';
+import { TokenData } from '@/shared/types';
+import { Text } from '@/shared/ui/atoms';
 
 const OEVPage = () => {
   const {

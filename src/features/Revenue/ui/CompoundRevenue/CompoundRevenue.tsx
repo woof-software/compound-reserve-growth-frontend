@@ -1,0 +1,269 @@
+import React, { useCallback, useMemo, useReducer } from 'react';
+
+import {
+  CompoundRevenueBlockProps,
+  CompoundRevenueChart,
+  CompoundRevenueFilters,
+  createIdSet,
+  preprocessData
+} from '@/entities/Revenue';
+import { useChartControls, useCSVExport } from '@/shared/hooks';
+import { OptionType } from '@/shared/types/types';
+import { View } from '@/shared/ui/atoms';
+import { Card, NoDataPlaceholder } from '@/shared/ui/molecules';
+
+const CompoundRevenueBlock = ({
+  revenueData: data,
+  isLoading,
+  isError
+}: CompoundRevenueBlockProps) => {
+  const [selectedOptions, setSelectedOptions] = useReducer(
+    (prev, next) => ({
+      ...prev,
+      ...next
+    }),
+    {
+      chain: [] as OptionType[],
+      source: [] as OptionType[],
+      deployment: [] as OptionType[],
+      symbol: [] as OptionType[]
+    }
+  );
+
+  const { barSize, onBarSizeChange } = useChartControls({
+    initialBarSize: 'D'
+  });
+
+  const { filterOptions, processedItems, initialAggregatedData, sortedDates } =
+    useMemo(() => preprocessData(data || []), [data]);
+
+  const { chainOptions, marketOptions, sourceOptions, symbolOptions } =
+    filterOptions;
+
+  const deploymentOptionsFilter = useMemo(() => {
+    const marketV2 =
+      marketOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
+
+    const marketV3 =
+      marketOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
+
+    const noMarkets = marketOptions?.find(
+      (el) => el.id.toLowerCase() === 'no name'
+    );
+
+    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
+
+    let allMarkets = [...marketV3, ...marketV2];
+
+    if (noMarkets) {
+      allMarkets = [...allMarkets, noMarkets];
+    }
+
+    if (selectedChainIds.length) {
+      return allMarkets.filter((el) =>
+        Array.isArray(el.chain)
+          ? el.chain.some((c) => selectedChainIds.includes(c))
+          : false
+      );
+    }
+
+    return allMarkets;
+  }, [marketOptions, selectedOptions]);
+
+  const processedChartData = useMemo(() => {
+    const hasActiveFilters =
+      selectedOptions.chain.length > 0 ||
+      selectedOptions.deployment.length > 0 ||
+      selectedOptions.source.length > 0 ||
+      selectedOptions.symbol.length > 0;
+
+    if (!hasActiveFilters) {
+      return initialAggregatedData;
+    }
+
+    const activeFiltersById = {
+      chain: createIdSet(selectedOptions.chain),
+      market: createIdSet(selectedOptions.deployment),
+      source: createIdSet(selectedOptions.source),
+      symbol: createIdSet(selectedOptions.symbol)
+    };
+
+    const dailyTotals: Record<string, number> = {};
+
+    for (const item of processedItems) {
+      if (
+        activeFiltersById.chain.size > 0 &&
+        !activeFiltersById.chain.has(item.chain)
+      )
+        continue;
+      if (
+        activeFiltersById.market.size > 0 &&
+        !activeFiltersById.market.has(item.market)
+      )
+        continue;
+      if (
+        activeFiltersById.source.size > 0 &&
+        !activeFiltersById.source.has(item.source)
+      )
+        continue;
+      if (
+        activeFiltersById.symbol.size > 0 &&
+        !activeFiltersById.symbol.has(item.symbol)
+      )
+        continue;
+
+      dailyTotals[item.date] = (dailyTotals[item.date] || 0) + item.value;
+    }
+
+    const result: { date: string; value: number }[] = [];
+    for (const date of sortedDates) {
+      if (dailyTotals[date] !== undefined) {
+        result.push({ date, value: dailyTotals[date] });
+      }
+    }
+    return result;
+  }, [processedItems, initialAggregatedData, sortedDates, selectedOptions]);
+
+  const chartSeriesForCSV = useMemo(() => {
+    if (!processedChartData || processedChartData.length === 0) return [];
+
+    return [
+      {
+        name: 'Revenue',
+        data: processedChartData.map((item) => ({
+          x: new Date(item.date).getTime(),
+          y: item.value
+        }))
+      }
+    ];
+  }, [processedChartData]);
+
+  const groupBy = useMemo(() => {
+    const hasFilters =
+      selectedOptions.chain.length > 0 ||
+      selectedOptions.deployment.length > 0 ||
+      selectedOptions.source.length > 0 ||
+      selectedOptions.symbol.length > 0;
+    return hasFilters ? 'Filtered' : 'Total';
+  }, [selectedOptions]);
+
+  const { csvData, csvFilename } = useCSVExport({
+    chartSeries: chartSeriesForCSV,
+    barSize,
+    groupBy,
+    filePrefix: 'Compound_Revenue',
+    aggregationType: 'sum'
+  });
+
+  const hasData = useMemo(
+    () => processedChartData.length > 0,
+    [processedChartData]
+  );
+
+  const noDataMessage = useMemo(
+    () =>
+      selectedOptions.chain.length > 0 ||
+      selectedOptions.deployment.length > 0 ||
+      selectedOptions.source.length > 0 ||
+      selectedOptions.symbol.length > 0
+        ? 'No data for selected filters'
+        : 'No data available',
+    [selectedOptions]
+  );
+  const onSelectChain = useCallback(
+    (chain: OptionType[]) => {
+      const selectedChainIds = chain.map((o) => o.id);
+
+      const filteredDeployment = selectedOptions.deployment.filter((el) =>
+        selectedChainIds.length === 0
+          ? true
+          : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
+      );
+
+      setSelectedOptions({
+        chain,
+        deployment: filteredDeployment
+      });
+    },
+    [selectedOptions]
+  );
+
+  const onSelectSource = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedOptions({
+      source: selectedOptions
+    });
+  }, []);
+
+  const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedOptions({
+      deployment: selectedOptions
+    });
+  }, []);
+
+  const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
+    setSelectedOptions({
+      symbol: selectedOptions
+    });
+  }, []);
+
+  const onClearSelectedOptions = useCallback(() => {
+    setSelectedOptions({
+      chain: [],
+      assetType: [],
+      deployment: [],
+      symbol: []
+    });
+  }, []);
+
+  return (
+    <Card
+      title='Compound Revenue'
+      id='Compound Revenue'
+      isLoading={isLoading}
+      isError={isError}
+      className={{
+        loading: 'min-h-[inherit]',
+        container: 'border-background min-h-[567px] border',
+        content: 'flex flex-col gap-3 p-0 px-0 pb-5 md:px-5 lg:pb-10'
+      }}
+    >
+      <CompoundRevenueFilters
+        barSize={barSize}
+        csvData={csvData}
+        csvFilename={csvFilename}
+        chainOptions={chainOptions}
+        selectedOptions={selectedOptions}
+        deploymentOptionsFilter={deploymentOptionsFilter}
+        sourceOptions={sourceOptions}
+        symbolOptions={symbolOptions}
+        isLoading={isLoading}
+        onSelectChain={onSelectChain}
+        onSelectSource={onSelectSource}
+        onSelectMarket={onSelectMarket}
+        onSelectSymbol={onSelectSymbol}
+        onBarSizeChange={onBarSizeChange}
+        onClearAll={onClearSelectedOptions}
+      />
+      <View.Condition if={!isLoading && !isError && hasData}>
+        <div className='h-[400px]'>
+          <CompoundRevenueChart
+            data={processedChartData}
+            barSize={barSize}
+          />
+        </div>
+      </View.Condition>
+      <View.Condition if={!isLoading && !isError && !hasData}>
+        <NoDataPlaceholder
+          onButtonClick={onClearSelectedOptions}
+          text={noDataMessage}
+        />
+      </View.Condition>
+    </Card>
+  );
+};
+
+export { CompoundRevenueBlock };

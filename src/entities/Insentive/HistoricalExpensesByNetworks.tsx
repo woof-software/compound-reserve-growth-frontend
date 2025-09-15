@@ -1,22 +1,22 @@
 import React, { memo, useMemo } from 'react';
 import { CSVLink } from 'react-csv';
 
-import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import LineChart from '@/components/Charts/Line/Line';
-import { useChartControls } from '@/shared/hooks/useChartControls';
-import { useCSVExport } from '@/shared/hooks/useCSVExport';
-import { useLineChart } from '@/shared/hooks/useLineChart';
-import { useModal } from '@/shared/hooks/useModal';
-import { ChartDataItem } from '@/shared/lib/utils/utils';
-import { TokenData } from '@/shared/types/Treasury/types';
-import { BarSize } from '@/shared/types/types';
-import Button from '@/shared/ui/Button/Button';
-import Card from '@/shared/ui/Card/Card';
-import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
-import Drawer from '@/shared/ui/Drawer/Drawer';
-import Icon from '@/shared/ui/Icon/Icon';
-import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import Text from '@/shared/ui/Text/Text';
+import {
+  useChartControls,
+  useCSVExport,
+  useLineChart,
+  useModal
+} from '@/shared/hooks';
+import { BarSize, ChartDataItem, TokenData } from '@/shared/types/types';
+import { Button, Icon, Text } from '@/shared/ui/atoms';
+import {
+  Card,
+  ChartIconToggle,
+  Drawer,
+  TabsGroup
+} from '@/shared/ui/molecules';
+import { CSVDownloadButton } from '@/shared/ui/organisms';
 
 interface TotalTreasuryValueProps {
   isLoading?: boolean;
@@ -127,7 +127,7 @@ const HistoricalExpensesByNetworks = ({
       isLoading={isLoading}
       isError={isError}
       title='Historical expenses by networks'
-      id='historical-expenses-by-networks'
+      id='Historical expenses by networks'
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',

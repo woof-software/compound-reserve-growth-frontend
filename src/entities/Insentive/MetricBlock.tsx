@@ -2,11 +2,9 @@ import { memo } from 'react';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { formatPrice, sumValues } from '@/shared/lib/utils/utils';
-import { TokenData } from '@/shared/types/Treasury/types';
-import { AssetType } from '@/shared/types/types';
-import Card from '@/shared/ui/Card/Card';
-import Icon from '@/shared/ui/Icon/Icon';
-import Text from '@/shared/ui/Text/Text';
+import { AssetType, TokenData } from '@/shared/types/types';
+import { Icon, Text } from '@/shared/ui/atoms';
+import { Card } from '@/shared/ui/molecules';
 
 type MetricData = {
   uniqDataByCategory: Record<string, TokenData[]>;

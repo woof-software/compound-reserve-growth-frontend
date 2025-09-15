@@ -1,27 +1,25 @@
-import React, { memo, useCallback, useMemo, useReducer } from 'react';
+import { memo, useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
-import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import LineChart from '@/components/Charts/Line/Line';
-import Filter from '@/components/Filter/Filter';
-import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import { useChartControls } from '@/shared/hooks/useChartControls';
-import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
-import { useCSVExport } from '@/shared/hooks/useCSVExport';
-import { useLineChart } from '@/shared/hooks/useLineChart';
-import { useModal } from '@/shared/hooks/useModal';
-import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
-import { TokenData } from '@/shared/types/Treasury/types';
-import { BarSize, OptionType } from '@/shared/types/types';
-import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
-import Button from '@/shared/ui/Button/Button';
-import Card from '@/shared/ui/Card/Card';
-import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
-import Drawer from '@/shared/ui/Drawer/Drawer';
-import Icon from '@/shared/ui/Icon/Icon';
-import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
+import {
+  useChartControls,
+  useChartDataProcessor,
+  useCSVExport,
+  useLineChart,
+  useModal
+} from '@/shared/hooks';
+import { extractFilterOptions } from '@/shared/lib/utils';
+import { BarSize, ChartDataItem, OptionType, TokenData } from '@/shared/types';
+import { Button, Icon, Text, View } from '@/shared/ui/atoms';
+import {
+  Card,
+  ChartIconToggle,
+  Drawer,
+  NoDataPlaceholder,
+  TabsGroup
+} from '@/shared/ui/molecules';
+import { CSVDownloadButton, Filter, MultiSelect } from '@/shared/ui/organisms';
 
 interface SpecificCollateralPriceProps {
   isLoading?: boolean;
@@ -303,7 +301,7 @@ const SpecificCollateralPrice = ({
       isLoading={isLoading}
       isError={isError}
       title='Specific Collateral Price against Price Restriction'
-      id='specific-collateral-price-against-price-restriction'
+      id='Specific Collateral Price against Price Restriction'
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',

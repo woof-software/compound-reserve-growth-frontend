@@ -20,6 +20,6 @@
   "include": [
     "./src/**/*.ts",
     "./src/**/*.tsx",
-    "src/components/HoverCard/HoverCard.tsx"
+    "src/shared/ui/atoms/HoverCard/HoverCard.tsx"
   ]
 }
