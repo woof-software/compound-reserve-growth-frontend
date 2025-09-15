@@ -1,8 +1,7 @@
-import { AppRouter } from '@/app/providers/router/AppRouter';
-import { withTheme } from '@/app/providers/ThemeProvider/theme-provider';
-import PageWrapper from '@/shared/ui/atoms/PageWrapper/PageWrapper';
+import { PageWrapper } from '@/shared/ui/atoms';
 import { Footer } from '@/widget/Footer';
 import { Header } from '@/widget/Header';
+import { AppRouter, withTheme } from '@/app/providers';
 
 function App() {
   return (

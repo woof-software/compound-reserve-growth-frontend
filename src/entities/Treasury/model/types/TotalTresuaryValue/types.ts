@@ -7,7 +7,7 @@ interface TotalTreasuryValueProps {
   onCopyLink?: (id: string) => void;
 }
 
-interface FiltersProps {
+interface TotalTreasuryFiltersProps {
   chainOptions: OptionType[];
 
   deploymentOptionsFilter: OptionType[];
@@ -73,4 +73,4 @@ interface FiltersProps {
   onShowEvents: (value: boolean) => void;
 }
 
-export type { FiltersProps, TotalTreasuryValueProps };
+export type { TotalTreasuryFiltersProps, TotalTreasuryValueProps };

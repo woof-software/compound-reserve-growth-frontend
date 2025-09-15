@@ -8,12 +8,7 @@ import {
   VALID_NAVIGATION_ROUTES
 } from '@/app/providers/router/config';
 import { cn } from '@/shared/lib/classNames';
-import Each from '@/shared/ui/atoms/Each/Each';
-import Icon from '@/shared/ui/atoms/Icon/Icon';
-import Link from '@/shared/ui/atoms/Link/Link';
-import NavLink from '@/shared/ui/atoms/NavLink/NavLink';
-import Portal from '@/shared/ui/atoms/Portal/Portal';
-import Text from '@/shared/ui/atoms/Text/Text';
+import { Each, Icon, Link, NavLink, Portal, Text } from '@/shared/ui/atoms';
 import { Tooltip } from '@/shared/ui/molecules/Tooltip/Tooltip';
 
 type NavLinkProps = {
@@ -199,7 +194,7 @@ const Header = () => {
           <div className='flex h-full flex-col justify-center gap-2'>
             <Each
               data={navLinks}
-              render={(link, index) =>
+              render={(link, index: number) =>
                 link.isComingSoon ? (
                   <div
                     key={index}

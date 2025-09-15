@@ -3,22 +3,17 @@ import { useMemo } from 'react';
 
 import { cn } from '@/shared/lib/classNames';
 import {
-  defaultExplorer,
-  explorers,
   formatLargeNumber,
   formatNumber,
   formatPrice,
   formatQuantity,
   sliceAddress
 } from '@/shared/lib/utils/utils';
-import HoverCard from '@/shared/ui/atoms/HoverCard/HoverCard';
-import Icon from '@/shared/ui/atoms/Icon/Icon';
-import Text from '@/shared/ui/atoms/Text/Text';
+import { HoverCard, Icon, Text } from '@/shared/ui/atoms';
 import { ClipboardButton } from '@/shared/ui/molecules/CopyButton/CopyButton';
-import DataTable, {
-  ExtendedColumnDef
-} from '@/shared/ui/molecules/DataTable/DataTable';
 import { MobileDataTable } from '@/shared/ui/molecules/MobileDataTable/MobileDataTable';
+import { DataTable, ExtendedColumnDef } from '@/shared/ui/molecules';
+import { defaultExplorer, explorers } from '@/shared/consts';
 
 export type TreasuryBalanceByNetworkType = {
   symbol: string;

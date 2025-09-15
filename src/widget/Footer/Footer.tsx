@@ -1,10 +1,8 @@
 import { FC } from 'react';
 
 import { commonRoutes } from '@/app/providers/router/config';
-import Icon from '@/shared/ui/atoms/Icon/Icon';
-import Link from '@/shared/ui/atoms/Link/Link';
-import Text from '@/shared/ui/atoms/Text/Text';
-import ThemeSwitcher from '@/shared/ui/organisms/ThemeSwitcher/ThemeSwitcher';
+import { Icon, Link, Text } from '@/shared/ui/atoms';
+import { ThemeSwitcher } from '@/shared/ui/organisms';
 
 const Footer: FC = () => {
   return (

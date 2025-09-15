@@ -1,12 +1,9 @@
 import { useMemo } from 'react';
 
 import type { LineChartSeries } from '@/components/Charts/Line/Line';
+import { ChartDataItem } from '@/shared/types';
 
-import {
-  capitalizeFirstLetter,
-  ChartDataItem,
-  getValueByPath
-} from '../lib/utils/utils';
+import { capitalizeFirstLetter, getValueByPath } from '../lib/utils/utils';
 
 interface ChartDataProcessorConfig {
   rawData: ChartDataItem[];

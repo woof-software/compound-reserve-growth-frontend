@@ -1,7 +1,8 @@
 import { memo, useCallback, useMemo } from 'react';
 import { CSVLink } from 'react-csv';
 
-import { FiltersProps, groupByOptionsWithNone } from '@/entities/Treasury';
+import { TotalTreasuryFiltersProps } from '@/entities/Treasury';
+import { groupByOptionsWithNone } from '@/shared/consts';
 import { useModal } from '@/shared/hooks';
 import { groupOptionsDto } from '@/shared/lib/utils';
 import { Button, Icon, Text, View } from '@/shared/ui/atoms';
@@ -44,7 +45,7 @@ const TotalTreasuryFilters = memo(
     onSelectAll,
     onDeselectAll,
     onShowEvents
-  }: FiltersProps) => {
+  }: TotalTreasuryFiltersProps) => {
     const { isOpen, onOpenModal, onCloseModal } = useModal();
 
     const {
