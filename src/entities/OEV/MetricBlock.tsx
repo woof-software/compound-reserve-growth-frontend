@@ -1,6 +1,7 @@
 import { memo } from 'react';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
+import { cn } from '@/shared/lib/classNames/classNames';
 import { formatPrice, sumValues } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { AssetType } from '@/shared/types/types';
@@ -97,7 +98,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             loading: 'h-[200px]',
             header: 'px-5 py-4',
             content:
-              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#F7931A_-56.86%,#1D2833_88.01%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#F7931A_-56.86%,#1D2833_88.01%)]'
+              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#E0B177_0%,#FFFFFF_100%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#F7931A_-56.86%,#1D2833_88.01%)]'
           }}
         >
           <div className='grid gap-3'>
@@ -115,8 +116,13 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             </div>
           </div>
           <Icon
-            name={theme === 'dark' ? 'BTC-corellated-bg' : 'BTC-corellated-bg'}
-            className='absolute right-0 z-[1] h-[110px] w-[203px] scale-110'
+            name={theme === 'dark' ? 'BTC-corellated-bg' : 'BTC-light'}
+            className={cn(
+              'absolute right-0 z-[1] h-[110px] w-[203px] scale-110',
+              {
+                'opacity-20': theme === 'light'
+              }
+            )}
           />
         </Card>
         <Card
@@ -127,7 +133,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             loading: 'h-[200px]',
             header: 'px-5 py-4',
             content:
-              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#0F7A62_0%,#1D2833_100%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#0F7A62_0%,#1D2833_100%)]'
+              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#8BDDC4_0%,#FFFFFF_100%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#0F7A62_0%,#1D2833_100%)]'
           }}
         >
           <div className='grid gap-3'>
@@ -146,11 +152,14 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           </div>
           <Icon
             name={
-              theme === 'dark'
-                ? 'stablecoin-corellated-bg'
-                : 'stablecoin-corellated-bg'
+              theme === 'dark' ? 'stablecoin-corellated-bg' : 'stablecoin-light'
             }
-            className='absolute right-2.5 z-[1] h-[110px] w-[170px] scale-110'
+            className={cn(
+              'absolute right-2.5 z-[1] h-[110px] w-[170px] scale-110',
+              {
+                'opacity-20': theme === 'light'
+              }
+            )}
           />
         </Card>
       </div>
@@ -163,7 +172,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             loading: 'h-[200px]',
             header: 'px-5 py-4',
             content:
-              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#5168BC_0%,#1D2833_100%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#5168BC_0%,#1D2833_100%)]'
+              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#97ADFF_0%,#FFFFFF_100%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#5168BC_0%,#1D2833_100%)]'
           }}
         >
           <div className='grid gap-3'>
@@ -181,8 +190,13 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             </div>
           </div>
           <Icon
-            name={theme === 'dark' ? 'eth-corellated-bg' : 'eth-corellated-bg'}
-            className='absolute right-5 z-[1] h-[110px] w-[170px] scale-110'
+            name={theme === 'dark' ? 'eth-corellated-bg' : 'ETH-light'}
+            className={cn(
+              'absolute right-5 z-[1] h-[110px] w-[170px] scale-110',
+              {
+                'opacity-20': theme === 'light'
+              }
+            )}
           />
         </Card>
         <Card
@@ -193,13 +207,17 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             loading: 'h-[200px]',
             header: 'px-5 py-4',
             content:
-              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#00AAFF_0%,#1D2833_88.01%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#00AAFF_0%,#1D2833_88.01%)]'
+              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#55BAED_0%,#FFFFFF_100%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#00AAFF_0%,#1D2833_88.01%)]'
           }}
         >
           <div className='grid gap-3'>
             <div className='flex items-center gap-2.5'>
               <Icon
-                name='fees-captured-icon'
+                name={
+                  theme === 'dark'
+                    ? 'fees-captured-icon'
+                    : 'fees-captured-light-icon'
+                }
                 className='h-8 w-8'
               />
               <Text
@@ -214,9 +232,14 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             name={
               theme === 'dark'
                 ? 'total-OEV-fees-captured'
-                : 'total-OEV-fees-captured'
+                : 'total-OEV-fees-captured-light'
             }
-            className='absolute right-5 z-[1] h-[110px] w-[170px] scale-110'
+            className={cn(
+              'absolute right-5 z-[1] h-[110px] w-[170px] scale-110',
+              {
+                'opacity-20': theme === 'light'
+              }
+            )}
           />
         </Card>
       </div>
