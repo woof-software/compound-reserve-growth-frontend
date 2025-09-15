@@ -7,8 +7,7 @@ import {
   defaultExplorer,
   explorers,
   formatLargeNumber,
-  formatPrice,
-  sliceAddress
+  formatPrice
 } from '@/shared/lib/utils/utils';
 import { ClipboardButton } from '@/shared/ui/AnimationProvider/CopyButton/CopyButton';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
@@ -267,7 +266,7 @@ const DailyExpensesTable = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                             size='14'
                             className='text-primary-11'
                           >
-                            {sliceAddress(row.address, 7)}
+                            {row.address}
                           </Text>
                           <ClipboardButton textToCopy={row.address} />
                         </div>
