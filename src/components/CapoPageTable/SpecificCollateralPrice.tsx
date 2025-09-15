@@ -2,9 +2,9 @@ import React, { memo, useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
-import LineChart from '@/components/Charts/Line/Line';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
+import SpecificLineChart from '@/entities/Capo/SpecificLineChart';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
@@ -335,7 +335,7 @@ const SpecificCollateralPrice = ({
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder onButtonClick={onClearAll} />
       ) : (
-        <LineChart
+        <SpecificLineChart
           key={groupBy}
           data={correctedChartSeries}
           groupBy={groupBy}
