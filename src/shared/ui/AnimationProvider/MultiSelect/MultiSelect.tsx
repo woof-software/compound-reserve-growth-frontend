@@ -186,6 +186,19 @@ export const MultiSelect: FC<MultiSelectProps> = ({
     [options, searchValue]
   );
 
+  const isAllSelected = useMemo(() => {
+    if (type === 'valueInTrigger') {
+      const first = filteredOptions[0];
+      return Boolean(first && value.length === 1 && value[0]?.id === first.id);
+    }
+
+    if (filteredOptions.length === 0) return false;
+
+    return filteredOptions.every((option) =>
+      value.some((v) => v.id === option.id)
+    );
+  }, [filteredOptions, type, value]);
+
   const onChangeSearch = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
     setHighlightedIndex(-1);
@@ -260,6 +273,37 @@ export const MultiSelect: FC<MultiSelectProps> = ({
 
     setSearchValue('');
   };
+
+  const onSelectAll = useCallback(() => {
+    if (!onChange || filteredOptions.length === 0) return;
+
+    if (type === 'valueInTrigger') {
+      const first = filteredOptions[0];
+      if (!first) return;
+      const alreadySelected = value.some((v) => v.id === first.id);
+      onChange(alreadySelected ? [] : [first]);
+      return;
+    }
+
+    const allSelected = filteredOptions.every((option) =>
+      value.some((v) => v.id === option.id)
+    );
+
+    if (allSelected) {
+      onChange(
+        value.filter((v) => !filteredOptions.some((o) => o.id === v.id))
+      );
+    } else {
+      const newSelected = [
+        ...value,
+        ...filteredOptions.filter(
+          (option) => !value.some((v) => v.id === option.id)
+        )
+      ];
+
+      onChange(newSelected);
+    }
+  }, [filteredOptions, onChange, type, value]);
 
   useEffect(() => {
     if (isOpen) {
@@ -364,13 +408,26 @@ export const MultiSelect: FC<MultiSelectProps> = ({
             </div>
           </View.Condition>
         </div>
+        <div
+          aria-hidden='true'
+          className='bg-secondary-29 h-px w-full origin-top scale-y-[.5] transform-gpu'
+        />
+        <Button
+          disabled={isAllSelected}
+          className={cn(
+            'text-primary-14 hover:bg-secondary-40 m-2 h-[30px] rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white',
+            {
+              '!text-primary-14 !bg-transparent': isAllSelected,
+              'mb-0': Boolean(value.length > 0)
+            }
+          )}
+          onClick={onSelectAll}
+        >
+          Select All
+        </Button>
         <View.Condition if={Boolean(value.length > 0)}>
-          <div
-            aria-hidden='true'
-            className='bg-secondary-29 h-px w-full origin-top scale-y-[.5] transform-gpu'
-          />
           <Button
-            className='bg-secondary-12 text-primary-14 hover:bg-secondary-40 m-2 h-[30px] rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white'
+            className='bg-secondary-12 text-primary-14 hover:bg-secondary-40 m-2 mt-0.5 h-[30px] rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white'
             onClick={onClearFilters}
           >
             Clear filters
