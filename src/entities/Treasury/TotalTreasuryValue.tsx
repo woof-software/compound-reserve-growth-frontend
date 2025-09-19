@@ -1,3 +1,4 @@
+import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import React, { memo, useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -111,7 +112,7 @@ interface FiltersProps {
   onShowEvents: (value: boolean) => void;
 }
 
-const TotalTresuaryValue = ({
+const TotalTreasuryValue = ({
   isLoading,
   isError,
   data: treasuryApiResponse
@@ -128,6 +129,8 @@ const TotalTresuaryValue = ({
       symbol: [] as OptionType[]
     }
   );
+
+  useFiltersSync(selectedOptions, setSelectedOptions);
 
   const {
     isOpen: isOpenSingle,
@@ -738,4 +741,4 @@ const Filters = memo(
   }
 );
 
-export default TotalTresuaryValue;
+export default TotalTreasuryValue;
