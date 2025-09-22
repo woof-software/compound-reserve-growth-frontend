@@ -9,7 +9,11 @@ type SetSelectedOptions<T extends string> = (
 ) => void;
 type ObjecEntries = [string, OptionType[] | undefined][];
 
-// используется для множественной фильтрации
+/*
+  This hook writes and reads URL parameters and implements two-way synchronization of filters. It is used for multiple filtering.
+  1) Sets parameters from URLs to filters using a setter and an array of filter keys
+  2) Sets filter values in URLs based on filters selected on the client
+*/
 export const useFiltersSync = <const T extends string>(
   selectedOptions: SelectedOptions<T>,
   setSelectedOptions: SetSelectedOptions<T>,
@@ -19,7 +23,7 @@ export const useFiltersSync = <const T extends string>(
   const [searchParams, setSearchParams] = useSearchParams();
   const hasInitialized = useRef(false);
 
-  // синхронизация фильтров из юрла с фильтрами на клиенте
+  // filters synchronization from URL to client state
   useEffect(() => {
     if (hasInitialized.current) return;
     const nextState: Partial<SelectedOptions<T>> = {};
@@ -38,17 +42,15 @@ export const useFiltersSync = <const T extends string>(
     hasInitialized.current = true;
   }, [filtersKey]);
 
-  // синхронизация выбранных фильтров с юрлом
+  // filters synchronization from client state to url
   useEffect(() => {
     if (!hasInitialized.current) return;
 
     setSearchParams(
-      (prev) => {
-        const nextParams = new URLSearchParams(prev);
-
-        Array.from(nextParams.keys())
+      (params) => {
+        Array.from(params.keys())
           .filter((key) => key.startsWith(`${filtersKey}:`))
-          .forEach((key) => nextParams.delete(key));
+          .forEach((key) => params.delete(key));
 
         (Object.entries(selectedOptions) as ObjecEntries)?.reduce(
           (params, [key, arr]) => {
@@ -56,17 +58,17 @@ export const useFiltersSync = <const T extends string>(
             arr?.forEach((opt) => params.append(namespacedKey, opt?.id));
             return params;
           },
-          nextParams
+          params
         );
 
-        return nextParams;
+        return params;
       },
       { replace: true }
     );
   }, [filtersKey, selectedOptions]);
 };
 
-//используется для одиночной фильтрации
+/*This hook does the same thing as useFiltersSync, but is used for single filtering.*/
 export const useFilterSyncSingle = (
   filterId: string,
   filterValue: any,
@@ -74,7 +76,7 @@ export const useFilterSyncSingle = (
 ) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // синхронизация из юрл в фильтры
+  // filters synchronization from URL to client state
   useEffect(() => {
     const currentFilter = searchParams.get(filterId);
     if (currentFilter !== null && currentFilter !== filterValue) {
@@ -82,7 +84,7 @@ export const useFilterSyncSingle = (
     }
   }, [filterId]);
 
-  // синхронизация фильтров в юрл
+  // filters synchronization from client state to url
   useEffect(() => {
     const currentUrlValue = searchParams.get(filterId);
 
