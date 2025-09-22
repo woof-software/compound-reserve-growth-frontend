@@ -59,9 +59,9 @@ const TreasuryComposition = ({
           <div className='flex items-center gap-3'>
             <View.Condition if={activeFilter !== 'Market'}>
               <Icon
-                name={config.getIconName(row.original)}
+                name={config?.getIconName(row?.original)}
                 className='h-6 w-6'
-                folder={config.folder}
+                folder={config?.folder}
               />
             </View.Condition>
             <Text
@@ -144,9 +144,9 @@ const TreasuryComposition = ({
                   <div className='flex items-center gap-1'>
                     <View.Condition if={activeFilter !== 'Market'}>
                       <Icon
-                        name={filterConfig[activeFilter].getIconName(row)}
+                        name={filterConfig[activeFilter]?.getIconName(row)}
                         className='h-4 w-4'
-                        folder={filterConfig[activeFilter].folder}
+                        folder={filterConfig[activeFilter]?.folder}
                       />
                     </View.Condition>
                     <Text

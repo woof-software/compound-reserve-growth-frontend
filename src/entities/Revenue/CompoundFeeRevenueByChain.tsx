@@ -10,6 +10,7 @@ import CompoundFeeRevenuebyChainComponent, {
   Interval,
   ProcessedRevenueData as TableData
 } from '@/components/RevenuePageTable/CompoundFeeRevenuebyChain';
+import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { cn } from '@/shared/lib/classNames/classNames';
@@ -265,6 +266,17 @@ const CompoundFeeRevenueByChain = ({
   );
 
   const [selectedPeriod, setSelectedPeriod] = useState<string | undefined>();
+
+  useFilterSyncSingle(
+    'compFeeRevenueInterval',
+    selectedInterval,
+    setSelectedInterval
+  );
+  useFilterSyncSingle(
+    'compFeeRevenuePeriod',
+    selectedPeriod,
+    setSelectedPeriod
+  );
 
   const [sortType, setSortType] = useReducer(
     (prev, next) => ({

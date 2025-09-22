@@ -27,7 +27,6 @@ const GroupDrawer: FC<GroupDrawerProps> = ({
   onSelect
 }) => {
   const [radioValue, setRadioValue] = useState<string>(selectedOption || '');
-
   const isApplyButtonDisabled = useMemo(
     () => Boolean(radioValue),
     [radioValue]

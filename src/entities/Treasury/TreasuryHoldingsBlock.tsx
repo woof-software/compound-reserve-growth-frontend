@@ -7,6 +7,7 @@ import TreasuryHoldings, {
   TreasuryBalanceByNetworkType
 } from '@/components/TreasuryPageTable/TreasuryHoldings';
 import { treasuryBalanceByNetworkColumns } from '@/entities/Treasury/TreasuryBalanceByNetwork';
+import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
@@ -115,6 +116,13 @@ const TreasuryHoldingsBlock = ({
       symbol: [] as OptionType[]
     }
   );
+
+  useFiltersSync(selectedOptions, setSelectedOptions, 'thb', [
+    'chain',
+    'assetType',
+    'deployment',
+    'symbol'
+  ]);
 
   const [sortType, setSortType] = useReducer(
     (prev, next) => ({

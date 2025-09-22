@@ -1,3 +1,4 @@
+import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import React, { useCallback, useMemo, useReducer } from 'react';
 
 import CryptoChart from '@/components/Charts/Bar/Bar';
@@ -98,6 +99,13 @@ const TreasuryBalanceByNetworkBlock = ({
       symbol: [] as OptionType[]
     }
   );
+
+  useFiltersSync(selectedOptions, setSelectedOptions, 'tbbn', [
+    'chain',
+    'assetType',
+    'deployment',
+    'symbol'
+  ]);
 
   const [sortType, setSortType] = useReducer(
     (prev, next) => ({

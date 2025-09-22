@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 
 import MetricBlock from '@/entities/Treasury/MetricBlock';
-import TotalTresuaryValue from '@/entities/Treasury/TotalTresuaryValue';
+import TotalTreasuryValue from '@/entities/Treasury/TotalTreasuryValue';
 import TreasuryBalanceByNetworkBlock from '@/entities/Treasury/TreasuryBalanceByNetwork';
 import TreasuryCompositionBlock from '@/entities/Treasury/TreasuryCompositionBlock';
 import TreasuryHoldingsBlock from '@/entities/Treasury/TreasuryHoldingsBlock';
@@ -83,7 +83,7 @@ const TreasuryPage = () => {
             uniqData
           }}
         />
-        <TotalTresuaryValue
+        <TotalTreasuryValue
           isLoading={isLoading}
           isError={isError}
           data={treasuryData}

@@ -89,7 +89,8 @@ const useDropdown = (type: 'single' | 'multiple') => {
     open,
     close,
     select,
-    selectClose
+    selectClose,
+    setSelectedValue
   };
 };
 

@@ -1,3 +1,4 @@
+import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import React, { useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -198,6 +199,13 @@ const CompoundRevenueBlock = ({
       symbol: [] as OptionType[]
     }
   );
+
+  useFiltersSync(selectedOptions, setSelectedOptions, 'cr', [
+    'chain',
+    'source',
+    'deployment',
+    'symbol'
+  ]);
 
   const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: 'D'
