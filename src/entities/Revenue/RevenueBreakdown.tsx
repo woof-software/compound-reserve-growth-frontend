@@ -1,3 +1,4 @@
+import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import React, { useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -90,6 +91,13 @@ const RevenueBreakDownBlock = ({
     }),
     initialState
   );
+
+  useFiltersSync(selectedOptions, setSelectedOptions, 'rb', [
+    'chain',
+    'market',
+    'source',
+    'symbol'
+  ]);
 
   const {
     isOpen: yearOpen,

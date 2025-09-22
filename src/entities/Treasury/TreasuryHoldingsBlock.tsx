@@ -117,7 +117,12 @@ const TreasuryHoldingsBlock = ({
     }
   );
 
-  useFiltersSync(selectedOptions, setSelectedOptions, 'thb'); // treasury holding block
+  useFiltersSync(selectedOptions, setSelectedOptions, 'thb', [
+    'chain',
+    'assetType',
+    'deployment',
+    'symbol'
+  ]);
 
   const [sortType, setSortType] = useReducer(
     (prev, next) => ({

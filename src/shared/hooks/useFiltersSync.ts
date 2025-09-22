@@ -3,32 +3,29 @@ import { useSearchParams } from 'react-router-dom';
 
 import { OptionType } from '@/shared/types/types';
 
-type selectedOptions = Record<string, OptionType[]>;
-type setSelectedOptions = (next: Partial<Record<string, OptionType[]>>) => void;
-type selectedKeysArr = string[];
+type SelectedOptions<T extends string> = Record<T, OptionType[]>;
+type SetSelectedOptions<T extends string> = (
+  next: Partial<SelectedOptions<T>>
+) => void;
+type ObjecEntries = [string, OptionType[] | undefined][];
 
-export const useFiltersSync = (
-  selectedOptions: selectedOptions,
-  setSelectedOptions: setSelectedOptions,
+export const useFiltersSync = <const T extends string>(
+  selectedOptions: SelectedOptions<T>,
+  setSelectedOptions: SetSelectedOptions<T>,
   filtersKey: string,
-  selectedKeysArr: selectedKeysArr = [
-    'chain',
-    'assetType',
-    'deployment',
-    'symbol'
-  ]
+  selectedKeysArr: T[]
 ) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const hasInitialized = useRef(false);
 
   useEffect(() => {
     if (hasInitialized.current) return;
-    const nextState: Partial<Record<string, OptionType[]>> = {};
+    const nextState: Partial<SelectedOptions<T>> = {};
 
-    selectedKeysArr.forEach((key) => {
-      const values = searchParams.getAll(`${filtersKey}:${key}`);
+    selectedKeysArr?.forEach((key: T) => {
+      const values = searchParams?.getAll(`${filtersKey}:${key}`);
       if (values.length > 0) {
-        nextState[key] = values.map((v) => ({ label: v, id: v }));
+        nextState[key] = values?.map((v) => ({ label: v, id: v }));
       }
     });
 
@@ -37,9 +34,11 @@ export const useFiltersSync = (
     }
 
     hasInitialized.current = true;
-  }, [searchParams, filtersKey, selectedKeysArr, setSelectedOptions]);
+  }, [filtersKey]);
 
   useEffect(() => {
+    if (!hasInitialized.current) return;
+
     setSearchParams(
       (prev) => {
         const nextParams = new URLSearchParams(prev);
@@ -48,15 +47,18 @@ export const useFiltersSync = (
           .filter((key) => key.startsWith(`${filtersKey}:`))
           .forEach((key) => nextParams.delete(key));
 
-        Object.entries(selectedOptions).reduce((params, [key, arr]) => {
-          const namespacedKey = `${filtersKey}:${key}`;
-          arr.forEach((opt) => params.append(namespacedKey, opt?.id));
-          return params;
-        }, nextParams);
+        (Object.entries(selectedOptions) as ObjecEntries)?.reduce(
+          (params, [key, arr]) => {
+            const namespacedKey = `${filtersKey}:${key}`;
+            arr?.forEach((opt) => params.append(namespacedKey, opt?.id));
+            return params;
+          },
+          nextParams
+        );
 
         return nextParams;
       },
       { replace: true }
     );
-  }, [filtersKey, selectedOptions, setSearchParams]);
+  }, [filtersKey, selectedOptions]);
 };

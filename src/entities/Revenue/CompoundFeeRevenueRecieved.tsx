@@ -1,3 +1,4 @@
+import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -138,6 +139,13 @@ const CompoundFeeRevenueRecieved = ({
     }),
     initialState
   );
+
+  useFiltersSync(selectedOptions, setSelectedOptions, 'cfrr', [
+    'chain',
+    'market',
+    'symbol',
+    'assetType'
+  ]);
 
   const [groupBy, setGroupBy] = useState<string>('Chain');
 

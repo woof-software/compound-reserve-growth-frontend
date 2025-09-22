@@ -100,7 +100,12 @@ const TreasuryBalanceByNetworkBlock = ({
     }
   );
 
-  useFiltersSync(selectedOptions, setSelectedOptions, 'tbbn');
+  useFiltersSync(selectedOptions, setSelectedOptions, 'tbbn', [
+    'chain',
+    'assetType',
+    'deployment',
+    'symbol'
+  ]);
 
   const [sortType, setSortType] = useReducer(
     (prev, next) => ({

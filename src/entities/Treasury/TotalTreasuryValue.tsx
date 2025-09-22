@@ -130,7 +130,12 @@ const TotalTreasuryValue = ({
     }
   );
 
-  useFiltersSync(selectedOptions, setSelectedOptions, 'ttv'); // total treasure value
+  useFiltersSync(selectedOptions, setSelectedOptions, 'ttv', [
+    'chain',
+    'assetType',
+    'deployment',
+    'symbol'
+  ]);
 
   const {
     isOpen: isOpenSingle,
