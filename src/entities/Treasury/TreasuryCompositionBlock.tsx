@@ -4,6 +4,7 @@ import PieChart from '@/components/Charts/Pie/Pie';
 import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
+import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
@@ -90,10 +91,14 @@ const TreasuryCompositionBlock = memo(
       selectedValue: selectedSingle,
       close: closeSingle,
       open: openSingle,
-      select: selectSingle
+      select: selectSingle,
+      setSelectedValue
     } = useDropdown('single');
 
     const [includeComp, setIncludeComp] = useState<boolean>(true);
+
+    useFilterSyncSingle('includeComp', includeComp, setIncludeComp);
+    useFilterSyncSingle('treasuryCompGroup', selectedSingle, setSelectedValue);
 
     const [sortType, setSortType] = useReducer(
       (prev, next) => ({
@@ -137,7 +142,7 @@ const TreasuryCompositionBlock = memo(
 
     const { uniqData, uniqDataByCategory } = filteredData;
 
-    const selectedGroup = selectedSingle?.[0] || 'Asset Type';
+    const selectedGroup = selectedSingle?.toString() || 'Asset type';
 
     const chartData = useMemo(() => {
       if (selectedGroup === 'Chain') {
