@@ -6,6 +6,10 @@ import Link from '@/shared/ui/Link/Link';
 import Text from '@/shared/ui/Text/Text';
 import ThemeSwitcher from '@/shared/ui/ThemeSwitcher/ThemeSwitcher';
 
+const version = import.meta.env.VITE_APP_VERSION;
+
+const isVersioned = version && version.length > 0;
+
 const Footer: FC = () => {
   return (
     <footer className='md:border-primary-17 px-3 md:border-t md:px-0'>
@@ -72,6 +76,15 @@ const Footer: FC = () => {
           recommendations. Users should not rely on the data presented here as a
           basis for making investment decisions.
         </Text>
+        {isVersioned && (
+          <Text
+            size='9'
+            align='center'
+            className='text-primary-14 w-full pb-6 text-center'
+          >
+            Build: {version}
+          </Text>
+        )}
       </div>
     </footer>
   );
