@@ -130,7 +130,7 @@ const TotalTreasuryValue = ({
     }
   );
 
-  useFiltersSync(selectedOptions, setSelectedOptions);
+  useFiltersSync(selectedOptions, setSelectedOptions, 'ttv'); // total treasure value
 
   const {
     isOpen: isOpenSingle,
