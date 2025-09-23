@@ -76,7 +76,7 @@ export const useFiltersSync = <const T extends string>(
 
     // Restore the hash after URL update if it existed
     if (currentHash) {
-      window.location.hash = currentHash;
+      window.location.hash = '';
     }
   }, [filtersKey, selectedOptions]);
 };
@@ -129,7 +129,7 @@ export const useFilterSyncSingle = (
 
       // Restore the hash after URL update if it existed
       if (currentHash) {
-        window.location.hash = currentHash;
+        window.location.hash = '';
       }
     }
   }, [filterId, filterValue, searchParams, setSearchParams]);
