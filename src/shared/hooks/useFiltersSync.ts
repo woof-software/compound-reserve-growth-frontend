@@ -22,6 +22,7 @@ export const useFiltersSync = <const T extends string>(
 ) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const hasInitialized = useRef(false);
+  const initialHash = useRef(window.location.hash);
 
   // filters synchronization from URL to client state
   useEffect(() => {
@@ -40,18 +41,25 @@ export const useFiltersSync = <const T extends string>(
     }
 
     hasInitialized.current = true;
+
+    // Restore initial hash if it existed when page loaded
+    if (initialHash.current) {
+      window.location.hash = initialHash.current;
+    }
   }, [filtersKey]);
 
   // filters synchronization from client state to url
   useEffect(() => {
     if (!hasInitialized.current) return;
 
+    // Preserve the current hash/anchor (prioritize current hash over initial)
+    const currentHash = window.location.hash || initialHash.current;
+
     setSearchParams(
       (params) => {
         Array.from(params.keys())
           .filter((key) => key.startsWith(`${filtersKey}:`))
           .forEach((key) => params.delete(key));
-
         (Object.entries(selectedOptions) as ObjecEntries)?.reduce(
           (params, [key, arr]) => {
             const namespacedKey = `${filtersKey}:${key}`;
@@ -65,6 +73,11 @@ export const useFiltersSync = <const T extends string>(
       },
       { replace: true }
     );
+
+    // Restore the hash after URL update if it existed
+    if (currentHash) {
+      window.location.hash = currentHash;
+    }
   }, [filtersKey, selectedOptions]);
 };
 
@@ -75,6 +88,8 @@ export const useFilterSyncSingle = (
   setFilter: (value: any) => void
 ) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const hasInitialized = useRef(false);
+  const initialHash = useRef(window.location.hash);
 
   // filters synchronization from URL to client state
   useEffect(() => {
@@ -82,13 +97,24 @@ export const useFilterSyncSingle = (
     if (currentFilter !== null && currentFilter !== filterValue) {
       setFilter(currentFilter);
     }
+
+    hasInitialized.current = true;
+
+    // Restore initial hash if it existed when page loaded
+    if (initialHash.current) {
+      window.location.hash = initialHash.current;
+    }
   }, [filterId]);
 
   // filters synchronization from client state to url
   useEffect(() => {
+    if (!hasInitialized.current) return;
     const currentUrlValue = searchParams.get(filterId);
 
     if (filterValue !== currentUrlValue) {
+      // Preserve the current hash/anchor (prioritize current hash over initial)
+      const currentHash = window.location.hash || initialHash.current;
+
       setSearchParams(
         (params) => {
           if (filterValue && filterValue !== '') {
@@ -100,6 +126,11 @@ export const useFilterSyncSingle = (
         },
         { replace: true }
       );
+
+      // Restore the hash after URL update if it existed
+      if (currentHash) {
+        window.location.hash = currentHash;
+      }
     }
   }, [filterId, filterValue, searchParams, setSearchParams]);
 };
