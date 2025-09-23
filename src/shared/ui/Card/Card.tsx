@@ -2,6 +2,7 @@ import { FC, ReactNode, useMemo } from 'react';
 
 import { useClipboard } from '@/shared/hooks/useClipboard';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { useSearchParams } from 'react-router-dom';
 
 import Icon from '../Icon/Icon';
 import Text from '../Text/Text';
@@ -32,6 +33,7 @@ const Card: FC<CardProps> = ({
   id
 }) => {
   const [isCopied, copy] = useClipboard();
+  const [searchParams] = useSearchParams();
 
   const showPlaceholder = isLoading || isError;
 
@@ -44,7 +46,10 @@ const Card: FC<CardProps> = ({
   const onCopyLink = (id: string) => {
     if (!id) return;
 
-    const link = `${window.location.origin}${window.location.pathname}#${id}`;
+    const link =
+      `${window.location.origin}${window.location.pathname}` +
+      `${searchParams.size ? '?' + searchParams : ''}` +
+      `#${id}`;
 
     copy(link);
   };
