@@ -1,32 +1,39 @@
-import React, { useMemo } from 'react';
+import { useCapoApiData } from '@/shared/hooks/useCapoApiData';
+import { useSourceApiData } from '@/shared/hooks/useSourceApiData';
+import React from 'react';
 
-import SpecificCollateralPrice from '@/components/CapoPageTable/SpecificCollateralPrice';
+// import SpecificCollateralPrice from '@/components/CapoPageTable/SpecificCollateralPrice';
 import CollateralsPriceBlock from '@/entities/Capo/CollateralsPriceBlock';
-import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
-import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
-import { uniqByNestedAddresses } from '@/shared/lib/utils/utils';
-import { TokenData } from '@/shared/types/Treasury/types';
+// import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
+// import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
+// import { uniqByNestedAddresses } from '@/shared/lib/utils/utils';
+// import { TokenData } from '@/shared/types/Treasury/types';
 import Text from '@/shared/ui/Text/Text';
 
 const CapoPage = () => {
-  const {
-    data: treasuryApiResponse,
-    isLoading,
-    isError
-  } = useTreasuryHistory({
-    params: { order: 'DESC' }
-  });
+  const capoApiResponse = useCapoApiData();
+  const sourceApiResponse = useSourceApiData();
 
-  const treasuryData = useMemo<TokenData[]>(
-    () => treasuryApiResponse || [],
-    [treasuryApiResponse]
-  );
+  console.log(sourceApiResponse?.data);
 
-  const uniqData = useMemo(() => {
-    return uniqByNestedAddresses(treasuryData);
-  }, [treasuryData]);
+  // const {
+  //   data: treasuryApiResponse,
+  //   isLoading,
+  //   isError
+  // } = useTreasuryHistory({
+  //   params: { order: 'DESC' }
+  // });
+  //
+  // const treasuryData = useMemo<TokenData[]>(
+  //   () => treasuryApiResponse || [],
+  //   [treasuryApiResponse]
+  // );
+  //
+  // const uniqData = useMemo(() => {
+  //   return uniqByNestedAddresses(treasuryData);
+  // }, [treasuryData]);
 
-  useScrollToHash(!isLoading);
+  // useScrollToHash(!isPending);
 
   return (
     <div className='flex flex-col gap-6 md:gap-[40px] xl:gap-[50px]'>
@@ -50,15 +57,15 @@ const CapoPage = () => {
       <section className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
         <div className='grid gap-3'>
           <CollateralsPriceBlock
-            data={uniqData}
-            isError={isError}
-            isLoading={isLoading}
+            data={[]}
+            isError={capoApiResponse?.isError}
+            isLoading={capoApiResponse?.isPending}
           />
-          <SpecificCollateralPrice
-            isLoading={isLoading}
-            isError={isError}
-            data={treasuryData}
-          />
+          {/*<SpecificCollateralPrice*/}
+          {/*  isLoading={isLoading}*/}
+          {/*  isError={isError}*/}
+          {/*  data={treasuryData}*/}
+          {/*/>*/}
         </div>
       </section>
     </div>
