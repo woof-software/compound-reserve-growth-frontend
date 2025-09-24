@@ -27,6 +27,9 @@ const capoApiResponseSchema = z.object({
   )
 });
 
+/**
+ * get sources data from API https://compound-reserve-growth-backend-dev.woof.software/api/docs#/Capo/CapoController_list
+ */
 export const useCapoApiData = () => {
   return useQuery({
     queryKey: ['capo-page-api-data'],

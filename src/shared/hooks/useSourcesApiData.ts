@@ -28,9 +28,13 @@ const sourcesApiResponseSchema = z.object({
   assets: z.array(assetDetailsSchema)
 });
 
-export const useSourceApiData = () => {
+/**
+ * get sources data from API https://compound-reserve-growth-backend-dev.woof.software/api/docs#/Source/SourceController_getSourceList
+ */
+export const useSourcesApiData = () => {
   return useQuery({
     queryKey: ['source-api-data'],
-    queryFn: () => $api.get(SOURCE_API_URL, sourcesApiResponseSchema)
+    queryFn: () => $api.get(SOURCE_API_URL, sourcesApiResponseSchema),
+    select: (data) => data?.data
   });
 };
