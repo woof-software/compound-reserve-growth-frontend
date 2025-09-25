@@ -10,6 +10,9 @@ interface CSVDownloadButtonProps {
   filename?: string;
   className?: string;
   tooltipContent?: string;
+  onClick?: () => void;
+  renderAsLink?: boolean;
+  children?: React.ReactNode;
 }
 
 const CSVDownloadButton: FC<CSVDownloadButtonProps> = ({

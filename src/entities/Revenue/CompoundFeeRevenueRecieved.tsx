@@ -1,4 +1,3 @@
-import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -10,6 +9,7 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCompoundReceivedBars } from '@/shared/hooks/useCompoundReceivedBars';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
+import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {

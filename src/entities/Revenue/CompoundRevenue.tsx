@@ -1,4 +1,3 @@
-import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import React, { useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -7,6 +6,7 @@ import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
+import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { type RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { capitalizeFirstLetter, ChartDataItem } from '@/shared/lib/utils/utils';

@@ -15,13 +15,12 @@ const capoApiResponseSchema = z.object({
       ar: z.string(),
       mr: z.string(),
       xr: z.string(),
-      cp: z.string(),
       ap: z.string(),
       mp: z.string(),
       xp: z.string(),
+      cp: z.string(),
       cc: z.number(),
       tc: z.number(),
-      sId: z.number(),
       aId: z.number()
     })
   )
@@ -49,7 +48,6 @@ export const useCapoApiData = () => {
         maximumPrice: item?.xp,
         countOfCappedEntries: item?.cc,
         totalCountOfEntries: item?.tc,
-        sourceId: item?.sId,
         assetId: item?.aId
       }));
     }

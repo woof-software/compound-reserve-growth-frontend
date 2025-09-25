@@ -1,39 +1,12 @@
-import { useCapoApiData } from '@/shared/hooks/useCapoApiData';
-import { useSourceApiData } from '@/shared/hooks/useSourceApiData';
-import React from 'react';
-
-// import SpecificCollateralPrice from '@/components/CapoPageTable/SpecificCollateralPrice';
-import CollateralsPriceBlock from '@/entities/Capo/CollateralsPriceBlock';
-// import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
-// import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
-// import { uniqByNestedAddresses } from '@/shared/lib/utils/utils';
-// import { TokenData } from '@/shared/types/Treasury/types';
+import { useNormalizedTableData } from '@/components/CapoPageTable/lib/useNormalizedTableData';
+import CollateralsPriceBlock from '@/entities/Capo/CollateralPriceBlock/CollateralsPriceBlock';
+import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import Text from '@/shared/ui/Text/Text';
 
 const CapoPage = () => {
-  const capoApiResponse = useCapoApiData();
-  const sourceApiResponse = useSourceApiData();
+  const { data, isError, isLoading } = useNormalizedTableData();
 
-  console.log(sourceApiResponse?.data);
-
-  // const {
-  //   data: treasuryApiResponse,
-  //   isLoading,
-  //   isError
-  // } = useTreasuryHistory({
-  //   params: { order: 'DESC' }
-  // });
-  //
-  // const treasuryData = useMemo<TokenData[]>(
-  //   () => treasuryApiResponse || [],
-  //   [treasuryApiResponse]
-  // );
-  //
-  // const uniqData = useMemo(() => {
-  //   return uniqByNestedAddresses(treasuryData);
-  // }, [treasuryData]);
-
-  // useScrollToHash(!isPending);
+  useScrollToHash(!isLoading);
 
   return (
     <div className='flex flex-col gap-6 md:gap-[40px] xl:gap-[50px]'>
@@ -57,9 +30,9 @@ const CapoPage = () => {
       <section className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
         <div className='grid gap-3'>
           <CollateralsPriceBlock
-            data={[]}
-            isError={capoApiResponse?.isError}
-            isLoading={capoApiResponse?.isPending}
+            tableData={data}
+            isError={isError}
+            isLoading={isLoading}
           />
           {/*<SpecificCollateralPrice*/}
           {/*  isLoading={isLoading}*/}
