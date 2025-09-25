@@ -34,7 +34,7 @@ export const DesktopFilters = ({
       disabled={isLoading}
     />
     <MultiSelect
-      options={collateralOptions} // Add deployment options when available
+      options={collateralOptions}
       value={selectedCollateral}
       onChange={onSelectCollateral}
       placeholder='Collateral'

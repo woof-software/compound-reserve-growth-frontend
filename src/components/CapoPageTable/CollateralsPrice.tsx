@@ -21,10 +21,7 @@ export interface CollateralsPriceProps {
   tableData: TableItem[];
   sortType: { key: string; type: string };
 }
-// TODO: make columns the same width
-// TODO: add filters url
-// TODO: remove useCallback and useMemo
-// TODO: fix weETH and sFRAX when filtering applyied
+
 const treasuryColumns: ExtendedColumnDef<TableItem>[] = [
   {
     id: 'network',
@@ -48,7 +45,6 @@ const treasuryColumns: ExtendedColumnDef<TableItem>[] = [
     accessorFn: (row) => row.collateral,
     header: 'Collateral',
     enableSorting: true,
-    // size: 168,
     cell: ({ row }) => (
       <div className='flex items-center gap-3'>
         <Icon
@@ -87,6 +83,7 @@ const treasuryColumns: ExtendedColumnDef<TableItem>[] = [
     accessorFn: (row) => row.priceFeed,
     header: 'Price Feed',
     enableSorting: true,
+    align: 'right',
     size: 120,
     cell: ({ row }) => {
       const explorerUrl =
@@ -138,7 +135,7 @@ const treasuryColumns: ExtendedColumnDef<TableItem>[] = [
           side='top'
         >
           <div
-            className='flex items-start'
+            className='flex justify-end'
             style={{ width: `${120}px` }}
           >
             <Text

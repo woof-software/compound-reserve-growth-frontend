@@ -1,3 +1,4 @@
+import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useCallback, useMemo, useReducer } from 'react';
 
 import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
@@ -42,6 +43,11 @@ export const useCollateralsFilters = (tableData: TableItem[]) => {
     }),
     INITIAL_FILTER_STATE
   );
+
+  useFiltersSync(selectedOptions, setSelectedOptions, 'cpapr', [
+    'chain',
+    'collateral'
+  ]);
 
   const chainOptions = useMemo(
     () => createFilterOptions(tableData, 'network'),

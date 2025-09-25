@@ -1,4 +1,4 @@
-import { useCallback, useReducer } from 'react';
+import { useReducer } from 'react';
 
 interface SortState {
   key: string;
@@ -19,32 +19,29 @@ export const useCollateralsSort = () => {
     INITIAL_SORT_STATE
   );
 
-  const onKeySelect = useCallback((key: string) => {
+  const onKeySelect = (key: string) => {
     setSortType({ key });
-  }, []);
+  };
 
-  const onTypeSelect = useCallback((type: string) => {
+  const onTypeSelect = (type: string) => {
     setSortType({ type });
-  }, []);
+  };
 
-  const onClearSort = useCallback(() => {
+  const onClearSort = () => {
     setSortType(INITIAL_SORT_STATE);
-  }, []);
+  };
 
-  const applySorting = useCallback(
-    (data: any[]) => {
-      if (!sortType.key) return data;
+  const applySorting = (data: any[]) => {
+    if (!sortType.key) return data;
 
-      return [...data].sort((a, b) => {
-        const aValue = a[sortType.key as keyof typeof a];
-        const bValue = b[sortType.key as keyof typeof b];
+    return [...data].sort((a, b) => {
+      const aValue = a[sortType.key as keyof typeof a];
+      const bValue = b[sortType.key as keyof typeof b];
 
-        const comparison = aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-        return sortType.type === 'asc' ? comparison : -comparison;
-      });
-    },
-    [sortType]
-  );
+      const comparison = aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+      return sortType.type === 'asc' ? comparison : -comparison;
+    });
+  };
 
   return {
     sortType,

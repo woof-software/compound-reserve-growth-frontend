@@ -31,9 +31,8 @@ export const useCollateralsData = ({
     return applySorting(transformed);
   }, [tableData, applyFilters, applySorting]);
 
-  const hasData = useMemo(() => tableData.length > 0, [tableData]);
-
-  const showNoData = useMemo(() => tableData.length === 0, [tableData]);
+  const hasData = tableData.length > 0;
+  const showNoData = tableData.length === 0;
 
   return {
     processedData,
