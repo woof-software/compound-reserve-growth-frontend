@@ -28,11 +28,10 @@ const treasuryColumns: ExtendedColumnDef<TableItem>[] = [
     accessorFn: (row) => row.network,
     header: 'Network',
     enableSorting: true,
-    size: 168,
     cell: ({ row }) => (
       <div className='flex items-center gap-3'>
         <Icon
-          name={row.original.network || 'not-found-icon'}
+          name={row.original.network.toLowerCase() || 'not-found-icon'}
           className='h-6 w-6'
           folder='network'
         />
@@ -151,7 +150,10 @@ const treasuryColumns: ExtendedColumnDef<TableItem>[] = [
   }
 ];
 
-const CollateralsPrice = ({ tableData, sortType }: CollateralsPriceProps) => {
+const CollateralsPriceTable = ({
+  tableData,
+  sortType
+}: CollateralsPriceProps) => {
   const mobileTableData = useMemo(() => {
     if (!sortType?.key) {
       return tableData;
@@ -326,4 +328,4 @@ const CollateralsPrice = ({ tableData, sortType }: CollateralsPriceProps) => {
   );
 };
 
-export default CollateralsPrice;
+export default CollateralsPriceTable;

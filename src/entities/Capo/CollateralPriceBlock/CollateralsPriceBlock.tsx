@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 
-import CollateralsPrice from '@/components/CapoPageTable/CollateralsPrice';
+import CollateralsPriceTable from '@/components/CapoPageTable/CollateralsPriceTable';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { DesktopFilters } from '@/entities/Capo/CollateralPriceBlock/filters/CollateralDesktopFilters';
 import { MobileFilters } from '@/entities/Capo/CollateralPriceBlock/filters/CollateralMobileFilters';
@@ -93,7 +93,7 @@ const CollateralsPriceBlock = ({
         csvData={processedData}
       />
       <View.Condition if={showData}>
-        <CollateralsPrice
+        <CollateralsPriceTable
           sortType={sortType}
           tableData={processedData}
         />

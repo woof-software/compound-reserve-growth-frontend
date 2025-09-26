@@ -65,7 +65,8 @@ const Icon = ({
 
   return (
     <SvgComponent
-      className={cn('fill-current', { 'rounded-full': isRound }, className)}
+      // className={cn('fill-current', { 'rounded-full': isRound }, className)}
+      className={cn({ 'rounded-full': isRound }, className)}
       style={{ color: color ? `var(--${color})` : undefined }}
       {...props}
     />
