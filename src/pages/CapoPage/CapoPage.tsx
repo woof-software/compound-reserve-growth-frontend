@@ -1,30 +1,10 @@
-import React, { useMemo } from 'react';
-
-import SpecificCollateralPrice from '@/components/CapoPageTable/SpecificCollateralPrice';
-import CollateralsPriceBlock from '@/entities/Capo/CollateralsPriceBlock';
+import { useNormalizedTableData } from '@/components/CapoPageTable/lib/useNormalizedTableData';
+import CollateralsPriceBlock from '@/entities/Capo/CollateralPriceBlock/CollateralsPriceBlock';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
-import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
-import { uniqByNestedAddresses } from '@/shared/lib/utils/utils';
-import { TokenData } from '@/shared/types/Treasury/types';
 import Text from '@/shared/ui/Text/Text';
 
 const CapoPage = () => {
-  const {
-    data: treasuryApiResponse,
-    isLoading,
-    isError
-  } = useTreasuryHistory({
-    params: { order: 'DESC' }
-  });
-
-  const treasuryData = useMemo<TokenData[]>(
-    () => treasuryApiResponse || [],
-    [treasuryApiResponse]
-  );
-
-  const uniqData = useMemo(() => {
-    return uniqByNestedAddresses(treasuryData);
-  }, [treasuryData]);
+  const { data, isError, isLoading } = useNormalizedTableData();
 
   useScrollToHash(!isLoading);
 
@@ -50,15 +30,15 @@ const CapoPage = () => {
       <section className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
         <div className='grid gap-3'>
           <CollateralsPriceBlock
-            data={uniqData}
+            tableData={data}
             isError={isError}
             isLoading={isLoading}
           />
-          <SpecificCollateralPrice
-            isLoading={isLoading}
-            isError={isError}
-            data={treasuryData}
-          />
+          {/*<SpecificCollateralPrice*/}
+          {/*  isLoading={isLoading}*/}
+          {/*  isError={isError}*/}
+          {/*  data={treasuryData}*/}
+          {/*/>*/}
         </div>
       </section>
     </div>

@@ -9,7 +9,7 @@ type SetSelectedOptions<T extends string> = (
 ) => void;
 type ObjecEntries = [string, OptionType[] | undefined][];
 
-/*
+/**
   This hook writes and reads URL parameters and implements two-way synchronization of filters. It is used for multiple filtering.
   1) Sets parameters from URLs to filters using a setter and an array of filter keys
   2) Sets filter values in URLs based on filters selected on the client
@@ -81,7 +81,7 @@ export const useFiltersSync = <const T extends string>(
   }, [filtersKey, selectedOptions]);
 };
 
-/*This hook does the same thing as useFiltersSync, but is used for single filtering.*/
+/**This hook does the same thing as useFiltersSync, but is used for single filtering.*/
 export const useFilterSyncSingle = (
   filterId: string,
   filterValue: any,

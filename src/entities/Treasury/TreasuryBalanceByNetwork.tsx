@@ -1,4 +1,3 @@
-import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import React, { useCallback, useMemo, useReducer } from 'react';
 
 import CryptoChart from '@/components/Charts/Bar/Bar';
@@ -7,6 +6,7 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import TreasuryBalanceByNetwork, {
   TreasuryBalanceByNetworkType
 } from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
+import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   capitalizeFirstLetter,
