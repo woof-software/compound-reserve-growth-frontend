@@ -1,10 +1,13 @@
 import { useNormalizedTableData } from '@/components/CapoPageTable/lib/useNormalizedTableData';
-import CollateralsPriceBlock from '@/entities/Capo/CollateralPriceBlock/CollateralsPriceBlock';
+import { CapoSpecificCollateralPrice } from '@/entities/Capo/CapoSpecificCollateralPrice/CapoSpecificCollateralPrice';
+import { useNormalizedChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useNormalizedChartData';
+import CapoCollateralsPriceBlock from '@/entities/Capo/CollateralPriceBlock/CapoCollateralsPriceBlock';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import Text from '@/shared/ui/Text/Text';
 
 const CapoPage = () => {
   const { data, isError, isLoading } = useNormalizedTableData();
+  const { chartData } = useNormalizedChartData();
 
   useScrollToHash(!isLoading);
 
@@ -29,16 +32,12 @@ const CapoPage = () => {
       </section>
       <section className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
         <div className='grid gap-3'>
-          <CollateralsPriceBlock
+          <CapoCollateralsPriceBlock
             tableData={data}
             isError={isError}
             isLoading={isLoading}
           />
-          {/*<SpecificCollateralPrice*/}
-          {/*  isLoading={isLoading}*/}
-          {/*  isError={isError}*/}
-          {/*  data={treasuryData}*/}
-          {/*/>*/}
+          <CapoSpecificCollateralPrice rawData={chartData} />
         </div>
       </section>
     </div>

@@ -10,17 +10,9 @@ const capoApiResponseSchema = z.object({
     z.object({
       oa: z.string(),
       on: z.string(),
-      cId: z.number(),
       d: z.number(),
-      ar: z.string(),
-      mr: z.string(),
-      xr: z.string(),
-      ap: z.string(),
-      mp: z.string(),
-      xp: z.string(),
       cp: z.string(),
-      cc: z.number(),
-      tc: z.number(),
+      lp: z.string(),
       aId: z.number()
     })
   )
@@ -37,18 +29,10 @@ export const useCapoApiData = () => {
       return data?.data?.data?.map((item) => ({
         oracleAddress: item?.oa,
         oracleName: item?.on,
-        chainId: item?.cId,
         dateOfAggregation: item?.d,
-        averageRatio: item?.ar,
-        minimumRatio: item?.mr,
-        maximumRatio: item?.xr,
         capValue: item?.cp,
-        averagePrice: item?.ap,
-        minimumPrice: item?.mp,
-        maximumPrice: item?.xp,
-        countOfCappedEntries: item?.cc,
-        totalCountOfEntries: item?.tc,
-        assetId: item?.aId
+        assetId: item?.aId,
+        price: item?.lp
       }));
     }
   });
