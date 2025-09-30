@@ -29,7 +29,7 @@ export const useChartDataProcessor = ({
   hasData: boolean;
 } => {
   const chartSeries = useMemo((): LineChartSeries[] => {
-    if (!rawData.length) return [];
+    if (!rawData?.length) return [];
 
     const filteredData = rawData.filter((item) => {
       return Object.entries(filters).every(([key, selectedValues]) => {

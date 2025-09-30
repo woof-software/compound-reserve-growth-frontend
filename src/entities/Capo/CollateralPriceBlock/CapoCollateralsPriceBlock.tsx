@@ -32,7 +32,7 @@ export interface CollateralsPriceBlockProps {
   tableData: TableItem[];
 }
 
-const CollateralsPriceBlock = ({
+const CapoCollateralsPriceBlock = ({
   isLoading = false,
   isError = false,
   tableData
@@ -105,4 +105,4 @@ const CollateralsPriceBlock = ({
   );
 };
 
-export default CollateralsPriceBlock;
+export default CapoCollateralsPriceBlock;

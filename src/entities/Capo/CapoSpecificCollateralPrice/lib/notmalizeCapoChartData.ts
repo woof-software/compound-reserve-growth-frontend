@@ -1,4 +1,4 @@
-import { Asset, CapoItem, Source, TableItem } from '@/shared/types/Capo/types';
+import { Asset, CapoItem, Source } from '@/shared/types/Capo/types';
 
 export const createSourcesMap = (sourcesData: {
   sources: Source[];
@@ -18,10 +18,10 @@ export const createSourcesMap = (sourcesData: {
   return { sourcesMap, assetsMap };
 };
 
-export const normalizeCapoData = (
+export const normalizeCapoChartData = (
   capoData: CapoItem[],
   sourcesData: { sources: Source[]; assets: Asset[] }
-): TableItem[] => {
+) => {
   if (!capoData || !sourcesData) {
     return [];
   }
@@ -33,12 +33,12 @@ export const normalizeCapoData = (
     const asset = assetsMap.get(capoItem.assetId);
 
     return {
+      assetId: capoItem?.assetId,
       network: source?.network || '',
       collateral: asset?.symbol || '',
-      collateralPrice: capoItem?.price,
-      priceRestriction: capoItem?.capValue,
-      priceFeed: capoItem?.oracleAddress,
-      oracleName: capoItem?.oracleName
+      price: capoItem?.price,
+      capValue: capoItem?.capValue,
+      dateOfAggregation: capoItem?.dateOfAggregation
     };
   });
 };
