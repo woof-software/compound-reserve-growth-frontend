@@ -8,10 +8,12 @@ import {
 import { useChartFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useChartFilters';
 import { useCollateralChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useCollateralChartData';
 import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { NormalizedChartData } from '@/shared/types/Capo/types';
 import Card from '@/shared/ui/Card/Card';
+import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import SingleSelect from '@/shared/ui/SingleSelect/SingleSelect';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
@@ -19,8 +21,7 @@ interface CapoSpecificCollateralPriceProps {
   rawData: NormalizedChartData[];
 }
 /* TODO:
-    - fix any type at Line component (custom option and custom tooltip)
-    - csv export logic
+    - fix context type for Line component customTooltipFormatter
 *   */
 export const CapoSpecificCollateralPrice = (
   props: CapoSpecificCollateralPriceProps
@@ -57,13 +58,13 @@ export const CapoSpecificCollateralPrice = (
     setSelectedCollateral
   );
 
-  // const { csvData, csvFilename } = useCSVExport({
-  //   chartSeries: chartSeries,
-  //   barSize,
-  //   groupBy: groupBy(),
-  //   filePrefix: 'Capo_Specific_Collateral_Price',
-  //   aggregationType: 'sum'
-  // });
+  const { csvData, csvFilename } = useCSVExport({
+    chartSeries: chartSeries,
+    barSize,
+    groupBy: groupBy(),
+    filePrefix: 'Capo_Specific_Collateral_Price',
+    aggregationType: 'sum'
+  });
 
   const {
     chartRef,
@@ -115,6 +116,10 @@ export const CapoSpecificCollateralPrice = (
           onChange={setSelectedCollateral}
           placeholder='Collateral'
         />
+        <CSVDownloadButton
+          data={csvData}
+          filename={csvFilename}
+        />
       </div>
       {hasData && (
         <Line
@@ -133,6 +138,8 @@ export const CapoSpecificCollateralPrice = (
           onDeselectAll={onDeselectAll}
           onShowEvents={onShowEvents}
           onEventsData={onEventsData}
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
           customTooltipFormatter={customFormatter}
           customOptions={customOptions}
         />
