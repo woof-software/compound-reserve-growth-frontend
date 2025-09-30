@@ -1,3 +1,4 @@
+import SingleSelect from '@/shared/ui/SingleSelect/SingleSelect';
 import React from 'react';
 
 import Line from '@/components/Charts/Line/Line';
@@ -11,12 +12,17 @@ import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { NormalizedChartData } from '@/shared/types/Capo/types';
 import Card from '@/shared/ui/Card/Card';
-import SingleDropdown from '@/shared/ui/SingleDropdown/SingleDropdown';
+import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
 interface CapoSpecificCollateralPriceProps {
   rawData: NormalizedChartData[];
 }
-// TODO: fix any type at Line component (custom option and custom tooltip)
+/* TODO:
+    - fix any type at Line component (custom option and custom tooltip)
+    - new component for dropdown
+    - csv export logic
+    - fix filters
+*   */
 export const CapoSpecificCollateralPrice = (
   props: CapoSpecificCollateralPriceProps
 ) => {
@@ -26,23 +32,27 @@ export const CapoSpecificCollateralPrice = (
     selectedCollateral,
     setSelectedChain,
     setSelectedCollateral,
-    isChainDropdownOpen,
-    isCollateralDropdownOpen,
-    setIsChainDropdownOpen,
-    setIsCollateralDropdownOpen,
     chainOptions,
     collateralOptions,
     filteredData,
     groupBy
   } = useChartFilters(rawData);
 
-  const { barSize } = useChartControls({
+  const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
 
   const { chartSeries, hasData } = useCollateralChartData({
     rawData: filteredData
   });
+
+  // const { csvData, csvFilename } = useCSVExport({
+  //   chartSeries: chartSeries,
+  //   barSize,
+  //   groupBy: groupBy(),
+  //   filePrefix: 'Capo_Specific_Collateral_Price',
+  //   aggregationType: 'sum'
+  // });
 
   const {
     chartRef,
@@ -72,29 +82,26 @@ export const CapoSpecificCollateralPrice = (
       }}
     >
       <div className='hidden items-center justify-end gap-2 px-10 py-3 lg:flex lg:px-0'>
-        <SingleDropdown
-          options={chainOptions}
-          selectedValue={selectedChain}
-          isOpen={isChainDropdownOpen}
-          onOpen={() => setIsChainDropdownOpen(true)}
-          onClose={() => setIsChainDropdownOpen(false)}
-          onSelect={(value) => {
-            setSelectedChain(value);
-            setIsChainDropdownOpen(false);
+        <TabsGroup
+          className={{
+            container: 'w-full sm:w-auto',
+            list: 'w-full sm:w-auto'
           }}
-          triggerContentClassName='min-w-[120px]'
+          tabs={['D', 'W', 'M']}
+          value={barSize}
+          onTabChange={onBarSizeChange}
         />
-        <SingleDropdown
+        <SingleSelect
+          options={chainOptions}
+          value={selectedChain || chainOptions[0]}
+          onChange={setSelectedChain}
+          placeholder='Chain'
+        />
+        <SingleSelect
           options={collateralOptions}
-          selectedValue={selectedCollateral}
-          isOpen={isCollateralDropdownOpen}
-          onOpen={() => setIsCollateralDropdownOpen(true)}
-          onClose={() => setIsCollateralDropdownOpen(false)}
-          onSelect={(value) => {
-            setSelectedCollateral(value);
-            setIsCollateralDropdownOpen(false);
-          }}
-          triggerContentClassName='min-w-[120px]'
+          value={selectedCollateral || collateralOptions[0]}
+          onChange={setSelectedCollateral}
+          placeholder='Collateral'
         />
       </div>
       {hasData && (
