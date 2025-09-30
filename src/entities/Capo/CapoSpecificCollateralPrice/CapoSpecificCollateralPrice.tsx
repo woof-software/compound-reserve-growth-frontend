@@ -1,56 +1,48 @@
-import React, { useReducer } from 'react';
+import React from 'react';
 
-import LineChart from '@/components/Charts/Line/Line';
+import Line from '@/components/Charts/Line/Line';
+import {
+  customFormatter,
+  customOptions
+} from '@/entities/Capo/CapoSpecificCollateralPrice/lib/chartConfig';
+import { useChartFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useChartFilters';
 import { useCollateralChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useCollateralChartData';
 import { useChartControls } from '@/shared/hooks/useChartControls';
-import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
-import { OptionType } from '@/shared/types/types';
+import { NormalizedChartData } from '@/shared/types/Capo/types';
 import Card from '@/shared/ui/Card/Card';
+import SingleDropdown from '@/shared/ui/SingleDropdown/SingleDropdown';
 
 interface CapoSpecificCollateralPriceProps {
-  rawData: any[];
+  rawData: NormalizedChartData[];
 }
-
+// TODO: fix any type at Line component (custom option and custom tooltip)
 export const CapoSpecificCollateralPrice = (
   props: CapoSpecificCollateralPriceProps
 ) => {
   const { rawData } = props;
-
-  const [selectedOptions, setSelectedOptions] = useReducer(
-    (prev, next) => ({
-      ...prev,
-      ...next
-    }),
-    {
-      chain: [] as OptionType[],
-      collateral: [] as OptionType[]
-    }
-  );
-
-  useFiltersSync(selectedOptions, setSelectedOptions, 'cscp', [
-    'chain',
-    'collateral'
-  ]);
+  const {
+    selectedChain,
+    selectedCollateral,
+    setSelectedChain,
+    setSelectedCollateral,
+    isChainDropdownOpen,
+    isCollateralDropdownOpen,
+    setIsChainDropdownOpen,
+    setIsCollateralDropdownOpen,
+    chainOptions,
+    collateralOptions,
+    filteredData,
+    groupBy
+  } = useChartFilters(rawData);
 
   const { barSize } = useChartControls({
     initialBarSize: 'D'
   });
 
-  const groupBy = (): string => {
-    if (selectedOptions.chain.length > 0) return 'chain';
-    if (selectedOptions.collateral.length > 0) return 'collateral';
-    return 'none';
-  };
-
   const { chartSeries, hasData } = useCollateralChartData({
-    rawData,
-    selectedAsset: 14
+    rawData: filteredData
   });
-  // console.log(chartSeries);
-  // console.log(rawData);
-  // console.log('raw data', rawData);
-  // console.log('chart data', chartSeries);
 
   const {
     chartRef,
@@ -71,9 +63,42 @@ export const CapoSpecificCollateralPrice = (
   });
 
   return (
-    <Card title={'Specific Collateral Price against Price Restriction'}>
+    <Card
+      title={'Specific Collateral Price against Price Restriction'}
+      className={{
+        loading: 'min-h-[inherit]',
+        container: 'min-h-[571px] rounded-lg',
+        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-5 lg:px-10 lg:pb-10'
+      }}
+    >
+      <div className='hidden items-center justify-end gap-2 px-10 py-3 lg:flex lg:px-0'>
+        <SingleDropdown
+          options={chainOptions}
+          selectedValue={selectedChain}
+          isOpen={isChainDropdownOpen}
+          onOpen={() => setIsChainDropdownOpen(true)}
+          onClose={() => setIsChainDropdownOpen(false)}
+          onSelect={(value) => {
+            setSelectedChain(value);
+            setIsChainDropdownOpen(false);
+          }}
+          triggerContentClassName='min-w-[120px]'
+        />
+        <SingleDropdown
+          options={collateralOptions}
+          selectedValue={selectedCollateral}
+          isOpen={isCollateralDropdownOpen}
+          onOpen={() => setIsCollateralDropdownOpen(true)}
+          onClose={() => setIsCollateralDropdownOpen(false)}
+          onSelect={(value) => {
+            setSelectedCollateral(value);
+            setIsCollateralDropdownOpen(false);
+          }}
+          triggerContentClassName='min-w-[120px]'
+        />
+      </div>
       {hasData && (
-        <LineChart
+        <Line
           key={`${groupBy()}`}
           data={chartSeries}
           groupBy={groupBy()}
@@ -89,6 +114,8 @@ export const CapoSpecificCollateralPrice = (
           onDeselectAll={onDeselectAll}
           onShowEvents={onShowEvents}
           onEventsData={onEventsData}
+          customTooltipFormatter={customFormatter}
+          customOptions={customOptions}
         />
       )}
       {!hasData && (

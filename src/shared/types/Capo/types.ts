@@ -33,3 +33,12 @@ export interface CapoItem {
   assetId: number;
   price: string;
 }
+
+export interface NormalizedChartData {
+  assetId: number;
+  network: string;
+  collateral: string;
+  price: string;
+  capValue: string;
+  dateOfAggregation: number;
+}

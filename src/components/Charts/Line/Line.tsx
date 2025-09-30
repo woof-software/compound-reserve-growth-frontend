@@ -52,6 +52,10 @@ interface LineChartProps {
 
   className?: string;
 
+  customTooltipFormatter?: (context: any, groupBy: string) => string;
+
+  customOptions?: any;
+
   onAllSeriesHidden: (value: boolean) => void;
 
   onSelectAll: () => void;
@@ -73,6 +77,8 @@ const LineChart: FC<LineChartProps> = ({
   aggregatedSeries,
   areAllSeriesHidden,
   className,
+  customTooltipFormatter,
+  customOptions,
   onAllSeriesHidden,
   onSelectAll,
   onDeselectAll,
@@ -134,11 +140,10 @@ const LineChart: FC<LineChartProps> = ({
     if (!chart) return;
 
     chart.series.forEach((s) => {
-      (s as any).group?.attr({ opacity: 1 });
-
-      (s as any).markerGroup?.attr?.({ opacity: 1 });
-
-      (s as any).dataLabelsGroup?.attr?.({ opacity: 1 });
+      (s as any).group
+        ?.attr({ opacity: 1 })(s as any)
+        .markerGroup?.attr?.({ opacity: 1 })(s as any)
+        .dataLabelsGroup?.attr?.({ opacity: 1 });
     });
   }, []);
 
@@ -179,6 +184,55 @@ const LineChart: FC<LineChartProps> = ({
     [isLastActiveLegend]
   );
 
+  const defaultTooltipFormatter = useCallback(
+    (context: any) => {
+      const header = `<div style="font-weight: 500; margin-bottom: 12px; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${Highcharts.dateFormat('%B %e, %Y', context.x as number)}</div>`;
+
+      if (groupBy === 'none') {
+        const point = context.points?.find(
+          (p: { series: { type: string } }) => p.series.type === 'area'
+        );
+        if (!point) return '';
+        return `${header}<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 8px; height: 8px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${Highcharts.numberFormat(point.y ?? 0, 0, '.', ',')}</span></div>`;
+      }
+
+      const dataPoints = (context.points || []).filter(
+        (p: { series: { type: string } }) => p.series.type !== 'scatter'
+      );
+      const sortedPoints = [...dataPoints].sort(
+        (a, b) => (b.y ?? 0) - (a.y ?? 0)
+      );
+      let total = 0;
+      sortedPoints.forEach((point) => {
+        total += point.y ?? 0;
+      });
+      let body = '';
+      if (groupBy === 'Market') {
+        const midPoint = Math.ceil(sortedPoints.length / 2);
+        const col1Points = sortedPoints.slice(0, midPoint);
+        const col2Points = sortedPoints.slice(midPoint);
+        const renderColumn = (points: Highcharts.Point[]) =>
+          points
+            .map(
+              (point) =>
+                `<div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="white-space: nowrap; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span><span style="font-weight: 400; text-align: right; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(point.y ?? 0)}</span></div>`
+            )
+            .join('');
+        body = `<div style="display: flex; gap: 24px;"><div style="display: flex; flex-direction: column;">${renderColumn(col1Points)}</div><div style="display: flex; flex-direction: column;">${renderColumn(col2Points)}</div></div>`;
+      } else {
+        body = sortedPoints
+          .map(
+            (point) =>
+              `<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(point.y ?? 0)}</span></div>`
+          )
+          .join('');
+      }
+      const footer = `<div style=" padding-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 16px;"><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">Total</span><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(total)}</span></div>`;
+      return header + body + footer;
+    },
+    [groupBy]
+  );
+
   const options: Highcharts.Options = useMemo(() => {
     const yPositions = [40, 60, 80, 100, 120, 140, 160, 180];
     const eventPlotLines = showEvents
@@ -211,7 +265,7 @@ const LineChart: FC<LineChartProps> = ({
       });
     };
 
-    return {
+    const baseOptions: Highcharts.Options = {
       chart: {
         type: 'area',
         backgroundColor: 'transparent',
@@ -325,45 +379,10 @@ const LineChart: FC<LineChartProps> = ({
         },
         shared: true,
         formatter: function () {
-          const header = `<div style="font-weight: 500; margin-bottom: 12px; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${Highcharts.dateFormat('%B %e, %Y', this.x as number)}</div>`;
-          if (groupBy === 'none') {
-            const point = this.points?.find((p) => p.series.type === 'area');
-            if (!point) return '';
-            return `${header}<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 8px; height: 8px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${Highcharts.numberFormat(point.y ?? 0, 0, '.', ',')}</span></div>`;
+          if (customTooltipFormatter) {
+            return customTooltipFormatter(this, groupBy);
           }
-          const dataPoints = (this.points || []).filter(
-            (p) => p.series.type !== 'scatter'
-          );
-          const sortedPoints = [...dataPoints].sort(
-            (a, b) => (b.y ?? 0) - (a.y ?? 0)
-          );
-          let total = 0;
-          sortedPoints.forEach((point) => {
-            total += point.y ?? 0;
-          });
-          let body = '';
-          if (groupBy === 'Market') {
-            const midPoint = Math.ceil(sortedPoints.length / 2);
-            const col1Points = sortedPoints.slice(0, midPoint);
-            const col2Points = sortedPoints.slice(midPoint);
-            const renderColumn = (points: Highcharts.Point[]) =>
-              points
-                .map(
-                  (point) =>
-                    `<div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="white-space: nowrap; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span><span style="font-weight: 400; text-align: right; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(point.y ?? 0)}</span></div>`
-                )
-                .join('');
-            body = `<div style="display: flex; gap: 24px;"><div style="display: flex; flex-direction: column;">${renderColumn(col1Points)}</div><div style="display: flex; flex-direction: column;">${renderColumn(col2Points)}</div></div>`;
-          } else {
-            body = sortedPoints
-              .map(
-                (point) =>
-                  `<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(point.y ?? 0)}</span></div>`
-              )
-              .join('');
-          }
-          const footer = `<div style=" padding-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 16px;"><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">Total</span><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(total)}</span></div>`;
-          return header + body + footer;
+          return defaultTooltipFormatter(this);
         }
       },
       legend: { enabled: false },
@@ -391,7 +410,20 @@ const LineChart: FC<LineChartProps> = ({
       scrollbar: { enabled: false },
       rangeSelector: { enabled: false }
     };
-  }, [aggregatedSeries, groupBy, isLegendEnabled, eventsData, showEvents]);
+
+    return customOptions
+      ? Highcharts.merge(baseOptions, customOptions)
+      : baseOptions;
+  }, [
+    aggregatedSeries,
+    groupBy,
+    isLegendEnabled,
+    eventsData,
+    showEvents,
+    customTooltipFormatter,
+    defaultTooltipFormatter,
+    customOptions
+  ]);
 
   useEffect(() => {
     const eventsApiUrl =

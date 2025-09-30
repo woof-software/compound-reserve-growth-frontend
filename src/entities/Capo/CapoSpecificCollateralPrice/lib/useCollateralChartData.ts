@@ -1,13 +1,6 @@
 import { useMemo } from 'react';
 
-export interface CollateralPriceData {
-  oracleAddress: string;
-  oracleName: string;
-  dateOfAggregation: number;
-  capValue: string;
-  assetId: number;
-  price: string;
-}
+import { NormalizedChartData } from '@/shared/types/Capo/types';
 
 export interface CollateralChartSeries {
   name: string;
@@ -15,8 +8,8 @@ export interface CollateralChartSeries {
 }
 
 interface UseCollateralChartDataConfig {
-  rawData: CollateralPriceData[];
-  groupBy?: 'oracle' | 'asset' | 'none';
+  rawData: NormalizedChartData[];
+  groupBy?: 'asset' | 'none';
   selectedOracle?: string;
   selectedAsset?: number;
 }
@@ -34,7 +27,6 @@ export const useCollateralChartData = ({
     if (!rawData?.length) return [];
 
     const filteredData = rawData.filter((item) => {
-      if (selectedOracle && item.oracleAddress !== selectedOracle) return false;
       if (selectedAsset !== undefined && item.assetId !== selectedAsset)
         return false;
       return true;
@@ -89,8 +81,7 @@ export const useCollateralChartData = ({
       const price = parseFloat(item.price);
       const cap = parseFloat(item.capValue);
 
-      const key =
-        groupBy === 'oracle' ? item.oracleName : `Asset ${item.assetId}`;
+      const key = `Asset ${item.assetId}`;
 
       if (!aggregatedData.has(key)) {
         aggregatedData.set(key, {
