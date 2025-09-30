@@ -1,11 +1,4 @@
-import React, {
-  Dispatch,
-  FC,
-  Ref,
-  SetStateAction,
-  useRef,
-  useState
-} from 'react';
+import React, { FC, Ref, useRef, useState } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
@@ -24,7 +17,7 @@ type Option = {
 type SingleSelectProps = {
   options: Option[];
   value: Option | null;
-  onChange: Dispatch<SetStateAction<Option | null>>;
+  onChange: (value: Option | null) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
@@ -90,6 +83,9 @@ const SingleSelectTrigger = ({
     <div
       className={cn(
         'bg-custom-trigger flex h-[32px] items-center gap-1.5 rounded-lg p-1.5 pr-3',
+        {
+          'pr-1.5': !value?.label
+        },
         className
       )}
     >

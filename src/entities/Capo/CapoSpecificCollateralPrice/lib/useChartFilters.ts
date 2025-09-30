@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { NormalizedChartData } from '@/shared/types/Capo/types';
 
@@ -19,21 +19,98 @@ const getOptions = <T extends Array<any>>(arr: T, key: string) => {
     .sort((a, b) => a.label.localeCompare(b.label));
 };
 
+const findOptionById = (
+  options: Option[],
+  id: string | null
+): Option | null => {
+  if (!id) return null;
+  return options.find((opt) => opt.id === id) || null;
+};
+
 export const useChartFilters = (rawData: NormalizedChartData[]) => {
+  const chainOptions = getOptions(rawData, 'network');
+  const collateralOptions = getOptions(rawData, 'collateral');
+
   const [selectedChain, setSelectedChain] = useState<Option | null>(null);
   const [selectedCollateral, setSelectedCollateral] = useState<Option | null>(
     null
   );
 
-  const chainOptions = getOptions(rawData, 'network');
-  const collateralOptions = getOptions(rawData, 'collateral');
+  const setSelectedChainWrapper = (value: Option | null) => {
+    if (!value) {
+      setSelectedChain(null);
+      return;
+    }
 
-  const filteredData = rawData.filter((item) => {
-    const matchesChain = !selectedChain || item.network === selectedChain?.id;
-    const matchesCollateral =
-      !selectedCollateral || item.collateral === selectedCollateral?.id;
-    return matchesChain && matchesCollateral;
-  });
+    if (typeof value === 'string') {
+      const option = findOptionById(chainOptions, value);
+      if (option) {
+        setSelectedChain(option);
+      } else if (chainOptions.length === 0) {
+        setPendingChainId(value);
+      }
+    } else {
+      setSelectedChain(value);
+    }
+  };
+
+  const setSelectedCollateralWrapper = (value: Option | null) => {
+    if (!value) {
+      setSelectedCollateral(null);
+      return;
+    }
+
+    if (typeof value === 'string') {
+      const option = findOptionById(collateralOptions, value);
+      if (option) {
+        setSelectedCollateral(option);
+      } else if (collateralOptions.length === 0) {
+        setPendingCollateralId(value);
+      }
+    } else {
+      setSelectedCollateral(value);
+    }
+  };
+
+  const [pendingChainId, setPendingChainId] = useState<string | null>(null);
+  const [pendingCollateralId, setPendingCollateralId] = useState<string | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (chainOptions.length > 0 && pendingChainId && !selectedChain) {
+      const option = findOptionById(chainOptions, pendingChainId);
+      if (option) {
+        setSelectedChain(option);
+        setPendingChainId(null);
+      }
+    }
+  }, [chainOptions, pendingChainId, selectedChain]);
+
+  useEffect(() => {
+    if (
+      collateralOptions.length > 0 &&
+      pendingCollateralId &&
+      !selectedCollateral
+    ) {
+      const option = findOptionById(collateralOptions, pendingCollateralId);
+      if (option) {
+        setSelectedCollateral(option);
+        setPendingCollateralId(null);
+      }
+    }
+  }, [collateralOptions, pendingCollateralId, selectedCollateral]);
+
+  const filteredData =
+    !selectedChain && !selectedCollateral
+      ? []
+      : rawData.filter((item) => {
+          const matchesChain =
+            !selectedChain || item.network === selectedChain?.id;
+          const matchesCollateral =
+            !selectedCollateral || item.collateral === selectedCollateral?.id;
+          return matchesChain && matchesCollateral;
+        });
 
   const groupBy = (): string => {
     if (selectedChain && selectedCollateral) return 'both';
@@ -42,13 +119,11 @@ export const useChartFilters = (rawData: NormalizedChartData[]) => {
     return 'none';
   };
 
-  console.log(filteredData);
-
   return {
     selectedChain,
-    setSelectedChain,
+    setSelectedChain: setSelectedChainWrapper,
     selectedCollateral,
-    setSelectedCollateral,
+    setSelectedCollateral: setSelectedCollateralWrapper,
     chainOptions,
     collateralOptions,
     filteredData,

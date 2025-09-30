@@ -1,4 +1,3 @@
-import SingleSelect from '@/shared/ui/SingleSelect/SingleSelect';
 import React from 'react';
 
 import Line from '@/components/Charts/Line/Line';
@@ -9,9 +8,11 @@ import {
 import { useChartFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useChartFilters';
 import { useCollateralChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useCollateralChartData';
 import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { NormalizedChartData } from '@/shared/types/Capo/types';
 import Card from '@/shared/ui/Card/Card';
+import SingleSelect from '@/shared/ui/SingleSelect/SingleSelect';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
 interface CapoSpecificCollateralPriceProps {
@@ -19,9 +20,7 @@ interface CapoSpecificCollateralPriceProps {
 }
 /* TODO:
     - fix any type at Line component (custom option and custom tooltip)
-    - new component for dropdown
     - csv export logic
-    - fix filters
 *   */
 export const CapoSpecificCollateralPrice = (
   props: CapoSpecificCollateralPriceProps
@@ -45,6 +44,18 @@ export const CapoSpecificCollateralPrice = (
   const { chartSeries, hasData } = useCollateralChartData({
     rawData: filteredData
   });
+
+  useFilterSyncSingle(
+    'capoSpecificCollateralPriceChain',
+    selectedChain?.id,
+    setSelectedChain
+  );
+
+  useFilterSyncSingle(
+    'capoSpecificCollateralPriceCollateral',
+    selectedCollateral?.id,
+    setSelectedCollateral
+  );
 
   // const { csvData, csvFilename } = useCSVExport({
   //   chartSeries: chartSeries,
@@ -74,6 +85,7 @@ export const CapoSpecificCollateralPrice = (
 
   return (
     <Card
+      id='specific-collateral-price-against-price-restriction'
       title={'Specific Collateral Price against Price Restriction'}
       className={{
         loading: 'min-h-[inherit]',
@@ -93,13 +105,13 @@ export const CapoSpecificCollateralPrice = (
         />
         <SingleSelect
           options={chainOptions}
-          value={selectedChain || chainOptions[0]}
+          value={selectedChain}
           onChange={setSelectedChain}
           placeholder='Chain'
         />
         <SingleSelect
           options={collateralOptions}
-          value={selectedCollateral || collateralOptions[0]}
+          value={selectedCollateral}
           onChange={setSelectedCollateral}
           placeholder='Collateral'
         />
