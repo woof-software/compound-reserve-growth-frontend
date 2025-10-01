@@ -1,7 +1,7 @@
 import { JSX } from 'react';
 
 import CapoPage from '@/pages/CapoPage/CapoPage';
-import InsentivePage from '@/pages/InsentivePage/InsentivePage';
+import IncentivePage from '@/pages/InsentivePage/IncentivePage';
 import OEVPage from '@/pages/OEVPage/OEVPage';
 import RevenuePage from '@/pages/RevenuePage/RevenuePage';
 import RunwayPage from '@/pages/RunwayPage/RunwayPage';
@@ -55,7 +55,7 @@ export const routesConfig: Record<commonRoutes, RouteConfig> = {
   },
   [commonRoutes.INCENTIVES]: {
     path: commonRoutes.INCENTIVES,
-    element: <InsentivePage />
+    element: <IncentivePage />
   },
   [commonRoutes.OEV]: {
     path: commonRoutes.OEV,

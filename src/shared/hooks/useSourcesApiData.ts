@@ -34,7 +34,9 @@ const sourcesApiResponseSchema = z.object({
 export const useSourcesApiData = () => {
   return useQuery({
     queryKey: ['source-api-data'],
-    queryFn: () => $api.get(SOURCE_API_URL, sourcesApiResponseSchema),
-    select: (data) => data?.data
+    queryFn: async () => {
+      const response = await $api.get(SOURCE_API_URL, sourcesApiResponseSchema);
+      return response.data;
+    }
   });
 };

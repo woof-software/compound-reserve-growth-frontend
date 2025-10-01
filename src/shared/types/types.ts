@@ -1,5 +1,3 @@
-import { Source } from '@/shared/types/Treasury/types';
-
 export type FilterItem = {
   id: string;
 
@@ -47,4 +45,22 @@ export enum SourceType {
   AVANTGARDE_TREASURY_GROWTH_PROPOSAL = 'Avantgarde Treasury Growth Proposal',
   AERA_COMPOUND_RESERVES = 'Aera Compound Reserves',
   AERA_VENDORS_VAULT = 'Aera Vendors Vault'
+}
+
+export interface Source {
+  id: number;
+  address: string;
+  network: string;
+  type: string;
+  market: string | null;
+  assetId: number;
+}
+
+export interface Asset {
+  id: number;
+  address: string;
+  decimals: number;
+  symbol: string;
+  network: string;
+  type: string;
 }
