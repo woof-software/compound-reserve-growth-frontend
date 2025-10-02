@@ -155,7 +155,11 @@ const DataTable = <T,>({
                           'cursor-pointer select-none',
                         headerCellClassName
                       )}
-                      style={{ width: header.column.columnDef.size }}
+                      style={{
+                        width: header.column.columnDef.size,
+                        maxWidth: header.column.columnDef.maxSize,
+                        minWidth: header.column.columnDef.minSize
+                      }}
                       onClick={
                         enableSorting
                           ? header.column.getToggleSortingHandler()
@@ -239,7 +243,11 @@ const DataTable = <T,>({
                           getAlignmentClass(columnAlign),
                           cellClassName
                         )}
-                        style={{ width: cell.column.columnDef.size }}
+                        style={{
+                          width: cell.column.columnDef.size,
+                          maxWidth: cell.column.columnDef.maxSize,
+                          minWidth: cell.column.columnDef.minSize
+                        }}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
