@@ -62,7 +62,7 @@ const treasuryColumns: ExtendedColumnDef<TableItem>[] = [
     enableSorting: true,
     cell: ({ row }) => (
       <Text size='13'>
-        {formatLargeNumber(Number(row.original.collateralPrice), 1)}
+        ${formatLargeNumber(Number(row.original.collateralPrice), 1)}
       </Text>
     )
   },
@@ -73,7 +73,7 @@ const treasuryColumns: ExtendedColumnDef<TableItem>[] = [
     enableSorting: true,
     cell: ({ row }) => (
       <Text size='13'>
-        {formatLargeNumber(Number(row.original.priceRestriction), 1)}
+        ${formatLargeNumber(Number(row.original.priceRestriction), 1)}
       </Text>
     )
   },
@@ -261,7 +261,7 @@ const CollateralsPriceTable = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatLargeNumber(Number(row.collateralPrice), 1)}
+                    ${formatLargeNumber(Number(row.collateralPrice), 1)}
                   </Text>
                 </div>
                 <div className='grid w-full'>
