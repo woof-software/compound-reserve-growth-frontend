@@ -105,6 +105,22 @@ const Filter: FC<FilterProps> = ({
     setSelectedKey(null);
   }, [onClose]);
 
+  const onSelectAll = () => {
+    if (!activeFilter) return;
+
+    const setFilterValue = activeFilter.onChange;
+
+    if (!setFilterValue) return;
+
+    const selectedItemsNumber = activeFilter.selectedOptions.length ?? 0;
+
+    const relatedOptions = filterOptions.find(({ id }) => id === selectedKey);
+
+    setFilterValue(
+      selectedItemsNumber > 0 ? [] : (relatedOptions?.options ?? [])
+    );
+  };
+
   return (
     <Drawer
       isOpen={isOpen}
@@ -222,7 +238,7 @@ const Filter: FC<FilterProps> = ({
             </div>
           </View.Condition>
         </View.Condition>
-        <div className='hide-scrollbar mt-8 max-h-[450px] overflow-y-auto'>
+        <div className='hide-scrollbar mt-8 max-h-80 overflow-y-auto'>
           <Each
             data={filteredOptions}
             render={(option, index) => {
@@ -260,6 +276,15 @@ const Filter: FC<FilterProps> = ({
               );
             }}
           />
+        </div>
+        <div className='w-full px-2 pt-8 pb-4'>
+          <Button
+            className='text-primary-14 flex w-full items-center justify-center rounded-lg text-[11px] font-medium'
+            onClick={onSelectAll}
+          >
+            {!!activeFilter?.selectedOptions?.length && 'Clear Selection'}
+            {!activeFilter?.selectedOptions?.length && 'Select All'}
+          </Button>
         </div>
       </View.Condition>
     </Drawer>
