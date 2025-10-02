@@ -313,7 +313,7 @@ export const groupByTypeLast30Days = <T extends ResponseDataType>(
     .filter((item) => item.date >= threshold)
     .reduce<Record<string, T[]>>(
       (acc, item) => {
-        const type = item.source.asset.type ?? 'Unknown';
+        const type = item.source.type ?? 'Unknown';
         if (!acc[type]) acc[type] = [];
         acc[type].push(item);
         return acc;
