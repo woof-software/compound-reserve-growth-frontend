@@ -1,11 +1,16 @@
+import { useState } from 'react';
+
+import MetricBlock from '@/entities/Insentive/MetricBlock/MetricBlock';
 import { useIncentivesApiData } from '@/shared/hooks/useIncentivesApiData';
 import { useSourceCombinator } from '@/shared/hooks/useSourceCombinator';
+import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 
 const IncentivePage = () => {
+  const [activeTab, setActiveTab] = useState<string>('Day');
   const incentivesQuery = useIncentivesApiData();
 
-  const result = useSourceCombinator(
+  const combinedIncentivesData = useSourceCombinator(
     incentivesQuery?.data,
     (item, { sourcesMap }) => {
       const { sourceId, ...options } = item;
@@ -16,8 +21,6 @@ const IncentivePage = () => {
       return { ...options, source };
     }
   );
-
-  console.log(result);
 
   return (
     <div className='flex flex-col gap-6 md:gap-[40px] xl:gap-[50px]'>
@@ -47,19 +50,17 @@ const IncentivePage = () => {
             >
               Daily Incentives
             </Text>
-            {/*<TabsGroup*/}
-            {/*  tabs={['Days', 'Year']}*/}
-            {/*  value={tabValue}*/}
-            {/*  onTabChange={onTabsChange}*/}
-            {/*/>*/}
+            <TabsGroup
+              tabs={['Day', 'Year']}
+              value={activeTab}
+              onTabChange={setActiveTab}
+            />
           </div>
-          {/*<MetricBlock*/}
-          {/*  isLoading={isLoading}*/}
-          {/*  data={{*/}
-          {/*    uniqDataByCategory,*/}
-          {/*    uniqData30DaysOldByCategory*/}
-          {/*  }}*/}
-          {/*/>*/}
+          <MetricBlock
+            activeTab={activeTab}
+            data={combinedIncentivesData}
+            isLoading={incentivesQuery.isPending}
+          />
         </div>
         {/*<CurrentSpendingByChainBlock*/}
         {/*  data={uniqData}*/}
