@@ -68,11 +68,8 @@ export const CapoSpecificCollateralPrice = (
 
   const {
     chartRef,
-    eventsData,
     showEvents,
-    isLegendEnabled,
     aggregatedSeries,
-    areAllSeriesHidden,
     onAllSeriesHidden,
     onEventsData,
     onShowEvents,
@@ -129,10 +126,7 @@ export const CapoSpecificCollateralPrice = (
           aggregatedSeries={aggregatedSeries}
           className='max-h-fit'
           chartRef={chartRef}
-          isLegendEnabled={isLegendEnabled}
-          eventsData={eventsData}
           showEvents={showEvents}
-          areAllSeriesHidden={areAllSeriesHidden}
           onAllSeriesHidden={onAllSeriesHidden}
           onSelectAll={onSelectAll}
           onDeselectAll={onDeselectAll}
