@@ -1,91 +1,21 @@
-import { memo } from 'react';
-
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
-import { formatPrice, sumValues } from '@/shared/lib/utils/utils';
-import { TokenData } from '@/shared/types/Treasury/types';
-import { AssetType } from '@/shared/types/types';
+import { getTotalMetricValues } from '@/entities/Insentive/MetricBlock/lib/utils';
+import { formatPrice } from '@/shared/lib/utils/utils';
+import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
-type MetricData = {
-  uniqDataByCategory: Record<string, TokenData[]>;
-
-  uniqData30DaysOldByCategory: Record<string, TokenData[]>;
-};
-
 interface MetricBlockProps {
-  isLoading?: boolean;
-
-  data: MetricData;
+  data: CombinedIncentivesData[];
+  isLoading: boolean;
+  activeTab: string;
 }
 
-const mapMetricData = ({
-  uniqDataByCategory,
-  uniqData30DaysOldByCategory
-}: MetricData) => {
-  // TOTAL VALUES
-  const allItems = Object.values(uniqDataByCategory).flat();
-  const totalValue = sumValues(allItems);
-  const totalLastValue =
-    totalValue - sumValues(Object.values(uniqData30DaysOldByCategory).flat());
-
-  // COMP VALUES
-  const compItems = uniqDataByCategory[AssetType.COMP] ?? [];
-  const compTotalValue = sumValues(compItems);
-  const compLastValue =
-    compTotalValue -
-    sumValues(uniqData30DaysOldByCategory[AssetType.COMP] ?? []);
-
-  // NON-COMP VALUES
-  const nonCompItems = Object.entries(uniqDataByCategory)
-    .filter(([type]) => type !== AssetType.COMP)
-    .flatMap(([, items]) => items);
-
-  const nonCompItems30DaysOld = Object.entries(uniqData30DaysOldByCategory)
-    .filter(([type]) => type !== AssetType.COMP)
-    .flatMap(([, items]) => items);
-
-  const nonCompTotalValue = sumValues(nonCompItems);
-  const nonCompLastValue =
-    nonCompTotalValue - sumValues(nonCompItems30DaysOld ?? []);
-
-  //STABLECOIN VALUES
-  const stablecoinItems = uniqDataByCategory[AssetType.STABLECOIN] ?? [];
-  const stablecoinTotalValue = sumValues(stablecoinItems);
-  const stablecoinLastValue =
-    stablecoinTotalValue -
-    sumValues(uniqData30DaysOldByCategory[AssetType.STABLECOIN] ?? []);
-
-  // ETH CORRELATED VALUES
-  const ethCorrelatedItems = uniqDataByCategory[AssetType.ETH_CORRELATED] ?? [];
-  const ethCorrelatedHoldingTotalValue = sumValues(ethCorrelatedItems);
-  const ethCorrelatedHoldingLastValue =
-    ethCorrelatedHoldingTotalValue -
-    sumValues(uniqData30DaysOldByCategory[AssetType.ETH_CORRELATED] ?? []);
-
-  return {
-    totalValue,
-    totalLastValue,
-
-    compTotalValue,
-    compLastValue,
-
-    nonCompTotalValue,
-    nonCompLastValue,
-
-    stablecoinTotalValue,
-    stablecoinLastValue,
-
-    ethCorrelatedHoldingTotalValue,
-    ethCorrelatedHoldingLastValue
-  };
-};
-
-const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
+const MetricBlock = (props: MetricBlockProps) => {
+  const { data, isLoading, activeTab } = props;
   const { theme } = useTheme();
-
-  const { totalValue, totalLastValue } = mapMetricData(data);
+  const metrics = getTotalMetricValues(data, activeTab);
 
   return (
     <div className='flex flex-col gap-2.5 lg:gap-5'>
@@ -111,7 +41,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
                 weight='700'
                 size='32'
               >
-                {formatPrice(totalValue, 1)}
+                {formatPrice(metrics.totalLendIncentives)}
               </Text>
             </div>
             <Text
@@ -119,7 +49,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
               size='13'
               className='text-primary-14'
             >
-              {formatPrice(totalLastValue, 1)}
+              {formatPrice(metrics.totalLendIncentivesUsdPrice)}
             </Text>
           </div>
           <Icon
@@ -150,7 +80,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
                 weight='700'
                 size='32'
               >
-                {formatPrice(totalValue, 1)}
+                {formatPrice(metrics.totalBorrowIncentives)}
               </Text>
             </div>
             <Text
@@ -158,7 +88,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
               size='13'
               className='text-primary-14'
             >
-              {formatPrice(totalLastValue, 1)}
+              {formatPrice(metrics.totalBorrowIncentivesUsdPrice)}
             </Text>
           </div>
           <Icon
@@ -191,7 +121,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
                 weight='700'
                 size='32'
               >
-                {formatPrice(totalValue, 1)}
+                {formatPrice(metrics.totalIncentives)}
               </Text>
             </div>
             <Text
@@ -199,7 +129,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
               size='13'
               className='text-primary-14'
             >
-              {formatPrice(totalLastValue, 1)}
+              {formatPrice(metrics.totalIncentivesUsdPrice)}
             </Text>
           </div>
           <Icon
@@ -230,7 +160,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
                 weight='700'
                 size='32'
               >
-                {formatPrice(totalValue, 1)}
+                {formatPrice(metrics.totalFeesGenerated)}
               </Text>
             </div>
             <Text
@@ -238,7 +168,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
               size='13'
               className='text-primary-14'
             >
-              {formatPrice(totalLastValue, 1)}
+              {formatPrice(metrics.totalFeesGeneratedUsdPrice)}
             </Text>
           </div>
           <Icon
@@ -251,6 +181,6 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
       </div>
     </div>
   );
-});
+};
 
 export default MetricBlock;
