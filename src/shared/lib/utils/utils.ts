@@ -3,7 +3,6 @@ import { ChangeEvent, MouseEvent as ReactMouseEvent } from 'react';
 import { THIRTY_DAYS } from '@/shared/consts/consts';
 import { TokenData } from '@/shared/types/Treasury/types';
 import type { OptionType } from '@/shared/types/types';
-import { ResponseDataType } from '@/shared/types/types';
 
 export const preventEventBubbling = (
   e: ReactMouseEvent<HTMLElement> | ChangeEvent<HTMLInputElement>
@@ -232,15 +231,16 @@ export const formatGrowth = (growth: number) => {
   return `${growth > 0 ? '+' : ''}${growth?.toFixed(1)}%`;
 };
 
-export function formatLargeNumber(
+export const formatLargeNumber = (
   num: number,
-  digits: number = 4,
+  digits?: number,
   exact: boolean = false
-): string {
-  const threshold = 1 / 10 ** (digits + 1);
+): string => {
+  const defaultDigits = digits ?? 4;
+  const threshold = 1 / 10 ** (defaultDigits + 1);
 
   if (num === 0 || isNaN(num)) {
-    return exact ? '0' : threshold.toFixed(digits);
+    return exact ? '0' : threshold.toFixed(defaultDigits);
   }
 
   const sign = num < 0 ? '-' : '';
@@ -262,32 +262,45 @@ export function formatLargeNumber(
   }
 
   if (absNum < 1_000) {
+    if (digits === undefined) {
+      return sign + Math.round(absNum).toLocaleString('en-US');
+    }
     return (
       sign +
       absNum.toLocaleString('en-US', {
-        maximumFractionDigits: digits,
-        minimumFractionDigits: digits
+        maximumFractionDigits: defaultDigits,
+        minimumFractionDigits: defaultDigits
       })
     );
   }
 
   for (const unit of units) {
     if (absNum >= unit.value) {
+      const unitValue = absNum / unit.value;
+      if (digits === undefined) {
+        return (
+          sign + Math.round(unitValue).toLocaleString('en-US') + unit.symbol
+        );
+      }
       return (
         sign +
-        (absNum / unit.value).toLocaleString('en-US', {
-          maximumFractionDigits: digits,
-          minimumFractionDigits: digits
+        unitValue.toLocaleString('en-US', {
+          maximumFractionDigits: defaultDigits,
+          minimumFractionDigits: defaultDigits
         }) +
         unit.symbol
       );
     }
   }
 
+  if (digits === undefined) {
+    return sign + Math.round(absNum).toLocaleString('en-US');
+  }
   return (
-    sign + absNum.toLocaleString('en-US', { maximumFractionDigits: digits })
+    sign +
+    absNum.toLocaleString('en-US', { maximumFractionDigits: defaultDigits })
   );
-}
+};
 
 export const formatPrice = (price: number, decimals = 2): string => {
   const priceFormat = `$${formatLargeNumber(price, decimals)}`;
@@ -297,30 +310,30 @@ export const formatPrice = (price: number, decimals = 2): string => {
     : priceFormat;
 };
 
-export const groupByTypeLast30Days = <T extends ResponseDataType>(
-  data: T[],
-  useLatestDate = false
-): Record<string, T[]> => {
-  if (data.length === 0) return {} as Record<string, T[]>;
-
-  const nowSec = useLatestDate
-    ? Math.max(...data.map((d) => d.date))
-    : Math.floor(Date.now() / 1000);
-
-  const threshold = nowSec - THIRTY_DAYS;
-
-  return data
-    .filter((item) => item.date >= threshold)
-    .reduce<Record<string, T[]>>(
-      (acc, item) => {
-        const type = item.source.asset.type ?? 'Unknown';
-        if (!acc[type]) acc[type] = [];
-        acc[type].push(item);
-        return acc;
-      },
-      {} as Record<string, T[]>
-    );
-};
+// export const groupByTypeLast30Days = <T extends ResponseDataType>(
+//   data: T[],
+//   useLatestDate = false
+// ): Record<string, T[]> => {
+//   if (data.length === 0) return {} as Record<string, T[]>;
+//
+//   const nowSec = useLatestDate
+//     ? Math.max(...data.map((d) => d.date))
+//     : Math.floor(Date.now() / 1000);
+//
+//   const threshold = nowSec - THIRTY_DAYS;
+//
+//   return data
+//     .filter((item) => item.date >= threshold)
+//     .reduce<Record<string, T[]>>(
+//       (acc, item) => {
+//         const type = item.source.asset.type ?? 'Unknown';
+//         if (!acc[type]) acc[type] = [];
+//         acc[type].push(item);
+//         return acc;
+//       },
+//       {} as Record<string, T[]>
+//     );
+// };
 
 // TotalTresuaryValue and CompoundCumulativeRevenue helpers
 export interface ChartDataItem {
