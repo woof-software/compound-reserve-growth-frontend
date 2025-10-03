@@ -165,6 +165,9 @@ const CompoundCumulativeRevenue = ({
     return 'none';
   }, [selectedOptions]);
 
+  console.log('=======');
+  console.log('groupBy=>', groupBy);
+
   const { chartSeries } = useChartDataProcessor({
     rawData,
     filters: {
@@ -184,10 +187,14 @@ const CompoundCumulativeRevenue = ({
     defaultSeriesName: 'Daily Revenue'
   });
 
+  console.log('chartSeries=>', chartSeries);
+
   const cumulativeChartSeries = useMemo(() => {
     if (!chartSeries || chartSeries.length === 0) {
       return [];
     }
+
+    console.log('chartSeries=>', chartSeries);
 
     return chartSeries.map((series) => {
       if (!series.data || series.data.length === 0) {

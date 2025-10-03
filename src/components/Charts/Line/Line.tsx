@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState
 } from 'react';
-import Highcharts, { SeriesAreaOptions, Options } from 'highcharts';
+import Highcharts, { Options, SeriesAreaOptions } from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
@@ -92,7 +92,7 @@ const LineChart: FC<LineChartProps> = ({
 
   const currentZoom = useRef<{ min: number; max: number } | null>(null);
 
-  const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
+  const [hiddenItems, setHiddenItems] = useState<string[]>([]);
 
   const viewportRef = useRef<HTMLDivElement>(null);
 
@@ -115,9 +115,19 @@ const LineChart: FC<LineChartProps> = ({
     el.scrollBy({ left: dir === 'left' ? -step : step, behavior: 'smooth' });
   };
 
-  const isLastActiveLegend = useMemo(() => {
-    return hiddenItems.size === aggregatedSeries.length - 1;
-  }, [aggregatedSeries, hiddenItems]);
+  const currentSeriesNames = useMemo(
+    () => aggregatedSeries.map((s) => s.name!).filter(Boolean) as string[],
+    [aggregatedSeries]
+  );
+
+  const currentHiddenSet = useMemo(() => {
+    return new Set(hiddenItems.filter((n) => currentSeriesNames.includes(n)));
+  }, [hiddenItems, currentSeriesNames]);
+
+  const isLastActiveLegend = useMemo(
+    () => currentHiddenSet.size === Math.max(0, currentSeriesNames.length - 1),
+    [currentHiddenSet, currentSeriesNames.length]
+  );
 
   const highlightSeries = useCallback((name: string) => {
     const chart = chartRef.current?.chart;
@@ -143,48 +153,40 @@ const LineChart: FC<LineChartProps> = ({
     if (!chart) return;
 
     chart.series.forEach((s) => {
-      (s as any).group
-        ?.attr({ opacity: 1 })(s as any)
-        .markerGroup?.attr?.({ opacity: 1 })(s as any)
-        .dataLabelsGroup?.attr?.({ opacity: 1 });
+      (s as any).group?.attr({ opacity: 1 });
+
+      (s as any).markerGroup?.attr?.({ opacity: 1 });
+
+      (s as any).dataLabelsGroup?.attr?.({ opacity: 1 });
     });
   }, []);
 
   const toggleSeriesByName = useCallback(
     (name: string) => {
-      if (isLastActiveLegend && !hiddenItems.has(name)) return;
+      const isHiddenNow = currentHiddenSet.has(name);
+      if (isLastActiveLegend && !isHiddenNow) return; // не даём скрыть последнюю видимую в ТЕКУЩЕМ наборе
 
       const chart = chartRef.current?.chart;
-
       if (!chart) return;
 
       const s = chart.series.find((sr) => sr.name === name);
-
       if (!s) return;
 
       s.setVisible(!s.visible, false);
-
       chart.redraw();
 
       setHiddenItems((prev) => {
-        const next = new Set(prev);
-
-        if (s.visible) {
-          next.delete(name);
-        } else {
-          next.add(name);
-        }
-
-        return next;
+        // обычный тоггл в исходном массиве
+        if (prev.includes(name)) return prev.filter((n) => n !== name);
+        return [...prev, name];
       });
 
       setTimeout(() => {
         const anyVisible = chart.series.some((sr) => sr.visible);
-
         onAllSeriesHidden(!anyVisible);
       }, 0);
     },
-    [isLastActiveLegend]
+    [chartRef, currentHiddenSet, isLastActiveLegend, onAllSeriesHidden]
   );
 
   const defaultTooltipFormatter = useCallback(
@@ -475,15 +477,17 @@ const LineChart: FC<LineChartProps> = ({
     if (!chart) return;
 
     chart.series.forEach((s) => {
-      if (hiddenItems.has(s.name)) {
-        if (s.visible) s.setVisible(false, false);
-      } else {
-        if (!s.visible) s.setVisible(true, false);
-      }
+      const shouldBeHidden = currentHiddenSet.has(s.name);
+      if (shouldBeHidden && s.visible) s.setVisible(false, false);
+      if (!shouldBeHidden && !s.visible) s.setVisible(true, false);
     });
 
     chart.redraw();
-  }, [areAllSeriesHidden, hiddenItems]);
+  }, [areAllSeriesHidden, currentHiddenSet]);
+
+  console.log('aggregatedSeries=>', aggregatedSeries);
+  console.log('hiddenItems=>', hiddenItems);
+  console.log('areAllSeriesHidden=>', areAllSeriesHidden);
 
   return (
     <div
@@ -594,9 +598,11 @@ const LineChart: FC<LineChartProps> = ({
                     className={cn(
                       'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
                       {
-                        'line-through opacity-30': hiddenItems.has(s.name!),
+                        'line-through opacity-30': currentHiddenSet.has(
+                          s.name!
+                        ),
                         'cursor-not-allowed':
-                          isLastActiveLegend && !hiddenItems.has(s.name!)
+                          isLastActiveLegend && !currentHiddenSet.has(s.name!)
                       }
                     )}
                     onMouseEnter={() => highlightSeries(s.name!)}
@@ -640,11 +646,11 @@ const LineChart: FC<LineChartProps> = ({
                 <Button
                   key={s.name}
                   className={cn(
-                    'text-secondary-42 flex shrink-0 gap-2.5 text-[11px] leading-none font-normal',
+                    'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
                     {
-                      'line-through opacity-30': hiddenItems.has(s.name!),
+                      'line-through opacity-30': currentHiddenSet.has(s.name!),
                       'cursor-not-allowed':
-                        isLastActiveLegend && !hiddenItems.has(s.name!)
+                        isLastActiveLegend && !currentHiddenSet.has(s.name!)
                     }
                   )}
                   onMouseEnter={() => highlightSeries(s.name!)}
