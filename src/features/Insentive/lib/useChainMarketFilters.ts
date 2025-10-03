@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useReducer } from 'react';
 
+import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import { OptionType } from '@/shared/types/types';
 
@@ -45,7 +46,7 @@ export const useChainMarketFilters = (data: CombinedIncentivesData[]) => {
     ];
     return uniqueNetworks.map((network) => ({
       id: network,
-      label: network
+      label: capitalizeFirstLetter(network)
     }));
   }, [data]);
 
@@ -70,7 +71,7 @@ export const useChainMarketFilters = (data: CombinedIncentivesData[]) => {
       return allMarketOptions;
     }
 
-    const selectedNetworks = selectedOptions.chain.map((chain) => chain.label);
+    const selectedNetworks = selectedOptions.chain.map((chain) => chain.id);
 
     return allMarketOptions.filter((market) =>
       market.chain?.some((network) => selectedNetworks.includes(network))
@@ -86,7 +87,7 @@ export const useChainMarketFilters = (data: CombinedIncentivesData[]) => {
         return;
       }
 
-      const selectedNetworks = newChainSelection.map((chain) => chain.label);
+      const selectedNetworks = newChainSelection.map((chain) => chain.id);
 
       // Filter out markets that don't belong to selected chains
       const validMarkets = selectedOptions.deployment.filter((market) => {
@@ -122,9 +123,7 @@ export const useChainMarketFilters = (data: CombinedIncentivesData[]) => {
 
     // Then filter by chains
     if (selectedOptions.chain?.length > 0) {
-      const selectedNetworks = selectedOptions.chain.map(
-        (chain) => chain.label
-      );
+      const selectedNetworks = selectedOptions.chain.map((chain) => chain.id);
       result = result.filter((item) =>
         selectedNetworks.includes(item.source.network)
       );
@@ -133,7 +132,7 @@ export const useChainMarketFilters = (data: CombinedIncentivesData[]) => {
     // Then filter by markets
     if (selectedOptions.deployment?.length > 0) {
       const selectedMarkets = selectedOptions.deployment.map(
-        (market) => market.label
+        (market) => market.id
       );
       result = result.filter((item) =>
         selectedMarkets.includes(item.source.market!)

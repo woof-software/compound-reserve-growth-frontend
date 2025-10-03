@@ -1,4 +1,4 @@
-import { colorPicker } from '@/shared/lib/utils/utils';
+import { capitalizeFirstLetter, colorPicker } from '@/shared/lib/utils/utils';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 
 type TabType = 'lend' | 'borrow' | 'total';
@@ -31,7 +31,7 @@ export const getChartData = (
 
   return Object.entries(groupedByNetwork)
     .map(([network, value], index) => ({
-      name: network,
+      name: capitalizeFirstLetter(network),
       value: value,
       color: colorPicker(index)
     }))
