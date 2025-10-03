@@ -65,7 +65,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
     {
       id: 'ValueUSDC',
       accessorFn: (row) => row.valueUsd,
-      header: 'Value USDC',
+      header: 'Value USD',
       enableSorting: true,
       cell: ({ row }) => (
         <Text size='13'>{formatPrice(row.original.valueUsd)}</Text>
@@ -246,7 +246,7 @@ const CurrentSpendingByChainTable = ({
                       weight='500'
                       className='text-primary-14'
                     >
-                      Value USDC
+                      Value USD
                     </Text>
                     <Text
                       size='13'
