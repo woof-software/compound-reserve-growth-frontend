@@ -7,6 +7,7 @@ import {
   capitalizeFirstLetter,
   defaultExplorer,
   explorers,
+  formatNumber,
   formatPrice,
   sliceAddress
 } from '@/shared/lib/utils/utils';
