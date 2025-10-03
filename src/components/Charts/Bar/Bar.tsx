@@ -1,3 +1,4 @@
+import { formatLargeNumber } from '@/shared/lib/utils/utils';
 import React, { FC, useEffect, useMemo, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -72,9 +73,7 @@ const CryptoChart: FC<CryptoChartProps> = ({ data, onClear }) => {
         },
         formatter: function () {
           const value = this.value as number;
-          if (value >= 1000000) return value / 1000000 + 'M';
-          if (value >= 1000) return value / 1000 + 'K';
-          return value.toString();
+          return formatLargeNumber(value, 0);
         }
       }
     },
@@ -184,14 +183,14 @@ const CryptoChart: FC<CryptoChartProps> = ({ data, onClear }) => {
 
   return (
     <>
-      <View.Condition if={Boolean(data.length > 1)}>
+      <View.Condition if={Boolean(data.length > 0)}>
         <HighchartsReact
           ref={chartRef}
           highcharts={Highcharts}
           options={chartOptions}
         />
       </View.Condition>
-      <View.Condition if={Boolean(data.length <= 1)}>
+      <View.Condition if={Boolean(data.length <= 0)}>
         <div className='flex min-w-[400px] flex-col items-center justify-center gap-3.5'>
           <Text
             size='11'

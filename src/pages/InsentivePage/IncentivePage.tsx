@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import MetricBlock from '@/entities/Insentive/MetricBlock/MetricBlock';
+import CurrentSpendingByChainBlock from '@/features/Insentive/CurrentSpendingByChain';
 import { useIncentivesApiData } from '@/shared/hooks/useIncentivesApiData';
 import { useSourceCombinator } from '@/shared/hooks/useSourceCombinator';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
@@ -62,11 +63,11 @@ const IncentivePage = () => {
             isLoading={incentivesQuery.isPending}
           />
         </div>
-        {/*<CurrentSpendingByChainBlock*/}
-        {/*  data={uniqData}*/}
-        {/*  isError={isError}*/}
-        {/*  isLoading={isLoading}*/}
-        {/*/>*/}
+        <CurrentSpendingByChainBlock
+          data={combinedIncentivesData}
+          isError={incentivesQuery?.isError}
+          isLoading={incentivesQuery?.isPending}
+        />
         {/*<HistoricalExpensesByNetworks*/}
         {/*  isLoading={isLoading}*/}
         {/*  isError={isError}*/}
