@@ -7,9 +7,7 @@ import {
   capitalizeFirstLetter,
   defaultExplorer,
   explorers,
-  formatNumber,
   formatPrice,
-  formatQuantity,
   sliceAddress
 } from '@/shared/lib/utils/utils';
 import { Source } from '@/shared/types/types';
@@ -284,56 +282,6 @@ const CurrentSpendingByChainTable = ({
                 </div>
               );
             })}
-            <div
-              className={cn(
-                'grid grid-cols-3 gap-x-10 gap-y-3 p-5 md:gap-x-[63px] md:px-10'
-              )}
-            >
-              <div className='grid min-h-[39px] w-full max-w-[100px]'>
-                <Text
-                  size='13'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Total
-                </Text>
-              </div>
-              <div className='grid min-h-[39px] w-full max-w-[100px]'>
-                <Text
-                  size='13'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Value COMP
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='18'
-                  weight='500'
-                >
-                  {formatQuantity(41680359)}
-                </Text>
-              </div>
-              <div className='grid min-h-[39px] w-full max-w-[100px]'>
-                <Text
-                  size='13'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Value USDC
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='18'
-                  weight='500'
-                >
-                  {formatNumber(54448945)}
-                </Text>
-              </div>
-            </div>
           </>
         )}
       </MobileDataTable>
