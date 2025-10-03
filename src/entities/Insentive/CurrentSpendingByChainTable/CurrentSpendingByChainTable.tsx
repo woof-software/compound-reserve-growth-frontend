@@ -35,6 +35,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       header: 'Network',
       accessorFn: (row) => row.network,
       enableSorting: true,
+      size: 170,
       cell: ({ row }) => (
         <div className='flex items-center gap-3'>
           <Icon
@@ -57,7 +58,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       header: 'Value COMP',
       enableSorting: true,
       cell: ({ row }) => (
-        <Text size='13'>{formatPrice(row.original.valueComp)}</Text>
+        <Text size='13'>{formatNumber(row.original.valueComp, '')}</Text>
       )
     },
     {
@@ -74,7 +75,8 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       accessorFn: (row) => row.source,
       header: 'Source',
       enableSorting: true,
-      size: 120,
+      align: 'right',
+      size: 80,
       cell: ({ row }) => {
         const { source } = row.original;
 
@@ -129,10 +131,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
             }
             side='top'
           >
-            <div
-              className='flex items-start'
-              style={{ width: `${120}px` }}
-            >
+            <div className='flex justify-end'>
               <Text
                 size='13'
                 className='text-primary-11 inline-block max-w-full cursor-pointer truncate border-b border-dotted border-gray-500 leading-none'
@@ -236,7 +235,7 @@ const CurrentSpendingByChainTable = ({
                       lineHeight='21'
                       className='truncate'
                     >
-                      {formatPrice(row.valueComp)}
+                      {formatNumber(row.valueComp, '')}
                     </Text>
                   </div>
                   <div className='grid w-full'>
@@ -298,6 +297,7 @@ const CurrentSpendingByChainTable = ({
           cellClassName='py-3 px-[5px]'
           headerTextClassName='text-primary-14 font-medium'
           paginationClassName='py-0 px-[5px]'
+          tableClassName='table-fixed w-full'
         />
       </div>
     </>

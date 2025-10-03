@@ -132,8 +132,8 @@ const DataTable = <T,>({
 
   return (
     <div className={cn('w-full gap-[26px]', className)}>
-      <div className={cn('overflow-x-auto', containerTableClassName)}>
-        <table className={cn('min-w-full', tableClassName)}>
+      <div className={cn(containerTableClassName)}>
+        <table className={cn('w-full', tableClassName)}>
           <thead className={cn('bg-transparent', headerClassName)}>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
