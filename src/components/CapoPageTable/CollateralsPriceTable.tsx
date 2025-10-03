@@ -60,9 +60,10 @@ const treasuryColumns: ExtendedColumnDef<TableItem>[] = [
     accessorFn: (row) => row.collateralPrice,
     header: 'Collateral Price',
     enableSorting: true,
+    size: 215,
     cell: ({ row }) => (
       <Text size='13'>
-        {formatLargeNumber(Number(row.original.collateralPrice), 1)}
+        ${formatLargeNumber(Number(row.original.collateralPrice), 1)}
       </Text>
     )
   },
@@ -71,9 +72,10 @@ const treasuryColumns: ExtendedColumnDef<TableItem>[] = [
     accessorFn: (row) => row.priceRestriction,
     header: 'Price Restriction',
     enableSorting: true,
+    size: 215,
     cell: ({ row }) => (
       <Text size='13'>
-        {formatLargeNumber(Number(row.original.priceRestriction), 1)}
+        ${formatLargeNumber(Number(row.original.priceRestriction), 1)}
       </Text>
     )
   },
@@ -83,7 +85,7 @@ const treasuryColumns: ExtendedColumnDef<TableItem>[] = [
     header: 'Price Feed',
     enableSorting: true,
     align: 'right',
-    size: 120,
+    size: 80,
     cell: ({ row }) => {
       const explorerUrl =
         (row.original.network &&
@@ -133,10 +135,7 @@ const treasuryColumns: ExtendedColumnDef<TableItem>[] = [
           }
           side='top'
         >
-          <div
-            className='flex justify-end'
-            style={{ width: `${120}px` }}
-          >
+          <div className='flex justify-end'>
             <Text
               size='13'
               className='text-primary-11 inline-block max-w-full cursor-pointer truncate border-b border-dotted border-gray-500 leading-none'
@@ -261,7 +260,7 @@ const CollateralsPriceTable = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatLargeNumber(Number(row.collateralPrice), 1)}
+                    ${formatLargeNumber(Number(row.collateralPrice), 1)}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -323,6 +322,7 @@ const CollateralsPriceTable = ({
         cellClassName='py-3 px-[5px]'
         headerTextClassName='text-primary-14 font-medium'
         paginationClassName='py-0 px-[5px]'
+        tableClassName='table-fixed w-full'
       />
     </>
   );

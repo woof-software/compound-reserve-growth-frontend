@@ -49,7 +49,7 @@ const IncentivePage = () => {
               size='17'
               weight='500'
             >
-              Daily Incentives
+              {activeTab === 'Day' ? 'Daily' : 'Yearly'} Incentives
             </Text>
             <TabsGroup
               tabs={['Day', 'Year']}

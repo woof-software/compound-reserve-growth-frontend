@@ -142,7 +142,7 @@ const TreasuryCompositionBlock = memo(
 
     const { uniqData, uniqDataByCategory } = filteredData;
 
-    const selectedGroup = selectedSingle?.toString() || 'Asset type';
+    const selectedGroup = selectedSingle?.toString() || 'Asset Type';
 
     const chartData = useMemo(() => {
       if (selectedGroup === 'Chain') {

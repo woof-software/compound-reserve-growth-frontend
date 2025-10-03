@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 
 import { NormalizedChartData } from '@/shared/types/Capo/types';
 
-type Option = {
+export type Option = {
   id: string;
   label: string;
 };
+
+export type OptionSetter = (previous: Option | null) => Option | null;
 
 const capitalizeFirstLetter = (str: string): string =>
   str.charAt(0).toUpperCase() + str.slice(1);
@@ -28,15 +30,25 @@ const findOptionById = (
 };
 
 export const useChartFilters = (rawData: NormalizedChartData[]) => {
-  const chainOptions = getOptions(rawData, 'network');
-  const collateralOptions = getOptions(rawData, 'collateral');
-
   const [selectedChain, setSelectedChain] = useState<Option | null>(null);
   const [selectedCollateral, setSelectedCollateral] = useState<Option | null>(
     null
   );
 
-  const setSelectedChainWrapper = (value: Option | null) => {
+  const chainOptions = getOptions(rawData, 'network');
+
+  const collateralOptions = getOptions(
+    rawData.filter(({ network }) => {
+      if (!selectedChain) return true;
+
+      return network === selectedChain.id;
+    }),
+    'collateral'
+  );
+
+  const setSelectedChainWrapper = (
+    value: Option | null | string | OptionSetter
+  ) => {
     if (!value) {
       setSelectedChain(null);
       return;
@@ -54,7 +66,9 @@ export const useChartFilters = (rawData: NormalizedChartData[]) => {
     }
   };
 
-  const setSelectedCollateralWrapper = (value: Option | null) => {
+  const setSelectedCollateralWrapper = (
+    value: Option | null | string | OptionSetter
+  ) => {
     if (!value) {
       setSelectedCollateral(null);
       return;

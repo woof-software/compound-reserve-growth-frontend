@@ -37,7 +37,11 @@ const CapoPage = () => {
             isError={isError}
             isLoading={isLoading}
           />
-          <CapoSpecificCollateralPrice rawData={chartData} />
+          <CapoSpecificCollateralPrice
+            isError={isError}
+            isLoading={isLoading}
+            rawData={chartData}
+          />
         </div>
       </section>
     </div>
