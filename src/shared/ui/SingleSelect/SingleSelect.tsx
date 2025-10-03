@@ -22,6 +22,7 @@ type SingleSelectProps = {
   className?: string;
   disabled?: boolean;
   type?: string;
+  isClearable?: boolean;
 };
 
 interface CustomDropdownProps {
@@ -117,7 +118,8 @@ const SingleSelect = ({
   onChange,
   placeholder,
   className,
-  disabled
+  disabled,
+  isClearable = false
 }: SingleSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -269,7 +271,7 @@ const SingleSelect = ({
             </div>
           </View.Condition>
         </div>
-        <View.Condition if={hasSelection}>
+        <View.Condition if={hasSelection && isClearable}>
           <div
             aria-hidden='true'
             className='bg-secondary-29 h-px w-full origin-top scale-y-[.5] transform-gpu'

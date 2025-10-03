@@ -1,12 +1,14 @@
 import React from 'react';
 
 import Line from '@/components/Charts/Line/Line';
+import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import {
   customFormatter,
   customOptions
 } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/chartConfig';
 import { useChartFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useChartFilters';
 import { useCollateralChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useCollateralChartData';
+import { useRelativeFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useRelativeFilters';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
@@ -19,14 +21,15 @@ import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
 interface CapoSpecificCollateralPriceProps {
   rawData: NormalizedChartData[];
+  isLoading?: boolean;
+  isError?: boolean;
 }
-/* TODO:
-    - fix context type for Line component customTooltipFormatter
-*   */
+
 export const CapoSpecificCollateralPrice = (
   props: CapoSpecificCollateralPriceProps
 ) => {
-  const { rawData } = props;
+  const { rawData, isLoading, isError } = props;
+
   const {
     selectedChain,
     selectedCollateral,
@@ -58,6 +61,14 @@ export const CapoSpecificCollateralPrice = (
     setSelectedCollateral
   );
 
+  useRelativeFilters({
+    collaterals: collateralOptions,
+    chains: chainOptions,
+    chain: selectedChain,
+    onCollateralSelect: setSelectedCollateral,
+    onChainSelect: setSelectedChain
+  });
+
   const { csvData, csvFilename } = useCSVExport({
     chartSeries: chartSeries,
     barSize,
@@ -81,10 +92,20 @@ export const CapoSpecificCollateralPrice = (
     barSize
   });
 
+  const resetFilters = () => {
+    const firstChain = chainOptions[0];
+
+    if (!firstChain) return;
+
+    setSelectedChain(firstChain);
+  };
+
   return (
     <Card
       id='specific-collateral-price-against-price-restriction'
       title={'Specific Collateral Price against Price Restriction'}
+      isLoading={isLoading}
+      isError={isError}
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',
@@ -132,8 +153,7 @@ export const CapoSpecificCollateralPrice = (
           onDeselectAll={onDeselectAll}
           onShowEvents={onShowEvents}
           onEventsData={onEventsData}
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
+          // @ts-expect-error TODO: fix context type for Line component customTooltipFormatter
           customTooltipFormatter={customFormatter}
           customOptions={customOptions}
         />
@@ -146,7 +166,7 @@ export const CapoSpecificCollateralPrice = (
             color: '#666'
           }}
         >
-          No data available for the selected filters
+          <NoDataPlaceholder onButtonClick={resetFilters} />
         </div>
       )}
     </Card>

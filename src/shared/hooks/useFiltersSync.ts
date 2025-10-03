@@ -84,7 +84,9 @@ export const useFiltersSync = <const T extends string>(
 /**This hook does the same thing as useFiltersSync, but is used for single filtering.*/
 export const useFilterSyncSingle = (
   filterId: string,
+  // TODO: has to be string (important - lead to unpredictable behaviour)
   filterValue: any,
+  // TODO: value has to be string (important - lead to unpredictable behaviour)
   setFilter: (value: any) => void
 ) => {
   const [searchParams, setSearchParams] = useSearchParams();
