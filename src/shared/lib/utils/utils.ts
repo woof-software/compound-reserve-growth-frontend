@@ -310,31 +310,6 @@ export const formatPrice = (price: number, decimals = 2): string => {
     : priceFormat;
 };
 
-// export const groupByTypeLast30Days = <T extends ResponseDataType>(
-//   data: T[],
-//   useLatestDate = false
-// ): Record<string, T[]> => {
-//   if (data.length === 0) return {} as Record<string, T[]>;
-//
-//   const nowSec = useLatestDate
-//     ? Math.max(...data.map((d) => d.date))
-//     : Math.floor(Date.now() / 1000);
-//
-//   const threshold = nowSec - THIRTY_DAYS;
-//
-//   return data
-//     .filter((item) => item.date >= threshold)
-//     .reduce<Record<string, T[]>>(
-//       (acc, item) => {
-//         const type = item.source.asset.type ?? 'Unknown';
-//         if (!acc[type]) acc[type] = [];
-//         acc[type].push(item);
-//         return acc;
-//       },
-//       {} as Record<string, T[]>
-//     );
-// };
-
 // TotalTresuaryValue and CompoundCumulativeRevenue helpers
 export interface ChartDataItem {
   date: number;

@@ -47,7 +47,6 @@ export const CurrendSpendingByChainMobileFilters = (
     onClearFilters
   } = props;
 
-  console.log(filterOptions);
   const {
     isOpen: isFilterOpen,
     onOpenModal: onFilterOpen,
