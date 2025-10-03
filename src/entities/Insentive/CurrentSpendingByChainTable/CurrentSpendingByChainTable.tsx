@@ -152,20 +152,6 @@ const CurrentSpendingByChainTable = ({
   sortType,
   tableData
 }: CurrentSpendingByChainTableProps) => {
-  const footerRow = (
-    <tr key='footer-total-row'>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
-        Total
-      </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
-        {formatQuantity(41680359)}
-      </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
-        {formatNumber(54448945)}
-      </td>
-    </tr>
-  );
-
   const mobileTableData = useMemo(() => {
     if (!sortType?.key) {
       return tableData;
@@ -355,7 +341,6 @@ const CurrentSpendingByChainTable = ({
         <DataTable
           data={tableData}
           columns={SpendingByChainTableColumns}
-          footerContent={footerRow}
           enableSorting={true}
           enablePagination={true}
           pageSize={10}
