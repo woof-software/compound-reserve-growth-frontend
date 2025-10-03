@@ -51,7 +51,7 @@ const CapoCollateralsPriceBlock = ({
   const { sortType, onKeySelect, onTypeSelect, onClearSort, applySorting } =
     useCollateralsSort();
 
-  const { processedData, hasData, showNoData } = useCollateralsData({
+  const processedData = useCollateralsData({
     tableData,
     applyFilters,
     applySorting
@@ -62,8 +62,9 @@ const CapoCollateralsPriceBlock = ({
     onClearSort();
   }, [onClearSelectedOptions, onClearSort]);
 
-  const showData = !isLoading && !isError && hasData;
-  const showNoDataPlaceholder = !isLoading && !isError && showNoData;
+  const isFiltersApplied = !!(
+    selectedOptions.chain.length || selectedOptions.collateral.length
+  );
 
   return (
     <Card
@@ -92,14 +93,18 @@ const CapoCollateralsPriceBlock = ({
         onClearAll={onClearAll}
         csvData={processedData}
       />
-      <View.Condition if={showData}>
+      <View.Condition if={processedData.length}>
         <CollateralsPriceTable
           sortType={sortType}
           tableData={processedData}
         />
       </View.Condition>
-      <View.Condition if={showNoDataPlaceholder}>
-        <NoDataPlaceholder onButtonClick={onClearAll} />
+      <View.Condition if={!processedData.length}>
+        <NoDataPlaceholder
+          text={!isFiltersApplied ? 'No data found' : undefined}
+          hideButton={!isFiltersApplied}
+          onButtonClick={onClearAll}
+        />
       </View.Condition>
     </Card>
   );
