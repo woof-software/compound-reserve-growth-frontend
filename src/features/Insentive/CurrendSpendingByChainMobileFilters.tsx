@@ -13,7 +13,7 @@ import Text from '@/shared/ui/Text/Text';
 const sortColumns = [
   { accessorKey: 'network', header: 'Network' },
   { accessorKey: 'valueCOMP', header: 'Value COMP' },
-  { accessorKey: 'valueUSDC', header: 'Value USDC' },
+  { accessorKey: 'valueUSDC', header: 'Value USD' },
   { accessorKey: 'source', header: 'Source' }
 ];
 
