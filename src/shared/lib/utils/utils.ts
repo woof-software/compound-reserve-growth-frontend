@@ -216,9 +216,9 @@ export const formatCurrency = (value: number) => {
   return `${value.toLocaleString()}`;
 };
 
-export const formatNumber = (num: number | undefined | null) => {
+export const formatNumber = (num: number | undefined | null, prefix = '$') => {
   if (num === null || num === undefined || num === 0) return '-';
-  return `$${Math.round(num).toLocaleString('en-US')}`;
+  return `${prefix}${Math.round(num).toLocaleString('en-US')}`;
 };
 
 export const formatQuantity = (quantity: number) => {
