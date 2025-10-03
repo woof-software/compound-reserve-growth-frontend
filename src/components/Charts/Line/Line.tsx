@@ -59,6 +59,8 @@ interface LineChartProps {
 
   customOptions?: Partial<Options>;
 
+  resetHiddenKey?: number;
+
   onAllSeriesHidden: (value: boolean) => void;
 
   onSelectAll: () => void;
@@ -82,6 +84,7 @@ const LineChart: FC<LineChartProps> = ({
   className,
   customTooltipFormatter,
   customOptions,
+  resetHiddenKey,
   onAllSeriesHidden,
   onSelectAll,
   onDeselectAll,
@@ -485,9 +488,11 @@ const LineChart: FC<LineChartProps> = ({
     chart.redraw();
   }, [areAllSeriesHidden, currentHiddenSet]);
 
-  console.log('aggregatedSeries=>', aggregatedSeries);
-  console.log('hiddenItems=>', hiddenItems);
-  console.log('areAllSeriesHidden=>', areAllSeriesHidden);
+  useEffect(() => {
+    if (resetHiddenKey !== undefined) {
+      setHiddenItems([]);
+    }
+  }, [resetHiddenKey]);
 
   return (
     <div

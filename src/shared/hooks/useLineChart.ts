@@ -43,8 +43,6 @@ const useLineChart = ({
   const aggregatedSeries = useMemo<Highcharts.SeriesAreaOptions[]>(() => {
     const allSeriesNames = data.map((series) => series.name);
 
-    console.log('allSeriesNames=>', allSeriesNames);
-
     if (barSize === 'D') {
       return data.map((series) => ({
         id: series.name,

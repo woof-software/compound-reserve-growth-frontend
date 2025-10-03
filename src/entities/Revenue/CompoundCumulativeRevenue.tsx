@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useReducer } from 'react';
+import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
@@ -96,6 +96,8 @@ const CompoundCumulativeRevenue = ({
     }
   );
 
+  const [resetHiddenKey, setResetHiddenKey] = useState(0);
+
   useFiltersSync(selectedOptions, setSelectedOptions, 'ccr', [
     'chain',
     'assetType',
@@ -165,9 +167,6 @@ const CompoundCumulativeRevenue = ({
     return 'none';
   }, [selectedOptions]);
 
-  console.log('=======');
-  console.log('groupBy=>', groupBy);
-
   const { chartSeries } = useChartDataProcessor({
     rawData,
     filters: {
@@ -187,14 +186,10 @@ const CompoundCumulativeRevenue = ({
     defaultSeriesName: 'Daily Revenue'
   });
 
-  console.log('chartSeries=>', chartSeries);
-
   const cumulativeChartSeries = useMemo(() => {
     if (!chartSeries || chartSeries.length === 0) {
       return [];
     }
-
-    console.log('chartSeries=>', chartSeries);
 
     return chartSeries.map((series) => {
       if (!series.data || series.data.length === 0) {
@@ -304,6 +299,10 @@ const CompoundCumulativeRevenue = ({
           : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
       );
 
+      if (selectedOptions.chain.length > 0 && chain.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
+
       setSelectedOptions({
         chain,
         deploymentOptions: filteredDeployment
@@ -312,23 +311,44 @@ const CompoundCumulativeRevenue = ({
     [selectedOptions]
   );
 
-  const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      assetType: selectedOptions
-    });
-  }, []);
+  const onSelectAssetType = useCallback(
+    (assetTypes: OptionType[]) => {
+      if (selectedOptions.assetType.length > 0 && assetTypes.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
 
-  const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      deployment: selectedOptions
-    });
-  }, []);
+      setSelectedOptions({
+        assetType: assetTypes
+      });
+    },
+    [selectedOptions]
+  );
 
-  const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      symbol: selectedOptions
-    });
-  }, []);
+  const onSelectMarket = useCallback(
+    (deployments: OptionType[]) => {
+      if (selectedOptions.deployment.length > 0 && deployments.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
+
+      setSelectedOptions({
+        deployment: deployments
+      });
+    },
+    [selectedOptions]
+  );
+
+  const onSelectSymbol = useCallback(
+    (symbols: OptionType[]) => {
+      if (selectedOptions.symbol.length > 0 && symbols.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
+
+      setSelectedOptions({
+        symbol: symbols
+      });
+    },
+    [selectedOptions]
+  );
 
   const onClearSelectedOptions = useCallback(() => {
     setSelectedOptions({
@@ -337,6 +357,8 @@ const CompoundCumulativeRevenue = ({
       deployment: [],
       symbol: []
     });
+
+    setResetHiddenKey((k) => k + 1);
   }, []);
 
   return (
@@ -383,6 +405,7 @@ const CompoundCumulativeRevenue = ({
       ) : (
         <LineChart
           className='max-h-fit'
+          resetHiddenKey={resetHiddenKey}
           data={cumulativeChartSeries}
           groupBy={getGroupByForChart()}
           chartRef={chartRef}
