@@ -5,20 +5,13 @@ import { Tabs, TabsList, TabsTrigger } from '../Tabs/Tabs';
 
 interface TabsGroupProps {
   tabs: string[];
-
   defaultTab?: string;
-
   value?: string | null;
-
   onTabChange?: (value: string) => void;
-
   className?: {
     container?: string;
-
     list?: string;
-
     trigger?: string;
-
     activeTrigger?: string;
   };
   disabled?: boolean;

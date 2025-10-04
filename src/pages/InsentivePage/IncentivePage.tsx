@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import HistoricalExpensesByNetworks from '@/entities/Insentive/HistoricalExpensesByNetwork/HistoricalExpensesByNetworks';
 import MetricBlock from '@/entities/Insentive/MetricBlock/MetricBlock';
 import CurrentSpendingByChainBlock from '@/features/Insentive/CurrentSpendingByChain';
 import { useIncentivesApiData } from '@/shared/hooks/useIncentivesApiData';
@@ -68,11 +69,11 @@ const IncentivePage = () => {
           isError={incentivesQuery?.isError}
           isLoading={incentivesQuery?.isPending}
         />
-        {/*<HistoricalExpensesByNetworks*/}
-        {/*  isLoading={isLoading}*/}
-        {/*  isError={isError}*/}
-        {/*  data={treasuryData}*/}
-        {/*/>*/}
+        <HistoricalExpensesByNetworks
+          data={combinedIncentivesData}
+          isError={incentivesQuery?.isError}
+          isLoading={incentivesQuery?.isPending}
+        />
         {/*<FeesGeneratedVsIncentives*/}
         {/*  isLoading={isLoading}*/}
         {/*  isError={isError}*/}
