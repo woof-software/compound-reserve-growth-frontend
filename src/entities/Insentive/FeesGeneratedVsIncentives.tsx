@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useReducer } from 'react';
+import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
@@ -78,6 +78,8 @@ const FeesGeneratedVsIncentives = ({
   isError,
   data: treasuryApiResponse
 }: FeesGeneratedVsIncentivesProps) => {
+  const [resetHiddenKey, setResetHiddenKey] = useState(0);
+
   const [selectedOptions, setSelectedOptions] = useReducer(
     (prev, next) => ({
       ...prev,
@@ -252,22 +254,36 @@ const FeesGeneratedVsIncentives = ({
           ? true
           : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
       );
+
+      if (selectedOptions.chain.length > 0 && chain.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
+
       setSelectedOptions({ chain, deployment: filteredDeployment });
     },
-    [selectedOptions.deployment]
+    [selectedOptions.chain.length, selectedOptions.deployment]
   );
 
-  const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      deployment: selectedOptions
-    });
-  }, []);
+  const onSelectMarket = useCallback(
+    (deployments: OptionType[]) => {
+      if (selectedOptions.deployment.length > 0 && deployments.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
+
+      setSelectedOptions({
+        deployment: deployments
+      });
+    },
+    [selectedOptions]
+  );
 
   const onClearSelectedOptions = useCallback(() => {
     setSelectedOptions({
       chain: [],
       deployment: []
     });
+
+    setResetHiddenKey((k) => k + 1);
   }, []);
 
   const onClearAll = useCallback(() => {
@@ -308,6 +324,7 @@ const FeesGeneratedVsIncentives = ({
         <LineChart
           className='max-h-fit'
           key={groupBy}
+          resetHiddenKey={resetHiddenKey}
           data={correctedChartSeries}
           groupBy={groupBy}
           chartRef={chartRef}
