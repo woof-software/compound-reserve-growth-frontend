@@ -74,7 +74,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
     {
       id: 'Source',
       accessorFn: (row) => row.source,
-      header: 'Source',
+      header: 'Market',
       enableSorting: true,
       align: 'right',
       size: 80,
