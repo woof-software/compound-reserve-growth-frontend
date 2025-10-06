@@ -13,6 +13,7 @@ import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import Text from '@/shared/ui/Text/Text';
 
 interface HistoricalExpensesByNetworksProps {
   isLoading: boolean;
@@ -25,8 +26,10 @@ const HistoricalExpensesByNetworks = (
   props: HistoricalExpensesByNetworksProps
 ) => {
   const { data, isError, isLoading } = props;
-  const [activeModeTab, setActiveModeTab] = useState('Total');
-  const [activeViewTab, setActiveViewTab] = useState('COMP');
+  const [activeModeTab, setActiveModeTab] = useState<
+    'Lend' | 'Borrow' | 'Total'
+  >('Total');
+  const [activeViewTab, setActiveViewTab] = useState<'COMP' | 'USD'>('COMP');
   const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
@@ -72,7 +75,7 @@ const HistoricalExpensesByNetworks = (
     chartSeries,
     barSize,
     groupBy: 'None',
-    filePrefix: 'Historical_Expenses_By_Network',
+    filePrefix: 'historical_expenses_by_networks',
     aggregationType: 'sum'
   });
 
@@ -84,7 +87,7 @@ const HistoricalExpensesByNetworks = (
       id='historical-expenses-by-networks'
       className={{
         loading: 'min-h-[inherit]',
-        container: 'min-h-[571px] rounded-lg',
+        container: 'min-h-143 rounded-lg',
         content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-5 lg:px-10 lg:pb-10'
       }}
     >
@@ -127,7 +130,7 @@ const HistoricalExpensesByNetworks = (
               barSize={barSize}
             />
             {/*TODO: fix download button style applying*/}
-            <span className={'mt-[3px] hidden md:block'}>
+            <span className={'mt-1 hidden md:block'}>
               <CSVDownloadButton
                 data={csvData}
                 filename={getCsvFileName('historical_expenses_by_networks', {
@@ -140,7 +143,20 @@ const HistoricalExpensesByNetworks = (
           </div>
         </div>
       </div>
-      {hasData && (
+      {!isLoading && !isError && !hasData ? (
+        <div
+          className={
+            'flex h-[400px] flex-col items-center justify-center gap-4'
+          }
+        >
+          <Text
+            size='12'
+            className='text-primary-14'
+          >
+            No data
+          </Text>
+        </div>
+      ) : (
         <Line
           key={`${groupBy}`}
           data={chartSeries}

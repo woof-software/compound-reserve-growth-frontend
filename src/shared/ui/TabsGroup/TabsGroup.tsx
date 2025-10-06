@@ -3,11 +3,11 @@ import Each from '@/shared/ui/Each/Each';
 
 import { Tabs, TabsList, TabsTrigger } from '../Tabs/Tabs';
 
-interface TabsGroupProps {
+interface TabsGroupProps<T extends string = string> {
   tabs: string[];
   defaultTab?: string;
-  value?: string | null;
-  onTabChange?: (value: string) => void;
+  value?: T | null;
+  onTabChange?: (value: T) => void;
   className?: {
     container?: string;
     list?: string;
@@ -17,21 +17,21 @@ interface TabsGroupProps {
   disabled?: boolean;
 }
 
-const TabsGroup = ({
+const TabsGroup = <T extends string = string>({
   tabs,
   defaultTab,
   value,
   onTabChange,
   className,
   disabled
-}: TabsGroupProps) => {
+}: TabsGroupProps<T>) => {
   const internalValue = value === null ? '' : value;
 
   return (
     <Tabs
       value={internalValue}
       defaultValue={defaultTab || tabs[0]}
-      onValueChange={onTabChange}
+      onValueChange={(a) => onTabChange?.(a as T)}
       className={cn(className?.container, {
         'pointer-events-none': disabled
       })}

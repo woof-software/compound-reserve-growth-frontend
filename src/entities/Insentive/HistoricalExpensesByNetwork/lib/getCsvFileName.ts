@@ -18,5 +18,9 @@ export const getCsvFileName = (prefix: string, config?: Config) => {
     .replace(/\//g, '.')
     .replace(', ', '_');
 
+  if (!config) {
+    return `${prefix}_${dateWithTime}.csv`;
+  }
+
   return `${prefix}_${config?.timeFrame}_${config?.mode}_${config?.view}_${dateWithTime}.csv`;
 };

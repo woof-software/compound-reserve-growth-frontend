@@ -63,7 +63,7 @@ export const HistoricalExpensesMobileActions = (
               <div className='flex items-center gap-1.5'>
                 <Icon
                   name='download'
-                  className='h-[26px] w-[26px]'
+                  className='h-6.5 w-6.5'
                 />
                 <Text
                   size='14'

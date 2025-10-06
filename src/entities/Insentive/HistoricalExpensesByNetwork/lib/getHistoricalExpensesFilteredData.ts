@@ -1,5 +1,11 @@
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 
+type AggregatedDataPoint = {
+  date: number;
+  compoundPrice?: number;
+  spends: { valueBorrow: number; valueSupply: number };
+};
+
 /**
  * This is the core data processing function.
  * It takes the raw API data and applies the filtering logic you specified.
@@ -41,11 +47,11 @@ const calculateValue = (item: any, mode: string, view: string): number => {
 };
 
 /**
- * Groups the raw data by network and calculates the value for each entry.
+ * Groups raw data by network and date, then transforms it for charting.
  *
  * @param data - The entire array of data from the API.
- * @param mode - The selected mode.
- * @param view - The selected view.
+ * @param mode - The selected mode ('Lend', 'Borrow', 'Total').
+ * @param view - The selected view ('COMP', 'USD').
  * @returns An object where keys are network names and values are arrays of chart data points.
  */
 export const getHistoricalExpensesFilteredData = (
@@ -53,52 +59,48 @@ export const getHistoricalExpensesFilteredData = (
   mode: string,
   view: string
 ): Record<string, { x: number; y: number }[]> => {
-  if (!data) {
+  if (!data || data.length === 0) {
     return {};
   }
 
-  const groupedByDate = data.reduce(
-    (acc, currentItem) => {
-      const { date, incomes, spends } = currentItem;
+  const aggregatedData = data.reduce((acc, item) => {
+    const { network } = item.source;
+    const { date, spends, compoundPrice } = item;
 
-      if (!acc[date]) {
-        acc[date] = {
-          ...currentItem,
-          incomes: { ...incomes },
-          spends: spends
-            ? { ...spends }
-            : { id: 0, valueBorrow: 0, valueSupply: 0 }
-        };
-      } else {
-        acc[date].incomes.valueBorrow += incomes.valueBorrow;
-        acc[date].incomes.valueSupply += incomes.valueSupply;
+    if (!acc.has(network)) {
+      acc.set(network, new Map());
+    }
+    const networkGroup = acc.get(network)!;
 
-        if (spends) {
-          acc[date].spends!.valueBorrow += spends.valueBorrow;
-          acc[date].spends!.valueSupply += spends.valueSupply;
-        }
-      }
+    if (!networkGroup.has(date)) {
+      networkGroup.set(date, {
+        date,
+        compoundPrice,
+        spends: { valueBorrow: 0, valueSupply: 0 }
+      });
+    }
 
-      return acc;
-    },
-    {} as Record<number, CombinedIncentivesData>
-  );
+    const dateEntry = networkGroup.get(date)!;
+    if (spends) {
+      dateEntry.spends.valueBorrow += spends.valueBorrow;
+      dateEntry.spends.valueSupply += spends.valueSupply;
+    }
 
-  return Object.values(groupedByDate).reduce(
-    (acc: Record<string, { x: number; y: number }[]>, item) => {
-      const network = item.source.network;
+    return acc;
+  }, new Map<string, Map<number, AggregatedDataPoint>>());
 
-      if (!acc[network]) {
-        acc[network] = [];
-      }
+  const finalChartData: Record<string, { x: number; y: number }[]> = {};
 
-      const yValue = calculateValue(item, mode, view);
-      const xValue = item.date * 1000;
+  for (const [network, dateMap] of aggregatedData.entries()) {
+    const chartPoints = Array.from(dateMap.values()).map((aggregatedItem) => {
+      const yValue = calculateValue(aggregatedItem, mode, view);
+      const xValue = aggregatedItem.date * 1000;
 
-      acc[network].push({ x: xValue, y: yValue });
+      return { x: xValue, y: yValue };
+    });
 
-      return acc;
-    },
-    {}
-  );
+    finalChartData[network] = chartPoints.sort((a, b) => a.x - b.x);
+  }
+
+  return finalChartData;
 };
