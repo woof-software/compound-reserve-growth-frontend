@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useReducer } from 'react';
+import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
@@ -149,6 +149,8 @@ const TotalTreasuryValue = ({
   const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: 'D'
   });
+
+  const [resetHiddenKey, setResetHiddenKey] = useState(0);
 
   const rawData: ChartDataItem[] = useMemo(() => {
     if (!treasuryApiResponse) {
@@ -317,28 +319,54 @@ const TotalTreasuryValue = ({
           ? true
           : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
       );
+
+      if (selectedOptions.chain.length > 0 && chain.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
+
       setSelectedOptions({ chain, deployment: filteredDeployment });
     },
-    [selectedOptions.deployment]
+    [selectedOptions.chain.length, selectedOptions.deployment]
   );
 
-  const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      assetType: selectedOptions
-    });
-  }, []);
+  const onSelectAssetType = useCallback(
+    (assetTypes: OptionType[]) => {
+      if (selectedOptions.assetType.length > 0 && assetTypes.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
 
-  const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      deployment: selectedOptions
-    });
-  }, []);
+      setSelectedOptions({
+        assetType: assetTypes
+      });
+    },
+    [selectedOptions.assetType.length]
+  );
 
-  const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      symbol: selectedOptions
-    });
-  }, []);
+  const onSelectMarket = useCallback(
+    (deployments: OptionType[]) => {
+      if (selectedOptions.deployment.length > 0 && deployments.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
+
+      setSelectedOptions({
+        deployment: deployments
+      });
+    },
+    [selectedOptions]
+  );
+
+  const onSelectSymbol = useCallback(
+    (symbols: OptionType[]) => {
+      if (selectedOptions.symbol.length > 0 && symbols.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
+
+      setSelectedOptions({
+        symbol: symbols
+      });
+    },
+    [selectedOptions]
+  );
 
   const onClearSelectedOptions = useCallback(() => {
     setSelectedOptions({
@@ -347,6 +375,8 @@ const TotalTreasuryValue = ({
       deployment: [],
       symbol: []
     });
+
+    setResetHiddenKey((k) => k + 1);
   }, []);
 
   const onClearAll = useCallback(() => {
@@ -402,6 +432,7 @@ const TotalTreasuryValue = ({
       ) : (
         <LineChart
           key={groupBy}
+          resetHiddenKey={resetHiddenKey}
           data={correctedChartSeries}
           groupBy={groupBy}
           aggregatedSeries={aggregatedSeries}
