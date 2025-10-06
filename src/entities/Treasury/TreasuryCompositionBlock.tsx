@@ -97,7 +97,12 @@ const TreasuryCompositionBlock = memo(
 
     const [includeComp, setIncludeComp] = useState<boolean>(true);
 
-    useFilterSyncSingle('includeComp', includeComp, setIncludeComp);
+    const includeCompURl = !includeComp ? 'false' : undefined;
+
+    useFilterSyncSingle('includeComp', includeCompURl, (v) => {
+      setIncludeComp(v === 'true');
+    });
+
     useFilterSyncSingle('treasuryCompGroup', selectedSingle, setSelectedValue);
 
     const [sortType, setSortType] = useReducer(
