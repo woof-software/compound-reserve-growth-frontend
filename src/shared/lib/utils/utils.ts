@@ -527,3 +527,13 @@ export const removeDuplicates = <T>(array: T[], key: keyof T): T[] => {
     return true;
   });
 };
+
+/**
+ * A no-operation function that performs no actions and returns undefined.
+ * Typically used as a placeholder or default callback.
+ *
+ * @return Always returns undefined.
+ */
+export function noop() {
+  // Do nothing
+}
