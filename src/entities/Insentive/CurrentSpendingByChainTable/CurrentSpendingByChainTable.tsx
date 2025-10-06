@@ -190,7 +190,7 @@ const CurrentSpendingByChainTable = ({
 
               return (
                 <div
-                  key={row.source.assetId}
+                  key={`${row.source.assetId} + ${row.source.address}`}
                   className={cn(
                     'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
                     {
