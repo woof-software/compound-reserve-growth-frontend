@@ -45,7 +45,7 @@ const IncentivePage = () => {
       </div>
       <div className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
         <div className='grid gap-3'>
-          <div className='flex items-center justify-between'>
+          <div className='flex items-center justify-between px-3 md:px-0'>
             <Text
               size='17'
               weight='500'
