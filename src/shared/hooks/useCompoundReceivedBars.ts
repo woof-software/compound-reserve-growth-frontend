@@ -26,7 +26,7 @@ const useCompoundReceivedBars = ({
 
   const [areAllSeriesHidden, setAreAllSeriesHidden] = useState<boolean>(false);
 
-  const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
+  const [hiddenItems, setHiddenItems] = useState<string[]>([]);
 
   const { seriesData, aggregatedData } = useMemo(() => {
     if (!data || data.length === 0) {
@@ -136,15 +136,9 @@ const useCompoundReceivedBars = ({
     chart.redraw();
 
     setHiddenItems((prev) => {
-      const next = new Set(prev);
+      if (prev.includes(name)) return prev.filter((n) => n !== name);
 
-      if (s.visible) {
-        next.delete(name);
-      } else {
-        next.add(name);
-      }
-
-      return next;
+      return [...prev, name];
     });
 
     setTimeout(() => {
@@ -178,6 +172,7 @@ const useCompoundReceivedBars = ({
     hiddenItems,
 
     toggleSeriesByName,
+    setHiddenItems,
     onSelectAll,
     onDeselectAll
   };

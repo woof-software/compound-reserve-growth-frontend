@@ -32,7 +32,9 @@ interface CompoundFeeRecievedProps {
 
   groupBy: string;
 
-  hiddenItems: Set<string>;
+  hiddenItems: string[];
+
+  resetHiddenKey?: number;
 
   areAllSeriesHidden: boolean;
 
@@ -43,6 +45,8 @@ interface CompoundFeeRecievedProps {
   className?: string;
 
   toggleSeriesByName: (name: string) => void;
+
+  onHiddenItems?: (hiddenItems: string[]) => void;
 
   onSelectAll: () => void;
 
@@ -59,10 +63,12 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   barCount = 90,
   barSize = 'D',
   hiddenItems,
+  resetHiddenKey,
   areAllSeriesHidden,
   toggleSeriesByName,
   onSelectAll,
   onDeselectAll,
+  onHiddenItems,
   onVisibleBarsChange,
   className
 }) => {
@@ -76,9 +82,19 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
 
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  const isLastActiveLegend = useMemo(() => {
-    return hiddenItems.size === seriesData.length - 1;
-  }, [seriesData, hiddenItems]);
+  const currentSeriesNames = useMemo(
+    () => seriesData.map((s) => s.name!).filter(Boolean) as string[],
+    [seriesData]
+  );
+
+  const currentHiddenSet = useMemo(() => {
+    return new Set(hiddenItems.filter((n) => currentSeriesNames.includes(n)));
+  }, [hiddenItems, currentSeriesNames]);
+
+  const isLastActiveLegend = useMemo(
+    () => currentHiddenSet.size === Math.max(0, currentSeriesNames.length - 1),
+    [currentHiddenSet, currentSeriesNames.length]
+  );
 
   const updateArrows = useCallback(() => {
     const el = viewportRef.current;
@@ -151,7 +167,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
 
   const onSelectLegend = useCallback(
     (name: string) => {
-      if (isLastActiveLegend && !hiddenItems.has(name)) return;
+      if (isLastActiveLegend && !hiddenItems.includes(name)) return;
 
       toggleSeriesByName(name);
     },
@@ -329,7 +345,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     if (!chart) return;
 
     chart.series.forEach((s) => {
-      if (hiddenItems.has(s.name)) {
+      if (hiddenItems.includes(s.name)) {
         if (s.visible) s.setVisible(false, false);
       } else {
         if (!s.visible) s.setVisible(true, false);
@@ -338,6 +354,12 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
 
     chart.redraw();
   }, [areAllSeriesHidden, hiddenItems]);
+
+  useEffect(() => {
+    if (resetHiddenKey !== undefined) {
+      onHiddenItems?.([]);
+    }
+  }, [resetHiddenKey, onHiddenItems]);
 
   return (
     <div
@@ -434,9 +456,11 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
                     className={cn(
                       'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
                       {
-                        'line-through opacity-30': hiddenItems.has(s.name!),
+                        'line-through opacity-30': currentHiddenSet.has(
+                          s.name!
+                        ),
                         'cursor-not-allowed':
-                          isLastActiveLegend && !hiddenItems.has(s.name!)
+                          isLastActiveLegend && !currentHiddenSet.has(s.name!)
                       }
                     )}
                     onMouseEnter={() => highlightSeries(s.name!)}
@@ -482,9 +506,9 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
                   className={cn(
                     'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
                     {
-                      'line-through opacity-30': hiddenItems.has(s.name!),
+                      'line-through opacity-30': currentHiddenSet.has(s.name!),
                       'cursor-not-allowed':
-                        isLastActiveLegend && !hiddenItems.has(s.name!)
+                        isLastActiveLegend && !currentHiddenSet.has(s.name!)
                     }
                   )}
                   onMouseEnter={() => highlightSeries(s.name!)}
