@@ -57,7 +57,34 @@ export const getHistoricalExpensesFilteredData = (
     return {};
   }
 
-  return data.reduce(
+  const groupedByDate = data.reduce(
+    (acc, currentItem) => {
+      const { date, incomes, spends } = currentItem;
+
+      if (!acc[date]) {
+        acc[date] = {
+          ...currentItem,
+          incomes: { ...incomes },
+          spends: spends
+            ? { ...spends }
+            : { id: 0, valueBorrow: 0, valueSupply: 0 }
+        };
+      } else {
+        acc[date].incomes.valueBorrow += incomes.valueBorrow;
+        acc[date].incomes.valueSupply += incomes.valueSupply;
+
+        if (spends) {
+          acc[date].spends!.valueBorrow += spends.valueBorrow;
+          acc[date].spends!.valueSupply += spends.valueSupply;
+        }
+      }
+
+      return acc;
+    },
+    {} as Record<number, CombinedIncentivesData>
+  );
+
+  return Object.values(groupedByDate).reduce(
     (acc: Record<string, { x: number; y: number }[]>, item) => {
       const network = item.source.network;
 

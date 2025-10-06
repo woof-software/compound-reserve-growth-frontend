@@ -37,10 +37,7 @@ export const useHistoricalExpensesChartSeries = ({
     );
   }, [rawData, mode, view]);
 
-  const hasData = useMemo(
-    () => chartSeries.some((series) => series.data && series.data.length > 0),
-    [chartSeries]
-  );
+  const hasData = chartSeries.length > 0;
 
   return { chartSeries, hasData };
 };

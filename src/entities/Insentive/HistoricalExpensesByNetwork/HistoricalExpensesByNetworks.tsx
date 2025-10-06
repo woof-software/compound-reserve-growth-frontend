@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 
 import Line from '@/components/Charts/Line/Line';
+import { HistoricalExpensesMobileActions } from '@/entities/Insentive/HistoricalExpensesByNetwork/HistoricalExpensesMobileActions';
+import { customTooltipFormatter } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/customTooltipFormatter';
+import { getCsvFileName } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/getCsvFileName';
 import { useHistoricalExpensesChartSeries } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/useHistoricalExpensesChartSeries';
 import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import Card from '@/shared/ui/Card/Card';
+import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
 interface HistoricalExpensesByNetworksProps {
@@ -41,7 +46,8 @@ const HistoricalExpensesByNetworks = (
     onEventsData,
     onShowEvents,
     onSelectAll,
-    onDeselectAll
+    onDeselectAll,
+    areAllSeriesHidden
   } = useLineChart({
     groupBy,
     data: chartSeries,
@@ -62,13 +68,13 @@ const HistoricalExpensesByNetworks = (
 
   useFilterSyncSingle('historicalExpByNetworkPeriod', barSize, onBarSizeChange);
 
-  // const { csvData, csvFilename } = useCSVExport({
-  //   chartSeries: correctedChartSeries,
-  //   barSize,
-  //   groupBy: 'None',
-  //   filePrefix: 'Total_Treasury_Value',
-  //   aggregationType: 'sum'
-  // });
+  const { csvData } = useCSVExport({
+    chartSeries,
+    barSize,
+    groupBy: 'None',
+    filePrefix: 'Historical_Expenses_By_Network',
+    aggregationType: 'sum'
+  });
 
   return (
     <Card
@@ -83,10 +89,10 @@ const HistoricalExpensesByNetworks = (
       }}
     >
       <div className='flex flex-col justify-end gap-2 px-5 py-3 sm:flex-row md:px-0'>
-        <div className='flex justify-end gap-2'>
+        <div className='flex flex-wrap items-center justify-end gap-2'>
           <TabsGroup
             className={{
-              container: 'hidden w-full sm:block sm:w-auto',
+              container: 'w-full sm:w-auto',
               list: 'w-auto'
             }}
             tabs={['COMP', 'USD']}
@@ -103,20 +109,35 @@ const HistoricalExpensesByNetworks = (
             onTabChange={setActiveModeTab}
             disabled={isLoading}
           />
-          <TabsGroup
-            className={{
-              container: 'hidden w-full sm:block sm:w-auto',
-              list: 'w-auto'
-            }}
-            tabs={['D', 'W', 'M']}
-            value={barSize}
-            onTabChange={onBarSizeChange}
-            disabled={isLoading}
-          />
-          {/*<CSVDownloadButton*/}
-          {/*  data={chartSeries}*/}
-          {/*  filename={'Incentive_Current_Spending_By_Chain'}*/}
-          {/*/>*/}
+          <div className={'flex w-full items-center gap-2 sm:w-auto'}>
+            <TabsGroup
+              className={{
+                container: 'w-full',
+                list: 'w-full'
+              }}
+              tabs={['D', 'W', 'M']}
+              value={barSize}
+              onTabChange={onBarSizeChange}
+              disabled={isLoading}
+            />
+            <HistoricalExpensesMobileActions
+              csvData={csvData}
+              activeModeTab={activeModeTab}
+              activeViewTab={activeViewTab}
+              barSize={barSize}
+            />
+            {/*TODO: fix download button style applying*/}
+            <span className={'mt-[3px] hidden md:block'}>
+              <CSVDownloadButton
+                data={csvData}
+                filename={getCsvFileName('historical_expenses_by_networks', {
+                  view: activeViewTab,
+                  mode: activeModeTab,
+                  timeFrame: barSize
+                })}
+              />
+            </span>
+          </div>
         </div>
       </div>
       {hasData && (
@@ -133,196 +154,14 @@ const HistoricalExpensesByNetworks = (
           onDeselectAll={onDeselectAll}
           onShowEvents={onShowEvents}
           onEventsData={onEventsData}
+          areAllSeriesHidden={areAllSeriesHidden}
           isLegendEnabled={true}
-          areAllSeriesHidden={false}
+          // @ts-expect-error TODO: fix customTooltip types
+          customTooltipFormatter={customTooltipFormatter(activeViewTab)}
         />
       )}
     </Card>
   );
 };
-
-// const Filters = memo(
-//   ({
-//     barSize,
-//     csvData,
-//     csvFilename,
-//     isLoading,
-//     areAllSeriesHidden,
-//     onBarSizeChange,
-//     onSelectAll,
-//     onDeselectAll
-//   }: FiltersProps) => {
-//     const {
-//       isOpen: isMoreOpen,
-//       onOpenModal: onMoreOpen,
-//       onCloseModal: onMoreClose
-//     } = useModal();
-//
-//     const onEyeClick = () => {
-//       if (areAllSeriesHidden) {
-//         onSelectAll();
-//       } else {
-//         onDeselectAll();
-//       }
-//
-//       onMoreClose();
-//     };
-//
-//     return (
-//       <>
-//         <div className='block lg:hidden'>
-//           <div className='flex flex-col justify-end gap-2 px-5 py-3 sm:flex-row md:px-0'>
-//             <div className='flex justify-end gap-2'>
-//               <TabsGroup
-//                 className={{
-//                   container: 'hidden w-full sm:block sm:w-auto',
-//                   list: 'w-auto'
-//                 }}
-//                 tabs={['COMP', 'USD']}
-//                 value={'COMP'}
-//                 onTabChange={() => {}}
-//               />
-//               <TabsGroup
-//                 className={{
-//                   container: 'w-full sm:w-auto',
-//                   list: 'w-full sm:w-auto'
-//                 }}
-//                 tabs={['Lend', 'Borrow', 'Total']}
-//                 value={'Borrow'}
-//                 onTabChange={() => {}}
-//                 disabled={isLoading}
-//               />
-//               <TabsGroup
-//                 className={{
-//                   container: 'hidden w-full sm:block sm:w-auto',
-//                   list: 'w-auto'
-//                 }}
-//                 tabs={['D', 'W', 'M']}
-//                 value={barSize}
-//                 onTabChange={onBarSizeChange}
-//                 disabled={isLoading}
-//               />
-//             </div>
-//             <div className='flex flex-row items-center justify-end gap-2'>
-//               <TabsGroup
-//                 className={{
-//                   container: 'block w-full sm:hidden',
-//                   list: 'w-full'
-//                 }}
-//                 tabs={['COMP', 'USD']}
-//                 value={'COMP'}
-//                 onTabChange={() => {}}
-//               />
-//               <TabsGroup
-//                 className={{
-//                   container: 'block w-full sm:hidden',
-//                   list: 'w-full'
-//                 }}
-//                 tabs={['D', 'W', 'M']}
-//                 value={barSize}
-//                 onTabChange={onBarSizeChange}
-//                 disabled={isLoading}
-//               />
-//               <Button
-//                 onClick={onMoreOpen}
-//                 className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
-//               >
-//                 <Icon
-//                   name='3-dots'
-//                   className='h-6 w-6 fill-none'
-//                 />
-//               </Button>
-//             </div>
-//           </div>
-//         </div>
-
-// MOBILE FILTERS
-//         <div className='hidden lg:block'>
-//           <div className='flex items-center justify-end gap-2 px-0 py-3'>
-//             <TabsGroup
-//               tabs={['COMP', 'USD']}
-//               value={'COMP'}
-//               onTabChange={() => {}}
-//             />
-//             <TabsGroup
-//               tabs={['Lend', 'Borrow', 'Total']}
-//               value={'Borrow'}
-//               onTabChange={() => {}}
-//               disabled={isLoading}
-//             />
-//             <TabsGroup
-//               tabs={['D', 'W', 'M']}
-//               value={barSize}
-//               onTabChange={onBarSizeChange}
-//               disabled={isLoading}
-//             />
-//             <CSVDownloadButton
-//               data={csvData}
-//               filename={csvFilename}
-//               tooltipContent='CSV with the entire historical data can be downloaded'
-//             />
-//           </div>
-//         </div>
-//         <Drawer
-//           isOpen={isMoreOpen}
-//           onClose={onMoreClose}
-//         >
-//           <Text
-//             size='17'
-//             weight='700'
-//             align='center'
-//             className='mb-5'
-//           >
-//             Actions
-//           </Text>
-//           <div className='flex flex-col gap-1.5'>
-//             <div className='px-3 py-2'>
-//               <CSVLink
-//                 data={csvData}
-//                 filename={csvFilename}
-//                 onClick={onMoreClose}
-//               >
-//                 <div className='flex items-center gap-1.5'>
-//                   <Icon
-//                     name='download'
-//                     className='h-[26px] w-[26px]'
-//                   />
-//                   <Text
-//                     size='14'
-//                     weight='500'
-//                   >
-//                     CSV with the entire historical data
-//                   </Text>
-//                 </div>
-//               </CSVLink>
-//             </div>
-//             <div className='px-3 py-2'>
-//               <ChartIconToggle
-//                 active={areAllSeriesHidden}
-//                 onIcon='eye'
-//                 offIcon='eye-closed'
-//                 ariaLabel='Toggle all series visibility'
-//                 className={{
-//                   container:
-//                     'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
-//                   icon: 'h-[26px] w-[26px]',
-//                   iconContainer: 'h-[26px] w-[26px]'
-//                 }}
-//                 onClick={onEyeClick}
-//               >
-//                 <Text
-//                   size='14'
-//                   weight='500'
-//                 >
-//                   Unselect All
-//                 </Text>
-//               </ChartIconToggle>
-//             </div>
-//           </div>
-//         </Drawer>
-//       </>
-//     );
-//   }
-// );
 
 export default HistoricalExpensesByNetworks;
