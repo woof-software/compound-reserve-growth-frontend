@@ -127,10 +127,8 @@ const LineChart: FC<LineChartProps> = ({
     return new Set(hiddenItems.filter((n) => currentSeriesNames.includes(n)));
   }, [hiddenItems, currentSeriesNames]);
 
-  const isLastActiveLegend = useMemo(
-    () => currentHiddenSet.size === Math.max(0, currentSeriesNames.length - 1),
-    [currentHiddenSet, currentSeriesNames.length]
-  );
+  const isLastActiveLegend =
+    currentHiddenSet.size === Math.max(0, currentSeriesNames.length - 1);
 
   const highlightSeries = useCallback((name: string) => {
     const chart = chartRef.current?.chart;
@@ -167,7 +165,7 @@ const LineChart: FC<LineChartProps> = ({
   const toggleSeriesByName = useCallback(
     (name: string) => {
       const isHiddenNow = currentHiddenSet.has(name);
-      if (isLastActiveLegend && !isHiddenNow) return; // не даём скрыть последнюю видимую в ТЕКУЩЕМ наборе
+      if (isLastActiveLegend && !isHiddenNow) return;
 
       const chart = chartRef.current?.chart;
       if (!chart) return;
@@ -179,7 +177,6 @@ const LineChart: FC<LineChartProps> = ({
       chart.redraw();
 
       setHiddenItems((prev) => {
-        // обычный тоггл в исходном массиве
         if (prev.includes(name)) return prev.filter((n) => n !== name);
         return [...prev, name];
       });

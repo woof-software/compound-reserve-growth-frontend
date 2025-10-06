@@ -91,10 +91,8 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     return new Set(hiddenItems.filter((n) => currentSeriesNames.includes(n)));
   }, [hiddenItems, currentSeriesNames]);
 
-  const isLastActiveLegend = useMemo(
-    () => currentHiddenSet.size === Math.max(0, currentSeriesNames.length - 1),
-    [currentHiddenSet, currentSeriesNames.length]
-  );
+  const isLastActiveLegend =
+    currentHiddenSet.size === Math.max(0, currentSeriesNames.length - 1);
 
   const updateArrows = useCallback(() => {
     const el = viewportRef.current;
