@@ -123,7 +123,7 @@ const SingleSelect = ({
 }: SingleSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
@@ -137,13 +137,13 @@ const SingleSelect = ({
   const onOpenModal = () => {
     setIsOpen(true);
     setSearchValue('');
-    setHighlightedIndex(0);
+    setHighlightedIndex(-1);
   };
 
   const onCloseDropdown = () => {
     setIsOpen(false);
     setSearchValue('');
-    setHighlightedIndex(0);
+    setHighlightedIndex(-1);
   };
 
   const onSelect = (option: Option) => {
@@ -158,7 +158,7 @@ const SingleSelect = ({
 
   const onChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
-    setHighlightedIndex(0);
+    setHighlightedIndex(-1);
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -253,6 +253,7 @@ const SingleSelect = ({
                 render={(option, index) => {
                   const isSelected = value?.id === option.id;
                   const isHighlighted = index === highlightedIndex;
+
                   return (
                     <CustomDropdownItem
                       key={option.id}
