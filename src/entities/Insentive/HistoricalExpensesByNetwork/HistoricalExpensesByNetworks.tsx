@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import Line from '@/components/Charts/Line/Line';
+import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { HistoricalExpensesMobileActions } from '@/entities/Insentive/HistoricalExpensesByNetwork/HistoricalExpensesMobileActions';
 import { customTooltipFormatter } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/customTooltipFormatter';
 import { getCsvFileName } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/getCsvFileName';
@@ -13,7 +14,6 @@ import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import Text from '@/shared/ui/Text/Text';
 
 interface HistoricalExpensesByNetworksProps {
   isLoading: boolean;
@@ -144,18 +144,7 @@ const HistoricalExpensesByNetworks = (
         </div>
       </div>
       {!isLoading && !isError && !hasData ? (
-        <div
-          className={
-            'flex h-[400px] flex-col items-center justify-center gap-4'
-          }
-        >
-          <Text
-            size='12'
-            className='text-primary-14'
-          >
-            No data
-          </Text>
-        </div>
+        <NoDataPlaceholder isHideButton={true} />
       ) : (
         <Line
           key={`${groupBy}`}

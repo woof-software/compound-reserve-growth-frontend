@@ -4,8 +4,8 @@ import Each from '@/shared/ui/Each/Each';
 import { Tabs, TabsList, TabsTrigger } from '../Tabs/Tabs';
 
 interface TabsGroupProps<T extends string = string> {
-  tabs: string[];
-  defaultTab?: string;
+  tabs: T[];
+  defaultTab?: T;
   value?: T | null;
   onTabChange?: (value: T) => void;
   className?: {
