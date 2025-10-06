@@ -10,19 +10,34 @@ export const normalizeCapoData = (
     return [];
   }
 
-  const { sourcesMap, assetsMap } = createSourcesMap(sourcesData);
+  const { assetsMap } = createSourcesMap(sourcesData);
 
-  return capoData.map((capoItem) => {
-    const source = sourcesMap.get(capoItem.assetId);
+  const existingAssets = new Set<number>();
+
+  const result = new Array<TableItem>();
+
+  for (const capoItem of capoData) {
+    if (existingAssets.has(capoItem.assetId)) continue;
+
     const asset = assetsMap.get(capoItem.assetId);
 
-    return {
-      network: source?.network || '',
-      collateral: asset?.symbol || '',
+    if (!asset) {
+      console.warn(`CAPO: Asset with ID ${capoItem.assetId} not found`);
+
+      continue;
+    }
+
+    result.push({
+      network: asset.network,
+      collateral: asset.symbol,
       collateralPrice: capoItem?.price,
       priceRestriction: capoItem?.capValue,
       priceFeed: capoItem?.oracleAddress,
       oracleName: capoItem?.oracleName
-    };
-  });
+    });
+
+    existingAssets.add(capoItem.assetId);
+  }
+
+  return result;
 };
