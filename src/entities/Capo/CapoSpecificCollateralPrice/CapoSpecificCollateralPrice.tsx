@@ -1,6 +1,8 @@
 import React from 'react';
+import { CSVLink } from 'react-csv';
 
 import Line from '@/components/Charts/Line/Line';
+import Filter, { FilterOptions } from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import {
   customFormatter,
@@ -13,11 +15,16 @@ import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
+import { useModal } from '@/shared/hooks/useModal';
 import { NormalizedChartData } from '@/shared/types/Capo/types';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
+import Drawer from '@/shared/ui/Drawer/Drawer';
+import Icon from '@/shared/ui/Icon/Icon';
 import SingleSelect from '@/shared/ui/SingleSelect/SingleSelect';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import Text from '@/shared/ui/Text/Text';
 
 interface CapoSpecificCollateralPriceProps {
   rawData: NormalizedChartData[];
@@ -40,6 +47,65 @@ export const CapoSpecificCollateralPrice = (
     filteredData,
     groupBy
   } = useChartFilters(rawData);
+
+  const {
+    isOpen: isFilterOpen,
+    onOpenModal: onFilterOpen,
+    onCloseModal: onFilterClose
+  } = useModal();
+
+  const {
+    isOpen: isMoreOpen,
+    onOpenModal: onMoreOpen,
+    onCloseModal: onMoreClose
+  } = useModal();
+
+  /**
+   * A variable holding filter configurations for mobile devices.
+   * The bridge between useChartFilters and Filter component.
+   */
+  const mobileFilters = ((): FilterOptions[] => {
+    return [
+      {
+        id: 'chain',
+        placeholder: 'Chain',
+        total: chainOptions.length,
+        options: chainOptions,
+        selectedOptions: selectedChain ? [selectedChain] : [],
+        disableSelectAll: true,
+        onChange: (options) => {
+          /**
+           * The Filter component throws the selected filter as the latest one,
+           * so it is used to implement a 'single' element behavior
+           */
+          const option = options.at(-1);
+
+          if (!option) return;
+
+          setSelectedChain(option);
+        }
+      },
+      {
+        id: 'collateral',
+        placeholder: 'Collaterals',
+        total: chainOptions.length,
+        options: collateralOptions,
+        selectedOptions: selectedCollateral ? [selectedCollateral] : [],
+        disableSelectAll: true,
+        onChange: (options) => {
+          /**
+           * The Filter component throws the selected filter as the latest one,
+           * so it is used to implement a 'single' element behavior
+           */
+          const option = options.at(-1);
+
+          if (!option) return;
+
+          setSelectedCollateral(option);
+        }
+      }
+    ];
+  })();
 
   const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: 'D'
@@ -138,6 +204,81 @@ export const CapoSpecificCollateralPrice = (
           data={csvData}
           filename={csvFilename}
         />
+      </div>
+      <div className='block lg:hidden'>
+        <div className='flex flex-col-reverse items-center justify-end gap-2 px-5 py-3 sm:flex-row'>
+          <TabsGroup
+            className={{
+              container: 'w-full sm:w-auto',
+              list: 'w-full sm:w-auto'
+            }}
+            tabs={['D', 'W', 'M']}
+            value={barSize}
+            onTabChange={onBarSizeChange}
+          />
+          <div className='flex w-full items-center justify-end gap-2 sm:w-auto'>
+            <Button
+              onClick={onFilterOpen}
+              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-32 gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
+            >
+              <Icon
+                name='filters'
+                className='h-3.5 w-3.5 fill-none'
+              />
+              Filters
+            </Button>
+            <Button
+              onClick={onMoreOpen}
+              className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
+            >
+              <Icon
+                name='3-dots'
+                className='h-6 w-6 fill-none'
+              />
+            </Button>
+          </div>
+        </div>
+        <Filter
+          isOpen={isFilterOpen}
+          filterOptions={mobileFilters}
+          onClose={onFilterClose}
+          disableClearFilters
+        />
+        <Drawer
+          isOpen={isMoreOpen}
+          onClose={onMoreClose}
+        >
+          <Text
+            size='17'
+            weight='700'
+            align='center'
+            className='mb-5'
+          >
+            Actions
+          </Text>
+          <div className='flex flex-col gap-1.5'>
+            <div className='px-3 py-2'>
+              <CSVLink
+                data={csvData}
+                filename={csvFilename}
+                onClick={onMoreClose}
+              >
+                <div className='flex items-center gap-1.5'>
+                  <Icon
+                    name='download'
+                    className='h-6.5 w-6.5'
+                  />
+                  <Text
+                    size='14'
+                    weight='500'
+                  >
+                    CSV with the entire historical data
+                  </Text>
+                </div>
+              </CSVLink>
+            </div>
+          </div>
+        </Drawer>
       </div>
       {hasData && (
         <Line
