@@ -22,5 +22,5 @@ export const getCsvFileName = (prefix: string, config?: Config) => {
     return `${prefix}_${dateWithTime}.csv`;
   }
 
-  return `${prefix}_${config?.timeFrame}_${config?.mode}_${config?.view}_${dateWithTime}.csv`;
+  return `${prefix}_${config.timeFrame}_${config.mode}_${config.view}_${dateWithTime}.csv`;
 };
