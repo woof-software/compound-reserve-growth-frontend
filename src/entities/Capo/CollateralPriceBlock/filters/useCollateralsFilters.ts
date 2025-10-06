@@ -1,6 +1,6 @@
-import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
-import { useCallback, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 
+import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import { TableItem } from '@/shared/types/Capo/types';
 import { OptionType } from '@/shared/types/types';
@@ -54,25 +54,26 @@ export const useCollateralsFilters = (tableData: TableItem[]) => {
     [tableData]
   );
 
-  const collateralOptions = useMemo(
-    () => createFilterOptions(tableData, 'collateral'),
-    [tableData]
-  );
+  const collateralOptions = useMemo(() => {
+    return createFilterOptions(
+      tableData.filter(({ network }) => {
+        if (!selectedOptions.chain.length) return true;
 
-  const onSelectChain = useCallback(
-    (chain: OptionType[]) => {
-      const selectedChainIds = chain.map((option) => option.id);
+        const isNetworkSelected = selectedOptions.chain.some(
+          ({ id }) => id === network
+        );
 
-      const filteredCollateral = selectedOptions.collateral.filter(
-        (option) =>
-          selectedChainIds.length === 0 ||
-          option.chain?.some((chainId) => selectedChainIds.includes(chainId))
-      );
+        return isNetworkSelected;
+      }),
+      'collateral'
+    );
+  }, [tableData, selectedOptions.chain]);
 
-      setSelectedOptions({ chain, collateral: filteredCollateral });
-    },
-    [selectedOptions.collateral]
-  );
+  const onSelectChain = useCallback((selectedChains: OptionType[]) => {
+    setSelectedOptions({
+      chain: selectedChains
+    });
+  }, []);
 
   const onSelectCollateral = useCallback((collateral: OptionType[]) => {
     setSelectedOptions({ collateral });
@@ -134,6 +135,16 @@ export const useCollateralsFilters = (tableData: TableItem[]) => {
     },
     [selectedOptions]
   );
+
+  useEffect(() => {
+    const filteredCollaterals = selectedOptions.collateral.filter(({ id }) => {
+      return collateralOptions.some(({ id: _id }) => id === _id);
+    });
+
+    setSelectedOptions({
+      collateral: filteredCollaterals
+    });
+  }, [collateralOptions]);
 
   return {
     selectedOptions,
