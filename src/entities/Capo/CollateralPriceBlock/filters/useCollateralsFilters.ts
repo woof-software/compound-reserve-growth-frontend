@@ -22,7 +22,8 @@ interface FilterOption {
 
 const createFilterOptions = (
   data: TableItem[],
-  field: keyof TableItem
+  field: keyof TableItem,
+  transformLabel?: (value: string) => string
 ): FilterOption[] => {
   const uniqueValues = [...new Set(data.map((item) => item[field]))];
 
@@ -30,7 +31,7 @@ const createFilterOptions = (
     .filter(Boolean)
     .map((value) => ({
       id: value,
-      label: capitalizeFirstLetter(value)
+      label: transformLabel ? transformLabel(value) : value
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
 };
@@ -50,7 +51,7 @@ export const useCollateralsFilters = (tableData: TableItem[]) => {
   ]);
 
   const chainOptions = useMemo(
-    () => createFilterOptions(tableData, 'network'),
+    () => createFilterOptions(tableData, 'network', capitalizeFirstLetter),
     [tableData]
   );
 
