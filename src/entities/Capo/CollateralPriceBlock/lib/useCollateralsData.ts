@@ -24,19 +24,10 @@ export const useCollateralsData = ({
   applyFilters,
   applySorting
 }: UseCollateralsDataProps) => {
-  const processedData = useMemo(() => {
+  return useMemo(() => {
     const filtered = applyFilters(tableData);
     const transformed = transformTableData(filtered);
 
     return applySorting(transformed);
   }, [tableData, applyFilters, applySorting]);
-
-  const hasData = tableData.length > 0;
-  const showNoData = tableData.length === 0;
-
-  return {
-    processedData,
-    hasData,
-    showNoData
-  };
 };

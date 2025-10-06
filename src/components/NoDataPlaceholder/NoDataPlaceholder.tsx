@@ -10,6 +10,7 @@ interface NoDataPlaceholderProps {
   text?: string;
   buttonText?: string;
   className?: string;
+  hideButton?: boolean;
 }
 
 const NoDataPlaceholder: FC<NoDataPlaceholderProps> = ({

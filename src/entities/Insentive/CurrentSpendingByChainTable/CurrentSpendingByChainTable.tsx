@@ -9,7 +9,6 @@ import {
   explorers,
   formatNumber,
   formatPrice,
-  formatQuantity,
   sliceAddress
 } from '@/shared/lib/utils/utils';
 import { Source } from '@/shared/types/types';
@@ -37,6 +36,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       header: 'Network',
       accessorFn: (row) => row.network,
       enableSorting: true,
+      size: 170,
       cell: ({ row }) => (
         <div className='flex items-center gap-3'>
           <Icon
@@ -59,13 +59,13 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       header: 'Value COMP',
       enableSorting: true,
       cell: ({ row }) => (
-        <Text size='13'>{formatPrice(row.original.valueComp)}</Text>
+        <Text size='13'>{formatNumber(row.original.valueComp, '')}</Text>
       )
     },
     {
       id: 'ValueUSDC',
       accessorFn: (row) => row.valueUsd,
-      header: 'Value USDC',
+      header: 'Value USD',
       enableSorting: true,
       cell: ({ row }) => (
         <Text size='13'>{formatPrice(row.original.valueUsd)}</Text>
@@ -76,7 +76,8 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       accessorFn: (row) => row.source,
       header: 'Source',
       enableSorting: true,
-      size: 120,
+      align: 'right',
+      size: 80,
       cell: ({ row }) => {
         const { source } = row.original;
 
@@ -131,10 +132,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
             }
             side='top'
           >
-            <div
-              className='flex items-start'
-              style={{ width: `${120}px` }}
-            >
+            <div className='flex justify-end'>
               <Text
                 size='13'
                 className='text-primary-11 inline-block max-w-full cursor-pointer truncate border-b border-dotted border-gray-500 leading-none'
@@ -152,20 +150,6 @@ const CurrentSpendingByChainTable = ({
   sortType,
   tableData
 }: CurrentSpendingByChainTableProps) => {
-  const footerRow = (
-    <tr key='footer-total-row'>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
-        Total
-      </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
-        {formatQuantity(41680359)}
-      </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
-        {formatNumber(54448945)}
-      </td>
-    </tr>
-  );
-
   const mobileTableData = useMemo(() => {
     if (!sortType?.key) {
       return tableData;
@@ -252,7 +236,7 @@ const CurrentSpendingByChainTable = ({
                       lineHeight='21'
                       className='truncate'
                     >
-                      {formatPrice(row.valueComp)}
+                      {formatNumber(row.valueComp, '')}
                     </Text>
                   </div>
                   <div className='grid w-full'>
@@ -262,7 +246,7 @@ const CurrentSpendingByChainTable = ({
                       weight='500'
                       className='text-primary-14'
                     >
-                      Value USDC
+                      Value USD
                     </Text>
                     <Text
                       size='13'
@@ -298,56 +282,6 @@ const CurrentSpendingByChainTable = ({
                 </div>
               );
             })}
-            <div
-              className={cn(
-                'grid grid-cols-3 gap-x-10 gap-y-3 p-5 md:gap-x-[63px] md:px-10'
-              )}
-            >
-              <div className='grid min-h-[39px] w-full max-w-[100px]'>
-                <Text
-                  size='13'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Total
-                </Text>
-              </div>
-              <div className='grid min-h-[39px] w-full max-w-[100px]'>
-                <Text
-                  size='13'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Value COMP
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='18'
-                  weight='500'
-                >
-                  {formatQuantity(41680359)}
-                </Text>
-              </div>
-              <div className='grid min-h-[39px] w-full max-w-[100px]'>
-                <Text
-                  size='13'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Value USDC
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='18'
-                  weight='500'
-                >
-                  {formatNumber(54448945)}
-                </Text>
-              </div>
-            </div>
           </>
         )}
       </MobileDataTable>
@@ -355,7 +289,6 @@ const CurrentSpendingByChainTable = ({
         <DataTable
           data={tableData}
           columns={SpendingByChainTableColumns}
-          footerContent={footerRow}
           enableSorting={true}
           enablePagination={true}
           pageSize={10}
@@ -365,6 +298,7 @@ const CurrentSpendingByChainTable = ({
           cellClassName='py-3 px-[5px]'
           headerTextClassName='text-primary-14 font-medium'
           paginationClassName='py-0 px-[5px]'
+          tableClassName='table-fixed w-full'
         />
       </div>
     </>

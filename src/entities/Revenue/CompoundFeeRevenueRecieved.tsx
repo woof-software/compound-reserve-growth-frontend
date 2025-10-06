@@ -119,6 +119,8 @@ const CompoundFeeRevenueRecieved = ({
     initialBarSize: 'D'
   });
 
+  const [resetHiddenKey, setResetHiddenKey] = useState(0);
+
   const initialState: SelectedOptionsState = useMemo(
     () => ({
       chain: [],
@@ -302,6 +304,7 @@ const CompoundFeeRevenueRecieved = ({
     aggregatedData,
     areAllSeriesHidden,
     hiddenItems,
+    setHiddenItems,
     toggleSeriesByName,
     onSelectAll,
     onDeselectAll
@@ -360,27 +363,55 @@ const CompoundFeeRevenueRecieved = ({
           ? true
           : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
       );
+
+      if (selectedOptions.chain.length > 0 && chain.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
+
       setSelectedOptions({ chain, market: filteredDeployment });
     },
-    [selectedOptions.market]
+    [selectedOptions]
   );
 
-  const onSelectMarket = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ market: options });
-  }, []);
+  const onSelectMarket = useCallback(
+    (options: OptionType[]) => {
+      if (selectedOptions.market.length > 0 && options.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
 
-  const onSelectSymbol = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ symbol: options });
-  }, []);
+      setSelectedOptions({ market: options });
+    },
+    [selectedOptions]
+  );
 
-  const onSelectAssetType = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ assetType: options });
-  }, []);
+  const onSelectSymbol = useCallback(
+    (options: OptionType[]) => {
+      if (selectedOptions.symbol.length > 0 && options.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
+
+      setSelectedOptions({ symbol: options });
+    },
+    [selectedOptions]
+  );
+
+  const onSelectAssetType = useCallback(
+    (options: OptionType[]) => {
+      if (selectedOptions.assetType.length > 0 && options.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
+
+      setSelectedOptions({ assetType: options });
+    },
+    [selectedOptions]
+  );
 
   const handleResetFilters = useCallback(() => {
     setSelectedOptions(initialState);
 
     setGroupBy('Chain');
+
+    setResetHiddenKey((k) => k + 1);
   }, [initialState]);
 
   return (
@@ -429,6 +460,7 @@ const CompoundFeeRevenueRecieved = ({
       ) : (
         <CompoundFeeRecieved
           chartRef={chartRef}
+          resetHiddenKey={resetHiddenKey}
           hiddenItems={hiddenItems}
           areAllSeriesHidden={areAllSeriesHidden}
           groupBy={groupBy}
@@ -436,6 +468,7 @@ const CompoundFeeRevenueRecieved = ({
           seriesData={seriesData}
           aggregatedData={aggregatedData}
           toggleSeriesByName={toggleSeriesByName}
+          onHiddenItems={setHiddenItems}
           onSelectAll={onSelectAll}
           onDeselectAll={onDeselectAll}
         />
