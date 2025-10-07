@@ -1,26 +1,27 @@
 import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { SortAdapter } from '@/shared/hooks/useSorting';
+import { OnlyStringKeys } from '@/shared/lib/utils/types';
 import { formatNumber } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-export interface FormattedRevenueData {
+export type FormattedRevenueData = {
   chain: string;
   market: string;
   source: string;
   reserveAsset: string;
+} & OnlyStringKeys<{
   [key: string]: string | number;
-}
+}>;
 
 interface RevenueBreakdownProps {
   data: FormattedRevenueData[];
   columns: ExtendedColumnDef<FormattedRevenueData>[];
-  sortType:
-    | { key: string; type: 'asc' | 'desc' }
-    | { key: string; type: string };
+  sortType: SortAdapter<FormattedRevenueData>;
 }
 
 type ColKey = { accessorKey: string; header: string };

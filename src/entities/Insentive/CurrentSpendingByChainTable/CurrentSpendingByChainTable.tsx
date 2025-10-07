@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import HoverCard from '@/components/HoverCard/HoverCard';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
   capitalizeFirstLetter,
@@ -26,7 +27,7 @@ export type SpendingByChainTableColumns = {
 
 interface CurrentSpendingByChainTableProps {
   tableData: SpendingByChainTableColumns[];
-  sortType: { key: string; type: string };
+  sortType: SortAdapter<SpendingByChainTableColumns>;
 }
 
 const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns>[] =
@@ -156,10 +157,9 @@ const CurrentSpendingByChainTable = ({
     }
 
     const key = sortType.key;
+
     return [...tableData].sort((a, b) => {
-      // @ts-expect-error TODO: fix key index error
       const aVal = a[key];
-      // @ts-expect-error TODO: fix key index error
       const bVal = b[key];
 
       if (typeof aVal === 'number' && typeof bVal === 'number') {
@@ -174,7 +174,7 @@ const CurrentSpendingByChainTable = ({
 
       return 0;
     });
-  }, [tableData, sortType]);
+  }, [tableData, sortType.key, sortType.type]);
 
   return (
     <>

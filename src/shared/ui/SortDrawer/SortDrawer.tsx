@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
@@ -8,37 +8,40 @@ import { Radio } from '@/shared/ui/RadioButton/RadioButton';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 
-interface SortDrawerProps {
+type SortDirection = 'asc' | 'desc';
+
+type SortAdapter<T extends string> = {
+  key: T | null;
+  type: SortDirection;
+};
+
+type SortAccessor<T extends string> = {
+  header: string;
+  accessorKey: T;
+};
+
+interface SortDrawerProps<T extends string> {
   isOpen: boolean;
-
-  sortType: {
-    key: string;
-
-    type: string;
-  };
-
-  columns: { header: string; accessorKey: string }[];
-
+  sortType: SortAdapter<T>;
+  columns: SortAccessor<T>[];
   onClose: () => void;
-
-  onKeySelect: (value: string) => void;
-
-  onTypeSelect: (value: string) => void;
+  onKeySelect: (value: T | null) => void;
+  onTypeSelect: (value: SortDirection) => void;
 }
 
-const SortDrawer: FC<SortDrawerProps> = ({
+const SortDrawer = <T extends string>({
   isOpen,
   sortType,
   columns,
   onClose,
   onKeySelect,
   onTypeSelect
-}) => {
+}: SortDrawerProps<T>) => {
   const [tabValue, setTabValue] = useState<string>(
     sortType?.type === 'asc' ? 'Ascending' : 'Descending'
   );
 
-  const [radioValue, setRadioValue] = useState<string>(sortType?.key || '');
+  const [radioValue, setRadioValue] = useState<T | null>(sortType.key ?? null);
 
   const isApplyButtonDisabled = useMemo(
     () => Boolean(radioValue) && Boolean(tabValue),
@@ -76,13 +79,13 @@ const SortDrawer: FC<SortDrawerProps> = ({
   }, [onKeySelect, radioValue, tabValue, onClose, onTypeSelect]);
 
   const onClearAll = useCallback(() => {
-    setRadioValue('');
+    setRadioValue(null);
 
     setTabValue('Ascending');
 
-    onKeySelect('');
+    onKeySelect(null);
 
-    onTypeSelect('');
+    onTypeSelect('asc');
 
     onClose();
   }, [onClose, onKeySelect, onTypeSelect]);

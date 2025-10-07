@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { formatLargeNumber } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
@@ -23,7 +24,7 @@ interface AnnualisedExpensesComponentProps {
 
   footerData: AnnualisedExpensesFooter;
 
-  sortType: { key: string; type: string };
+  sortType: SortAdapter<AnnualisedExpensesRow>;
 }
 
 const columns: ExtendedColumnDef<AnnualisedExpensesRow>[] = [

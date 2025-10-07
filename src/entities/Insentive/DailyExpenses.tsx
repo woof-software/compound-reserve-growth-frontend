@@ -6,6 +6,7 @@ import DailyExpensesTable from '@/components/IncentivesPageTable/DailyExpenses';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { TreasuryBalanceByNetworkType } from '@/components/TreasuryPageTable/TreasuryHoldings';
 import { useModal } from '@/shared/hooks/useModal';
+import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
 import {
   capitalizeFirstLetter,
   extractFilterOptions
@@ -48,7 +49,12 @@ const mapTableData = (data: TokenData[]) => {
   });
 };
 
-const sortColumns = [
+type Column = {
+  accessorKey: keyof TreasuryBalanceByNetworkType;
+  header: string;
+};
+
+const sortColumns: Column[] = [
   {
     accessorKey: 'symbol',
     header: 'Network'
@@ -109,13 +115,13 @@ const DailyExpenses = ({
     }
   );
 
-  const [sortType, setSortType] = useReducer(
-    (prev, next) => ({
-      ...prev,
-      ...next
-    }),
-    { key: '', type: 'asc' }
-  );
+  const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
+    useSorting<TreasuryBalanceByNetworkType>('asc', null);
+
+  const sortType: SortAdapter<TreasuryBalanceByNetworkType> = {
+    type: sortDirection,
+    key: sortKey
+  };
 
   const filterOptionsConfig = useMemo(
     () => ({
@@ -207,18 +213,6 @@ const DailyExpenses = ({
   const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
       deployment: selectedOptions
-    });
-  }, []);
-
-  const onKeySelect = useCallback((value: string) => {
-    setSortType({
-      key: value
-    });
-  }, []);
-
-  const onTypeSelect = useCallback((value: string) => {
-    setSortType({
-      type: value
     });
   }, []);
 

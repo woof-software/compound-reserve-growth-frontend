@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import * as React from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { formatPrice } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
@@ -21,7 +22,7 @@ interface TreasuryCompositionProps {
   tableData: TreasuryCompositionType[];
   totalBalance: number;
   activeFilter: 'Chain' | 'Asset Type' | 'Market';
-  sortType: { key: string; type: string };
+  sortType: SortAdapter<TreasuryCompositionType>;
 }
 
 const filterConfig = {

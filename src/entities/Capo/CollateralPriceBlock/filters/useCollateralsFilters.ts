@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useReducer } from 'react';
 
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
-import { TableItem } from '@/shared/types/Capo/types';
+import { CapoTableItem } from '@/shared/types/Capo/types';
 import { OptionType } from '@/shared/types/types';
 
 interface FilterState {
@@ -21,8 +21,8 @@ interface FilterOption {
 }
 
 const createFilterOptions = (
-  data: TableItem[],
-  field: keyof TableItem,
+  data: CapoTableItem[],
+  field: keyof CapoTableItem,
   transformLabel?: (value: string) => string
 ): FilterOption[] => {
   const uniqueValues = [...new Set(data.map((item) => item[field]))];
@@ -36,7 +36,7 @@ const createFilterOptions = (
     .sort((a, b) => a.label.localeCompare(b.label));
 };
 
-export const useCollateralsFilters = (tableData: TableItem[]) => {
+export const useCollateralsFilters = (tableData: CapoTableItem[]) => {
   const [selectedOptions, setSelectedOptions] = useReducer(
     (prev: FilterState, next: Partial<FilterState>) => ({
       ...prev,
@@ -113,7 +113,7 @@ export const useCollateralsFilters = (tableData: TableItem[]) => {
   );
 
   const applyFilters = useCallback(
-    (data: TableItem[]) => {
+    (data: CapoTableItem[]) => {
       return data.filter((item) => {
         if (
           selectedOptions.chain.length > 0 &&

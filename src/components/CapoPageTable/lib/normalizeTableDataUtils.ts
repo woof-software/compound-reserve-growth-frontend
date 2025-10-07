@@ -1,11 +1,11 @@
 import { createSourcesMap } from '@/shared/lib/utils/createSourcesMap';
-import { CapoItem, TableItem } from '@/shared/types/Capo/types';
+import { CapoItem, CapoTableItem } from '@/shared/types/Capo/types';
 import { Asset, Source } from '@/shared/types/types';
 
 export const normalizeCapoData = (
   capoData: CapoItem[],
   sourcesData: { sources: Source[]; assets: Asset[] }
-): TableItem[] => {
+): CapoTableItem[] => {
   if (!capoData || !sourcesData) {
     return [];
   }
@@ -14,7 +14,7 @@ export const normalizeCapoData = (
 
   const existingAssets = new Set<number>();
 
-  const result = new Array<TableItem>();
+  const result = new Array<CapoTableItem>();
 
   for (const capoItem of capoData) {
     if (existingAssets.has(capoItem.assetId)) continue;
