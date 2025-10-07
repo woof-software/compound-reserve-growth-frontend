@@ -255,27 +255,16 @@ const FeesGeneratedVsIncentives = ({
           : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
       );
 
-      if (selectedOptions.chain.length > 0 && chain.length === 0) {
-        setResetHiddenKey((k) => k + 1);
-      }
-
       setSelectedOptions({ chain, deployment: filteredDeployment });
     },
     [selectedOptions.chain.length, selectedOptions.deployment]
   );
 
-  const onSelectMarket = useCallback(
-    (deployments: OptionType[]) => {
-      if (selectedOptions.deployment.length > 0 && deployments.length === 0) {
-        setResetHiddenKey((k) => k + 1);
-      }
-
-      setSelectedOptions({
-        deployment: deployments
-      });
-    },
-    [selectedOptions]
-  );
+  const onSelectMarket = useCallback((deployments: OptionType[]) => {
+    setSelectedOptions({
+      deployment: deployments
+    });
+  }, []);
 
   const onClearSelectedOptions = useCallback(() => {
     setSelectedOptions({
