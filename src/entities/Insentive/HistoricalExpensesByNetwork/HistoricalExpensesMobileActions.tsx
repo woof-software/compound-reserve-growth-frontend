@@ -30,7 +30,7 @@ export const HistoricalExpensesMobileActions = (
     <>
       <Button
         onClick={onMoreOpen}
-        className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:hidden md:h-8 md:min-w-8 lg:hidden'
+        className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
       >
         <Icon
           name='3-dots'
