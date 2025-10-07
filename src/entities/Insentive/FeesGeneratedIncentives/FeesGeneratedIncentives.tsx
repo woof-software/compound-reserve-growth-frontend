@@ -5,7 +5,7 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import { FeesGeneratedIncentivesMobileFilters } from '@/entities/Insentive/FeesGeneratedIncentives/FeesGeneratedIncentivesMobileFilters';
 import { customTooltipFormatter } from '@/entities/Insentive/FeesGeneratedIncentives/lib/customTooltipFormatter';
 import { getGeneratedIncentivesChartSeries } from '@/entities/Insentive/FeesGeneratedIncentives/lib/getGeneratedIncentivesChartSeries';
-import { useChainMarketFilters } from '@/shared/hooks/useChainMarketFilters';
+import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import {

@@ -6,7 +6,7 @@ import { CurrendSpendingByChainMobileFilters } from '@/features/Insentive/Curren
 import { getChartData } from '@/features/Insentive/lib/getChartData';
 import { getCsvData } from '@/features/Insentive/lib/getCsvData';
 import { tableDataNormalizer } from '@/features/Insentive/lib/tableDataNormalizer';
-import { useChainMarketFilters } from '@/shared/hooks/useChainMarketFilters';
+import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
 import {
   useFiltersSync,
   useFilterSyncSingle
