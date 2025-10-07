@@ -14,7 +14,7 @@ const sortColumns = [
   { accessorKey: 'network', header: 'Network' },
   { accessorKey: 'valueCOMP', header: 'Value COMP' },
   { accessorKey: 'valueUSDC', header: 'Value USD' },
-  { accessorKey: 'source', header: 'Source' }
+  { accessorKey: 'source', header: 'Market' }
 ];
 
 interface CurrentSpendingByChainMobileFiltersProps {

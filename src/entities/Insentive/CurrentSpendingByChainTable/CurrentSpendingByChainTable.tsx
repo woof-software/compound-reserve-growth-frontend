@@ -263,7 +263,7 @@ const CurrentSpendingByChainTable = ({
                       weight='500'
                       className='text-primary-14'
                     >
-                      Source
+                      Market
                     </Text>
                     <a
                       href={fullExplorerLink}
