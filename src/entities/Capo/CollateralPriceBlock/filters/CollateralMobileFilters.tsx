@@ -1,9 +1,9 @@
 import React from 'react';
+import { CSVLink } from 'react-csv';
 
 import Filter from '@/components/Filter/Filter';
 import { useModal } from '@/shared/hooks/useModal';
 import Button from '@/shared/ui/Button/Button';
-import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
@@ -109,16 +109,15 @@ export const MobileFilters = ({
         </Text>
         <div className='flex flex-col gap-1.5'>
           <div className='px-3 py-2'>
-            <CSVDownloadButton
+            <CSVLink
               data={csvData}
-              filename='Collaterals Price against Price Restriction'
+              filename='collaterals_price_against_price_restriction'
               onClick={onMoreClose}
-              renderAsLink
             >
               <div className='flex items-center gap-1.5'>
                 <Icon
                   name='download'
-                  className='h-[26px] w-[26px]'
+                  className='h-6.5 w-6.5'
                 />
                 <Text
                   size='14'
@@ -127,7 +126,7 @@ export const MobileFilters = ({
                   CSV with the entire historical data
                 </Text>
               </div>
-            </CSVDownloadButton>
+            </CSVLink>
           </div>
         </div>
       </Drawer>
