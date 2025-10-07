@@ -1,15 +1,15 @@
 import { useMemo } from 'react';
 
 import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
-import { TableItem } from '@/shared/types/Capo/types';
+import { CapoTableItem } from '@/shared/types/Capo/types';
 
 interface UseCollateralsDataProps {
-  tableData: TableItem[];
-  applyFilters: (data: TableItem[]) => TableItem[];
+  tableData: CapoTableItem[];
+  applyFilters: (data: CapoTableItem[]) => CapoTableItem[];
   applySorting: (data: any[]) => any[];
 }
 
-const transformTableData = (data: TableItem[]): TableItem[] =>
+const transformTableData = (data: CapoTableItem[]): CapoTableItem[] =>
   data.map((item) => ({
     network: capitalizeFirstLetter(item.network),
     collateral: item.collateral,
@@ -24,19 +24,10 @@ export const useCollateralsData = ({
   applyFilters,
   applySorting
 }: UseCollateralsDataProps) => {
-  const processedData = useMemo(() => {
+  return useMemo(() => {
     const filtered = applyFilters(tableData);
     const transformed = transformTableData(filtered);
 
     return applySorting(transformed);
   }, [tableData, applyFilters, applySorting]);
-
-  const hasData = tableData.length > 0;
-  const showNoData = tableData.length === 0;
-
-  return {
-    processedData,
-    hasData,
-    showNoData
-  };
 };

@@ -4,85 +4,68 @@ export const getTotalMetricValues = (
   data: CombinedIncentivesData[],
   activeTab: string
 ) => {
-  let filteredData = [];
+  let filteredData: CombinedIncentivesData[] = [];
 
   if (activeTab === 'Day') {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayTimestamp = today.getTime() / 1000;
+    const now = new Date();
 
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowTimestamp = tomorrow.getTime() / 1000;
+    const today = new Date(
+      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
+    );
+
+    const tomorrow = new Date(
+      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+    );
+
+    const todayTs = today.getTime() / 1000;
+    const tomorrowTs = tomorrow.getTime() / 1000;
 
     const latestMap = new Map();
 
-    data.forEach((item) => {
-      if (item.date >= todayTimestamp && item.date <= tomorrowTimestamp) {
-        const source = item.source;
-        if (!source) return;
+    for (const item of data) {
+      if (item.date < todayTs || item.date > tomorrowTs) continue;
 
-        latestMap.set(source.id, item);
-      }
-    });
+      latestMap.set(item.source.id, item);
+    }
 
     filteredData = Array.from(latestMap.values());
   } else if (activeTab === 'Year') {
     const currentYear = new Date().getFullYear();
-    const startOfYear = new Date(currentYear, 0, 1).getTime() / 1000;
-    const endOfYear =
-      new Date(currentYear, 11, 31, 23, 59, 59).getTime() / 1000;
+
+    const startOfYear = new Date(Date.UTC(currentYear, 0, 1));
+    const endOfYear = new Date(Date.UTC(currentYear + 1, 0, 1));
+
+    const startOfYearTs = startOfYear.getTime() / 1000;
+    const endOfYearTs = endOfYear.getTime() / 1000;
 
     filteredData = data.filter((item) => {
-      return item.date >= startOfYear && item.date <= endOfYear;
+      return item.date >= startOfYearTs && item.date <= endOfYearTs;
     });
   }
 
   return filteredData.reduce(
     (acc, curr) => {
-      return {
-        totalLendIncentives: curr.compoundPrice
-          ? (acc.totalLendIncentives || 0) +
-            (curr?.spends?.valueSupply || 0) / curr.compoundPrice
-          : 0,
+      const { incomes, spends, compoundPrice } = curr;
 
-        totalLendIncentivesUsdPrice:
-          (acc.totalLendIncentivesUsdPrice || 0) +
-          (curr?.spends?.valueSupply || 0),
+      if (spends) {
+        acc.totalLendIncentives += spends.valueSupply / compoundPrice;
+        acc.totalLendIncentivesUsdPrice += spends.valueSupply;
 
-        totalBorrowIncentives: curr.compoundPrice
-          ? (acc.totalBorrowIncentives || 0) +
-            (curr?.spends?.valueBorrow || 0) / curr.compoundPrice
-          : 0,
+        acc.totalBorrowIncentives += spends.valueBorrow / compoundPrice;
+        acc.totalBorrowIncentivesUsdPrice += spends.valueBorrow;
 
-        totalBorrowIncentivesUsdPrice:
-          (acc.totalBorrowIncentivesUsdPrice || 0) +
-          (curr?.spends?.valueBorrow || 0),
+        const total = spends.valueSupply + spends.valueBorrow;
 
-        totalIncentives: curr.compoundPrice
-          ? (acc.totalIncentives || 0) +
-            ((curr?.spends?.valueBorrow || 0) +
-              (curr?.spends?.valueSupply || 0)) /
-              curr.compoundPrice
-          : 0,
+        acc.totalIncentives += total / compoundPrice;
+        acc.totalIncentivesUsdPrice += total;
+      }
 
-        totalIncentivesUsdPrice:
-          (acc.totalIncentivesUsdPrice || 0) +
-          (curr?.spends?.valueSupply || 0) +
-          (curr?.spends?.valueBorrow || 0),
+      const total = incomes.valueSupply + incomes.valueBorrow;
 
-        totalFeesGenerated: curr.compoundPrice
-          ? (acc.totalFeesGenerated || 0) +
-            ((curr?.incomes?.valueBorrow || 0) +
-              (curr?.incomes?.valueSupply || 0)) /
-              curr.compoundPrice
-          : 0,
+      acc.totalFeesGenerated += total / compoundPrice;
+      acc.totalFeesGeneratedUsdPrice += total;
 
-        totalFeesGeneratedUsdPrice:
-          (acc.totalFeesGeneratedUsdPrice || 0) +
-          (curr?.incomes?.valueBorrow || 0) +
-          (curr?.incomes?.valueSupply || 0)
-      };
+      return acc;
     },
     {
       totalLendIncentives: 0,

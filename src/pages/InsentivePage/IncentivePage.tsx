@@ -1,5 +1,7 @@
+import FeesGeneratedIncentives from '@/entities/Insentive/FeesGeneratedIncentives/FeesGeneratedIncentives';
 import { useState } from 'react';
 
+import HistoricalExpensesByNetworks from '@/entities/Insentive/HistoricalExpensesByNetwork/HistoricalExpensesByNetworks';
 import MetricBlock from '@/entities/Insentive/MetricBlock/MetricBlock';
 import CurrentSpendingByChainBlock from '@/features/Insentive/CurrentSpendingByChain';
 import { useIncentivesApiData } from '@/shared/hooks/useIncentivesApiData';
@@ -44,7 +46,7 @@ const IncentivePage = () => {
       </div>
       <div className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
         <div className='grid gap-3'>
-          <div className='flex items-center justify-between px-3'>
+          <div className='flex items-center justify-between px-3 md:px-0'>
             <Text
               size='17'
               weight='500'
@@ -68,16 +70,16 @@ const IncentivePage = () => {
           isError={incentivesQuery?.isError}
           isLoading={incentivesQuery?.isPending}
         />
-        {/*<HistoricalExpensesByNetworks*/}
-        {/*  isLoading={isLoading}*/}
-        {/*  isError={isError}*/}
-        {/*  data={treasuryData}*/}
-        {/*/>*/}
-        {/*<FeesGeneratedVsIncentives*/}
-        {/*  isLoading={isLoading}*/}
-        {/*  isError={isError}*/}
-        {/*  data={treasuryData}*/}
-        {/*/>*/}
+        <HistoricalExpensesByNetworks
+          data={combinedIncentivesData}
+          isError={incentivesQuery?.isError}
+          isLoading={incentivesQuery?.isPending}
+        />
+        <FeesGeneratedIncentives
+          data={combinedIncentivesData}
+          isError={incentivesQuery?.isError}
+          isLoading={incentivesQuery?.isPending}
+        />
         {/*<DailyExpenses*/}
         {/*  data={uniqData}*/}
         {/*  isError={isError}*/}

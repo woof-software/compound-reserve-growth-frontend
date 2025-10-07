@@ -42,7 +42,7 @@ export const DesktopFilters = ({
     />
     <CSVDownloadButton
       data={csvData}
-      filename='Collaterals Price against Price Restriction'
+      filename='collaterals_price_against_price_restriction'
     />
   </div>
 );

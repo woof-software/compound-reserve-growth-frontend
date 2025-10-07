@@ -1,8 +1,8 @@
-import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
-import { useCallback, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 
+import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
-import { TableItem } from '@/shared/types/Capo/types';
+import { CapoTableItem } from '@/shared/types/Capo/types';
 import { OptionType } from '@/shared/types/types';
 
 interface FilterState {
@@ -21,8 +21,9 @@ interface FilterOption {
 }
 
 const createFilterOptions = (
-  data: TableItem[],
-  field: keyof TableItem
+  data: CapoTableItem[],
+  field: keyof CapoTableItem,
+  transformLabel?: (value: string) => string
 ): FilterOption[] => {
   const uniqueValues = [...new Set(data.map((item) => item[field]))];
 
@@ -30,12 +31,12 @@ const createFilterOptions = (
     .filter(Boolean)
     .map((value) => ({
       id: value,
-      label: capitalizeFirstLetter(value)
+      label: transformLabel ? transformLabel(value) : value
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
 };
 
-export const useCollateralsFilters = (tableData: TableItem[]) => {
+export const useCollateralsFilters = (tableData: CapoTableItem[]) => {
   const [selectedOptions, setSelectedOptions] = useReducer(
     (prev: FilterState, next: Partial<FilterState>) => ({
       ...prev,
@@ -50,29 +51,30 @@ export const useCollateralsFilters = (tableData: TableItem[]) => {
   ]);
 
   const chainOptions = useMemo(
-    () => createFilterOptions(tableData, 'network'),
+    () => createFilterOptions(tableData, 'network', capitalizeFirstLetter),
     [tableData]
   );
 
-  const collateralOptions = useMemo(
-    () => createFilterOptions(tableData, 'collateral'),
-    [tableData]
-  );
+  const collateralOptions = useMemo(() => {
+    return createFilterOptions(
+      tableData.filter(({ network }) => {
+        if (!selectedOptions.chain.length) return true;
 
-  const onSelectChain = useCallback(
-    (chain: OptionType[]) => {
-      const selectedChainIds = chain.map((option) => option.id);
+        const isNetworkSelected = selectedOptions.chain.some(
+          ({ id }) => id === network
+        );
 
-      const filteredCollateral = selectedOptions.collateral.filter(
-        (option) =>
-          selectedChainIds.length === 0 ||
-          option.chain?.some((chainId) => selectedChainIds.includes(chainId))
-      );
+        return isNetworkSelected;
+      }),
+      'collateral'
+    );
+  }, [tableData, selectedOptions.chain]);
 
-      setSelectedOptions({ chain, collateral: filteredCollateral });
-    },
-    [selectedOptions.collateral]
-  );
+  const onSelectChain = useCallback((selectedChains: OptionType[]) => {
+    setSelectedOptions({
+      chain: selectedChains
+    });
+  }, []);
 
   const onSelectCollateral = useCallback((collateral: OptionType[]) => {
     setSelectedOptions({ collateral });
@@ -111,7 +113,7 @@ export const useCollateralsFilters = (tableData: TableItem[]) => {
   );
 
   const applyFilters = useCallback(
-    (data: TableItem[]) => {
+    (data: CapoTableItem[]) => {
       return data.filter((item) => {
         if (
           selectedOptions.chain.length > 0 &&
@@ -134,6 +136,16 @@ export const useCollateralsFilters = (tableData: TableItem[]) => {
     },
     [selectedOptions]
   );
+
+  useEffect(() => {
+    const filteredCollaterals = selectedOptions.collateral.filter(({ id }) => {
+      return collateralOptions.some(({ id: _id }) => id === _id);
+    });
+
+    setSelectedOptions({
+      collateral: filteredCollaterals
+    });
+  }, [collateralOptions]);
 
   return {
     selectedOptions,

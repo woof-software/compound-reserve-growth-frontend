@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
   formatLargeNumber,
@@ -29,7 +30,7 @@ interface CurrentInitiativesProps {
 
   footerData: CurrentInitiativesFooter;
 
-  sortType: { key: string; type: string };
+  sortType: SortAdapter<CurrentInitiativeRow>;
 }
 
 const columns: ExtendedColumnDef<CurrentInitiativeRow>[] = [

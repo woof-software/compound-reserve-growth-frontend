@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { $api } from '@/shared/api/api';
 
-const STATS_API_URL = '/api/history/v2/stats?limit=1000001';
+const STATS_API_URL = '/api/history/v2/stats';
 
 const incentivesApiResponseSchema = z.object({
   data: z.array(

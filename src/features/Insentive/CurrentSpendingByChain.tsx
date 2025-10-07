@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 
 import CryptoChart from '@/components/Charts/Bar/Bar';
-import CurrentSpendingByChainTable from '@/entities/Insentive/CurrentSpendingByChainTable/CurrentSpendingByChainTable';
+import CurrentSpendingByChainTable, {
+  SpendingByChainTableColumns
+} from '@/entities/Insentive/CurrentSpendingByChainTable/CurrentSpendingByChainTable';
 import { CurrendSpendingByChainMobileFilters } from '@/features/Insentive/CurrendSpendingByChainMobileFilters';
 import { getChartData } from '@/features/Insentive/lib/getChartData';
 import { getCsvData } from '@/features/Insentive/lib/getCsvData';
 import { tableDataNormalizer } from '@/features/Insentive/lib/tableDataNormalizer';
-import { useChainMarketFilters } from '@/features/Insentive/lib/useChainMarketFilters';
+import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
 import {
   useFiltersSync,
   useFilterSyncSingle
 } from '@/shared/hooks/useFiltersSync';
-import { useSorting } from '@/shared/hooks/useSorting';
+import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
 import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
@@ -31,12 +33,19 @@ const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
     filteredData,
     clearAllFilters,
     mobileFilterOptions
-  } = useChainMarketFilters(data);
+  } = useChainMarketFilters(data, { filterByLatestDate: true });
 
   const chartData = getChartData(filteredData, activeTab);
   const tableData = tableDataNormalizer(filteredData, activeTab);
   const csvData = getCsvData(tableData);
-  const { sortType, onKeySelect, onTypeSelect } = useSorting();
+
+  const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
+    useSorting<SpendingByChainTableColumns>('asc', null);
+
+  const sortType: SortAdapter<SpendingByChainTableColumns> = {
+    type: sortDirection,
+    key: sortKey
+  };
 
   useFilterSyncSingle('icscb', activeTab, setActiveTab);
   useFiltersSync(selectedOptions, setSelectedOptions, 'icscb', [
@@ -73,7 +82,6 @@ const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
           disabled={isLoading}
         />
         <MultiSelect
-          //@ts-expect-error TODO: fix deployment options filter error
           options={deploymentOptionsFilter}
           value={selectedOptions.deployment}
           onChange={onSelectMarket}

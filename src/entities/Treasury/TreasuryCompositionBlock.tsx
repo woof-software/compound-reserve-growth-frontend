@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
@@ -6,6 +6,11 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
+import {
+  SortAccessor,
+  SortAdapter,
+  useSorting
+} from '@/shared/hooks/useSorting';
 import {
   capitalizeFirstLetter,
   formatPrice,
@@ -97,16 +102,21 @@ const TreasuryCompositionBlock = memo(
 
     const [includeComp, setIncludeComp] = useState<boolean>(true);
 
-    useFilterSyncSingle('includeComp', includeComp, setIncludeComp);
+    const includeCompURl = !includeComp ? 'false' : undefined;
+
+    useFilterSyncSingle('includeComp', includeCompURl, (v) => {
+      setIncludeComp(v === 'true');
+    });
+
     useFilterSyncSingle('treasuryCompGroup', selectedSingle, setSelectedValue);
 
-    const [sortType, setSortType] = useReducer(
-      (prev, next) => ({
-        ...prev,
-        ...next
-      }),
-      { key: '', type: 'asc' }
-    );
+    const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
+      useSorting<TreasuryCompositionType>('asc', null);
+
+    const sortType: SortAdapter<TreasuryCompositionType> = {
+      type: sortDirection,
+      key: sortKey
+    };
 
     const {
       isOpen: isSortOpen,
@@ -215,31 +225,20 @@ const TreasuryCompositionBlock = memo(
       return tableData.length > 0 && chartData.length > 0;
     }, [tableData, chartData]);
 
-    const treasuryCompositionColumns = useMemo(
-      () => [
-        {
-          accessorKey: 'name',
-          header: selectedGroup !== 'Asset Type' ? selectedGroup : 'Asset'
-        },
-        {
-          accessorKey: 'balance',
-          header: 'Total Balance USD'
-        }
-      ],
-      [selectedGroup]
-    );
-
-    const onSortKeySelect = useCallback((value: string) => {
-      setSortType({
-        key: value
-      });
-    }, []);
-
-    const onSortTypeSelect = useCallback((value: string) => {
-      setSortType({
-        type: value
-      });
-    }, []);
+    const treasuryCompositionColumns: SortAccessor<TreasuryCompositionType>[] =
+      useMemo(
+        () => [
+          {
+            accessorKey: 'name',
+            header: selectedGroup !== 'Asset Type' ? selectedGroup : 'Asset'
+          },
+          {
+            accessorKey: 'balance',
+            header: 'Total Balance USD'
+          }
+        ],
+        [selectedGroup]
+      );
 
     const onGroupSelect = (value: string) => {
       selectSingle(value);
@@ -341,8 +340,8 @@ const TreasuryCompositionBlock = memo(
           sortType={sortType}
           columns={treasuryCompositionColumns}
           onClose={onSortClose}
-          onKeySelect={onSortKeySelect}
-          onTypeSelect={onSortTypeSelect}
+          onKeySelect={onKeySelect}
+          onTypeSelect={onTypeSelect}
         />
         <GroupDrawer
           isOpen={isGroupOpen}

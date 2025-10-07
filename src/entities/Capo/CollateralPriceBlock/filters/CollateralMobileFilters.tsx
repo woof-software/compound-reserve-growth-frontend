@@ -1,27 +1,39 @@
 import React from 'react';
+import { CSVLink } from 'react-csv';
 
 import Filter from '@/components/Filter/Filter';
 import { useModal } from '@/shared/hooks/useModal';
+import {
+  SortAccessor,
+  SortAdapter,
+  SortDirection
+} from '@/shared/hooks/useSorting';
+import { CapoTableItem } from '@/shared/types/Capo/types';
 import Button from '@/shared/ui/Button/Button';
-import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Text from '@/shared/ui/Text/Text';
 
-interface MobileFiltersProps {
+export const SORT_COLUMNS: SortAccessor<CapoTableItem>[] = [
+  { accessorKey: 'network', header: 'Network' },
+  { accessorKey: 'collateral', header: 'Collateral' },
+  { accessorKey: 'collateralPrice', header: 'Collateral Price' },
+  { accessorKey: 'priceRestriction', header: 'Price Restriction' },
+  { accessorKey: 'priceFeed', header: 'Price Feed' }
+];
+
+export type MobileFiltersProps = {
   filterOptions: any[];
-  sortColumns: any[];
-  sortType: any;
-  onKeySelect: (key: string) => void;
-  onTypeSelect: (type: string) => void;
+  sortType: SortAdapter<CapoTableItem>;
+  onKeySelect: (key: keyof CapoTableItem | null) => void;
+  onTypeSelect: (type: SortDirection) => void;
   onClearAll: () => void;
   csvData: any[];
-}
+};
 
 export const MobileFilters = ({
   filterOptions,
-  sortColumns,
   sortType,
   onKeySelect,
   onTypeSelect,
@@ -84,7 +96,7 @@ export const MobileFilters = ({
       <SortDrawer
         isOpen={isSortOpen}
         sortType={sortType}
-        columns={sortColumns}
+        columns={SORT_COLUMNS}
         onClose={onSortClose}
         onKeySelect={onKeySelect}
         onTypeSelect={onTypeSelect}
@@ -109,16 +121,15 @@ export const MobileFilters = ({
         </Text>
         <div className='flex flex-col gap-1.5'>
           <div className='px-3 py-2'>
-            <CSVDownloadButton
+            <CSVLink
               data={csvData}
-              filename='Collaterals Price against Price Restriction'
+              filename='collaterals_price_against_price_restriction'
               onClick={onMoreClose}
-              renderAsLink
             >
               <div className='flex items-center gap-1.5'>
                 <Icon
                   name='download'
-                  className='h-[26px] w-[26px]'
+                  className='h-6.5 w-6.5'
                 />
                 <Text
                   size='14'
@@ -127,7 +138,7 @@ export const MobileFilters = ({
                   CSV with the entire historical data
                 </Text>
               </div>
-            </CSVDownloadButton>
+            </CSVLink>
           </div>
         </div>
       </Drawer>

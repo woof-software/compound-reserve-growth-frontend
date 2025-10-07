@@ -6,18 +6,10 @@ import { DesktopFilters } from '@/entities/Capo/CollateralPriceBlock/filters/Col
 import { MobileFilters } from '@/entities/Capo/CollateralPriceBlock/filters/CollateralMobileFilters';
 import { useCollateralsFilters } from '@/entities/Capo/CollateralPriceBlock/filters/useCollateralsFilters';
 import { useCollateralsData } from '@/entities/Capo/CollateralPriceBlock/lib/useCollateralsData';
-import { useCollateralsSort } from '@/entities/Capo/CollateralPriceBlock/lib/useCollateralsSort';
-import { TableItem } from '@/shared/types/Capo/types';
+import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
+import { CapoTableItem } from '@/shared/types/Capo/types';
 import Card from '@/shared/ui/Card/Card';
 import View from '@/shared/ui/View/View';
-
-export const SORT_COLUMNS = [
-  { accessorKey: 'network', header: 'Network' },
-  { accessorKey: 'collateral', header: 'Collateral' },
-  { accessorKey: 'collateralPrice', header: 'Collateral Price' },
-  { accessorKey: 'priceRestriction', header: 'Price Restriction' },
-  { accessorKey: 'priceFeed', header: 'Price Feed' }
-];
 
 export const CARD_CLASS_NAMES = {
   loading: 'min-h-[inherit]',
@@ -29,7 +21,7 @@ export const CARD_CLASS_NAMES = {
 export interface CollateralsPriceBlockProps {
   isLoading?: boolean;
   isError?: boolean;
-  tableData: TableItem[];
+  tableData: CapoTableItem[];
 }
 
 const CapoCollateralsPriceBlock = ({
@@ -48,10 +40,21 @@ const CapoCollateralsPriceBlock = ({
     applyFilters
   } = useCollateralsFilters(tableData);
 
-  const { sortType, onKeySelect, onTypeSelect, onClearSort, applySorting } =
-    useCollateralsSort();
+  const {
+    sortDirection,
+    sortKey,
+    onKeySelect,
+    onTypeSelect,
+    onClearSort,
+    applySorting
+  } = useSorting<CapoTableItem>('asc', null);
 
-  const { processedData, hasData, showNoData } = useCollateralsData({
+  const sortType: SortAdapter<CapoTableItem> = {
+    type: sortDirection,
+    key: sortKey
+  };
+
+  const processedData = useCollateralsData({
     tableData,
     applyFilters,
     applySorting
@@ -62,8 +65,9 @@ const CapoCollateralsPriceBlock = ({
     onClearSort();
   }, [onClearSelectedOptions, onClearSort]);
 
-  const showData = !isLoading && !isError && hasData;
-  const showNoDataPlaceholder = !isLoading && !isError && showNoData;
+  const isFiltersApplied = !!(
+    selectedOptions.chain.length || selectedOptions.collateral.length
+  );
 
   return (
     <Card
@@ -85,21 +89,24 @@ const CapoCollateralsPriceBlock = ({
       />
       <MobileFilters
         filterOptions={filterOptions}
-        sortColumns={SORT_COLUMNS}
         sortType={sortType}
         onKeySelect={onKeySelect}
         onTypeSelect={onTypeSelect}
         onClearAll={onClearAll}
         csvData={processedData}
       />
-      <View.Condition if={showData}>
+      <View.Condition if={processedData.length}>
         <CollateralsPriceTable
           sortType={sortType}
           tableData={processedData}
         />
       </View.Condition>
-      <View.Condition if={showNoDataPlaceholder}>
-        <NoDataPlaceholder onButtonClick={onClearAll} />
+      <View.Condition if={!processedData.length}>
+        <NoDataPlaceholder
+          text={!isFiltersApplied ? 'No data found' : undefined}
+          hideButton={!isFiltersApplied}
+          onButtonClick={onClearAll}
+        />
       </View.Condition>
     </Card>
   );

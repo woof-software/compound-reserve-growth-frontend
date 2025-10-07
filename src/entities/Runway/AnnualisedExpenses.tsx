@@ -1,10 +1,15 @@
-import React, { useCallback, useMemo, useReducer } from 'react';
+import React, { useMemo } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import AnnualisedExpenses from '@/components/RunwayPageTable/AnnualisedExpenses';
 import { useModal } from '@/shared/hooks/useModal';
 import type { RunwayItem } from '@/shared/hooks/useRunway';
 import { useRunway } from '@/shared/hooks/useRunway';
+import {
+  SortAccessor,
+  SortAdapter,
+  useSorting
+} from '@/shared/hooks/useSorting';
 import { formatLargeNumber } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
@@ -15,33 +20,41 @@ const useCurrentYear = () => {
   return useMemo(() => new Date().getFullYear(), []);
 };
 
-export const annualisedExpensesColumns = [
-  {
-    accessorKey: 'discipline',
-    header: 'Discipline'
-  },
-  {
-    accessorKey: 'token',
-    header: 'Token'
-  },
-  {
-    accessorKey: 'amount',
-    header: 'Amount (Qty)'
-  },
-  {
-    accessorKey: 'value',
-    header: 'Value ($)'
-  }
-];
+export const annualisedExpensesColumns: SortAccessor<AnnualisedExpensesRecord>[] =
+  [
+    {
+      accessorKey: 'discipline',
+      header: 'Discipline'
+    },
+    {
+      accessorKey: 'token',
+      header: 'Token'
+    },
+    {
+      accessorKey: 'amount',
+      header: 'Amount (Qty)'
+    },
+    {
+      accessorKey: 'value',
+      header: 'Value ($)'
+    }
+  ];
+
+type AnnualisedExpensesRecord = {
+  discipline: string;
+  token: string;
+  amount: number;
+  value: number;
+};
 
 const AnnualisedExpensesBlock = () => {
-  const [sortType, setSortType] = useReducer(
-    (prev, next) => ({
-      ...prev,
-      ...next
-    }),
-    { key: '', type: 'asc' }
-  );
+  const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
+    useSorting<AnnualisedExpensesRecord>('asc', null);
+
+  const sortType: SortAdapter<AnnualisedExpensesRecord> = {
+    type: sortDirection,
+    key: sortKey
+  };
 
   const { data: runwayResponse, isLoading, isError } = useRunway();
 
@@ -67,15 +80,7 @@ const AnnualisedExpensesBlock = () => {
       return initialResult;
     }
 
-    const expensesByGroup: Record<
-      string,
-      {
-        discipline: string;
-        token: string;
-        amount: number;
-        value: number;
-      }
-    > = {};
+    const expensesByGroup: Record<string, AnnualisedExpensesRecord> = {};
 
     const expensesByDisciplineForPie: Record<string, number> = {};
 
@@ -170,18 +175,6 @@ const AnnualisedExpensesBlock = () => {
       calculationYear: currentYear
     };
   }, [runwayResponse, currentYear]);
-
-  const onKeySelect = useCallback((value: string) => {
-    setSortType({
-      key: value
-    });
-  }, []);
-
-  const onTypeSelect = useCallback((value: string) => {
-    setSortType({
-      type: value
-    });
-  }, []);
 
   return (
     <Card

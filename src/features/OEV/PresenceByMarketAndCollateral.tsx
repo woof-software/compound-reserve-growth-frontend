@@ -8,6 +8,11 @@ import PresenceByMarketAndCollateralTable, {
 } from '@/entities/OEV/PresenceByMarketAndCollateralTable';
 import { useModal } from '@/shared/hooks/useModal';
 import {
+  SortAccessor,
+  SortAdapter,
+  useSorting
+} from '@/shared/hooks/useSorting';
+import {
   capitalizeFirstLetter,
   extractFilterOptions
 } from '@/shared/lib/utils/utils';
@@ -49,28 +54,29 @@ const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
   });
 };
 
-const treasuryBalanceByNetworkColumns = [
-  {
-    accessorKey: 'symbol',
-    header: 'Source'
-  },
-  {
-    accessorKey: 'qty',
-    header: 'Chain'
-  },
-  {
-    accessorKey: 'value',
-    header: 'Market'
-  },
-  {
-    accessorKey: 'source',
-    header: 'OEV on Collateral'
-  },
-  {
-    accessorKey: 'source',
-    header: 'Price Feed'
-  }
-];
+const treasuryBalanceByNetworkColumns: SortAccessor<TreasuryBalanceByNetworkType>[] =
+  [
+    {
+      accessorKey: 'symbol',
+      header: 'Source'
+    },
+    {
+      accessorKey: 'qty',
+      header: 'Chain'
+    },
+    {
+      accessorKey: 'value',
+      header: 'Market'
+    },
+    {
+      accessorKey: 'source',
+      header: 'OEV on Collateral'
+    },
+    {
+      accessorKey: 'source',
+      header: 'Price Feed'
+    }
+  ];
 
 const PresenceByMarketAndCollateral: FC<CurrentSpendingByChainProps> = ({
   isLoading,
@@ -108,13 +114,13 @@ const PresenceByMarketAndCollateral: FC<CurrentSpendingByChainProps> = ({
     }
   );
 
-  const [sortType, setSortType] = useReducer(
-    (prev, next) => ({
-      ...prev,
-      ...next
-    }),
-    { key: '', type: 'asc' }
-  );
+  const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
+    useSorting<TreasuryBalanceByNetworkType>('asc', null);
+
+  const sortType: SortAdapter<TreasuryBalanceByNetworkType> = {
+    type: sortDirection,
+    key: sortKey
+  };
 
   const filterOptionsConfig = useMemo(
     () => ({
@@ -208,18 +214,6 @@ const PresenceByMarketAndCollateral: FC<CurrentSpendingByChainProps> = ({
   const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
       deployment: selectedOptions
-    });
-  }, []);
-
-  const onKeySelect = useCallback((value: string) => {
-    setSortType({
-      key: value
-    });
-  }, []);
-
-  const onTypeSelect = useCallback((value: string) => {
-    setSortType({
-      type: value
     });
   }, []);
 

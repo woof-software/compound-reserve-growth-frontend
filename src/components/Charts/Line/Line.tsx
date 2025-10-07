@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState
 } from 'react';
-import Highcharts, { Options, SeriesAreaOptions } from 'highcharts';
+import Highcharts, { Options, Point, SeriesAreaOptions } from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
@@ -51,10 +51,7 @@ interface LineChartProps {
 
   className?: string;
 
-  customTooltipFormatter?: (
-    context: Partial<Options>,
-    groupBy: string
-  ) => string;
+  customTooltipFormatter?: (context: Point, groupBy: string) => string;
 
   customOptions?: Partial<Options>;
 
@@ -384,8 +381,6 @@ const LineChart: FC<LineChartProps> = ({
         shared: true,
         formatter: function () {
           if (customTooltipFormatter) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
             return customTooltipFormatter(this, groupBy);
           }
           return defaultTooltipFormatter(this);

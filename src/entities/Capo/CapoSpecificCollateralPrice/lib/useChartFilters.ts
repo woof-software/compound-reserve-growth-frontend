@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { NormalizedChartData } from '@/shared/types/Capo/types';
+import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
+import { CapoNormalizedChartData } from '@/shared/types/Capo/types';
 
 export type Option = {
   id: string;
@@ -9,14 +10,15 @@ export type Option = {
 
 export type OptionSetter = (previous: Option | null) => Option | null;
 
-const capitalizeFirstLetter = (str: string): string =>
-  str.charAt(0).toUpperCase() + str.slice(1);
-
-const getOptions = <T extends Array<any>>(arr: T, key: string) => {
+const getOptions = <T extends Array<any>>(
+  arr: T,
+  key: string,
+  transformLabelCb?: (label: string) => string
+) => {
   return [...new Set(arr.map((item) => item[key]))]
     .map((item) => ({
       id: item,
-      label: capitalizeFirstLetter(item)
+      label: transformLabelCb ? transformLabelCb(item) : item
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
 };
@@ -29,13 +31,13 @@ const findOptionById = (
   return options.find((opt) => opt.id === id) || null;
 };
 
-export const useChartFilters = (rawData: NormalizedChartData[]) => {
+export const useChartFilters = (rawData: CapoNormalizedChartData[]) => {
   const [selectedChain, setSelectedChain] = useState<Option | null>(null);
   const [selectedCollateral, setSelectedCollateral] = useState<Option | null>(
     null
   );
 
-  const chainOptions = getOptions(rawData, 'network');
+  const chainOptions = getOptions(rawData, 'network', capitalizeFirstLetter);
 
   const collateralOptions = getOptions(
     rawData.filter(({ network }) => {

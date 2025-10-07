@@ -194,9 +194,9 @@ export const formatCurrency = (value: number) => {
   return `${value.toLocaleString()}`;
 };
 
-export const formatNumber = (num: number | undefined | null) => {
+export const formatNumber = (num: number | undefined | null, prefix = '$') => {
   if (num === null || num === undefined || num === 0) return '-';
-  return `$${Math.round(num).toLocaleString('en-US')}`;
+  return `${prefix}${Math.round(num).toLocaleString('en-US')}`;
 };
 
 export const formatQuantity = (quantity: number) => {
@@ -505,3 +505,13 @@ export const removeDuplicates = <T>(array: T[], key: keyof T): T[] => {
     return true;
   });
 };
+
+/**
+ * A no-operation function that performs no actions and returns undefined.
+ * Typically used as a placeholder or default callback.
+ *
+ * @return Always returns undefined.
+ */
+export function noop() {
+  // Do nothing
+}

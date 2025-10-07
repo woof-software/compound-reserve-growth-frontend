@@ -9,6 +9,11 @@ import TreasuryBalanceByNetwork, {
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import {
+  SortAccessor,
+  SortAdapter,
+  useSorting
+} from '@/shared/hooks/useSorting';
+import {
   capitalizeFirstLetter,
   colorPicker,
   extractFilterOptions
@@ -47,28 +52,29 @@ const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
   });
 };
 
-export const treasuryBalanceByNetworkColumns = [
-  {
-    accessorKey: 'symbol',
-    header: 'Symbol'
-  },
-  {
-    accessorKey: 'qty',
-    header: 'QTY'
-  },
-  {
-    accessorKey: 'value',
-    header: 'Value'
-  },
-  {
-    accessorKey: 'market',
-    header: 'Market'
-  },
-  {
-    accessorKey: 'source',
-    header: 'Source'
-  }
-];
+export const treasuryBalanceByNetworkColumns: SortAccessor<TreasuryBalanceByNetworkType>[] =
+  [
+    {
+      accessorKey: 'symbol',
+      header: 'Symbol'
+    },
+    {
+      accessorKey: 'qty',
+      header: 'QTY'
+    },
+    {
+      accessorKey: 'value',
+      header: 'Value'
+    },
+    {
+      accessorKey: 'market',
+      header: 'Market'
+    },
+    {
+      accessorKey: 'source',
+      header: 'Source'
+    }
+  ];
 
 const TreasuryBalanceByNetworkBlock = ({
   isLoading,
@@ -107,13 +113,13 @@ const TreasuryBalanceByNetworkBlock = ({
     'symbol'
   ]);
 
-  const [sortType, setSortType] = useReducer(
-    (prev, next) => ({
-      ...prev,
-      ...next
-    }),
-    { key: '', type: 'asc' }
-  );
+  const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
+    useSorting<TreasuryBalanceByNetworkType>('asc', null);
+
+  const sortType: SortAdapter<TreasuryBalanceByNetworkType> = {
+    type: sortDirection,
+    key: sortKey
+  };
 
   const filterOptionsConfig = useMemo(
     () => ({
@@ -248,18 +254,6 @@ const TreasuryBalanceByNetworkBlock = ({
   const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
       symbol: selectedOptions
-    });
-  }, []);
-
-  const onKeySelect = useCallback((value: string) => {
-    setSortType({
-      key: value
-    });
-  }, []);
-
-  const onTypeSelect = useCallback((value: string) => {
-    setSortType({
-      type: value
     });
   }, []);
 
