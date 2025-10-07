@@ -33,7 +33,14 @@ const filterReducer = (
   }
 };
 
-export const useChainMarketFilters = (data: CombinedIncentivesData[]) => {
+type UseChainMarketFiltersOptions = {
+  filterByLatestDate?: boolean;
+};
+
+export const useChainMarketFilters = (
+  data: CombinedIncentivesData[],
+  { filterByLatestDate = true }: UseChainMarketFiltersOptions = {}
+) => {
   const [selectedOptions, dispatch] = useReducer(filterReducer, {
     chain: [],
     deployment: []
@@ -50,19 +57,29 @@ export const useChainMarketFilters = (data: CombinedIncentivesData[]) => {
     }));
   }, [data]);
 
-  // Get all unique market options
-  const allMarketOptions = useMemo(() => {
-    const uniqueMarkets = [...new Set(data.map((item) => item.source.market))];
-    return uniqueMarkets.map((market) => {
-      const networkForMarket = data.find(
-        (item) => item.source.market === market
-      )?.source.network;
-      return {
-        id: market,
-        label: market,
-        chain: networkForMarket ? [networkForMarket] : undefined
-      };
-    });
+  const allMarketOptions: {
+    id: string;
+    label: string;
+    chain?: string[];
+  }[] = useMemo(() => {
+    if (!data) return [];
+
+    const uniqueMarketMap = new Map<string, { network?: string }>();
+
+    for (const item of data) {
+      const market = item.source?.market;
+      const network = item.source?.network;
+
+      if (market && !uniqueMarketMap.has(market)) {
+        uniqueMarketMap.set(market, { network });
+      }
+    }
+
+    return Array.from(uniqueMarketMap.entries()).map(([market, details]) => ({
+      id: market,
+      label: market,
+      ...(details.network && { chain: [details.network] })
+    }));
   }, [data]);
 
   // Filter markets based on selected chains
@@ -117,9 +134,12 @@ export const useChainMarketFilters = (data: CombinedIncentivesData[]) => {
 
   // Get filtered data based on selections
   const filteredData = useMemo(() => {
-    // First filter by latest date
-    const latestDate = Math.max(...data.map((item) => item.date));
-    let result = data.filter((item) => item.date === latestDate);
+    let result = data;
+
+    if (filterByLatestDate && result.length > 0) {
+      const latestDate = Math.max(...result.map((item) => item.date));
+      result = result.filter((item) => item.date === latestDate);
+    }
 
     // Then filter by chains
     if (selectedOptions.chain?.length > 0) {

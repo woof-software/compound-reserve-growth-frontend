@@ -6,7 +6,7 @@ import { CurrendSpendingByChainMobileFilters } from '@/features/Insentive/Curren
 import { getChartData } from '@/features/Insentive/lib/getChartData';
 import { getCsvData } from '@/features/Insentive/lib/getCsvData';
 import { tableDataNormalizer } from '@/features/Insentive/lib/tableDataNormalizer';
-import { useChainMarketFilters } from '@/features/Insentive/lib/useChainMarketFilters';
+import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
 import {
   useFiltersSync,
   useFilterSyncSingle
@@ -31,7 +31,7 @@ const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
     filteredData,
     clearAllFilters,
     mobileFilterOptions
-  } = useChainMarketFilters(data);
+  } = useChainMarketFilters(data, { filterByLatestDate: true });
 
   const chartData = getChartData(filteredData, activeTab);
   const tableData = tableDataNormalizer(filteredData, activeTab);
@@ -73,7 +73,6 @@ const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
           disabled={isLoading}
         />
         <MultiSelect
-          //@ts-expect-error TODO: fix deployment options filter error
           options={deploymentOptionsFilter}
           value={selectedOptions.deployment}
           onChange={onSelectMarket}

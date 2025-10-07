@@ -1,3 +1,4 @@
+import FeesGeneratedIncentives from '@/entities/Insentive/FeesGeneratedIncentives/FeesGeneratedIncentives';
 import { useState } from 'react';
 
 import HistoricalExpensesByNetworks from '@/entities/Insentive/HistoricalExpensesByNetwork/HistoricalExpensesByNetworks';
@@ -74,11 +75,11 @@ const IncentivePage = () => {
           isError={incentivesQuery?.isError}
           isLoading={incentivesQuery?.isPending}
         />
-        {/*<FeesGeneratedVsIncentives*/}
-        {/*  isLoading={isLoading}*/}
-        {/*  isError={isError}*/}
-        {/*  data={treasuryData}*/}
-        {/*/>*/}
+        <FeesGeneratedIncentives
+          data={combinedIncentivesData}
+          isError={incentivesQuery?.isError}
+          isLoading={incentivesQuery?.isPending}
+        />
         {/*<DailyExpenses*/}
         {/*  data={uniqData}*/}
         {/*  isError={isError}*/}

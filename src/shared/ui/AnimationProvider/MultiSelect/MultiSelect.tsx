@@ -20,43 +20,29 @@ import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-export interface MultiSelectProps {
+export interface MultiSelectProps<T extends OptionType> {
   type?: 'default' | 'valueInTrigger';
-
-  options: OptionType[];
-
+  options: T[];
   placeholder?: string;
-
-  onChange?: (selectedOptions: OptionType[]) => void;
-
+  onChange?: (selectedOptions: T[]) => void;
   className?: string;
-
-  value?: OptionType[];
-
+  value?: T[];
   disabled?: boolean;
 }
 
 interface CustomDropdownProps {
   label: string;
-
   marketType?: string;
-
   isSelected: boolean;
-
   isHighlighted: boolean;
-
   onSelect: () => void;
-
   itemRef?: Ref<HTMLDivElement>;
 }
 
-interface MultiSelectDrawerProps {
+interface MultiSelectDrawerProps<T extends OptionType> {
   type?: 'default' | 'valueInTrigger';
-
-  value: OptionType[];
-
+  value: T[];
   placeholder?: string;
-
   className?: string;
 }
 
@@ -96,12 +82,12 @@ const CustomDropdownItem: FC<CustomDropdownProps> = ({
   );
 };
 
-const MultiSelectTrigger: FC<MultiSelectDrawerProps> = ({
+const MultiSelectTrigger = <T extends OptionType>({
   type,
   value,
   placeholder,
   className
-}) => {
+}: MultiSelectDrawerProps<T>) => {
   return (
     <div
       className={cn(
@@ -157,7 +143,7 @@ const MultiSelectTrigger: FC<MultiSelectDrawerProps> = ({
   );
 };
 
-export const MultiSelect: FC<MultiSelectProps> = ({
+export const MultiSelect = <T extends OptionType>({
   type = 'default',
   options,
   placeholder = 'Chain',
@@ -165,7 +151,7 @@ export const MultiSelect: FC<MultiSelectProps> = ({
   className = '',
   value = [],
   disabled = false
-}) => {
+}: MultiSelectProps<T>) => {
   const { isOpen, onOpenModal, onCloseModal } = useModal();
 
   const [searchValue, setSearchValue] = useState('');
@@ -205,7 +191,7 @@ export const MultiSelect: FC<MultiSelectProps> = ({
   };
 
   const onSelect = useCallback(
-    (optionToToggle: OptionType) => {
+    (optionToToggle: T) => {
       if (!onChange) return;
 
       const isSelected = value.some((v) => v.id === optionToToggle.id);
