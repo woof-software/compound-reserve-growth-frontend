@@ -5,50 +5,65 @@ Calculation logic for the "Current Service Providers" block:
 3. Pie Chart Data: The total values (`item.value`) are grouped and summed by the provider's name to show the total expense per provider.
 4. Values Used: The full contract values (`item.value` and `item.amount`) are used, not the annualised equivalents.
 */
-import React, { useCallback, useMemo, useReducer } from 'react';
+import React, { useMemo } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import CurrentServiceProviders from '@/components/RunwayPageTable/CurrentServiceProviders';
 import { useModal } from '@/shared/hooks/useModal';
 import type { RunwayItem } from '@/shared/hooks/useRunway';
 import { useRunway } from '@/shared/hooks/useRunway';
+import {
+  SortAccessor,
+  SortAdapter,
+  useSorting
+} from '@/shared/hooks/useSorting';
 import { formatPrice } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 
-export const currentServiceProvidersColumns = [
-  {
-    accessorKey: 'provider',
-    header: 'Provider'
-  },
-  {
-    accessorKey: 'discipline',
-    header: 'Discipline'
-  },
-  {
-    accessorKey: 'token',
-    header: 'Token'
-  },
-  {
-    accessorKey: 'amount',
-    header: 'Amount (Qty)'
-  },
-  {
-    accessorKey: 'value',
-    header: 'Value ($)'
-  }
-];
+export type RunawayServiceProviderRecord = {
+  provider: string;
+  iconKey: string;
+  discipline: string;
+  token: string;
+  amount: number;
+  value: number;
+};
+
+export const currentServiceProvidersColumns: SortAccessor<RunawayServiceProviderRecord>[] =
+  [
+    {
+      accessorKey: 'provider',
+      header: 'Provider'
+    },
+    {
+      accessorKey: 'discipline',
+      header: 'Discipline'
+    },
+    {
+      accessorKey: 'token',
+      header: 'Token'
+    },
+    {
+      accessorKey: 'amount',
+      header: 'Amount (Qty)'
+    },
+    {
+      accessorKey: 'value',
+      header: 'Value ($)'
+    }
+  ];
 
 const CurrentServiceProvidersBlock = () => {
-  const [sortType, setSortType] = useReducer(
-    (prev, next) => ({
-      ...prev,
-      ...next
-    }),
-    { key: '', type: 'asc' }
-  );
+  const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
+    useSorting<RunawayServiceProviderRecord>('asc', null);
+
+  const sortType: SortAdapter<RunawayServiceProviderRecord> = {
+    type: sortDirection,
+    key: sortKey
+  };
 
   const {
     isOpen: isSortOpen,
@@ -89,14 +104,17 @@ const CurrentServiceProvidersBlock = () => {
 
     providerData.sort((a, b) => b.value - a.value);
 
-    const tableData = providerData.map((item) => ({
-      provider: item.name,
-      iconKey: item.iconKey,
-      discipline: item.discipline,
-      token: item.token,
-      amount: item.amount,
-      value: item.value
-    }));
+    const tableData = providerData.map(
+      (item) =>
+        ({
+          provider: item.name,
+          iconKey: item.iconKey,
+          discipline: item.discipline,
+          token: item.token,
+          amount: item.amount,
+          value: item.value
+        }) satisfies RunawayServiceProviderRecord
+    );
 
     const footerData = providerData.reduce(
       (acc, item) => {
@@ -124,18 +142,6 @@ const CurrentServiceProvidersBlock = () => {
 
     return { tableData, footerData, pieData };
   }, [runwayResponse]);
-
-  const onKeySelect = useCallback((value: string) => {
-    setSortType({
-      key: value
-    });
-  }, []);
-
-  const onTypeSelect = useCallback((value: string) => {
-    setSortType({
-      type: value
-    });
-  }, []);
 
   return (
     <Card

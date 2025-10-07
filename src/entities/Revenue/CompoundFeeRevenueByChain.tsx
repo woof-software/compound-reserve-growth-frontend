@@ -1,18 +1,17 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useState
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import CompoundFeeRevenuebyChainComponent, {
   Interval,
-  ProcessedRevenueData as TableData
+  ProcessedRevenueData
 } from '@/components/RevenuePageTable/CompoundFeeRevenuebyChain';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
+import {
+  SortAccessor,
+  SortAdapter,
+  useSorting
+} from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
   capitalizeFirstLetter,
@@ -35,11 +34,6 @@ import SingleDropdown, {
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
-
-export interface ProcessedRevenueData {
-  chain: string;
-  [key: string]: string | number;
-}
 
 export interface View {
   tableData: ProcessedRevenueData[];
@@ -278,13 +272,13 @@ const CompoundFeeRevenueByChain = ({
     setSelectedPeriod
   );
 
-  const [sortType, setSortType] = useReducer(
-    (prev, next) => ({
-      ...prev,
-      ...next
-    }),
-    { key: '', type: 'asc' }
-  );
+  const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
+    useSorting<ProcessedRevenueData>('asc', null);
+
+  const sortType: SortAdapter<ProcessedRevenueData> = {
+    type: sortDirection,
+    key: sortKey
+  };
 
   const {
     isOpen: isSortOpen,
@@ -338,25 +332,27 @@ const CompoundFeeRevenueByChain = ({
       return { tableData: [], columns: [], totals: {} };
     }
 
-    const finalColumns: ExtendedColumnDef<TableData>[] = [
+    const finalColumns: ExtendedColumnDef<ProcessedRevenueData>[] = [
       {
         accessorKey: 'chain',
         header: 'Chain',
-        cell: ({ row }) => (
-          <div className='flex items-center gap-3'>
-            <Icon
-              name={(row.original.chain || 'not-found-icon').toLowerCase()}
-              className='h-6 w-6'
-              folder='network'
-            />
-            <Text
-              size='13'
-              weight='500'
-            >
-              {capitalizeFirstLetter(row.original.chain)}
-            </Text>
-          </div>
-        )
+        cell: ({ row }) => {
+          return (
+            <div className='flex items-center gap-3'>
+              <Icon
+                name={(row.original.chain || 'not-found-icon').toLowerCase()}
+                className='h-6 w-6'
+                folder='network'
+              />
+              <Text
+                size='13'
+                weight='500'
+              >
+                {capitalizeFirstLetter(row.original.chain)}
+              </Text>
+            </div>
+          );
+        }
       },
       ...viewData.columns
     ];
@@ -396,7 +392,7 @@ const CompoundFeeRevenueByChain = ({
 
   const hasData = currentView.tableData.length > 0;
 
-  const sortColumns = useMemo(() => {
+  const sortColumns: SortAccessor<ProcessedRevenueData>[] = useMemo(() => {
     return compoundFeeRevenueByCainColumns.map((col) => ({
       accessorKey: String(col.accessorKey),
       header: typeof col.header === 'string' ? col.header : ''
@@ -417,18 +413,6 @@ const CompoundFeeRevenueByChain = ({
     setSelectedPeriod(period);
     periodDropdown.close();
   };
-
-  const onKeySelect = useCallback((value: string) => {
-    setSortType({
-      key: value
-    });
-  }, []);
-
-  const onTypeSelect = useCallback((value: string) => {
-    setSortType({
-      type: value
-    });
-  }, []);
 
   useEffect(() => {
     if (precomputedViews && !selectedPeriod) {

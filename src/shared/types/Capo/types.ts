@@ -1,4 +1,4 @@
-export interface TableItem {
+export interface CapoTableItem {
   network: string;
   collateral: string;
   collateralPrice: string;
@@ -16,7 +16,7 @@ export interface CapoItem {
   price: string;
 }
 
-export interface NormalizedChartData {
+export interface CapoNormalizedChartData {
   assetId: number;
   network: string;
   collateral: string;

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { defaultExplorer, explorers } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
@@ -22,7 +23,7 @@ export type TreasuryBalanceByNetworkType = {
 export interface ReturnedFeesToTheCompoundProtocolTableProps {
   tableData: TreasuryBalanceByNetworkType[];
 
-  sortType: { key: string; type: string };
+  sortType: SortAdapter<TreasuryBalanceByNetworkType>;
 }
 
 const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [

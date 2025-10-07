@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
-import { NormalizedChartData } from '@/shared/types/Capo/types';
+import { CapoNormalizedChartData } from '@/shared/types/Capo/types';
 
 export type Option = {
   id: string;
@@ -31,7 +31,7 @@ const findOptionById = (
   return options.find((opt) => opt.id === id) || null;
 };
 
-export const useChartFilters = (rawData: NormalizedChartData[]) => {
+export const useChartFilters = (rawData: CapoNormalizedChartData[]) => {
   const [selectedChain, setSelectedChain] = useState<Option | null>(null);
   const [selectedCollateral, setSelectedCollateral] = useState<Option | null>(
     null

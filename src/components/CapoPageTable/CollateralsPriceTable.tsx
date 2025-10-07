@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 
 import HoverCard from '@/components/HoverCard/HoverCard';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
   defaultExplorer,
@@ -11,18 +12,18 @@ import {
   formatPrice,
   sliceAddress
 } from '@/shared/lib/utils/utils';
-import { TableItem } from '@/shared/types/Capo/types';
+import { CapoTableItem } from '@/shared/types/Capo/types';
 import { ClipboardButton } from '@/shared/ui/AnimationProvider/CopyButton/CopyButton';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
 export interface CollateralsPriceProps {
-  tableData: TableItem[];
-  sortType: { key: string; type: string };
+  tableData: CapoTableItem[];
+  sortType: SortAdapter<CapoTableItem>;
 }
 
-const treasuryColumns: ExtendedColumnDef<TableItem>[] = [
+const treasuryColumns: ExtendedColumnDef<CapoTableItem>[] = [
   {
     id: 'network',
     accessorFn: (row) => row.network,
@@ -158,7 +159,7 @@ const CollateralsPriceTable = ({
       return tableData;
     }
 
-    const key = sortType.key as keyof TableItem;
+    const key = sortType.key as keyof CapoTableItem;
     return [...tableData].sort((a, b) => {
       const aVal = a[key];
       const bVal = b[key];

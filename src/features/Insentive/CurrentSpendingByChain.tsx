@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 
 import CryptoChart from '@/components/Charts/Bar/Bar';
-import CurrentSpendingByChainTable from '@/entities/Insentive/CurrentSpendingByChainTable/CurrentSpendingByChainTable';
+import CurrentSpendingByChainTable, {
+  SpendingByChainTableColumns
+} from '@/entities/Insentive/CurrentSpendingByChainTable/CurrentSpendingByChainTable';
 import { CurrendSpendingByChainMobileFilters } from '@/features/Insentive/CurrendSpendingByChainMobileFilters';
 import { getChartData } from '@/features/Insentive/lib/getChartData';
 import { getCsvData } from '@/features/Insentive/lib/getCsvData';
@@ -11,7 +13,7 @@ import {
   useFiltersSync,
   useFilterSyncSingle
 } from '@/shared/hooks/useFiltersSync';
-import { useSorting } from '@/shared/hooks/useSorting';
+import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
 import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
@@ -36,7 +38,14 @@ const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
   const chartData = getChartData(filteredData, activeTab);
   const tableData = tableDataNormalizer(filteredData, activeTab);
   const csvData = getCsvData(tableData);
-  const { sortType, onKeySelect, onTypeSelect } = useSorting();
+
+  const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
+    useSorting<SpendingByChainTableColumns>('asc', null);
+
+  const sortType: SortAdapter<SpendingByChainTableColumns> = {
+    type: sortDirection,
+    key: sortKey
+  };
 
   useFilterSyncSingle('icscb', activeTab, setActiveTab);
   useFiltersSync(selectedOptions, setSelectedOptions, 'icscb', [
