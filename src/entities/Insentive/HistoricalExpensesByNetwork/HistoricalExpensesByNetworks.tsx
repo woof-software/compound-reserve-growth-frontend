@@ -135,6 +135,9 @@ const HistoricalExpensesByNetworks = (
             <span className={'mt-1 hidden lg:block'}>
               <CSVDownloadButton
                 data={csvData}
+                tooltipContent={
+                  'CSV with the entire historical data can be downloaded'
+                }
                 filename={getCsvFileName('historical_expenses_by_networks', {
                   view: activeViewTab,
                   mode: activeModeTab,
