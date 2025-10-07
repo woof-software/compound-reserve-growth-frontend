@@ -2,7 +2,8 @@ import { JSX } from 'react';
 
 import CapoPage from '@/pages/CapoPage/CapoPage';
 import IncentivePage from '@/pages/InsentivePage/IncentivePage';
-import OEVPage from '@/pages/OEVPage/OEVPage';
+// TODO: OEV Page has to be hidden until it is finalized
+// import OEVPage from '@/pages/OEVPage/OEVPage';
 import RevenuePage from '@/pages/RevenuePage/RevenuePage';
 import RunwayPage from '@/pages/RunwayPage/RunwayPage';
 import TreasuryPage from '@/pages/TreasuryPage/TreasuryPage';
@@ -17,7 +18,8 @@ export enum commonRoutes {
   RUNWAY = '/runway',
   TREASURY = '/treasury',
   INCENTIVES = '/incentives',
-  OEV = '/oev',
+  // TODO: OEV Page has to be hidden until it is finalized
+  // OEV = '/oev',
   CAPO = '/capo',
   NOT_FOUND = '*'
 }
@@ -27,7 +29,8 @@ export const VALID_NAVIGATION_ROUTES = [
   commonRoutes.RUNWAY,
   commonRoutes.REVENUE,
   commonRoutes.INCENTIVES,
-  commonRoutes.OEV,
+  // TODO: OEV Page has to be hidden until it is finalized
+  // commonRoutes.OEV,
   commonRoutes.CAPO
 ] as const;
 
@@ -36,8 +39,9 @@ export const enum routeTitles {
   RUNWAY = 'Runway',
   REVENUE = 'Revenue',
   INCENTIVES = 'Incentives',
-  CAPO = 'CAPO',
-  OEV = 'OEV'
+  CAPO = 'CAPO'
+  // TODO: OEV Page has to be hidden until it is finalized
+  // OEV = 'OEV'
 }
 
 export const routesConfig: Record<commonRoutes, RouteConfig> = {
@@ -57,10 +61,11 @@ export const routesConfig: Record<commonRoutes, RouteConfig> = {
     path: commonRoutes.INCENTIVES,
     element: <IncentivePage />
   },
-  [commonRoutes.OEV]: {
-    path: commonRoutes.OEV,
-    element: <OEVPage />
-  },
+  // TODO: OEV Page has to be hidden until it is finalized
+  // [commonRoutes.OEV]: {
+  //   path: commonRoutes.OEV,
+  //   element: <OEVPage />
+  // },
   [commonRoutes.CAPO]: {
     path: commonRoutes.CAPO,
     element: <CapoPage />

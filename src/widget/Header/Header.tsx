@@ -32,11 +32,11 @@ const navLinks: NavLinkProps[] = [
     title: routeTitles.INCENTIVES,
     icon: 'incentives-header-icon'
   },
-  {
-    to: commonRoutes.OEV,
-    title: routeTitles.OEV,
-    icon: 'oev-header-icon'
-  },
+  // {
+  //   to: commonRoutes.OEV,
+  //   title: routeTitles.OEV,
+  //   icon: 'oev-header-icon'
+  // },
   {
     to: commonRoutes.CAPO,
     title: routeTitles.CAPO,
