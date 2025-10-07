@@ -128,6 +128,8 @@ const HistoricalExpensesByNetworks = (
               activeModeTab={activeModeTab}
               activeViewTab={activeViewTab}
               barSize={barSize}
+              areAllSeriesHidden={areAllSeriesHidden}
+              onEyeClick={() => onAllSeriesHidden(!areAllSeriesHidden)}
             />
             {/*TODO: fix download button style applying*/}
             <span className={'mt-1 hidden lg:block'}>

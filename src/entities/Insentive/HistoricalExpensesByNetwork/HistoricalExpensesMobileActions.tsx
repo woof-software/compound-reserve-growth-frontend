@@ -1,8 +1,10 @@
 import React from 'react';
 import { CSVLink } from 'react-csv';
 
+import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { getCsvFileName } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/getCsvFileName';
 import { useModal } from '@/shared/hooks/useModal';
+import { noop } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -13,12 +15,21 @@ interface HistoricalExpensesMobileActionsProps {
   activeViewTab: string;
   activeModeTab: string;
   barSize: string;
+  areAllSeriesHidden?: boolean;
+  onEyeClick?: () => void;
 }
 
 export const HistoricalExpensesMobileActions = (
   props: HistoricalExpensesMobileActionsProps
 ) => {
-  const { csvData, activeModeTab, activeViewTab, barSize } = props;
+  const {
+    csvData,
+    activeModeTab,
+    activeViewTab,
+    barSize,
+    areAllSeriesHidden = false,
+    onEyeClick = noop
+  } = props;
 
   const {
     isOpen: isMoreOpen,
@@ -73,6 +84,28 @@ export const HistoricalExpensesMobileActions = (
                 </Text>
               </div>
             </CSVLink>
+          </div>
+          <div className='px-3 py-2'>
+            <ChartIconToggle
+              active={areAllSeriesHidden}
+              onIcon='eye'
+              offIcon='eye-closed'
+              ariaLabel='Toggle all series visibility'
+              className={{
+                container:
+                  'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
+                icon: 'h-6.5 w-6.5',
+                iconContainer: 'h-6.5 w-6.5'
+              }}
+              onClick={onEyeClick}
+            >
+              <Text
+                size='14'
+                weight='500'
+              >
+                {areAllSeriesHidden ? 'Select All' : 'Unselect All'}
+              </Text>
+            </ChartIconToggle>
           </div>
         </div>
       </Drawer>
