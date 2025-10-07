@@ -2,7 +2,7 @@ import React from 'react';
 import { CSVLink } from 'react-csv';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
-import { getCsvFileName } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/getCsvFileName';
+import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import { useModal } from '@/shared/hooks/useModal';
 import { noop } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
