@@ -3,6 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import { LineChartSeries } from '@/components/Charts/Line/Line';
+import { filterForRange } from '@/shared/lib/utils/chart';
 import {
   capitalizeFirstLetter,
   getStableColorForSeries
@@ -43,62 +44,19 @@ const useLineChart = ({
   const aggregatedSeries = useMemo<Highcharts.SeriesAreaOptions[]>(() => {
     const allSeriesNames = data.map((series) => series.name);
 
-    if (barSize === 'D') {
-      return data.map((series) => ({
-        id: series.name,
-        type: 'area' as const,
-        name: capitalizeFirstLetter(series.name),
-        data: series.data.map((d) => [d.x, d.y]),
-        color: getStableColorForSeries(series.name, allSeriesNames)
-      }));
-    }
-
     return data.map((series) => {
-      if (!series.data?.length) {
-        return {
-          id: series.name,
-          type: 'area' as const,
-          name: capitalizeFirstLetter(series.name),
-          data: [],
-          color: getStableColorForSeries(series.name, allSeriesNames)
-        };
-      }
-
-      const aggregatedPoints = new Map<number, number>();
-
-      for (const point of series.data) {
-        const date = new Date(point.x);
-        date.setUTCHours(0, 0, 0, 0);
-        let periodStartTimestamp: number;
-
-        if (barSize === 'W') {
-          const dayOfWeek = date.getUTCDay();
-          const diff =
-            date.getUTCDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-          const startOfWeek = new Date(date);
-          startOfWeek.setUTCDate(diff);
-          periodStartTimestamp = startOfWeek.getTime();
-        } else {
-          periodStartTimestamp = new Date(
-            date.getUTCFullYear(),
-            date.getUTCMonth(),
-            1
-          ).getTime();
-        }
-        aggregatedPoints.set(periodStartTimestamp, point.y);
-      }
-
-      const resultData = Array.from(aggregatedPoints.entries()).map(
-        ([timestamp, yValue]) => [timestamp, yValue]
-      );
-
-      resultData.sort((a, b) => a[0] - b[0]);
+      const data = filterForRange({
+        data: series.data,
+        getDate: ({ x }) => new Date(x),
+        transform: ({ x, y }) => [x, y],
+        range: barSize
+      });
 
       return {
+        data,
         id: series.name,
         type: 'area' as const,
         name: capitalizeFirstLetter(series.name),
-        data: resultData,
         color: getStableColorForSeries(series.name, allSeriesNames)
       };
     });
