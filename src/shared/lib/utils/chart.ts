@@ -70,7 +70,11 @@ export function filterForRange<T, R>(args: FilterForRangeArgs<T, R>): R[] {
         break;
       }
       case 'M': {
-        const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 0);
+        const lastDayOfMonth = new Date(
+          date.getFullYear(),
+          date.getMonth() + 1,
+          0
+        );
 
         const pointDate = date.getDate();
 
