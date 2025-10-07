@@ -130,7 +130,7 @@ const HistoricalExpensesByNetworks = (
               barSize={barSize}
             />
             {/*TODO: fix download button style applying*/}
-            <span className={'mt-1 hidden md:block'}>
+            <span className={'mt-1 hidden lg:block'}>
               <CSVDownloadButton
                 data={csvData}
                 filename={getCsvFileName('historical_expenses_by_networks', {
