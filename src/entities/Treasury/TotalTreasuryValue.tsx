@@ -320,53 +320,28 @@ const TotalTreasuryValue = ({
           : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
       );
 
-      if (selectedOptions.chain.length > 0 && chain.length === 0) {
-        setResetHiddenKey((k) => k + 1);
-      }
-
       setSelectedOptions({ chain, deployment: filteredDeployment });
     },
-    [selectedOptions.chain.length, selectedOptions.deployment]
+    [selectedOptions.deployment]
   );
 
-  const onSelectAssetType = useCallback(
-    (assetTypes: OptionType[]) => {
-      if (selectedOptions.assetType.length > 0 && assetTypes.length === 0) {
-        setResetHiddenKey((k) => k + 1);
-      }
+  const onSelectAssetType = useCallback((assetTypes: OptionType[]) => {
+    setSelectedOptions({
+      assetType: assetTypes
+    });
+  }, []);
 
-      setSelectedOptions({
-        assetType: assetTypes
-      });
-    },
-    [selectedOptions.assetType.length]
-  );
+  const onSelectMarket = useCallback((deployments: OptionType[]) => {
+    setSelectedOptions({
+      deployment: deployments
+    });
+  }, []);
 
-  const onSelectMarket = useCallback(
-    (deployments: OptionType[]) => {
-      if (selectedOptions.deployment.length > 0 && deployments.length === 0) {
-        setResetHiddenKey((k) => k + 1);
-      }
-
-      setSelectedOptions({
-        deployment: deployments
-      });
-    },
-    [selectedOptions]
-  );
-
-  const onSelectSymbol = useCallback(
-    (symbols: OptionType[]) => {
-      if (selectedOptions.symbol.length > 0 && symbols.length === 0) {
-        setResetHiddenKey((k) => k + 1);
-      }
-
-      setSelectedOptions({
-        symbol: symbols
-      });
-    },
-    [selectedOptions]
-  );
+  const onSelectSymbol = useCallback((symbols: OptionType[]) => {
+    setSelectedOptions({
+      symbol: symbols
+    });
+  }, []);
 
   const onClearSelectedOptions = useCallback(() => {
     setSelectedOptions({
