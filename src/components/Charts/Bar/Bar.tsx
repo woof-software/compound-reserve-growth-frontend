@@ -1,8 +1,8 @@
-import { formatLargeNumber } from '@/shared/lib/utils/utils';
 import React, { FC, useEffect, useMemo, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
+import { formatLargeNumber } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
@@ -191,7 +191,7 @@ const CryptoChart: FC<CryptoChartProps> = ({ data, onClear }) => {
         />
       </View.Condition>
       <View.Condition if={Boolean(data.length <= 0)}>
-        <div className='flex min-w-[400px] flex-col items-center justify-center gap-3.5'>
+        <div className='flex min-w-auto flex-col items-center justify-center gap-3.5 sm:min-w-[400px]'>
           <Text
             size='11'
             weight='500'
