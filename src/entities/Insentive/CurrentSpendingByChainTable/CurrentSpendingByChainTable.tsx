@@ -178,7 +178,7 @@ const CurrentSpendingByChainTable = ({
           </>
         )}
       </MobileDataTable>
-      <div className='hidden w-full max-w-full lg:block lg:max-w-[522px]'>
+      <div className='hidden w-full max-w-full lg:block lg:max-w-[400px]'>
         <DataTable
           data={tableData}
           columns={SpendingByChainTableColumns}
