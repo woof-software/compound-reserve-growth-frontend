@@ -7,6 +7,7 @@ import { NormalizedTableData } from '@/entities/Insentive/DailyExpenses/lib/type
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
+  capitalizeFirstLetter,
   defaultExplorer,
   explorers,
   formatLargeNumber,
@@ -33,7 +34,6 @@ const getDailyColumns = (
       accessorFn: (row) => row.network,
       header: 'Network',
       enableSorting: true,
-      size: 168,
       cell: ({ row }) => (
         <div className='flex items-center gap-3'>
           <Icon
@@ -45,20 +45,22 @@ const getDailyColumns = (
             size='13'
             weight='500'
           >
-            {row.original.network}
+            {capitalizeFirstLetter(row.original.network)}
           </Text>
         </div>
       )
     },
     {
       id: 'market',
-      accessorFn: (row) => row.market,
+      accessorFn: (row) => row.source,
       header: 'Market',
       enableSorting: true,
       cell: ({ row }) => (
-        <Text size='13'>
-          {row.original.market === 'no market' ? ' - ' : row.original.market}
-        </Text>
+        <AddressTooltip
+          text={row.original.source.market!}
+          address={row.original.source.address}
+          chain={row.original.source.network}
+        />
       )
     },
     {
@@ -79,6 +81,7 @@ const getDailyColumns = (
       accessorFn: (row) => row.borrowIncentive,
       header: 'Borrow Incentive',
       enableSorting: true,
+      size: 120,
       cell: ({ row }) => (
         <Text size='13'>
           {view === 'USD'
@@ -92,28 +95,16 @@ const getDailyColumns = (
       accessorFn: (row) => row.total,
       header: 'Total',
       enableSorting: true,
+      align: 'right',
       cell: ({ row }) => (
-        <Text size='13'>
+        <Text
+          size='13'
+          className={'flex justify-end'}
+        >
           {view === 'USD'
             ? formatUSD(row.original.total, 'compact')
             : formatLargeNumber(row.original.total, 2)}
         </Text>
-      )
-    },
-    {
-      id: 'source',
-      accessorFn: (row) => row.source,
-      header: 'Source',
-      enableSorting: true,
-      align: 'right',
-      size: 120,
-      cell: ({ row }) => (
-        <AddressTooltip
-          className={'justify-end'}
-          text={row.original.source.market!}
-          address={row.original.source.address}
-          chain={row.original.source.network}
-        />
       )
     }
   ];
@@ -202,13 +193,55 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                   >
                     Market
                   </Text>
-                  <Text
-                    size='13'
-                    lineHeight='21'
-                    className='truncate'
+                  <DrawerInfo
+                    content={
+                      <div className='flex w-full flex-col items-start gap-4'>
+                        <Text
+                          size='17'
+                          weight='500'
+                          className='text-primary-11 mb-5 w-full !text-center break-all'
+                        >
+                          {row.source.market}
+                        </Text>
+                        <div className='flex w-full items-center justify-between'>
+                          <Text
+                            size='14'
+                            className='text-primary-11'
+                          >
+                            {row.source.address}
+                          </Text>
+                          <ClipboardButton textToCopy={row.source.address} />
+                        </div>
+                        <div className='flex w-full items-center justify-between'>
+                          <Text
+                            size='14'
+                            className='text-primary-11'
+                          >
+                            View on Explorer
+                          </Text>
+                          <a
+                            href={fullExplorerLink}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='text-primary-11 flex h-5 w-5 items-center justify-center'
+                          >
+                            <Icon
+                              name={'arrow-link'}
+                              className='h-4.5 w-3 text-[#7A8A99]'
+                            />
+                          </a>
+                        </div>
+                      </div>
+                    }
                   >
-                    {row.market === 'no market' ? ' - ' : row.market}
-                  </Text>
+                    <Text
+                      size='13'
+                      lineHeight='21'
+                      className='w-fit max-w-[60px] truncate border-b border-dotted border-gray-500'
+                    >
+                      {row.source.market}
+                    </Text>
+                  </DrawerInfo>
                 </div>
                 <div className='grid w-full'>
                   <Text
@@ -266,65 +299,6 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                       ? formatUSD(row.total, 'compact')
                       : formatLargeNumber(row.total, 2)}
                   </Text>
-                </div>
-                <div className='grid w-full'>
-                  <Text
-                    size='11'
-                    lineHeight='18'
-                    weight='500'
-                    className='text-primary-14'
-                  >
-                    Source
-                  </Text>
-                  <DrawerInfo
-                    content={
-                      <div className='flex w-full flex-col items-start gap-4'>
-                        <Text
-                          size='17'
-                          weight='500'
-                          className='text-primary-11 mb-5 w-full !text-center break-all'
-                        >
-                          {row.source.market}
-                        </Text>
-                        <div className='flex w-full items-center justify-between'>
-                          <Text
-                            size='14'
-                            className='text-primary-11'
-                          >
-                            {row.source.address}
-                          </Text>
-                          <ClipboardButton textToCopy={row.source.address} />
-                        </div>
-                        <div className='flex w-full items-center justify-between'>
-                          <Text
-                            size='14'
-                            className='text-primary-11'
-                          >
-                            View on Explorer
-                          </Text>
-                          <a
-                            href={fullExplorerLink}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            className='text-primary-11 flex h-5 w-5 items-center justify-center'
-                          >
-                            <Icon
-                              name={'arrow-link'}
-                              className='h-4.5 w-3 text-[#7A8A99]'
-                            />
-                          </a>
-                        </div>
-                      </div>
-                    }
-                  >
-                    <Text
-                      size='13'
-                      lineHeight='21'
-                      className='w-fit max-w-[60px] truncate border-b border-dotted border-gray-500'
-                    >
-                      {row.source.market}
-                    </Text>
-                  </DrawerInfo>
                 </div>
               </div>
             );

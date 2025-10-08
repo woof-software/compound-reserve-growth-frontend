@@ -36,8 +36,7 @@ const sortColumns: SortAccessor<NormalizedTableData>[] = [
   { accessorKey: 'market', header: 'Market' },
   { accessorKey: 'lendIncentive', header: 'Lend Incentive' },
   { accessorKey: 'borrowIncentive', header: 'Borrow Incentive' },
-  { accessorKey: 'total', header: 'Total' },
-  { accessorKey: 'source', header: 'Source' }
+  { accessorKey: 'total', header: 'Total' }
 ];
 
 export const DailyExpensesMobileFilters = (
