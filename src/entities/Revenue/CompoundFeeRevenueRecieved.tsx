@@ -364,22 +364,47 @@ const CompoundFeeRevenueRecieved = ({
           : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
       );
 
+      if (selectedOptions.chain.length > 0 && chain.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
+
       setSelectedOptions({ chain, market: filteredDeployment });
     },
     [selectedOptions]
   );
 
-  const onSelectMarket = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ market: options });
-  }, []);
+  const onSelectMarket = useCallback(
+    (options: OptionType[]) => {
+      if (selectedOptions.market.length > 0 && options.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
 
-  const onSelectSymbol = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ symbol: options });
-  }, []);
+      setSelectedOptions({ market: options });
+    },
+    [selectedOptions]
+  );
 
-  const onSelectAssetType = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ assetType: options });
-  }, []);
+  const onSelectSymbol = useCallback(
+    (options: OptionType[]) => {
+      if (selectedOptions.symbol.length > 0 && options.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
+
+      setSelectedOptions({ symbol: options });
+    },
+    [selectedOptions]
+  );
+
+  const onSelectAssetType = useCallback(
+    (options: OptionType[]) => {
+      if (selectedOptions.assetType.length > 0 && options.length === 0) {
+        setResetHiddenKey((k) => k + 1);
+      }
+
+      setSelectedOptions({ assetType: options });
+    },
+    [selectedOptions]
+  );
 
   const handleResetFilters = useCallback(() => {
     setSelectedOptions(initialState);
