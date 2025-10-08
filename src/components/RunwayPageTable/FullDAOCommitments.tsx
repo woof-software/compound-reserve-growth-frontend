@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
   capitalizeFirstLetter,
@@ -31,7 +32,7 @@ export interface FullDAOCommitmentRow {
 interface FullDAOCommitmentsProps {
   data: FullDAOCommitmentRow[];
 
-  sortType: { key: string; type: string };
+  sortType: SortAdapter<FullDAOCommitmentRow>;
 }
 
 const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [

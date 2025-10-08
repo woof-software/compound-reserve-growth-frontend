@@ -16,7 +16,7 @@ import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
-import { NormalizedChartData } from '@/shared/types/Capo/types';
+import { CapoNormalizedChartData } from '@/shared/types/Capo/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
@@ -27,7 +27,7 @@ import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 
 interface CapoSpecificCollateralPriceProps {
-  rawData: NormalizedChartData[];
+  rawData: CapoNormalizedChartData[];
   isLoading?: boolean;
   isError?: boolean;
 }

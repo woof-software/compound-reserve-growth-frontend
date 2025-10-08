@@ -2,7 +2,13 @@ import { Dispatch, SetStateAction } from 'react';
 import { CSVLink } from 'react-csv';
 
 import Filter from '@/components/Filter/Filter';
+import { SpendingByChainTableColumns } from '@/entities/Insentive/CurrentSpendingByChainTable/CurrentSpendingByChainTable';
 import { useModal } from '@/shared/hooks/useModal';
+import {
+  SortAccessor,
+  SortAdapter,
+  SortDirection
+} from '@/shared/hooks/useSorting';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -10,19 +16,19 @@ import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 
-const sortColumns = [
+const sortColumns: SortAccessor<SpendingByChainTableColumns>[] = [
   { accessorKey: 'network', header: 'Network' },
-  { accessorKey: 'valueCOMP', header: 'Value COMP' },
-  { accessorKey: 'valueUSDC', header: 'Value USD' },
+  { accessorKey: 'valueComp', header: 'Value COMP' },
+  { accessorKey: 'valueUsd', header: 'Value USD' },
   { accessorKey: 'source', header: 'Market' }
 ];
 
 interface CurrentSpendingByChainMobileFiltersProps {
   activeTab: string;
   setActiveTab: Dispatch<SetStateAction<string>>;
-  onKeySelect: (key: string) => void;
-  onTypeSelect: (type: string) => void;
-  sortType: any;
+  onKeySelect: (key: keyof SpendingByChainTableColumns | null) => void;
+  onTypeSelect: (type: SortDirection) => void;
+  sortType: SortAdapter<SpendingByChainTableColumns>;
   csvData: {
     network: string;
     valueComp: number;

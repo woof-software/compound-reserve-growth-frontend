@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 
 import HoverCard from '@/components/HoverCard/HoverCard';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
   defaultExplorer,
@@ -28,7 +29,7 @@ export type TreasuryBalanceByNetworkType = {
 interface PresenceByMarketAndCollateralProps {
   tableData: TreasuryBalanceByNetworkType[];
 
-  sortType: { key: string; type: string };
+  sortType: SortAdapter<TreasuryBalanceByNetworkType>;
 }
 
 const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [

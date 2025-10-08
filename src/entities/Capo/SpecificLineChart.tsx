@@ -16,7 +16,6 @@ import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
-import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
 import 'highcharts/modules/stock';
@@ -473,17 +472,15 @@ const SpecificLineChart: FC<SpecificLineChartProps> = ({
         className
       )}
     >
-      <div className='relative flex-grow'>
-        <View.Condition if={areAllSeriesHidden}>
-          <div className='flex min-h-[400px] items-center justify-center'>
-            <Text
-              size='11'
-              className='text-primary-14 items-center justify-center'
-            >
-              All series are hidden
-            </Text>
-          </div>
-        </View.Condition>
+      <div className='relative min-h-[400px] flex-grow'>
+        <div className='absolute top-1/2 left-1/2 z-[2] -translate-x-1/2 -translate-y-1/2 opacity-40'>
+          <Icon
+            name='logo-gray'
+            className='h-[27px] w-[121px]'
+            color='primary-11'
+            isRound={false}
+          />
+        </div>
         <HighchartsReact
           ref={chartRef}
           highcharts={Highcharts}

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { NormalizedChartData } from '@/shared/types/Capo/types';
+import { CapoNormalizedChartData } from '@/shared/types/Capo/types';
 
 export interface CollateralChartSeries {
   name: string;
@@ -8,7 +8,7 @@ export interface CollateralChartSeries {
 }
 
 interface UseCollateralChartDataConfig {
-  rawData: NormalizedChartData[];
+  rawData: CapoNormalizedChartData[];
   groupBy?: 'asset' | 'none';
   selectedOracle?: string;
   selectedAsset?: number;

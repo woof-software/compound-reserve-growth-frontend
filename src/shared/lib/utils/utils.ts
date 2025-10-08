@@ -40,48 +40,41 @@ export const longMonthNames = [
   'December'
 ];
 
+const STABLE_COLORS = [
+  '#6F42EB',
+  '#3877FF',
+  '#00D395',
+  '#F54E59',
+  '#FFA374',
+  '#F9FF8E',
+  '#8FE6FE',
+  '#B39AFF',
+  '#FDB0C0',
+  '#BCE954',
+  '#10A674',
+  '#5C8BC4',
+  '#F6C642',
+  '#02CCFE',
+  '#BC8F6F',
+  '#7A89B8',
+  '#FF752E',
+  '#FAB3FF',
+  '#58F0C5',
+  '#62B1FF'
+];
+
+const hashName = (s: string) => {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+};
+
 export const colorPicker = (index: number): string => {
-  const colors = [
-    '#6F42EB',
-    '#3877FF',
-    '#00D395',
-    '#F54E59',
-    '#FFA374',
-    '#F9FF8E',
-    '#8FE6FE',
-    '#B39AFF',
-    '#FDB0C0',
-    '#BCE954',
-    '#10A674',
-    '#5C8BC4',
-    '#F6C642',
-    '#02CCFE',
-    '#BC8F6F',
-    '#7A89B8',
-    '#FF752E',
-    '#FAB3FF',
-    '#58F0C5',
-    '#62B1FF'
-  ];
+  const i =
+    ((index % STABLE_COLORS.length) + STABLE_COLORS.length) %
+    STABLE_COLORS.length;
 
-  if (index < colors.length) {
-    return colors[index];
-  }
-
-  const base = colors[Math.floor(Math.random() * colors.length)];
-
-  const r = parseInt(base.slice(1, 3), 16);
-  const g = parseInt(base.slice(3, 5), 16);
-  const b = parseInt(base.slice(5, 7), 16);
-
-  const offset = Math.floor(Math.random() * 30) - 15;
-  const nr = Math.min(255, Math.max(0, r + offset));
-  const ng = Math.min(255, Math.max(0, g + offset));
-  const nb = Math.min(255, Math.max(0, b + offset));
-
-  return `#${nr.toString(16).padStart(2, '0')}${ng
-    .toString(16)
-    .padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`;
+  return STABLE_COLORS[i];
 };
 
 export const networkColorMap: { [key: string]: string } = {
@@ -105,37 +98,22 @@ export const getStableColorForSeries = (
   seriesName: string,
   allSeriesNames: string[]
 ): string => {
-  const lowerName = seriesName.toLowerCase();
+  const nameNorm = seriesName.trim().toLowerCase();
 
-  // First check networkColorMap
-  if (networkColorMap[lowerName]) {
-    return networkColorMap[lowerName];
-  }
+  if (networkColorMap[nameNorm]) return networkColorMap[nameNorm];
 
-  // For networks check partial matches
   for (const [network, color] of Object.entries(networkColorMap)) {
-    if (lowerName.includes(network)) {
-      return color;
-    }
+    if (nameNorm.includes(network)) return color;
   }
 
-  // Create stable index based on series name
-  // Sort all series names for stable ordering
-  const sortedNames = [...allSeriesNames].sort();
-  const stableIndex = sortedNames.indexOf(seriesName);
+  const sortedLower = [
+    ...new Set(allSeriesNames.map((n) => n.trim().toLowerCase()))
+  ].sort();
+  let idx = sortedLower.indexOf(nameNorm);
 
-  // If series not found in sorted list, use name hash
-  if (stableIndex === -1) {
-    let hash = 0;
-    for (let i = 0; i < seriesName.length; i++) {
-      const char = seriesName.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    return colorPicker((Math.abs(hash) % 20) + 1);
-  }
+  if (idx === -1) idx = hashName(nameNorm) % STABLE_COLORS.length;
 
-  return colorPicker(stableIndex + 1);
+  return colorPicker(idx);
 };
 
 export const explorers: { [key: string]: string } = {

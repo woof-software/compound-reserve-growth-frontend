@@ -1,10 +1,17 @@
-import React, { useCallback, useMemo, useReducer } from 'react';
+import React, { useMemo } from 'react';
 import { CSVLink } from 'react-csv';
 
-import FullDAOCommitments from '@/components/RunwayPageTable/FullDAOCommitments';
+import FullDAOCommitments, {
+  FullDAOCommitmentRow
+} from '@/components/RunwayPageTable/FullDAOCommitments';
 import { useModal } from '@/shared/hooks/useModal';
 import type { RunwayItem } from '@/shared/hooks/useRunway';
 import { useRunway } from '@/shared/hooks/useRunway';
+import {
+  SortAccessor,
+  SortAdapter,
+  useSorting
+} from '@/shared/hooks/useSorting';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
@@ -13,7 +20,7 @@ import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Text from '@/shared/ui/Text/Text';
 
-export const fullDAOCommitmentsColumns = [
+export const fullDAOCommitmentsColumns: SortAccessor<FullDAOCommitmentRow>[] = [
   {
     accessorKey: 'recipient',
     header: 'Recipient'
@@ -53,13 +60,13 @@ export const fullDAOCommitmentsColumns = [
 ];
 
 const FullDAOCommitmentsBlock = () => {
-  const [sortType, setSortType] = useReducer(
-    (prev, next) => ({
-      ...prev,
-      ...next
-    }),
-    { key: '', type: 'asc' }
-  );
+  const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
+    useSorting<FullDAOCommitmentRow>('asc', null);
+
+  const sortType: SortAdapter<FullDAOCommitmentRow> = {
+    type: sortDirection,
+    key: sortKey
+  };
 
   const { data: runwayResponse, isLoading, isError } = useRunway();
 
@@ -180,18 +187,6 @@ const FullDAOCommitmentsBlock = () => {
 
     return tableData;
   }, [runwayResponse]);
-
-  const onKeySelect = useCallback((value: string) => {
-    setSortType({
-      key: value
-    });
-  }, []);
-
-  const onTypeSelect = useCallback((value: string) => {
-    setSortType({
-      type: value
-    });
-  }, []);
 
   return (
     <Card

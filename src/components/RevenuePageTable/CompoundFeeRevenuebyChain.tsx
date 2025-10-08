@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { OnlyStringKeys } from '@/shared/lib/utils/types';
 import {
   capitalizeFirstLetter,
   formatCurrencyValue,
@@ -12,10 +14,9 @@ import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-export interface ProcessedRevenueData {
-  chain: string;
-  [key: string]: string | number;
-}
+export type ProcessedRevenueData = { chain: string } & OnlyStringKeys<{
+  [key: Exclude<string, 'chain'>]: string | number;
+}>;
 
 export type Interval = 'Quarterly' | 'Monthly' | 'Weekly';
 
@@ -28,7 +29,7 @@ interface CompoundFeeRevenuebyChainProps {
 
   totals: { [key: string]: number };
 
-  sortType: { key: string; type: string };
+  sortType: SortAdapter<ProcessedRevenueData>;
 }
 
 const CompoundFeeRevenuebyChain = ({
@@ -111,7 +112,7 @@ const CompoundFeeRevenuebyChain = ({
           <>
             {dataRows.map((rowObj, rowIndex) => (
               <div
-                key={rowObj.chain + rowIndex}
+                key={`${rowObj.chain}${rowIndex}`}
                 className={cn(
                   'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
                   {

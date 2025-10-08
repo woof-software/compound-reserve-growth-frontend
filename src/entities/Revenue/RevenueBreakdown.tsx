@@ -11,6 +11,11 @@ import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
+  SortAccessor,
+  SortAdapter,
+  useSorting
+} from '@/shared/hooks/useSorting';
+import {
   capitalizeFirstLetter,
   extractFilterOptions,
   formatNumber,
@@ -49,13 +54,13 @@ const RevenueBreakDownBlock = ({
     symbol: []
   };
 
-  const [sortType, setSortType] = useReducer(
-    (prev, next) => ({
-      ...prev,
-      ...next
-    }),
-    { key: '', type: 'asc' }
-  );
+  const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
+    useSorting<FormattedRevenueData>('asc', null);
+
+  const sortType: SortAdapter<FormattedRevenueData> = {
+    type: sortDirection,
+    key: sortKey
+  };
 
   const {
     isOpen: isFilterOpen,
@@ -305,27 +310,16 @@ const RevenueBreakDownBlock = ({
     return { tableData: finalData, dynamicColumns: columns };
   }, [filteredData, selectedYear, yearOptions, selectedOptions]);
 
-  const revenueBreakdownColumns = useMemo(() => {
-    return dynamicColumns.map((column) => ({
-      accessorKey: String(column.accessorKey),
-      header: typeof column.header === 'string' ? column.header : ''
-    }));
-  }, [dynamicColumns]);
+  const revenueBreakdownColumns: SortAccessor<FormattedRevenueData>[] =
+    useMemo(() => {
+      return dynamicColumns.map((column) => ({
+        accessorKey: String(column.accessorKey),
+        header: typeof column.header === 'string' ? column.header : ''
+      }));
+    }, [dynamicColumns]);
 
   const handleResetFilters = useCallback(() => {
     setSelectedOptions(initialState);
-  }, []);
-
-  const onKeySelect = useCallback((value: string) => {
-    setSortType({
-      key: value
-    });
-  }, []);
-
-  const onTypeSelect = useCallback((value: string) => {
-    setSortType({
-      type: value
-    });
   }, []);
 
   const hasData = tableData.length > 0;
