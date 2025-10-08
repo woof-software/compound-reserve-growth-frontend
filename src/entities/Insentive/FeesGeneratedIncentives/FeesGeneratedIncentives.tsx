@@ -63,7 +63,7 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
   const chartSeries = getGeneratedIncentivesChartSeries(filteredData);
 
   const displaySeries = isFeesOnly
-    ? chartSeries.filter((series) => series.name === 'Fees')
+    ? chartSeries.filter((series) => series.name === 'Revenue')
     : chartSeries;
 
   const { csvData } = useCSVExport({

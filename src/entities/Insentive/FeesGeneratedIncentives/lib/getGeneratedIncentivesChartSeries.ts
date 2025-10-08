@@ -85,7 +85,7 @@ export const getGeneratedIncentivesChartSeries = (
       data: incentivesData
     },
     {
-      name: 'Fees',
+      name: 'Revenue',
       data: feesData
     }
   ];
