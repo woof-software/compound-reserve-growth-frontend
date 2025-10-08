@@ -152,10 +152,6 @@ const MetricBlock = (props: MetricBlockProps) => {
         >
           <div className='grid gap-3'>
             <div className='flex items-center gap-2.5'>
-              <Icon
-                name='comp-metric'
-                className='h-8 w-8'
-              />
               <Text
                 weight='700'
                 size='32'
