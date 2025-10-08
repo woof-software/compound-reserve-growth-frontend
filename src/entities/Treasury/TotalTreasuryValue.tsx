@@ -643,7 +643,7 @@ const Filters = memo(
                       size='14'
                       weight='500'
                     >
-                      Unselect All
+                      {areAllSeriesHidden ? 'Select All' : 'Unselect All'}
                     </Text>
                   </ChartIconToggle>
                 </div>

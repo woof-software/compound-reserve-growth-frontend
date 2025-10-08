@@ -2,8 +2,8 @@ import React from 'react';
 import { CSVLink } from 'react-csv';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
-import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import { useModal } from '@/shared/hooks/useModal';
+import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import { noop } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
@@ -28,7 +28,7 @@ export const HistoricalExpensesMobileActions = (
     activeViewTab,
     barSize,
     areAllSeriesHidden = false,
-    onEyeClick = noop
+    onEyeClick: onEyeClickProp = noop
   } = props;
 
   const {
@@ -36,6 +36,12 @@ export const HistoricalExpensesMobileActions = (
     onCloseModal: onMoreClose,
     onOpenModal: onMoreOpen
   } = useModal();
+
+  const onEyeClick = () => {
+    onEyeClickProp?.();
+
+    onMoreClose();
+  };
 
   return (
     <>
