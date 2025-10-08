@@ -35,7 +35,12 @@ const treasuryColumns: ExtendedColumnDef<CapoTableItem>[] = [
           className='h-6 w-6'
           folder='network'
         />
-        <Text size='13'>{row.original.network}</Text>
+        <Text
+          size='13'
+          weight='500'
+        >
+          {row.original.network}
+        </Text>
       </div>
     )
   },
@@ -212,6 +217,7 @@ const CollateralsPriceTable = ({
                     <Text
                       size='13'
                       lineHeight='21'
+                      weight='500'
                       className='truncate'
                     >
                       {row.network}
