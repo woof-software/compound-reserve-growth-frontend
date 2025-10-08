@@ -4,11 +4,11 @@ import CryptoChart from '@/components/Charts/Bar/Bar';
 import CurrentSpendingByChainTable, {
   SpendingByChainTableColumns
 } from '@/entities/Insentive/CurrentSpendingByChainTable/CurrentSpendingByChainTable';
+import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
 import { CurrendSpendingByChainMobileFilters } from '@/features/Insentive/CurrendSpendingByChainMobileFilters';
 import { getChartData } from '@/features/Insentive/lib/getChartData';
 import { getCsvData } from '@/features/Insentive/lib/getCsvData';
 import { tableDataNormalizer } from '@/features/Insentive/lib/tableDataNormalizer';
-import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
 import {
   useFiltersSync,
   useFilterSyncSingle
@@ -25,11 +25,9 @@ const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
 
   const {
     chainOptions,
-    deploymentOptionsFilter,
     selectedOptions,
     setSelectedOptions,
     onSelectChain,
-    onSelectMarket,
     filteredData,
     clearAllFilters,
     mobileFilterOptions
@@ -80,13 +78,6 @@ const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
           onChange={onSelectChain}
           placeholder='Chain'
           disabled={isLoading}
-        />
-        <MultiSelect
-          options={deploymentOptionsFilter}
-          value={selectedOptions.deployment}
-          onChange={onSelectMarket}
-          placeholder='Market'
-          disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
         />
         <CSVDownloadButton
           data={csvData}
