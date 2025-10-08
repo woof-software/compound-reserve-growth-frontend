@@ -180,7 +180,7 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                       lineHeight='21'
                       className='truncate'
                     >
-                      {row.network}
+                      {capitalizeFirstLetter(row.network)}
                     </Text>
                   </div>
                 </div>
