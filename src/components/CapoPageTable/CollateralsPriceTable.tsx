@@ -8,6 +8,7 @@ import { cn } from '@/shared/lib/classNames/classNames';
 import {
   defaultExplorer,
   explorers,
+  formatUSD,
   sliceAddress
 } from '@/shared/lib/utils/utils';
 import { CapoTableItem } from '@/shared/types/Capo/types';
@@ -61,7 +62,7 @@ const treasuryColumns: ExtendedColumnDef<CapoTableItem>[] = [
     enableSorting: true,
     size: 215,
     cell: ({ row }) => (
-      <Text size='13'>${Number(row.original.collateralPrice).toFixed(2)}</Text>
+      <Text size='13'>{formatUSD(Number(row.original.collateralPrice))}</Text>
     )
   },
   {
@@ -71,7 +72,7 @@ const treasuryColumns: ExtendedColumnDef<CapoTableItem>[] = [
     enableSorting: true,
     size: 215,
     cell: ({ row }) => (
-      <Text size='13'>${Number(row.original.priceRestriction).toFixed(2)}</Text>
+      <Text size='13'>{formatUSD(Number(row.original.priceRestriction))}</Text>
     )
   },
   {
@@ -255,7 +256,7 @@ const CollateralsPriceTable = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    ${Number(row.collateralPrice).toFixed(2)}
+                    {formatUSD(Number(row.collateralPrice))}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -272,7 +273,7 @@ const CollateralsPriceTable = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {Number(row.priceRestriction).toFixed(2)}
+                    {formatUSD(Number(row.priceRestriction))}
                   </Text>
                 </div>
                 <div className='grid w-full'>

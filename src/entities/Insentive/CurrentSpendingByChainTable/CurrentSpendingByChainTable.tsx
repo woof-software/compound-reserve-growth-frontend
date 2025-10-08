@@ -1,14 +1,19 @@
 import { useMemo } from 'react';
 
+import HoverCard from '@/components/HoverCard/HoverCard';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
   capitalizeFirstLetter,
+  defaultExplorer,
+  explorers,
   formatNumber,
-  formatPrice
+  formatUSD,
+  sliceAddress
 } from '@/shared/lib/utils/utils';
 import { Source } from '@/shared/types/types';
+import { ClipboardButton } from '@/shared/ui/AnimationProvider/CopyButton/CopyButton';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -32,6 +37,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       header: 'Network',
       accessorFn: (row) => row.network,
       enableSorting: true,
+      size: 170,
       cell: ({ row }) => (
         <div className='flex items-center gap-3'>
           <Icon
@@ -63,8 +69,81 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       header: 'Value USD',
       enableSorting: true,
       cell: ({ row }) => (
-        <Text size='13'>{formatPrice(row.original.valueUsd)}</Text>
+        <Text size='13'>{formatUSD(row.original.valueUsd, 'compact')}</Text>
       )
+    },
+    {
+      id: 'Source',
+      accessorFn: (row) => row.source,
+      header: 'Market',
+      enableSorting: true,
+      align: 'right',
+      size: 80,
+      cell: ({ row }) => {
+        const { source } = row.original;
+
+        const explorerUrl =
+          (row.original.source &&
+            explorers[row.original.source.network.toLowerCase()]) ||
+          defaultExplorer;
+
+        const fullExplorerLink = `${explorerUrl}${row.original.source.address}`;
+
+        return (
+          <HoverCard
+            content={
+              <div className='flex w-50 flex-col items-start gap-3 py-2'>
+                <div className='flex w-full items-center justify-between'>
+                  <Text
+                    size='11'
+                    weight='500'
+                  >
+                    {source.market}
+                  </Text>
+                </div>
+                <div className='flex w-full items-center justify-between'>
+                  <Text
+                    size='12'
+                    className='text-primary-11'
+                  >
+                    {sliceAddress(row.original.source.address, 7)}
+                  </Text>
+                  <ClipboardButton textToCopy={row.original.source.address} />
+                </div>
+                <div className='flex w-full items-center justify-between'>
+                  <Text
+                    size='12'
+                    className='text-primary-11'
+                  >
+                    View on Explorer
+                  </Text>
+                  <a
+                    href={fullExplorerLink}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-primary-11 flex h-4 w-4 items-center justify-center'
+                  >
+                    <Icon
+                      name={'arrow-link'}
+                      className='h-4.5 w-3 text-[#7A8A99]'
+                    />
+                  </a>
+                </div>
+              </div>
+            }
+            side='top'
+          >
+            <div className='flex justify-end'>
+              <Text
+                size='13'
+                className='text-primary-11 inline-block max-w-full cursor-pointer truncate border-b border-dotted border-gray-500 leading-none'
+              >
+                {source.market}
+              </Text>
+            </div>
+          </HoverCard>
+        );
+      }
     }
   ];
 
@@ -103,6 +182,12 @@ const CurrentSpendingByChainTable = ({
         {(dataRows) => (
           <>
             {dataRows.map((row, index) => {
+              const explorerUrl =
+                (row.source && explorers[row.source.network.toLowerCase()]) ||
+                defaultExplorer;
+
+              const fullExplorerLink = `${explorerUrl}${row.source.address}`;
+
               return (
                 <div
                   key={`${row.source.assetId} + ${row.source.address}`}
@@ -168,8 +253,31 @@ const CurrentSpendingByChainTable = ({
                       lineHeight='21'
                       className='truncate'
                     >
-                      {formatPrice(row.valueUsd, 1)}
+                      {formatUSD(row.valueUsd, 'compact')}
                     </Text>
+                  </div>
+                  <div className='grid w-full'>
+                    <Text
+                      size='11'
+                      lineHeight='18'
+                      weight='500'
+                      className='text-primary-14'
+                    >
+                      Market
+                    </Text>
+                    <a
+                      href={fullExplorerLink}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                    >
+                      <Text
+                        size='13'
+                        lineHeight='21'
+                        className='w-fit truncate border-b border-dashed border-gray-500'
+                      >
+                        {sliceAddress(row.source.address, 7)}
+                      </Text>
+                    </a>
                   </div>
                 </div>
               );
@@ -177,7 +285,7 @@ const CurrentSpendingByChainTable = ({
           </>
         )}
       </MobileDataTable>
-      <div className='hidden w-full max-w-full lg:block lg:max-w-[400px]'>
+      <div className='hidden w-full max-w-full lg:block lg:max-w-[522px]'>
         <DataTable
           data={tableData}
           columns={SpendingByChainTableColumns}

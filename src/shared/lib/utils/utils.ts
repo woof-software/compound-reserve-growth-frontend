@@ -444,10 +444,11 @@ export const groupByKey = <T>(
 export const sumValues = (arr: TokenData[] = []): number =>
   arr.reduce((acc, item) => acc + item.value, 0);
 
-export const formatUSD = (num: number): string => {
+export const formatUSD = (num: number, format?: 'compact'): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
+    notation: format ?? 'standard',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(num);

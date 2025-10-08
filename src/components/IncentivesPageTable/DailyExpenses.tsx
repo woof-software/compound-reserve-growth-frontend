@@ -9,7 +9,8 @@ import { cn } from '@/shared/lib/classNames/classNames';
 import {
   defaultExplorer,
   explorers,
-  formatLargeNumber
+  formatLargeNumber,
+  formatUSD
 } from '@/shared/lib/utils/utils';
 import { ClipboardButton } from '@/shared/ui/AnimationProvider/CopyButton/CopyButton';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
@@ -68,7 +69,7 @@ const getDailyColumns = (
       cell: ({ row }) => (
         <Text size='13'>
           {view === 'USD'
-            ? `$${formatLargeNumber(row.original.lendIncentive, 2)}`
+            ? formatUSD(row.original.lendIncentive, 'compact')
             : formatLargeNumber(row.original.lendIncentive, 2)}
         </Text>
       )
@@ -81,7 +82,7 @@ const getDailyColumns = (
       cell: ({ row }) => (
         <Text size='13'>
           {view === 'USD'
-            ? `$${formatLargeNumber(row.original.borrowIncentive, 2)}`
+            ? formatUSD(row.original.borrowIncentive, 'compact')
             : formatLargeNumber(row.original.borrowIncentive, 2)}
         </Text>
       )
@@ -94,7 +95,7 @@ const getDailyColumns = (
       cell: ({ row }) => (
         <Text size='13'>
           {view === 'USD'
-            ? `$${formatLargeNumber(row.original.total, 2)}`
+            ? formatUSD(row.original.total, 'compact')
             : formatLargeNumber(row.original.total, 2)}
         </Text>
       )
@@ -224,7 +225,7 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                     className='truncate'
                   >
                     {activeViewTab === 'USD'
-                      ? `$${formatLargeNumber(row.lendIncentive, 2)}`
+                      ? formatUSD(row.lendIncentive, 'compact')
                       : formatLargeNumber(row.lendIncentive, 2)}
                   </Text>
                 </div>
@@ -243,7 +244,7 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                     className='truncate'
                   >
                     {activeViewTab === 'USD'
-                      ? `$${formatLargeNumber(row.borrowIncentive, 2)}`
+                      ? formatUSD(row.borrowIncentive, 'compact')
                       : formatLargeNumber(row.borrowIncentive, 2)}
                   </Text>
                 </div>
@@ -262,7 +263,7 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                     className='truncate'
                   >
                     {activeViewTab === 'USD'
-                      ? `$${formatLargeNumber(row.total, 2)}`
+                      ? formatUSD(row.total, 'compact')
                       : formatLargeNumber(row.total, 2)}
                   </Text>
                 </div>

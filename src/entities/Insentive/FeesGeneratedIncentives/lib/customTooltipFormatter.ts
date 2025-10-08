@@ -1,6 +1,6 @@
 import Highcharts, { Point } from 'highcharts';
 
-import { formatLargeNumber } from '@/shared/lib/utils/utils';
+import { formatUSD } from '@/shared/lib/utils/utils';
 
 export const customTooltipFormatter = (context: Point) => {
   const header = `<div class="font-medium mb-3 text-[11px] font-haas">
@@ -19,7 +19,7 @@ export const customTooltipFormatter = (context: Point) => {
                 <span class="text-[11px] font-haas">${point.series.name}</span>
               </div>
               <span class="font-normal text-[11px] font-haas">
-                 ${'$' + formatLargeNumber(point.y ?? 0, 2)}
+                 ${formatUSD(point.y ?? 0, 'compact')}
               </span>
             </div>`
           )
