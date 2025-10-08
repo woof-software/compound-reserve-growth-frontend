@@ -1,7 +1,7 @@
 type Config = {
-  mode: string;
-  view: string;
-  timeFrame: string;
+  mode?: string;
+  view?: string;
+  timeFrame?: string;
 };
 
 export const getCsvFileName = (prefix: string, config?: Config) => {
