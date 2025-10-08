@@ -353,6 +353,16 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   }, [areAllSeriesHidden, hiddenItems]);
 
   useEffect(() => {
+    if (onHiddenItems) {
+      const current = new Set(currentSeriesNames);
+
+      const filtered = hiddenItems.filter((name) => current.has(name));
+
+      onHiddenItems(filtered);
+    }
+  }, [currentSeriesNames]);
+
+  useEffect(() => {
     if (resetHiddenKey !== undefined) {
       onHiddenItems?.([]);
     }
