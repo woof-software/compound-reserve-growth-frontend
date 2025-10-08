@@ -4,12 +4,12 @@ import Line from '@/components/Charts/Line/Line';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { HistoricalExpensesMobileActions } from '@/entities/Insentive/HistoricalExpensesByNetwork/HistoricalExpensesMobileActions';
 import { customTooltipFormatter } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/customTooltipFormatter';
-import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import { useHistoricalExpensesChartSeries } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/useHistoricalExpensesChartSeries';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
+import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
@@ -92,7 +92,7 @@ const HistoricalExpensesByNetworks = (
       }}
     >
       <div className='flex flex-col justify-end gap-2 px-5 py-3 sm:flex-row md:px-0'>
-        <div className='flex flex-wrap items-center justify-end gap-2'>
+        <div className='hidden flex-wrap items-center justify-end gap-2 sm:flex'>
           <TabsGroup
             className={{
               container: 'w-full sm:w-auto',
@@ -145,6 +145,47 @@ const HistoricalExpensesByNetworks = (
                 })}
               />
             </span>
+          </div>
+        </div>
+        <div className='flex flex-wrap items-center justify-end gap-2 sm:hidden'>
+          <TabsGroup
+            className={{
+              container: 'w-full sm:w-auto',
+              list: 'w-full sm:w-auto'
+            }}
+            tabs={['Lend', 'Borrow', 'Total']}
+            value={activeModeTab}
+            onTabChange={setActiveModeTab}
+            disabled={isLoading}
+          />
+          <div className={'flex w-full items-center gap-2 sm:w-auto'}>
+            <TabsGroup
+              className={{
+                container: 'w-full sm:w-auto',
+                list: 'w-auto'
+              }}
+              tabs={['COMP', 'USD']}
+              value={activeViewTab}
+              onTabChange={setActiveViewTab}
+            />
+            <TabsGroup
+              className={{
+                container: 'w-full',
+                list: 'w-full'
+              }}
+              tabs={['D', 'W', 'M']}
+              value={barSize}
+              onTabChange={onBarSizeChange}
+              disabled={isLoading}
+            />
+            <HistoricalExpensesMobileActions
+              csvData={csvData}
+              activeModeTab={activeModeTab}
+              activeViewTab={activeViewTab}
+              barSize={barSize}
+              areAllSeriesHidden={areAllSeriesHidden}
+              onEyeClick={() => onAllSeriesHidden(!areAllSeriesHidden)}
+            />
           </div>
         </div>
       </div>
