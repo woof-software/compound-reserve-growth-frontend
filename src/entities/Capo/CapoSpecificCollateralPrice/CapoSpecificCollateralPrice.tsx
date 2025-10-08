@@ -206,7 +206,7 @@ export const CapoSpecificCollateralPrice = (
         />
       </div>
       <div className='block lg:hidden'>
-        <div className='flex flex-col-reverse items-center justify-end gap-2 px-5 py-3 sm:flex-row'>
+        <div className='flex w-full items-center justify-end gap-2 px-5 py-3 sm:w-auto'>
           <TabsGroup
             className={{
               container: 'w-full sm:w-auto',
@@ -216,27 +216,25 @@ export const CapoSpecificCollateralPrice = (
             value={barSize}
             onTabChange={onBarSizeChange}
           />
-          <div className='flex w-full items-center justify-end gap-2 sm:w-auto'>
-            <Button
-              onClick={onFilterOpen}
-              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-32 gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
-            >
-              <Icon
-                name='filters'
-                className='h-3.5 w-3.5 fill-none'
-              />
-              Filters
-            </Button>
-            <Button
-              onClick={onMoreOpen}
-              className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
-            >
-              <Icon
-                name='3-dots'
-                className='h-6 w-6 fill-none'
-              />
-            </Button>
-          </div>
+          <Button
+            onClick={onFilterOpen}
+            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-32 gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
+          >
+            <Icon
+              name='filters'
+              className='h-3.5 w-3.5 fill-none'
+            />
+            Filters
+          </Button>
+          <Button
+            onClick={onMoreOpen}
+            className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
+          >
+            <Icon
+              name='3-dots'
+              className='h-6 w-6 fill-none'
+            />
+          </Button>
         </div>
         <Filter
           isOpen={isFilterOpen}
