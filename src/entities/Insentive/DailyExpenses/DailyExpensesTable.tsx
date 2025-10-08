@@ -55,6 +55,16 @@ const getDailyColumns = (
       accessorFn: (row) => row.source,
       header: 'Market',
       enableSorting: true,
+      sortingFn: (a, b, id) => {
+        const aSource = a.getValue(id) as { market?: string };
+        const bSource = b.getValue(id) as { market?: string };
+
+        return String(aSource?.market ?? '').localeCompare(
+          String(bSource?.market ?? ''),
+          undefined,
+          { sensitivity: 'base' }
+        );
+      },
       cell: ({ row }) => (
         <AddressTooltip
           text={row.original.source.market!}
