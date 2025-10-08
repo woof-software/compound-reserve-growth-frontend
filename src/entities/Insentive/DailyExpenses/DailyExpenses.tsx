@@ -5,12 +5,13 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import { DailyExpensesMobileFilters } from '@/entities/Insentive/DailyExpenses/DailyExpensesMobileFilters';
 import { getCsvData } from '@/entities/Insentive/DailyExpenses/lib/getCsvData';
 import { normalizeTableData } from '@/entities/Insentive/DailyExpenses/lib/normalizeTableData';
+import { NormalizedTableData } from '@/entities/Insentive/DailyExpenses/lib/types';
 import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
 import {
   useFiltersSync,
   useFilterSyncSingle
 } from '@/shared/hooks/useFiltersSync';
-import { useSorting } from '@/shared/hooks/useSorting';
+import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
@@ -41,8 +42,14 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
   } = useChainMarketFilters(data, { filterByLatestDate: true });
 
   const normalizedTableData = normalizeTableData(filteredData, activeViewTab);
-  const { sortType, onKeySelect, onTypeSelect } = useSorting();
+  const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
+    useSorting<NormalizedTableData>('asc', null);
   const csvData = getCsvData(normalizedTableData);
+
+  const sortType: SortAdapter<NormalizedTableData> = {
+    type: sortDirection,
+    key: sortKey
+  };
 
   useFiltersSync(selectedOptions, setSelectedOptions, 'icscb', [
     'chain',

@@ -1,13 +1,17 @@
 import { CSVLink } from 'react-csv';
 
 import Filter, { FilterOptions } from '@/components/Filter/Filter';
+import { NormalizedTableData } from '@/entities/Insentive/DailyExpenses/lib/types';
 import { useModal } from '@/shared/hooks/useModal';
+import { SortAccessor, SortAdapter } from '@/shared/hooks/useSorting';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
+
+export type SortDirection = 'asc' | 'desc';
 
 interface CsvData {
   network: string;
@@ -21,37 +25,19 @@ interface CsvData {
 interface DailyExpensesMobileFiltersProps {
   csvData: CsvData[];
   filterOptions: () => FilterOptions[];
-  sortType: { key: string; type: string };
-  onKeySelect: (value: string) => void;
-  onTypeSelect: (value: string) => void;
+  sortType: SortAdapter<NormalizedTableData>;
+  onKeySelect: (key: keyof NormalizedTableData | null) => void;
+  onTypeSelect: (type: SortDirection) => void;
   onClearAll: () => void;
 }
 
-const sortColumns = [
-  {
-    accessorKey: 'network',
-    header: 'Network'
-  },
-  {
-    accessorKey: 'deployment',
-    header: 'Market'
-  },
-  {
-    accessorKey: 'lend',
-    header: 'Lend Incentive'
-  },
-  {
-    accessorKey: 'borrow',
-    header: 'Borrow Incentive'
-  },
-  {
-    accessorKey: 'total',
-    header: 'Total'
-  },
-  {
-    accessorKey: 'source',
-    header: 'Source'
-  }
+const sortColumns: SortAccessor<NormalizedTableData>[] = [
+  { accessorKey: 'network', header: 'Network' },
+  { accessorKey: 'market', header: 'Market' },
+  { accessorKey: 'lendIncentive', header: 'Lend Incentive' },
+  { accessorKey: 'borrowIncentive', header: 'Borrow Incentive' },
+  { accessorKey: 'total', header: 'Total' },
+  { accessorKey: 'source', header: 'Source' }
 ];
 
 export const DailyExpensesMobileFilters = (

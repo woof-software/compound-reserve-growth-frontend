@@ -1,32 +1,25 @@
+import * as React from 'react';
 import { useMemo } from 'react';
 
 import { AddressTooltip } from '@/components/AddressTooltip/AddressTooltip';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { NormalizedTableData } from '@/entities/Insentive/DailyExpenses/lib/types';
+import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
   defaultExplorer,
   explorers,
   formatLargeNumber
 } from '@/shared/lib/utils/utils';
-import { Source } from '@/shared/types/types';
 import { ClipboardButton } from '@/shared/ui/AnimationProvider/CopyButton/CopyButton';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import DrawerInfo from '@/shared/ui/DrawerInfo/DrawerInfo';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
-interface NormalizedTableData {
-  network: string;
-  market: string;
-  lendIncentive: number;
-  borrowIncentive: number;
-  total: number;
-  source: Source;
-}
-
 export interface DailyExpensesTableProps {
   tableData: NormalizedTableData[];
-  sortType: { key: string; type: string };
+  sortType: SortAdapter<NormalizedTableData>;
   activeViewTab: 'COMP' | 'USD';
 }
 
@@ -68,7 +61,7 @@ const getDailyColumns = (
       )
     },
     {
-      id: 'lend',
+      id: 'lendIncentive',
       accessorFn: (row) => row.lendIncentive,
       header: 'Lend Incentive',
       enableSorting: true,
@@ -81,7 +74,7 @@ const getDailyColumns = (
       )
     },
     {
-      id: 'borrow',
+      id: 'borrowIncentive',
       accessorFn: (row) => row.borrowIncentive,
       header: 'Borrow Incentive',
       enableSorting: true,
@@ -184,13 +177,20 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                   >
                     Network
                   </Text>
-                  <Text
-                    size='13'
-                    lineHeight='21'
-                    className='truncate'
-                  >
-                    {row.network}
-                  </Text>
+                  <div className='flex items-center gap-1'>
+                    <Icon
+                      name={row.network.toLowerCase() || 'not-found-icon'}
+                      className='h-4 w-4'
+                      folder='network'
+                    />
+                    <Text
+                      size='13'
+                      lineHeight='21'
+                      className='truncate'
+                    >
+                      {row.network}
+                    </Text>
+                  </div>
                 </div>
                 <div className='grid w-full'>
                   <Text
