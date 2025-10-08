@@ -8,10 +8,13 @@ export const customTooltipFormatter =
       ${Highcharts.dateFormat('%B %e, %Y', context.x)}
     </div>`;
 
+    const pointsSortedDesc = [...context.points].sort(
+      (a, b) => (b.y ?? 0) - (a.y ?? 0)
+    );
+
     const body = `<div class='flex flex-col gap-3'>
       ${
-        context.points
-          ?.reverse()
+        pointsSortedDesc
           .map(
             (point) =>
               `<div class="flex justify-between items-center gap-4">
