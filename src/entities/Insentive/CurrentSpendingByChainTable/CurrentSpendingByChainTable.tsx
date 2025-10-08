@@ -6,7 +6,7 @@ import { cn } from '@/shared/lib/classNames/classNames';
 import {
   capitalizeFirstLetter,
   formatNumber,
-  formatPrice
+  formatUSD
 } from '@/shared/lib/utils/utils';
 import { Source } from '@/shared/types/types';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
@@ -32,6 +32,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       header: 'Network',
       accessorFn: (row) => row.network,
       enableSorting: true,
+      size: 170,
       cell: ({ row }) => (
         <div className='flex items-center gap-3'>
           <Icon
@@ -63,7 +64,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       header: 'Value USD',
       enableSorting: true,
       cell: ({ row }) => (
-        <Text size='13'>{formatPrice(row.original.valueUsd)}</Text>
+        <Text size='13'>{formatUSD(row.original.valueUsd, 'compact')}</Text>
       )
     }
   ];
@@ -168,7 +169,7 @@ const CurrentSpendingByChainTable = ({
                       lineHeight='21'
                       className='truncate'
                     >
-                      {formatPrice(row.valueUsd, 1)}
+                      {formatUSD(row.valueUsd, 'compact')}
                     </Text>
                   </div>
                 </div>
@@ -177,7 +178,7 @@ const CurrentSpendingByChainTable = ({
           </>
         )}
       </MobileDataTable>
-      <div className='hidden w-full max-w-full lg:block lg:max-w-[400px]'>
+      <div className='hidden w-full max-w-full lg:block lg:max-w-[522px]'>
         <DataTable
           data={tableData}
           columns={SpendingByChainTableColumns}
