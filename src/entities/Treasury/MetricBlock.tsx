@@ -106,7 +106,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           isLoading={isLoading}
           className={{
             container: cn(
-              'flex h-auto min-h-auto min-w-[343px] flex-1 items-center rounded-b-none md:min-w-auto',
+              'flex h-auto min-h-auto min-w-auto flex-1 items-center rounded-b-none sm:min-w-[343px] md:min-w-auto',
               {
                 'min-h-[180px]': isLoading
               }
@@ -136,7 +136,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           isLoading={isLoading}
           className={{
             container: cn(
-              'border-secondary-26 flex h-auto min-h-auto min-w-[343px] flex-1 items-center rounded-none border-t-1 border-b-1 md:min-w-auto md:border-none',
+              'border-secondary-26 flex h-auto min-h-auto min-w-auto flex-1 items-center rounded-none border-t-1 border-b-1 sm:min-w-[343px] md:min-w-auto md:border-none',
               {
                 'min-h-[180px]': isLoading
               }
@@ -161,7 +161,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           isLoading={isLoading}
           className={{
             container: cn(
-              'border-b-secondary-26 flex h-auto min-h-auto min-w-[343px] flex-1 items-center rounded-b-none border-b-1 md:min-w-auto md:border-none',
+              'border-b-secondary-26 flex h-auto min-h-auto min-w-auto flex-1 items-center rounded-b-none border-b-1 sm:min-w-[343px] md:min-w-auto md:border-none',
               {
                 'min-h-[180px]': isLoading
               }
@@ -188,7 +188,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           isLoading={isLoading}
           className={{
             container: cn(
-              'border-b-secondary-26 flex h-auto min-h-auto min-w-[343px] flex-1 items-center rounded-t-none rounded-b-none border-b-1 md:min-w-auto md:border-none',
+              'border-b-secondary-26 flex h-auto min-h-auto min-w-auto flex-1 items-center rounded-t-none rounded-b-none border-b-1 sm:min-w-[343px] md:min-w-auto md:border-none',
               {
                 'min-h-[180px]': isLoading
               }
@@ -219,7 +219,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           isLoading={isLoading}
           className={{
             container: cn(
-              'flex h-auto min-h-auto min-w-[343px] flex-1 items-center rounded-t-none md:min-w-auto',
+              'flex h-auto min-h-auto min-w-auto flex-1 items-center rounded-t-none sm:min-w-[343px] md:min-w-auto',
               {
                 'min-h-[180px]': isLoading
               }
