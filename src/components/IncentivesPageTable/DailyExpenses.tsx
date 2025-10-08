@@ -1,123 +1,141 @@
-import * as React from 'react';
 import { useMemo } from 'react';
 
+import { AddressTooltip } from '@/components/AddressTooltip/AddressTooltip';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
   defaultExplorer,
   explorers,
-  formatLargeNumber,
-  formatPrice
+  formatLargeNumber
 } from '@/shared/lib/utils/utils';
+import { Source } from '@/shared/types/types';
 import { ClipboardButton } from '@/shared/ui/AnimationProvider/CopyButton/CopyButton';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import DrawerInfo from '@/shared/ui/DrawerInfo/DrawerInfo';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
-import { AddressTooltip } from '../AddressTooltip/AddressTooltip';
-
-export type TreasuryBalanceByNetworkType = {
-  symbol: string;
-  chain: string;
-  market: string | null;
-  qty: number;
-  value: number;
-  price: number;
-  source: string;
-  address: string;
-};
-
-export interface TreasuryHoldingsProps {
-  tableData: TreasuryBalanceByNetworkType[];
-
-  sortType: { key: string; type: string };
+interface NormalizedTableData {
+  network: string;
+  market: string;
+  lendIncentive: number;
+  borrowIncentive: number;
+  total: number;
+  source: Source;
 }
 
-const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
-  {
-    id: 'symbol',
-    accessorFn: (row) => row.symbol,
-    header: 'Network',
-    enableSorting: true,
-    size: 168,
-    cell: ({ row }) => (
-      <div className='flex items-center gap-3'>
-        <Icon
-          name={row.original.symbol || 'not-found-icon'}
-          className='h-6 w-6'
-          folder='collaterals'
-        />
-        <Text
-          size='13'
-          weight='500'
-        >
-          {row.original.symbol}
-        </Text>
-      </div>
-    )
-  },
-  {
-    id: 'market',
-    accessorFn: (row) => row.market,
-    header: 'Market',
-    enableSorting: true,
-    cell: ({ row }) => (
-      <Text size='13'>
-        {row.original.market === 'no market' ? ' - ' : row.original.market}
-      </Text>
-    )
-  },
-  {
-    id: 'qty',
-    accessorFn: (row) => row.qty,
-    header: 'Lend Incentive',
-    enableSorting: true,
-    cell: ({ row }) => (
-      <Text size='13'>{formatLargeNumber(row.original.qty, 1)}</Text>
-    )
-  },
-  {
-    id: 'value',
-    accessorFn: (row) => row.value,
-    header: 'Borrow Incentive',
-    enableSorting: true,
-    cell: ({ row }) => (
-      <Text size='13'>{formatPrice(row.original.value, 1)}</Text>
-    )
-  },
-  {
-    id: 'price',
-    accessorFn: (row) => row.price,
-    header: 'Total',
-    enableSorting: true,
-    cell: ({ row }) => (
-      <Text size='13'>{formatPrice(row.original.price, 1)}</Text>
-    )
-  },
-  {
-    id: 'source',
-    accessorFn: (row) => row.source,
-    header: 'Source',
-    enableSorting: true,
-    size: 120,
-    cell: ({ row }) => (
-      <AddressTooltip
-        text={row.original.source}
-        address={row.original.address}
-        chain={row.original.chain}
-      />
-    )
-  }
-];
+export interface DailyExpensesTableProps {
+  tableData: NormalizedTableData[];
+  sortType: { key: string; type: string };
+  activeViewTab: 'COMP' | 'USD';
+}
 
-const DailyExpensesTable = ({ tableData, sortType }: TreasuryHoldingsProps) => {
+const getDailyColumns = (
+  view: 'COMP' | 'USD'
+): ExtendedColumnDef<NormalizedTableData>[] => {
+  return [
+    {
+      id: 'network',
+      accessorFn: (row) => row.network,
+      header: 'Network',
+      enableSorting: true,
+      size: 168,
+      cell: ({ row }) => (
+        <div className='flex items-center gap-3'>
+          <Icon
+            name={row.original.network || 'not-found-icon'}
+            className='h-6 w-6'
+            folder='network'
+          />
+          <Text
+            size='13'
+            weight='500'
+          >
+            {row.original.network}
+          </Text>
+        </div>
+      )
+    },
+    {
+      id: 'market',
+      accessorFn: (row) => row.market,
+      header: 'Market',
+      enableSorting: true,
+      cell: ({ row }) => (
+        <Text size='13'>
+          {row.original.market === 'no market' ? ' - ' : row.original.market}
+        </Text>
+      )
+    },
+    {
+      id: 'lend',
+      accessorFn: (row) => row.lendIncentive,
+      header: 'Lend Incentive',
+      enableSorting: true,
+      cell: ({ row }) => (
+        <Text size='13'>
+          {view === 'USD'
+            ? `$${formatLargeNumber(row.original.lendIncentive, 2)}`
+            : formatLargeNumber(row.original.lendIncentive, 2)}
+        </Text>
+      )
+    },
+    {
+      id: 'borrow',
+      accessorFn: (row) => row.borrowIncentive,
+      header: 'Borrow Incentive',
+      enableSorting: true,
+      cell: ({ row }) => (
+        <Text size='13'>
+          {view === 'USD'
+            ? `$${formatLargeNumber(row.original.borrowIncentive, 2)}`
+            : formatLargeNumber(row.original.borrowIncentive, 2)}
+        </Text>
+      )
+    },
+    {
+      id: 'total',
+      accessorFn: (row) => row.total,
+      header: 'Total',
+      enableSorting: true,
+      cell: ({ row }) => (
+        <Text size='13'>
+          {view === 'USD'
+            ? `$${formatLargeNumber(row.original.total, 2)}`
+            : formatLargeNumber(row.original.total, 2)}
+        </Text>
+      )
+    },
+    {
+      id: 'source',
+      accessorFn: (row) => row.source,
+      header: 'Source',
+      enableSorting: true,
+      align: 'right',
+      size: 120,
+      cell: ({ row }) => (
+        <AddressTooltip
+          className={'justify-end'}
+          text={row.original.source.market!}
+          address={row.original.source.address}
+          chain={row.original.source.network}
+        />
+      )
+    }
+  ];
+};
+
+const DailyExpensesTable = (props: DailyExpensesTableProps) => {
+  const { tableData, sortType, activeViewTab } = props;
+
+  const dailyColumns = getDailyColumns(activeViewTab);
+
   const mobileTableData = useMemo(() => {
     if (!sortType?.key) {
       return tableData;
     }
 
-    const key = sortType.key as keyof TreasuryBalanceByNetworkType;
+    const key = sortType.key as keyof NormalizedTableData;
     return [...tableData].sort((a, b) => {
       const aVal = a[key];
       const bVal = b[key];
@@ -142,14 +160,14 @@ const DailyExpensesTable = ({ tableData, sortType }: TreasuryHoldingsProps) => {
         {(dataRows) =>
           dataRows.map((row, index) => {
             const explorerUrl =
-              (row.chain && explorers[row.chain.toLowerCase()]) ||
+              (row.source && explorers[row.source.network.toLowerCase()]) ||
               defaultExplorer;
 
-            const fullExplorerLink = `${explorerUrl}${row.address}`;
+            const fullExplorerLink = `${explorerUrl}${row.source.address}`;
 
             return (
               <div
-                key={row.symbol + index}
+                key={`${row.network} + ${row.source.address}`}
                 className={cn(
                   'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
                   {
@@ -171,7 +189,7 @@ const DailyExpensesTable = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                     lineHeight='21'
                     className='truncate'
                   >
-                    {row.chain}
+                    {row.network}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -205,7 +223,9 @@ const DailyExpensesTable = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatLargeNumber(row.qty, 1)}
+                    {activeViewTab === 'USD'
+                      ? `$${formatLargeNumber(row.lendIncentive, 2)}`
+                      : formatLargeNumber(row.lendIncentive, 2)}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -222,7 +242,9 @@ const DailyExpensesTable = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatPrice(row.value, 1)}
+                    {activeViewTab === 'USD'
+                      ? `$${formatLargeNumber(row.borrowIncentive, 2)}`
+                      : formatLargeNumber(row.borrowIncentive, 2)}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -239,7 +261,9 @@ const DailyExpensesTable = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatPrice(row.price, 1)}
+                    {activeViewTab === 'USD'
+                      ? `$${formatLargeNumber(row.total, 2)}`
+                      : formatLargeNumber(row.total, 2)}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -259,16 +283,16 @@ const DailyExpensesTable = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                           weight='500'
                           className='text-primary-11 mb-5 w-full !text-center break-all'
                         >
-                          {row.source}
+                          {row.source.market}
                         </Text>
                         <div className='flex w-full items-center justify-between'>
                           <Text
                             size='14'
                             className='text-primary-11'
                           >
-                            {row.address}
+                            {row.source.address}
                           </Text>
-                          <ClipboardButton textToCopy={row.address} />
+                          <ClipboardButton textToCopy={row.source.address} />
                         </div>
                         <div className='flex w-full items-center justify-between'>
                           <Text
@@ -297,7 +321,7 @@ const DailyExpensesTable = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                       lineHeight='21'
                       className='w-fit max-w-[60px] truncate border-b border-dotted border-gray-500'
                     >
-                      {row.source}
+                      {row.source.market}
                     </Text>
                   </DrawerInfo>
                 </div>
@@ -308,7 +332,7 @@ const DailyExpensesTable = ({ tableData, sortType }: TreasuryHoldingsProps) => {
       </MobileDataTable>
       <DataTable
         data={tableData}
-        columns={treasuryColumns}
+        columns={dailyColumns}
         enableSorting
         enablePagination={tableData.length > 10}
         pageSize={10}

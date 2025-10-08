@@ -1,6 +1,7 @@
-import FeesGeneratedIncentives from '@/entities/Insentive/FeesGeneratedIncentives/FeesGeneratedIncentives';
 import { useState } from 'react';
 
+import DailyExpenses from '@/entities/Insentive/DailyExpenses/DailyExpenses';
+import FeesGeneratedIncentives from '@/entities/Insentive/FeesGeneratedIncentives/FeesGeneratedIncentives';
 import HistoricalExpensesByNetworks from '@/entities/Insentive/HistoricalExpensesByNetwork/HistoricalExpensesByNetworks';
 import MetricBlock from '@/entities/Insentive/MetricBlock/MetricBlock';
 import CurrentSpendingByChainBlock from '@/features/Insentive/CurrentSpendingByChain';
@@ -80,11 +81,11 @@ const IncentivePage = () => {
           isError={incentivesQuery?.isError}
           isLoading={incentivesQuery?.isPending}
         />
-        {/*<DailyExpenses*/}
-        {/*  data={uniqData}*/}
-        {/*  isError={isError}*/}
-        {/*  isLoading={isLoading}*/}
-        {/*/>*/}
+        <DailyExpenses
+          data={combinedIncentivesData}
+          isError={incentivesQuery?.isError}
+          isLoading={incentivesQuery?.isPending}
+        />
       </div>
     </div>
   );
