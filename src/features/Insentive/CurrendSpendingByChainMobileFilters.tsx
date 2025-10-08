@@ -53,6 +53,10 @@ export const CurrendSpendingByChainMobileFilters = (
     onClearFilters
   } = props;
 
+  const mobileFilterOptions = filterOptions().filter(
+    (el: any) => el.id !== 'market'
+  );
+
   const {
     isOpen: isFilterOpen,
     onOpenModal: onFilterOpen,
@@ -135,7 +139,7 @@ export const CurrendSpendingByChainMobileFilters = (
       />
       <Filter
         isOpen={isFilterOpen}
-        filterOptions={filterOptions()}
+        filterOptions={mobileFilterOptions}
         onClose={onFilterClose}
         onClearAll={onClearFilters}
       />
