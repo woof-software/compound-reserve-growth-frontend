@@ -39,7 +39,7 @@ export const currentInitiativesColumns: SortAccessor<RunawayInitiativeRecord>[] 
     },
     {
       accessorKey: 'discipline',
-      header: 'discipline'
+      header: 'Discipline'
     },
     {
       accessorKey: 'token',
