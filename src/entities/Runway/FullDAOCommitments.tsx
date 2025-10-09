@@ -35,7 +35,7 @@ export const fullDAOCommitmentsColumns: SortAccessor<FullDAOCommitmentRow>[] = [
   },
   {
     accessorKey: 'amount',
-    header: 'Amount (Qty)'
+    header: 'Total Amount'
   },
   {
     accessorKey: 'paidAmount',
