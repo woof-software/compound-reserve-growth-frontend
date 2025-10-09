@@ -59,6 +59,14 @@ export const treasuryBalanceByNetworkColumns: SortAccessor<TreasuryBalanceByNetw
       header: 'Symbol'
     },
     {
+      accessorKey: 'chain',
+      header: 'Chain'
+    },
+    {
+      accessorKey: 'market',
+      header: 'Market'
+    },
+    {
       accessorKey: 'qty',
       header: 'QTY'
     },
@@ -67,8 +75,8 @@ export const treasuryBalanceByNetworkColumns: SortAccessor<TreasuryBalanceByNetw
       header: 'Value'
     },
     {
-      accessorKey: 'market',
-      header: 'Market'
+      accessorKey: 'price',
+      header: 'Price'
     },
     {
       accessorKey: 'source',
