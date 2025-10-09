@@ -19,8 +19,7 @@ import Text from '@/shared/ui/Text/Text';
 const sortColumns: SortAccessor<SpendingByChainTableColumns>[] = [
   { accessorKey: 'network', header: 'Network' },
   { accessorKey: 'valueComp', header: 'Value COMP' },
-  { accessorKey: 'valueUsd', header: 'Value USD' },
-  { accessorKey: 'source', header: 'Market' }
+  { accessorKey: 'valueUsd', header: 'Value USD' }
 ];
 
 interface CurrentSpendingByChainMobileFiltersProps {
