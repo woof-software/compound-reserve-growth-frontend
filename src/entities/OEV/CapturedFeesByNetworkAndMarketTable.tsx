@@ -15,6 +15,7 @@ export type TreasuryBalanceByNetworkType = {
   value: number;
   source: string;
   market: string;
+  price: number;
   address: string;
   chain: string;
 };
