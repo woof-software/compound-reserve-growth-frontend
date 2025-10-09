@@ -188,6 +188,7 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                     <Text
                       size='13'
                       lineHeight='21'
+                      weight='500'
                       className='truncate'
                     >
                       {capitalizeFirstLetter(row.network)}
