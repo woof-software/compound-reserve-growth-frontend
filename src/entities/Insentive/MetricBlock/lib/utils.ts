@@ -7,39 +7,29 @@ export const getTotalMetricValues = (
   let filteredData: CombinedIncentivesData[] = [];
 
   if (activeTab === 'Day') {
-    const now = new Date();
-
-    const today = new Date(
-      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
-    );
-
-    const tomorrow = new Date(
-      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() + 1)
-    );
-
-    const todayTs = today.getTime() / 1000;
-    const tomorrowTs = tomorrow.getTime() / 1000;
+    const now = Date.now() / 1000;
+    const twentyFourHoursAgo = now - 36 * 60 * 60;
 
     const latestMap = new Map();
 
     for (const item of data) {
-      if (item.date < todayTs || item.date > tomorrowTs) continue;
+      if (item.date < twentyFourHoursAgo || item.date > now) continue;
 
       latestMap.set(item.source.id, item);
     }
 
     filteredData = Array.from(latestMap.values());
   } else if (activeTab === 'Year') {
-    const currentYear = new Date().getFullYear();
-
-    const startOfYear = new Date(Date.UTC(currentYear, 0, 1));
-    const endOfYear = new Date(Date.UTC(currentYear + 1, 0, 1));
-
-    const startOfYearTs = startOfYear.getTime() / 1000;
-    const endOfYearTs = endOfYear.getTime() / 1000;
-
+    const now = new Date();
+    now.setHours(23, 59, 59);
+    const targetDate = new Date();
+    targetDate.setHours(0, 0, 0);
+    targetDate.setDate(now.getDate() - 365);
+    const targetTs =
+      targetDate.getTime() / 1000 - targetDate.getTimezoneOffset() * 60;
+    const nowTs = now.getTime() / 1000 - now.getTimezoneOffset() * 60;
     filteredData = data.filter((item) => {
-      return item.date >= startOfYearTs && item.date <= endOfYearTs;
+      return item.date >= targetTs && item.date <= nowTs;
     });
   }
 
