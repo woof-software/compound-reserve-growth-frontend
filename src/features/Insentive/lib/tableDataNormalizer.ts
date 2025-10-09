@@ -33,7 +33,7 @@ export const tableDataNormalizer = (
     };
 
     const normalizedTab = activeTab.toLowerCase() as TabType;
-    return values[normalizedTab] || values.total;
+    return values[normalizedTab];
   };
 
   const latestDate = Math.max(

@@ -17,7 +17,7 @@ export const getChartData = (
     };
 
     const normalizedTab = activeTab?.toLowerCase() as TabType;
-    return values[normalizedTab] || values.total;
+    return values[normalizedTab];
   };
 
   const groupedByNetwork: Record<string, number> = data.reduce(

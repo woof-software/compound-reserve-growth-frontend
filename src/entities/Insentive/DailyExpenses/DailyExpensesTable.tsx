@@ -11,7 +11,8 @@ import {
   defaultExplorer,
   explorers,
   formatLargeNumber,
-  formatUSD
+  formatUSD,
+  sliceAddress
 } from '@/shared/lib/utils/utils';
 import { ClipboardButton } from '@/shared/ui/AnimationProvider/CopyButton/CopyButton';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
@@ -188,6 +189,7 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                     <Text
                       size='13'
                       lineHeight='21'
+                      weight='500'
                       className='truncate'
                     >
                       {capitalizeFirstLetter(row.network)}
@@ -218,7 +220,7 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                             size='14'
                             className='text-primary-11'
                           >
-                            {row.source.address}
+                            {sliceAddress(row.source.address)}
                           </Text>
                           <ClipboardButton textToCopy={row.source.address} />
                         </div>
