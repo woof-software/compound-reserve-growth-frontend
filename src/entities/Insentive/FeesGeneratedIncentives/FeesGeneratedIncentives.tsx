@@ -58,7 +58,7 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
     barSize,
     onBarSizeChange
   );
-  useFilterSyncSingle('FeesGeneratedIncentivesFees', isFeesOnly, setIsFeesOnly);
+  useFilterSyncSingle('FeesGeneratedRevenueOnly', isFeesOnly, setIsFeesOnly);
 
   const chartSeries = getGeneratedIncentivesChartSeries(filteredData);
 
@@ -134,7 +134,7 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
             disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
           />
           <Switch
-            label='Fees Only'
+            label='Revenue Only'
             positionLabel='left'
             checked={isFeesOnly}
             onCheckedChange={setIsFeesOnly}
