@@ -193,7 +193,7 @@ const HistoricalExpensesByNetworks = (
         <NoDataPlaceholder isHideButton={true} />
       ) : (
         <Line
-          key={`${groupBy}`}
+          key={groupBy}
           data={chartSeries}
           groupBy={groupBy}
           aggregatedSeries={aggregatedSeries}

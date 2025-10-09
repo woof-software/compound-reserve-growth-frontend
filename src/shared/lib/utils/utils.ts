@@ -507,6 +507,30 @@ export const removeDuplicates = <T>(array: T[], key: keyof T): T[] => {
   });
 };
 
+export const startOfUTCDay = (t: number) => {
+  const d = new Date(t);
+
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+};
+
+export const startOfUTCWeekMon = (t: number) => {
+  const d = new Date(t);
+
+  const weekday = d.getUTCDay();
+
+  const shift = (weekday + 6) % 7;
+
+  const dayStart = startOfUTCDay(t);
+
+  return dayStart - shift * 24 * 60 * 60 * 1000;
+};
+
+export const startOfUTCMonth = (t: number) => {
+  const d = new Date(t);
+
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
+};
+
 /**
  * A no-operation function that performs no actions and returns undefined.
  * Typically used as a placeholder or default callback.
