@@ -355,7 +355,6 @@ const CollateralsPriceTable = ({
         enableSorting
         enablePagination={tableData.length > 10}
         pageSize={10}
-        containerTableClassName='min-h-[518px]'
         className={cn('hidden flex-col justify-between lg:flex', {
           'min-h-[565px]': tableData.length > 10
         })}
