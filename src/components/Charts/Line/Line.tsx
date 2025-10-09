@@ -495,6 +495,30 @@ const LineChart: FC<LineChartProps> = ({
     }
   }, [resetHiddenKey]);
 
+  useEffect(() => {
+    const chart = chartRef.current?.chart;
+
+    if (!chart) return;
+
+    if (areAllSeriesHidden) {
+      setHiddenItems(currentSeriesNames);
+
+      chart.series.forEach((s) => {
+        if (s.visible) s.setVisible(false, false);
+      });
+
+      chart.redraw();
+    } else {
+      setHiddenItems([]);
+
+      chart.series.forEach((s) => {
+        if (!s.visible) s.setVisible(true, false);
+      });
+
+      chart.redraw();
+    }
+  }, [areAllSeriesHidden, currentSeriesNames, chartRef]);
+
   return (
     <div
       className={cn(
@@ -518,7 +542,7 @@ const LineChart: FC<LineChartProps> = ({
           allowChartUpdate
           containerProps={{
             style: {
-              display: !areAllSeriesHidden ? 'block' : 'none',
+              display: 'block',
               width: '100%',
               height: '100%',
               touchAction: 'none',
@@ -551,9 +575,7 @@ const LineChart: FC<LineChartProps> = ({
           </View.Condition>
         </div>
       </div>
-      <View.Condition
-        if={Boolean(isLegendEnabled && !areAllSeriesHidden && data.length > 1)}
-      >
+      <View.Condition if={Boolean(isLegendEnabled && data.length > 1)}>
         <div className='mx-5 block md:mx-0 lg:hidden'>
           <div
             className={cn(
