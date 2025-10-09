@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
 import { CSVLink } from 'react-csv';
 
-import Filter from '@/components/Filter/Filter';
+import Filter, { FilterOptions } from '@/components/Filter/Filter';
 import { SpendingByChainTableColumns } from '@/entities/Insentive/CurrentSpendingByChainTable/CurrentSpendingByChainTable';
 import { useModal } from '@/shared/hooks/useModal';
 import {
@@ -22,23 +22,24 @@ const sortColumns: SortAccessor<SpendingByChainTableColumns>[] = [
   { accessorKey: 'valueUsd', header: 'Value USD' }
 ];
 
+interface CsvData {
+  network: string;
+  valueComp: number;
+  valueUsd: number;
+}
+
 interface CurrentSpendingByChainMobileFiltersProps {
   activeTab: string;
   setActiveTab: Dispatch<SetStateAction<string>>;
   onKeySelect: (key: keyof SpendingByChainTableColumns | null) => void;
   onTypeSelect: (type: SortDirection) => void;
   sortType: SortAdapter<SpendingByChainTableColumns>;
-  csvData: {
-    network: string;
-    valueComp: number;
-    valueUsd: number;
-    source: string;
-  };
-  filterOptions: any;
-  onClearFilters: any;
+  csvData: CsvData[];
+  filterOptions: () => FilterOptions[];
+  onClearFilters: () => void;
 }
 
-export const CurrendSpendingByChainMobileFilters = (
+export const CurrentSpendingByChainMobileFilters = (
   props: CurrentSpendingByChainMobileFiltersProps
 ) => {
   const {
@@ -157,7 +158,6 @@ export const CurrendSpendingByChainMobileFilters = (
         <div className='flex flex-col gap-1.5'>
           <div className='px-3 py-2'>
             <CSVLink
-              // @ts-expect-error TODO fix csv data type
               data={csvData}
               filename={'Incentive_Current_Spending_By_Chain'}
               onClick={onMoreClose}

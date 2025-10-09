@@ -7,7 +7,7 @@ export const getChartData = (
   data: CombinedIncentivesData[],
   activeTab: string
 ) => {
-  const getTabValue = (item: CombinedIncentivesData) => {
+  const getTabValue = (item: CombinedIncentivesData): number => {
     const { valueSupply = 0, valueBorrow = 0 } = item?.spends || {};
 
     const values = {
@@ -20,14 +20,17 @@ export const getChartData = (
     return values[normalizedTab];
   };
 
-  const groupedByNetwork = data.reduce((acc: any, item: any) => {
-    const network = item.source.network;
-    const value = getTabValue(item);
+  const groupedByNetwork: Record<string, number> = data.reduce(
+    (acc: Record<string, number>, item: CombinedIncentivesData) => {
+      const network = item.source.network;
+      const value = getTabValue(item);
 
-    acc[network] = (acc[network] || 0) + value;
+      acc[network] = (acc[network] || 0) + value;
 
-    return acc;
-  }, {});
+      return acc;
+    },
+    {}
+  );
 
   return Object.entries(groupedByNetwork)
     .map(([network, value], index) => ({

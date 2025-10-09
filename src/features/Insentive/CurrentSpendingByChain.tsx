@@ -5,7 +5,7 @@ import CurrentSpendingByChainTable, {
   SpendingByChainTableColumns
 } from '@/entities/Insentive/CurrentSpendingByChainTable/CurrentSpendingByChainTable';
 import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
-import { CurrendSpendingByChainMobileFilters } from '@/features/Insentive/CurrendSpendingByChainMobileFilters';
+import { CurrentSpendingByChainMobileFilters } from '@/features/Insentive/CurrentSpendingByChainMobileFilters';
 import { getChartData } from '@/features/Insentive/lib/getChartData';
 import { getCsvData } from '@/features/Insentive/lib/getCsvData';
 import { tableDataNormalizer } from '@/features/Insentive/lib/tableDataNormalizer';
@@ -36,7 +36,6 @@ const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
   const chartData = getChartData(filteredData, activeTab);
   const tableData = tableDataNormalizer(filteredData, activeTab);
   const csvData = getCsvData(tableData);
-
   const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
     useSorting<SpendingByChainTableColumns>('asc', null);
 
@@ -84,11 +83,10 @@ const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
           filename={'Incentive_Current_Spending_By_Chain'}
         />
       </div>
-      <CurrendSpendingByChainMobileFilters
+      <CurrentSpendingByChainMobileFilters
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         sortType={sortType}
-        //@ts-expect-error TODO: fix csv data error
         csvData={csvData}
         onKeySelect={onKeySelect}
         onTypeSelect={onTypeSelect}
@@ -98,7 +96,6 @@ const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
       <View.Condition if={Boolean(!isLoading && !isError)}>
         <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
           <CryptoChart
-            //@ts-expect-error TODO: fix chart data error
             data={chartData}
             onClear={clearAllFilters}
           />
