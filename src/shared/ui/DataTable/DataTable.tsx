@@ -219,7 +219,12 @@ const DataTable = <T,>({
                   colSpan={columns.length}
                   className='text-center'
                 >
-                  {emptyMessage}
+                  <Text
+                    size='12'
+                    className='text-primary-14'
+                  >
+                    {emptyMessage}
+                  </Text>
                 </td>
               </tr>
             ) : (

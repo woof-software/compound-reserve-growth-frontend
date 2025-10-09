@@ -16,7 +16,6 @@ const MetricBlock = (props: MetricBlockProps) => {
   const { data, isLoading, activeTab } = props;
   const { theme } = useTheme();
   const metrics = getTotalMetricValues(data, activeTab);
-
   return (
     <div className='flex flex-col gap-2.5 lg:gap-5'>
       <div className='flex flex-col gap-2.5 md:flex-row lg:gap-5'>
