@@ -9,6 +9,8 @@ import {
   formatLargeNumber
 } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
+import DrawerInfo from '@/shared/ui/DrawerInfo/DrawerInfo';
+import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import { TextTooltip } from '@/shared/ui/TextTooltip/TextTooltip';
 
@@ -207,177 +209,212 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
     <>
       <MobileDataTable tableData={mobileTableData}>
         {(dataRows) =>
-          dataRows.map((row, index) => (
-            <div
-              key={row.token + index}
-              className={cn(
-                'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
-                {
-                  'border-none': index === dataRows.length - 1
-                }
-              )}
-            >
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Recipient
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.recipient}
-                </Text>
+          dataRows.map((row, index) => {
+            return (
+              <div
+                key={row.token + index}
+                className={cn(
+                  'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                  {
+                    'border-none': index === dataRows.length - 1
+                  }
+                )}
+              >
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Recipient
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.recipient}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Discipline
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.discipline}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Status
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {capitalizeFirstLetter(row.status, '-')}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Total Amount
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.amount ? `$${formatLargeNumber(row.amount, 2)}` : '-'}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Paid Amount
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.amount
+                      ? `$${formatLargeNumber(row.paidAmount, 2)}`
+                      : '-'}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    % Paid
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.percentagePaid
+                      ? `${(row.percentagePaid * 100).toFixed(2)}%`
+                      : '-'}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Payment Type
+                  </Text>
+                  <DrawerInfo
+                    content={
+                      <div className='flex w-full flex-col items-start gap-4'>
+                        <Text
+                          size='17'
+                          weight='500'
+                          className='text-primary-11 mb-5 w-full !text-center break-all'
+                        >
+                          {row.paymentType}
+                        </Text>
+                        <div className='flex w-full items-center justify-between'>
+                          <Text
+                            size='14'
+                            className='text-primary-11'
+                          >
+                            View Proposal
+                          </Text>
+                          <a
+                            href={row.proposalLink}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='text-primary-11 flex h-5 w-5 items-center justify-center'
+                          >
+                            <Icon
+                              name={'arrow-link'}
+                              className='h-4.5 w-3 text-[#7A8A99]'
+                            />
+                          </a>
+                        </div>
+                      </div>
+                    }
+                  >
+                    <Text
+                      size='13'
+                      lineHeight='21'
+                      className='w-fit max-w-[60px] truncate border-b border-dotted border-gray-500'
+                    >
+                      {row.paymentType}
+                    </Text>
+                  </DrawerInfo>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Start Date
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.startDate ? formatDateWithOrdinal(row.startDate) : '-'}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    End Date
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.streamEndDate
+                      ? formatDateWithOrdinal(row.streamEndDate)
+                      : '-'}
+                  </Text>
+                </div>
               </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Discipline
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.discipline}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Status
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {capitalizeFirstLetter(row.status, '-')}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Total Amount
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.amount ? `$${formatLargeNumber(row.amount, 2)}` : '-'}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Paid Amount
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.amount
-                    ? `$${formatLargeNumber(row.paidAmount, 2)}`
-                    : '-'}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  % Paid
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.percentagePaid
-                    ? `${(row.percentagePaid * 100).toFixed(2)}%`
-                    : '-'}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Payment Type
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.paymentType}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Start Date
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.startDate ? formatDateWithOrdinal(row.startDate) : '-'}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  End Date
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.streamEndDate
-                    ? formatDateWithOrdinal(row.streamEndDate)
-                    : '-'}
-                </Text>
-              </div>
-            </div>
-          ))
+            );
+          })
         }
       </MobileDataTable>
       <div className='hidden w-full max-w-full lg:block'>
