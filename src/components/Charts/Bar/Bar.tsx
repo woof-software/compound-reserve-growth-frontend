@@ -15,7 +15,6 @@ interface ChartData {
 
 interface CryptoChartProps {
   data: ChartData[];
-
   onClear: () => void;
 }
 

@@ -5,10 +5,10 @@ import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
   capitalizeFirstLetter,
+  formatLargeNumber,
   formatNumber,
   formatUSD
 } from '@/shared/lib/utils/utils';
-import { Source } from '@/shared/types/types';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -17,7 +17,6 @@ export type SpendingByChainTableColumns = {
   network: string;
   valueComp: number;
   valueUsd: number;
-  source: Source;
 };
 
 interface CurrentSpendingByChainTableProps {
@@ -36,7 +35,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       cell: ({ row }) => (
         <div className='flex items-center gap-3'>
           <Icon
-            name={row.original.source.network || 'not-found-icon'}
+            name={row.original.network || 'not-found-icon'}
             className='h-6 w-6'
             folder='network'
           />
@@ -44,7 +43,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
             size='13'
             weight='500'
           >
-            {capitalizeFirstLetter(row.original.source.network)}
+            {capitalizeFirstLetter(row.original.network)}
           </Text>
         </div>
       )
@@ -54,8 +53,14 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       accessorFn: (row) => row.valueComp,
       header: 'Value COMP',
       enableSorting: true,
+      align: 'right',
       cell: ({ row }) => (
-        <Text size='13'>{formatNumber(row.original.valueComp, '')}</Text>
+        <Text
+          size='13'
+          className={'flex justify-end'}
+        >
+          {formatLargeNumber(row.original.valueComp, 2)}
+        </Text>
       )
     },
     {
@@ -63,8 +68,14 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       accessorFn: (row) => row.valueUsd,
       header: 'Value USD',
       enableSorting: true,
+      align: 'right',
       cell: ({ row }) => (
-        <Text size='13'>{formatUSD(row.original.valueUsd, 'compact')}</Text>
+        <Text
+          className={'flex justify-end'}
+          size='13'
+        >
+          {formatUSD(row.original.valueUsd, 'compact')}
+        </Text>
       )
     }
   ];
@@ -106,7 +117,7 @@ const CurrentSpendingByChainTable = ({
             {dataRows.map((row, index) => {
               return (
                 <div
-                  key={`${row.source.assetId} + ${row.source.address}`}
+                  key={`${row.network} + ${row.valueComp}`}
                   className={cn(
                     'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
                     {
@@ -125,7 +136,7 @@ const CurrentSpendingByChainTable = ({
                     </Text>
                     <div className='flex items-center gap-1'>
                       <Icon
-                        name={row.source.network || 'not-found-icon'}
+                        name={row.network || 'not-found-icon'}
                         className='h-4 w-4'
                         folder='network'
                       />
@@ -134,7 +145,7 @@ const CurrentSpendingByChainTable = ({
                         lineHeight='21'
                         className='truncate'
                       >
-                        {capitalizeFirstLetter(row.source.network)}
+                        {capitalizeFirstLetter(row.network)}
                       </Text>
                     </div>
                   </div>

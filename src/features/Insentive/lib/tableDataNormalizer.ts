@@ -1,5 +1,9 @@
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
-
+type NormalizedData = {
+  network: string;
+  valueComp: number;
+  valueUsd: number;
+};
 type TabType = 'lend' | 'borrow' | 'total';
 
 export const tableDataNormalizer = (
@@ -38,14 +42,23 @@ export const tableDataNormalizer = (
 
   return data
     .filter((item: { date: number }) => item.date === latestDate)
-    .map((item) => {
-      const { usd, comp } = getTabValues(item);
+    .reduce((acc, currentItem) => {
+      const { usd, comp } = getTabValues(currentItem);
+      const network = currentItem.source.network;
 
-      return {
-        network: item.source.network,
-        valueComp: comp,
-        valueUsd: usd,
-        source: item.source
-      };
-    });
+      const existing = acc.find((item) => item.network === network);
+
+      if (existing) {
+        existing.valueComp += comp;
+        existing.valueUsd += usd;
+      } else {
+        acc.push({
+          network: network,
+          valueComp: comp,
+          valueUsd: usd
+        });
+      }
+
+      return acc;
+    }, [] as NormalizedData[]);
 };
