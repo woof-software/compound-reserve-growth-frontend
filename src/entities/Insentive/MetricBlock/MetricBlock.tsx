@@ -140,7 +140,7 @@ const MetricBlock = (props: MetricBlockProps) => {
           />
         </Card>
         <Card
-          title='Total fees incentives'
+          title='Total revenue granted'
           isLoading={isLoading}
           className={{
             container: 'max-w-full min-w-64',
