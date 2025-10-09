@@ -48,9 +48,6 @@ function aggregateByBarSize(
 
   const map = new Map<number, number>();
 
-  console.log('map=>', map);
-  console.log('sorted=>', sorted);
-
   for (const p of sorted) {
     const key = bucketFn(p.x);
 
