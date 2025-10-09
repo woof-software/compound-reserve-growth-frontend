@@ -109,6 +109,8 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
         onTypeSelect={onTypeSelect}
         onClearAll={clearAllFilters}
         csvData={csvData}
+        activeViewTab={activeViewTab}
+        setActiveViewTab={setActiveViewTab}
       />
       <View.Condition
         if={Boolean(!isLoading && !isError && normalizedTableData.length)}

@@ -29,6 +29,8 @@ interface DailyExpensesMobileFiltersProps {
   onKeySelect: (key: keyof NormalizedTableData | null) => void;
   onTypeSelect: (type: SortDirection) => void;
   onClearAll: () => void;
+  activeViewTab: 'COMP' | 'USD';
+  setActiveViewTab: (v: 'COMP' | 'USD') => void;
 }
 
 const sortColumns: SortAccessor<NormalizedTableData>[] = [
@@ -48,7 +50,9 @@ export const DailyExpensesMobileFilters = (
     onTypeSelect,
     sortType,
     csvData,
-    onClearAll
+    onClearAll,
+    activeViewTab,
+    setActiveViewTab
   } = props;
 
   const {
@@ -78,8 +82,8 @@ export const DailyExpensesMobileFilters = (
             list: 'w-full sm:w-auto'
           }}
           tabs={['COMP', 'USD']}
-          value={'COMP'}
-          onTabChange={() => {}}
+          value={activeViewTab}
+          onTabChange={setActiveViewTab}
         />
         <div className='flex w-full items-center gap-2 sm:w-auto'>
           <Button
@@ -110,8 +114,8 @@ export const DailyExpensesMobileFilters = (
               list: 'w-full sm:w-auto'
             }}
             tabs={['COMP', 'USD']}
-            value={'COMP'}
-            onTabChange={() => {}}
+            value={activeViewTab}
+            onTabChange={setActiveViewTab}
           />
           <Button
             onClick={onMoreOpen}
