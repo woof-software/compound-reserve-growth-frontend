@@ -1,6 +1,6 @@
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { getTotalMetricValues } from '@/entities/Insentive/MetricBlock/lib/utils';
-import { formatNumber } from '@/shared/lib/utils/utils';
+import { formatNumber, formatUSD } from '@/shared/lib/utils/utils';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -146,7 +146,7 @@ const MetricBlock = (props: MetricBlockProps) => {
             loading: 'h-[200px]',
             header: 'px-5 py-4',
             content:
-              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#B9E6D9_2.63%,#FFFFFF_100%)] px-5 py-10 md:p-10 dark:bg-[linear-gradient(270deg,#154F48_2.63%,#1D2833_100%)]'
+              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#B9E6D9_2.63%,#FFFFFF_100%)] px-5 py-10 md:px-10 md:py-13 dark:bg-[linear-gradient(270deg,#154F48_2.63%,#1D2833_100%)]'
           }}
         >
           <div className='grid gap-3'>
@@ -155,16 +155,9 @@ const MetricBlock = (props: MetricBlockProps) => {
                 weight='700'
                 size='32'
               >
-                {formatNumber(metrics.totalFeesGenerated, '')}
+                {formatUSD(metrics.totalFeesGeneratedUsdPrice)}
               </Text>
             </div>
-            <Text
-              weight='500'
-              size='13'
-              className='text-primary-14'
-            >
-              {formatNumber(metrics.totalFeesGeneratedUsdPrice)}
-            </Text>
           </div>
           <Icon
             name={
