@@ -60,25 +60,29 @@ export const useChainMarketFilters = (
   const allMarketOptions: {
     id: string;
     label: string;
-    chain?: string[];
+    chain: string[];
   }[] = useMemo(() => {
-    if (!data) return [];
+    if (!data?.length) return [];
 
-    const uniqueMarketMap = new Map<string, { network?: string }>();
+    const marketToNetworks = new Map<string, Set<string>>();
 
     for (const item of data) {
-      const market = item.source?.market;
-      const network = item.source?.network;
+      const market = item.source?.market?.trim();
+      const network = item.source?.network?.trim();
 
-      if (market && !uniqueMarketMap.has(market)) {
-        uniqueMarketMap.set(market, { network });
+      if (!market || !network) continue;
+
+      if (!marketToNetworks.has(market)) {
+        marketToNetworks.set(market, new Set());
       }
+
+      marketToNetworks.get(market)!.add(network);
     }
 
-    return Array.from(uniqueMarketMap.entries()).map(([market, details]) => ({
+    return Array.from(marketToNetworks.entries()).map(([market, networks]) => ({
       id: market,
       label: market,
-      ...(details.network && { chain: [details.network] })
+      chain: Array.from(networks)
     }));
   }, [data]);
 
@@ -111,6 +115,7 @@ export const useChainMarketFilters = (
         const marketOption = allMarketOptions.find(
           (opt) => opt.id === market.id
         );
+
         return marketOption?.chain?.some((network) =>
           selectedNetworks.includes(network)
         );
