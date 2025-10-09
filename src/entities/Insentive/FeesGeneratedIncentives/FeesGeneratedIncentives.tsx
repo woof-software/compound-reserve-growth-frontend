@@ -94,7 +94,7 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
     <Card
       isLoading={isLoading}
       isError={isError}
-      title='Fees Generated vs Incentives'
+      title='Revenue vs Incentives'
       id='fees-generated-vs-incentives'
       className={{
         loading: 'min-h-[inherit]',
