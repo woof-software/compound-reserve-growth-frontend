@@ -338,7 +338,7 @@ const CollateralsPriceTable = ({
                     <Text
                       size='13'
                       lineHeight='21'
-                      className='w-fit truncate border-b border-dotted border-gray-500'
+                      className='w-fit max-w-[60px] truncate border-b border-dotted border-gray-500'
                     >
                       {sliceAddress(row.priceFeed)}
                     </Text>
