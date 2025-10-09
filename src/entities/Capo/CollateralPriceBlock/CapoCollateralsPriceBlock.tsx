@@ -13,7 +13,7 @@ import View from '@/shared/ui/View/View';
 
 export const CARD_CLASS_NAMES = {
   loading: 'min-h-[inherit]',
-  container: 'min-h-[427px] overflow-visible rounded-lg lg:min-h-[458.5px]',
+  container: 'overflow-visible rounded-lg',
   content: 'rounded-b-lg px-0 pt-0 pb-0 lg:px-10 lg:pb-10',
   header: 'rounded-t-lg'
 };
