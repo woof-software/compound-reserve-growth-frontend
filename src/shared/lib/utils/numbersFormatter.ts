@@ -17,11 +17,11 @@ type FormatView = 'full' | 'compact';
 const formatter = (
   value: number | string,
   config: {
+    view: FormatView;
     type?: FormatType;
-    view?: FormatView;
     decimals?: number;
     tokenSymbol?: string;
-  } = {}
+  }
 ): string => {
   const numericValue = Number(value);
 
