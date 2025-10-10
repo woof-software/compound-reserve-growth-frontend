@@ -27,8 +27,8 @@ interface FeesGeneratedIncentivesMobileFiltersProps {
   filterOptions: () => FilterOptions[];
   onClearAll: () => void;
   csvData: Record<string, string | number>[];
-  isFeesOnly: boolean;
-  setIsFeesOnly: (b: boolean) => void;
+  isRevenueOnly: boolean;
+  setIsRevenueOnly: (b: boolean) => void;
 }
 
 export const FeesGeneratedIncentivesMobileFilters = (
@@ -40,8 +40,8 @@ export const FeesGeneratedIncentivesMobileFilters = (
     filterOptions,
     onClearAll,
     csvData,
-    isFeesOnly,
-    setIsFeesOnly
+    isRevenueOnly,
+    setIsRevenueOnly
   } = props;
 
   const { isOpen, onOpenModal, onCloseModal } = useModal();
@@ -89,10 +89,10 @@ export const FeesGeneratedIncentivesMobileFilters = (
               Filters
             </Button>
             <Switch
-              label='Fees Only'
+              label='Revenue Only'
               positionLabel='left'
-              checked={isFeesOnly}
-              onCheckedChange={setIsFeesOnly}
+              checked={isRevenueOnly}
+              onCheckedChange={setIsRevenueOnly}
               className={{ title: '!text-[11px]' }}
             />
           </div>
