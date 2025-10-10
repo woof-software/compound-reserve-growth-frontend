@@ -256,7 +256,6 @@ const CompoundCumulativeRevenue = ({
     isLegendEnabled,
     aggregatedSeries,
     areAllSeriesHidden,
-    onAllSeriesHidden,
     onEventsData,
     onShowEvents,
     onSelectAll,
@@ -398,7 +397,6 @@ const CompoundCumulativeRevenue = ({
           eventsData={eventsData}
           showEvents={showEvents}
           areAllSeriesHidden={areAllSeriesHidden}
-          onAllSeriesHidden={onAllSeriesHidden}
           onSelectAll={onSelectAll}
           onDeselectAll={onDeselectAll}
           onShowEvents={onShowEvents}

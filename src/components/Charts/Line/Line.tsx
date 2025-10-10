@@ -57,7 +57,7 @@ interface LineChartProps {
 
   resetHiddenKey?: number;
 
-  onAllSeriesHidden: (value: boolean) => void;
+  onAllSeriesHidden?: (value: boolean) => void;
 
   onSelectAll: () => void;
 
@@ -81,7 +81,6 @@ const LineChart: FC<LineChartProps> = ({
   customTooltipFormatter,
   customOptions,
   resetHiddenKey,
-  onAllSeriesHidden,
   onSelectAll,
   onDeselectAll,
   onShowEvents,
@@ -120,7 +119,8 @@ const LineChart: FC<LineChartProps> = ({
   );
 
   const currentHiddenSet = useMemo(() => {
-    return new Set(hiddenItems.filter((n) => currentSeriesNames.includes(n)));
+    const allowed = new Set(currentSeriesNames);
+    return new Set(hiddenItems.filter((n) => allowed.has(n)));
   }, [hiddenItems, currentSeriesNames]);
 
   const isLastActiveLegend =
@@ -160,29 +160,28 @@ const LineChart: FC<LineChartProps> = ({
 
   const toggleSeriesByName = useCallback(
     (name: string) => {
-      const isHiddenNow = currentHiddenSet.has(name);
-      if (isLastActiveLegend && !isHiddenNow) return;
-
       const chart = chartRef.current?.chart;
       if (!chart) return;
 
-      const s = chart.series.find((sr) => sr.name === name);
-      if (!s) return;
+      const targetSeries = chart.series.find((sr) => sr.name === name);
 
-      s.setVisible(!s.visible, false);
+      if (!targetSeries) return;
+
+      if (isLastActiveLegend && targetSeries.visible) return;
+
+      targetSeries.setVisible(!targetSeries.visible, false);
       chart.redraw();
 
       setHiddenItems((prev) => {
-        if (prev.includes(name)) return prev.filter((n) => n !== name);
+        const has = prev.includes(name);
+        if (has) {
+          return prev.filter((n) => n !== name);
+        }
+
         return [...prev, name];
       });
-
-      setTimeout(() => {
-        const anyVisible = chart.series.some((sr) => sr.visible);
-        onAllSeriesHidden(!anyVisible);
-      }, 0);
     },
-    [chartRef, currentHiddenSet, isLastActiveLegend, onAllSeriesHidden]
+    [chartRef, isLastActiveLegend]
   );
 
   const defaultTooltipFormatter = useCallback(
