@@ -47,6 +47,8 @@ interface CompoundFeeRecievedProps {
 
   onHiddenItems?: (hiddenItems: string[]) => void;
 
+  onAreAllSeriesHidden?: (areAllSeriesHidden: boolean) => void;
+
   onSelectAll: () => void;
 
   onDeselectAll: () => void;
@@ -64,6 +66,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   hiddenItems,
   resetHiddenKey,
   areAllSeriesHidden,
+  onAreAllSeriesHidden,
   toggleSeriesByName,
   onSelectAll,
   onDeselectAll,
@@ -351,7 +354,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     });
 
     chart.redraw();
-  }, [areAllSeriesHidden, hiddenItems]);
+  }, [hiddenItems]);
 
   useEffect(() => {
     if (onHiddenItems) {
@@ -370,28 +373,10 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   }, [resetHiddenKey, onHiddenItems]);
 
   useEffect(() => {
-    const chart = chartRef.current?.chart;
-
-    if (!chart) return;
-
-    if (areAllSeriesHidden) {
-      onHiddenItems?.(currentSeriesNames);
-
-      chart.series.forEach((s) => {
-        if (s.visible) s.setVisible(false, false);
-      });
-
-      chart.redraw();
-    } else {
-      onHiddenItems?.([]);
-
-      chart.series.forEach((s) => {
-        if (!s.visible) s.setVisible(true, false);
-      });
-
-      chart.redraw();
-    }
-  }, [areAllSeriesHidden, currentSeriesNames, chartRef]);
+    const total = seriesData.length;
+    const allHidden = total > 0 && currentHiddenSet.size === total;
+    onAreAllSeriesHidden?.(allHidden);
+  }, [seriesData.length, currentHiddenSet.size, onAreAllSeriesHidden]);
 
   return (
     <div

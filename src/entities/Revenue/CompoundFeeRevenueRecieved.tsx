@@ -305,6 +305,7 @@ const CompoundFeeRevenueRecieved = ({
     areAllSeriesHidden,
     hiddenItems,
     setHiddenItems,
+    setAreAllSeriesHidden,
     toggleSeriesByName,
     onSelectAll,
     onDeselectAll
@@ -469,6 +470,7 @@ const CompoundFeeRevenueRecieved = ({
           aggregatedData={aggregatedData}
           toggleSeriesByName={toggleSeriesByName}
           onHiddenItems={setHiddenItems}
+          onAreAllSeriesHidden={setAreAllSeriesHidden}
           onSelectAll={onSelectAll}
           onDeselectAll={onDeselectAll}
         />
