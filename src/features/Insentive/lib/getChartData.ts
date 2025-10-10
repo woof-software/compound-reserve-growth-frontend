@@ -8,12 +8,12 @@ export const getChartData = (
   activeTab: string
 ) => {
   const getTabValue = (item: CombinedIncentivesData): number => {
-    const { valueSupply = 0, valueBorrow = 0 } = item?.spends || {};
+    const { rewardsSupply = 0, rewardsBorrow = 0 } = item || {};
 
     const values = {
-      lend: valueSupply,
-      borrow: valueBorrow,
-      total: valueSupply + valueBorrow
+      lend: rewardsSupply,
+      borrow: rewardsBorrow,
+      total: rewardsSupply + rewardsBorrow
     };
 
     const normalizedTab = activeTab?.toLowerCase() as TabType;

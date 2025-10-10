@@ -22,19 +22,16 @@ export const normalizeTableData = (
     if (!dateGroup.has(market!)) {
       dateGroup.set(market!, {
         ...item,
-        spends: {
-          id: item.spends?.id || 0,
-          valueBorrow: 0,
-          valueSupply: 0
-        }
+        rewardsSupply: 0,
+        rewardsBorrow: 0
       });
     }
 
     const marketEntry = dateGroup.get(market!);
 
-    if (item.spends && marketEntry) {
-      marketEntry.spends!.valueBorrow += item.spends.valueBorrow;
-      marketEntry.spends!.valueSupply += item.spends.valueSupply;
+    if (marketEntry) {
+      marketEntry.rewardsBorrow += item.rewardsBorrow;
+      marketEntry.rewardsSupply += item.rewardsSupply;
     }
 
     return acc;
@@ -59,9 +56,9 @@ export const normalizeTableData = (
   ).flatMap(([network, networkMap]) => {
     return Array.from(networkMap.entries()).flatMap((item) => {
       return Array.from(item[1].entries()).map(([market, data]) => {
-        const { spends, compoundPrice } = data;
-        const lendValue = spends?.valueSupply || 0;
-        const borrowValue = spends?.valueBorrow || 0;
+        const { rewardsSupply, rewardsBorrow, compoundPrice } = data;
+        const lendValue = rewardsSupply || 0;
+        const borrowValue = rewardsBorrow || 0;
         const total =
           view === 'COMP' && compoundPrice > 0
             ? (lendValue + borrowValue) / compoundPrice
