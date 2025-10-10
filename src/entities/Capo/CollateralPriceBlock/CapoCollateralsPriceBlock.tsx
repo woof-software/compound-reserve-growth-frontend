@@ -12,7 +12,7 @@ import Card from '@/shared/ui/Card/Card';
 import View from '@/shared/ui/View/View';
 
 export const CARD_CLASS_NAMES = {
-  loading: 'min-h-[inherit]',
+  loading: 'min-h-[565px]',
   container: 'overflow-visible rounded-lg',
   content: 'rounded-b-lg px-0 pt-0 pb-0 lg:px-10 lg:pb-10',
   header: 'rounded-t-lg'
