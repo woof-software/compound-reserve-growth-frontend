@@ -79,16 +79,14 @@ const useLineChart = ({
     const allSeriesNames = data.map((series) => series.name);
 
     return data.map((series) => {
-      const aggregatedByBar = aggregateByBarSize(series.data, barSize);
-
-      const filtered: XY[] = filterForRange({
-        data: series.data,
-        getDate: ({ x }) => new Date(x),
-        transform: ({ x, y }) => [x, y] as XY,
-        range: barSize
-      });
-
-      const seriesData: XY[] = isAggregate ? aggregatedByBar : filtered;
+      const seriesData: XY[] = isAggregate
+        ? aggregateByBarSize(series.data, barSize)
+        : filterForRange({
+            data: series.data,
+            getDate: ({ x }) => new Date(x),
+            transform: ({ x, y }) => [x, y] as XY,
+            range: barSize
+          });
 
       return {
         data: seriesData,
