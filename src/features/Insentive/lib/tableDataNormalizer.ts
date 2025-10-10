@@ -11,24 +11,23 @@ export const tableDataNormalizer = (
   activeTab: string
 ) => {
   const getTabValues = (item: CombinedIncentivesData) => {
-    const { valueSupply = 0, valueBorrow = 0 } = item?.spends || {};
-    const { compoundPrice = 0 } = item;
+    const { rewardsSupply, rewardsBorrow, compoundPrice } = item;
 
     const safeComp = (usdValue: number) =>
       compoundPrice > 0 ? usdValue / compoundPrice : 0;
 
     const values = {
       lend: {
-        usd: valueSupply,
-        comp: safeComp(valueSupply)
+        usd: rewardsSupply,
+        comp: safeComp(rewardsSupply)
       },
       borrow: {
-        usd: valueBorrow,
-        comp: safeComp(valueBorrow)
+        usd: rewardsBorrow,
+        comp: safeComp(rewardsBorrow)
       },
       total: {
-        usd: valueSupply + valueBorrow,
-        comp: safeComp(valueSupply + valueBorrow)
+        usd: rewardsSupply + rewardsBorrow,
+        comp: safeComp(rewardsSupply + rewardsBorrow)
       }
     };
 

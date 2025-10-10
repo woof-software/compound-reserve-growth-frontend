@@ -25,27 +25,17 @@ export const getGeneratedIncentivesChartSeries = (
     if (!networkGroup.has(date)) {
       networkGroup.set(date, {
         ...item,
-        spends: {
-          id: item.spends?.id || 0,
-          valueBorrow: 0,
-          valueSupply: 0
-        },
-        incomes: {
-          id: item.incomes?.id || 0,
-          valueBorrow: 0,
-          valueSupply: 0
-        }
+        rewardsSupply: 0,
+        rewardsBorrow: 0,
+        income: 0
       });
     }
 
     const dateEntry = networkGroup.get(date)!;
 
-    if (item.spends) {
-      dateEntry.spends!.valueBorrow += item.spends.valueBorrow;
-      dateEntry.spends!.valueSupply += item.spends.valueSupply;
-    }
-    dateEntry.incomes.valueBorrow += item.incomes.valueBorrow;
-    dateEntry.incomes.valueSupply += item.incomes.valueSupply;
+    dateEntry.rewardsBorrow += item.rewardsBorrow;
+    dateEntry.rewardsSupply += item.rewardsSupply;
+    dateEntry.income += item.income;
 
     return acc;
   }, new Map<string, Map<number, CombinedIncentivesData>>());
@@ -63,9 +53,8 @@ export const getGeneratedIncentivesChartSeries = (
 
       const aggregate = aggregatedByDate.get(date)!;
 
-      aggregate.incentives +=
-        entry.spends!.valueSupply + entry.spends!.valueBorrow;
-      aggregate.fees += entry.incomes.valueSupply + entry.incomes.valueBorrow;
+      aggregate.incentives += entry.rewardsSupply + entry.rewardsBorrow;
+      aggregate.fees += entry.income;
     });
   });
 

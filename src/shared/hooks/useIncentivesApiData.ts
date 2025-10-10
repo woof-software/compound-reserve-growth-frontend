@@ -3,26 +3,17 @@ import { useQuery } from '@tanstack/react-query';
 
 import { $api } from '@/shared/api/api';
 
-const STATS_API_URL = '/api/history/v2/stats';
+const STATS_API_URL = '/api/history/v2/incentives';
 
 const incentivesApiResponseSchema = z.object({
   data: z.array(
     z.object({
-      incomes: z.object({
-        id: z.number(),
-        vb: z.number(),
-        vs: z.number()
-      }),
-      spends: z
-        .object({
-          id: z.number(),
-          vb: z.number(),
-          vs: z.number()
-        })
-        .optional(),
+      i: z.number(),
+      rs: z.number(),
+      rb: z.number(),
       pc: z.number(),
-      d: z.number(),
-      sourceId: z.number()
+      sid: z.number(),
+      d: z.number()
     })
   ),
   meta: z.object({
@@ -35,19 +26,12 @@ const incentivesApiResponseSchema = z.object({
 type IncentiveApiResponse = z.infer<typeof incentivesApiResponseSchema>;
 type IncentiveApiItem = IncentiveApiResponse['data'][number];
 type IncentiveItem = {
-  incomes: {
-    id: number;
-    valueBorrow: number;
-    valueSupply: number;
-  };
-  spends?: {
-    id: number;
-    valueBorrow: number;
-    valueSupply: number;
-  };
-  date: number;
+  income: number;
+  rewardsSupply: number;
+  rewardsBorrow: number;
   compoundPrice: number;
   sourceId: number;
+  date: number;
 };
 
 /**
@@ -63,23 +47,12 @@ export const useIncentivesApiData = () => {
       );
       return response.data.data.map<IncentiveItem>(
         (item: IncentiveApiItem) => ({
-          incomes: {
-            id: item.incomes.id,
-            valueBorrow: item.incomes.vb,
-            valueSupply: item.incomes.vs
-          },
-          ...(item?.spends
-            ? {
-                spends: {
-                  id: item.spends?.id,
-                  valueBorrow: item.spends?.vb,
-                  valueSupply: item.spends?.vs
-                }
-              }
-            : {}),
-          date: item.d,
+          income: item.i,
+          rewardsSupply: item.rs,
+          rewardsBorrow: item.rb,
           compoundPrice: item.pc,
-          sourceId: item.sourceId
+          sourceId: item.sid,
+          date: item.d
         })
       );
     }

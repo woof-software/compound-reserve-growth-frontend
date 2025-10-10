@@ -3,7 +3,8 @@ import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 type AggregatedDataPoint = {
   date: number;
   compoundPrice?: number;
-  spends: { valueBorrow: number; valueSupply: number };
+  rewardsSupply: number;
+  rewardsBorrow: number;
 };
 
 /**
@@ -15,10 +16,14 @@ type AggregatedDataPoint = {
  * @param view - The selected view ('COMP', 'USD').
  * @returns The calculated value for a single data point.
  */
-const calculateValue = (item: any, mode: string, view: string): number => {
-  const { spends, compoundPrice } = item;
-  const valueSupply = spends?.valueSupply || 0;
-  const valueBorrow = spends?.valueBorrow || 0;
+const calculateValue = (
+  item: AggregatedDataPoint,
+  mode: string,
+  view: string
+): number => {
+  const { rewardsSupply, rewardsBorrow, compoundPrice } = item;
+  const valueSupply = rewardsSupply || 0;
+  const valueBorrow = rewardsBorrow || 0;
 
   let value: number;
 
@@ -65,7 +70,7 @@ export const getHistoricalExpensesFilteredData = (
 
   const aggregatedData = data.reduce((acc, item) => {
     const { network } = item.source;
-    const { date, spends, compoundPrice } = item;
+    const { date, rewardsBorrow, rewardsSupply, compoundPrice } = item;
 
     if (!acc.has(network)) {
       acc.set(network, new Map());
@@ -76,15 +81,14 @@ export const getHistoricalExpensesFilteredData = (
       networkGroup.set(date, {
         date,
         compoundPrice,
-        spends: { valueBorrow: 0, valueSupply: 0 }
+        rewardsBorrow: 0,
+        rewardsSupply: 0
       });
     }
 
     const dateEntry = networkGroup.get(date)!;
-    if (spends) {
-      dateEntry.spends.valueBorrow += spends.valueBorrow;
-      dateEntry.spends.valueSupply += spends.valueSupply;
-    }
+    dateEntry.rewardsBorrow += rewardsBorrow;
+    dateEntry.rewardsSupply += rewardsSupply;
 
     return acc;
   }, new Map<string, Map<number, AggregatedDataPoint>>());
