@@ -29,7 +29,7 @@ interface FeesGeneratedIncentivesProps {
 
 const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
   const { data, isLoading, isError } = props;
-  const [isFeesOnly, setIsFeesOnly] = useState(false);
+  const [isRevenueOnly, setIsRevenueOnly] = useState(false);
   const groupBy = 'None';
 
   const { barSize, onBarSizeChange } = useChartControls({
@@ -58,11 +58,15 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
     barSize,
     onBarSizeChange
   );
-  useFilterSyncSingle('FeesGeneratedRevenueOnly', isFeesOnly, setIsFeesOnly);
+  useFilterSyncSingle(
+    'FeesGeneratedRevenueOnly',
+    isRevenueOnly,
+    setIsRevenueOnly
+  );
 
   const chartSeries = getGeneratedIncentivesChartSeries(filteredData);
 
-  const displaySeries = isFeesOnly
+  const displaySeries = isRevenueOnly
     ? chartSeries.filter((series) => series.name === 'Revenue')
     : chartSeries;
 
@@ -108,8 +112,8 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
         filterOptions={mobileFilterOptions}
         onClearAll={clearAllFilters}
         csvData={csvData}
-        isFeesOnly={isFeesOnly}
-        setIsFeesOnly={setIsFeesOnly}
+        isRevenueOnly={isRevenueOnly}
+        setIsRevenueOnly={setIsRevenueOnly}
       />
       <div className='hidden lg:block'>
         <div className='flex items-center justify-end gap-2 px-0 py-3'>
@@ -136,8 +140,8 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
           <Switch
             label='Revenue Only'
             positionLabel='left'
-            checked={isFeesOnly}
-            onCheckedChange={setIsFeesOnly}
+            checked={isRevenueOnly}
+            onCheckedChange={setIsRevenueOnly}
             className={{ title: '!text-[11px]' }}
           />
           <CSVDownloadButton
