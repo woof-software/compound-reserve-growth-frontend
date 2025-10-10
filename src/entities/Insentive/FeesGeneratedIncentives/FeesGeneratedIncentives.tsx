@@ -91,7 +91,8 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
   } = useLineChart({
     groupBy,
     data: displaySeries,
-    barSize
+    barSize,
+    isAggregate: true
   });
 
   return (

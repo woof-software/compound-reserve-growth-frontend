@@ -3,6 +3,7 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import { LineChartSeries } from '@/components/Charts/Line/Line';
+import { filterForRange } from '@/shared/lib/utils/chart';
 import {
   capitalizeFirstLetter,
   getStableColorForSeries,
@@ -19,6 +20,8 @@ interface LineChartProps {
   groupBy: string;
 
   barSize: 'D' | 'W' | 'M';
+
+  isAggregate?: boolean;
 }
 
 export interface EventDataItem {
@@ -61,7 +64,8 @@ const useLineChart = ({
   showLegend,
   groupBy,
   data,
-  barSize
+  barSize,
+  isAggregate = false
 }: LineChartProps) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
 
@@ -75,10 +79,19 @@ const useLineChart = ({
     const allSeriesNames = data.map((series) => series.name);
 
     return data.map((series) => {
-      const aggregated = aggregateByBarSize(series.data, barSize);
+      const aggregatedByBar = aggregateByBarSize(series.data, barSize);
+
+      const filtered: XY[] = filterForRange({
+        data: series.data,
+        getDate: ({ x }) => new Date(x),
+        transform: ({ x, y }) => [x, y] as XY,
+        range: barSize
+      });
+
+      const seriesData: XY[] = isAggregate ? aggregatedByBar : filtered;
 
       return {
-        data: aggregated,
+        data: seriesData,
         id: series.name,
         type: 'area' as const,
         name: capitalizeFirstLetter(series.name),
