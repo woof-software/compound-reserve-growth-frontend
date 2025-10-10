@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { dateSortingFn, parseDateToUTC } from '@/shared/lib/utils/dateSorting';
 import {
   capitalizeFirstLetter,
   formatDateWithOrdinal,
@@ -41,7 +42,6 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
   {
     accessorKey: 'recipient',
     header: 'Recipient',
-    // cell: ({ getValue }) => (getValue() as string) || '-'
     size: 150,
     cell: ({ getValue }) => {
       const initiative = (getValue() as string) || '-';
@@ -139,19 +139,7 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
       const value = getValue() as string;
       return value ? formatDateWithOrdinal(value) : '-';
     },
-    sortingFn: (rowA, rowB) => {
-      const dateA = rowA.original.startDate;
-      const dateB = rowB.original.startDate;
-
-      if (!dateA && !dateB) return 0;
-      if (!dateA) return 1;
-      if (!dateB) return -1;
-
-      const timeA = new Date(dateA).getTime();
-      const timeB = new Date(dateB).getTime();
-
-      return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
-    }
+    sortingFn: dateSortingFn((row) => row.original.startDate)
   },
   {
     accessorKey: 'streamEndDate',
@@ -161,19 +149,7 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
       const value = getValue() as string;
       return value ? formatDateWithOrdinal(value) : '-';
     },
-    sortingFn: (rowA, rowB) => {
-      const dateA = rowA.original.streamEndDate;
-      const dateB = rowB.original.streamEndDate;
-
-      if (!dateA && !dateB) return 0;
-      if (!dateA) return 1;
-      if (!dateB) return -1;
-
-      const timeA = new Date(dateA).getTime();
-      const timeB = new Date(dateB).getTime();
-
-      return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
-    }
+    sortingFn: dateSortingFn((row) => row.original.streamEndDate)
   }
 ];
 
@@ -182,23 +158,35 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
   sortType
 }) => {
   const mobileTableData = useMemo(() => {
-    if (!sortType?.key) {
-      return data;
-    }
+    if (!sortType?.key) return data;
 
     const key = sortType.key as keyof FullDAOCommitmentRow;
-    return [...data].sort((a, b) => {
-      const aVal = a[key];
-      const bVal = b[key];
 
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        return sortType.type === 'asc' ? aVal - bVal : bVal - aVal;
+    return [...data].sort((a, b) => {
+      const asc = sortType.type === 'asc';
+
+      if (typeof a[key] === 'number' && typeof b[key] === 'number') {
+        const diff = (a[key] as number) - (b[key] as number);
+        return asc ? diff : -diff;
       }
 
-      if (typeof aVal === 'string' && typeof bVal === 'string') {
-        return sortType.type === 'asc'
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
+      if (key === 'startDate' || key === 'streamEndDate') {
+        const ta = parseDateToUTC(a[key] as string | undefined);
+        const tb = parseDateToUTC(b[key] as string | undefined);
+
+        const badA = Number.isNaN(ta);
+        const badB = Number.isNaN(tb);
+        if (badA && badB) return 0;
+        if (badA) return asc ? 1 : -1;
+        if (badB) return asc ? -1 : 1;
+
+        const diff = ta - tb;
+        return asc ? diff : -diff;
+      }
+
+      if (typeof a[key] === 'string' && typeof b[key] === 'string') {
+        const diff = (a[key] as string).localeCompare(b[key] as string);
+        return asc ? diff : -diff;
       }
 
       return 0;
