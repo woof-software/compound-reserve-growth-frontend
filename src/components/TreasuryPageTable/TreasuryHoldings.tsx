@@ -8,12 +8,9 @@ import {
   defaultExplorer,
   explorers,
   formatLargeNumber,
-  formatPrice,
-  sliceAddress
+  formatPrice
 } from '@/shared/lib/utils/utils';
-import { ClipboardButton } from '@/shared/ui/AnimationProvider/CopyButton/CopyButton';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
-import DrawerInfo from '@/shared/ui/DrawerInfo/DrawerInfo';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
@@ -283,46 +280,10 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                   >
                     Source
                   </Text>
-                  <DrawerInfo
-                    content={
-                      <div className='flex w-full flex-col items-start gap-4'>
-                        <Text
-                          size='17'
-                          weight='500'
-                          className='text-primary-11 mb-5 w-full !text-center break-all'
-                        >
-                          {row.source}
-                        </Text>
-                        <div className='flex w-full items-center justify-between'>
-                          <Text
-                            size='14'
-                            className='text-primary-11'
-                          >
-                            {sliceAddress(row.address)}
-                          </Text>
-                          <ClipboardButton textToCopy={row.address} />
-                        </div>
-                        <div className='flex w-full items-center justify-between'>
-                          <Text
-                            size='14'
-                            className='text-primary-11'
-                          >
-                            View on Explorer
-                          </Text>
-                          <a
-                            href={fullExplorerLink}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            className='text-primary-11 flex h-5 w-5 items-center justify-center'
-                          >
-                            <Icon
-                              name={'arrow-link'}
-                              className='h-4.5 w-3 text-[#7A8A99]'
-                            />
-                          </a>
-                        </div>
-                      </div>
-                    }
+                  <a
+                    href={fullExplorerLink}
+                    target='_blank'
+                    rel='noopener noreferrer'
                   >
                     <Text
                       size='13'
@@ -331,7 +292,7 @@ const TreasuryHoldings = ({ tableData, sortType }: TreasuryHoldingsProps) => {
                     >
                       {row.source}
                     </Text>
-                  </DrawerInfo>
+                  </a>
                 </div>
               </div>
             );
