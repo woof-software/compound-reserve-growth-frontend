@@ -127,25 +127,22 @@ const useCompoundReceivedBars = ({
 
     if (!chart) return;
 
-    const s = chart.series.find((sr) => sr.name === name);
+    const targetSeries = chart.series.find((sr) => sr.name === name);
 
-    if (!s) return;
+    if (!targetSeries) return;
 
-    s.setVisible(!s.visible, false);
+    targetSeries.setVisible(!targetSeries.visible, false);
 
     chart.redraw();
 
     setHiddenItems((prev) => {
-      if (prev.includes(name)) return prev.filter((n) => n !== name);
+      const has = prev.includes(name);
+      if (has) {
+        return prev.filter((n) => n !== name);
+      }
 
       return [...prev, name];
     });
-
-    setTimeout(() => {
-      const anyVisible = chart.series.some((sr) => sr.visible);
-
-      setAreAllSeriesHidden(!anyVisible);
-    }, 0);
   }, []);
 
   const onSelectAll = useCallback(() => {

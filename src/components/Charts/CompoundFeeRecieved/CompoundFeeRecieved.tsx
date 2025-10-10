@@ -87,7 +87,8 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   );
 
   const currentHiddenSet = useMemo(() => {
-    return new Set(hiddenItems.filter((n) => currentSeriesNames.includes(n)));
+    const allowed = new Set(currentSeriesNames);
+    return new Set(hiddenItems.filter((n) => allowed.has(n)));
   }, [hiddenItems, currentSeriesNames]);
 
   const isLastActiveLegend =
