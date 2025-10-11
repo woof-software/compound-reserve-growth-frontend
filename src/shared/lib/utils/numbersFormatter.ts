@@ -74,25 +74,23 @@ const formatter = (
 export const NumbersFormatter = {
   /**
    * Formats a number as a USD price.
-   * e.g., price(12345.67, { view: 'compact' }) -> '$12.35K'
-   * e.g., price(12345.67, { view: 'full' }) -> '$12,345.67'
+   * e.g., price(12345.67, view: 'compact' ) -> '$12.35K'
+   * e.g., price(12345.67, view: 'full' ) -> '$12,345.67'
    */
-  price(value: number | string, { view }: { view: FormatView }) {
+  price(value: number | string, view: FormatView) {
     return formatter(value, { type: 'usd', view });
   },
 
   /**
    * Formats a number as a token amount with a symbol.
-   * e.g., token(12345, { tokenSymbol: 'ETH', view: 'compact' }) -> '12.35K ETH'
-   * e.g., token(123.45678, { tokenSymbol: 'ETH', decimals: 4 }) -> '123.4568 ETH'
+   * e.g., token(12345, tokenSymbol: 'ETH', view: 'compact' ) -> '12.35K ETH'
+   * e.g., token(123.45678, tokenSymbol: 'ETH', view: 'full', decimals: 4 ) -> '123.4568 ETH'
    */
   token(
     value: number | string,
-    {
-      tokenSymbol,
-      decimals,
-      view
-    }: { tokenSymbol: string; view: FormatView; decimals?: number }
+    view: FormatView,
+    tokenSymbol: string,
+    decimals?: number
   ) {
     return formatter(value, {
       type: 'token',
@@ -104,13 +102,10 @@ export const NumbersFormatter = {
 
   /**
    * Formats a number with default settings.
-   * e.g., universal(98765, { view: 'compact' }) -> '98.77K'
-   * e.g., universal(98765.4321, { decimals: 2 }) -> '98,765.43'
+   * e.g., universal(98765, view: 'compact') -> '98.77K'
+   * e.g., universal(98765.4321, view: 'full', decimals: 2 ) -> '98,765.43'
    */
-  universal(
-    value: number | string,
-    { decimals, view }: { decimals?: number; view: FormatView }
-  ) {
+  universal(value: number | string, view: FormatView, decimals?: number) {
     return formatter(value, {
       type: 'number',
       decimals,
