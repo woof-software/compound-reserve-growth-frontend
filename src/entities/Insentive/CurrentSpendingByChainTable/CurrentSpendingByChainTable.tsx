@@ -4,11 +4,7 @@ import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { Format } from '@/shared/lib/utils/numbersFormatter';
-import {
-  capitalizeFirstLetter,
-  formatNumber,
-  formatUSD
-} from '@/shared/lib/utils/utils';
+import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -163,7 +159,7 @@ const CurrentSpendingByChainTable = ({
                       lineHeight='21'
                       className='truncate'
                     >
-                      {formatNumber(row.valueComp, '')}
+                      {Format.token(row.valueComp, 'standard')}
                     </Text>
                   </div>
                   <div className='grid w-full'>
@@ -180,7 +176,7 @@ const CurrentSpendingByChainTable = ({
                       lineHeight='21'
                       className='truncate'
                     >
-                      {formatUSD(row.valueUsd, 'compact')}
+                      {Format.price(row.valueUsd, 'standard')}
                     </Text>
                   </div>
                 </div>

@@ -187,21 +187,9 @@ export const sliceAddress = (
   return address && `${address.slice(0, before)}...${address.slice(-after)}`;
 };
 
-export const formatCurrency = (value: number) => {
-  if (value >= 1000000) {
-    return `${(value / 1000000).toFixed(1)}M`;
-  }
-  return `${value.toLocaleString()}`;
-};
-
 export const formatNumber = (num: number | undefined | null, prefix = '$') => {
   if (num === null || num === undefined || num === 0) return '-';
   return `${prefix}${Math.round(num).toLocaleString('en-US')}`;
-};
-
-export const formatQuantity = (quantity: number) => {
-  if (quantity === null || quantity === undefined) return '-';
-  return quantity.toLocaleString('en-US', { maximumFractionDigits: 0 });
 };
 
 export const formatGrowth = (growth: number) => {

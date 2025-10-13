@@ -1,4 +1,3 @@
-import { Format } from '@/shared/lib/utils/numbersFormatter';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
@@ -16,10 +15,9 @@ import RevenueOverviewUSD, {
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import {
   capitalizeFirstLetter,
-  formatPrice,
-  formatUSD,
   networkColorMap
 } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
@@ -204,7 +202,7 @@ const RevenueOverview = ({
             key={p}
             className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'
           >
-            {formatUSD(totals[p] || 0)}
+            {Format.price(totals[p] || 0, 'standard')}
           </td>
         ))}
       </tr>
@@ -226,7 +224,7 @@ const RevenueOverview = ({
       const rawPercent = totalPieValue > 0 ? (value / totalPieValue) * 100 : 0;
       return {
         name: capitalizeFirstLetter(name),
-        value: formatPrice(value, 1),
+        value: Format.price(value, 'standard'),
         percent: Number(rawPercent.toFixed(1)),
         color: networkColorMap[name.toLowerCase()] || '#808080'
       };
