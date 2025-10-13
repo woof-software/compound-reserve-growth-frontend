@@ -35,7 +35,9 @@ export const getGeneratedIncentivesChartSeries = (
 
     dateEntry.rewardsBorrow += item.rewardsBorrow;
     dateEntry.rewardsSupply += item.rewardsSupply;
-    dateEntry.income += item.income;
+    if (item.income > 0) {
+      dateEntry.income += item.income;
+    }
 
     return acc;
   }, new Map<string, Map<number, CombinedIncentivesData>>());
