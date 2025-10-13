@@ -1,3 +1,4 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import React, {
   RefObject,
   useCallback,
@@ -294,11 +295,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
             fontFamily: 'Haas Grot Text R, sans-serif'
           },
           formatter: function () {
-            const v = this.value as number;
-            if (Math.abs(v) >= 1_000_000)
-              return (v / 1_000_000).toFixed(0) + 'M';
-            if (Math.abs(v) >= 1_000) return (v / 1_000).toFixed(0) + 'K';
-            return v.toString();
+            return Format.token(this.value, 'compact');
           }
         },
         lineWidth: 0

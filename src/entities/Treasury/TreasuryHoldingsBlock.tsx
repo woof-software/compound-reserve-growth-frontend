@@ -7,6 +7,7 @@ import TreasuryHoldingsTable, {
   TreasuryBalanceByNetworkType
 } from '@/components/TreasuryPageTable/TreasuryHoldingsTable';
 import { treasuryBalanceByNetworkColumns } from '@/entities/Treasury/TreasuryBalanceByNetwork/TreasuryBalanceByNetwork';
+import { NOT_MARKET } from '@/shared/consts/consts';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
@@ -41,7 +42,7 @@ const mapTableData = (data: TokenData[]) => {
     return {
       symbol: el.source.asset.symbol,
       chain: capitalizeFirstLetter(el.source.network),
-      market: el.source.market ?? 'no market',
+      market: el.source.market ?? NOT_MARKET,
       qty: humanReadableQuantity,
       value: el.value,
       price: el.price,
@@ -161,7 +162,7 @@ const TreasuryHoldingsBlock = ({
         .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const noMarkets = deploymentOptions?.find(
-      (el) => el.id.toLowerCase() === 'no name'
+      (el) => el.id.toLowerCase() === NOT_MARKET.toLowerCase()
     );
 
     const selectedChainIds = selectedOptions.chain.map((o) => o.id);
@@ -201,12 +202,12 @@ const TreasuryHoldingsBlock = ({
         return false;
       }
 
-      const market = item.source.market ?? 'no market';
+      const market = item.source.market ?? NOT_MARKET;
 
       if (
         selectedOptions.deployment.length > 0 &&
         !selectedOptions.deployment.some((o: OptionType) =>
-          o.id === 'no name' ? market === 'no market' : o.id === market
+          o.id === 'no name' ? market === NOT_MARKET : o.id === market
         )
       ) {
         return false;
