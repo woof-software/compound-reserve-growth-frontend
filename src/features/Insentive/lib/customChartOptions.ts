@@ -11,7 +11,7 @@ export const customChartOptions = {
         fontFamily: 'Haas Grot Text R, sans-serif'
       },
       formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
-        return Format.price(this.value, 'compact');
+        return Format.chartAxis(this.value, { type: 'usd', view: 'standard' });
       }
     }
   }
