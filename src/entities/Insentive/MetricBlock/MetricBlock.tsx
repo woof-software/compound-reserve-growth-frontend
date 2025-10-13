@@ -1,6 +1,6 @@
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { getTotalMetricValues } from '@/entities/Insentive/MetricBlock/lib/utils';
-import { formatNumber, formatUSD } from '@/shared/lib/utils/utils';
+import { NumbersFormatter } from '@/shared/lib/utils/numbersFormatter';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -40,7 +40,10 @@ const MetricBlock = (props: MetricBlockProps) => {
                 weight='700'
                 size='32'
               >
-                {formatNumber(metrics.totalLendIncentives, '')}
+                {NumbersFormatter.universal(
+                  metrics.totalLendIncentives,
+                  'full'
+                )}
               </Text>
             </div>
             <Text
@@ -48,7 +51,10 @@ const MetricBlock = (props: MetricBlockProps) => {
               size='13'
               className='text-primary-14'
             >
-              {formatNumber(metrics.totalLendIncentivesUsdPrice)}
+              {NumbersFormatter.price(
+                metrics.totalLendIncentivesUsdPrice,
+                'full'
+              )}
             </Text>
           </div>
           <Icon
@@ -79,7 +85,10 @@ const MetricBlock = (props: MetricBlockProps) => {
                 weight='700'
                 size='32'
               >
-                {formatNumber(metrics.totalBorrowIncentives, '')}
+                {NumbersFormatter.universal(
+                  metrics.totalBorrowIncentives,
+                  'full'
+                )}
               </Text>
             </div>
             <Text
@@ -87,7 +96,10 @@ const MetricBlock = (props: MetricBlockProps) => {
               size='13'
               className='text-primary-14'
             >
-              {formatNumber(metrics.totalBorrowIncentivesUsdPrice)}
+              {NumbersFormatter.price(
+                metrics.totalBorrowIncentivesUsdPrice,
+                'full'
+              )}
             </Text>
           </div>
           <Icon
@@ -120,7 +132,7 @@ const MetricBlock = (props: MetricBlockProps) => {
                 weight='700'
                 size='32'
               >
-                {formatNumber(metrics.totalIncentives, '')}
+                {NumbersFormatter.universal(metrics.totalIncentives, 'full')}
               </Text>
             </div>
             <Text
@@ -128,7 +140,7 @@ const MetricBlock = (props: MetricBlockProps) => {
               size='13'
               className='text-primary-14'
             >
-              {formatNumber(metrics.totalIncentivesUsdPrice)}
+              {NumbersFormatter.price(metrics.totalIncentivesUsdPrice, 'full')}
             </Text>
           </div>
           <Icon
@@ -155,7 +167,10 @@ const MetricBlock = (props: MetricBlockProps) => {
                 weight='700'
                 size='32'
               >
-                {formatUSD(metrics.totalFeesGeneratedUsdPrice)}
+                {NumbersFormatter.price(
+                  metrics.totalFeesGeneratedUsdPrice,
+                  'full'
+                )}
               </Text>
             </div>
           </div>

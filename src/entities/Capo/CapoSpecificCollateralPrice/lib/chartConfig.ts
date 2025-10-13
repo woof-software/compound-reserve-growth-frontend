@@ -1,3 +1,4 @@
+import { NumbersFormatter } from '@/shared/lib/utils/numbersFormatter';
 import Highcharts from 'highcharts';
 
 import { formatUSD } from '@/shared/lib/utils/utils';
@@ -35,7 +36,7 @@ export const customOptions = {
         fontFamily: 'Haas Grot Text R, sans-serif'
       },
       formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
-        return `$${this.value}`;
+        return NumbersFormatter.price(this.value, 'compact');
       }
     }
   }

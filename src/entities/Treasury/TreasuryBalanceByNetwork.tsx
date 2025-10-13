@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useReducer } from 'react';
 
-import CryptoChart from '@/components/Charts/Bar/Bar';
+import BarChart from '@/components/Charts/Bar/Bar';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import TreasuryBalanceByNetwork, {
@@ -434,7 +434,7 @@ const TreasuryBalanceByNetworkBlock = ({
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
-          <CryptoChart
+          <BarChart
             data={chartData}
             onClear={onClearFilters}
           />

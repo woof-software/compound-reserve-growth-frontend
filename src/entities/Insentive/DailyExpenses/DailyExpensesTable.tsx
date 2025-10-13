@@ -1,3 +1,4 @@
+import { NumbersFormatter } from '@/shared/lib/utils/numbersFormatter';
 import * as React from 'react';
 import { useMemo } from 'react';
 
@@ -79,8 +80,8 @@ const getDailyColumns = (
       cell: ({ row }) => (
         <Text size='13'>
           {view === 'USD'
-            ? formatUSD(row.original.lendIncentive, 'compact')
-            : formatLargeNumber(row.original.lendIncentive, 2)}
+            ? NumbersFormatter.price(row.original.lendIncentive, 'full')
+            : NumbersFormatter.universal(row.original.lendIncentive, 'full', 4)}
         </Text>
       )
     },
@@ -93,8 +94,12 @@ const getDailyColumns = (
       cell: ({ row }) => (
         <Text size='13'>
           {view === 'USD'
-            ? formatUSD(row.original.borrowIncentive, 'compact')
-            : formatLargeNumber(row.original.borrowIncentive, 2)}
+            ? NumbersFormatter.price(row.original.borrowIncentive, 'full')
+            : NumbersFormatter.universal(
+                row.original.borrowIncentive,
+                'full',
+                4
+              )}
         </Text>
       )
     },
@@ -110,8 +115,8 @@ const getDailyColumns = (
           className={'flex justify-end'}
         >
           {view === 'USD'
-            ? formatUSD(row.original.total, 'compact')
-            : formatLargeNumber(row.original.total, 2)}
+            ? NumbersFormatter.price(row.original.total, 'full')
+            : NumbersFormatter.universal(row.original.total, 'full', 4)}
         </Text>
       )
     }

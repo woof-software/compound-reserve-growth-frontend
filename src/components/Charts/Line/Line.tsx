@@ -1,3 +1,4 @@
+import { NumbersFormatter } from '@/shared/lib/utils/numbersFormatter';
 import React, {
   FC,
   RefObject,
@@ -357,12 +358,7 @@ const LineChart: FC<LineChartProps> = ({
             fontFamily: 'Haas Grot Text R, sans-serif'
           },
           formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
-            const val = Number(this.value);
-            if (isNaN(val)) return this.value.toString();
-            if (val >= 1e9) return `${(val / 1e9).toFixed(1)}B`;
-            if (val >= 1e6) return `${(val / 1e6).toFixed(1)}M`;
-            if (val >= 1e3) return `${(val / 1e3).toFixed(0)}K`;
-            return val.toString();
+            return NumbersFormatter.universal(this.value, 'compact');
           }
         }
       },
