@@ -224,7 +224,7 @@ const RevenueOverview = ({
       const rawPercent = totalPieValue > 0 ? (value / totalPieValue) * 100 : 0;
       return {
         name: capitalizeFirstLetter(name),
-        value: Format.price(value, 'standard'),
+        value: Format.price(value, 'compact'),
         percent: Number(rawPercent.toFixed(1)),
         color: networkColorMap[name.toLowerCase()] || '#808080'
       };
