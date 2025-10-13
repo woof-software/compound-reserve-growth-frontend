@@ -13,7 +13,7 @@ import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { AggregatedPoint } from '@/shared/hooks/useCompoundReceivedBars';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { formatValue } from '@/shared/lib/utils/utils';
+import { formatValue, noop } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -66,12 +66,12 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   hiddenItems,
   resetHiddenKey,
   areAllSeriesHidden,
-  onAreAllSeriesHidden,
+  onAreAllSeriesHidden = noop,
   toggleSeriesByName,
   onSelectAll,
   onDeselectAll,
-  onHiddenItems,
-  onVisibleBarsChange,
+  onHiddenItems = noop,
+  onVisibleBarsChange = noop,
   className
 }) => {
   const { theme } = useTheme();
@@ -236,7 +236,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
               (p) => p.x >= (e.min || 0) && p.x <= (e.max || Infinity)
             ).length
           );
-          onVisibleBarsChange?.(visibleCount);
+          onVisibleBarsChange(visibleCount);
         }
       }
     },
@@ -368,14 +368,14 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
 
   useEffect(() => {
     if (resetHiddenKey !== undefined) {
-      onHiddenItems?.([]);
+      onHiddenItems([]);
     }
   }, [resetHiddenKey, onHiddenItems]);
 
   useEffect(() => {
     const total = seriesData.length;
     const allHidden = total > 0 && currentHiddenSet.size === total;
-    onAreAllSeriesHidden?.(allHidden);
+    onAreAllSeriesHidden(allHidden);
   }, [seriesData.length, currentHiddenSet.size, onAreAllSeriesHidden]);
 
   return (
