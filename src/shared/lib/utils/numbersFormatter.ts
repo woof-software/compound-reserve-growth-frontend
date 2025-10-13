@@ -1,6 +1,4 @@
-/** For all formatters parameter view is required*/
 export namespace Format {
-  export type FormatType = 'token' | 'usd' | 'chart';
   export type FormatView = 'standard' | 'compact';
   /**
    * Formats a number as a USD price.
@@ -64,6 +62,10 @@ export namespace Format {
     type: 'usd';
     view: FormatView;
   };
+
+  /**
+   * Use this function for Y axis for on every chart
+   */
   export function chartAxis(
     value: number | string,
     options: TokenChartAxis | UsdChartAxis
