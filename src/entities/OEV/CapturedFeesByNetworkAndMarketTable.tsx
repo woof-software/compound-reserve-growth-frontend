@@ -1,10 +1,10 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import * as React from 'react';
 import { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { formatNumber, formatPrice } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -48,7 +48,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     header: 'Fees by network',
     enableSorting: true,
     cell: ({ row }) => (
-      <Text size='13'>{formatPrice(row.original.value, 1)}</Text>
+      <Text size='13'>{Format.price(row.original.value, 'standard')}</Text>
     )
   },
 
@@ -74,7 +74,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     enableSorting: true,
     size: 100,
     cell: ({ row }) => (
-      <Text size='13'>{formatPrice(row.original.value, 1)}</Text>
+      <Text size='13'>{Format.price(row.original.value, 'standard')}</Text>
     )
   }
 ];
@@ -89,11 +89,11 @@ const CapturedFeesByNetworkAndMarketTable = ({
         Total
       </td>
       <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
-        {formatNumber(41680359)}
+        {Format.token(41680359, 'standard')}
       </td>
       <td></td>
       <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
-        {formatNumber(54448945)}
+        {Format.token(54448945, 'standard')}
       </td>
     </tr>
   );
@@ -175,7 +175,7 @@ const CapturedFeesByNetworkAndMarketTable = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatPrice(row.value, 1)}
+                    {Format.price(row.value, 'standard')}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -216,7 +216,7 @@ const CapturedFeesByNetworkAndMarketTable = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatPrice(row.value, 1)}
+                    {Format.price(row.value, 'standard')}
                   </Text>
                 </div>
               </div>
@@ -246,7 +246,7 @@ const CapturedFeesByNetworkAndMarketTable = ({
                   lineHeight='18'
                   weight='500'
                 >
-                  {formatPrice(9999.99)}
+                  {Format.price(9999.99, 'standard')}
                 </Text>
               </div>
               <div className='grid min-h-[39px] w-full max-w-[100px]'>
@@ -263,7 +263,7 @@ const CapturedFeesByNetworkAndMarketTable = ({
                   lineHeight='18'
                   weight='500'
                 >
-                  {formatPrice(9999.99)}
+                  {Format.price(9999.99, 'standard')}
                 </Text>
               </div>
             </div>

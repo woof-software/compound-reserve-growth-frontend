@@ -1,8 +1,9 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { memo } from 'react';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { formatPrice, sumValues } from '@/shared/lib/utils/utils';
+import { sumValues } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { AssetType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
@@ -111,7 +112,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
                 weight='700'
                 size='32'
               >
-                {formatPrice(totalValue, 1)}
+                {Format.price(totalValue, 'standard')}
               </Text>
             </div>
           </div>
@@ -146,7 +147,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
                 weight='700'
                 size='32'
               >
-                {formatPrice(totalValue, 1)}
+                {Format.price(totalValue, 'standard')}
               </Text>
             </div>
           </div>
@@ -185,7 +186,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
                 weight='700'
                 size='32'
               >
-                {formatPrice(totalValue, 1)}
+                {Format.price(totalValue, 'standard')}
               </Text>
             </div>
           </div>
@@ -224,7 +225,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
                 weight='700'
                 size='32'
               >
-                {formatPrice(totalValue, 1)}
+                {Format.price(totalValue, 'standard')}
               </Text>
             </div>
           </div>
