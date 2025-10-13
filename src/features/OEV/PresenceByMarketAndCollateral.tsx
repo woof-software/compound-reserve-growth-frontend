@@ -6,6 +6,7 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import PresenceByMarketAndCollateralTable, {
   TreasuryBalanceByNetworkType
 } from '@/entities/OEV/PresenceByMarketAndCollateralTable';
+import { NOT_MARKET } from '@/shared/consts/consts';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   SortAccessor,
@@ -45,7 +46,7 @@ const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
     return {
       symbol: el.source.asset.symbol,
       chain: capitalizeFirstLetter(el.source.network),
-      market: el.source.market ?? 'no market',
+      market: el.source.market ?? NOT_MARKET,
       qty: humanReadableQuantity,
       value: el.value,
       source: el.source.type,
@@ -149,7 +150,7 @@ const PresenceByMarketAndCollateral: FC<CurrentSpendingByChainProps> = ({
         .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const noMarkets = marketOptions?.find(
-      (el) => el.id.toLowerCase() === 'no name'
+      (el) => el.id.toLowerCase() === NOT_MARKET.toLowerCase()
     );
 
     const selectedChainIds = selectedOptions.chain.map((o) => o.id);
@@ -180,12 +181,12 @@ const PresenceByMarketAndCollateral: FC<CurrentSpendingByChainProps> = ({
         return false;
       }
 
-      const market = item.source.market ?? 'no market';
+      const market = item.source.market ?? NOT_MARKET;
 
       if (
         selectedOptions.market.length > 0 &&
         !selectedOptions.market.some((o: OptionType) =>
-          o.id === 'no name' ? market === 'no market' : o.id === market
+          o.id === NOT_MARKET ? market === NOT_MARKET : o.id === market
         )
       ) {
         return false;

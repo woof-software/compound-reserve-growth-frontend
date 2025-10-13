@@ -7,6 +7,7 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import RevenueBreakdown, {
   FormattedRevenueData
 } from '@/components/RevenuePageTable/RevenueBreakdown';
+import { NOT_MARKET } from '@/shared/consts/consts';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
@@ -179,7 +180,7 @@ const RevenueBreakDownBlock = ({
     if (selectedOptions.market.length > 0) {
       const selectedValues = selectedOptions.market.map((option) => option.id);
       data = data.filter((item) => {
-        const marketValue = item.source.market || 'no name';
+        const marketValue = item.source.market || NOT_MARKET;
         return selectedValues.includes(marketValue);
       });
     }
@@ -266,7 +267,7 @@ const RevenueBreakDownBlock = ({
     const groupedData: Record<string, FormattedRevenueData> = {};
 
     dataForYear.forEach((item) => {
-      const marketValue = item.source.market || 'no name';
+      const marketValue = item.source.market || NOT_MARKET;
 
       const keyParts = [item.source.network];
       if (

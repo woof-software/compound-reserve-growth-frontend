@@ -6,6 +6,7 @@ import LineChart from '@/components/Charts/Line/Line';
 import Filter from '@/components/Filter/Filter';
 import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
+import { NOT_MARKET } from '@/shared/consts/consts';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
@@ -187,7 +188,7 @@ const TotalTreasuryValue = ({
         .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const noMarkets = deploymentOptions?.find(
-      (el) => el.id.toLowerCase() === 'no name'
+      (el) => el.id.toLowerCase() === NOT_MARKET.toLowerCase()
     );
 
     const selectedChainIds = selectedOptions.chain.map((o) => o.id);

@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
 
+import { NOT_MARKET } from '@/shared/consts/consts';
+
 interface SeriesData {
   name: string;
   data: { x: number; y: number }[];
@@ -63,7 +65,7 @@ export const useCSVExport = ({
       const filteredData = rawData
         .filter((item) => {
           const network = item.source.network;
-          const marketName = item.source.market ?? 'no name';
+          const marketName = item.source.market ?? NOT_MARKET;
           const chainMatch =
             !isChainFilterActive || selectedChainSet.has(network);
           const marketMatch =
@@ -114,7 +116,7 @@ export const useCSVExport = ({
           if (groupBy === 'None') {
             seriesKey = 'Total';
           } else {
-            seriesKey = getValueByPath(item, groupByKeyPath) || 'Unknown';
+            seriesKey = getValueByPath(item, groupByKeyPath) || NOT_MARKET;
           }
 
           groupedByDate[date][seriesKey] =

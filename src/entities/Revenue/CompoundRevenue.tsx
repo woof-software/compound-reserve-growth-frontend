@@ -4,6 +4,7 @@ import { CSVLink } from 'react-csv';
 import CompoundRevenue from '@/components/Charts/CompoundRevenue/CompoundRevenue';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
+import { NOT_MARKET } from '@/shared/consts/consts';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
@@ -114,7 +115,7 @@ function preprocessData(rawData: ChartDataItem[]): PreprocessedResult {
   for (const item of rawData) {
     const chain = item.source?.network || 'N/A';
     const market =
-      item.source?.market === null ? 'no name' : item.source?.market || 'N/A';
+      item.source?.market === null ? NOT_MARKET : item.source?.market || 'N/A';
     const source = item.source?.type || 'N/A';
     const symbol = item.source?.asset?.symbol || 'N/A';
     const date = new Date(item.date * 1000).toISOString().split('T')[0];
@@ -150,7 +151,7 @@ function preprocessData(rawData: ChartDataItem[]): PreprocessedResult {
 
         if (key === 'market') {
           const matches =
-            value === 'no name'
+            value === NOT_MARKET
               ? rawData.filter((item) => item.source?.market == null)
               : rawData.filter((item) => item.source?.market === value);
 
@@ -229,7 +230,7 @@ const CompoundRevenueBlock = ({
         .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const noMarkets = marketOptions?.find(
-      (el) => el.id.toLowerCase() === 'no name'
+      (el) => el.id.toLowerCase() === NOT_MARKET.toLowerCase()
     );
 
     const selectedChainIds = selectedOptions.chain.map((o) => o.id);
