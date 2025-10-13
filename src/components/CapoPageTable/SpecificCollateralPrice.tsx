@@ -5,6 +5,7 @@ import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import SpecificLineChart from '@/entities/Capo/SpecificLineChart';
+import { NOT_MARKET } from '@/shared/consts/consts';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
@@ -140,7 +141,7 @@ const SpecificCollateralPrice = ({
         .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const noMarkets = marketOptions?.find(
-      (el) => el.id.toLowerCase() === 'no name'
+      (el) => el.id.toLowerCase() === NOT_MARKET.toLowerCase()
     );
 
     const selectedChainIds = selectedOptions.chain.map((o) => o.id);
