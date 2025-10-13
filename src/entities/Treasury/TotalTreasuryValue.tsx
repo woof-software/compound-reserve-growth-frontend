@@ -299,6 +299,7 @@ const TotalTreasuryValue = ({
     isLegendEnabled,
     aggregatedSeries,
     areAllSeriesHidden,
+    onAllSeriesHidden,
     onEventsData,
     onShowEvents,
     onSelectAll,
@@ -420,6 +421,7 @@ const TotalTreasuryValue = ({
           onDeselectAll={onDeselectAll}
           onShowEvents={onShowEvents}
           onEventsData={onEventsData}
+          onAllSeriesHidden={onAllSeriesHidden}
         />
       )}
     </Card>

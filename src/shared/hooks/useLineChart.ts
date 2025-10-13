@@ -111,18 +111,20 @@ const useLineChart = ({
 
   const onSelectAll = useCallback(() => {
     const chart = chartRef.current?.chart;
+
     if (!chart) return;
+
     chart.series.forEach((s) => s.setVisible(true, false));
     chart.redraw();
-    setAreAllSeriesHidden(false);
   }, []);
 
   const onDeselectAll = useCallback(() => {
     const chart = chartRef.current?.chart;
+
     if (!chart) return;
+
     chart.series.forEach((s) => s.setVisible(false, false));
     chart.redraw();
-    setAreAllSeriesHidden(true);
   }, []);
 
   return {

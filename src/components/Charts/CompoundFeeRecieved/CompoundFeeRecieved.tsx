@@ -13,7 +13,7 @@ import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { AggregatedPoint } from '@/shared/hooks/useCompoundReceivedBars';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { formatValue } from '@/shared/lib/utils/utils';
+import { formatValue, noop } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -47,6 +47,8 @@ interface CompoundFeeRecievedProps {
 
   onHiddenItems?: (hiddenItems: string[]) => void;
 
+  onAreAllSeriesHidden?: (areAllSeriesHidden: boolean) => void;
+
   onSelectAll: () => void;
 
   onDeselectAll: () => void;
@@ -64,11 +66,12 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   hiddenItems,
   resetHiddenKey,
   areAllSeriesHidden,
+  onAreAllSeriesHidden = noop,
   toggleSeriesByName,
   onSelectAll,
   onDeselectAll,
-  onHiddenItems,
-  onVisibleBarsChange,
+  onHiddenItems = noop,
+  onVisibleBarsChange = noop,
   className
 }) => {
   const { theme } = useTheme();
@@ -233,7 +236,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
               (p) => p.x >= (e.min || 0) && p.x <= (e.max || Infinity)
             ).length
           );
-          onVisibleBarsChange?.(visibleCount);
+          onVisibleBarsChange(visibleCount);
         }
       }
     },
@@ -351,7 +354,7 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     });
 
     chart.redraw();
-  }, [areAllSeriesHidden, hiddenItems]);
+  }, [hiddenItems]);
 
   useEffect(() => {
     if (onHiddenItems) {
@@ -365,33 +368,15 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
 
   useEffect(() => {
     if (resetHiddenKey !== undefined) {
-      onHiddenItems?.([]);
+      onHiddenItems([]);
     }
   }, [resetHiddenKey, onHiddenItems]);
 
   useEffect(() => {
-    const chart = chartRef.current?.chart;
-
-    if (!chart) return;
-
-    if (areAllSeriesHidden) {
-      onHiddenItems?.(currentSeriesNames);
-
-      chart.series.forEach((s) => {
-        if (s.visible) s.setVisible(false, false);
-      });
-
-      chart.redraw();
-    } else {
-      onHiddenItems?.([]);
-
-      chart.series.forEach((s) => {
-        if (!s.visible) s.setVisible(true, false);
-      });
-
-      chart.redraw();
-    }
-  }, [areAllSeriesHidden, currentSeriesNames, chartRef]);
+    const total = seriesData.length;
+    const allHidden = total > 0 && currentHiddenSet.size === total;
+    onAreAllSeriesHidden(allHidden);
+  }, [seriesData.length, currentHiddenSet.size, onAreAllSeriesHidden]);
 
   return (
     <div
