@@ -548,7 +548,7 @@ export const filterAndSortMarkets = (
   const filtered = options.filter(
     (el) =>
       ['v2', 'v3'].includes(el.marketType?.toLowerCase() ?? '') ||
-      el.id.toLowerCase() === 'no name'
+      el.id.toLowerCase() === NOT_MARKET.toLowerCase()
   );
 
   const sorted = filtered.sort((a, b) => {
@@ -559,7 +559,7 @@ export const filterAndSortMarkets = (
 
       if (type === 'v2') return 1;
 
-      if (el.id.toLowerCase() === 'no name') return 2;
+      if (el.id.toLowerCase() === NOT_MARKET.toLowerCase()) return 2;
 
       return 3;
     };
