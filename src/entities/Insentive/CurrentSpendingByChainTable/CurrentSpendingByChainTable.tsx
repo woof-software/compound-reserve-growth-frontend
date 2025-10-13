@@ -1,9 +1,9 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { NumbersFormatter } from '@/shared/lib/utils/numbersFormatter';
 import {
   capitalizeFirstLetter,
   formatNumber,
@@ -59,7 +59,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
           size='13'
           className='flex justify-center'
         >
-          {NumbersFormatter.universal(row.original.valueComp, 'full', 4)}
+          {Format.token(row.original.valueComp, 'standard')}
         </Text>
       )
     },
@@ -74,7 +74,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
           className={'flex justify-end'}
           size='13'
         >
-          {NumbersFormatter.price(row.original.valueUsd, 'full')}
+          {Format.price(row.original.valueUsd, 'standard')}
         </Text>
       )
     }

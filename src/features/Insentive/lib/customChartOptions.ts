@@ -1,6 +1,5 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import Highcharts from 'highcharts';
-
-import { NumbersFormatter } from '@/shared/lib/utils/numbersFormatter';
 
 export const customChartOptions = {
   yAxis: {
@@ -11,7 +10,7 @@ export const customChartOptions = {
         fontFamily: 'Haas Grot Text R, sans-serif'
       },
       formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
-        return NumbersFormatter.price(this.value, 'compact');
+        return Format.price(this.value, 'compact');
       }
     }
   }

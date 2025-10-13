@@ -1,6 +1,5 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import Highcharts, { Point } from 'highcharts';
-
-import { NumbersFormatter } from '@/shared/lib/utils/numbersFormatter';
 
 export const customTooltipFormatter = (context: Point) => {
   const header = `<div class="font-medium mb-3 text-[11px] font-haas">
@@ -19,7 +18,7 @@ export const customTooltipFormatter = (context: Point) => {
                 <span class="text-[11px] font-haas">${point.series.name}</span>
               </div>
               <span class="font-normal text-[11px] font-haas">
-                 ${NumbersFormatter.price(point.y ?? 0, 'full')}
+                 ${Format.price(point.y ?? 0, 'standard')}
               </span>
             </div>`
           )
@@ -39,7 +38,7 @@ export const customChartOptions = {
         fontFamily: 'Haas Grot Text R, sans-serif'
       },
       formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
-        return NumbersFormatter.price(this.value, 'compact');
+        return Format.price(this.value, 'compact');
       }
     }
   }

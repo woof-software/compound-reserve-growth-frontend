@@ -1,6 +1,6 @@
-import { NumbersFormatter } from '@/shared/lib/utils/numbersFormatter';
 import Highcharts from 'highcharts';
 
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { formatUSD } from '@/shared/lib/utils/utils';
 
 export const customFormatter = (context: { x: number; points: any[] }) => {
@@ -36,7 +36,7 @@ export const customOptions = {
         fontFamily: 'Haas Grot Text R, sans-serif'
       },
       formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
-        return NumbersFormatter.price(this.value, 'compact');
+        return Format.price(this.value, 'compact');
       }
     }
   }

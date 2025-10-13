@@ -5,10 +5,10 @@ import HoverCard from '@/components/HoverCard/HoverCard';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import {
   defaultExplorer,
   explorers,
-  formatUSD,
   sliceAddress
 } from '@/shared/lib/utils/utils';
 import { CapoTableItem } from '@/shared/types/Capo/types';
@@ -68,7 +68,9 @@ const treasuryColumns: ExtendedColumnDef<CapoTableItem>[] = [
     enableSorting: true,
     size: 215,
     cell: ({ row }) => (
-      <Text size='13'>{formatUSD(Number(row.original.collateralPrice))}</Text>
+      <Text size='13'>
+        {Format.price(row.original.collateralPrice, 'standard')}
+      </Text>
     )
   },
   {
@@ -78,7 +80,9 @@ const treasuryColumns: ExtendedColumnDef<CapoTableItem>[] = [
     enableSorting: true,
     size: 215,
     cell: ({ row }) => (
-      <Text size='13'>{formatUSD(Number(row.original.priceRestriction))}</Text>
+      <Text size='13'>
+        {Format.price(row.original.priceRestriction, 'standard')}
+      </Text>
     )
   },
   {
@@ -263,7 +267,7 @@ const CollateralsPriceTable = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatUSD(Number(row.collateralPrice))}
+                    {Format.price(row.collateralPrice, 'standard')}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -280,7 +284,7 @@ const CollateralsPriceTable = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatUSD(Number(row.priceRestriction))}
+                    {Format.price(row.priceRestriction, 'standard')}
                   </Text>
                 </div>
                 <div className='grid w-full'>

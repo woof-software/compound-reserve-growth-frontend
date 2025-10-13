@@ -1,4 +1,4 @@
-import { NumbersFormatter } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import React, {
   FC,
   RefObject,
@@ -359,7 +359,7 @@ const LineChart: FC<LineChartProps> = ({
             fontFamily: 'Haas Grot Text R, sans-serif'
           },
           formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
-            return NumbersFormatter.universal(this.value, 'compact');
+            return Format.token(this.value, 'compact');
           }
         }
       },

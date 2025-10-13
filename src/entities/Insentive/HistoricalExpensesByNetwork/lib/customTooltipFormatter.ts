@@ -1,6 +1,5 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import Highcharts from 'highcharts';
-
-import { NumbersFormatter } from '@/shared/lib/utils/numbersFormatter';
 
 export const customTooltipFormatter =
   (view: string) => (context: { x: number; points: any[] }) => {
@@ -23,7 +22,7 @@ export const customTooltipFormatter =
                 <span class="text-[11px] font-haas">${point.series.name}</span>
               </div>
               <span class="font-normal text-[11px] font-haas">
-                 ${view === 'COMP' ? NumbersFormatter.token(point.y, 'full', 'COMP', 4) : NumbersFormatter.price(point.y, 'full')}
+                 ${view === 'COMP' ? Format.token(point.y, 'standard', 'COMP') : Format.price(point.y, 'standard')}
               </span>
             </div>`
           )
@@ -44,8 +43,8 @@ export const customChartOptions = (view: string) => ({
       },
       formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
         return view === 'COMP'
-          ? NumbersFormatter.token(this.value, 'compact', 'COMP', 4)
-          : NumbersFormatter.price(this.value, 'compact');
+          ? Format.token(this.value, 'compact', 'COMP')
+          : Format.price(this.value, 'compact');
       }
     }
   }

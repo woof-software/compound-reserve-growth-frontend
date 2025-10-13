@@ -1,4 +1,4 @@
-import { NumbersFormatter } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import * as React from 'react';
 import { useMemo } from 'react';
 
@@ -10,9 +10,7 @@ import { cn } from '@/shared/lib/classNames/classNames';
 import {
   capitalizeFirstLetter,
   defaultExplorer,
-  explorers,
-  formatLargeNumber,
-  formatUSD
+  explorers
 } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -80,8 +78,8 @@ const getDailyColumns = (
       cell: ({ row }) => (
         <Text size='13'>
           {view === 'USD'
-            ? NumbersFormatter.price(row.original.lendIncentive, 'full')
-            : NumbersFormatter.universal(row.original.lendIncentive, 'full', 4)}
+            ? Format.price(row.original.lendIncentive, 'standard')
+            : Format.token(row.original.lendIncentive, 'standard')}
         </Text>
       )
     },
@@ -94,12 +92,8 @@ const getDailyColumns = (
       cell: ({ row }) => (
         <Text size='13'>
           {view === 'USD'
-            ? NumbersFormatter.price(row.original.borrowIncentive, 'full')
-            : NumbersFormatter.universal(
-                row.original.borrowIncentive,
-                'full',
-                4
-              )}
+            ? Format.price(row.original.borrowIncentive, 'standard')
+            : Format.token(row.original.borrowIncentive, 'standard')}
         </Text>
       )
     },
@@ -115,8 +109,8 @@ const getDailyColumns = (
           className={'flex justify-end'}
         >
           {view === 'USD'
-            ? NumbersFormatter.price(row.original.total, 'full')
-            : NumbersFormatter.universal(row.original.total, 'full', 4)}
+            ? Format.price(row.original.total, 'standard')
+            : Format.token(row.original.total, 'standard')}
         </Text>
       )
     }
@@ -236,8 +230,8 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                     className='truncate'
                   >
                     {activeViewTab === 'USD'
-                      ? formatUSD(row.lendIncentive, 'compact')
-                      : formatLargeNumber(row.lendIncentive, 2)}
+                      ? Format.price(row.lendIncentive, 'standard')
+                      : Format.token(row.lendIncentive, 'standard')}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -255,8 +249,8 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                     className='truncate'
                   >
                     {activeViewTab === 'USD'
-                      ? formatUSD(row.borrowIncentive, 'compact')
-                      : formatLargeNumber(row.borrowIncentive, 2)}
+                      ? Format.price(row.borrowIncentive, 'standard')
+                      : Format.token(row.borrowIncentive, 'standard')}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -274,8 +268,8 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                     className='truncate'
                   >
                     {activeViewTab === 'USD'
-                      ? formatUSD(row.total, 'compact')
-                      : formatLargeNumber(row.total, 2)}
+                      ? Format.price(row.total, 'standard')
+                      : Format.token(row.total, 'standard')}
                   </Text>
                 </div>
               </div>
