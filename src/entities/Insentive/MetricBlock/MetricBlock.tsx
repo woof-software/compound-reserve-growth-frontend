@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { getTotalMetricValues } from '@/entities/Insentive/MetricBlock/lib/utils';
 import { formatNumber, formatUSD } from '@/shared/lib/utils/utils';
@@ -5,6 +7,7 @@ import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
+import { Tooltip } from '@/shared/ui/Tooltip/Tooltip';
 
 interface MetricBlockProps {
   data: CombinedIncentivesData[];
@@ -12,10 +15,42 @@ interface MetricBlockProps {
   activeTab: string;
 }
 
+const TooltipIncentive = ({ children }: { children: ReactNode }) => {
+  return (
+    <Tooltip
+      content={
+        <div>
+          <Text
+            weight='500'
+            size='11'
+            lineHeight='16'
+            className='text-primary-14'
+          >
+            Data for the recent 24 hours.
+          </Text>
+          <Text
+            weight='500'
+            size='11'
+            lineHeight='16'
+            className='text-primary-14'
+          >
+            Updates daily at 12:05 PM UTC.
+          </Text>
+        </div>
+      }
+    >
+      {children}
+    </Tooltip>
+  );
+};
+
 const MetricBlock = (props: MetricBlockProps) => {
   const { data, isLoading, activeTab } = props;
+
   const { theme } = useTheme();
+
   const metrics = getTotalMetricValues(data, activeTab);
+
   return (
     <div className='flex flex-col gap-2.5 lg:gap-5'>
       <div className='flex flex-col gap-2.5 md:flex-row lg:gap-5'>
@@ -36,12 +71,15 @@ const MetricBlock = (props: MetricBlockProps) => {
                 name='comp-metric'
                 className='h-8 w-8'
               />
-              <Text
-                weight='700'
-                size='32'
-              >
-                {formatNumber(metrics.totalLendIncentives, '')}
-              </Text>
+              <TooltipIncentive>
+                <Text
+                  weight='700'
+                  size='32'
+                  className='hover:cursor-pointer'
+                >
+                  {formatNumber(metrics.totalLendIncentives, '')}
+                </Text>
+              </TooltipIncentive>
             </div>
             <Text
               weight='500'
@@ -75,12 +113,15 @@ const MetricBlock = (props: MetricBlockProps) => {
                 name='comp-metric'
                 className='h-8 w-8'
               />
-              <Text
-                weight='700'
-                size='32'
-              >
-                {formatNumber(metrics.totalBorrowIncentives, '')}
-              </Text>
+              <TooltipIncentive>
+                <Text
+                  weight='700'
+                  size='32'
+                  className='hover:cursor-pointer'
+                >
+                  {formatNumber(metrics.totalBorrowIncentives, '')}
+                </Text>
+              </TooltipIncentive>
             </div>
             <Text
               weight='500'
@@ -116,12 +157,15 @@ const MetricBlock = (props: MetricBlockProps) => {
                 name='comp-metric'
                 className='h-8 w-8'
               />
-              <Text
-                weight='700'
-                size='32'
-              >
-                {formatNumber(metrics.totalIncentives, '')}
-              </Text>
+              <TooltipIncentive>
+                <Text
+                  weight='700'
+                  size='32'
+                  className='hover:cursor-pointer'
+                >
+                  {formatNumber(metrics.totalIncentives, '')}
+                </Text>
+              </TooltipIncentive>
             </div>
             <Text
               weight='500'
@@ -151,12 +195,15 @@ const MetricBlock = (props: MetricBlockProps) => {
         >
           <div className='grid gap-3'>
             <div className='flex items-center gap-2.5'>
-              <Text
-                weight='700'
-                size='32'
-              >
-                {formatUSD(metrics.totalFeesGeneratedUsdPrice)}
-              </Text>
+              <TooltipIncentive>
+                <Text
+                  weight='700'
+                  size='32'
+                  className='hover:cursor-pointer'
+                >
+                  {formatUSD(metrics.totalFeesGeneratedUsdPrice)}
+                </Text>
+              </TooltipIncentive>
             </div>
           </div>
           <Icon
