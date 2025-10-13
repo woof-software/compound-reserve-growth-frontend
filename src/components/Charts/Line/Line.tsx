@@ -85,7 +85,8 @@ const LineChart: FC<LineChartProps> = ({
   onSelectAll,
   onDeselectAll,
   onShowEvents,
-  onEventsData
+  onEventsData,
+  onAllSeriesHidden
 }) => {
   const programmaticChange = useRef(false);
 
@@ -472,7 +473,7 @@ const LineChart: FC<LineChartProps> = ({
     });
 
     chart.redraw();
-  }, [areAllSeriesHidden, currentHiddenSet]);
+  }, [currentHiddenSet]);
 
   useEffect(() => {
     setHiddenItems((prev) => {
@@ -491,28 +492,11 @@ const LineChart: FC<LineChartProps> = ({
   }, [resetHiddenKey]);
 
   useEffect(() => {
-    const chart = chartRef.current?.chart;
+    const total = currentSeriesNames.length;
+    const allHidden = total > 0 && currentHiddenSet.size === total;
 
-    if (!chart) return;
-
-    if (areAllSeriesHidden) {
-      setHiddenItems(currentSeriesNames);
-
-      chart.series.forEach((s) => {
-        if (s.visible) s.setVisible(false, false);
-      });
-
-      chart.redraw();
-    } else {
-      setHiddenItems([]);
-
-      chart.series.forEach((s) => {
-        if (!s.visible) s.setVisible(true, false);
-      });
-
-      chart.redraw();
-    }
-  }, [areAllSeriesHidden, currentSeriesNames, chartRef]);
+    onAllSeriesHidden?.(allHidden);
+  }, [currentHiddenSet.size, currentSeriesNames.length, onAllSeriesHidden]);
 
   return (
     <div
@@ -553,7 +537,18 @@ const LineChart: FC<LineChartProps> = ({
           >
             <ChartIconToggle
               active={areAllSeriesHidden}
-              onClick={areAllSeriesHidden ? onSelectAll : onDeselectAll}
+              onClick={() => {
+                const chart = chartRef.current?.chart;
+                if (!chart) return;
+
+                if (areAllSeriesHidden) {
+                  setHiddenItems([]);
+                  onSelectAll?.();
+                } else {
+                  setHiddenItems(currentSeriesNames);
+                  onDeselectAll?.();
+                }
+              }}
               onIcon='eye'
               offIcon='eye-closed'
               ariaLabel='Toggle all series visibility'

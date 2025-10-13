@@ -57,7 +57,8 @@ const HistoricalExpensesByNetworks = (
   } = useLineChart({
     groupBy,
     data: chartSeries,
-    barSize
+    barSize,
+    isAggregate: true
   });
 
   useFilterSyncSingle(

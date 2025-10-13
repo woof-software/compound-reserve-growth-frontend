@@ -48,6 +48,9 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
       if (initiative.length > maxLength) {
         return (
           <TextTooltip
+            className={{
+              text: '!font-medium'
+            }}
             text={initiative}
             triggerWidth={120}
           />

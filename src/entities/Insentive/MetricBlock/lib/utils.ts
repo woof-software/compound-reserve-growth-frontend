@@ -35,25 +35,21 @@ export const getTotalMetricValues = (
 
   return filteredData.reduce(
     (acc, curr) => {
-      const { incomes, spends, compoundPrice } = curr;
+      const { income, rewardsBorrow, rewardsSupply, compoundPrice } = curr;
 
-      if (spends) {
-        acc.totalLendIncentives += spends.valueSupply / compoundPrice;
-        acc.totalLendIncentivesUsdPrice += spends.valueSupply;
+      acc.totalLendIncentives += rewardsSupply / compoundPrice;
+      acc.totalLendIncentivesUsdPrice += rewardsSupply;
 
-        acc.totalBorrowIncentives += spends.valueBorrow / compoundPrice;
-        acc.totalBorrowIncentivesUsdPrice += spends.valueBorrow;
+      acc.totalBorrowIncentives += rewardsBorrow / compoundPrice;
+      acc.totalBorrowIncentivesUsdPrice += rewardsBorrow;
 
-        const total = spends.valueSupply + spends.valueBorrow;
+      const total = rewardsSupply + rewardsBorrow;
 
-        acc.totalIncentives += total / compoundPrice;
-        acc.totalIncentivesUsdPrice += total;
-      }
+      acc.totalIncentives += total / compoundPrice;
+      acc.totalIncentivesUsdPrice += total;
 
-      const total = incomes.valueSupply + incomes.valueBorrow;
-
-      acc.totalFeesGenerated += total / compoundPrice;
-      acc.totalFeesGeneratedUsdPrice += total;
+      acc.totalFeesGenerated += income / compoundPrice;
+      acc.totalFeesGeneratedUsdPrice += income;
 
       return acc;
     },

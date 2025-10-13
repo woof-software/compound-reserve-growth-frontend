@@ -147,17 +147,27 @@ const useCompoundReceivedBars = ({
 
   const onSelectAll = useCallback(() => {
     const chart = chartRef.current?.chart;
+
     if (!chart) return;
+
     chart.series.forEach((s) => s.setVisible(true, false));
     chart.redraw();
+
+    setHiddenItems([]);
     setAreAllSeriesHidden(false);
   }, []);
 
   const onDeselectAll = useCallback(() => {
     const chart = chartRef.current?.chart;
+
     if (!chart) return;
+
     chart.series.forEach((s) => s.setVisible(false, false));
     chart.redraw();
+
+    const allNames = chart.series.map((s) => s.name as string);
+    setHiddenItems(allNames);
+
     setAreAllSeriesHidden(true);
   }, []);
 
@@ -170,6 +180,7 @@ const useCompoundReceivedBars = ({
 
     toggleSeriesByName,
     setHiddenItems,
+    setAreAllSeriesHidden,
     onSelectAll,
     onDeselectAll
   };

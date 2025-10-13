@@ -53,11 +53,11 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       accessorFn: (row) => row.valueComp,
       header: 'Value COMP',
       enableSorting: true,
-      align: 'right',
+      align: 'left',
       cell: ({ row }) => (
         <Text
           size='13'
-          className={'flex justify-end'}
+          className='flex justify-center'
         >
           {NumbersFormatter.universal(row.original.valueComp, 'full', 4)}
         </Text>
