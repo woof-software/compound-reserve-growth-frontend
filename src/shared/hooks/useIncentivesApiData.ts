@@ -47,7 +47,7 @@ export const useIncentivesApiData = () => {
       );
       return response.data.data.map<IncentiveItem>(
         (item: IncentiveApiItem) => ({
-          income: item.i < 0 ? 0 : item.i,
+          income: item.i,
           rewardsSupply: item.rs,
           rewardsBorrow: item.rb,
           compoundPrice: item.pc,
