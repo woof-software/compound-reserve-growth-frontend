@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 
 import HoverCard from '@/components/HoverCard/HoverCard';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { NOT_MARKET } from '@/shared/consts/consts';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
@@ -245,7 +246,7 @@ const CollateralsPriceTable = ({
                       lineHeight='21'
                       className='truncate'
                     >
-                      {row.collateral === 'no market' ? ' - ' : row.collateral}
+                      {row.collateral === NOT_MARKET ? ' - ' : row.collateral}
                     </Text>
                   </div>
                 </div>
@@ -300,7 +301,7 @@ const CollateralsPriceTable = ({
                           weight='500'
                           className='text-primary-11 mb-5 w-full !text-center break-all'
                         >
-                          {row.collateral === 'no market'
+                          {row.collateral === NOT_MARKET
                             ? ' - '
                             : row.collateral}
                         </Text>

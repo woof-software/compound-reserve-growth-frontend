@@ -6,6 +6,7 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import TreasuryBalanceByNetwork, {
   TreasuryBalanceByNetworkType
 } from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
+import { NOT_MARKET } from '@/shared/consts/consts';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import {
@@ -43,7 +44,7 @@ const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
     return {
       symbol: el.source.asset.symbol,
       chain: capitalizeFirstLetter(el.source.network),
-      market: el.source.market ?? 'no market',
+      market: el.source.market ?? NOT_MARKET,
       qty: humanReadableQuantity,
       value: el.value,
       price: el.price,
@@ -173,12 +174,12 @@ const TreasuryBalanceByNetworkBlock = ({
         return false;
       }
 
-      const market = item.source.market ?? 'no market';
+      const market = item.source.market ?? NOT_MARKET;
 
       if (
         selectedOptions.deployment.length > 0 &&
         !selectedOptions.deployment.some((o: OptionType) =>
-          o.id === 'no name' ? market === 'no market' : o.id === market
+          o.id === NOT_MARKET ? market === NOT_MARKET : o.id === market
         )
       ) {
         return false;

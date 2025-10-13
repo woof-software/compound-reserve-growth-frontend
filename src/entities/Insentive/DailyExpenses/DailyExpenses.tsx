@@ -1,8 +1,8 @@
 import { useState } from 'react';
 
-import DailyExpensesTable from '@/entities/Insentive/DailyExpenses/DailyExpensesTable';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { DailyExpensesMobileFilters } from '@/entities/Insentive/DailyExpenses/DailyExpensesMobileFilters';
+import DailyExpensesTable from '@/entities/Insentive/DailyExpenses/DailyExpensesTable';
 import { getCsvData } from '@/entities/Insentive/DailyExpenses/lib/getCsvData';
 import { normalizeTableData } from '@/entities/Insentive/DailyExpenses/lib/normalizeTableData';
 import { NormalizedTableData } from '@/entities/Insentive/DailyExpenses/lib/types';

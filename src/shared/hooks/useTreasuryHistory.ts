@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 
+import { NOT_MARKET } from '@/shared/consts/consts';
+
 import { $api } from '../api/api';
 import { SortDirectionType } from '../types/types';
 
@@ -95,7 +97,7 @@ export const useTreasuryHistory = ({
         sourcesAndAssetsResponse.data.sources.map((source) => {
           const assetDetails = assetsMap.get(source.assetId) || {
             id: -1,
-            type: 'Unknown',
+            type: NOT_MARKET,
             symbol: 'N/A',
             address: '0x0',
             decimals: 0,
