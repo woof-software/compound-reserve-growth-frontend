@@ -1,5 +1,6 @@
-import { Format } from '@/shared/lib/utils/numbersFormatter';
 import Highcharts, { Point } from 'highcharts';
+
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 
 export const customTooltipFormatter = (context: Point) => {
   const header = `<div class="font-medium mb-3 text-[11px] font-haas">

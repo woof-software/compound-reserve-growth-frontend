@@ -1,4 +1,3 @@
-import { Format } from '@/shared/lib/utils/numbersFormatter';
 import React, {
   FC,
   RefObject,
@@ -14,6 +13,7 @@ import HighchartsReact from 'highcharts-react-official';
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { EventDataItem } from '@/shared/hooks/useLineChart';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { formatValue } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Each from '@/shared/ui/Each/Each';
@@ -35,37 +35,21 @@ export interface LineChartSeries {
 
 interface LineChartProps {
   data: LineChartSeries[];
-
   groupBy: string;
-
   chartRef: RefObject<HighchartsReact.RefObject | null>;
-
   isLegendEnabled: boolean;
-
   eventsData?: EventDataItem[];
-
   aggregatedSeries: SeriesAreaOptions[];
-
   showEvents: boolean;
-
   areAllSeriesHidden: boolean;
-
   className?: string;
-
   customTooltipFormatter?: (context: Point, groupBy: string) => string;
-
   customOptions?: Partial<Options>;
-
   resetHiddenKey?: number;
-
   onAllSeriesHidden?: (value: boolean) => void;
-
   onSelectAll: () => void;
-
   onDeselectAll: () => void;
-
   onShowEvents: (value: boolean) => void;
-
   onEventsData: (value: EventDataItem[]) => void;
 }
 

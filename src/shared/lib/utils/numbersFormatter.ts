@@ -16,6 +16,7 @@ export namespace Format {
       numberValue = 0;
     }
 
+    options.maximumFractionDigits = 2;
     options.notation = view;
     options.style = 'currency';
     options.currency = 'USD';

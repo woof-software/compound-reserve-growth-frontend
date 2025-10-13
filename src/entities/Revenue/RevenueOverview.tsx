@@ -1,3 +1,4 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
@@ -75,7 +76,7 @@ const createTableColumns = (
         dateType === 'Rolling'
           ? `Rolling ${period.toLowerCase()}`
           : toDateHeaderMap[period as ToDateTab] || period,
-      cell: ({ getValue }) => formatUSD(getValue() as number)
+      cell: ({ getValue }) => Format.price(getValue() as number, 'standard')
     })
   );
 

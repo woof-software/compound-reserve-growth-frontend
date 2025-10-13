@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState
 } from 'react';
-import Highcharts from 'highcharts';
+import Highcharts, { Options, Point } from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
@@ -24,36 +24,23 @@ import 'highcharts/modules/mouse-wheel-zoom';
 
 interface CompoundFeeRecievedProps {
   seriesData: Highcharts.SeriesColumnOptions[];
-
   chartRef: RefObject<HighchartsReact.RefObject | null>;
-
   aggregatedData: AggregatedPoint[];
-
   groupBy: string;
-
   hiddenItems: string[];
-
   resetHiddenKey?: number;
-
   areAllSeriesHidden: boolean;
-
   barCount?: number;
-
   barSize?: 'D' | 'W' | 'M';
-
   className?: string;
-
   toggleSeriesByName: (name: string) => void;
-
   onHiddenItems?: (hiddenItems: string[]) => void;
-
   onAreAllSeriesHidden?: (areAllSeriesHidden: boolean) => void;
-
   onSelectAll: () => void;
-
   onDeselectAll: () => void;
-
   onVisibleBarsChange?: (count: number) => void;
+  customTooltipFormatter?: (context: Point, groupBy: string) => string;
+  customOptions?: Partial<Options>;
 }
 
 const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
@@ -72,7 +59,9 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   onDeselectAll,
   onHiddenItems = noop,
   onVisibleBarsChange = noop,
-  className
+  className,
+  customTooltipFormatter,
+  customOptions
 }) => {
   const { theme } = useTheme();
 
@@ -175,6 +164,58 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
     [toggleSeriesByName, isLastActiveLegend, hiddenItems]
   );
 
+  const defaultTooltipFormatter = useCallback(
+    (context: any) => {
+      const header = `<div style="font-weight: 500; margin-bottom: 12px; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${Highcharts.dateFormat('%B %e, %Y', context.x as number)}</div>`;
+
+      if (groupBy === 'none') {
+        const point = context.points?.find(
+          (p: any) => p.series.type === 'area'
+        );
+        if (!point) return '';
+        return `${header}<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 14px; height: 14px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">$${Highcharts.numberFormat(point.y ?? 0, 0, '.', ',')}</span></div>`;
+      }
+
+      const dataPoints = (context.points || []).filter(
+        (p: any) => p.series.type !== 'scatter'
+      );
+      const sortedPoints = [...dataPoints].sort(
+        (a: any, b: any) => (b.y ?? 0) - (a.y ?? 0)
+      );
+      let total = 0;
+      sortedPoints.forEach((point: any) => {
+        total += point.y ?? 0;
+      });
+      let body = '';
+
+      if (groupBy === 'Market') {
+        const midPoint = Math.ceil(sortedPoints.length / 2);
+        const col1Points = sortedPoints.slice(0, midPoint);
+        const col2Points = sortedPoints.slice(midPoint);
+        const renderColumn = (points: Highcharts.Point[]) =>
+          points
+            .map(
+              (point: any) =>
+                `<div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-bottom: 4px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="white-space: nowrap; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span><span style="font-weight: 500; text-align: right; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(point.y ?? 0)}</span></div>`
+            )
+            .join('');
+        body = `<div style="display: flex; gap: 24px;"><div style="display: flex; flex-direction: column;">${renderColumn(col1Points)}</div><div style="display: flex; flex-direction: column;">${renderColumn(col2Points)}</div></div>`;
+      } else {
+        body = sortedPoints
+          .map(
+            (point: any) =>
+              `<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 4px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(point.y ?? 0)}</span></div>`
+          )
+          .join('');
+      }
+
+      const footer = `<div style="padding-top: 12px; display: flex; justify-content: space-between; align-items: center; gap: 16px;"><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">Total</span><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(total)}</span></div>`;
+
+      return header + body + footer;
+    },
+    [groupBy]
+  );
+
   let xAxisLabelFormat: string;
   switch (barSize) {
     case 'D':
@@ -187,149 +228,131 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
       break;
   }
 
-  const chartOptions: Highcharts.Options = {
-    chart: {
-      type: 'column',
-      animation: true,
-      backgroundColor: 'transparent',
-      panning: { enabled: true, type: 'x' },
-      zooming: {
-        mouseWheel: {
-          enabled: true,
-          type: 'x',
-          sensitivity: 1.1,
-          preventDefault: true
-        },
-        type: undefined,
-        pinchType: undefined,
-        resetButton: { theme: { display: 'none' } }
-      }
-    },
-    title: { text: undefined },
-    xAxis: {
-      type: 'datetime',
-      labels: {
-        format: xAxisLabelFormat,
-        style: {
-          fontSize: '11px',
-          color: '#7A8A99',
-          fontFamily: 'Haas Grot Text R, sans-serif'
+  const chartOptions: Highcharts.Options = useMemo(() => {
+    const baseOptions: Highcharts.Options = {
+      chart: {
+        type: 'column',
+        animation: true,
+        backgroundColor: 'transparent',
+        panning: { enabled: true, type: 'x' },
+        zooming: {
+          mouseWheel: {
+            enabled: true,
+            type: 'x',
+            sensitivity: 1.1,
+            preventDefault: true
+          },
+          type: undefined,
+          pinchType: undefined,
+          resetButton: { theme: { display: 'none' } }
         }
       },
-      lineWidth: 0,
-      tickLength: 0,
-      tickWidth: 0,
-      crosshair: {
-        width: 1,
-        color: theme === 'light' ? '#A1A1AA' : '#52525b',
-        dashStyle: 'ShortDash'
-      },
-      events: {
-        setExtremes: (e) => {
-          if (programmaticChange.current) {
-            programmaticChange.current = false;
-            return;
-          }
-          if (e.trigger === 'zoom') return;
-          const visibleCount = Math.round(
-            aggregatedData.filter(
-              (p) => p.x >= (e.min || 0) && p.x <= (e.max || Infinity)
-            ).length
-          );
-          onVisibleBarsChange(visibleCount);
-        }
-      }
-    },
-    yAxis: {
       title: { text: undefined },
-      gridLineWidth: 1,
-      gridLineColor: theme === 'light' ? '#E5E7EA' : '#2B3947',
-      gridLineDashStyle: 'Dash',
-      labels: {
+      xAxis: {
+        type: 'datetime',
+        labels: {
+          format: xAxisLabelFormat,
+          style: {
+            fontSize: '11px',
+            color: '#7A8A99',
+            fontFamily: 'Haas Grot Text R, sans-serif'
+          }
+        },
+        lineWidth: 0,
+        tickLength: 0,
+        tickWidth: 0,
+        crosshair: {
+          width: 1,
+          color: theme === 'light' ? '#A1A1AA' : '#52525b',
+          dashStyle: 'ShortDash'
+        },
+        events: {
+          setExtremes: (e) => {
+            if (programmaticChange.current) {
+              programmaticChange.current = false;
+              return;
+            }
+            if (e.trigger === 'zoom') return;
+            const visibleCount = Math.round(
+              aggregatedData.filter(
+                (p) => p.x >= (e.min || 0) && p.x <= (e.max || Infinity)
+              ).length
+            );
+            onVisibleBarsChange(visibleCount);
+          }
+        }
+      },
+      yAxis: {
+        title: { text: undefined },
+        gridLineWidth: 1,
+        gridLineColor: theme === 'light' ? '#E5E7EA' : '#2B3947',
+        gridLineDashStyle: 'Dash',
+        labels: {
+          style: {
+            fontSize: '11px',
+            color: '#7A8A99',
+            fontFamily: 'Haas Grot Text R, sans-serif'
+          },
+          formatter: function () {
+            const v = this.value as number;
+            if (Math.abs(v) >= 1_000_000)
+              return (v / 1_000_000).toFixed(0) + 'M';
+            if (Math.abs(v) >= 1_000) return (v / 1_000).toFixed(0) + 'K';
+            return v.toString();
+          }
+        },
+        lineWidth: 0
+      },
+      legend: { enabled: false },
+      plotOptions: {
+        column: {
+          pointPadding: 0.05,
+          groupPadding: 0.05,
+          borderWidth: 0,
+          states: { hover: { animation: false }, inactive: { opacity: 1 } }
+        },
+        series: { states: { inactive: { opacity: 0.25 } } }
+      },
+      credits: { enabled: false },
+      tooltip: {
+        useHTML: true,
+        backgroundColor: 'rgba(18, 24, 47, 0.55)',
+        borderWidth: 0,
+        shadow: false,
+        borderRadius: 8,
+        padding: 12,
         style: {
-          fontSize: '11px',
-          color: '#7A8A99',
+          color: 'var(--color-white-10)',
           fontFamily: 'Haas Grot Text R, sans-serif'
         },
+        shared: true,
         formatter: function () {
-          const v = this.value as number;
-          if (Math.abs(v) >= 1_000_000) return (v / 1_000_000).toFixed(0) + 'M';
-          if (Math.abs(v) >= 1_000) return (v / 1_000).toFixed(0) + 'K';
-          return v.toString();
+          if (customTooltipFormatter) {
+            return customTooltipFormatter(this, groupBy);
+          }
+          return defaultTooltipFormatter(this);
         }
       },
-      lineWidth: 0
-    },
-    legend: { enabled: false },
-    plotOptions: {
-      column: {
-        pointPadding: 0.05,
-        groupPadding: 0.05,
-        borderWidth: 0,
-        states: { hover: { animation: false }, inactive: { opacity: 1 } }
-      },
-      series: { states: { inactive: { opacity: 0.25 } } }
-    },
-    credits: { enabled: false },
-    tooltip: {
-      useHTML: true,
-      backgroundColor: 'rgba(18, 24, 47, 0.55)',
-      borderWidth: 0,
-      shadow: false,
-      borderRadius: 8,
-      padding: 12,
-      style: {
-        color: 'var(--color-white-10)',
-        fontFamily: 'Haas Grot Text R, sans-serif'
-      },
-      shared: true,
-      formatter: function () {
-        const header = `<div style="font-weight: 500; margin-bottom: 12px; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${Highcharts.dateFormat('%B %e, %Y', this.x as number)}</div>`;
-        if (groupBy === 'none') {
-          const point = this.points?.find((p) => p.series.type === 'area');
-          if (!point) return '';
-          return `${header}<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 14px; height: 14px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">$${Highcharts.numberFormat(point.y ?? 0, 0, '.', ',')}</span></div>`;
-        }
-        const dataPoints = (this.points || []).filter(
-          (p) => p.series.type !== 'scatter'
-        );
-        const sortedPoints = [...dataPoints].sort(
-          (a, b) => (b.y ?? 0) - (a.y ?? 0)
-        );
-        let total = 0;
-        sortedPoints.forEach((point) => {
-          total += point.y ?? 0;
-        });
-        let body = '';
-        if (groupBy === 'Market') {
-          const midPoint = Math.ceil(sortedPoints.length / 2);
-          const col1Points = sortedPoints.slice(0, midPoint);
-          const col2Points = sortedPoints.slice(midPoint);
-          const renderColumn = (points: Highcharts.Point[]) =>
-            points
-              .map(
-                (point) =>
-                  `<div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-bottom: 4px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="white-space: nowrap; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span><span style="font-weight: 500; text-align: right; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(point.y ?? 0)}</span></div>`
-              )
-              .join('');
-          body = `<div style="display: flex; gap: 24px;"><div style="display: flex; flex-direction: column;">${renderColumn(col1Points)}</div><div style="display: flex; flex-direction: column;">${renderColumn(col2Points)}</div></div>`;
-        } else {
-          body = sortedPoints
-            .map(
-              (point) =>
-                `<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 4px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(point.y ?? 0)}</span></div>`
-            )
-            .join('');
-        }
-        const footer = `<div style="padding-top: 12px; display: flex; justify-content: space-between; align-items: center; gap: 16px;"><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">Total</span><span style="font-weight: 500; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(total)}</span></div>`;
-        return header + body + footer;
-      }
-    },
-    series: seriesData as unknown as Highcharts.SeriesOptionsType[],
-    navigator: { enabled: false },
-    scrollbar: { enabled: false },
-    rangeSelector: { enabled: false }
-  };
+      series: seriesData as unknown as Highcharts.SeriesOptionsType[],
+      navigator: { enabled: false },
+      scrollbar: { enabled: false },
+      rangeSelector: { enabled: false }
+    };
+
+    return customOptions
+      ? Highcharts.merge(baseOptions, customOptions)
+      : baseOptions;
+  }, [
+    seriesData,
+    theme,
+    xAxisLabelFormat,
+    aggregatedData,
+    onVisibleBarsChange,
+    groupBy,
+    customTooltipFormatter,
+    defaultTooltipFormatter,
+    customOptions
+  ]);
 
   useEffect(() => {
     updateArrows();

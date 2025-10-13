@@ -2,8 +2,8 @@ import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { OnlyStringKeys } from '@/shared/lib/utils/types';
-import { formatNumber } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -271,8 +271,8 @@ const RevenueBreakdown = ({
 
                 const formattedValue =
                   totalValue < 0
-                    ? `-${formatNumber(Math.abs(totalValue))}`
-                    : formatNumber(totalValue);
+                    ? `-${Format.price(Math.abs(totalValue), 'standard')}`
+                    : Format.price(totalValue, 'standard');
 
                 return (
                   <div

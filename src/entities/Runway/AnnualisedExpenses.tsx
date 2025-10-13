@@ -1,3 +1,4 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import React, { useMemo } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
@@ -10,7 +11,6 @@ import {
   SortAdapter,
   useSorting
 } from '@/shared/hooks/useSorting';
-import { formatLargeNumber } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -164,7 +164,7 @@ const AnnualisedExpensesBlock = () => {
       .sort(([, valueA], [, valueB]) => valueB - valueA)
       .map(([name, value]) => ({
         name,
-        value: formatLargeNumber(value, 2),
+        value: Format.price(value, 'compact'),
         percent: totalValueForPie > 0 ? (value / totalValueForPie) * 100 : 0
       }));
 

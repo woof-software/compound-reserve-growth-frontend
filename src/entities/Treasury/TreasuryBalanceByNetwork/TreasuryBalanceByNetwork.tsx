@@ -1,11 +1,12 @@
+import { customChartOptions } from '@/entities/Treasury/TreasuryBalanceByNetwork/customChartOptions';
 import React, { useCallback, useMemo, useReducer } from 'react';
 
 import BarChart from '@/components/Charts/Bar/Bar';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import TreasuryBalanceByNetwork, {
+import TreasuryBalanceByNetworkTable, {
   TreasuryBalanceByNetworkType
-} from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
+} from '@/components/TreasuryPageTable/TreasuryBalanceByNetworkTable';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import {
@@ -435,10 +436,11 @@ const TreasuryBalanceByNetworkBlock = ({
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
           <BarChart
+            customOptions={customChartOptions}
             data={chartData}
             onClear={onClearFilters}
           />
-          <TreasuryBalanceByNetwork
+          <TreasuryBalanceByNetworkTable
             sortType={sortType}
             tableData={tableData}
           />

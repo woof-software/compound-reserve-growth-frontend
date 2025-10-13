@@ -3,10 +3,10 @@ import { CSVLink } from 'react-csv';
 
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import TreasuryHoldings, {
+import TreasuryHoldingsTable, {
   TreasuryBalanceByNetworkType
-} from '@/components/TreasuryPageTable/TreasuryHoldings';
-import { treasuryBalanceByNetworkColumns } from '@/entities/Treasury/TreasuryBalanceByNetwork';
+} from '@/components/TreasuryPageTable/TreasuryHoldingsTable';
+import { treasuryBalanceByNetworkColumns } from '@/entities/Treasury/TreasuryBalanceByNetwork/TreasuryBalanceByNetwork';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
@@ -465,7 +465,7 @@ const TreasuryHoldingsBlock = ({
         </Drawer>
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
-        <TreasuryHoldings
+        <TreasuryHoldingsTable
           sortType={sortType}
           tableData={tableData}
         />

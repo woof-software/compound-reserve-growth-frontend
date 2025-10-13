@@ -1,3 +1,4 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import React, { memo, useMemo, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
@@ -13,7 +14,6 @@ import {
 } from '@/shared/hooks/useSorting';
 import {
   capitalizeFirstLetter,
-  formatPrice,
   groupByKey,
   groupOptionsDto,
   removeDuplicates
@@ -65,7 +65,7 @@ const mapChartData = (
       return {
         name: capitalizeFirstLetter(key) || 'Unclassified',
         percent: parseFloat(percent.toFixed(2)),
-        value: formatPrice(totalValue, 1),
+        value: Format.price(totalValue, 'compact'),
         rawValue: totalValue
       };
     })

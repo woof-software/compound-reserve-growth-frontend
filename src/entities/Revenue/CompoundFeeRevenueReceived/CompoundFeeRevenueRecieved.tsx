@@ -1,3 +1,7 @@
+import {
+  customChartOptions,
+  customTooltipFormatter
+} from '@/entities/Revenue/CompoundFeeRevenueReceived/customChartOptions';
 import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -460,6 +464,8 @@ const CompoundFeeRevenueRecieved = ({
         />
       ) : (
         <CompoundFeeRecieved
+          customTooltipFormatter={customTooltipFormatter}
+          customOptions={customChartOptions}
           chartRef={chartRef}
           resetHiddenKey={resetHiddenKey}
           hiddenItems={hiddenItems}

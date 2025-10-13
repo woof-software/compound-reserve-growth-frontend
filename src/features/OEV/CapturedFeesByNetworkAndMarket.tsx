@@ -4,7 +4,7 @@ import { CSVLink } from 'react-csv';
 import BarChart from '@/components/Charts/Bar/Bar';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import { TreasuryBalanceByNetworkType } from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
+import { TreasuryBalanceByNetworkType } from '@/components/TreasuryPageTable/TreasuryBalanceByNetworkTable';
 import CapturedFeesByNetworkAndMarketTable from '@/entities/OEV/CapturedFeesByNetworkAndMarketTable';
 import { useModal } from '@/shared/hooks/useModal';
 import {

@@ -1,3 +1,4 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
@@ -90,7 +91,7 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
       const value = getValue() as number;
       return value === null || value === undefined
         ? '-'
-        : `$${formatLargeNumber(value, 2)}`;
+        : Format.price(value, 'standard');
     }
   },
   {
@@ -101,7 +102,7 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
       const value = getValue() as number;
       return value === null || value === undefined
         ? '-'
-        : `$${formatLargeNumber(value, 2)}`;
+        : Format.price(value, 'standard');
     }
   },
   {
