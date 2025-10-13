@@ -18,6 +18,7 @@ import {
 import {
   capitalizeFirstLetter,
   extractFilterOptions,
+  filterAndSortMarkets,
   formatNumber,
   groupOptionsDto
 } from '@/shared/lib/utils/utils';
@@ -166,37 +167,10 @@ const RevenueBreakDownBlock = ({
     );
 
   const deploymentOptionsFilter = useMemo(() => {
-    const marketV2 =
-      deploymentOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const marketV3 =
-      deploymentOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const noMarkets = deploymentOptions?.find(
-      (el) => el.id.toLowerCase() === 'no name'
+    return filterAndSortMarkets(
+      deploymentOptions,
+      selectedOptions.chain.map((o) => o.id)
     );
-
-    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
-
-    let allMarkets = [...marketV3, ...marketV2];
-
-    if (noMarkets) {
-      allMarkets = [...allMarkets, noMarkets];
-    }
-
-    if (selectedChainIds.length) {
-      return allMarkets.filter((el) =>
-        Array.isArray(el.chain)
-          ? el.chain.some((c) => selectedChainIds.includes(c))
-          : false
-      );
-    }
-
-    return allMarkets;
   }, [deploymentOptions, selectedOptions]);
 
   const filteredData = useMemo(() => {

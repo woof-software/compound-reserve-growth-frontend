@@ -12,7 +12,11 @@ import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
-import { ChartDataItem, extractFilterOptions } from '@/shared/lib/utils/utils';
+import {
+  ChartDataItem,
+  extractFilterOptions,
+  filterAndSortMarkets
+} from '@/shared/lib/utils/utils';
 import { BarSize, OptionType } from '@/shared/types/types';
 import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
 import Button from '@/shared/ui/Button/Button';
@@ -130,35 +134,10 @@ const CompoundCumulativeRevenue = ({
     );
 
   const deploymentOptionsFilter = useMemo(() => {
-    const marketV2 =
-      deploymentOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const marketV3 =
-      deploymentOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const noMarkets = deploymentOptions?.find(
-      (el) => el.id.toLowerCase() === 'no name'
+    return filterAndSortMarkets(
+      deploymentOptions,
+      selectedOptions.chain.map((o) => o.id)
     );
-
-    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
-
-    let allMarkets = [...marketV3, ...marketV2];
-
-    if (noMarkets) {
-      allMarkets = [...allMarkets, noMarkets];
-    }
-
-    if (selectedChainIds.length) {
-      return allMarkets.filter(
-        (el) => el.chain?.some((c) => selectedChainIds.includes(c)) ?? false
-      );
-    }
-
-    return allMarkets;
   }, [deploymentOptions, selectedOptions]);
 
   const groupBy = useMemo(() => {

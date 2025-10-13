@@ -14,7 +14,8 @@ import {
 } from '@/shared/hooks/useSorting';
 import {
   capitalizeFirstLetter,
-  extractFilterOptions
+  extractFilterOptions,
+  filterAndSortMarkets
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { OptionType } from '@/shared/types/types';
@@ -138,35 +139,10 @@ const PresenceByMarketAndCollateral: FC<CurrentSpendingByChainProps> = ({
   );
 
   const deploymentOptionsFilter = useMemo(() => {
-    const marketV2 =
-      marketOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const marketV3 =
-      marketOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const noMarkets = marketOptions?.find(
-      (el) => el.id.toLowerCase() === 'no name'
+    return filterAndSortMarkets(
+      marketOptions,
+      selectedOptions.chain.map((o) => o.id)
     );
-
-    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
-
-    let allMarkets = [...marketV3, ...marketV2];
-
-    if (noMarkets) {
-      allMarkets = [...allMarkets, noMarkets];
-    }
-
-    if (selectedChainIds.length) {
-      return allMarkets.filter(
-        (el) => el.chain?.some((c) => selectedChainIds.includes(c)) ?? false
-      );
-    }
-
-    return allMarkets;
   }, [marketOptions, selectedOptions]);
 
   const tableData = useMemo<TreasuryBalanceByNetworkType[]>(() => {

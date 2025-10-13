@@ -12,7 +12,8 @@ import { useModal } from '@/shared/hooks/useModal';
 import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
 import {
   capitalizeFirstLetter,
-  extractFilterOptions
+  extractFilterOptions,
+  filterAndSortMarkets
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { OptionType } from '@/shared/types/types';
@@ -150,35 +151,10 @@ const TreasuryHoldingsBlock = ({
     );
 
   const deploymentOptionsFilter = useMemo(() => {
-    const marketV2 =
-      deploymentOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const marketV3 =
-      deploymentOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const noMarkets = deploymentOptions?.find(
-      (el) => el.id.toLowerCase() === 'no name'
+    return filterAndSortMarkets(
+      deploymentOptions,
+      selectedOptions.chain.map((o) => o.id)
     );
-
-    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
-
-    let allMarkets = [...marketV3, ...marketV2];
-
-    if (noMarkets) {
-      allMarkets = [...allMarkets, noMarkets];
-    }
-
-    if (selectedChainIds.length) {
-      return allMarkets.filter(
-        (el) => el.chain?.some((c) => selectedChainIds.includes(c)) ?? false
-      );
-    }
-
-    return allMarkets;
   }, [deploymentOptions, selectedOptions]);
 
   const tableData = useMemo<TreasuryBalanceByNetworkType[]>(() => {

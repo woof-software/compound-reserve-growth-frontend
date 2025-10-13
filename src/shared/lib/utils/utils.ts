@@ -540,3 +540,45 @@ export const startOfUTCMonth = (t: number) => {
 export function noop() {
   // Do nothing
 }
+
+export const filterAndSortMarkets = (
+  options: OptionType[] = [],
+  selectedChainIds: string[] = []
+): OptionType[] => {
+  const filtered = options.filter(
+    (el) =>
+      ['v2', 'v3'].includes(el.marketType?.toLowerCase() ?? '') ||
+      el.id.toLowerCase() === 'no name'
+  );
+
+  const sorted = filtered.sort((a, b) => {
+    const getOrder = (el: OptionType) => {
+      const type = el.marketType?.toLowerCase();
+
+      if (type === 'v3') return 0;
+
+      if (type === 'v2') return 1;
+
+      if (el.id.toLowerCase() === 'no name') return 2;
+
+      return 3;
+    };
+
+    const orderA = getOrder(a);
+    const orderB = getOrder(b);
+
+    if (orderA !== orderB) return orderA - orderB;
+
+    return a.label.localeCompare(b.label);
+  });
+
+  if (selectedChainIds.length) {
+    return sorted.filter((el) =>
+      Array.isArray(el.chain)
+        ? el.chain.some((c) => selectedChainIds.includes(c))
+        : false
+    );
+  }
+
+  return sorted;
+};
