@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useRef } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
@@ -20,11 +20,6 @@ interface CryptoChartProps {
 
 const CryptoChart: FC<CryptoChartProps> = ({ data, onClear }) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
-
-  const maxValue = useMemo(
-    () => (data.length ? Math.max(...data.map((item) => item.value)) : 0),
-    [data]
-  );
 
   const chartOptions: Highcharts.Options = {
     chart: {
@@ -55,8 +50,6 @@ const CryptoChart: FC<CryptoChartProps> = ({ data, onClear }) => {
       }
     },
     yAxis: {
-      type: 'logarithmic',
-      max: maxValue,
       endOnTick: true,
       maxPadding: 0,
       title: {
