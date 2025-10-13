@@ -152,17 +152,52 @@ const RevenueBreakDownBlock = ({
   const filterOptionsConfig = useMemo(
     () => ({
       chain: { path: 'source.network' },
-      market: { path: 'source.market' },
+      deployment: { path: 'source.market' },
       source: { path: 'source.type' },
       symbol: { path: 'source.asset.symbol' }
     }),
     []
   );
 
-  const { chainOptions, marketOptions, sourceOptions, symbolOptions } = useMemo(
-    () => extractFilterOptions(rawData, filterOptionsConfig),
-    [rawData, filterOptionsConfig]
-  );
+  const { chainOptions, deploymentOptions, sourceOptions, symbolOptions } =
+    useMemo(
+      () => extractFilterOptions(rawData, filterOptionsConfig),
+      [rawData, filterOptionsConfig]
+    );
+
+  const deploymentOptionsFilter = useMemo(() => {
+    const marketV2 =
+      deploymentOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
+
+    const marketV3 =
+      deploymentOptions
+        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
+        .sort((a, b) => a.label.localeCompare(b.label)) || [];
+
+    const noMarkets = deploymentOptions?.find(
+      (el) => el.id.toLowerCase() === 'no name'
+    );
+
+    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
+
+    let allMarkets = [...marketV3, ...marketV2];
+
+    if (noMarkets) {
+      allMarkets = [...allMarkets, noMarkets];
+    }
+
+    if (selectedChainIds.length) {
+      return allMarkets.filter((el) =>
+        Array.isArray(el.chain)
+          ? el.chain.some((c) => selectedChainIds.includes(c))
+          : false
+      );
+    }
+
+    return allMarkets;
+  }, [deploymentOptions, selectedOptions]);
 
   const filteredData = useMemo(() => {
     let data = rawData;
@@ -347,7 +382,7 @@ const RevenueBreakDownBlock = ({
       placeholder: 'Market',
       total: selectedOptions.market.length,
       selectedOptions: selectedOptions.market,
-      options: marketOptions || [],
+      options: deploymentOptions || [],
       onChange: onSelectMarket
     };
 
@@ -379,7 +414,7 @@ const RevenueBreakDownBlock = ({
     ];
   }, [
     chainOptions,
-    marketOptions,
+    deploymentOptions,
     onSelectChain,
     onSelectMarket,
     onSelectSource,
@@ -459,11 +494,11 @@ const RevenueBreakDownBlock = ({
               disabled={isLoading}
             />
             <MultiSelect
-              options={marketOptions || []}
+              options={deploymentOptionsFilter || []}
               value={selectedOptions.market}
               onChange={onSelectMarket}
               placeholder='Market'
-              disabled={isLoading || !Boolean(marketOptions.length)}
+              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
             />
             <MultiSelect
               options={
