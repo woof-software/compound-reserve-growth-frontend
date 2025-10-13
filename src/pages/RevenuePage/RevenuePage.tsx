@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 
-import CompoundCumulativeRevenue from '@/entities/Revenue/CompoundCumulativeRevenue';
+import CompoundCumulativeRevenue from '@/entities/Revenue/CompoundCumulativeRevenue/CompoundCumulativeRevenue';
 import CompoundFeeRevenueByChain from '@/entities/Revenue/CompoundFeeRevenueByChain';
-import CompoundFeeRevenueRecieved from '@/entities/Revenue/CompoundFeeRevenueRecieved';
+import CompoundFeeRevenueRecieved from '@/entities/Revenue/CompoundFeeRevenueReceived/CompoundFeeRevenueRecieved';
 import CompoundRevenueBlock from '@/entities/Revenue/CompoundRevenue';
 import RevenueBreakDownBlock from '@/entities/Revenue/RevenueBreakdown';
 import RevenueMetrics from '@/entities/Revenue/RevenueMetrics';

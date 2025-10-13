@@ -3,12 +3,8 @@ import { useMemo } from 'react';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
-import {
-  capitalizeFirstLetter,
-  formatLargeNumber,
-  formatNumber,
-  formatUSD
-} from '@/shared/lib/utils/utils';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -59,7 +55,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
           size='13'
           className='flex justify-center'
         >
-          {formatLargeNumber(row.original.valueComp, 2)}
+          {Format.token(row.original.valueComp, 'standard')}
         </Text>
       )
     },
@@ -74,7 +70,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
           className={'flex justify-end'}
           size='13'
         >
-          {formatUSD(row.original.valueUsd, 'compact')}
+          {Format.price(row.original.valueUsd, 'standard')}
         </Text>
       )
     }
@@ -163,7 +159,7 @@ const CurrentSpendingByChainTable = ({
                       lineHeight='21'
                       className='truncate'
                     >
-                      {formatNumber(row.valueComp, '')}
+                      {Format.token(row.valueComp, 'standard')}
                     </Text>
                   </div>
                   <div className='grid w-full'>
@@ -180,7 +176,7 @@ const CurrentSpendingByChainTable = ({
                       lineHeight='21'
                       className='truncate'
                     >
-                      {formatUSD(row.valueUsd, 'compact')}
+                      {Format.price(row.valueUsd, 'standard')}
                     </Text>
                   </div>
                 </div>

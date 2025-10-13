@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import CompoundFeeRevenuebyChainComponent, {
+import CompoundFeeRevenueByChainTable, {
   Interval,
   ProcessedRevenueData
-} from '@/components/RevenuePageTable/CompoundFeeRevenuebyChain';
+} from '@/components/RevenuePageTable/CompoundFeeRevenueByChainTable';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
@@ -540,7 +540,7 @@ const CompoundFeeRevenueByChain = ({
           </Text>
         </div>
       ) : (
-        <CompoundFeeRevenuebyChainComponent
+        <CompoundFeeRevenueByChainTable
           sortType={sortType}
           data={currentView.tableData}
           columns={currentView.columns}

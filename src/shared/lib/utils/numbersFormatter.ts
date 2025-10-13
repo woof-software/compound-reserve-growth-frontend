@@ -16,6 +16,7 @@ export namespace Format {
       numberValue = 0;
     }
 
+    options.maximumFractionDigits = 2;
     options.notation = view;
     options.style = 'currency';
     options.currency = 'USD';
@@ -31,8 +32,8 @@ export namespace Format {
    */
   export function token(
     value: number | string,
-    tokenSymbol?: string,
-    view?: FormatView
+    view?: FormatView,
+    tokenSymbol?: string
   ) {
     let numberValue = Number(value);
     const options: Intl.NumberFormatOptions = {};
@@ -73,6 +74,6 @@ export namespace Format {
     if (options.type === 'usd') {
       return price(value, options.view);
     }
-    return token(value, options.symbol, options.view);
+    return token(value, options.view, options.symbol);
   }
 }

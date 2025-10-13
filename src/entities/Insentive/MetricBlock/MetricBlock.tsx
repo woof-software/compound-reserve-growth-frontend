@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { getTotalMetricValues } from '@/entities/Insentive/MetricBlock/lib/utils';
-import { formatNumber, formatUSD } from '@/shared/lib/utils/utils';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -71,22 +71,19 @@ const MetricBlock = (props: MetricBlockProps) => {
                 name='comp-metric'
                 className='h-8 w-8'
               />
-              <TooltipIncentive>
-                <Text
-                  weight='700'
-                  size='32'
-                  className='hover:cursor-pointer'
-                >
-                  {formatNumber(metrics.totalLendIncentives, '')}
-                </Text>
-              </TooltipIncentive>
+              <Text
+                weight='700'
+                size='32'
+              >
+                {Format.token(metrics.totalLendIncentives, 'standard')}
+              </Text>
             </div>
             <Text
               weight='500'
               size='13'
               className='text-primary-14'
             >
-              {formatNumber(metrics.totalLendIncentivesUsdPrice)}
+              {Format.price(metrics.totalLendIncentivesUsdPrice, 'standard')}
             </Text>
           </div>
           <Icon
@@ -113,22 +110,19 @@ const MetricBlock = (props: MetricBlockProps) => {
                 name='comp-metric'
                 className='h-8 w-8'
               />
-              <TooltipIncentive>
-                <Text
-                  weight='700'
-                  size='32'
-                  className='hover:cursor-pointer'
-                >
-                  {formatNumber(metrics.totalBorrowIncentives, '')}
-                </Text>
-              </TooltipIncentive>
+              <Text
+                weight='700'
+                size='32'
+              >
+                {Format.token(metrics.totalBorrowIncentives, 'standard')}
+              </Text>
             </div>
             <Text
               weight='500'
               size='13'
               className='text-primary-14'
             >
-              {formatNumber(metrics.totalBorrowIncentivesUsdPrice)}
+              {Format.price(metrics.totalBorrowIncentivesUsdPrice, 'standard')}
             </Text>
           </div>
           <Icon
@@ -157,22 +151,19 @@ const MetricBlock = (props: MetricBlockProps) => {
                 name='comp-metric'
                 className='h-8 w-8'
               />
-              <TooltipIncentive>
-                <Text
-                  weight='700'
-                  size='32'
-                  className='hover:cursor-pointer'
-                >
-                  {formatNumber(metrics.totalIncentives, '')}
-                </Text>
-              </TooltipIncentive>
+              <Text
+                weight='700'
+                size='32'
+              >
+                {Format.token(metrics.totalIncentives, 'standard')}
+              </Text>
             </div>
             <Text
               weight='500'
               size='13'
               className='text-primary-14'
             >
-              {formatNumber(metrics.totalIncentivesUsdPrice)}
+              {Format.price(metrics.totalIncentivesUsdPrice, 'standard')}
             </Text>
           </div>
           <Icon
@@ -195,15 +186,12 @@ const MetricBlock = (props: MetricBlockProps) => {
         >
           <div className='grid gap-3'>
             <div className='flex items-center gap-2.5'>
-              <TooltipIncentive>
-                <Text
-                  weight='700'
-                  size='32'
-                  className='hover:cursor-pointer'
-                >
-                  {formatUSD(metrics.totalFeesGeneratedUsdPrice)}
-                </Text>
-              </TooltipIncentive>
+              <Text
+                weight='700'
+                size='32'
+              >
+                {Format.price(metrics.totalFeesGeneratedUsdPrice, 'standard')}
+              </Text>
             </div>
           </div>
           <Icon

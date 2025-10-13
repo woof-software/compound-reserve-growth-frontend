@@ -1,5 +1,6 @@
 import Highcharts from 'highcharts';
 
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { formatUSD } from '@/shared/lib/utils/utils';
 
 export const customFormatter = (context: { x: number; points: any[] }) => {
@@ -35,7 +36,7 @@ export const customOptions = {
         fontFamily: 'Haas Grot Text R, sans-serif'
       },
       formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
-        return `$${this.value}`;
+        return Format.chartAxis(this.value, { type: 'usd', view: 'compact' });
       }
     }
   }

@@ -1,3 +1,4 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import React, { useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -19,7 +20,6 @@ import {
 import {
   capitalizeFirstLetter,
   extractFilterOptions,
-  formatNumber,
   groupOptionsDto
 } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
@@ -238,24 +238,24 @@ const RevenueBreakDownBlock = ({
       {
         accessorKey: `q1_${yearToDisplay}`,
         header: `Q1 ${yearToDisplay}`,
-        cell: ({ getValue }) => formatNumber(getValue() as number)
+        cell: ({ getValue }) => Format.price(getValue() as number, 'standard')
       },
       {
         accessorKey: `q2_${yearToDisplay}`,
         header: `Q2 ${yearToDisplay}`,
-        cell: ({ getValue }) => formatNumber(getValue() as number)
+        cell: ({ getValue }) => Format.price(getValue() as number, 'standard')
       },
       {
         accessorKey: `q3_${yearToDisplay}`,
         header: `Q3 ${yearToDisplay}`,
-        cell: ({ getValue }) => formatNumber(getValue() as number)
+        cell: ({ getValue }) => Format.price(getValue() as number, 'standard')
       },
       {
         accessorKey: `q4_${yearToDisplay}`,
         header: `Q4 ${yearToDisplay}`,
         cell: ({ getValue }) => {
           const val = getValue<number>();
-          return val === 0 ? '-' : formatNumber(val);
+          return val === 0 ? '-' : Format.price(val, 'standard');
         }
       }
     );

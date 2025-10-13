@@ -3,8 +3,9 @@ import React, { FC, useMemo } from 'react';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { OnlyStringKeys } from '@/shared/lib/utils/types';
-import { capitalizeFirstLetter, formatUSD } from '@/shared/lib/utils/utils';
+import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -130,7 +131,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                         >
                           {key === 'chain'
                             ? capitalizeFirstLetter(cellValue as string)
-                            : formatUSD(cellValue as number)}
+                            : Format.price(cellValue as number, 'standard')}
                         </Text>
                       </div>
                     </div>
@@ -179,7 +180,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                         weight='500'
                         className='truncate'
                       >
-                        {formatUSD(el[1] || 0)}
+                        {Format.price(el[1] || 0, 'standard')}
                       </Text>
                     </div>
                   )

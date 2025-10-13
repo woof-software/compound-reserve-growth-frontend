@@ -3,7 +3,10 @@ import { useState } from 'react';
 import Line from '@/components/Charts/Line/Line';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { FeesGeneratedIncentivesMobileFilters } from '@/entities/Insentive/FeesGeneratedIncentives/FeesGeneratedIncentivesMobileFilters';
-import { customTooltipFormatter } from '@/entities/Insentive/FeesGeneratedIncentives/lib/customTooltipFormatter';
+import {
+  customChartOptions,
+  customTooltipFormatter
+} from '@/entities/Insentive/FeesGeneratedIncentives/lib/customTooltipFormatter';
 import { getGeneratedIncentivesChartSeries } from '@/entities/Insentive/FeesGeneratedIncentives/lib/getGeneratedIncentivesChartSeries';
 import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
 import { useChartControls } from '@/shared/hooks/useChartControls';
@@ -170,6 +173,7 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
           onDeselectAll={onDeselectAll}
           onShowEvents={onShowEvents}
           onEventsData={onEventsData}
+          customOptions={customChartOptions}
           customTooltipFormatter={customTooltipFormatter}
         />
       )}

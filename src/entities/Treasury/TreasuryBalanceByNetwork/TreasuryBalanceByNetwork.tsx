@@ -1,12 +1,12 @@
+import { customChartOptions } from '@/entities/Treasury/TreasuryBalanceByNetwork/customChartOptions';
 import React, { useCallback, useMemo, useReducer } from 'react';
 
-import CryptoChart from '@/components/Charts/Bar/Bar';
+import BarChart from '@/components/Charts/Bar/Bar';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import TreasuryBalanceByNetwork, {
+import TreasuryBalanceByNetworkTable, {
   TreasuryBalanceByNetworkType
-} from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
-import { NOT_MARKET } from '@/shared/consts/consts';
+} from '@/components/TreasuryPageTable/TreasuryBalanceByNetworkTable';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import {
@@ -43,7 +43,7 @@ const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
     return {
       symbol: el.source.asset.symbol,
       chain: capitalizeFirstLetter(el.source.network),
-      market: el.source.market ?? NOT_MARKET,
+      market: el.source.market ?? 'no market',
       qty: humanReadableQuantity,
       value: el.value,
       price: el.price,
@@ -158,7 +158,7 @@ const TreasuryBalanceByNetworkBlock = ({
         .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const noMarkets = deploymentOptions?.find(
-      (el) => el.id.toLowerCase() === NOT_MARKET.toLowerCase()
+      (el) => el.id.toLowerCase() === 'no name'
     );
 
     const selectedChainIds = selectedOptions.chain.map((o) => o.id);
@@ -198,12 +198,12 @@ const TreasuryBalanceByNetworkBlock = ({
         return false;
       }
 
-      const market = item.source.market ?? NOT_MARKET;
+      const market = item.source.market ?? 'no market';
 
       if (
         selectedOptions.deployment.length > 0 &&
         !selectedOptions.deployment.some((o: OptionType) =>
-          o.id === NOT_MARKET ? market === NOT_MARKET : o.id === market
+          o.id === 'no name' ? market === 'no market' : o.id === market
         )
       ) {
         return false;
@@ -435,11 +435,12 @@ const TreasuryBalanceByNetworkBlock = ({
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
-          <CryptoChart
+          <BarChart
+            customOptions={customChartOptions}
             data={chartData}
             onClear={onClearFilters}
           />
-          <TreasuryBalanceByNetwork
+          <TreasuryBalanceByNetworkTable
             sortType={sortType}
             tableData={tableData}
           />

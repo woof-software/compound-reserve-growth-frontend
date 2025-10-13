@@ -1,6 +1,7 @@
+import { customChartOptions } from '@/features/Insentive/lib/customChartOptions';
 import React, { useState } from 'react';
 
-import CryptoChart from '@/components/Charts/Bar/Bar';
+import BarChart from '@/components/Charts/Bar/Bar';
 import CurrentSpendingByChainTable, {
   SpendingByChainTableColumns
 } from '@/entities/Insentive/CurrentSpendingByChainTable/CurrentSpendingByChainTable';
@@ -95,7 +96,8 @@ const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
       />
       <View.Condition if={Boolean(!isLoading && !isError)}>
         <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
-          <CryptoChart
+          <BarChart
+            customOptions={customChartOptions}
             data={chartData}
             onClear={clearAllFilters}
           />

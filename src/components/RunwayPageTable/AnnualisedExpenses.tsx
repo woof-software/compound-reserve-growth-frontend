@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { formatLargeNumber } from '@/shared/lib/utils/utils';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Text from '@/shared/ui/Text/Text';
 
@@ -40,13 +40,13 @@ const columns: ExtendedColumnDef<AnnualisedExpensesRow>[] = [
     accessorKey: 'amount',
     header: 'Amount (Qty)',
     align: 'center',
-    cell: ({ getValue }) => formatLargeNumber(getValue() as number, 2)
+    cell: ({ getValue }) => Format.token(getValue() as number, 'standard')
   },
   {
     accessorKey: 'value',
     header: 'Value ($)',
     align: 'right',
-    cell: ({ getValue }) => `$${formatLargeNumber(getValue() as number, 2)}`
+    cell: ({ getValue }) => Format.price(getValue() as number, 'standard')
   }
 ];
 
@@ -62,10 +62,10 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
       </td>
       <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px]'></td>
       <td className='text-primary-14 px-[5px] py-[13px] text-center text-[13px] font-medium'>
-        {formatLargeNumber(footerData.amount, 2)}
+        {Format.token(footerData.amount, 'standard')}
       </td>
       <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px] font-medium'>
-        {`$${formatLargeNumber(footerData.value, 2)}`}
+        {Format.price(footerData.value, 'standard')}
       </td>
     </tr>
   );
@@ -158,7 +158,7 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatLargeNumber(row.amount, 2)}
+                    {Format.token(row.amount, 'standard')}
                   </Text>
                 </div>
                 <div className='grid w-full max-w-[100px]'>
@@ -175,7 +175,7 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    ${formatLargeNumber(row.value, 2)}
+                    {Format.price(row.value, 'standard')}
                   </Text>
                 </div>
               </div>
@@ -206,7 +206,7 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
                   weight='500'
                   className='truncate'
                 >
-                  {formatLargeNumber(footerData.amount, 2)}
+                  {Format.token(footerData.amount, 'standard')}
                 </Text>
               </div>
               <div className='grid w-full max-w-[100px]'>
@@ -223,7 +223,9 @@ const AnnualisedExpenses: React.FC<AnnualisedExpensesComponentProps> = ({
                   lineHeight='21'
                   weight='500'
                   className='truncate'
-                >{`$${formatLargeNumber(footerData.value, 2)}`}</Text>
+                >
+                  {Format.price(footerData.value, 'standard')}
+                </Text>
               </div>
             </div>
           </>

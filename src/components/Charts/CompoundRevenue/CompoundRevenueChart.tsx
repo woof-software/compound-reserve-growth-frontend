@@ -1,3 +1,4 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import React, { useEffect, useMemo, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -15,7 +16,10 @@ interface CompoundRevenueProps {
   barSize: 'D' | 'W' | 'M';
 }
 
-const CompoundRevenue: React.FC<CompoundRevenueProps> = ({ data, barSize }) => {
+const CompoundRevenueChart: React.FC<CompoundRevenueProps> = ({
+  data,
+  barSize
+}) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
   const programmaticChange = useRef(false);
 
@@ -108,11 +112,7 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({ data, barSize }) => {
       labels: {
         style: { fontSize: '11px', color: '#7A8A99' },
         formatter: function () {
-          const value = this.value as number;
-          if (Math.abs(value) >= 1000000)
-            return (value / 1000000).toFixed(1) + 'M';
-          if (Math.abs(value) >= 1000) return (value / 1000).toFixed(1) + 'K';
-          return value.toString();
+          return Format.price(this.value, 'compact');
         }
       },
       lineWidth: 0
@@ -153,12 +153,7 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({ data, barSize }) => {
             dateFormat = '%b %d, %Y';
         }
         const date = Highcharts.dateFormat(dateFormat, point.x);
-        const value =
-          '$' +
-          (point.y as number).toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          });
+        const value = Format.price(point.y as number, 'standard');
         return `<div>
                  <p style="color: #FFFFFF; font-weight: 500; font-size: 11px; margin-bottom: 12px;">${date}</p>
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -217,4 +212,4 @@ const CompoundRevenue: React.FC<CompoundRevenueProps> = ({ data, barSize }) => {
   );
 };
 
-export default CompoundRevenue;
+export default CompoundRevenueChart;

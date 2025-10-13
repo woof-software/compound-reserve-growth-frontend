@@ -1,3 +1,7 @@
+import {
+  customChartOptions,
+  customTooltipFormatter
+} from '@/entities/Revenue/CompoundCumulativeRevenue/customChartOptions';
 import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -402,6 +406,8 @@ const CompoundCumulativeRevenue = ({
           onDeselectAll={onDeselectAll}
           onShowEvents={onShowEvents}
           onEventsData={onEventsData}
+          customOptions={customChartOptions}
+          customTooltipFormatter={customTooltipFormatter}
         />
       )}
     </Card>

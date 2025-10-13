@@ -1,7 +1,8 @@
 import { memo } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
-import { formatPrice, sumValues } from '@/shared/lib/utils/utils';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { sumValues } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { AssetType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
@@ -120,8 +121,8 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
               content: ''
             }}
             label='Total Treasury Value'
-            value={formatPrice(totalValue, 1)}
-            badge={formatPrice(totalLastValue, 1)}
+            value={Format.price(totalValue, 'compact')}
+            badge={Format.price(totalLastValue, 'compact')}
             badgeType={totalLastValue > 0 ? 'positive' : 'negative'}
             icon={
               <Icon
@@ -146,8 +147,8 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
         >
           <ValueMetricField
             label='Total COMP Value'
-            value={formatPrice(compTotalValue, 1)}
-            badge={formatPrice(compLastValue, 1)}
+            value={Format.price(compTotalValue, 'compact')}
+            badge={Format.price(compLastValue, 'compact')}
             badgeType={compLastValue > 0 ? 'positive' : 'negative'}
             icon={
               <Icon
@@ -171,8 +172,8 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
         >
           <ValueMetricField
             label='Total Non-Comp Value'
-            value={formatPrice(nonCompTotalValue)}
-            badge={formatPrice(nonCompLastValue, 1)}
+            value={Format.price(nonCompTotalValue, 'compact')}
+            badge={Format.price(nonCompLastValue, 'compact')}
             badgeType={nonCompLastValue > 0 ? 'positive' : 'negative'}
             icon={
               <Icon
@@ -203,8 +204,8 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             }}
             iconText='Stablecoin Holdings'
             label='Total Stablecoin Holdings'
-            value={formatPrice(stablecoinTotalValue)}
-            badge={formatPrice(stablecoinLastValue, 1)}
+            value={Format.price(stablecoinTotalValue, 'compact')}
+            badge={Format.price(stablecoinLastValue, 'compact')}
             badgeType={stablecoinLastValue > 0 ? 'positive' : 'negative'}
             icon={
               <Icon
@@ -234,8 +235,8 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             }}
             iconText='ETH Correlated Holdings'
             label='Total ETH Correlated Holdings'
-            value={formatPrice(ethCorrelatedHoldingTotalValue)}
-            badge={formatPrice(ethCorrelatedHoldingLastValue, 1)}
+            value={Format.price(ethCorrelatedHoldingTotalValue, 'compact')}
+            badge={Format.price(ethCorrelatedHoldingLastValue, 'compact')}
             badgeType={
               ethCorrelatedHoldingLastValue > 0 ? 'positive' : 'negative'
             }

@@ -4,10 +4,10 @@ import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { dateSortingFn, parseDateToUTC } from '@/shared/lib/utils/dateSorting';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import {
   capitalizeFirstLetter,
-  formatDateWithOrdinal,
-  formatLargeNumber
+  formatDateWithOrdinal
 } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Text from '@/shared/ui/Text/Text';
@@ -90,7 +90,7 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
       const value = getValue() as number;
       return value === null || value === undefined
         ? '-'
-        : `$${formatLargeNumber(value, 2)}`;
+        : Format.price(value, 'standard');
     }
   },
   {
@@ -101,7 +101,7 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
       const value = getValue() as number;
       return value === null || value === undefined
         ? '-'
-        : `$${formatLargeNumber(value, 2)}`;
+        : Format.price(value, 'standard');
     }
   },
   {
@@ -274,7 +274,7 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {row.amount ? `$${formatLargeNumber(row.amount, 2)}` : '-'}
+                    {row.amount ? Format.price(row.amount, 'standard') : '-'}
                   </Text>
                 </div>
                 <div className='grid w-full max-w-[100px]'>
@@ -292,7 +292,7 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
                     className='truncate'
                   >
                     {row.amount
-                      ? `$${formatLargeNumber(row.paidAmount, 2)}`
+                      ? Format.price(row.paidAmount, 'standard')
                       : '-'}
                   </Text>
                 </div>

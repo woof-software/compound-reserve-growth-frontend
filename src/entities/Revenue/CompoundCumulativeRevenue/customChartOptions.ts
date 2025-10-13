@@ -1,21 +1,19 @@
-import Highcharts from 'highcharts';
+import Highcharts, { Point } from 'highcharts';
 
 import { Format } from '@/shared/lib/utils/numbersFormatter';
 
-export const customTooltipFormatter =
-  (view: string) => (context: { x: number; points: any[] }) => {
-    const header = `<div class="font-medium mb-3 text-[11px] font-haas">
+export const customTooltipFormatter = (context: Point) => {
+  const header = `<div class="font-medium mb-3 text-[11px] font-haas">
       ${Highcharts.dateFormat('%B %e, %Y', context.x)}
     </div>`;
 
-    const pointsSortedDesc = [...context.points].sort(
-      (a, b) => (b.y ?? 0) - (a.y ?? 0)
-    );
+  const total =
+    context.points?.reduce((sum, point) => sum + (point.y ?? 0), 0) ?? 0;
 
-    const body = `<div class='flex flex-col gap-3'>
+  const body = `<div class='flex flex-col gap-3'>
       ${
-        pointsSortedDesc
-          .map(
+        context.points
+          ?.map(
             (point) =>
               `<div class="flex justify-between items-center gap-4">
               <div class="flex items-center gap-2">
@@ -23,18 +21,24 @@ export const customTooltipFormatter =
                 <span class="text-[11px] font-haas">${point.series.name}</span>
               </div>
               <span class="font-normal text-[11px] font-haas">
-                 ${view === 'COMP' ? Format.token(point.y, 'standard', 'COMP') : Format.price(point.y, 'standard')}
+                 ${Format.price(point.y ?? 0, 'standard')}
               </span>
             </div>`
           )
           .join('') || ''
       }
+      <div class="flex justify-between items-center gap-4">
+        <span class="text-[11px] font-haas">Total</span>
+        <span class="text-[11px] font-haas">
+          ${Format.price(total, 'standard')}
+        </span>
+      </div>
     </div>`;
 
-    return header + body;
-  };
+  return header + body;
+};
 
-export const customChartOptions = (view: string) => ({
+export const customChartOptions = {
   yAxis: {
     labels: {
       style: {
@@ -43,10 +47,8 @@ export const customChartOptions = (view: string) => ({
         fontFamily: 'Haas Grot Text R, sans-serif'
       },
       formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
-        return view === 'COMP'
-          ? Format.token(this.value, 'compact', 'COMP')
-          : Format.price(this.value, 'compact');
+        return Format.chartAxis(this.value, { type: 'usd', view: 'compact' });
       }
     }
   }
-});
+};

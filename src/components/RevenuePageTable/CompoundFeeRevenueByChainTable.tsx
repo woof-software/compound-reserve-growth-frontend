@@ -3,11 +3,11 @@ import React, { useMemo } from 'react';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { OnlyStringKeys } from '@/shared/lib/utils/types';
 import {
   capitalizeFirstLetter,
-  formatCurrencyValue,
-  formatNumber
+  formatCurrencyValue
 } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -22,17 +22,13 @@ export type Interval = 'Quarterly' | 'Monthly' | 'Weekly';
 
 interface CompoundFeeRevenuebyChainProps {
   data: ProcessedRevenueData[];
-
   columns: ExtendedColumnDef<ProcessedRevenueData>[];
-
   selectedInterval: Interval;
-
   totals: { [key: string]: number };
-
   sortType: SortAdapter<ProcessedRevenueData>;
 }
 
-const CompoundFeeRevenuebyChain = ({
+const CompoundFeeRevenueByChainTable = ({
   data,
   columns,
   totals,
@@ -66,8 +62,8 @@ const CompoundFeeRevenuebyChain = ({
 
         const formattedValue =
           totalValue < 0
-            ? `-${formatNumber(Math.abs(totalValue))}`
-            : formatNumber(totalValue);
+            ? `-${Format.price(Math.abs(totalValue), 'standard')}`
+            : Format.price(totalValue, 'standard');
 
         return (
           <td
@@ -214,8 +210,8 @@ const CompoundFeeRevenuebyChain = ({
 
                 const formattedValue =
                   totalValue < 0
-                    ? `-${formatNumber(Math.abs(totalValue))}`
-                    : formatNumber(totalValue);
+                    ? `-${Format.price(Math.abs(totalValue), 'standard')}`
+                    : Format.price(totalValue, 'standard');
 
                 return (
                   <div
@@ -261,4 +257,4 @@ const CompoundFeeRevenuebyChain = ({
   );
 };
 
-export default CompoundFeeRevenuebyChain;
+export default CompoundFeeRevenueByChainTable;

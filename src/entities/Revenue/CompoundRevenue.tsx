@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
-import CompoundRevenue from '@/components/Charts/CompoundRevenue/CompoundRevenue';
+import CompoundRevenueChart from '@/components/Charts/CompoundRevenue/CompoundRevenueChart';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { NOT_MARKET } from '@/shared/consts/consts';
@@ -423,7 +423,7 @@ const CompoundRevenueBlock = ({
       />
       <View.Condition if={!isLoading && !isError && hasData}>
         <div className='h-[400px]'>
-          <CompoundRevenue
+          <CompoundRevenueChart
             data={processedChartData}
             barSize={barSize}
           />
