@@ -10,6 +10,7 @@ import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/Compoun
 import Filter from '@/components/Filter/Filter';
 import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
+import { NOT_MARKET } from '@/shared/consts/consts';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCompoundReceivedBars } from '@/shared/hooks/useCompoundReceivedBars';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
@@ -207,7 +208,7 @@ const CompoundFeeRevenueRecieved = ({
 
     for (const item of rawData) {
       const network = item.source.network;
-      const marketName = item.source.market ?? 'no name';
+      const marketName = item.source.market ?? NOT_MARKET;
       const symbolName = item.source.asset.symbol;
       const assetTypeName = item.source.asset.type;
 
@@ -237,7 +238,7 @@ const CompoundFeeRevenueRecieved = ({
       if (groupBy === 'None') {
         seriesKey = 'Total';
       } else {
-        seriesKey = getValueByPath(item, groupByKeyPath) || 'Unknown';
+        seriesKey = getValueByPath(item, groupByKeyPath) || NOT_MARKET;
       }
 
       if (!groupedByDate[date]) {
@@ -262,7 +263,7 @@ const CompoundFeeRevenueRecieved = ({
 
           if (key === 'market') {
             const matches =
-              value === 'no name'
+              value === NOT_MARKET
                 ? rawData.filter((item) => item.source?.market == null)
                 : rawData.filter((item) => item.source?.market === value);
 
@@ -330,7 +331,7 @@ const CompoundFeeRevenueRecieved = ({
         .sort((a, b) => a.label.localeCompare(b.label)) || [];
 
     const noMarkets = marketOptions?.find(
-      (el) => el.id.toLowerCase() === 'no name'
+      (el) => el.id.toLowerCase() === NOT_MARKET.toLowerCase()
     );
 
     const selectedChainIds = selectedOptions.chain.map((o) => o.id);

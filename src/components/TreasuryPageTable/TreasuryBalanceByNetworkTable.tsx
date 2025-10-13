@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { NOT_MARKET } from '@/shared/consts/consts';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { Format } from '@/shared/lib/utils/numbersFormatter';
@@ -72,7 +73,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     enableSorting: true,
     cell: ({ row }) => (
       <Text size='13'>
-        {row.original.market === 'no market' ? ' - ' : row.original.market}
+        {row.original.market === NOT_MARKET ? ' - ' : row.original.market}
       </Text>
     )
   },
@@ -216,7 +217,7 @@ const TreasuryBalanceByNetworkTable = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {row.market === 'no market' ? ' - ' : row.market}
+                    {row.market === NOT_MARKET ? ' - ' : row.market}
                   </Text>
                 </div>
                 <div className='grid w-full'>

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import type { LineChartSeries } from '@/components/Charts/Line/Line';
+import { NOT_MARKET } from '@/shared/consts/consts';
 
 import {
   capitalizeFirstLetter,
@@ -61,7 +62,7 @@ export const useChartDataProcessor = ({
       filteredData.forEach((item) => {
         if (!item.date || typeof item.value !== 'number') return;
 
-        const key = getValueByPath(item, groupByKeyPath) || 'Unknown';
+        const key = getValueByPath(item, groupByKeyPath) || NOT_MARKET;
 
         if (!aggregatedData.has(key)) {
           aggregatedData.set(key, new Map<number, number>());

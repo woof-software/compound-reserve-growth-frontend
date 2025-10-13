@@ -5,6 +5,7 @@ import PieChart from '@/components/Charts/Pie/Pie';
 import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
+import { NOT_MARKET } from '@/shared/consts/consts';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import {
@@ -163,7 +164,7 @@ const TreasuryCompositionBlock = memo(
       if (selectedGroup === 'Market') {
         const markets = groupByKey(
           uniqData,
-          (item) => item.source.market || 'no market'
+          (item) => item.source.market || NOT_MARKET
         );
         return mapChartData(markets, uniqData);
       }
@@ -196,7 +197,7 @@ const TreasuryCompositionBlock = memo(
       if (selectedGroup === 'Market') {
         const markets = groupByKey(
           uniqData,
-          (item) => item.source.market || 'no market'
+          (item) => item.source.market || NOT_MARKET
         );
 
         const marketsDto = mapTableData(markets);

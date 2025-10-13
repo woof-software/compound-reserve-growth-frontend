@@ -1,6 +1,6 @@
 import { ChangeEvent, MouseEvent as ReactMouseEvent } from 'react';
 
-import { THIRTY_DAYS } from '@/shared/consts/consts';
+import { NOT_MARKET, THIRTY_DAYS } from '@/shared/consts/consts';
 import { TokenData } from '@/shared/types/Treasury/types';
 import type { OptionType } from '@/shared/types/types';
 
@@ -333,7 +333,7 @@ export const extractFilterOptions = (
       let value = getValueByPath(item, config[key].path);
 
       if (key === 'deployment' && value === null) {
-        value = 'no name';
+        value = NOT_MARKET;
       }
 
       if (value !== null && value !== undefined) {
@@ -355,7 +355,7 @@ export const extractFilterOptions = (
 
         if (key === 'deployment') {
           const matches =
-            value === 'no name'
+            value === NOT_MARKET
               ? rawData.filter(
                   (item) => getValueByPath(item, config[key].path) == null
                 )
@@ -363,7 +363,7 @@ export const extractFilterOptions = (
                   (item) => getValueByPath(item, config[key].path) === value
                 );
 
-          if (value !== 'no name') {
+          if (value !== NOT_MARKET) {
             option.marketType = matches[0]?.source.type.split(' ')[1] ?? '';
           }
 
