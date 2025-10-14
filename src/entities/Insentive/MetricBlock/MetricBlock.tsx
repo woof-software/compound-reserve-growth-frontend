@@ -15,7 +15,13 @@ interface MetricBlockProps {
   activeTab: string;
 }
 
-const TooltipIncentive = ({ children }: { children: ReactNode }) => {
+const TooltipIncentive = ({
+  children,
+  activeTab
+}: {
+  children: ReactNode;
+  activeTab: string;
+}) => {
   return (
     <Tooltip
       content={
@@ -26,7 +32,7 @@ const TooltipIncentive = ({ children }: { children: ReactNode }) => {
             lineHeight='16'
             className='text-primary-14'
           >
-            Data for the recent 24 hours.
+            Data for the recent {activeTab === 'Day' ? '24 hours' : '365 days'}.
           </Text>
           <Text
             weight='500'
@@ -71,12 +77,14 @@ const MetricBlock = (props: MetricBlockProps) => {
                 name='comp-metric'
                 className='h-8 w-8'
               />
-              <Text
-                weight='700'
-                size='32'
-              >
-                {Format.token(metrics.totalLendIncentives, 'standard')}
-              </Text>
+              <TooltipIncentive activeTab={activeTab}>
+                <Text
+                  weight='700'
+                  size='32'
+                >
+                  {Format.token(metrics.totalLendIncentives, 'standard')}
+                </Text>
+              </TooltipIncentive>
             </div>
             <Text
               weight='500'
@@ -110,12 +118,14 @@ const MetricBlock = (props: MetricBlockProps) => {
                 name='comp-metric'
                 className='h-8 w-8'
               />
-              <Text
-                weight='700'
-                size='32'
-              >
-                {Format.token(metrics.totalBorrowIncentives, 'standard')}
-              </Text>
+              <TooltipIncentive activeTab={activeTab}>
+                <Text
+                  weight='700'
+                  size='32'
+                >
+                  {Format.token(metrics.totalBorrowIncentives, 'standard')}
+                </Text>
+              </TooltipIncentive>
             </div>
             <Text
               weight='500'
@@ -151,12 +161,14 @@ const MetricBlock = (props: MetricBlockProps) => {
                 name='comp-metric'
                 className='h-8 w-8'
               />
-              <Text
-                weight='700'
-                size='32'
-              >
-                {Format.token(metrics.totalIncentives, 'standard')}
-              </Text>
+              <TooltipIncentive activeTab={activeTab}>
+                <Text
+                  weight='700'
+                  size='32'
+                >
+                  {Format.token(metrics.totalIncentives, 'standard')}
+                </Text>
+              </TooltipIncentive>
             </div>
             <Text
               weight='500'
@@ -186,12 +198,14 @@ const MetricBlock = (props: MetricBlockProps) => {
         >
           <div className='grid gap-3'>
             <div className='flex items-center gap-2.5'>
-              <Text
-                weight='700'
-                size='32'
-              >
-                {Format.price(metrics.totalFeesGeneratedUsdPrice, 'standard')}
-              </Text>
+              <TooltipIncentive activeTab={activeTab}>
+                <Text
+                  weight='700'
+                  size='32'
+                >
+                  {Format.price(metrics.totalFeesGeneratedUsdPrice, 'standard')}
+                </Text>
+              </TooltipIncentive>
             </div>
           </div>
           <Icon
