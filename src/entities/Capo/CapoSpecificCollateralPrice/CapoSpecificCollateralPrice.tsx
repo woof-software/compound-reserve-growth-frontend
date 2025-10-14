@@ -8,14 +8,15 @@ import {
   customFormatter,
   customOptions
 } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/chartConfig';
+import { getCsvDataNormalizer } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/getCsvData';
 import { useChartFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useChartFilters';
 import { useCollateralChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useCollateralChartData';
 import { useRelativeFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useRelativeFilters';
 import { useChartControls } from '@/shared/hooks/useChartControls';
-import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
+import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import { CapoNormalizedChartData } from '@/shared/types/Capo/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
@@ -135,13 +136,7 @@ export const CapoSpecificCollateralPrice = (
     onChainSelect: setSelectedChain
   });
 
-  const { csvData, csvFilename } = useCSVExport({
-    chartSeries: chartSeries,
-    barSize,
-    groupBy: groupBy(),
-    filePrefix: 'Capo_Specific_Collateral_Price',
-    aggregationType: 'sum'
-  });
+  const csvData = getCsvDataNormalizer(chartSeries, barSize);
 
   const {
     chartRef,
@@ -202,7 +197,7 @@ export const CapoSpecificCollateralPrice = (
         />
         <CSVDownloadButton
           data={csvData}
-          filename={csvFilename}
+          filename={getCsvFileName('capo_specific_collateral_price')}
         />
       </div>
       <div className='block lg:hidden'>
@@ -258,7 +253,7 @@ export const CapoSpecificCollateralPrice = (
             <div className='px-3 py-2'>
               <CSVLink
                 data={csvData}
-                filename={csvFilename}
+                filename={getCsvFileName('capo_specific_collateral_price')}
                 onClick={onMoreClose}
               >
                 <div className='flex items-center gap-1.5'>
