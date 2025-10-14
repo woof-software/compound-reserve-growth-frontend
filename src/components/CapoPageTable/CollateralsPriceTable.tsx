@@ -24,7 +24,7 @@ export interface CollateralsPriceProps {
   sortType: SortAdapter<CapoTableItem>;
 }
 
-const treasuryColumns: ExtendedColumnDef<CapoTableItem>[] = [
+const collateralTableColumns: ExtendedColumnDef<CapoTableItem>[] = [
   {
     id: 'network',
     accessorFn: (row) => row.network,
@@ -67,6 +67,7 @@ const treasuryColumns: ExtendedColumnDef<CapoTableItem>[] = [
     accessorFn: (row) => row.collateralPrice,
     header: 'Collateral Price',
     enableSorting: true,
+    sortDescFirst: true,
     size: 215,
     cell: ({ row }) => (
       <Text size='13'>
@@ -79,6 +80,7 @@ const treasuryColumns: ExtendedColumnDef<CapoTableItem>[] = [
     accessorFn: (row) => row.priceRestriction,
     header: 'Price Restriction',
     enableSorting: true,
+    sortDescFirst: true,
     size: 215,
     cell: ({ row }) => (
       <Text size='13'>
@@ -356,8 +358,8 @@ const CollateralsPriceTable = ({
       </MobileDataTable>
       <DataTable
         data={tableData}
-        columns={treasuryColumns}
-        enableSorting
+        columns={collateralTableColumns}
+        enableSorting={true}
         enablePagination={tableData.length > 10}
         pageSize={10}
         className={cn('hidden flex-col justify-between lg:flex', {
