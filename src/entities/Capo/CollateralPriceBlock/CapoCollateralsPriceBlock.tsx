@@ -1,3 +1,4 @@
+import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import React, { useCallback } from 'react';
 
 import CollateralsPriceTable from '@/components/CapoPageTable/CollateralsPriceTable';
@@ -31,6 +32,7 @@ const CapoCollateralsPriceBlock = ({
 }: CollateralsPriceBlockProps) => {
   const {
     selectedOptions,
+    setSelectedOptions,
     filterOptions,
     chainOptions,
     collateralOptions,
@@ -39,6 +41,11 @@ const CapoCollateralsPriceBlock = ({
     onClearSelectedOptions,
     applyFilters
   } = useCollateralsFilters(tableData);
+
+  useFiltersSync(selectedOptions, setSelectedOptions, 'ccpb', [
+    'chain',
+    'collateral'
+  ]);
 
   const {
     sortDirection,
