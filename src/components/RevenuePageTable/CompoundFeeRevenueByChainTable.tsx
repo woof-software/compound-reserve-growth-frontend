@@ -5,10 +5,7 @@ import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { OnlyStringKeys } from '@/shared/lib/utils/types';
-import {
-  capitalizeFirstLetter,
-  formatCurrencyValue
-} from '@/shared/lib/utils/utils';
+import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -147,7 +144,7 @@ const CompoundFeeRevenueByChainTable = ({
                         >
                           {key === 'chain'
                             ? value
-                            : formatCurrencyValue(value || 0)}
+                            : Format.price(value || 0, 'standard')}
                         </Text>
                       </div>
                     </div>
