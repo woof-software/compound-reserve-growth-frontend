@@ -1,4 +1,3 @@
-import { Format } from '@/shared/lib/utils/numbersFormatter';
 import React, { useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -17,9 +16,11 @@ import {
   SortAdapter,
   useSorting
 } from '@/shared/hooks/useSorting';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import {
   capitalizeFirstLetter,
   extractFilterOptions,
+  filterAndSortMarkets,
   groupOptionsDto
 } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
@@ -153,17 +154,25 @@ const RevenueBreakDownBlock = ({
   const filterOptionsConfig = useMemo(
     () => ({
       chain: { path: 'source.network' },
-      market: { path: 'source.market' },
+      deployment: { path: 'source.market' },
       source: { path: 'source.type' },
       symbol: { path: 'source.asset.symbol' }
     }),
     []
   );
 
-  const { chainOptions, marketOptions, sourceOptions, symbolOptions } = useMemo(
-    () => extractFilterOptions(rawData, filterOptionsConfig),
-    [rawData, filterOptionsConfig]
-  );
+  const { chainOptions, deploymentOptions, sourceOptions, symbolOptions } =
+    useMemo(
+      () => extractFilterOptions(rawData, filterOptionsConfig),
+      [rawData, filterOptionsConfig]
+    );
+
+  const deploymentOptionsFilter = useMemo(() => {
+    return filterAndSortMarkets(
+      deploymentOptions,
+      selectedOptions.chain.map((o) => o.id)
+    );
+  }, [deploymentOptions, selectedOptions]);
 
   const filteredData = useMemo(() => {
     let data = rawData;
@@ -348,7 +357,7 @@ const RevenueBreakDownBlock = ({
       placeholder: 'Market',
       total: selectedOptions.market.length,
       selectedOptions: selectedOptions.market,
-      options: marketOptions || [],
+      options: deploymentOptions || [],
       onChange: onSelectMarket
     };
 
@@ -380,7 +389,7 @@ const RevenueBreakDownBlock = ({
     ];
   }, [
     chainOptions,
-    marketOptions,
+    deploymentOptions,
     onSelectChain,
     onSelectMarket,
     onSelectSource,
@@ -460,11 +469,11 @@ const RevenueBreakDownBlock = ({
               disabled={isLoading}
             />
             <MultiSelect
-              options={marketOptions || []}
+              options={deploymentOptionsFilter || []}
               value={selectedOptions.market}
               onChange={onSelectMarket}
               placeholder='Market'
-              disabled={isLoading || !Boolean(marketOptions.length)}
+              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
             />
             <MultiSelect
               options={

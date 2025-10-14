@@ -10,7 +10,11 @@ import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { type RevenuePageProps } from '@/shared/hooks/useRevenue';
-import { capitalizeFirstLetter, ChartDataItem } from '@/shared/lib/utils/utils';
+import {
+  capitalizeFirstLetter,
+  ChartDataItem,
+  filterAndSortMarkets
+} from '@/shared/lib/utils/utils';
 import { BarSize, OptionType } from '@/shared/types/types';
 import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
 import Button from '@/shared/ui/Button/Button';
@@ -219,37 +223,10 @@ const CompoundRevenueBlock = ({
     filterOptions;
 
   const deploymentOptionsFilter = useMemo(() => {
-    const marketV2 =
-      marketOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const marketV3 =
-      marketOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const noMarkets = marketOptions?.find(
-      (el) => el.id.toLowerCase() === NOT_MARKET.toLowerCase()
+    return filterAndSortMarkets(
+      marketOptions,
+      selectedOptions.chain.map((o) => o.id)
     );
-
-    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
-
-    let allMarkets = [...marketV3, ...marketV2];
-
-    if (noMarkets) {
-      allMarkets = [...allMarkets, noMarkets];
-    }
-
-    if (selectedChainIds.length) {
-      return allMarkets.filter((el) =>
-        Array.isArray(el.chain)
-          ? el.chain.some((c) => selectedChainIds.includes(c))
-          : false
-      );
-    }
-
-    return allMarkets;
   }, [marketOptions, selectedOptions]);
 
   const processedChartData = useMemo(() => {

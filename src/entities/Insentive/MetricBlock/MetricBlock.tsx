@@ -71,12 +71,14 @@ const MetricBlock = (props: MetricBlockProps) => {
                 name='comp-metric'
                 className='h-8 w-8'
               />
-              <Text
-                weight='700'
-                size='32'
-              >
-                {Format.token(metrics.totalLendIncentives, 'standard')}
-              </Text>
+              <TooltipIncentive>
+                <Text
+                  weight='700'
+                  size='32'
+                >
+                  {Format.token(metrics.totalLendIncentives, 'standard')}
+                </Text>
+              </TooltipIncentive>
             </div>
             <Text
               weight='500'
@@ -110,12 +112,14 @@ const MetricBlock = (props: MetricBlockProps) => {
                 name='comp-metric'
                 className='h-8 w-8'
               />
-              <Text
-                weight='700'
-                size='32'
-              >
-                {Format.token(metrics.totalBorrowIncentives, 'standard')}
-              </Text>
+              <TooltipIncentive>
+                <Text
+                  weight='700'
+                  size='32'
+                >
+                  {Format.token(metrics.totalBorrowIncentives, 'standard')}
+                </Text>
+              </TooltipIncentive>
             </div>
             <Text
               weight='500'
@@ -151,12 +155,14 @@ const MetricBlock = (props: MetricBlockProps) => {
                 name='comp-metric'
                 className='h-8 w-8'
               />
-              <Text
-                weight='700'
-                size='32'
-              >
-                {Format.token(metrics.totalIncentives, 'standard')}
-              </Text>
+              <TooltipIncentive>
+                <Text
+                  weight='700'
+                  size='32'
+                >
+                  {Format.token(metrics.totalIncentives, 'standard')}
+                </Text>
+              </TooltipIncentive>
             </div>
             <Text
               weight='500'
@@ -186,12 +192,14 @@ const MetricBlock = (props: MetricBlockProps) => {
         >
           <div className='grid gap-3'>
             <div className='flex items-center gap-2.5'>
-              <Text
-                weight='700'
-                size='32'
-              >
-                {Format.price(metrics.totalFeesGeneratedUsdPrice, 'standard')}
-              </Text>
+              <TooltipIncentive>
+                <Text
+                  weight='700'
+                  size='32'
+                >
+                  {Format.price(metrics.totalFeesGeneratedUsdPrice, 'standard')}
+                </Text>
+              </TooltipIncentive>
             </div>
           </div>
           <Icon

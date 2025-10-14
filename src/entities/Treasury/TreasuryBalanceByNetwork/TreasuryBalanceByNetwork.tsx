@@ -1,4 +1,3 @@
-import { customChartOptions } from '@/entities/Treasury/TreasuryBalanceByNetwork/customChartOptions';
 import React, { useCallback, useMemo, useReducer } from 'react';
 
 import BarChart from '@/components/Charts/Bar/Bar';
@@ -7,6 +6,8 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import TreasuryBalanceByNetworkTable, {
   TreasuryBalanceByNetworkType
 } from '@/components/TreasuryPageTable/TreasuryBalanceByNetworkTable';
+import { customChartOptions } from '@/entities/Treasury/TreasuryBalanceByNetwork/customChartOptions';
+import { NOT_MARKET } from '@/shared/consts/consts';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import {
@@ -17,7 +18,8 @@ import {
 import {
   capitalizeFirstLetter,
   colorPicker,
-  extractFilterOptions
+  extractFilterOptions,
+  filterAndSortMarkets
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { OptionType } from '@/shared/types/types';
@@ -43,7 +45,7 @@ const mapTableData = (data: TokenData[]): TreasuryBalanceByNetworkType[] => {
     return {
       symbol: el.source.asset.symbol,
       chain: capitalizeFirstLetter(el.source.network),
-      market: el.source.market ?? 'no market',
+      market: el.source.market ?? NOT_MARKET,
       qty: humanReadableQuantity,
       value: el.value,
       price: el.price,
@@ -147,35 +149,10 @@ const TreasuryBalanceByNetworkBlock = ({
     );
 
   const deploymentOptionsFilter = useMemo(() => {
-    const marketV2 =
-      deploymentOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const marketV3 =
-      deploymentOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const noMarkets = deploymentOptions?.find(
-      (el) => el.id.toLowerCase() === 'no name'
+    return filterAndSortMarkets(
+      deploymentOptions,
+      selectedOptions.chain.map((o) => o.id)
     );
-
-    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
-
-    let allMarkets = [...marketV3, ...marketV2];
-
-    if (noMarkets) {
-      allMarkets = [...allMarkets, noMarkets];
-    }
-
-    if (selectedChainIds.length) {
-      return allMarkets.filter(
-        (el) => el.chain?.some((c) => selectedChainIds.includes(c)) ?? false
-      );
-    }
-
-    return allMarkets;
   }, [deploymentOptions, selectedOptions]);
 
   const tableData = useMemo<TreasuryBalanceByNetworkType[]>(() => {
@@ -198,12 +175,12 @@ const TreasuryBalanceByNetworkBlock = ({
         return false;
       }
 
-      const market = item.source.market ?? 'no market';
+      const market = item.source.market ?? NOT_MARKET;
 
       if (
         selectedOptions.deployment.length > 0 &&
         !selectedOptions.deployment.some((o: OptionType) =>
-          o.id === 'no name' ? market === 'no market' : o.id === market
+          o.id === NOT_MARKET ? market === NOT_MARKET : o.id === market
         )
       ) {
         return false;

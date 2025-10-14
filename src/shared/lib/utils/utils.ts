@@ -444,3 +444,56 @@ export const startOfUTCMonth = (t: number) => {
 export function noop() {
   // Do nothing
 }
+
+/**
+ * Filters and sorts an array of market options.
+ * Keeps only items with market type 'v2', 'v3', or id equal to NOT_MARKET.
+ * Sorts: first 'v3', then 'v2', then 'NOT_MARKET', then alphabetically by label.
+ * If selectedChainIds is provided, further filters by chain.
+ * Returns the filtered and sorted array.
+ *
+ * @param options Array of market options to filter and sort.
+ * @param selectedChainIds Array of selected chain ids (optional).
+ * @return Filtered and sorted array of market options.
+ */
+export const filterAndSortMarkets = (
+  options: OptionType[] = [],
+  selectedChainIds: string[] = []
+): OptionType[] => {
+  const filtered = options.filter(
+    (el) =>
+      ['v2', 'v3'].includes(el.marketType?.toLowerCase() ?? '') ||
+      el.id.toLowerCase() === NOT_MARKET.toLowerCase()
+  );
+
+  const sorted = filtered.sort((a, b) => {
+    const getOrder = (el: OptionType) => {
+      const type = el.marketType?.toLowerCase();
+
+      if (type === 'v3') return 0;
+
+      if (type === 'v2') return 1;
+
+      if (el.id.toLowerCase() === NOT_MARKET.toLowerCase()) return 2;
+
+      return 3;
+    };
+
+    const orderA = getOrder(a);
+    const orderB = getOrder(b);
+
+    if (orderA !== orderB) return orderA - orderB;
+
+    return a.label.localeCompare(b.label);
+  });
+
+  if (selectedChainIds.length) {
+    return sorted.filter((el) =>
+      Array.isArray(el.chain)
+        ? el.chain.some((c) => selectedChainIds.includes(c))
+        : false
+    );
+  }
+
+  return sorted;
+};
