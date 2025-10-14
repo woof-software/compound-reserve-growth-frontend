@@ -49,11 +49,10 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       accessorFn: (row) => row.valueComp,
       header: 'Value COMP',
       enableSorting: true,
-      align: 'left',
       cell: ({ row }) => (
         <Text
           size='13'
-          className='flex justify-center'
+          className='flex justify-start'
         >
           {Format.token(row.original.valueComp, 'standard', 'COMP')}
         </Text>
