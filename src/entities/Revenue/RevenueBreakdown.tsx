@@ -39,7 +39,7 @@ import View from '@/shared/ui/View/View';
 
 interface SelectedFiltersState {
   chain: OptionType[];
-  market: OptionType[];
+  deployment: OptionType[];
   source: OptionType[];
   symbol: OptionType[];
 }
@@ -51,7 +51,7 @@ const RevenueBreakDownBlock = ({
 }: RevenuePageProps) => {
   const initialState: SelectedFiltersState = {
     chain: [],
-    market: [],
+    deployment: [],
     source: [],
     symbol: []
   };
@@ -101,7 +101,7 @@ const RevenueBreakDownBlock = ({
 
   useFiltersSync(selectedOptions, setSelectedOptions, 'rb', [
     'chain',
-    'market',
+    'deployment',
     'source',
     'symbol'
   ]);
@@ -119,18 +119,18 @@ const RevenueBreakDownBlock = ({
     (chain: OptionType[]) => {
       const selectedChainIds = chain.map((o) => o.id);
 
-      const filteredDeployment = selectedOptions.market.filter((el) =>
+      const filteredDeployment = selectedOptions.deployment.filter((el) =>
         selectedChainIds.length === 0
           ? true
           : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
       );
-      setSelectedOptions({ chain, market: filteredDeployment });
+      setSelectedOptions({ chain, deployment: filteredDeployment });
     },
-    [selectedOptions.market]
+    [selectedOptions.deployment]
   );
 
   const onSelectMarket = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ market: options });
+    setSelectedOptions({ deployment: options });
   }, []);
 
   const onSelectSource = useCallback((options: OptionType[]) => {
@@ -186,8 +186,10 @@ const RevenueBreakDownBlock = ({
       );
     }
 
-    if (selectedOptions.market.length > 0) {
-      const selectedValues = selectedOptions.market.map((option) => option.id);
+    if (selectedOptions.deployment.length > 0) {
+      const selectedValues = selectedOptions.deployment.map(
+        (option) => option.id
+      );
       data = data.filter((item) => {
         const marketValue = item.source.market || NOT_MARKET;
         return selectedValues.includes(marketValue);
@@ -228,7 +230,7 @@ const RevenueBreakDownBlock = ({
       { accessorKey: 'chain', header: 'Chain' }
     ];
     if (
-      selectedOptions.market.length > 0 ||
+      selectedOptions.deployment.length > 0 ||
       selectedOptions.source.length > 0
     ) {
       columns.push({ accessorKey: 'market', header: 'Market' });
@@ -280,7 +282,7 @@ const RevenueBreakDownBlock = ({
 
       const keyParts = [item.source.network];
       if (
-        selectedOptions.market.length > 0 ||
+        selectedOptions.deployment.length > 0 ||
         selectedOptions.source.length > 0
       ) {
         keyParts.push(marketValue);
@@ -336,7 +338,7 @@ const RevenueBreakDownBlock = ({
 
   const noDataMessage =
     selectedOptions.chain.length > 0 ||
-    selectedOptions.market.length > 0 ||
+    selectedOptions.deployment.length > 0 ||
     selectedOptions.source.length > 0 ||
     selectedOptions.symbol.length > 0
       ? 'No data for selected filters'
@@ -355,9 +357,9 @@ const RevenueBreakDownBlock = ({
     const marketFilterOptions = {
       id: 'market',
       placeholder: 'Market',
-      total: selectedOptions.market.length,
-      selectedOptions: selectedOptions.market,
-      options: deploymentOptions || [],
+      total: selectedOptions.deployment.length,
+      selectedOptions: selectedOptions.deployment,
+      options: deploymentOptionsFilter || [],
       onChange: onSelectMarket
     };
 
@@ -389,7 +391,7 @@ const RevenueBreakDownBlock = ({
     ];
   }, [
     chainOptions,
-    deploymentOptions,
+    deploymentOptionsFilter,
     onSelectChain,
     onSelectMarket,
     onSelectSource,
@@ -470,7 +472,7 @@ const RevenueBreakDownBlock = ({
             />
             <MultiSelect
               options={deploymentOptionsFilter || []}
-              value={selectedOptions.market}
+              value={selectedOptions.deployment}
               onChange={onSelectMarket}
               placeholder='Market'
               disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
