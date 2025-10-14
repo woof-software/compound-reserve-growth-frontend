@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { getTotalMetricValues } from '@/entities/Insentive/MetricBlock/lib/utils';
-import { formatNumber, formatUSD } from '@/shared/lib/utils/utils';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -75,9 +75,8 @@ const MetricBlock = (props: MetricBlockProps) => {
                 <Text
                   weight='700'
                   size='32'
-                  className='hover:cursor-pointer'
                 >
-                  {formatNumber(metrics.totalLendIncentives, '')}
+                  {Format.token(metrics.totalLendIncentives, 'standard')}
                 </Text>
               </TooltipIncentive>
             </div>
@@ -86,7 +85,7 @@ const MetricBlock = (props: MetricBlockProps) => {
               size='13'
               className='text-primary-14'
             >
-              {formatNumber(metrics.totalLendIncentivesUsdPrice)}
+              {Format.price(metrics.totalLendIncentivesUsdPrice, 'standard')}
             </Text>
           </div>
           <Icon
@@ -117,9 +116,8 @@ const MetricBlock = (props: MetricBlockProps) => {
                 <Text
                   weight='700'
                   size='32'
-                  className='hover:cursor-pointer'
                 >
-                  {formatNumber(metrics.totalBorrowIncentives, '')}
+                  {Format.token(metrics.totalBorrowIncentives, 'standard')}
                 </Text>
               </TooltipIncentive>
             </div>
@@ -128,7 +126,7 @@ const MetricBlock = (props: MetricBlockProps) => {
               size='13'
               className='text-primary-14'
             >
-              {formatNumber(metrics.totalBorrowIncentivesUsdPrice)}
+              {Format.price(metrics.totalBorrowIncentivesUsdPrice, 'standard')}
             </Text>
           </div>
           <Icon
@@ -161,9 +159,8 @@ const MetricBlock = (props: MetricBlockProps) => {
                 <Text
                   weight='700'
                   size='32'
-                  className='hover:cursor-pointer'
                 >
-                  {formatNumber(metrics.totalIncentives, '')}
+                  {Format.token(metrics.totalIncentives, 'standard')}
                 </Text>
               </TooltipIncentive>
             </div>
@@ -172,7 +169,7 @@ const MetricBlock = (props: MetricBlockProps) => {
               size='13'
               className='text-primary-14'
             >
-              {formatNumber(metrics.totalIncentivesUsdPrice)}
+              {Format.price(metrics.totalIncentivesUsdPrice, 'standard')}
             </Text>
           </div>
           <Icon
@@ -199,9 +196,8 @@ const MetricBlock = (props: MetricBlockProps) => {
                 <Text
                   weight='700'
                   size='32'
-                  className='hover:cursor-pointer'
                 >
-                  {formatUSD(metrics.totalFeesGeneratedUsdPrice)}
+                  {Format.price(metrics.totalFeesGeneratedUsdPrice, 'standard')}
                 </Text>
               </TooltipIncentive>
             </div>

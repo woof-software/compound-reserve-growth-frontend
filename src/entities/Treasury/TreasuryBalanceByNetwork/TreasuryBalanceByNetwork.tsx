@@ -1,11 +1,12 @@
 import React, { useCallback, useMemo, useReducer } from 'react';
 
-import CryptoChart from '@/components/Charts/Bar/Bar';
+import BarChart from '@/components/Charts/Bar/Bar';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import TreasuryBalanceByNetwork, {
+import TreasuryBalanceByNetworkTable, {
   TreasuryBalanceByNetworkType
-} from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
+} from '@/components/TreasuryPageTable/TreasuryBalanceByNetworkTable';
+import { customChartOptions } from '@/entities/Treasury/TreasuryBalanceByNetwork/customChartOptions';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
@@ -411,11 +412,12 @@ const TreasuryBalanceByNetworkBlock = ({
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
-          <CryptoChart
+          <BarChart
+            customOptions={customChartOptions}
             data={chartData}
             onClear={onClearFilters}
           />
-          <TreasuryBalanceByNetwork
+          <TreasuryBalanceByNetworkTable
             sortType={sortType}
             tableData={tableData}
           />

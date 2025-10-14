@@ -13,7 +13,7 @@ import HighchartsReact from 'highcharts-react-official';
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { EventDataItem } from '@/shared/hooks/useLineChart';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { formatValue } from '@/shared/lib/utils/utils';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import Button from '@/shared/ui/Button/Button';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -34,37 +34,21 @@ export interface LineChartSeries {
 
 interface LineChartProps {
   data: LineChartSeries[];
-
   groupBy: string;
-
   chartRef: RefObject<HighchartsReact.RefObject | null>;
-
   isLegendEnabled: boolean;
-
   eventsData?: EventDataItem[];
-
   aggregatedSeries: SeriesAreaOptions[];
-
   showEvents: boolean;
-
   areAllSeriesHidden: boolean;
-
   className?: string;
-
   customTooltipFormatter?: (context: Point, groupBy: string) => string;
-
   customOptions?: Partial<Options>;
-
   resetHiddenKey?: number;
-
   onAllSeriesHidden?: (value: boolean) => void;
-
   onSelectAll: () => void;
-
   onDeselectAll: () => void;
-
   onShowEvents: (value: boolean) => void;
-
   onEventsData: (value: EventDataItem[]) => void;
 }
 
@@ -216,7 +200,7 @@ const LineChart: FC<LineChartProps> = ({
           points
             .map(
               (point) =>
-                `<div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="white-space: nowrap; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span><span style="font-weight: 400; text-align: right; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(point.y ?? 0)}</span></div>`
+                `<div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="white-space: nowrap; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span><span style="font-weight: 400; text-align: right; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${Format.price(point.y ?? 0, 'standard')}</span></div>`
             )
             .join('');
         body = `<div style="display: flex; gap: 24px;"><div style="display: flex; flex-direction: column;">${renderColumn(col1Points)}</div><div style="display: flex; flex-direction: column;">${renderColumn(col2Points)}</div></div>`;
@@ -224,11 +208,11 @@ const LineChart: FC<LineChartProps> = ({
         body = sortedPoints
           .map(
             (point) =>
-              `<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(point.y ?? 0)}</span></div>`
+              `<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"><div style="display: flex; align-items: center; gap: 8px;"><span style="background-color:${point.series.color}; width: 10px; height: 10px; display: inline-block; border-radius: 2px;"></span><span style="font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${point.series.name}</span></div><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${Format.price(point.y ?? 0, 'standard')}</span></div>`
           )
           .join('');
       }
-      const footer = `<div style=" padding-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 16px;"><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">Total</span><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${formatValue(total)}</span></div>`;
+      const footer = `<div style=" padding-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 16px;"><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">Total</span><span style="font-weight: 400; font-size: 11px; font-family: 'Haas Grot Text R', sans-serif;">${Format.price(total, 'standard')}</span></div>`;
       return header + body + footer;
     },
     [groupBy]
@@ -358,12 +342,7 @@ const LineChart: FC<LineChartProps> = ({
             fontFamily: 'Haas Grot Text R, sans-serif'
           },
           formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
-            const val = Number(this.value);
-            if (isNaN(val)) return this.value.toString();
-            if (val >= 1e9) return `${(val / 1e9).toFixed(1)}B`;
-            if (val >= 1e6) return `${(val / 1e6).toFixed(1)}M`;
-            if (val >= 1e3) return `${(val / 1e3).toFixed(0)}K`;
-            return val.toString();
+            return Format.token(this.value, 'compact');
           }
         }
       },

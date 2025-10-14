@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
-import CryptoChart from '@/components/Charts/Bar/Bar';
+import BarChart from '@/components/Charts/Bar/Bar';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import { TreasuryBalanceByNetworkType } from '@/components/TreasuryPageTable/TreasuryBalanceByNetwork';
+import { TreasuryBalanceByNetworkType } from '@/components/TreasuryPageTable/TreasuryBalanceByNetworkTable';
 import CapturedFeesByNetworkAndMarketTable from '@/entities/OEV/CapturedFeesByNetworkAndMarketTable';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useModal } from '@/shared/hooks/useModal';
@@ -390,7 +390,7 @@ const CapturedFeesByNetworkAndMarket = ({
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
-          <CryptoChart
+          <BarChart
             data={chartData}
             onClear={onClearFilters}
           />

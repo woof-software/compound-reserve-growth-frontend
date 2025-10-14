@@ -3,7 +3,10 @@ import React, { useState } from 'react';
 import Line from '@/components/Charts/Line/Line';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { HistoricalExpensesMobileActions } from '@/entities/Insentive/HistoricalExpensesByNetwork/HistoricalExpensesMobileActions';
-import { customTooltipFormatter } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/customTooltipFormatter';
+import {
+  customChartOptions,
+  customTooltipFormatter
+} from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/customTooltipFormatter';
 import { useHistoricalExpensesChartSeries } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/useHistoricalExpensesChartSeries';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
@@ -208,6 +211,7 @@ const HistoricalExpensesByNetworks = (
           onEventsData={onEventsData}
           areAllSeriesHidden={areAllSeriesHidden}
           isLegendEnabled={true}
+          customOptions={customChartOptions(activeViewTab)}
           // @ts-expect-error TODO: fix customTooltip types
           customTooltipFormatter={customTooltipFormatter(activeViewTab)}
         />

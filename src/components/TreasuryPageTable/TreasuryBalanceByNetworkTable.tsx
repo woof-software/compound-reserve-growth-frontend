@@ -5,12 +5,8 @@ import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
-import {
-  defaultExplorer,
-  explorers,
-  formatLargeNumber,
-  formatPrice
-} from '@/shared/lib/utils/utils';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { defaultExplorer, explorers } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -60,7 +56,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     header: 'QTY',
     enableSorting: true,
     cell: ({ row }) => (
-      <Text size='13'>{formatLargeNumber(row.original.qty, 1)}</Text>
+      <Text size='13'>{Format.token(row.original.qty, 'standard')}</Text>
     )
   },
   {
@@ -68,7 +64,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     header: 'Value',
     enableSorting: true,
     cell: ({ row }) => (
-      <Text size='13'>{formatPrice(row.original.value, 1)}</Text>
+      <Text size='13'>{Format.price(row.original.value, 'standard')}</Text>
     )
   },
   {
@@ -100,7 +96,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
   }
 ];
 
-const TreasuryBalanceByNetwork = ({
+const TreasuryBalanceByNetworkTable = ({
   sortType,
   tableData
 }: TreasuryBalanceByNetworkProps) => {
@@ -187,7 +183,7 @@ const TreasuryBalanceByNetwork = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatLargeNumber(row.qty, 1)}
+                    {Format.token(row.qty, 'standard')}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -204,7 +200,7 @@ const TreasuryBalanceByNetwork = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatPrice(row.value, 1)}
+                    {Format.price(row.value, 'standard')}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -271,4 +267,4 @@ const TreasuryBalanceByNetwork = ({
   );
 };
 
-export default TreasuryBalanceByNetwork;
+export default TreasuryBalanceByNetworkTable;

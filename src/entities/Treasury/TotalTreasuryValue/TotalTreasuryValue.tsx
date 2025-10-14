@@ -1,3 +1,7 @@
+import {
+  customChartOptions,
+  customTooltipFormatter
+} from '@/entities/Treasury/TotalTreasuryValue/customChartOptions';
 import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -382,6 +386,8 @@ const TotalTreasuryValue = ({
         <NoDataPlaceholder onButtonClick={onClearAll} />
       ) : (
         <LineChart
+          customOptions={customChartOptions}
+          customTooltipFormatter={customTooltipFormatter}
           key={groupBy}
           resetHiddenKey={resetHiddenKey}
           data={correctedChartSeries}

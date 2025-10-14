@@ -1,7 +1,7 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { useMemo } from 'react';
 
 import { useRunway } from '@/shared/hooks/useRunway';
-import { formatPrice } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
 
@@ -97,7 +97,7 @@ const RunwayMetrics = () => {
         }}
       >
         <ValueMetricField
-          value={formatPrice(metrics.total, 1)}
+          value={Format.price(metrics.total, 'compact')}
           label='Total Annualised Expenses'
         />
       </Card>
@@ -112,7 +112,7 @@ const RunwayMetrics = () => {
         }}
       >
         <ValueMetricField
-          value={formatPrice(metrics.provider, 1)}
+          value={Format.price(metrics.provider, 'compact')}
           label='Service Provider Expenses'
         />
       </Card>
@@ -127,7 +127,7 @@ const RunwayMetrics = () => {
         }}
       >
         <ValueMetricField
-          value={formatPrice(metrics.initiative, 1)}
+          value={Format.price(metrics.initiative, 'compact')}
           label='DAO Initiatives Expenses'
         />
       </Card>

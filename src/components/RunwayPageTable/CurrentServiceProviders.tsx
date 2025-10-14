@@ -3,11 +3,7 @@ import React, { useMemo } from 'react';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
-import {
-  formatLargeNumber,
-  formatNumber,
-  formatQuantity
-} from '@/shared/lib/utils/utils';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Text from '@/shared/ui/Text/Text';
 import { TextTooltip } from '@/shared/ui/TextTooltip/TextTooltip';
@@ -74,13 +70,13 @@ const columns: ExtendedColumnDef<ProviderRow>[] = [
     accessorKey: 'amount',
     header: 'Amount (Qty)',
     align: 'center',
-    cell: ({ getValue }) => formatQuantity(getValue() as number)
+    cell: ({ getValue }) => Format.token(getValue() as number, 'standard')
   },
   {
     accessorKey: 'value',
     align: 'right',
     header: 'Value ($)',
-    cell: ({ getValue }) => formatNumber(getValue() as number)
+    cell: ({ getValue }) => Format.price(getValue() as number, 'standard')
   }
 ];
 
@@ -98,7 +94,7 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
       <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'></td>
       <td className='text-primary-14 px-[5px] py-[13px] text-center text-[13px]'></td>
       <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px] font-medium'>
-        {formatNumber(footerData.value)}
+        {Format.price(footerData.value, 'standard')}
       </td>
     </tr>
   );
@@ -208,7 +204,7 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatQuantity(row.amount)}
+                    {Format.token(row.amount, 'standard')}
                   </Text>
                 </div>
                 <div className='grid w-full max-w-[100px]'>
@@ -225,7 +221,7 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatNumber(row.value)}
+                    {Format.price(row.value, 'standard')}
                   </Text>
                 </div>
               </div>
@@ -269,7 +265,9 @@ const CurrentServiceProviders: React.FC<CurrentServiceProvidersProps> = ({
                   lineHeight='21'
                   weight='500'
                   className='truncate'
-                >{`$${formatLargeNumber(footerData.value, 2)}`}</Text>
+                >
+                  {Format.price(footerData.value, 'standard')}
+                </Text>
               </div>
             </div>
           </>

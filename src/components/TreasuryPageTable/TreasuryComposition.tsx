@@ -4,7 +4,7 @@ import * as React from 'react';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { formatPrice } from '@/shared/lib/utils/utils';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -84,7 +84,7 @@ const TreasuryComposition = ({
             weight='400'
             className='text-right'
           >
-            {formatPrice(row.original.balance, 1)}
+            {Format.price(row.original.balance, 'standard')}
           </Text>
         )
       }
@@ -173,7 +173,7 @@ const TreasuryComposition = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatPrice(row.balance, 1)}
+                    {Format.price(row.balance, 'standard')}
                   </Text>
                 </div>
               </div>
@@ -193,7 +193,7 @@ const TreasuryComposition = ({
                 weight='500'
                 className='text-primary-14 min-w-[100px] truncate'
               >
-                {formatPrice(totalBalance, 1)}
+                {Format.price(totalBalance, 'standard')}
               </Text>
             </div>
           </>
@@ -222,7 +222,7 @@ const TreasuryComposition = ({
             weight='500'
             className='text-primary-14'
           >
-            {formatPrice(totalBalance, 1)}
+            {Format.price(totalBalance, 'standard')}
           </Text>
         </div>
       </div>
