@@ -445,6 +445,17 @@ export function noop() {
   // Do nothing
 }
 
+/**
+ * Filters and sorts an array of market options.
+ * Keeps only items with market type 'v2', 'v3', or id equal to NOT_MARKET.
+ * Sorts: first 'v3', then 'v2', then 'NOT_MARKET', then alphabetically by label.
+ * If selectedChainIds is provided, further filters by chain.
+ * Returns the filtered and sorted array.
+ *
+ * @param options Array of market options to filter and sort.
+ * @param selectedChainIds Array of selected chain ids (optional).
+ * @return Filtered and sorted array of market options.
+ */
 export const filterAndSortMarkets = (
   options: OptionType[] = [],
   selectedChainIds: string[] = []
