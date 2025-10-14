@@ -1,3 +1,4 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import CompoundFeeRevenueByChainTable, {
@@ -16,7 +17,6 @@ import { cn } from '@/shared/lib/classNames/classNames';
 import {
   capitalizeFirstLetter,
   ChartDataItem,
-  formatCurrencyValue,
   longMonthNames,
   shortMonthNames
 } from '@/shared/lib/utils/utils';
@@ -171,7 +171,7 @@ export function precomputeViews(
       columns: allKeys.map((k) => ({
         accessorKey: k,
         header: k,
-        cell: ({ getValue }) => formatCurrencyValue(getValue() as number)
+        cell: ({ getValue }) => Format.price(getValue() as number, 'standard')
       }))
     };
   };
