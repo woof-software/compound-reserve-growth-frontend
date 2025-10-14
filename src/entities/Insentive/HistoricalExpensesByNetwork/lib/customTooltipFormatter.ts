@@ -12,6 +12,9 @@ export const customTooltipFormatter =
       (a, b) => (b.y ?? 0) - (a.y ?? 0)
     );
 
+    const total =
+      context.points?.reduce((sum, point) => sum + (point.y ?? 0), 0) ?? 0;
+
     const body = `<div class='flex flex-col gap-3'>
       ${
         pointsSortedDesc
@@ -29,6 +32,12 @@ export const customTooltipFormatter =
           )
           .join('') || ''
       }
+      <div class="flex justify-between items-center gap-4">
+        <span class="text-[11px] font-haas">Total</span>
+        <span class="text-[11px] font-haas">
+          ${view === 'COMP' ? Format.token(total, 'standard', 'COMP') : Format.price(total, 'standard')}
+        </span>
+      </div>
     </div>`;
 
     return header + body;
