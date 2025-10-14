@@ -1,7 +1,16 @@
-import { ReactNode } from 'react';
+import {
+  ReactNode,
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef
+} from 'react';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { getTotalMetricValues } from '@/entities/Insentive/MetricBlock/lib/utils';
+import { useClickOutside } from '@/shared/hooks/useClickOutside';
+import { useModal } from '@/shared/hooks/useModal';
 import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import Card from '@/shared/ui/Card/Card';
@@ -17,36 +26,99 @@ interface MetricBlockProps {
 
 const TooltipIncentive = ({
   children,
-  activeTab
+  activeTab,
+  autoHideMs = 2000,
+  classNameMobile = 'block lg:hidden',
+  classNameDesktop = 'hidden lg:block'
 }: {
   children: ReactNode;
   activeTab: string;
+  autoHideMs?: number;
+  classNameMobile?: string;
+  classNameDesktop?: string;
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<number | null>(null);
+
+  const { isOpen, onOpenModal, onCloseModal } = useModal();
+
+  const infoContent = useMemo(
+    () => (
+      <div>
+        <Text
+          weight='500'
+          size='11'
+          lineHeight='16'
+          className='text-primary-14'
+        >
+          Data for the recent {activeTab === 'Day' ? '24 hours' : '365 days'}.
+        </Text>
+        <Text
+          weight='500'
+          size='11'
+          lineHeight='16'
+          className='text-primary-14'
+        >
+          Updates daily at 12:05 PM UTC.
+        </Text>
+      </div>
+    ),
+    [activeTab]
+  );
+
+  const clearTimer = useCallback(() => {
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  const onMobileToggle = useCallback(() => {
+    if (isOpen) {
+      clearTimer();
+      onCloseModal();
+      return;
+    }
+
+    onOpenModal();
+
+    clearTimer();
+    timerRef.current = window.setTimeout(() => {
+      onCloseModal();
+      timerRef.current = null;
+    }, autoHideMs);
+  }, [autoHideMs, clearTimer, isOpen, onCloseModal, onOpenModal]);
+
+  useClickOutside(containerRef as RefObject<HTMLDivElement>, () => {
+    if (isOpen) {
+      clearTimer();
+      onCloseModal();
+    }
+  });
+
+  useEffect(() => clearTimer, [clearTimer]);
+
   return (
-    <Tooltip
-      content={
-        <div>
-          <Text
-            weight='500'
-            size='11'
-            lineHeight='16'
-            className='text-primary-14'
+    <>
+      <div className={classNameMobile}>
+        <Tooltip
+          open={isOpen}
+          content={infoContent}
+        >
+          <div
+            ref={containerRef}
+            onClick={onMobileToggle}
+            role='button'
+            tabIndex={0}
           >
-            Data for the recent {activeTab === 'Day' ? '24 hours' : '365 days'}.
-          </Text>
-          <Text
-            weight='500'
-            size='11'
-            lineHeight='16'
-            className='text-primary-14'
-          >
-            Updates daily at 12:05 PM UTC.
-          </Text>
-        </div>
-      }
-    >
-      {children}
-    </Tooltip>
+            {children}
+          </div>
+        </Tooltip>
+      </div>
+      <div className={classNameDesktop}>
+        <Tooltip content={infoContent}>{children}</Tooltip>
+      </div>
+    </>
   );
 };
 
@@ -81,6 +153,7 @@ const MetricBlock = (props: MetricBlockProps) => {
                 <Text
                   weight='700'
                   size='32'
+                  className='cursor-pointer'
                 >
                   {Format.token(metrics.totalLendIncentives, 'standard')}
                 </Text>
@@ -122,6 +195,7 @@ const MetricBlock = (props: MetricBlockProps) => {
                 <Text
                   weight='700'
                   size='32'
+                  className='cursor-pointer'
                 >
                   {Format.token(metrics.totalBorrowIncentives, 'standard')}
                 </Text>
@@ -165,6 +239,7 @@ const MetricBlock = (props: MetricBlockProps) => {
                 <Text
                   weight='700'
                   size='32'
+                  className='cursor-pointer'
                 >
                   {Format.token(metrics.totalIncentives, 'standard')}
                 </Text>
@@ -202,6 +277,7 @@ const MetricBlock = (props: MetricBlockProps) => {
                 <Text
                   weight='700'
                   size='32'
+                  className='cursor-pointer'
                 >
                   {Format.price(metrics.totalFeesGeneratedUsdPrice, 'standard')}
                 </Text>
