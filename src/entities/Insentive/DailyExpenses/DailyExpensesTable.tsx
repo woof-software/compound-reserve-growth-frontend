@@ -51,6 +51,7 @@ const getDailyColumns = (
       id: 'market',
       accessorFn: (row) => row.source,
       header: 'Market',
+      sortDescFirst: false,
       enableSorting: true,
       sortingFn: (a, b, id) => {
         const aSource = a.getValue(id) as { market?: string };
@@ -79,7 +80,7 @@ const getDailyColumns = (
         <Text size='13'>
           {view === 'USD'
             ? Format.price(row.original.lendIncentive, 'standard')
-            : Format.token(row.original.lendIncentive, 'standard')}
+            : Format.token(row.original.lendIncentive, 'standard', 'COMP')}
         </Text>
       )
     },
@@ -93,7 +94,7 @@ const getDailyColumns = (
         <Text size='13'>
           {view === 'USD'
             ? Format.price(row.original.borrowIncentive, 'standard')
-            : Format.token(row.original.borrowIncentive, 'standard')}
+            : Format.token(row.original.borrowIncentive, 'standard', 'COMP')}
         </Text>
       )
     },
@@ -110,7 +111,7 @@ const getDailyColumns = (
         >
           {view === 'USD'
             ? Format.price(row.original.total, 'standard')
-            : Format.token(row.original.total, 'standard')}
+            : Format.token(row.original.total, 'standard', 'COMP')}
         </Text>
       )
     }
@@ -231,7 +232,7 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                   >
                     {activeViewTab === 'USD'
                       ? Format.price(row.lendIncentive, 'standard')
-                      : Format.token(row.lendIncentive, 'standard')}
+                      : Format.token(row.lendIncentive, 'standard', 'COMP')}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -250,7 +251,7 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                   >
                     {activeViewTab === 'USD'
                       ? Format.price(row.borrowIncentive, 'standard')
-                      : Format.token(row.borrowIncentive, 'standard')}
+                      : Format.token(row.borrowIncentive, 'standard', 'COMP')}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -269,7 +270,7 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
                   >
                     {activeViewTab === 'USD'
                       ? Format.price(row.total, 'standard')
-                      : Format.token(row.total, 'standard')}
+                      : Format.token(row.total, 'standard', 'COMP')}
                   </Text>
                 </div>
               </div>

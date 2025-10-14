@@ -49,13 +49,12 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
       accessorFn: (row) => row.valueComp,
       header: 'Value COMP',
       enableSorting: true,
-      align: 'left',
       cell: ({ row }) => (
         <Text
           size='13'
-          className='flex justify-center'
+          className='flex justify-start'
         >
-          {Format.token(row.original.valueComp, 'standard')}
+          {Format.token(row.original.valueComp, 'standard', 'COMP')}
         </Text>
       )
     },
@@ -159,7 +158,7 @@ const CurrentSpendingByChainTable = ({
                       lineHeight='21'
                       className='truncate'
                     >
-                      {Format.token(row.valueComp, 'standard')}
+                      {Format.token(row.valueComp, 'standard', 'COMP')}
                     </Text>
                   </div>
                   <div className='grid w-full'>

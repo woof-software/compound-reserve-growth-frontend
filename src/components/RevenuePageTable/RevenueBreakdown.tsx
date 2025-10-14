@@ -26,24 +26,6 @@ interface RevenueBreakdownProps {
 
 type ColKey = { accessorKey: string; header: string };
 
-const formatCurrencyValue = (value: unknown): string => {
-  const num = Number(value);
-
-  if (value === null || typeof value === 'undefined' || isNaN(num)) return '-';
-
-  if (num === 0) return '-';
-
-  const isNegative = num < 0;
-
-  const absValue = Math.abs(num);
-
-  const formattedNumber = new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 0
-  }).format(absValue);
-
-  return isNegative ? `-$${formattedNumber}` : `$${formattedNumber}`;
-};
-
 const RevenueBreakdown = ({
   data,
   columns,
@@ -78,7 +60,7 @@ const RevenueBreakdown = ({
           ...col,
 
           cell: ({ getValue }: { getValue: () => unknown }) =>
-            formatCurrencyValue(getValue())
+            Format.price(getValue() as number, 'standard')
         };
       }
 
@@ -114,7 +96,7 @@ const RevenueBreakdown = ({
             key={columnKey}
             className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'
           >
-            {formatCurrencyValue(totalValue)}
+            {Format.price(totalValue)}
           </td>
         );
       })}
@@ -185,7 +167,7 @@ const RevenueBreakdown = ({
                       ? Boolean(raw)
                         ? (raw as string)
                         : '-'
-                      : formatCurrencyValue(raw);
+                      : Format.price(raw as number, 'standard');
 
                   return (
                     <div

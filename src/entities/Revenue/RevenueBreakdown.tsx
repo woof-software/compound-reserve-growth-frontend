@@ -1,4 +1,3 @@
-import { Format } from '@/shared/lib/utils/numbersFormatter';
 import React, { useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -17,9 +16,11 @@ import {
   SortAdapter,
   useSorting
 } from '@/shared/hooks/useSorting';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import {
   capitalizeFirstLetter,
   extractFilterOptions,
+  filterAndSortMarkets,
   groupOptionsDto
 } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
@@ -38,7 +39,7 @@ import View from '@/shared/ui/View/View';
 
 interface SelectedFiltersState {
   chain: OptionType[];
-  market: OptionType[];
+  deployment: OptionType[];
   source: OptionType[];
   symbol: OptionType[];
 }
@@ -50,7 +51,7 @@ const RevenueBreakDownBlock = ({
 }: RevenuePageProps) => {
   const initialState: SelectedFiltersState = {
     chain: [],
-    market: [],
+    deployment: [],
     source: [],
     symbol: []
   };
@@ -100,7 +101,7 @@ const RevenueBreakDownBlock = ({
 
   useFiltersSync(selectedOptions, setSelectedOptions, 'rb', [
     'chain',
-    'market',
+    'deployment',
     'source',
     'symbol'
   ]);
@@ -118,18 +119,18 @@ const RevenueBreakDownBlock = ({
     (chain: OptionType[]) => {
       const selectedChainIds = chain.map((o) => o.id);
 
-      const filteredDeployment = selectedOptions.market.filter((el) =>
+      const filteredDeployment = selectedOptions.deployment.filter((el) =>
         selectedChainIds.length === 0
           ? true
           : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
       );
-      setSelectedOptions({ chain, market: filteredDeployment });
+      setSelectedOptions({ chain, deployment: filteredDeployment });
     },
-    [selectedOptions.market]
+    [selectedOptions.deployment]
   );
 
   const onSelectMarket = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ market: options });
+    setSelectedOptions({ deployment: options });
   }, []);
 
   const onSelectSource = useCallback((options: OptionType[]) => {
@@ -153,17 +154,25 @@ const RevenueBreakDownBlock = ({
   const filterOptionsConfig = useMemo(
     () => ({
       chain: { path: 'source.network' },
-      market: { path: 'source.market' },
+      deployment: { path: 'source.market' },
       source: { path: 'source.type' },
       symbol: { path: 'source.asset.symbol' }
     }),
     []
   );
 
-  const { chainOptions, marketOptions, sourceOptions, symbolOptions } = useMemo(
-    () => extractFilterOptions(rawData, filterOptionsConfig),
-    [rawData, filterOptionsConfig]
-  );
+  const { chainOptions, deploymentOptions, sourceOptions, symbolOptions } =
+    useMemo(
+      () => extractFilterOptions(rawData, filterOptionsConfig),
+      [rawData, filterOptionsConfig]
+    );
+
+  const deploymentOptionsFilter = useMemo(() => {
+    return filterAndSortMarkets(
+      deploymentOptions,
+      selectedOptions.chain.map((o) => o.id)
+    );
+  }, [deploymentOptions, selectedOptions]);
 
   const filteredData = useMemo(() => {
     let data = rawData;
@@ -177,8 +186,10 @@ const RevenueBreakDownBlock = ({
       );
     }
 
-    if (selectedOptions.market.length > 0) {
-      const selectedValues = selectedOptions.market.map((option) => option.id);
+    if (selectedOptions.deployment.length > 0) {
+      const selectedValues = selectedOptions.deployment.map(
+        (option) => option.id
+      );
       data = data.filter((item) => {
         const marketValue = item.source.market || NOT_MARKET;
         return selectedValues.includes(marketValue);
@@ -219,7 +230,7 @@ const RevenueBreakDownBlock = ({
       { accessorKey: 'chain', header: 'Chain' }
     ];
     if (
-      selectedOptions.market.length > 0 ||
+      selectedOptions.deployment.length > 0 ||
       selectedOptions.source.length > 0
     ) {
       columns.push({ accessorKey: 'market', header: 'Market' });
@@ -271,7 +282,7 @@ const RevenueBreakDownBlock = ({
 
       const keyParts = [item.source.network];
       if (
-        selectedOptions.market.length > 0 ||
+        selectedOptions.deployment.length > 0 ||
         selectedOptions.source.length > 0
       ) {
         keyParts.push(marketValue);
@@ -327,7 +338,7 @@ const RevenueBreakDownBlock = ({
 
   const noDataMessage =
     selectedOptions.chain.length > 0 ||
-    selectedOptions.market.length > 0 ||
+    selectedOptions.deployment.length > 0 ||
     selectedOptions.source.length > 0 ||
     selectedOptions.symbol.length > 0
       ? 'No data for selected filters'
@@ -346,9 +357,9 @@ const RevenueBreakDownBlock = ({
     const marketFilterOptions = {
       id: 'market',
       placeholder: 'Market',
-      total: selectedOptions.market.length,
-      selectedOptions: selectedOptions.market,
-      options: marketOptions || [],
+      total: selectedOptions.deployment.length,
+      selectedOptions: selectedOptions.deployment,
+      options: deploymentOptionsFilter || [],
       onChange: onSelectMarket
     };
 
@@ -380,7 +391,7 @@ const RevenueBreakDownBlock = ({
     ];
   }, [
     chainOptions,
-    marketOptions,
+    deploymentOptionsFilter,
     onSelectChain,
     onSelectMarket,
     onSelectSource,
@@ -460,11 +471,11 @@ const RevenueBreakDownBlock = ({
               disabled={isLoading}
             />
             <MultiSelect
-              options={marketOptions || []}
-              value={selectedOptions.market}
+              options={deploymentOptionsFilter || []}
+              value={selectedOptions.deployment}
               onChange={onSelectMarket}
               placeholder='Market'
-              disabled={isLoading || !Boolean(marketOptions.length)}
+              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
             />
             <MultiSelect
               options={

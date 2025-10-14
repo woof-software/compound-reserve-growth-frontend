@@ -44,16 +44,16 @@ const HistoricalExpensesByNetworks = (
     view: activeViewTab
   });
 
+  const [areAllSeriesHidden, setAreAllSeriesHidden] = useState(false);
   const {
     chartRef,
     showEvents,
     aggregatedSeries,
-    onAllSeriesHidden,
     onEventsData,
     onShowEvents,
     onSelectAll,
     onDeselectAll,
-    areAllSeriesHidden
+    isLegendEnabled
   } = useLineChart({
     groupBy,
     data: chartSeries,
@@ -82,6 +82,15 @@ const HistoricalExpensesByNetworks = (
     filePrefix: 'historical_expenses_by_networks',
     aggregationType: 'sum'
   });
+
+  const onEyeClick = () => {
+    if (areAllSeriesHidden) {
+      onSelectAll();
+    } else {
+      onDeselectAll();
+    }
+    setAreAllSeriesHidden(!areAllSeriesHidden);
+  };
 
   return (
     <Card
@@ -133,7 +142,7 @@ const HistoricalExpensesByNetworks = (
               activeViewTab={activeViewTab}
               barSize={barSize}
               areAllSeriesHidden={areAllSeriesHidden}
-              onEyeClick={() => onAllSeriesHidden(!areAllSeriesHidden)}
+              onEyeClick={onEyeClick}
             />
             {/*TODO: fix download button style applying*/}
             <span className={'mt-1 hidden lg:block'}>
@@ -188,7 +197,7 @@ const HistoricalExpensesByNetworks = (
               activeViewTab={activeViewTab}
               barSize={barSize}
               areAllSeriesHidden={areAllSeriesHidden}
-              onEyeClick={() => onAllSeriesHidden(!areAllSeriesHidden)}
+              onEyeClick={onEyeClick}
             />
           </div>
         </div>
@@ -204,13 +213,13 @@ const HistoricalExpensesByNetworks = (
           className='max-h-fit'
           chartRef={chartRef}
           showEvents={showEvents}
-          onAllSeriesHidden={onAllSeriesHidden}
+          onAllSeriesHidden={setAreAllSeriesHidden}
           onSelectAll={onSelectAll}
           onDeselectAll={onDeselectAll}
           onShowEvents={onShowEvents}
           onEventsData={onEventsData}
           areAllSeriesHidden={areAllSeriesHidden}
-          isLegendEnabled={true}
+          isLegendEnabled={isLegendEnabled}
           customOptions={customChartOptions(activeViewTab)}
           // @ts-expect-error TODO: fix customTooltip types
           customTooltipFormatter={customTooltipFormatter(activeViewTab)}

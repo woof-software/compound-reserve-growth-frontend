@@ -4,7 +4,6 @@ import { CSVLink } from 'react-csv';
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { useModal } from '@/shared/hooks/useModal';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
-import { noop } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -15,8 +14,8 @@ interface HistoricalExpensesMobileActionsProps {
   activeViewTab: string;
   activeModeTab: string;
   barSize: string;
-  areAllSeriesHidden?: boolean;
-  onEyeClick?: () => void;
+  areAllSeriesHidden: boolean;
+  onEyeClick: any;
 }
 
 export const HistoricalExpensesMobileActions = (
@@ -27,8 +26,8 @@ export const HistoricalExpensesMobileActions = (
     activeModeTab,
     activeViewTab,
     barSize,
-    areAllSeriesHidden = false,
-    onEyeClick: onEyeClickProp = noop
+    areAllSeriesHidden,
+    onEyeClick
   } = props;
 
   const {
@@ -37,9 +36,8 @@ export const HistoricalExpensesMobileActions = (
     onOpenModal: onMoreOpen
   } = useModal();
 
-  const onEyeClick = () => {
-    onEyeClickProp?.();
-
+  const handleEyeClick = () => {
+    onEyeClick();
     onMoreClose();
   };
 
@@ -103,7 +101,7 @@ export const HistoricalExpensesMobileActions = (
                 icon: 'h-6.5 w-6.5',
                 iconContainer: 'h-6.5 w-6.5'
               }}
-              onClick={onEyeClick}
+              onClick={handleEyeClick}
             >
               <Text
                 size='14'
