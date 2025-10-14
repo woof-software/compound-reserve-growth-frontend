@@ -55,7 +55,7 @@ const SpendingByChainTableColumns: ExtendedColumnDef<SpendingByChainTableColumns
           size='13'
           className='flex justify-center'
         >
-          {Format.token(row.original.valueComp, 'standard')}
+          {Format.token(row.original.valueComp, 'standard', 'COMP')}
         </Text>
       )
     },
@@ -159,7 +159,7 @@ const CurrentSpendingByChainTable = ({
                       lineHeight='21'
                       className='truncate'
                     >
-                      {Format.token(row.valueComp, 'standard')}
+                      {Format.token(row.valueComp, 'standard', 'COMP')}
                     </Text>
                   </div>
                   <div className='grid w-full'>
