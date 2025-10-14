@@ -51,6 +51,7 @@ const getDailyColumns = (
       id: 'market',
       accessorFn: (row) => row.source,
       header: 'Market',
+      sortDescFirst: false,
       enableSorting: true,
       sortingFn: (a, b, id) => {
         const aSource = a.getValue(id) as { market?: string };
