@@ -35,7 +35,15 @@ export const useChartDataProcessor = ({
     const filteredData = rawData.filter((item) => {
       return Object.entries(filters).every(([key, selectedValues]) => {
         if (selectedValues.length === 0) return true;
-        const itemValue = getValueByPath(item, filterPaths[key]);
+        let itemValue = getValueByPath(item, filterPaths[key]);
+
+        if (
+          key === 'deployment' &&
+          (itemValue === undefined || itemValue === null || itemValue === '')
+        ) {
+          itemValue = NOT_MARKET;
+        }
+
         return itemValue && selectedValues.includes(itemValue);
       });
     });
