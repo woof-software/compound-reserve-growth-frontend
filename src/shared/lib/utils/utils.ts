@@ -214,7 +214,7 @@ export const capitalizeFirstLetter = (
   str: string,
   replaceSymbol?: string
 ): string => {
-  if (!str) return replaceSymbol || 'Unknown';
+  if (!str) return replaceSymbol || NOT_MARKET;
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
