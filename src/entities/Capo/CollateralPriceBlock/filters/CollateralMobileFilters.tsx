@@ -20,6 +20,7 @@ export const SORT_COLUMNS: SortAccessor<CapoTableItem>[] = [
   { accessorKey: 'collateral', header: 'Collateral' },
   { accessorKey: 'collateralPrice', header: 'Collateral Price' },
   { accessorKey: 'priceRestriction', header: 'Price Restriction' },
+  { accessorKey: 'priceBuffer', header: 'Price Buffer' },
   { accessorKey: 'priceFeed', header: 'Price Feed' }
 ];
 

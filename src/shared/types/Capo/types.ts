@@ -3,6 +3,7 @@ export interface CapoTableItem {
   collateral: string;
   collateralPrice: string;
   priceRestriction: string;
+  priceBuffer: number;
   priceFeed: string;
   oracleName: string;
 }
