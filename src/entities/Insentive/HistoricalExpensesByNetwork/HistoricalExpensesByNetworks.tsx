@@ -11,6 +11,7 @@ import { useHistoricalExpensesChartSeries } from '@/entities/Insentive/Historica
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
+import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
@@ -44,22 +45,29 @@ const HistoricalExpensesByNetworks = (
     view: activeViewTab
   });
 
-  const [areAllSeriesHidden, setAreAllSeriesHidden] = useState(false);
-  const {
-    chartRef,
-    showEvents,
-    aggregatedSeries,
-    onEventsData,
-    onShowEvents,
-    onSelectAll,
-    onDeselectAll,
-    isLegendEnabled
-  } = useLineChart({
+  const { aggregatedSeries, isLegendEnabled } = useLineChart({
     groupBy,
     data: chartSeries,
     barSize,
     isAggregate: true
   });
+
+  const {
+    legends,
+    toggle: onLegendToggle,
+    activateAll: onSelectAllLegends,
+    deactivateAll: onDeselectAllLegends,
+    highlight: onLegendHover,
+    unhighlight: onLegendUnhover
+  } = useLegends(aggregatedSeries, ({ name, color }) => ({
+    id: `${name}`,
+    name: `${name}`,
+    isDisabled: false,
+    isHighlighted: false,
+    color: `${color}`
+  }));
+
+  const isSeriesHidden = legends.every((l) => l.isDisabled);
 
   useFilterSyncSingle(
     'historicalExpByNetworkMode',
@@ -84,12 +92,11 @@ const HistoricalExpensesByNetworks = (
   });
 
   const onEyeClick = () => {
-    if (areAllSeriesHidden) {
-      onSelectAll();
+    if (isSeriesHidden) {
+      onSelectAllLegends();
     } else {
-      onDeselectAll();
+      onDeselectAllLegends();
     }
-    setAreAllSeriesHidden(!areAllSeriesHidden);
   };
 
   return (
@@ -141,7 +148,7 @@ const HistoricalExpensesByNetworks = (
               activeModeTab={activeModeTab}
               activeViewTab={activeViewTab}
               barSize={barSize}
-              areAllSeriesHidden={areAllSeriesHidden}
+              areAllSeriesHidden={isSeriesHidden}
               onEyeClick={onEyeClick}
             />
             {/*TODO: fix download button style applying*/}
@@ -196,7 +203,7 @@ const HistoricalExpensesByNetworks = (
               activeModeTab={activeModeTab}
               activeViewTab={activeViewTab}
               barSize={barSize}
-              areAllSeriesHidden={areAllSeriesHidden}
+              areAllSeriesHidden={isSeriesHidden}
               onEyeClick={onEyeClick}
             />
           </div>
@@ -207,19 +214,16 @@ const HistoricalExpensesByNetworks = (
       ) : (
         <Line
           key={groupBy}
-          data={chartSeries}
           groupBy={groupBy}
           aggregatedSeries={aggregatedSeries}
           className='max-h-fit'
-          chartRef={chartRef}
-          showEvents={showEvents}
-          onAllSeriesHidden={setAreAllSeriesHidden}
-          onSelectAll={onSelectAll}
-          onDeselectAll={onDeselectAll}
-          onShowEvents={onShowEvents}
-          onEventsData={onEventsData}
-          areAllSeriesHidden={areAllSeriesHidden}
+          legends={legends}
           isLegendEnabled={isLegendEnabled}
+          onSelectAllLegends={onSelectAllLegends}
+          onDeselectAllLegends={onDeselectAllLegends}
+          onLegendLeave={onLegendUnhover}
+          onLegendHover={onLegendHover}
+          onLegendClick={onLegendToggle}
           customOptions={customChartOptions(activeViewTab)}
           // @ts-expect-error TODO: fix customTooltip types
           customTooltipFormatter={customTooltipFormatter(activeViewTab)}

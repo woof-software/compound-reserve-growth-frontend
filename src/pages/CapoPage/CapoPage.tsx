@@ -1,7 +1,7 @@
-import { useNormalizedTableData } from '@/components/CapoPageTable/lib/useNormalizedTableData';
 import { CapoSpecificCollateralPrice } from '@/entities/Capo/CapoSpecificCollateralPrice/CapoSpecificCollateralPrice';
 import { useNormalizedChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useNormalizedChartData';
 import CapoCollateralsPriceBlock from '@/entities/Capo/CollateralPriceBlock/CapoCollateralsPriceBlock';
+import { useNormalizedTableData } from '@/entities/Capo/CollateralPriceBlock/lib/useNormalizedTableData';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import Text from '@/shared/ui/Text/Text';
 

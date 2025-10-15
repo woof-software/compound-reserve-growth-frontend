@@ -7,13 +7,20 @@ import React, {
   useRef,
   useState
 } from 'react';
-import Highcharts, { Options, Point, SeriesAreaOptions } from 'highcharts';
+import Highcharts, {
+  Options,
+  Point,
+  Series,
+  SeriesAreaOptions
+} from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
-import { EventDataItem } from '@/shared/hooks/useLineChart';
+import { CompoundEvent } from '@/shared/hooks/useEventsApi';
+import { Legend } from '@/shared/hooks/useLegends';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { noop } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -33,55 +40,53 @@ export interface LineChartSeries {
 }
 
 interface LineChartProps {
-  data: LineChartSeries[];
   groupBy: string;
-  chartRef: RefObject<HighchartsReact.RefObject | null>;
-  isLegendEnabled: boolean;
-  eventsData?: EventDataItem[];
   aggregatedSeries: SeriesAreaOptions[];
-  showEvents: boolean;
-  areAllSeriesHidden: boolean;
+  chartRef?: RefObject<HighchartsReact.RefObject | null>;
+  isLegendEnabled?: boolean;
+  legends?: Legend[];
+  showEvents?: boolean;
+  events?: CompoundEvent[];
   className?: string;
   customTooltipFormatter?: (context: Point, groupBy: string) => string;
   customOptions?: Partial<Options>;
-  resetHiddenKey?: number;
-  onAllSeriesHidden?: (value: boolean) => void;
-  onSelectAll: () => void;
-  onDeselectAll: () => void;
-  onShowEvents: (value: boolean) => void;
-  onEventsData: (value: EventDataItem[]) => void;
+  onSelectAllLegends?: () => void;
+  onDeselectAllLegends?: () => void;
+  onShowEvents?: (value: boolean) => void;
+  onLegendHover?: (id: string) => void;
+  onLegendLeave?: (id?: string) => void;
+  onLegendClick?: (id: string) => void;
 }
 
 const LineChart: FC<LineChartProps> = ({
-  data,
   groupBy,
-  chartRef,
-  isLegendEnabled,
-  eventsData = [],
-  showEvents,
   aggregatedSeries,
-  areAllSeriesHidden,
+  chartRef = useRef<HighchartsReact.RefObject | null>(null),
+  isLegendEnabled = false,
+  showEvents = false,
   className,
   customTooltipFormatter,
   customOptions,
-  resetHiddenKey,
-  onSelectAll,
-  onDeselectAll,
-  onShowEvents,
-  onEventsData,
-  onAllSeriesHidden
+  events = [],
+  legends = [],
+  onSelectAllLegends = noop,
+  onDeselectAllLegends = noop,
+  onShowEvents = noop,
+  onLegendHover = noop,
+  onLegendLeave = noop,
+  onLegendClick = noop
 }) => {
   const programmaticChange = useRef(false);
 
   const currentZoom = useRef<{ min: number; max: number } | null>(null);
-
-  const [hiddenItems, setHiddenItems] = useState<string[]>([]);
 
   const viewportRef = useRef<HTMLDivElement>(null);
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
 
   const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const areAllSeriesHidden = legends.every(({ isDisabled }) => isDisabled);
 
   const updateArrows = useCallback(() => {
     const el = viewportRef.current;
@@ -98,76 +103,71 @@ const LineChart: FC<LineChartProps> = ({
     el.scrollBy({ left: dir === 'left' ? -step : step, behavior: 'smooth' });
   };
 
-  const currentSeriesNames = useMemo(
-    () => aggregatedSeries.map((s) => s.name!).filter(Boolean) as string[],
-    [aggregatedSeries]
-  );
-
-  const currentHiddenSet = useMemo(() => {
-    const allowed = new Set(currentSeriesNames);
-    return new Set(hiddenItems.filter((n) => allowed.has(n)));
-  }, [hiddenItems, currentSeriesNames]);
-
   const isLastActiveLegend =
-    currentHiddenSet.size === Math.max(0, currentSeriesNames.length - 1);
+    legends.filter(({ isDisabled }) => !isDisabled).length === 1;
 
-  const highlightSeries = useCallback((name: string) => {
+  useEffect(() => {
     const chart = chartRef.current?.chart;
 
     if (!chart) return;
 
-    chart.series.forEach((s) => {
-      const active = s.name === name && s.visible;
+    let highlightedSeries: Series | null = null;
 
-      (s as any).group?.attr({ opacity: active ? 1 : 0.25 });
+    let isNeedRedraw = false;
 
-      (s as any).markerGroup?.attr?.({ opacity: active ? 1 : 0.25 });
+    for (const legend of legends) {
+      const series = chart?.series.find(({ name }) => name === legend.name);
 
-      (s as any).dataLabelsGroup?.attr?.({ opacity: active ? 1 : 0.25 });
+      if (!series) continue;
 
-      if (active) (s as any).group?.toFront();
-    });
-  }, []);
+      if (series.visible !== !legend.isDisabled) {
+        series.setVisible(!legend.isDisabled, false);
 
-  const clearHighlight = useCallback(() => {
-    const chart = chartRef.current?.chart;
+        isNeedRedraw = true;
+      }
 
-    if (!chart) return;
+      if (!legend.isDisabled && legend.isHighlighted) {
+        highlightedSeries = series;
+      }
+    }
 
-    chart.series.forEach((s) => {
-      (s as any).group?.attr({ opacity: 1 });
-
-      (s as any).markerGroup?.attr?.({ opacity: 1 });
-
-      (s as any).dataLabelsGroup?.attr?.({ opacity: 1 });
-    });
-  }, []);
-
-  const toggleSeriesByName = useCallback(
-    (name: string) => {
-      const chart = chartRef.current?.chart;
-      if (!chart) return;
-
-      const targetSeries = chart.series.find((sr) => sr.name === name);
-
-      if (!targetSeries) return;
-
-      if (isLastActiveLegend && targetSeries.visible) return;
-
-      targetSeries.setVisible(!targetSeries.visible, false);
+    if (isNeedRedraw) {
       chart.redraw();
+    }
 
-      setHiddenItems((prev) => {
-        const has = prev.includes(name);
-        if (has) {
-          return prev.filter((n) => n !== name);
-        }
+    if (!highlightedSeries) return;
 
-        return [...prev, name];
-      });
-    },
-    [chartRef, isLastActiveLegend]
-  );
+    for (const series of chart?.series ?? []) {
+      const config = { opacity: 0 };
+
+      if (highlightedSeries === series) {
+        config.opacity = 1;
+
+        //@ts-expect-error wrong Highcharts types
+        series.group?.attr(config);
+
+        //@ts-expect-error wrong Highcharts types
+        series.markerGroup?.attr?.(config);
+
+        //@ts-expect-error wrong Highcharts types
+        series.dataLabelsGroup?.attr?.(config);
+
+        //@ts-expect-error wrong Highcharts types
+        series.group?.toFront();
+      } else {
+        config.opacity = 0.25;
+
+        //@ts-expect-error wrong Highcharts types
+        series.group?.attr(config);
+
+        //@ts-expect-error wrong Highcharts types
+        series.markerGroup?.attr?.(config);
+
+        //@ts-expect-error wrong Highcharts types
+        series.dataLabelsGroup?.attr?.(config);
+      }
+    }
+  }, [legends]);
 
   const defaultTooltipFormatter = useCallback(
     (context: any) => {
@@ -220,28 +220,31 @@ const LineChart: FC<LineChartProps> = ({
 
   const options: Highcharts.Options = useMemo(() => {
     const yPositions = [40, 60, 80, 100, 120, 140, 160, 180];
-    const eventPlotLines = showEvents
-      ? eventsData?.map((event, index) => ({
-          color: '#7A8A99',
-          width: 1,
-          value: event.x,
-          dashStyle: 'Dash' as const,
-          zIndex: 3,
-          label: {
-            text: event.title,
-            rotation: 0,
-            align: 'right' as const,
-            verticalAlign: 'top' as const,
-            y: yPositions[index % yPositions.length],
-            x: -5,
-            style: {
-              color: 'var(--color-primary-11)',
-              fontSize: '11px',
-              fontFamily: 'Haas Grot Text R, sans-serif'
-            }
+
+    let eventPlotLines: Highcharts.XAxisPlotLinesOptions[] = [];
+
+    if (showEvents) {
+      eventPlotLines = events.map((event, index) => ({
+        color: '#7A8A99',
+        width: 1,
+        value: event.date * 1000,
+        dashStyle: 'Dash',
+        zIndex: 3,
+        label: {
+          text: event.name,
+          rotation: 0,
+          align: 'right',
+          verticalAlign: 'top',
+          y: yPositions[index % yPositions.length],
+          x: -5,
+          style: {
+            color: 'var(--color-primary-11)',
+            fontSize: '11px',
+            fontFamily: 'Haas Grot Text R, sans-serif'
           }
-        }))
-      : [];
+        }
+      }));
+    }
 
     const bringMarkersToFront = (chart: Highcharts.Chart) => {
       chart.series.forEach((s: any) => {
@@ -397,43 +400,12 @@ const LineChart: FC<LineChartProps> = ({
   }, [
     aggregatedSeries,
     groupBy,
-    isLegendEnabled,
-    eventsData,
+    events,
     showEvents,
     customTooltipFormatter,
     defaultTooltipFormatter,
     customOptions
   ]);
-
-  useEffect(() => {
-    const eventsApiUrl =
-      'https://compound-reserve-growth-backend-dev.woof.software/api/events';
-    const fetchEvents = async () => {
-      try {
-        const response = await fetch(eventsApiUrl);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const rawEvents: {
-          date: number;
-          name: string;
-          description: string;
-        }[] = await response.json();
-        const formattedEvents = rawEvents
-          .filter((e) => e.date)
-          .map((event) => ({
-            x: event.date * 1000,
-            title: event.name,
-            text: event.description || event.name
-          }));
-        onEventsData(formattedEvents);
-      } catch (error) {
-        console.error('Failed to fetch chart events:', error);
-        onEventsData([]);
-      }
-    };
-    fetchEvents();
-  }, []);
 
   useEffect(() => {
     updateArrows();
@@ -444,42 +416,6 @@ const LineChart: FC<LineChartProps> = ({
 
     return () => window.removeEventListener('resize', onResize);
   }, [aggregatedSeries.length, updateArrows]);
-
-  useEffect(() => {
-    const chart = chartRef.current?.chart;
-    if (!chart) return;
-
-    chart.series.forEach((s) => {
-      const shouldBeHidden = currentHiddenSet.has(s.name);
-      if (shouldBeHidden && s.visible) s.setVisible(false, false);
-      if (!shouldBeHidden && !s.visible) s.setVisible(true, false);
-    });
-
-    chart.redraw();
-  }, [currentHiddenSet]);
-
-  useEffect(() => {
-    setHiddenItems((prev) => {
-      if (!prev.length) return prev;
-
-      const current = new Set(currentSeriesNames);
-
-      return prev.filter((name) => current.has(name));
-    });
-  }, [currentSeriesNames]);
-
-  useEffect(() => {
-    if (resetHiddenKey !== undefined) {
-      setHiddenItems([]);
-    }
-  }, [resetHiddenKey]);
-
-  useEffect(() => {
-    const total = currentSeriesNames.length;
-    const allHidden = total > 0 && currentHiddenSet.size === total;
-
-    onAllSeriesHidden?.(allHidden);
-  }, [currentHiddenSet.size, currentSeriesNames.length, onAllSeriesHidden]);
 
   return (
     <div
@@ -521,15 +457,10 @@ const LineChart: FC<LineChartProps> = ({
             <ChartIconToggle
               active={areAllSeriesHidden}
               onClick={() => {
-                const chart = chartRef.current?.chart;
-                if (!chart) return;
-
                 if (areAllSeriesHidden) {
-                  setHiddenItems([]);
-                  onSelectAll?.();
+                  onSelectAllLegends();
                 } else {
-                  setHiddenItems(currentSeriesNames);
-                  onDeselectAll?.();
+                  onDeselectAllLegends();
                 }
               }}
               onIcon='eye'
@@ -537,7 +468,7 @@ const LineChart: FC<LineChartProps> = ({
               ariaLabel='Toggle all series visibility'
             />
           </View.Condition>
-          <View.Condition if={Boolean(eventsData?.length > 0)}>
+          <View.Condition if={Boolean(events?.length > 0)}>
             <ChartIconToggle
               active={!showEvents}
               onClick={() => onShowEvents(!showEvents)}
@@ -548,7 +479,7 @@ const LineChart: FC<LineChartProps> = ({
           </View.Condition>
         </div>
       </div>
-      <View.Condition if={Boolean(isLegendEnabled && data.length > 1)}>
+      <View.Condition if={isLegendEnabled && aggregatedSeries.length > 1}>
         <div className='mx-5 block md:mx-0 lg:hidden'>
           <div
             className={cn(
@@ -569,7 +500,7 @@ const LineChart: FC<LineChartProps> = ({
                   'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-sm'
                 )}
                 onClick={() => {
-                  clearHighlight();
+                  onLegendLeave();
                   scrollByDir('left');
                 }}
               >
@@ -583,38 +514,33 @@ const LineChart: FC<LineChartProps> = ({
               ref={viewportRef}
               onScroll={() => {
                 updateArrows();
-                clearHighlight();
+                onLegendLeave();
               }}
               className={cn(
                 'hide-scrollbar mx-0.5 flex h-full max-w-[99%] items-center gap-4 overflow-x-auto scroll-smooth rounded-lg p-1.5'
               )}
             >
               <Each
-                data={aggregatedSeries}
-                render={(s) => (
+                data={legends}
+                render={({ id, name, color, isDisabled }) => (
                   <Button
-                    key={s.name}
+                    key={id}
                     className={cn(
                       'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
                       {
-                        'line-through opacity-30': currentHiddenSet.has(
-                          s.name!
-                        ),
-                        'cursor-not-allowed':
-                          isLastActiveLegend && !currentHiddenSet.has(s.name!)
+                        'line-through opacity-30': isDisabled,
+                        'cursor-not-allowed': isLastActiveLegend && !isDisabled
                       }
                     )}
-                    onMouseEnter={() => highlightSeries(s.name!)}
-                    onFocus={() => highlightSeries(s.name!)}
-                    onMouseLeave={clearHighlight}
-                    onBlur={clearHighlight}
-                    onClick={() => toggleSeriesByName(s.name!)}
+                    onMouseEnter={() => onLegendHover(id)}
+                    onMouseLeave={() => onLegendLeave(id)}
+                    onClick={() => onLegendClick(id)}
                   >
                     <span
                       className='inline-block h-3 w-3 rounded-full'
-                      style={{ backgroundColor: (s as any).color }}
+                      style={{ backgroundColor: color }}
                     />
-                    {s.name}
+                    {name}
                   </Button>
                 )}
               />
@@ -625,7 +551,7 @@ const LineChart: FC<LineChartProps> = ({
                   'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-sm'
                 )}
                 onClick={() => {
-                  clearHighlight();
+                  onLegendLeave();
                   scrollByDir('right');
                 }}
               >
@@ -637,32 +563,29 @@ const LineChart: FC<LineChartProps> = ({
             </View.Condition>
           </div>
         </div>
-        <View.Condition if={Boolean(aggregatedSeries.length > 1)}>
+        <View.Condition if={legends.length > 1}>
           <div className='mx-auto hidden max-w-[902px] flex-wrap justify-center gap-5 px-[15px] py-2 lg:flex'>
             <Each
-              data={aggregatedSeries}
-              render={(s) => (
+              data={legends}
+              render={({ id, name, color, isDisabled }) => (
                 <Button
-                  key={s.name}
+                  key={id}
                   className={cn(
                     'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
                     {
-                      'line-through opacity-30': currentHiddenSet.has(s.name!),
-                      'cursor-not-allowed':
-                        isLastActiveLegend && !currentHiddenSet.has(s.name!)
+                      'line-through opacity-30': isDisabled,
+                      'cursor-not-allowed': isLastActiveLegend && !isDisabled
                     }
                   )}
-                  onMouseEnter={() => highlightSeries(s.name!)}
-                  onFocus={() => highlightSeries(s.name!)}
-                  onMouseLeave={clearHighlight}
-                  onBlur={clearHighlight}
-                  onClick={() => toggleSeriesByName(s.name!)}
+                  onMouseEnter={() => onLegendHover(id)}
+                  onMouseLeave={() => onLegendLeave(id)}
+                  onClick={() => onLegendClick(id)}
                 >
                   <span
                     className='inline-block h-3 w-3 rounded-full'
-                    style={{ backgroundColor: (s as any).color }}
+                    style={{ backgroundColor: color }}
                   />
-                  {s.name}
+                  {name}
                 </Button>
               )}
             />

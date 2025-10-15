@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { normalizeCapoData } from '@/components/CapoPageTable/lib/normalizeTableDataUtils';
+import { normalizeCapoData } from '@/entities/Capo/CollateralPriceBlock/lib/normalizeTableDataUtils';
 import { useCapoApiData } from '@/shared/hooks/useCapoApiData';
 import { useSourcesApiData } from '@/shared/hooks/useSourcesApiData';
 
