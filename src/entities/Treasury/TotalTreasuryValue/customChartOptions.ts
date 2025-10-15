@@ -31,15 +31,22 @@ export const customTooltipFormatter = (context: Point, groupBy?: string) => {
 
   let body: string;
   if (groupBy === 'Market') {
-    const mid = Math.ceil(sorted.length / 2);
-    const col1 = sorted.slice(0, mid);
-    const col2 = sorted.slice(mid);
+    const columnsCount = sorted.length > 20 ? 3 : 2;
+    const itemsPerColumn = Math.ceil(sorted.length / columnsCount);
+    const columns = Array.from({ length: columnsCount }, (_, i) =>
+      sorted.slice(i * itemsPerColumn, (i + 1) * itemsPerColumn)
+    );
 
     body = `
-      <div style="display:flex;gap:24px;">
-        <div style="display:flex;flex-direction:column;gap:8px;">${col1.map(row).join('')}</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">${col2.map(row).join('')}</div>
-      </div>`;
+        <div style="display:flex;gap:24px;">
+          ${columns
+            .map(
+              (col) =>
+                `<div style="display:flex;flex-direction:column;gap:8px;">${col.map(row).join('')}</div>`
+            )
+            .join('')}
+        </div>
+      `;
   } else {
     body = `<div class="flex flex-col gap-3">${sorted.map(row).join('')}</div>`;
   }
