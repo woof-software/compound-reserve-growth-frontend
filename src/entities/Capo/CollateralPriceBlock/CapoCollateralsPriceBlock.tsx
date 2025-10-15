@@ -54,7 +54,7 @@ const CapoCollateralsPriceBlock = ({
     onTypeSelect,
     onClearSort,
     applySorting
-  } = useSorting<CapoTableItem>('asc', null);
+  } = useSorting<CapoTableItem>('desc', 'priceBuffer');
 
   const sortType: SortAdapter<CapoTableItem> = {
     type: sortDirection,

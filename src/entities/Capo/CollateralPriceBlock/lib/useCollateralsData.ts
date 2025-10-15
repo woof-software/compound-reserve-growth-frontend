@@ -16,6 +16,7 @@ const transformTableData = (data: CapoTableItem[]): CapoTableItem[] =>
     collateralPrice: item.collateralPrice,
     priceRestriction: item.priceRestriction,
     priceFeed: item.priceFeed,
+    priceBuffer: Number(item.priceRestriction) - Number(item.collateralPrice),
     oracleName: item.oracleName
   }));
 
