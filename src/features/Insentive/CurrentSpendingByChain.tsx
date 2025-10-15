@@ -41,7 +41,7 @@ const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
   const tableData = tableDataNormalizer(filteredData, activeTab);
   const csvData = getCsvData(tableData);
   const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
-    useSorting<SpendingByChainTableColumns>('asc', null);
+    useSorting<SpendingByChainTableColumns>('desc', 'valueUsd');
 
   const sortType: SortAdapter<SpendingByChainTableColumns> = {
     type: sortDirection,
