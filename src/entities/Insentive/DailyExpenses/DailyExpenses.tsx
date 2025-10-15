@@ -43,7 +43,7 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
 
   const normalizedTableData = normalizeTableData(filteredData, activeViewTab);
   const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
-    useSorting<NormalizedTableData>('asc', null);
+    useSorting<NormalizedTableData>('desc', 'total');
   const csvData = getCsvData(normalizedTableData);
 
   const sortType: SortAdapter<NormalizedTableData> = {
