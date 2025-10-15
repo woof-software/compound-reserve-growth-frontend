@@ -1,7 +1,3 @@
-import {
-  customChartOptions,
-  customTooltipFormatter
-} from '@/entities/Revenue/CompoundCumulativeRevenue/customChartOptions';
 import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -9,6 +5,10 @@ import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import LineChart from '@/components/Charts/Line/Line';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
+import {
+  customChartOptions,
+  customTooltipFormatter
+} from '@/entities/Revenue/CompoundCumulativeRevenue/customChartOptions';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useCSVExport } from '@/shared/hooks/useCSVExport';
