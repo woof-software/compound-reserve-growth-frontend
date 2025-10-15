@@ -109,78 +109,82 @@ const CurrentSpendingByChainTable = ({
       <MobileDataTable tableData={mobileTableData}>
         {(dataRows) => (
           <>
-            {dataRows.map((row, index) => {
-              return (
-                <div
-                  key={`${row.network} + ${row.valueComp}`}
-                  className={cn(
-                    'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
-                    {
-                      'border-none': dataRows.length - 1 === index
-                    }
-                  )}
-                >
-                  <div className='grid w-full'>
-                    <Text
-                      size='11'
-                      lineHeight='18'
-                      weight='500'
-                      className='text-primary-14'
-                    >
-                      Network
-                    </Text>
-                    <div className='flex items-center gap-1'>
-                      <Icon
-                        name={row.network || 'not-found-icon'}
-                        className='h-4 w-4'
-                        folder='network'
-                      />
+            {dataRows
+              .sort((a, b) => {
+                return b.valueUsd - a.valueUsd;
+              })
+              .map((row, index) => {
+                return (
+                  <div
+                    key={`${row.network} + ${row.valueComp}`}
+                    className={cn(
+                      'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                      {
+                        'border-none': dataRows.length - 1 === index
+                      }
+                    )}
+                  >
+                    <div className='grid w-full'>
+                      <Text
+                        size='11'
+                        lineHeight='18'
+                        weight='500'
+                        className='text-primary-14'
+                      >
+                        Network
+                      </Text>
+                      <div className='flex items-center gap-1'>
+                        <Icon
+                          name={row.network || 'not-found-icon'}
+                          className='h-4 w-4'
+                          folder='network'
+                        />
+                        <Text
+                          size='13'
+                          lineHeight='21'
+                          className='truncate'
+                        >
+                          {capitalizeFirstLetter(row.network)}
+                        </Text>
+                      </div>
+                    </div>
+                    <div className='grid w-full'>
+                      <Text
+                        size='11'
+                        lineHeight='18'
+                        weight='500'
+                        className='text-primary-14'
+                      >
+                        Value COMP
+                      </Text>
                       <Text
                         size='13'
                         lineHeight='21'
                         className='truncate'
                       >
-                        {capitalizeFirstLetter(row.network)}
+                        {Format.token(row.valueComp, 'standard', 'COMP')}
+                      </Text>
+                    </div>
+                    <div className='grid w-full'>
+                      <Text
+                        size='11'
+                        lineHeight='18'
+                        weight='500'
+                        className='text-primary-14'
+                      >
+                        Value USD
+                      </Text>
+                      <Text
+                        size='13'
+                        lineHeight='21'
+                        className='truncate'
+                      >
+                        {Format.price(row.valueUsd, 'standard')}
                       </Text>
                     </div>
                   </div>
-                  <div className='grid w-full'>
-                    <Text
-                      size='11'
-                      lineHeight='18'
-                      weight='500'
-                      className='text-primary-14'
-                    >
-                      Value COMP
-                    </Text>
-                    <Text
-                      size='13'
-                      lineHeight='21'
-                      className='truncate'
-                    >
-                      {Format.token(row.valueComp, 'standard', 'COMP')}
-                    </Text>
-                  </div>
-                  <div className='grid w-full'>
-                    <Text
-                      size='11'
-                      lineHeight='18'
-                      weight='500'
-                      className='text-primary-14'
-                    >
-                      Value USD
-                    </Text>
-                    <Text
-                      size='13'
-                      lineHeight='21'
-                      className='truncate'
-                    >
-                      {Format.price(row.valueUsd, 'standard')}
-                    </Text>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </>
         )}
       </MobileDataTable>
@@ -189,6 +193,10 @@ const CurrentSpendingByChainTable = ({
           data={tableData}
           columns={SpendingByChainTableColumns}
           enableSorting={true}
+          initialSort={{
+            id: 'ValueUSDC',
+            desc: true
+          }}
           enablePagination={true}
           pageSize={10}
           containerTableClassName='min-h-[518px]'
