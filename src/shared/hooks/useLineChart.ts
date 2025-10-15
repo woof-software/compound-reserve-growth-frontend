@@ -14,21 +14,15 @@ import {
 
 interface LineChartProps {
   showLegend?: boolean;
-
   data: LineChartSeries[];
-
   groupBy: string;
-
   barSize: 'D' | 'W' | 'M';
-
   isAggregate?: boolean;
 }
 
 export interface EventDataItem {
   x: number;
-
   title: string;
-
   text: string;
 }
 

@@ -5,7 +5,7 @@ export type ChartRange = 'D' | 'W' | 'M';
 export type FilterForRangeArgs<T, R = never> = {
   data: T[];
   getDate: (item: T) => Date;
-  transform?: Transformer<T, R extends never ? T : R>;
+  transform: Transformer<T, R extends never ? T : R>;
   range: ChartRange;
 };
 
@@ -22,7 +22,7 @@ export type FilterForRangeArgs<T, R = never> = {
  * @param args.data - The array of data to filter.
  * @param args.range - The time range filter ('D' for days, 'W' for weeks, 'M' for months).
  * @param args.getDate - A function that extracts the date from each data item.
- * @param [args.transform] - An optional transformation function to apply to each filtered item.
+ * @param args.transform - A transformation function to apply to each filtered item.
  *
  * @return An array of transformed and filtered items according to the range and transformation logic.
  */

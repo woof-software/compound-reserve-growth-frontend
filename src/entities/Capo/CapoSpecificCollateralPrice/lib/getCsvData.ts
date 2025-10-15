@@ -1,88 +1,69 @@
 import { CollateralChartSeries } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useCollateralChartData';
+import { filterForRange } from '@/shared/lib/utils/chart';
+
+interface CollateralDataItem {
+  Date: string;
+  'Collateral Price': number;
+}
+
+interface CollateralLimitationDataItem {
+  Date: string;
+  'Collateral price limitation': number;
+}
+
+interface CsvDataItem {
+  Date: string;
+  'Collateral Price': number;
+  'Collateral price limitation': number;
+}
 
 /**
  * This normalizer make csv data the same data represented in line chart
  * @param chartSeries
  * @param barSize
  */
-export const getCsvDataNormalizer = (
+export const getCsvData = (
   chartSeries: CollateralChartSeries[],
   barSize: 'D' | 'W' | 'M'
 ) => {
-  const collateralPriceData = chartSeries.find(
-    (series) => series.name === 'Collateral Price'
-  )?.data;
-  const priceLimitationData = chartSeries.find(
-    (series) => series.name === 'Collateral price limitation'
-  )?.data;
+  const collateralPriceCsvData = filterForRange({
+    data: chartSeries[0]?.data ?? [],
+    getDate: (item) => new Date(item.x),
+    transform: (item) => ({
+      Date: new Date(item.x).toISOString().split('T')[0],
+      'Collateral Price': item.y
+    }),
+    range: barSize
+  });
 
-  const formatDate = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
+  const collateralPriceLimitationCsvData = filterForRange({
+    data: chartSeries[1]?.data ?? [],
+    getDate: (item) => new Date(item.x),
+    transform: (item) => ({
+      Date: new Date(item.x).toISOString().split('T')[0],
+      'Collateral price limitation': item.y
+    }),
+    range: barSize
+  });
 
-  if (!collateralPriceData || !priceLimitationData) {
-    return [];
-  }
+  return [
+    ...collateralPriceCsvData,
+    ...collateralPriceLimitationCsvData
+  ].reduce(
+    (
+      acc: CsvDataItem[],
+      currentValue: CollateralDataItem | CollateralLimitationDataItem
+    ) => {
+      const existing = acc.find((item) => item.Date === currentValue.Date);
 
-  if (barSize === 'D') {
-    return collateralPriceData.map((dataPoint, index) => ({
-      Date: formatDate(new Date(dataPoint.x)),
-      'Collateral Price': dataPoint.y,
-      'Collateral price limitation': priceLimitationData[index].y
-    }));
-  }
-
-  if (barSize === 'W' || barSize === 'M') {
-    const aggregatedData: Record<
-      string,
-      {
-        'Collateral Price': number;
-        'Collateral price limitation': number;
-        count: number;
-      }
-    > = {};
-
-    collateralPriceData.forEach((dataPoint, index) => {
-      const date = new Date(dataPoint.x);
-      let key: string;
-
-      if (barSize === 'W') {
-        const dayOfWeek = date.getDay();
-        const distanceToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-        const mondayDate = new Date(date);
-        mondayDate.setDate(date.getDate() - distanceToMonday);
-        key = formatDate(mondayDate);
+      if (existing) {
+        Object.assign(existing, currentValue);
       } else {
-        key = formatDate(new Date(date.getFullYear(), date.getMonth(), 1));
+        acc.push({ ...currentValue } as CsvDataItem);
       }
 
-      if (!aggregatedData[key]) {
-        aggregatedData[key] = {
-          'Collateral Price': 0,
-          'Collateral price limitation': 0,
-          count: 0
-        };
-      }
-
-      aggregatedData[key]['Collateral Price'] += dataPoint.y;
-      aggregatedData[key]['Collateral price limitation'] +=
-        priceLimitationData[index].y;
-      aggregatedData[key].count += 1;
-    });
-
-    return Object.keys(aggregatedData).map((dateKey) => ({
-      Date: dateKey,
-      'Collateral Price':
-        aggregatedData[dateKey]['Collateral Price'] /
-        aggregatedData[dateKey].count,
-      'Collateral price limitation':
-        aggregatedData[dateKey]['Collateral price limitation'] /
-        aggregatedData[dateKey].count
-    }));
-  }
-
-  return [];
+      return acc;
+    },
+    []
+  );
 };

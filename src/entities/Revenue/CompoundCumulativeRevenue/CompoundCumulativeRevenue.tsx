@@ -2,6 +2,8 @@ import {
   customChartOptions,
   customTooltipFormatter
 } from '@/entities/Revenue/CompoundCumulativeRevenue/customChartOptions';
+import { filterForRange } from '@/shared/lib/utils/chart';
+import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -11,7 +13,6 @@ import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
-import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
@@ -224,12 +225,14 @@ const CompoundCumulativeRevenue = ({
     });
   }, [chartSeries]);
 
-  const { csvData, csvFilename } = useCSVExport({
-    chartSeries: cumulativeChartSeries,
-    barSize,
-    groupBy,
-    filePrefix: 'Compound_Cumulative_Revenue',
-    aggregationType: 'last'
+  const csvData = filterForRange({
+    data: cumulativeChartSeries[0]?.data ?? [],
+    getDate: (item) => new Date(item.x),
+    transform: (item) => ({
+      Date: new Date(item.x).toISOString().split('T')[0],
+      'Cumulative revenue': item.y
+    }),
+    range: barSize
   });
 
   const {
@@ -345,7 +348,7 @@ const CompoundCumulativeRevenue = ({
         areAllSeriesHidden={areAllSeriesHidden}
         isShowEyeIcon={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
         showEvents={showEvents}
-        csvFilename={csvFilename}
+        csvFilename={getCsvFileName('compound_cumulative_revenue')}
         chainOptions={chainOptions}
         selectedOptions={selectedOptions}
         isShowCalendarIcon={Boolean(eventsData.length > 0)}

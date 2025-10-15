@@ -10,12 +10,12 @@ import {
   customChartOptions,
   customTooltipFormatter
 } from '@/entities/Treasury/TotalTreasuryValue/customChartOptions';
-import { getCsvData } from '@/entities/Treasury/TotalTreasuryValue/getCsvData';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
+import { filterForRange } from '@/shared/lib/utils/chart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import {
   ChartDataItem,
@@ -258,7 +258,15 @@ const TotalTreasuryValue = ({
     });
   }, [chartSeries]);
 
-  const csvData = getCsvData(correctedChartSeries[0]?.data, barSize);
+  const csvData = filterForRange({
+    data: correctedChartSeries[0]?.data ?? [],
+    getDate: (item) => new Date(item.x),
+    transform: (item) => ({
+      Date: new Date(item.x).toISOString().split('T')[0],
+      'Total treasury': item.y
+    }),
+    range: barSize
+  });
 
   const hasData = useMemo(() => {
     return (

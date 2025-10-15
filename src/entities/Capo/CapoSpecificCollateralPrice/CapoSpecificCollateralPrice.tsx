@@ -8,7 +8,7 @@ import {
   customFormatter,
   customOptions
 } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/chartConfig';
-import { getCsvDataNormalizer } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/getCsvData';
+import { getCsvData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/getCsvData';
 import { useChartFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useChartFilters';
 import { useCollateralChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useCollateralChartData';
 import { useRelativeFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useRelativeFilters';
@@ -136,7 +136,7 @@ export const CapoSpecificCollateralPrice = (
     onChainSelect: setSelectedChain
   });
 
-  const csvData = getCsvDataNormalizer(chartSeries, barSize);
+  const csvData = getCsvData(chartSeries, barSize);
 
   const {
     chartRef,
@@ -196,6 +196,7 @@ export const CapoSpecificCollateralPrice = (
           placeholder='Collateral'
         />
         <CSVDownloadButton
+          // @ts-expect-error TODO: fix csv data type
           data={csvData}
           filename={getCsvFileName('capo_specific_collateral_price')}
         />
