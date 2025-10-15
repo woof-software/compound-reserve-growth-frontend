@@ -11,11 +11,23 @@ import View from '@/shared/ui/View/View';
 interface TooltipProps {
   children: ReactNode;
   content: string | ReactNode;
+
+  open?: boolean;
+
+  onOpenChange?: (open: boolean) => void;
 }
 
-export const Tooltip = ({ children, content }: TooltipProps) => {
+export const Tooltip = ({
+  children,
+  content,
+  open,
+  onOpenChange
+}: TooltipProps) => {
   return (
-    <BaseTooltip>
+    <BaseTooltip
+      open={open}
+      onOpenChange={onOpenChange}
+    >
       <TooltipTrigger asChild>{children}</TooltipTrigger>
       <TooltipContent>
         <View.Condition if={typeof content === 'string'}>

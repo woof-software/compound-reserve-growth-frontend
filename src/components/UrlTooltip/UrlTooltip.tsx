@@ -13,6 +13,7 @@ interface AddressTooltipProps {
   url?: string;
   tooltipClassName?: string;
   contentWidth?: string;
+  isRedirectContent?: boolean;
 }
 
 export const UrlTooltip: React.FC<AddressTooltipProps> = ({
@@ -22,9 +23,28 @@ export const UrlTooltip: React.FC<AddressTooltipProps> = ({
   className = '',
   url,
   tooltipClassName = '',
-  contentWidth = 'w-40'
+  contentWidth = 'w-40',
+  isRedirectContent = false
 }) => {
-  const triggerContent = (
+  const triggerContent = isRedirectContent ? (
+    <a
+      href={url}
+      target='_blank'
+      rel='noopener noreferrer'
+    >
+      <div
+        className={`flex items-start ${className}`}
+        style={{ width: `${triggerWidth}px` }}
+      >
+        <Text
+          size='13'
+          className='text-primary-11 inline-block max-w-full cursor-pointer truncate border-b border-dotted border-gray-500 leading-none'
+        >
+          {text}
+        </Text>
+      </div>
+    </a>
+  ) : (
     <div
       className={`flex items-start ${className}`}
       style={{ width: `${triggerWidth}px` }}

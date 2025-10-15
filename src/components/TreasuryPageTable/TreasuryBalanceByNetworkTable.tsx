@@ -87,6 +87,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
 
       return (
         <AddressTooltip
+          isRedirectContent
           text={source}
           address={address}
           chain={chain}

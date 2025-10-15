@@ -1,4 +1,3 @@
-import { Format } from '@/shared/lib/utils/numbersFormatter';
 import * as React from 'react';
 import { useMemo } from 'react';
 
@@ -7,6 +6,7 @@ import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { NormalizedTableData } from '@/entities/Insentive/DailyExpenses/lib/types';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import {
   capitalizeFirstLetter,
   defaultExplorer,
@@ -65,6 +65,7 @@ const getDailyColumns = (
       },
       cell: ({ row }) => (
         <AddressTooltip
+          isRedirectContent
           text={row.original.source.market!}
           address={row.original.source.address}
           chain={row.original.source.network}

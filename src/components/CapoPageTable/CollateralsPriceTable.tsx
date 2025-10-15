@@ -15,7 +15,6 @@ import {
 import { CapoTableItem } from '@/shared/types/Capo/types';
 import { ClipboardButton } from '@/shared/ui/AnimationProvider/CopyButton/CopyButton';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
-import DrawerInfo from '@/shared/ui/DrawerInfo/DrawerInfo';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
@@ -102,6 +101,7 @@ const collateralTableColumns: ExtendedColumnDef<CapoTableItem>[] = [
         defaultExplorer;
 
       const fullExplorerLink = `${explorerUrl}${row.original.priceFeed}`;
+
       return (
         <HoverCard
           content={
@@ -144,14 +144,20 @@ const collateralTableColumns: ExtendedColumnDef<CapoTableItem>[] = [
           }
           side='top'
         >
-          <div className='flex justify-end'>
-            <Text
-              size='13'
-              className='text-primary-11 inline-block max-w-full cursor-pointer truncate border-b border-dotted border-gray-500 leading-none'
-            >
-              {`${row.original.priceFeed.slice(0, 4)}...${row.original.priceFeed.slice(-4)}`}
-            </Text>
-          </div>
+          <a
+            href={fullExplorerLink}
+            target='_blank'
+            rel='noopener noreferrer'
+          >
+            <div className='flex justify-end'>
+              <Text
+                size='13'
+                className='text-primary-11 inline-block max-w-full cursor-pointer truncate border-b border-dotted border-gray-500 leading-none'
+              >
+                {`${row.original.priceFeed.slice(0, 4)}...${row.original.priceFeed.slice(-4)}`}
+              </Text>
+            </div>
+          </a>
         </HoverCard>
       );
     }
@@ -299,48 +305,10 @@ const CollateralsPriceTable = ({
                   >
                     Price Feed
                   </Text>
-                  <DrawerInfo
-                    content={
-                      <div className='flex w-full flex-col items-start gap-4'>
-                        <Text
-                          size='17'
-                          weight='500'
-                          className='text-primary-11 mb-5 w-full !text-center break-all'
-                        >
-                          {row.collateral === NOT_MARKET
-                            ? ' - '
-                            : row.collateral}
-                        </Text>
-                        <div className='flex w-full items-center justify-between'>
-                          <Text
-                            size='14'
-                            className='text-primary-11'
-                          >
-                            {sliceAddress(row.priceFeed)}
-                          </Text>
-                          <ClipboardButton textToCopy={row.priceFeed} />
-                        </div>
-                        <div className='flex w-full items-center justify-between'>
-                          <Text
-                            size='14'
-                            className='text-primary-11'
-                          >
-                            View on Explorer
-                          </Text>
-                          <a
-                            href={fullExplorerLink}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            className='text-primary-11 flex h-5 w-5 items-center justify-center'
-                          >
-                            <Icon
-                              name={'arrow-link'}
-                              className='h-4.5 w-3 text-[#7A8A99]'
-                            />
-                          </a>
-                        </div>
-                      </div>
-                    }
+                  <a
+                    href={fullExplorerLink}
+                    target='_blank'
+                    rel='noopener noreferrer'
                   >
                     <Text
                       size='13'
@@ -349,7 +317,7 @@ const CollateralsPriceTable = ({
                     >
                       {sliceAddress(row.priceFeed)}
                     </Text>
-                  </DrawerInfo>
+                  </a>
                 </div>
               </div>
             );

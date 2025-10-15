@@ -1,4 +1,3 @@
-import { Format } from '@/shared/lib/utils/numbersFormatter';
 import * as React from 'react';
 import { useMemo } from 'react';
 
@@ -6,6 +5,7 @@ import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { defaultExplorer, explorers } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -105,6 +105,7 @@ const treasuryColumns: ExtendedColumnDef<TreasuryBalanceByNetworkType>[] = [
     size: 120,
     cell: ({ row }) => (
       <AddressTooltip
+        isRedirectContent
         text={row.original.source}
         address={row.original.address}
         chain={row.original.chain}
