@@ -2,6 +2,8 @@ import {
   customChartOptions,
   customTooltipFormatter
 } from '@/entities/Treasury/TotalTreasuryValue/customChartOptions';
+import { getCsvData } from '@/entities/Treasury/TotalTreasuryValue/getCsvData';
+import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -12,7 +14,6 @@ import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
-import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
@@ -257,13 +258,7 @@ const TotalTreasuryValue = ({
     });
   }, [chartSeries]);
 
-  const { csvData, csvFilename } = useCSVExport({
-    chartSeries: correctedChartSeries,
-    barSize,
-    groupBy,
-    filePrefix: 'Total_Treasury_Value',
-    aggregationType: 'sum'
-  });
+  const csvData = getCsvData(correctedChartSeries[0]?.data, barSize);
 
   const hasData = useMemo(() => {
     return (
@@ -366,7 +361,7 @@ const TotalTreasuryValue = ({
         isLoading={isLoading || false}
         barSize={barSize}
         csvData={csvData}
-        csvFilename={csvFilename}
+        csvFilename={getCsvFileName('total_treasury_value')}
         isOpenSingle={isOpenSingle}
         onSelectChain={onSelectChain}
         onSelectAssetType={onSelectAssetType}
@@ -419,7 +414,6 @@ const Filters = memo(
     showEvents,
     groupBy,
     csvData,
-    csvFilename,
     areAllSeriesHidden,
     chainOptions,
     selectedOptions,
@@ -589,7 +583,7 @@ const Filters = memo(
               <div className='px-3 py-2'>
                 <CSVLink
                   data={csvData}
-                  filename={csvFilename}
+                  filename={getCsvFileName('total_treasury_value')}
                   onClick={onMoreClose}
                 >
                   <div className='flex items-center gap-1.5'>
@@ -725,7 +719,7 @@ const Filters = memo(
             </div>
             <CSVDownloadButton
               data={csvData}
-              filename={csvFilename}
+              filename={getCsvFileName('total_treasury_value')}
             />
           </div>
         </div>

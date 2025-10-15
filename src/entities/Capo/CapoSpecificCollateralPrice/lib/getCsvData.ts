@@ -1,5 +1,10 @@
 import { CollateralChartSeries } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useCollateralChartData';
 
+/**
+ * This normalizer make csv data the same data represented in line chart
+ * @param chartSeries
+ * @param barSize
+ */
 export const getCsvDataNormalizer = (
   chartSeries: CollateralChartSeries[],
   barSize: 'D' | 'W' | 'M'
