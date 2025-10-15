@@ -38,13 +38,16 @@ export const customTooltipFormatter = (context: Point, groupBy?: string) => {
     );
 
     body = `
-        <div style="display:flex;gap:24px;">
+        <div class="md:flex hidden gap-6">
           ${columns
             .map(
               (col) =>
                 `<div style="display:flex;flex-direction:column;gap:8px;">${col.map(row).join('')}</div>`
             )
             .join('')}
+        </div>
+        <div class="md:hidden grid sm:gap-4 gap-1 grid-cols-2 w-full min-w-[340px]">
+          ${columns.map((col) => col.map(row).join('')).join('')}
         </div>
       `;
   } else {
