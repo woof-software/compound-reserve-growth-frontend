@@ -1,4 +1,3 @@
-import { customChartOptions } from '@/features/Insentive/lib/customChartOptions';
 import React, { useState } from 'react';
 
 import BarChart from '@/components/Charts/Bar/Bar';
@@ -7,6 +6,7 @@ import CurrentSpendingByChainTable, {
 } from '@/entities/Insentive/CurrentSpendingByChainTable/CurrentSpendingByChainTable';
 import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
 import { CurrentSpendingByChainMobileFilters } from '@/features/Insentive/CurrentSpendingByChainMobileFilters';
+import { customChartOptions } from '@/features/Insentive/lib/customChartOptions';
 import { getChartData } from '@/features/Insentive/lib/getChartData';
 import { getCsvData } from '@/features/Insentive/lib/getCsvData';
 import { tableDataNormalizer } from '@/features/Insentive/lib/tableDataNormalizer';
@@ -34,7 +34,10 @@ const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
     mobileFilterOptions
   } = useChainMarketFilters(data, { filterByLatestDate: true });
 
-  const chartData = getChartData(filteredData, activeTab);
+  const chartData = getChartData(filteredData, activeTab).sort((a, b) => {
+    return b.value - a.value;
+  });
+
   const tableData = tableDataNormalizer(filteredData, activeTab);
   const csvData = getCsvData(tableData);
   const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
