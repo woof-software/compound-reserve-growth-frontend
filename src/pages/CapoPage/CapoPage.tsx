@@ -26,8 +26,8 @@ const CapoPage = () => {
           weight='400'
           className='text-primary-14 leading-[140%] md:leading-[100%]'
         >
-          Track Compound DAO&apos;s treasury portfolio including asset
-          allocation, strategic holdings, and investment returns.
+          Track for Growth‑rate control that protects LST and LRT tokens from
+          exchange‑rate manipulation
         </Text>
       </section>
       <section className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
