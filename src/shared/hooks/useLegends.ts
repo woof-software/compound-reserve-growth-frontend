@@ -43,14 +43,17 @@ export function useLegends<T>(data: Array<T>, getLegend: (item: T) => Legend) {
     setLegends(currentLegends);
   }, [JSON.stringify(currentLegends)]);
 
-  const _update = (id: string, update: (legend: Legend) => Legend) => {
+  const _update = (
+    id: string,
+    update: (legend: Legend, legends: Legend[]) => Legend
+  ) => {
     setLegends((prev) => {
       for (let i = 0; i < prev.length; i++) {
         const legend = prev[i];
 
         if (legend.id !== id) continue;
 
-        const updatedLegend = update(legend);
+        const updatedLegend = update(legend, prev);
 
         if (legend === updatedLegend) continue;
 
@@ -65,14 +68,16 @@ export function useLegends<T>(data: Array<T>, getLegend: (item: T) => Legend) {
     });
   };
 
-  const _updateAll = (update: (legend: Legend) => Legend) => {
+  const _updateAll = (
+    update: (legend: Legend, legends: Legend[]) => Legend
+  ) => {
     setLegends((prev) => {
       let result: null | Legend[] = null;
 
       for (let i = 0; i < prev.length; i++) {
         const legend = prev[i];
 
-        const updatedLegend = update(legend);
+        const updatedLegend = update(legend, prev);
 
         if (legend === updatedLegend) continue;
 
@@ -88,10 +93,18 @@ export function useLegends<T>(data: Array<T>, getLegend: (item: T) => Legend) {
   };
 
   const toggle = (id: string) => {
-    _update(id, (legend) => {
+    _update(id, (legend, legends) => {
+      const isDisabled = !legend.isDisabled;
+
+      if (isDisabled) {
+        const seriesEnabled = legends.filter((l) => !l.isDisabled);
+
+        if (seriesEnabled.length === 1) return legend;
+      }
+
       return {
         ...legend,
-        isDisabled: !legend.isDisabled
+        isDisabled
       };
     });
   };
