@@ -138,16 +138,7 @@ export const CapoSpecificCollateralPrice = (
 
   const csvData = getCsvDataNormalizer(chartSeries, barSize);
 
-  const {
-    chartRef,
-    showEvents,
-    aggregatedSeries,
-    onAllSeriesHidden,
-    onEventsData,
-    onShowEvents,
-    onSelectAll,
-    onDeselectAll
-  } = useLineChart({
+  const { aggregatedSeries } = useLineChart({
     groupBy: groupBy(),
     data: chartSeries,
     barSize
@@ -275,18 +266,10 @@ export const CapoSpecificCollateralPrice = (
       </div>
       {hasData && (
         <Line
-          key={`${groupBy()}`}
-          data={chartSeries}
+          key={groupBy()}
           groupBy={groupBy()}
           aggregatedSeries={aggregatedSeries}
           className='max-h-fit'
-          chartRef={chartRef}
-          showEvents={showEvents}
-          onAllSeriesHidden={onAllSeriesHidden}
-          onSelectAll={onSelectAll}
-          onDeselectAll={onDeselectAll}
-          onShowEvents={onShowEvents}
-          onEventsData={onEventsData}
           // @ts-expect-error TODO: fix context type for Line component customTooltipFormatter
           customTooltipFormatter={customFormatter}
           customOptions={customOptions}

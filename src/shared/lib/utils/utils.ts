@@ -116,6 +116,47 @@ export const getStableColorForSeries = (
   return colorPicker(idx);
 };
 
+/**
+ * Generates a **stable, deterministic color** string for a given input string.
+ *
+ * ## Why it exists
+ * In many applications (e.g., charts, tags, user avatars, or data visualizations),
+ * you often want each unique label or identifier to always have the same color,
+ * without manually assigning one.
+ * This function provides a simple, reproducible mapping from any string to a color
+ * in a predefined color palette (`STABLE_COLORS`).
+ *
+ * ## How it works
+ * - Converts the input string into a numeric hash using a lightweight algorithm.
+ * - Uses the hash value (modulo the number of available colors) to select
+ *   a color from the `STABLE_COLORS` array.
+ * - The same string will **always** yield the same color.
+ *
+ * @param {string} str - The input string (e.g., a username, category name, or ID).
+ * @returns {string} A color string (e.g., a hex code) deterministically selected from `STABLE_COLORS`.
+ *
+ * @example
+ * ```ts
+ * const color1 = getStableColorForString("Alice"); // e.g. "#4A90E2"
+ * const color2 = getStableColorForString("Bob");   // e.g. "#7ED321"
+ * const color3 = getStableColorForString("Alice"); // same as color1
+ * ```
+ */
+export function getStableColorForString(str: string): string {
+  // Simple hash function to convert string to number
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+
+  // Ensure positive index
+  const index = Math.abs(hash) % STABLE_COLORS.length;
+
+  return STABLE_COLORS[index];
+}
+
 export const explorers: { [key: string]: string } = {
   ethereum: 'https://etherscan.io/address/',
   mainnet: 'https://etherscan.io/address/',
