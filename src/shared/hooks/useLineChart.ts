@@ -1,6 +1,5 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import Highcharts from 'highcharts';
-import HighchartsReact from 'highcharts-react-official';
 
 import { LineChartSeries } from '@/components/Charts/Line/Line';
 import { filterForRange } from '@/shared/lib/utils/chart';
@@ -67,14 +66,6 @@ const useLineChart = ({
   barSize,
   isAggregate = false
 }: LineChartProps) => {
-  const chartRef = useRef<HighchartsReact.RefObject>(null);
-
-  const [areAllSeriesHidden, setAreAllSeriesHidden] = useState<boolean>(false);
-
-  const [showEvents, setShowEvents] = useState<boolean>(true);
-
-  const [eventsData, setEventsData] = useState<EventDataItem[]>([]);
-
   const aggregatedSeries = useMemo<Highcharts.SeriesAreaOptions[]>(() => {
     const allSeriesNames = data.map((series) => series.name);
 
@@ -91,7 +82,7 @@ const useLineChart = ({
       return {
         data: seriesData,
         id: series.name,
-        type: 'area' as const,
+        type: 'area',
         name: capitalizeFirstLetter(series.name),
         color: getStableColorForSeries(series.name, allSeriesNames)
       };
@@ -103,43 +94,9 @@ const useLineChart = ({
     [aggregatedSeries.length, groupBy, showLegend]
   );
 
-  const onAllSeriesHidden = (value: boolean) => setAreAllSeriesHidden(value);
-
-  const onShowEvents = (value: boolean) => setShowEvents(value);
-
-  const onEventsData = (value: EventDataItem[]) => setEventsData(value);
-
-  const onSelectAll = useCallback(() => {
-    const chart = chartRef.current?.chart;
-
-    if (!chart) return;
-
-    chart.series.forEach((s) => s.setVisible(true, false));
-    chart.redraw();
-  }, []);
-
-  const onDeselectAll = useCallback(() => {
-    const chart = chartRef.current?.chart;
-
-    if (!chart) return;
-
-    chart.series.forEach((s) => s.setVisible(false, false));
-    chart.redraw();
-  }, []);
-
   return {
-    chartRef,
-    eventsData,
-    showEvents,
-    areAllSeriesHidden,
     isLegendEnabled,
-    aggregatedSeries,
-
-    onEventsData,
-    onAllSeriesHidden,
-    onShowEvents,
-    onSelectAll,
-    onDeselectAll
+    aggregatedSeries
   };
 };
 
