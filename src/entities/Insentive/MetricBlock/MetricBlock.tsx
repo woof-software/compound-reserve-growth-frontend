@@ -129,11 +129,13 @@ const MetricBlock = (props: MetricBlockProps) => {
 
   const metrics = getTotalMetricValues(data, activeTab);
 
+  const activeTimeTab = activeTab === 'Day' ? '24h' : '365d';
+
   return (
     <div className='flex flex-col gap-2.5 lg:gap-5'>
       <div className='flex flex-col gap-2.5 md:flex-row lg:gap-5'>
         <Card
-          title='Total lend incentives'
+          title={`${activeTimeTab} Lend incentives`}
           isLoading={isLoading}
           className={{
             container: 'max-w-full min-w-64',
@@ -175,7 +177,7 @@ const MetricBlock = (props: MetricBlockProps) => {
           />
         </Card>
         <Card
-          title='Total borrow incentives'
+          title={`${activeTimeTab} Borrow incentives`}
           isLoading={isLoading}
           className={{
             container: 'max-w-full min-w-64',
@@ -219,7 +221,7 @@ const MetricBlock = (props: MetricBlockProps) => {
       </div>
       <div className='flex flex-col gap-2.5 md:flex-row lg:gap-5'>
         <Card
-          title='Total incentives'
+          title={`${activeTimeTab} Total incentives`}
           isLoading={isLoading}
           className={{
             container: 'max-w-full min-w-64',
@@ -261,7 +263,7 @@ const MetricBlock = (props: MetricBlockProps) => {
           />
         </Card>
         <Card
-          title='Total revenue granted'
+          title={`${activeTimeTab} Revenue generated`}
           isLoading={isLoading}
           className={{
             container: 'max-w-full min-w-64',
