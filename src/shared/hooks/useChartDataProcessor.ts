@@ -37,10 +37,11 @@ export const useChartDataProcessor = ({
         if (selectedValues.length === 0) return true;
         let itemValue = getValueByPath(item, filterPaths[key]);
 
-        if (
-          key === 'deployment' &&
-          (itemValue === undefined || itemValue === null || itemValue === '')
-        ) {
+        const isNotMarket =
+          (key === 'deployment' || key === 'market') &&
+          (itemValue === undefined || itemValue === null || itemValue === '');
+
+        if (isNotMarket) {
           itemValue = NOT_MARKET;
         }
 
