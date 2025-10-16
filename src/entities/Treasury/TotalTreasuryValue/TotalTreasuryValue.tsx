@@ -12,7 +12,9 @@ import {
 } from '@/entities/Treasury/TotalTreasuryValue/customChartOptions';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
+import { useEventsApi } from '@/shared/hooks/useEventsApi';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
+import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
 import { filterForRange } from '@/shared/lib/utils/chart';
@@ -156,8 +158,6 @@ const TotalTreasuryValue = ({
     initialBarSize: 'D'
   });
 
-  const [resetHiddenKey, setResetHiddenKey] = useState(0);
-
   const rawData: ChartDataItem[] = useMemo(() => {
     if (!treasuryApiResponse) {
       return [];
@@ -275,23 +275,32 @@ const TotalTreasuryValue = ({
     );
   }, [correctedChartSeries]);
 
-  const {
-    chartRef,
-    eventsData,
-    showEvents,
-    isLegendEnabled,
-    aggregatedSeries,
-    areAllSeriesHidden,
-    onAllSeriesHidden,
-    onEventsData,
-    onShowEvents,
-    onSelectAll,
-    onDeselectAll
-  } = useLineChart({
+  const { isLegendEnabled, aggregatedSeries } = useLineChart({
     groupBy,
     data: correctedChartSeries,
     barSize
   });
+
+  const {
+    legends,
+    toggle: onLegendToggle,
+    activateAll: onSelectAllLegends,
+    deactivateAll: onDeselectAllLegends,
+    highlight: onLegendHover,
+    unhighlight: onLegendUnhover
+  } = useLegends(aggregatedSeries, ({ name, color }) => ({
+    id: `${name}`,
+    name: `${name}`,
+    isDisabled: false,
+    isHighlighted: false,
+    color: `${color}`
+  }));
+
+  const isSeriesHidden = legends.every((l) => l.isDisabled);
+
+  const { data: events } = useEventsApi();
+
+  const [showEvents, setIsShowEvents] = useState<boolean>(true);
 
   const onSelectChain = useCallback(
     (chain: OptionType[]) => {
@@ -333,8 +342,6 @@ const TotalTreasuryValue = ({
       deployment: [],
       symbol: []
     });
-
-    setResetHiddenKey((k) => k + 1);
   }, []);
 
   const onClearAll = useCallback(() => {
@@ -358,8 +365,8 @@ const TotalTreasuryValue = ({
       <Filters
         groupBy={groupBy}
         showEvents={showEvents}
-        areAllSeriesHidden={areAllSeriesHidden}
-        isShowCalendarIcon={Boolean(eventsData.length > 0)}
+        areAllSeriesHidden={isSeriesHidden}
+        isShowCalendarIcon={!!events?.length}
         isShowEyeIcon={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
         assetTypeOptions={assetTypeOptions}
         selectedOptions={selectedOptions}
@@ -381,9 +388,9 @@ const TotalTreasuryValue = ({
         selectSingle={selectSingle}
         selectSingleClose={selectSingleClose}
         onClearAll={onClearAll}
-        onSelectAll={onSelectAll}
-        onDeselectAll={onDeselectAll}
-        onShowEvents={onShowEvents}
+        onSelectAll={onSelectAllLegends}
+        onDeselectAll={onDeselectAllLegends}
+        onShowEvents={setIsShowEvents}
       />
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder onButtonClick={onClearAll} />
@@ -392,21 +399,19 @@ const TotalTreasuryValue = ({
           customOptions={customChartOptions}
           customTooltipFormatter={customTooltipFormatter}
           key={groupBy}
-          resetHiddenKey={resetHiddenKey}
-          data={correctedChartSeries}
           groupBy={groupBy}
+          legends={legends}
           aggregatedSeries={aggregatedSeries}
           className='max-h-fit'
-          chartRef={chartRef}
           isLegendEnabled={isLegendEnabled}
-          eventsData={eventsData}
+          events={events}
           showEvents={showEvents}
-          areAllSeriesHidden={areAllSeriesHidden}
-          onSelectAll={onSelectAll}
-          onDeselectAll={onDeselectAll}
-          onShowEvents={onShowEvents}
-          onEventsData={onEventsData}
-          onAllSeriesHidden={onAllSeriesHidden}
+          onSelectAllLegends={onSelectAllLegends}
+          onDeselectAllLegends={onDeselectAllLegends}
+          onShowEvents={setIsShowEvents}
+          onLegendHover={onLegendHover}
+          onLegendLeave={onLegendUnhover}
+          onLegendClick={onLegendToggle}
         />
       )}
     </Card>

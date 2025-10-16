@@ -1,9 +1,3 @@
-import {
-  customChartOptions,
-  customTooltipFormatter
-} from '@/entities/Revenue/CompoundCumulativeRevenue/customChartOptions';
-import { filterForRange } from '@/shared/lib/utils/chart';
-import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -11,12 +5,20 @@ import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import LineChart from '@/components/Charts/Line/Line';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
+import {
+  customChartOptions,
+  customTooltipFormatter
+} from '@/entities/Revenue/CompoundCumulativeRevenue/customChartOptions';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
+import { useEventsApi } from '@/shared/hooks/useEventsApi';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
+import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
+import { filterForRange } from '@/shared/lib/utils/chart';
+import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import {
   ChartDataItem,
   extractFilterOptions,
@@ -104,8 +106,6 @@ const CompoundCumulativeRevenue = ({
       symbol: [] as OptionType[]
     }
   );
-
-  const [resetHiddenKey, setResetHiddenKey] = useState(0);
 
   useFiltersSync(selectedOptions, setSelectedOptions, 'ccr', [
     'chain',
@@ -235,22 +235,32 @@ const CompoundCumulativeRevenue = ({
     range: barSize
   });
 
-  const {
-    chartRef,
-    eventsData,
-    showEvents,
-    isLegendEnabled,
-    aggregatedSeries,
-    areAllSeriesHidden,
-    onEventsData,
-    onShowEvents,
-    onSelectAll,
-    onDeselectAll
-  } = useLineChart({
+  const { isLegendEnabled, aggregatedSeries } = useLineChart({
     groupBy,
     data: cumulativeChartSeries,
     barSize
   });
+
+  const {
+    legends,
+    toggle: onLegendToggle,
+    activateAll: onSelectAllLegends,
+    deactivateAll: onDeselectAllLegends,
+    highlight: onLegendHover,
+    unhighlight: onLegendUnhover
+  } = useLegends(aggregatedSeries, ({ name, color }) => ({
+    id: `${name}`,
+    name: `${name}`,
+    isDisabled: false,
+    isHighlighted: false,
+    color: `${color}`
+  }));
+
+  const isSeriesHidden = legends.every((l) => l.isDisabled);
+
+  const [isShowEvents, setIsShowEvents] = useState<boolean>(true);
+
+  const { data: events } = useEventsApi();
 
   const hasData = useMemo(() => {
     return (
@@ -326,8 +336,6 @@ const CompoundCumulativeRevenue = ({
       deployment: [],
       symbol: []
     });
-
-    setResetHiddenKey((k) => k + 1);
   }, []);
 
   return (
@@ -345,13 +353,13 @@ const CompoundCumulativeRevenue = ({
       <Filters
         barSize={barSize}
         csvData={csvData}
-        areAllSeriesHidden={areAllSeriesHidden}
+        areAllSeriesHidden={isSeriesHidden}
         isShowEyeIcon={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
-        showEvents={showEvents}
+        showEvents={isShowEvents}
         csvFilename={getCsvFileName('compound_cumulative_revenue')}
         chainOptions={chainOptions}
         selectedOptions={selectedOptions}
-        isShowCalendarIcon={Boolean(eventsData.length > 0)}
+        isShowCalendarIcon={!!events?.length}
         deploymentOptionsFilter={deploymentOptionsFilter}
         assetTypeOptions={assetTypeOptions}
         symbolOptions={symbolOptions}
@@ -362,9 +370,9 @@ const CompoundCumulativeRevenue = ({
         onSelectSymbol={onSelectSymbol}
         onBarSizeChange={onBarSizeChange}
         onClearAll={onClearSelectedOptions}
-        onShowEvents={onShowEvents}
-        onSelectAll={onSelectAll}
-        onDeselectAll={onDeselectAll}
+        onShowEvents={setIsShowEvents}
+        onSelectAll={onSelectAllLegends}
+        onDeselectAll={onDeselectAllLegends}
       />
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder
@@ -374,21 +382,20 @@ const CompoundCumulativeRevenue = ({
       ) : (
         <LineChart
           className='max-h-fit'
-          resetHiddenKey={resetHiddenKey}
-          data={cumulativeChartSeries}
           groupBy={getGroupByForChart()}
-          chartRef={chartRef}
           aggregatedSeries={aggregatedSeries}
           isLegendEnabled={isLegendEnabled}
-          eventsData={eventsData}
-          showEvents={showEvents}
-          areAllSeriesHidden={areAllSeriesHidden}
-          onSelectAll={onSelectAll}
-          onDeselectAll={onDeselectAll}
-          onShowEvents={onShowEvents}
-          onEventsData={onEventsData}
+          events={events}
+          showEvents={isShowEvents}
           customOptions={customChartOptions}
           customTooltipFormatter={customTooltipFormatter}
+          legends={legends}
+          onSelectAllLegends={onSelectAllLegends}
+          onDeselectAllLegends={onDeselectAllLegends}
+          onShowEvents={setIsShowEvents}
+          onLegendHover={onLegendHover}
+          onLegendLeave={onLegendUnhover}
+          onLegendClick={onLegendToggle}
         />
       )}
     </Card>

@@ -189,6 +189,10 @@ const CurrentSpendingByChainTable = ({
           data={tableData}
           columns={SpendingByChainTableColumns}
           enableSorting={true}
+          initialSort={{
+            id: 'ValueUSDC',
+            desc: true
+          }}
           enablePagination={true}
           pageSize={10}
           containerTableClassName='min-h-[518px]'

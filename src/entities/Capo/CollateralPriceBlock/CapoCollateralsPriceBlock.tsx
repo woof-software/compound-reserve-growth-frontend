@@ -1,12 +1,12 @@
-import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import React, { useCallback } from 'react';
 
-import CollateralsPriceTable from '@/components/CapoPageTable/CollateralsPriceTable';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
+import CollateralsPriceTable from '@/entities/Capo/CollateralPriceBlock/CollateralsPriceTable';
 import { DesktopFilters } from '@/entities/Capo/CollateralPriceBlock/filters/CollateralDesktopFilters';
 import { MobileFilters } from '@/entities/Capo/CollateralPriceBlock/filters/CollateralMobileFilters';
 import { useCollateralsFilters } from '@/entities/Capo/CollateralPriceBlock/filters/useCollateralsFilters';
 import { useCollateralsData } from '@/entities/Capo/CollateralPriceBlock/lib/useCollateralsData';
+import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
 import { CapoTableItem } from '@/shared/types/Capo/types';
 import Card from '@/shared/ui/Card/Card';
@@ -54,7 +54,7 @@ const CapoCollateralsPriceBlock = ({
     onTypeSelect,
     onClearSort,
     applySorting
-  } = useSorting<CapoTableItem>('asc', null);
+  } = useSorting<CapoTableItem>('desc', 'priceBuffer');
 
   const sortType: SortAdapter<CapoTableItem> = {
     type: sortDirection,

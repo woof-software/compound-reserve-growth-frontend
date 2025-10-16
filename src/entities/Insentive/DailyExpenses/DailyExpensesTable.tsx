@@ -283,6 +283,10 @@ const DailyExpensesTable = (props: DailyExpensesTableProps) => {
         data={tableData}
         columns={dailyColumns}
         enableSorting
+        initialSort={{
+          id: 'total',
+          desc: true
+        }}
         enablePagination={tableData.length > 10}
         pageSize={10}
         containerTableClassName='min-h-[518px]'

@@ -1,7 +1,7 @@
-import { useNormalizedTableData } from '@/components/CapoPageTable/lib/useNormalizedTableData';
 import { CapoSpecificCollateralPrice } from '@/entities/Capo/CapoSpecificCollateralPrice/CapoSpecificCollateralPrice';
 import { useNormalizedChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useNormalizedChartData';
 import CapoCollateralsPriceBlock from '@/entities/Capo/CollateralPriceBlock/CapoCollateralsPriceBlock';
+import { useNormalizedTableData } from '@/entities/Capo/CollateralPriceBlock/lib/useNormalizedTableData';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import Text from '@/shared/ui/Text/Text';
 
@@ -26,8 +26,8 @@ const CapoPage = () => {
           weight='400'
           className='text-primary-14 leading-[140%] md:leading-[100%]'
         >
-          Track Compound DAO&apos;s treasury portfolio including asset
-          allocation, strategic holdings, and investment returns.
+          Track for Growth‑rate control that protects LST and LRT tokens from
+          exchange‑rate manipulation
         </Text>
       </section>
       <section className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>

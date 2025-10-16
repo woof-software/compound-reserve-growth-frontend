@@ -73,17 +73,7 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
     ? chartSeries.filter((series) => series.name === 'Revenue')
     : chartSeries;
 
-  const {
-    chartRef,
-    showEvents,
-    aggregatedSeries,
-    areAllSeriesHidden,
-    onAllSeriesHidden,
-    onEventsData,
-    onShowEvents,
-    onSelectAll,
-    onDeselectAll
-  } = useLineChart({
+  const { aggregatedSeries } = useLineChart({
     groupBy,
     data: displaySeries,
     barSize,
@@ -156,17 +146,8 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
           className='max-h-fit'
           key={groupBy}
           isLegendEnabled={false}
-          data={displaySeries}
           groupBy={groupBy}
-          chartRef={chartRef}
           aggregatedSeries={aggregatedSeries}
-          showEvents={showEvents}
-          areAllSeriesHidden={areAllSeriesHidden}
-          onAllSeriesHidden={onAllSeriesHidden}
-          onSelectAll={onSelectAll}
-          onDeselectAll={onDeselectAll}
-          onShowEvents={onShowEvents}
-          onEventsData={onEventsData}
           customOptions={customChartOptions}
           customTooltipFormatter={customTooltipFormatter}
         />

@@ -88,6 +88,28 @@ const collateralTableColumns: ExtendedColumnDef<CapoTableItem>[] = [
     )
   },
   {
+    id: 'priceBuffer',
+    accessorFn: (row) => row.priceBuffer,
+    header: 'Price Buffer',
+    enableSorting: true,
+    size: 215,
+    cell: ({ row }) => {
+      const bufferValue = Number(row.original.priceBuffer.toFixed(2));
+
+      return (
+        <Text
+          size='13'
+          className={cn({
+            '!text-red-500': bufferValue < 0,
+            '!text-green-400': bufferValue > 0
+          })}
+        >
+          {Format.price(bufferValue, 'standard')}
+        </Text>
+      );
+    }
+  },
+  {
     id: 'priceFeed',
     accessorFn: (row) => row.priceFeed,
     header: 'Price Feed',
@@ -330,6 +352,10 @@ const CollateralsPriceTable = ({
         enableSorting={true}
         enablePagination={tableData.length > 10}
         pageSize={10}
+        initialSort={{
+          id: 'priceBuffer',
+          desc: true
+        }}
         className={cn('hidden flex-col justify-between lg:flex', {
           'min-h-[565px]': tableData.length > 10
         })}
