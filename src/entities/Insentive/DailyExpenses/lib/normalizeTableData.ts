@@ -5,9 +5,15 @@ export const normalizeTableData = (
   view: 'COMP' | 'USD'
 ) => {
   const groupedDataByNetworkDateAndMarket = filteredData.reduce((acc, item) => {
+    const market = item.source.market;
+    const sourceType = item.source.type;
+
+    if (!market || sourceType !== 'Market V3') {
+      return acc;
+    }
+
     const network = item.source.network;
     const date = item.date;
-    const market = item.source.market;
 
     if (!acc.has(network)) {
       acc.set(network, new Map());
@@ -19,15 +25,15 @@ export const normalizeTableData = (
     }
     const dateGroup = networkGroup.get(date)!;
 
-    if (!dateGroup.has(market!)) {
-      dateGroup.set(market!, {
+    if (!dateGroup.has(market)) {
+      dateGroup.set(market, {
         ...item,
         rewardsSupply: 0,
         rewardsBorrow: 0
       });
     }
 
-    const marketEntry = dateGroup.get(market!);
+    const marketEntry = dateGroup.get(market);
 
     if (marketEntry) {
       marketEntry.rewardsBorrow += item.rewardsBorrow;
