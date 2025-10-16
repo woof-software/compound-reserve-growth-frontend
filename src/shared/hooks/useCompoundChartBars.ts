@@ -72,6 +72,8 @@ const useCompoundChartBars = ({
       const seriesData = aggregateByBarSize({
         data: raw,
         getDate: ({ x }) => new Date(x),
+        getValue: ({ y }) => y,
+        applyValue: ({ x, y }, value) => ({ x, y: y + value }),
         transform: ({ x, y }) => [x, y],
         range: effectiveRange
       });

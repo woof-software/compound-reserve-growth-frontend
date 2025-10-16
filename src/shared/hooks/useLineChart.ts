@@ -33,19 +33,25 @@ const useLineChart = ({
     const allSeriesNames = data.map((series) => series.name);
 
     return data.map((series) => {
-      const seriesData = isAggregate
-        ? aggregateByBarSize({
-            data: series.data,
-            getDate: ({ x }) => new Date(x),
-            transform: (item) => item,
-            range: barSize
-          })
-        : filterForRange({
-            data: series.data,
-            getDate: ({ x }) => new Date(x),
-            transform: ({ x, y }) => [x, y],
-            range: barSize
-          });
+      let seriesData: [number, number][];
+
+      if (isAggregate) {
+        seriesData = aggregateByBarSize({
+          data: series.data,
+          getDate: ({ x }) => new Date(x),
+          getValue: ({ y }) => y,
+          applyValue: ({ x, y }, value) => ({ x, y: y + value }),
+          transform: ({ x, y }) => [x, y],
+          range: barSize
+        });
+      } else {
+        seriesData = filterForRange({
+          data: series.data,
+          getDate: ({ x }) => new Date(x),
+          transform: ({ x, y }) => [x, y],
+          range: barSize
+        });
+      }
 
       return {
         data: seriesData,
