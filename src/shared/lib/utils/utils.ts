@@ -1,9 +1,8 @@
 import { ChangeEvent, MouseEvent as ReactMouseEvent } from 'react';
 
-import { THIRTY_DAYS } from '@/shared/consts/consts';
+import { NOT_MARKET, THIRTY_DAYS } from '@/shared/consts/consts';
 import { TokenData } from '@/shared/types/Treasury/types';
 import type { OptionType } from '@/shared/types/types';
-import { ResponseDataType } from '@/shared/types/types';
 
 export const preventEventBubbling = (
   e: ReactMouseEvent<HTMLElement> | ChangeEvent<HTMLInputElement>
@@ -41,48 +40,41 @@ export const longMonthNames = [
   'December'
 ];
 
+const STABLE_COLORS = [
+  '#6F42EB',
+  '#3877FF',
+  '#00D395',
+  '#F54E59',
+  '#FFA374',
+  '#F9FF8E',
+  '#8FE6FE',
+  '#B39AFF',
+  '#FDB0C0',
+  '#BCE954',
+  '#10A674',
+  '#5C8BC4',
+  '#F6C642',
+  '#02CCFE',
+  '#BC8F6F',
+  '#7A89B8',
+  '#FF752E',
+  '#FAB3FF',
+  '#58F0C5',
+  '#62B1FF'
+];
+
+const hashName = (s: string) => {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+};
+
 export const colorPicker = (index: number): string => {
-  const colors = [
-    '#6F42EB',
-    '#3877FF',
-    '#00D395',
-    '#F54E59',
-    '#FFA374',
-    '#F9FF8E',
-    '#8FE6FE',
-    '#B39AFF',
-    '#FDB0C0',
-    '#BCE954',
-    '#10A674',
-    '#5C8BC4',
-    '#F6C642',
-    '#02CCFE',
-    '#BC8F6F',
-    '#7A89B8',
-    '#FF752E',
-    '#FAB3FF',
-    '#58F0C5',
-    '#62B1FF'
-  ];
+  const i =
+    ((index % STABLE_COLORS.length) + STABLE_COLORS.length) %
+    STABLE_COLORS.length;
 
-  if (index < colors.length) {
-    return colors[index];
-  }
-
-  const base = colors[Math.floor(Math.random() * colors.length)];
-
-  const r = parseInt(base.slice(1, 3), 16);
-  const g = parseInt(base.slice(3, 5), 16);
-  const b = parseInt(base.slice(5, 7), 16);
-
-  const offset = Math.floor(Math.random() * 30) - 15;
-  const nr = Math.min(255, Math.max(0, r + offset));
-  const ng = Math.min(255, Math.max(0, g + offset));
-  const nb = Math.min(255, Math.max(0, b + offset));
-
-  return `#${nr.toString(16).padStart(2, '0')}${ng
-    .toString(16)
-    .padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`;
+  return STABLE_COLORS[i];
 };
 
 export const networkColorMap: { [key: string]: string } = {
@@ -106,38 +98,64 @@ export const getStableColorForSeries = (
   seriesName: string,
   allSeriesNames: string[]
 ): string => {
-  const lowerName = seriesName.toLowerCase();
+  const nameNorm = seriesName.trim().toLowerCase();
 
-  // First check networkColorMap
-  if (networkColorMap[lowerName]) {
-    return networkColorMap[lowerName];
-  }
+  if (networkColorMap[nameNorm]) return networkColorMap[nameNorm];
 
-  // For networks check partial matches
   for (const [network, color] of Object.entries(networkColorMap)) {
-    if (lowerName.includes(network)) {
-      return color;
-    }
+    if (nameNorm.includes(network)) return color;
   }
 
-  // Create stable index based on series name
-  // Sort all series names for stable ordering
-  const sortedNames = [...allSeriesNames].sort();
-  const stableIndex = sortedNames.indexOf(seriesName);
+  const sortedLower = [
+    ...new Set(allSeriesNames.map((n) => n.trim().toLowerCase()))
+  ].sort();
+  let idx = sortedLower.indexOf(nameNorm);
 
-  // If series not found in sorted list, use name hash
-  if (stableIndex === -1) {
-    let hash = 0;
-    for (let i = 0; i < seriesName.length; i++) {
-      const char = seriesName.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    return colorPicker((Math.abs(hash) % 20) + 1);
-  }
+  if (idx === -1) idx = hashName(nameNorm) % STABLE_COLORS.length;
 
-  return colorPicker(stableIndex + 1);
+  return colorPicker(idx);
 };
+
+/**
+ * Generates a **stable, deterministic color** string for a given input string.
+ *
+ * ## Why it exists
+ * In many applications (e.g., charts, tags, user avatars, or data visualizations),
+ * you often want each unique label or identifier to always have the same color,
+ * without manually assigning one.
+ * This function provides a simple, reproducible mapping from any string to a color
+ * in a predefined color palette (`STABLE_COLORS`).
+ *
+ * ## How it works
+ * - Converts the input string into a numeric hash using a lightweight algorithm.
+ * - Uses the hash value (modulo the number of available colors) to select
+ *   a color from the `STABLE_COLORS` array.
+ * - The same string will **always** yield the same color.
+ *
+ * @param {string} str - The input string (e.g., a username, category name, or ID).
+ * @returns {string} A color string (e.g., a hex code) deterministically selected from `STABLE_COLORS`.
+ *
+ * @example
+ * ```ts
+ * const color1 = getStableColorForString("Alice"); // e.g. "#4A90E2"
+ * const color2 = getStableColorForString("Bob");   // e.g. "#7ED321"
+ * const color3 = getStableColorForString("Alice"); // same as color1
+ * ```
+ */
+export function getStableColorForString(str: string): string {
+  // Simple hash function to convert string to number
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+
+  // Ensure positive index
+  const index = Math.abs(hash) % STABLE_COLORS.length;
+
+  return STABLE_COLORS[index];
+}
 
 export const explorers: { [key: string]: string } = {
   ethereum: 'https://etherscan.io/address/',
@@ -210,116 +228,9 @@ export const sliceAddress = (
   return address && `${address.slice(0, before)}...${address.slice(-after)}`;
 };
 
-export const formatCurrency = (value: number) => {
-  if (value >= 1000000) {
-    return `${(value / 1000000).toFixed(1)}M`;
-  }
-  return `${value.toLocaleString()}`;
-};
-
-export const formatNumber = (num: number | undefined | null) => {
-  if (num === null || num === undefined || num === 0) return '-';
-  return `$${Math.round(num).toLocaleString('en-US')}`;
-};
-
-export const formatQuantity = (quantity: number) => {
-  if (quantity === null || quantity === undefined) return '-';
-  return quantity.toLocaleString('en-US', { maximumFractionDigits: 0 });
-};
-
 export const formatGrowth = (growth: number) => {
   if (growth === 0) return '-';
   return `${growth > 0 ? '+' : ''}${growth?.toFixed(1)}%`;
-};
-
-export function formatLargeNumber(
-  num: number,
-  digits: number = 4,
-  exact: boolean = false
-): string {
-  const threshold = 1 / 10 ** (digits + 1);
-
-  if (num === 0 || isNaN(num)) {
-    return exact ? '0' : threshold.toFixed(digits);
-  }
-
-  const sign = num < 0 ? '-' : '';
-  const absNum = Math.abs(num);
-
-  if (exact) {
-    if (absNum < 1_000) {
-      return sign + absNum.toString();
-    }
-
-    for (const unit of units) {
-      if (absNum >= unit.value) {
-        const exactValue = absNum / unit.value;
-        return sign + exactValue.toString() + unit.symbol;
-      }
-    }
-
-    return sign + absNum.toString();
-  }
-
-  if (absNum < 1_000) {
-    return (
-      sign +
-      absNum.toLocaleString('en-US', {
-        maximumFractionDigits: digits,
-        minimumFractionDigits: digits
-      })
-    );
-  }
-
-  for (const unit of units) {
-    if (absNum >= unit.value) {
-      return (
-        sign +
-        (absNum / unit.value).toLocaleString('en-US', {
-          maximumFractionDigits: digits,
-          minimumFractionDigits: digits
-        }) +
-        unit.symbol
-      );
-    }
-  }
-
-  return (
-    sign + absNum.toLocaleString('en-US', { maximumFractionDigits: digits })
-  );
-}
-
-export const formatPrice = (price: number, decimals = 2): string => {
-  const priceFormat = `$${formatLargeNumber(price, decimals)}`;
-
-  return priceFormat.startsWith('$-')
-    ? `-${priceFormat.replace('-', '')}`
-    : priceFormat;
-};
-
-export const groupByTypeLast30Days = <T extends ResponseDataType>(
-  data: T[],
-  useLatestDate = false
-): Record<string, T[]> => {
-  if (data.length === 0) return {} as Record<string, T[]>;
-
-  const nowSec = useLatestDate
-    ? Math.max(...data.map((d) => d.date))
-    : Math.floor(Date.now() / 1000);
-
-  const threshold = nowSec - THIRTY_DAYS;
-
-  return data
-    .filter((item) => item.date >= threshold)
-    .reduce<Record<string, T[]>>(
-      (acc, item) => {
-        const type = item.source.asset.type ?? 'Unknown';
-        if (!acc[type]) acc[type] = [];
-        acc[type].push(item);
-        return acc;
-      },
-      {} as Record<string, T[]>
-    );
 };
 
 // TotalTresuaryValue and CompoundCumulativeRevenue helpers
@@ -344,7 +255,7 @@ export const capitalizeFirstLetter = (
   str: string,
   replaceSymbol?: string
 ): string => {
-  if (!str) return replaceSymbol || 'Unknown';
+  if (!str) return replaceSymbol || NOT_MARKET;
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
@@ -367,7 +278,7 @@ export const extractFilterOptions = (
       let value = getValueByPath(item, config[key].path);
 
       if (key === 'deployment' && value === null) {
-        value = 'no name';
+        value = NOT_MARKET;
       }
 
       if (value !== null && value !== undefined) {
@@ -389,7 +300,7 @@ export const extractFilterOptions = (
 
         if (key === 'deployment') {
           const matches =
-            value === 'no name'
+            value === NOT_MARKET
               ? rawData.filter(
                   (item) => getValueByPath(item, config[key].path) == null
                 )
@@ -397,7 +308,7 @@ export const extractFilterOptions = (
                   (item) => getValueByPath(item, config[key].path) === value
                 );
 
-          if (value !== 'no name') {
+          if (value !== NOT_MARKET) {
             option.marketType = matches[0]?.source.type.split(' ')[1] ?? '';
           }
 
@@ -478,10 +389,11 @@ export const groupByKey = <T>(
 export const sumValues = (arr: TokenData[] = []): number =>
   arr.reduce((acc, item) => acc + item.value, 0);
 
-export const formatUSD = (num: number): string => {
+export const formatUSD = (num: number, format?: 'compact'): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
+    notation: format ?? 'standard',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(num);
@@ -538,4 +450,91 @@ export const removeDuplicates = <T>(array: T[], key: keyof T): T[] => {
 
     return true;
   });
+};
+
+export const startOfUTCDay = (t: number) => {
+  const d = new Date(t);
+
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+};
+
+export const startOfUTCWeekMon = (t: number) => {
+  const d = new Date(t);
+
+  const weekday = d.getUTCDay();
+
+  const shift = (weekday + 6) % 7;
+
+  const dayStart = startOfUTCDay(t);
+
+  return dayStart - shift * 24 * 60 * 60 * 1000;
+};
+
+export const startOfUTCMonth = (t: number) => {
+  const d = new Date(t);
+
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
+};
+
+/**
+ * A no-operation function that performs no actions and returns undefined.
+ * Typically used as a placeholder or default callback.
+ *
+ * @return Always returns undefined.
+ */
+export function noop() {
+  // Do nothing
+}
+
+/**
+ * Filters and sorts an array of market options.
+ * Keeps only items with market type 'v2', 'v3', or id equal to NOT_MARKET.
+ * Sorts: first 'v3', then 'v2', then 'NOT_MARKET', then alphabetically by label.
+ * If selectedChainIds is provided, further filters by chain.
+ * Returns the filtered and sorted array.
+ *
+ * @param options Array of market options to filter and sort.
+ * @param selectedChainIds Array of selected chain ids (optional).
+ * @return Filtered and sorted array of market options.
+ */
+export const filterAndSortMarkets = (
+  options: OptionType[] = [],
+  selectedChainIds: string[] = []
+): OptionType[] => {
+  const filtered = options.filter(
+    (el) =>
+      ['v2', 'v3'].includes(el.marketType?.toLowerCase() ?? '') ||
+      el.id.toLowerCase() === NOT_MARKET.toLowerCase()
+  );
+
+  const sorted = filtered.sort((a, b) => {
+    const getOrder = (el: OptionType) => {
+      const type = el.marketType?.toLowerCase();
+
+      if (type === 'v3') return 0;
+
+      if (type === 'v2') return 1;
+
+      if (el.id.toLowerCase() === NOT_MARKET.toLowerCase()) return 2;
+
+      return 3;
+    };
+
+    const orderA = getOrder(a);
+    const orderB = getOrder(b);
+
+    if (orderA !== orderB) return orderA - orderB;
+
+    return a.label.localeCompare(b.label);
+  });
+
+  if (selectedChainIds.length) {
+    return sorted.filter((el) =>
+      Array.isArray(el.chain)
+        ? el.chain.some((c) => selectedChainIds.includes(c))
+        : false
+    );
+  }
+
+  return sorted;
 };

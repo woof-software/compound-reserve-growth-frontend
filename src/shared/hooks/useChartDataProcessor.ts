@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import type { LineChartSeries } from '@/components/Charts/Line/Line';
+import { NOT_MARKET } from '@/shared/consts/consts';
 
 import {
   capitalizeFirstLetter,
@@ -29,12 +30,21 @@ export const useChartDataProcessor = ({
   hasData: boolean;
 } => {
   const chartSeries = useMemo((): LineChartSeries[] => {
-    if (!rawData.length) return [];
+    if (!rawData?.length) return [];
 
     const filteredData = rawData.filter((item) => {
       return Object.entries(filters).every(([key, selectedValues]) => {
         if (selectedValues.length === 0) return true;
-        const itemValue = getValueByPath(item, filterPaths[key]);
+        let itemValue = getValueByPath(item, filterPaths[key]);
+
+        const isNotMarket =
+          (key === 'deployment' || key === 'market') &&
+          (itemValue === undefined || itemValue === null || itemValue === '');
+
+        if (isNotMarket) {
+          itemValue = NOT_MARKET;
+        }
+
         return itemValue && selectedValues.includes(itemValue);
       });
     });
@@ -61,7 +71,7 @@ export const useChartDataProcessor = ({
       filteredData.forEach((item) => {
         if (!item.date || typeof item.value !== 'number') return;
 
-        const key = getValueByPath(item, groupByKeyPath) || 'Unknown';
+        const key = getValueByPath(item, groupByKeyPath) || NOT_MARKET;
 
         if (!aggregatedData.has(key)) {
           aggregatedData.set(key, new Map<number, number>());

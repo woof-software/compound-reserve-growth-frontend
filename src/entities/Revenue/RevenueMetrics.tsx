@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
-import { formatGrowth, formatPrice } from '@/shared/lib/utils/utils';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { formatGrowth } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
 
@@ -75,7 +76,7 @@ const RevenueMetrics = ({
           >
             <div className='flex flex-col gap-8'>
               <ValueMetricField
-                value={formatPrice(yearData?.total ?? 0, 1)}
+                value={Format.price(yearData?.total ?? 0, 'compact')}
                 label='Total Revenue'
               />
               <ValueMetricField

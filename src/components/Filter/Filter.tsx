@@ -1,6 +1,7 @@
 import React, { ChangeEvent, FC, useCallback, useMemo, useState } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
+import { noop } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
@@ -9,7 +10,7 @@ import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-type FilterOptions = {
+export type FilterOptions = {
   id: string;
 
   placeholder: string;
@@ -19,6 +20,8 @@ type FilterOptions = {
   selectedOptions: OptionType[];
 
   options: OptionType[];
+
+  disableSelectAll?: boolean;
 
   onChange?: (selectedOptions: OptionType[]) => void;
 };
@@ -30,7 +33,9 @@ interface FilterProps {
 
   onClose: () => void;
 
-  onClearAll: () => void;
+  onClearAll?: () => void;
+
+  disableClearFilters?: boolean;
 }
 
 const getKey = (f: FilterOptions) => f.id ?? f.placeholder;
@@ -39,7 +44,8 @@ const Filter: FC<FilterProps> = ({
   isOpen,
   filterOptions,
   onClose,
-  onClearAll
+  onClearAll = noop,
+  disableClearFilters = false
 }) => {
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
@@ -105,6 +111,22 @@ const Filter: FC<FilterProps> = ({
     setSelectedKey(null);
   }, [onClose]);
 
+  const onSelectAll = () => {
+    if (!activeFilter) return;
+
+    const setFilterValue = activeFilter.onChange;
+
+    if (!setFilterValue) return;
+
+    const selectedItemsNumber = activeFilter.selectedOptions.length ?? 0;
+
+    const relatedOptions = filterOptions.find(({ id }) => id === selectedKey);
+
+    setFilterValue(
+      selectedItemsNumber > 0 ? [] : (relatedOptions?.options ?? [])
+    );
+  };
+
   return (
     <Drawer
       isOpen={isOpen}
@@ -162,14 +184,16 @@ const Filter: FC<FilterProps> = ({
             )}
           />
         </div>
-        <div className='w-full px-2'>
-          <Button
-            className='text-primary-14 mx-2 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
-            onClick={onClearAll}
-          >
-            Clear Filters
-          </Button>
-        </div>
+        <View.Condition if={!disableClearFilters}>
+          <div className='w-full px-2'>
+            <Button
+              className='text-primary-14 mx-2 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'
+              onClick={onClearAll}
+            >
+              Clear Filters
+            </Button>
+          </div>
+        </View.Condition>
       </View.Condition>
       <View.Condition if={Boolean(selectedKey)}>
         <div className='mb-8 flex items-center'>
@@ -222,7 +246,7 @@ const Filter: FC<FilterProps> = ({
             </div>
           </View.Condition>
         </View.Condition>
-        <div className='hide-scrollbar mt-8 max-h-[450px] overflow-y-auto'>
+        <div className='hide-scrollbar mt-8 max-h-80 overflow-y-auto'>
           <Each
             data={filteredOptions}
             render={(option, index) => {
@@ -261,6 +285,17 @@ const Filter: FC<FilterProps> = ({
             }}
           />
         </div>
+        <View.Condition if={!activeFilter?.disableSelectAll}>
+          <div className='w-full px-2 pt-8 pb-4'>
+            <Button
+              className='text-primary-14 flex w-full items-center justify-center rounded-lg text-[11px] font-medium'
+              onClick={onSelectAll}
+            >
+              {!!activeFilter?.selectedOptions?.length && 'Clear Selection'}
+              {!activeFilter?.selectedOptions?.length && 'Select All'}
+            </Button>
+          </div>
+        </View.Condition>
       </View.Condition>
     </Drawer>
   );

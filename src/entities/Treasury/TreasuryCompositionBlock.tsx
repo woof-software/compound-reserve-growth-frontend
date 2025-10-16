@@ -1,15 +1,20 @@
-import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
+import React, { memo, useMemo, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import SingleDropdown from '@/components/SingleDropdown/SingleDropdown';
-import SortDrawer from '@/components/SortDrawer/SortDrawer';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
+import { NOT_MARKET } from '@/shared/consts/consts';
+import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import {
+  SortAccessor,
+  SortAdapter,
+  useSorting
+} from '@/shared/hooks/useSorting';
+import {
   capitalizeFirstLetter,
-  formatPrice,
   groupByKey,
   groupOptionsDto,
   removeDuplicates
@@ -19,6 +24,8 @@ import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
+import SingleDropdown from '@/shared/ui/SingleDropdown/SingleDropdown';
+import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Switch from '@/shared/ui/Switch/Switch';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
@@ -59,7 +66,7 @@ const mapChartData = (
       return {
         name: capitalizeFirstLetter(key) || 'Unclassified',
         percent: parseFloat(percent.toFixed(2)),
-        value: formatPrice(totalValue, 1),
+        value: Format.price(totalValue, 'compact'),
         rawValue: totalValue
       };
     })
@@ -83,17 +90,6 @@ const mapTableData = (data: Record<string, TokenData[]>) => {
     .sort((a, b) => b.balance - a.balance);
 };
 
-export const treasuryCompositionColumns = [
-  {
-    accessorKey: 'name',
-    header: 'Asset'
-  },
-  {
-    accessorKey: 'balance',
-    header: 'Total Balance USD'
-  }
-];
-
 const TreasuryCompositionBlock = memo(
   ({ isLoading, data }: TreasuryCompositionBlockProps) => {
     const {
@@ -101,18 +97,27 @@ const TreasuryCompositionBlock = memo(
       selectedValue: selectedSingle,
       close: closeSingle,
       open: openSingle,
-      select: selectSingle
+      select: selectSingle,
+      setSelectedValue
     } = useDropdown('single');
 
     const [includeComp, setIncludeComp] = useState<boolean>(true);
 
-    const [sortType, setSortType] = useReducer(
-      (prev, next) => ({
-        ...prev,
-        ...next
-      }),
-      { key: '', type: 'asc' }
-    );
+    const includeCompURl = !includeComp ? 'false' : undefined;
+
+    useFilterSyncSingle('includeComp', includeCompURl, (v) => {
+      setIncludeComp(v === 'true');
+    });
+
+    useFilterSyncSingle('treasuryCompGroup', selectedSingle, setSelectedValue);
+
+    const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
+      useSorting<TreasuryCompositionType>('asc', null);
+
+    const sortType: SortAdapter<TreasuryCompositionType> = {
+      type: sortDirection,
+      key: sortKey
+    };
 
     const {
       isOpen: isSortOpen,
@@ -148,7 +153,7 @@ const TreasuryCompositionBlock = memo(
 
     const { uniqData, uniqDataByCategory } = filteredData;
 
-    const selectedGroup = selectedSingle?.[0] || 'Asset Type';
+    const selectedGroup = selectedSingle?.toString() || 'Asset Type';
 
     const chartData = useMemo(() => {
       if (selectedGroup === 'Chain') {
@@ -159,7 +164,7 @@ const TreasuryCompositionBlock = memo(
       if (selectedGroup === 'Market') {
         const markets = groupByKey(
           uniqData,
-          (item) => item.source.market || 'no market'
+          (item) => item.source.market || NOT_MARKET
         );
         return mapChartData(markets, uniqData);
       }
@@ -192,7 +197,7 @@ const TreasuryCompositionBlock = memo(
       if (selectedGroup === 'Market') {
         const markets = groupByKey(
           uniqData,
-          (item) => item.source.market || 'no market'
+          (item) => item.source.market || NOT_MARKET
         );
 
         const marketsDto = mapTableData(markets);
@@ -221,17 +226,20 @@ const TreasuryCompositionBlock = memo(
       return tableData.length > 0 && chartData.length > 0;
     }, [tableData, chartData]);
 
-    const onSortKeySelect = useCallback((value: string) => {
-      setSortType({
-        key: value
-      });
-    }, []);
-
-    const onSortTypeSelect = useCallback((value: string) => {
-      setSortType({
-        type: value
-      });
-    }, []);
+    const treasuryCompositionColumns: SortAccessor<TreasuryCompositionType>[] =
+      useMemo(
+        () => [
+          {
+            accessorKey: 'name',
+            header: selectedGroup !== 'Asset Type' ? selectedGroup : 'Asset'
+          },
+          {
+            accessorKey: 'balance',
+            header: 'Total Balance USD'
+          }
+        ],
+        [selectedGroup]
+      );
 
     const onGroupSelect = (value: string) => {
       selectSingle(value);
@@ -244,8 +252,6 @@ const TreasuryCompositionBlock = memo(
 
       setIncludeComp(true);
     };
-
-    console.log('isOpenSingle=>', isOpenSingle);
 
     return (
       <Card
@@ -265,7 +271,9 @@ const TreasuryCompositionBlock = memo(
               positionLabel='left'
               checked={includeComp}
               onCheckedChange={setIncludeComp}
-              classNameTitle='!text-[12px]'
+              className={{
+                title: '!text-[12px]'
+              }}
             />
           </div>
           <div className='flex w-full items-center gap-2 sm:w-auto'>
@@ -317,7 +325,7 @@ const TreasuryCompositionBlock = memo(
           </View.Condition>
           <View.Condition if={hasData}>
             <PieChart
-              className='max-w-full md:max-w-1/2 lg:max-w-[336.5px]'
+              className='max-w-full md:max-w-1/2 lg:max-w-[450px]'
               data={chartData}
             />
             <TreasuryComposition
@@ -333,8 +341,8 @@ const TreasuryCompositionBlock = memo(
           sortType={sortType}
           columns={treasuryCompositionColumns}
           onClose={onSortClose}
-          onKeySelect={onSortKeySelect}
-          onTypeSelect={onSortTypeSelect}
+          onKeySelect={onKeySelect}
+          onTypeSelect={onTypeSelect}
         />
         <GroupDrawer
           isOpen={isGroupOpen}

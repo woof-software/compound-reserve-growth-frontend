@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useState
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import RevenueOverviewUSD, {
@@ -12,25 +6,25 @@ import RevenueOverviewUSD, {
   DateType,
   Period,
   PeriodMap,
+  RevenueTableRowData,
   ROLLING_TABS,
-  TableRowData,
   TO_DATE_TABS,
   toDateHeaderMap,
   ToDateTab
 } from '@/components/RevenuePageTable/RevenueOverviewUSD';
-import SortDrawer from '@/components/SortDrawer/SortDrawer';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
+import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import {
   capitalizeFirstLetter,
-  formatPrice,
-  formatUSD,
   networkColorMap
 } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
+import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 
@@ -72,15 +66,15 @@ const getStartDateForPeriod = (
 const createTableColumns = (
   periods: readonly string[],
   dateType: 'Rolling' | 'To Date'
-): ExtendedColumnDef<TableRowData>[] => {
-  const periodColumns: ExtendedColumnDef<TableRowData>[] = periods.map(
+): ExtendedColumnDef<RevenueTableRowData>[] => {
+  const periodColumns: ExtendedColumnDef<RevenueTableRowData>[] = periods.map(
     (period) => ({
       accessorKey: period,
       header:
         dateType === 'Rolling'
           ? `Rolling ${period.toLowerCase()}`
           : toDateHeaderMap[period as ToDateTab] || period,
-      cell: ({ getValue }) => formatUSD(getValue() as number)
+      cell: ({ getValue }) => Format.price(getValue() as number, 'standard')
     })
   );
 
@@ -124,13 +118,13 @@ const RevenueOverview = ({
   isLoading,
   isError
 }: RevenuePageProps) => {
-  const [sortType, setSortType] = useReducer(
-    (prev, next) => ({
-      ...prev,
-      ...next
-    }),
-    { key: '', type: 'asc' }
-  );
+  const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
+    useSorting<RevenueTableRowData>('asc', null);
+
+  const sortType: SortAdapter<RevenueTableRowData> = {
+    type: sortDirection,
+    key: sortKey
+  };
 
   const [dateType, setDateType] = useState<DateType>('Rolling');
   const [period, setPeriod] = useState<Period>('7D');
@@ -160,13 +154,13 @@ const RevenueOverview = ({
       };
     }
 
-    const tableDataMap = new Map<string, TableRowData>();
+    const tableDataMap = new Map<string, RevenueTableRowData>();
     const totals: { [key: string]: number } = {};
     primaryTabs.forEach((p) => (totals[p] = 0));
 
     const allChains = [...new Set(rawData.map((item) => item.source.network))];
     allChains.forEach((chain) => {
-      const initialChainData: TableRowData = { chain };
+      const initialChainData: RevenueTableRowData = { chain };
       primaryTabs.forEach((p) => {
         initialChainData[p] = 0;
       });
@@ -196,7 +190,7 @@ const RevenueOverview = ({
 
     setTotalFooterData(totals);
 
-    const tableData: TableRowData[] = Array.from(tableDataMap.values());
+    const tableData: RevenueTableRowData[] = Array.from(tableDataMap.values());
 
     const footerContent = (
       <tr>
@@ -208,7 +202,7 @@ const RevenueOverview = ({
             key={p}
             className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'
           >
-            {formatUSD(totals[p] || 0)}
+            {Format.price(totals[p] || 0, 'standard')}
           </td>
         ))}
       </tr>
@@ -230,7 +224,7 @@ const RevenueOverview = ({
       const rawPercent = totalPieValue > 0 ? (value / totalPieValue) * 100 : 0;
       return {
         name: capitalizeFirstLetter(name),
-        value: formatPrice(value, 1),
+        value: Format.price(value, 'compact'),
         percent: Number(rawPercent.toFixed(1)),
         color: networkColorMap[name.toLowerCase()] || '#808080'
       };
@@ -274,18 +268,6 @@ const RevenueOverview = ({
     if (isPeriod(newPeriod)) {
       setPeriod(newPeriod);
     }
-  }, []);
-
-  const onKeySelect = useCallback((value: string) => {
-    setSortType({
-      key: value
-    });
-  }, []);
-
-  const onTypeSelect = useCallback((value: string) => {
-    setSortType({
-      type: value
-    });
   }, []);
 
   useEffect(() => {

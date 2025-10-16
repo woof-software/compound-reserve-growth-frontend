@@ -91,7 +91,8 @@ export default defineConfig([
           quotesOnNewLine: true
         }
       ],
-      'linebreak-style': ['warn', 'unix'],
+      // 'linebreak-style': ['warn', 'unix'],
+      'linebreak-style': ['off'],
       quotes: ['warn', 'single'],
       semi: ['warn', 'always'],
       'no-console': 'warn',

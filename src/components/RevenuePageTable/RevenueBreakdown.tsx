@@ -1,47 +1,30 @@
 import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
-import { formatNumber } from '@/shared/lib/utils/utils';
+import { SortAdapter } from '@/shared/hooks/useSorting';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { OnlyStringKeys } from '@/shared/lib/utils/types';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-export interface FormattedRevenueData {
+export type FormattedRevenueData = {
   chain: string;
   market: string;
   source: string;
   reserveAsset: string;
+} & OnlyStringKeys<{
   [key: string]: string | number;
-}
+}>;
 
 interface RevenueBreakdownProps {
   data: FormattedRevenueData[];
   columns: ExtendedColumnDef<FormattedRevenueData>[];
-  sortType:
-    | { key: string; type: 'asc' | 'desc' }
-    | { key: string; type: string };
+  sortType: SortAdapter<FormattedRevenueData>;
 }
 
 type ColKey = { accessorKey: string; header: string };
-
-const formatCurrencyValue = (value: unknown): string => {
-  const num = Number(value);
-
-  if (value === null || typeof value === 'undefined' || isNaN(num)) return '-';
-
-  if (num === 0) return '-';
-
-  const isNegative = num < 0;
-
-  const absValue = Math.abs(num);
-
-  const formattedNumber = new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 0
-  }).format(absValue);
-
-  return isNegative ? `-$${formattedNumber}` : `$${formattedNumber}`;
-};
 
 const RevenueBreakdown = ({
   data,
@@ -77,7 +60,7 @@ const RevenueBreakdown = ({
           ...col,
 
           cell: ({ getValue }: { getValue: () => unknown }) =>
-            formatCurrencyValue(getValue())
+            Format.price(getValue() as number, 'standard')
         };
       }
 
@@ -113,7 +96,7 @@ const RevenueBreakdown = ({
             key={columnKey}
             className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'
           >
-            {formatCurrencyValue(totalValue)}
+            {Format.price(totalValue)}
           </td>
         );
       })}
@@ -184,7 +167,7 @@ const RevenueBreakdown = ({
                       ? Boolean(raw)
                         ? (raw as string)
                         : '-'
-                      : formatCurrencyValue(raw);
+                      : Format.price(raw as number, 'standard');
 
                   return (
                     <div
@@ -270,8 +253,8 @@ const RevenueBreakdown = ({
 
                 const formattedValue =
                   totalValue < 0
-                    ? `-${formatNumber(Math.abs(totalValue))}`
-                    : formatNumber(totalValue);
+                    ? `-${Format.price(Math.abs(totalValue), 'standard')}`
+                    : Format.price(totalValue, 'standard');
 
                 return (
                   <div

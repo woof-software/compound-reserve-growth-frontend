@@ -1,26 +1,30 @@
 import React, { useCallback, useMemo, useReducer } from 'react';
 import { CSVLink } from 'react-csv';
 
-import CSVDownloadButton from '@/components/CSVDownloadButton/CSVDownloadButton';
 import Filter from '@/components/Filter/Filter';
-import { MultiSelect } from '@/components/MultiSelect/MultiSelect';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import SortDrawer from '@/components/SortDrawer/SortDrawer';
-import TreasuryHoldings, {
+import TreasuryHoldingsTable, {
   TreasuryBalanceByNetworkType
-} from '@/components/TreasuryPageTable/TreasuryHoldings';
-import { treasuryBalanceByNetworkColumns } from '@/entities/Treasury/TreasuryBalanceByNetwork';
+} from '@/components/TreasuryPageTable/TreasuryHoldingsTable';
+import { treasuryBalanceByNetworkColumns } from '@/entities/Treasury/TreasuryBalanceByNetwork/TreasuryBalanceByNetwork';
+import { NOT_MARKET } from '@/shared/consts/consts';
+import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
+import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
 import {
   capitalizeFirstLetter,
-  extractFilterOptions
+  extractFilterOptions,
+  filterAndSortMarkets
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { OptionType } from '@/shared/types/types';
+import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
+import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
@@ -39,7 +43,7 @@ const mapTableData = (data: TokenData[]) => {
     return {
       symbol: el.source.asset.symbol,
       chain: capitalizeFirstLetter(el.source.network),
-      market: el.source.market ?? 'no market',
+      market: el.source.market ?? NOT_MARKET,
       qty: humanReadableQuantity,
       value: el.value,
       price: el.price,
@@ -116,13 +120,20 @@ const TreasuryHoldingsBlock = ({
     }
   );
 
-  const [sortType, setSortType] = useReducer(
-    (prev, next) => ({
-      ...prev,
-      ...next
-    }),
-    { key: '', type: 'asc' }
-  );
+  useFiltersSync(selectedOptions, setSelectedOptions, 'thb', [
+    'chain',
+    'assetType',
+    'deployment',
+    'symbol'
+  ]);
+
+  const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
+    useSorting<TreasuryBalanceByNetworkType>('asc', null);
+
+  const sortType: SortAdapter<TreasuryBalanceByNetworkType> = {
+    type: sortDirection,
+    key: sortKey
+  };
 
   const filterOptionsConfig = useMemo(
     () => ({
@@ -141,35 +152,10 @@ const TreasuryHoldingsBlock = ({
     );
 
   const deploymentOptionsFilter = useMemo(() => {
-    const marketV2 =
-      deploymentOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v2')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const marketV3 =
-      deploymentOptions
-        ?.filter((el) => el.marketType?.toLowerCase() === 'v3')
-        .sort((a, b) => a.label.localeCompare(b.label)) || [];
-
-    const noMarkets = deploymentOptions?.find(
-      (el) => el.id.toLowerCase() === 'no name'
+    return filterAndSortMarkets(
+      deploymentOptions,
+      selectedOptions.chain.map((o) => o.id)
     );
-
-    const selectedChainIds = selectedOptions.chain.map((o) => o.id);
-
-    let allMarkets = [...marketV3, ...marketV2];
-
-    if (noMarkets) {
-      allMarkets = [...allMarkets, noMarkets];
-    }
-
-    if (selectedChainIds.length) {
-      return allMarkets.filter(
-        (el) => el.chain?.some((c) => selectedChainIds.includes(c)) ?? false
-      );
-    }
-
-    return allMarkets;
   }, [deploymentOptions, selectedOptions]);
 
   const tableData = useMemo<TreasuryBalanceByNetworkType[]>(() => {
@@ -192,12 +178,12 @@ const TreasuryHoldingsBlock = ({
         return false;
       }
 
-      const market = item.source.market ?? 'no market';
+      const market = item.source.market ?? NOT_MARKET;
 
       if (
         selectedOptions.deployment.length > 0 &&
         !selectedOptions.deployment.some((o: OptionType) =>
-          o.id === 'no name' ? market === 'no market' : o.id === market
+          o.id === NOT_MARKET ? market === NOT_MARKET : o.id === market
         )
       ) {
         return false;
@@ -247,18 +233,6 @@ const TreasuryHoldingsBlock = ({
   const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
     setSelectedOptions({
       symbol: selectedOptions
-    });
-  }, []);
-
-  const onKeySelect = useCallback((value: string) => {
-    setSortType({
-      key: value
-    });
-  }, []);
-
-  const onTypeSelect = useCallback((value: string) => {
-    setSortType({
-      type: value
     });
   }, []);
 
@@ -468,7 +442,7 @@ const TreasuryHoldingsBlock = ({
         </Drawer>
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
-        <TreasuryHoldings
+        <TreasuryHoldingsTable
           sortType={sortType}
           tableData={tableData}
         />

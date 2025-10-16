@@ -12,9 +12,9 @@ import Each from '@/shared/ui/Each/Each';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-import ArrowDown from '@/assets/svg/arrow-down.svg';
-import CheckStroke from '@/assets/svg/check-stroke.svg';
-import CloseIcon from '@/assets/svg/close.svg';
+import ArrowDown from '@/shared/assets/svg/arrow-down.svg';
+import CheckStroke from '@/shared/assets/svg/check-stroke.svg';
+import CloseIcon from '@/shared/assets/svg/close.svg';
 
 interface SelectProps {
   filterId: string;

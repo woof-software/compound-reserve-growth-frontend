@@ -132,8 +132,8 @@ const DataTable = <T,>({
 
   return (
     <div className={cn('w-full gap-[26px]', className)}>
-      <div className={cn('overflow-x-auto', containerTableClassName)}>
-        <table className={cn('min-w-full', tableClassName)}>
+      <div className={cn(containerTableClassName)}>
+        <table className={cn('w-full', tableClassName)}>
           <thead className={cn('bg-transparent', headerClassName)}>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
@@ -155,7 +155,11 @@ const DataTable = <T,>({
                           'cursor-pointer select-none',
                         headerCellClassName
                       )}
-                      style={{ width: header.column.columnDef.size }}
+                      style={{
+                        width: header.column.columnDef.size,
+                        maxWidth: header.column.columnDef.maxSize,
+                        minWidth: header.column.columnDef.minSize
+                      }}
                       onClick={
                         enableSorting
                           ? header.column.getToggleSortingHandler()
@@ -215,7 +219,12 @@ const DataTable = <T,>({
                   colSpan={columns.length}
                   className='text-center'
                 >
-                  {emptyMessage}
+                  <Text
+                    size='12'
+                    className='text-primary-14'
+                  >
+                    {emptyMessage}
+                  </Text>
                 </td>
               </tr>
             ) : (
@@ -239,7 +248,11 @@ const DataTable = <T,>({
                           getAlignmentClass(columnAlign),
                           cellClassName
                         )}
-                        style={{ width: cell.column.columnDef.size }}
+                        style={{
+                          width: cell.column.columnDef.size,
+                          maxWidth: cell.column.columnDef.maxSize,
+                          minWidth: cell.column.columnDef.minSize
+                        }}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

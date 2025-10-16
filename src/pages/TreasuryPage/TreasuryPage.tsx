@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 
 import MetricBlock from '@/entities/Treasury/MetricBlock';
-import TotalTresuaryValue from '@/entities/Treasury/TotalTresuaryValue';
-import TreasuryBalanceByNetworkBlock from '@/entities/Treasury/TreasuryBalanceByNetwork';
+import TotalTreasuryValue from '@/entities/Treasury/TotalTreasuryValue/TotalTreasuryValue';
+import TreasuryBalanceByNetworkBlock from '@/entities/Treasury/TreasuryBalanceByNetwork/TreasuryBalanceByNetwork';
 import TreasuryCompositionBlock from '@/entities/Treasury/TreasuryCompositionBlock';
 import TreasuryHoldingsBlock from '@/entities/Treasury/TreasuryHoldingsBlock';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
@@ -83,7 +83,7 @@ const TreasuryPage = () => {
             uniqData
           }}
         />
-        <TotalTresuaryValue
+        <TotalTreasuryValue
           isLoading={isLoading}
           isError={isError}
           data={treasuryData}

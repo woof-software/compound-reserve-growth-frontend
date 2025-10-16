@@ -25,7 +25,7 @@ const FallbackImage: FC<FallbackImageProps> = ({
     <img
       width={width}
       height={height}
-      src={`src/assets/svg/${currentSrc}`}
+      src={`src/shared/assets/svg/${currentSrc}`}
       alt={alt || 'Fallback image'}
       onError={() => setCurrentSrc(fallbackSrc)}
       style={{

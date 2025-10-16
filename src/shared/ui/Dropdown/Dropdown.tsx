@@ -14,8 +14,8 @@ import { cn } from '@/shared/lib/classNames/classNames';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-import ArrowDown from '@/assets/svg/arrow-down.svg';
-import CheckStroke from '@/assets/svg/check-stroke.svg';
+import ArrowDown from '@/shared/assets/svg/arrow-down.svg';
+import CheckStroke from '@/shared/assets/svg/check-stroke.svg';
 
 interface DropdownProps extends PropsWithChildren {
   triggerContent: ReactNode;
@@ -89,7 +89,8 @@ const useDropdown = (type: 'single' | 'multiple') => {
     open,
     close,
     select,
-    selectClose
+    selectClose,
+    setSelectedValue
   };
 };
 
@@ -133,7 +134,7 @@ const Dropdown: FC<DropdownProps> = ({
   return (
     <div
       ref={containerRef}
-      className={cn('relative z-10 w-fit', {
+      className={cn('relative w-fit', {
         'pointer-events-none': isDisabled
       })}
     >
@@ -148,7 +149,7 @@ const Dropdown: FC<DropdownProps> = ({
         <View.Condition if={open}>
           <div
             className={cn(
-              'hide-scrollbar shadow-10 border-secondary-18 bg-primary-15 hide-scrollbar absolute top-10 right-0 grid max-h-[234px] min-w-[168px] gap-0.5 overflow-y-auto rounded-lg border border-solid p-2',
+              'hide-scrollbar shadow-10 border-secondary-18 bg-primary-15 hide-scrollbar absolute top-10 right-0 z-10 grid max-h-[234px] min-w-[168px] gap-0.5 overflow-y-auto rounded-lg border border-solid p-2',
               contentClassName
             )}
             onMouseDown={(e) => e.stopPropagation()}

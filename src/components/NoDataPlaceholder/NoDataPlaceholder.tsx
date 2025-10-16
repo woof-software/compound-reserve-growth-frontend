@@ -5,17 +5,20 @@ import Button from '@/shared/ui/Button/Button';
 import Text from '@/shared/ui/Text/Text';
 
 interface NoDataPlaceholderProps {
-  onButtonClick: () => void;
+  onButtonClick?: () => void;
+  isHideButton?: boolean;
   text?: string;
   buttonText?: string;
   className?: string;
+  hideButton?: boolean;
 }
 
 const NoDataPlaceholder: FC<NoDataPlaceholderProps> = ({
   onButtonClick,
   text = 'No data for selected filters',
   buttonText = 'Reset Filters',
-  className
+  className,
+  isHideButton = false
 }) => {
   return (
     <div
@@ -30,12 +33,14 @@ const NoDataPlaceholder: FC<NoDataPlaceholderProps> = ({
       >
         {text}
       </Text>
-      <Button
-        onClick={onButtonClick}
-        className='cursor-pointer rounded-md bg-[#00D395] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#00C48A] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[#00D395]'
-      >
-        {buttonText}
-      </Button>
+      {!isHideButton && (
+        <Button
+          onClick={onButtonClick}
+          className='cursor-pointer rounded-md bg-[#00D395] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#00C48A] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[#00D395]'
+        >
+          {buttonText}
+        </Button>
+      )}
     </div>
   );
 };

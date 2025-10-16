@@ -1,16 +1,18 @@
 import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { dateSortingFn, parseDateToUTC } from '@/shared/lib/utils/dateSorting';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import {
   capitalizeFirstLetter,
-  formatDateWithOrdinal,
-  formatLargeNumber
+  formatDateWithOrdinal
 } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Text from '@/shared/ui/Text/Text';
+import { TextTooltip } from '@/shared/ui/TextTooltip/TextTooltip';
 
-import { TextTooltip } from '../TextTooltip/TextTooltip';
 import { UrlTooltip } from '../UrlTooltip/UrlTooltip';
 
 export interface FullDAOCommitmentRow {
@@ -31,14 +33,13 @@ export interface FullDAOCommitmentRow {
 interface FullDAOCommitmentsProps {
   data: FullDAOCommitmentRow[];
 
-  sortType: { key: string; type: string };
+  sortType: SortAdapter<FullDAOCommitmentRow>;
 }
 
 const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
   {
     accessorKey: 'recipient',
     header: 'Recipient',
-    // cell: ({ getValue }) => (getValue() as string) || '-'
     size: 150,
     cell: ({ getValue }) => {
       const initiative = (getValue() as string) || '-';
@@ -47,6 +48,9 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
       if (initiative.length > maxLength) {
         return (
           <TextTooltip
+            className={{
+              text: '!font-medium'
+            }}
             text={initiative}
             triggerWidth={120}
           />
@@ -86,7 +90,7 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
       const value = getValue() as number;
       return value === null || value === undefined
         ? '-'
-        : `$${formatLargeNumber(value, 2)}`;
+        : Format.price(value, 'standard');
     }
   },
   {
@@ -97,7 +101,7 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
       const value = getValue() as number;
       return value === null || value === undefined
         ? '-'
-        : `$${formatLargeNumber(value, 2)}`;
+        : Format.price(value, 'standard');
     }
   },
   {
@@ -121,6 +125,7 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
 
       return (
         <UrlTooltip
+          isRedirectContent
           text={paymentType}
           url={proposalLink}
           tooltipClassName='pt-[13px] pb-[8px] pl-[10px] pr-[10px]'
@@ -136,19 +141,7 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
       const value = getValue() as string;
       return value ? formatDateWithOrdinal(value) : '-';
     },
-    sortingFn: (rowA, rowB) => {
-      const dateA = rowA.original.startDate;
-      const dateB = rowB.original.startDate;
-
-      if (!dateA && !dateB) return 0;
-      if (!dateA) return 1;
-      if (!dateB) return -1;
-
-      const timeA = new Date(dateA).getTime();
-      const timeB = new Date(dateB).getTime();
-
-      return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
-    }
+    sortingFn: dateSortingFn((row) => row.original.startDate)
   },
   {
     accessorKey: 'streamEndDate',
@@ -158,19 +151,7 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
       const value = getValue() as string;
       return value ? formatDateWithOrdinal(value) : '-';
     },
-    sortingFn: (rowA, rowB) => {
-      const dateA = rowA.original.streamEndDate;
-      const dateB = rowB.original.streamEndDate;
-
-      if (!dateA && !dateB) return 0;
-      if (!dateA) return 1;
-      if (!dateB) return -1;
-
-      const timeA = new Date(dateA).getTime();
-      const timeB = new Date(dateB).getTime();
-
-      return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
-    }
+    sortingFn: dateSortingFn((row) => row.original.streamEndDate)
   }
 ];
 
@@ -179,23 +160,35 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
   sortType
 }) => {
   const mobileTableData = useMemo(() => {
-    if (!sortType?.key) {
-      return data;
-    }
+    if (!sortType?.key) return data;
 
     const key = sortType.key as keyof FullDAOCommitmentRow;
-    return [...data].sort((a, b) => {
-      const aVal = a[key];
-      const bVal = b[key];
 
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        return sortType.type === 'asc' ? aVal - bVal : bVal - aVal;
+    return [...data].sort((a, b) => {
+      const asc = sortType.type === 'asc';
+
+      if (typeof a[key] === 'number' && typeof b[key] === 'number') {
+        const diff = (a[key] as number) - (b[key] as number);
+        return asc ? diff : -diff;
       }
 
-      if (typeof aVal === 'string' && typeof bVal === 'string') {
-        return sortType.type === 'asc'
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
+      if (key === 'startDate' || key === 'streamEndDate') {
+        const ta = parseDateToUTC(a[key] as string | undefined);
+        const tb = parseDateToUTC(b[key] as string | undefined);
+
+        const badA = Number.isNaN(ta);
+        const badB = Number.isNaN(tb);
+        if (badA && badB) return 0;
+        if (badA) return asc ? 1 : -1;
+        if (badB) return asc ? -1 : 1;
+
+        const diff = ta - tb;
+        return asc ? diff : -diff;
+      }
+
+      if (typeof a[key] === 'string' && typeof b[key] === 'string') {
+        const diff = (a[key] as string).localeCompare(b[key] as string);
+        return asc ? diff : -diff;
       }
 
       return 0;
@@ -206,177 +199,185 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
     <>
       <MobileDataTable tableData={mobileTableData}>
         {(dataRows) =>
-          dataRows.map((row, index) => (
-            <div
-              key={row.token + index}
-              className={cn(
-                'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
-                {
-                  'border-none': index === dataRows.length - 1
-                }
-              )}
-            >
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Recipient
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.recipient}
-                </Text>
+          dataRows.map((row, index) => {
+            return (
+              <div
+                key={row.token + index}
+                className={cn(
+                  'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                  {
+                    'border-none': index === dataRows.length - 1
+                  }
+                )}
+              >
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Recipient
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.recipient}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Discipline
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.discipline}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Status
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {capitalizeFirstLetter(row.status, '-')}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Total Amount
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.amount ? Format.price(row.amount, 'standard') : '-'}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Paid Amount
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.amount
+                      ? Format.price(row.paidAmount, 'standard')
+                      : '-'}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    % Paid
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.percentagePaid
+                      ? `${(row.percentagePaid * 100).toFixed(2)}%`
+                      : '-'}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Payment Type
+                  </Text>
+                  <a
+                    href={row.proposalLink}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                  >
+                    <Text
+                      size='13'
+                      lineHeight='21'
+                      className='w-fit max-w-[60px] truncate border-b border-dotted border-gray-500'
+                    >
+                      {row.paymentType}
+                    </Text>
+                  </a>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Start Date
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.startDate ? formatDateWithOrdinal(row.startDate) : '-'}
+                  </Text>
+                </div>
+                <div className='grid w-full max-w-[100px]'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    End Date
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className='truncate'
+                  >
+                    {row.streamEndDate
+                      ? formatDateWithOrdinal(row.streamEndDate)
+                      : '-'}
+                  </Text>
+                </div>
               </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Discipline
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.discipline}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Status
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {capitalizeFirstLetter(row.status, '-')}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Total Amount
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.amount ? `$${formatLargeNumber(row.amount, 2)}` : '-'}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Paid Amount
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.amount
-                    ? `$${formatLargeNumber(row.paidAmount, 2)}`
-                    : '-'}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  % Paid
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.percentagePaid
-                    ? `${(row.percentagePaid * 100).toFixed(2)}%`
-                    : '-'}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Payment Type
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.paymentType}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Start Date
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.startDate ? formatDateWithOrdinal(row.startDate) : '-'}
-                </Text>
-              </div>
-              <div className='grid w-full max-w-[100px]'>
-                <Text
-                  size='11'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  End Date
-                </Text>
-                <Text
-                  size='13'
-                  lineHeight='21'
-                  className='truncate'
-                >
-                  {row.streamEndDate
-                    ? formatDateWithOrdinal(row.streamEndDate)
-                    : '-'}
-                </Text>
-              </div>
-            </div>
-          ))
+            );
+          })
         }
       </MobileDataTable>
       <div className='hidden w-full max-w-full lg:block'>

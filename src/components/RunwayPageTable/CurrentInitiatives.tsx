@@ -1,16 +1,12 @@
 import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
-import {
-  formatLargeNumber,
-  formatNumber,
-  formatQuantity
-} from '@/shared/lib/utils/utils';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Text from '@/shared/ui/Text/Text';
-
-import { TextTooltip } from '../TextTooltip/TextTooltip';
+import { TextTooltip } from '@/shared/ui/TextTooltip/TextTooltip';
 
 export interface CurrentInitiativeRow {
   initiative: string;
@@ -30,7 +26,7 @@ interface CurrentInitiativesProps {
 
   footerData: CurrentInitiativesFooter;
 
-  sortType: { key: string; type: string };
+  sortType: SortAdapter<CurrentInitiativeRow>;
 }
 
 const columns: ExtendedColumnDef<CurrentInitiativeRow>[] = [
@@ -45,6 +41,9 @@ const columns: ExtendedColumnDef<CurrentInitiativeRow>[] = [
       if (initiative.length > maxLength) {
         return (
           <TextTooltip
+            className={{
+              text: '!font-medium'
+            }}
             text={initiative}
             triggerWidth={120}
           />
@@ -73,13 +72,13 @@ const columns: ExtendedColumnDef<CurrentInitiativeRow>[] = [
     accessorKey: 'amount',
     header: 'Amount (Qty)',
     align: 'center',
-    cell: ({ getValue }) => formatQuantity(getValue() as number)
+    cell: ({ getValue }) => Format.token(getValue() as number, 'standard')
   },
   {
     accessorKey: 'value',
     header: 'Value ($)',
     align: 'right',
-    cell: ({ getValue }) => formatNumber(getValue() as number)
+    cell: ({ getValue }) => Format.price(getValue() as number, 'standard')
   }
 ];
 
@@ -98,7 +97,7 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
         <td></td>
         <td></td>
         <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px] font-medium'>
-          {formatNumber(footerData.totalValue)}
+          {Format.price(footerData.totalValue, 'standard')}
         </td>
       </tr>
     </>
@@ -209,7 +208,7 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatQuantity(row.amount)}
+                    {Format.token(row.amount, 'standard')}
                   </Text>
                 </div>
                 <div className='grid w-full max-w-[100px]'>
@@ -226,7 +225,7 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatNumber(row.value)}
+                    {Format.price(row.value, 'standard')}
                   </Text>
                 </div>
               </div>
@@ -270,7 +269,9 @@ const CurrentInitiatives: React.FC<CurrentInitiativesProps> = ({
                   lineHeight='21'
                   weight='500'
                   className='truncate'
-                >{`$${formatLargeNumber(footerData.totalValue, 2)}`}</Text>
+                >
+                  {Format.price(footerData.totalValue, 'standard')}
+                </Text>
               </div>
             </div>
           </>

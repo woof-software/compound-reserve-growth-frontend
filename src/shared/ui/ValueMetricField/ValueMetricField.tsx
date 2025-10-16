@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 
-import { Tooltip } from '@/components/Tooltip/Tooltip';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { Tooltip } from '@/shared/ui/Tooltip/Tooltip';
 
 import Text from '../Text/Text';
 import View from '../View/View';

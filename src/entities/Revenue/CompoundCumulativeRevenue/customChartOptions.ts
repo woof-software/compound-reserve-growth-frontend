@@ -1,0 +1,85 @@
+import Highcharts, { Point } from 'highcharts';
+
+import { Format } from '@/shared/lib/utils/numbersFormatter';
+
+export const customTooltipFormatter = (context: Point, groupBy?: string) => {
+  const header = `<div class="font-medium mb-3 text-[11px] font-haas">
+    ${Highcharts.dateFormat('%B %e, %Y', context.x as number)}
+  </div>`;
+
+  const points = (context.points ?? []).filter(
+    (p) => p && p.series && p.series.type !== 'scatter'
+  );
+
+  const sorted = [...points].sort((a, b) => (b.y ?? 0) - (a.y ?? 0));
+
+  const total =
+    context.points?.reduce((sum, point) => sum + (point.y ?? 0), 0) ?? 0;
+
+  const row = (point: Highcharts.Point) => `
+    <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;">
+      <span style="background-color:${point.series.color};width:10px;height:10px;display:inline-block;border-radius:2px;"></span>
+
+      <span style="font-size:11px;font-family:'Haas Grot Text R',sans-serif;min-width:0;width:max-content;">
+        ${point.series.name}
+      </span>
+
+      <span style="font-weight:400;text-align:right;font-size:11px;font-family:'Haas Grot Text R',sans-serif;white-space:nowrap;">
+        ${Format.price(point.y ?? 0, 'standard')}
+      </span>
+    </div>`;
+
+  let body: string;
+  if (groupBy === 'Market') {
+    const columnsCount = sorted.length > 20 ? 3 : 2;
+    const itemsPerColumn = Math.ceil(sorted.length / columnsCount);
+    const columns = Array.from({ length: columnsCount }, (_, i) =>
+      sorted.slice(i * itemsPerColumn, (i + 1) * itemsPerColumn)
+    );
+
+    body = `
+        <div class="md:flex hidden gap-6">
+          ${columns
+            .map(
+              (col) =>
+                `<div style="display:flex;flex-direction:column;gap:8px;">${col.map(row).join('')}</div>`
+            )
+            .join('')}
+        </div>
+        <div class="md:hidden grid sm:gap-4 gap-1 grid-cols-2 w-full min-w-[340px]">
+          ${columns.map((col) => col.map(row).join('')).join('')}
+        </div>
+      `;
+  } else {
+    body = `<div class="flex flex-col gap-3">${sorted.map(row).join('')}</div>`;
+  }
+
+  const footer = `
+        <div class="flex justify-between items-center gap-4 mt-4">
+        <span class="text-[11px] font-haas">Total</span>
+        <span class="text-[11px] font-haas">
+          ${Format.price(total, 'standard')}
+        </span>
+      </div>
+  `;
+
+  return `
+    <div>
+      ${header}${body}${footer}
+    </div>`;
+};
+
+export const customChartOptions = {
+  yAxis: {
+    labels: {
+      style: {
+        color: '#7A8A99',
+        fontSize: '11px',
+        fontFamily: 'Haas Grot Text R, sans-serif'
+      },
+      formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
+        return Format.chartAxis(this.value, { type: 'usd', view: 'compact' });
+      }
+    }
+  }
+};

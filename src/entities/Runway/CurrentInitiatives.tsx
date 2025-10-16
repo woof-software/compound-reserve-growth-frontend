@@ -5,50 +5,64 @@ Calculation logic for the "Current Initiatives" block:
 3. Pie Chart Data: The total values (`item.value`) are grouped and summed by the initiative's discipline to show the total expense per discipline.
 4. Values Used: The full contract values (`item.value` and `item.amount`) are used, not the annualised equivalents.
 */
-import React, { useCallback, useMemo, useReducer } from 'react';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
+import React, { useMemo } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import CurrentInitiatives from '@/components/RunwayPageTable/CurrentInitiatives';
-import SortDrawer from '@/components/SortDrawer/SortDrawer';
 import { useModal } from '@/shared/hooks/useModal';
 import type { RunwayItem } from '@/shared/hooks/useRunway';
 import { useRunway } from '@/shared/hooks/useRunway';
-import { formatPrice } from '@/shared/lib/utils/utils';
+import {
+  SortAccessor,
+  SortAdapter,
+  useSorting
+} from '@/shared/hooks/useSorting';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
+import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 
-export const currentInitiativesColumns = [
-  {
-    accessorKey: 'initiative',
-    header: 'Initiative'
-  },
-  {
-    accessorKey: 'discipline',
-    header: 'discipline'
-  },
-  {
-    accessorKey: 'token',
-    header: 'Token'
-  },
-  {
-    accessorKey: 'amount',
-    header: 'Amount (Qty)'
-  },
-  {
-    accessorKey: 'value',
-    header: 'Value ($)'
-  }
-];
+export type RunawayInitiativeRecord = {
+  initiative: string;
+  discipline: string;
+  token: string;
+  amount: number;
+  value: number;
+};
+
+export const currentInitiativesColumns: SortAccessor<RunawayInitiativeRecord>[] =
+  [
+    {
+      accessorKey: 'initiative',
+      header: 'Initiative'
+    },
+    {
+      accessorKey: 'discipline',
+      header: 'Discipline'
+    },
+    {
+      accessorKey: 'token',
+      header: 'Token'
+    },
+    {
+      accessorKey: 'amount',
+      header: 'Amount (Qty)'
+    },
+    {
+      accessorKey: 'value',
+      header: 'Value ($)'
+    }
+  ];
 
 const CurrentInitiativesBlock = () => {
-  const [sortType, setSortType] = useReducer(
-    (prev, next) => ({
-      ...prev,
-      ...next
-    }),
-    { key: '', type: 'asc' }
-  );
+  const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
+    useSorting<RunawayInitiativeRecord>('asc', null);
+
+  const sortType: SortAdapter<RunawayInitiativeRecord> = {
+    type: sortDirection,
+    key: sortKey
+  };
 
   const { data: apiResponse, isLoading, isError } = useRunway();
 
@@ -89,13 +103,16 @@ const CurrentInitiativesBlock = () => {
 
     initiativeData.sort((a, b) => b.value - a.value);
 
-    const tableData = initiativeData.map((item) => ({
-      initiative: item.name,
-      discipline: item.discipline,
-      token: item.token,
-      amount: item.amount,
-      value: item.value
-    }));
+    const tableData = initiativeData.map(
+      (item) =>
+        ({
+          initiative: item.name,
+          discipline: item.discipline,
+          token: item.token,
+          amount: item.amount,
+          value: item.value
+        }) satisfies RunawayInitiativeRecord
+    );
 
     const totalValue = initiativeData.reduce(
       (sum, item) => sum + item.value,
@@ -114,24 +131,12 @@ const CurrentInitiativesBlock = () => {
       .sort(([, aValue], [, bValue]) => bValue - aValue)
       .map(([name, value]) => ({
         name,
-        value: formatPrice(value, 1),
+        value: Format.price(value, 'compact'),
         percent: totalValueForPie > 0 ? (value / totalValueForPie) * 100 : 0
       }));
 
     return { tableData, footerData, pieData };
   }, [apiResponse]);
-
-  const onKeySelect = useCallback((value: string) => {
-    setSortType({
-      key: value
-    });
-  }, []);
-
-  const onTypeSelect = useCallback((value: string) => {
-    setSortType({
-      type: value
-    });
-  }, []);
 
   return (
     <Card

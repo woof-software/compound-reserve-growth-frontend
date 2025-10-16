@@ -2,8 +2,9 @@ import { useMemo } from 'react';
 import * as React from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { formatPrice } from '@/shared/lib/utils/utils';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
@@ -21,7 +22,7 @@ interface TreasuryCompositionProps {
   tableData: TreasuryCompositionType[];
   totalBalance: number;
   activeFilter: 'Chain' | 'Asset Type' | 'Market';
-  sortType: { key: string; type: string };
+  sortType: SortAdapter<TreasuryCompositionType>;
 }
 
 const filterConfig = {
@@ -54,14 +55,14 @@ const TreasuryComposition = ({
     return [
       {
         accessorKey: 'name',
-        header: 'Asset',
+        header: activeFilter === 'Asset Type' ? 'Asset' : activeFilter,
         cell: ({ row }) => (
           <div className='flex items-center gap-3'>
             <View.Condition if={activeFilter !== 'Market'}>
               <Icon
-                name={config.getIconName(row.original)}
+                name={config?.getIconName(row?.original)}
                 className='h-6 w-6'
-                folder={config.folder}
+                folder={config?.folder}
               />
             </View.Condition>
             <Text
@@ -83,7 +84,7 @@ const TreasuryComposition = ({
             weight='400'
             className='text-right'
           >
-            {formatPrice(row.original.balance, 1)}
+            {Format.price(row.original.balance, 'standard')}
           </Text>
         )
       }
@@ -139,14 +140,14 @@ const TreasuryComposition = ({
                     weight='500'
                     className='text-primary-14 min-w-[100px]'
                   >
-                    Asset
+                    {activeFilter === 'Asset Type' ? 'Asset' : activeFilter}
                   </Text>
                   <div className='flex items-center gap-1'>
                     <View.Condition if={activeFilter !== 'Market'}>
                       <Icon
-                        name={filterConfig[activeFilter].getIconName(row)}
+                        name={filterConfig[activeFilter]?.getIconName(row)}
                         className='h-4 w-4'
-                        folder={filterConfig[activeFilter].folder}
+                        folder={filterConfig[activeFilter]?.folder}
                       />
                     </View.Condition>
                     <Text
@@ -172,7 +173,7 @@ const TreasuryComposition = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatPrice(row.balance, 1)}
+                    {Format.price(row.balance, 'standard')}
                   </Text>
                 </div>
               </div>
@@ -192,13 +193,13 @@ const TreasuryComposition = ({
                 weight='500'
                 className='text-primary-14 min-w-[100px] truncate'
               >
-                {formatPrice(totalBalance, 1)}
+                {Format.price(totalBalance, 'standard')}
               </Text>
             </div>
           </>
         )}
       </MobileDataTable>
-      <div className='hide-scrollbar hidden max-h-[400px] w-full max-w-full overflow-y-auto md:block md:max-w-2/5 lg:max-w-[522px]'>
+      <div className='hide-scrollbar hidden max-h-[400px] w-full max-w-full overflow-y-auto md:block md:max-w-[100%] lg:max-w-[522px]'>
         <DataTable
           data={tableData}
           columns={columns}
@@ -221,7 +222,7 @@ const TreasuryComposition = ({
             weight='500'
             className='text-primary-14'
           >
-            {formatPrice(totalBalance, 1)}
+            {Format.price(totalBalance, 'standard')}
           </Text>
         </div>
       </div>

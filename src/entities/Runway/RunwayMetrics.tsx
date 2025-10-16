@@ -1,7 +1,7 @@
+import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { useMemo } from 'react';
 
 import { useRunway } from '@/shared/hooks/useRunway';
-import { formatPrice } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';
 
@@ -91,12 +91,13 @@ const RunwayMetrics = () => {
         isError={isError}
         className={{
           loading: 'min-h-[130px] md:min-h-[153px]',
-          container: 'min-w-[343px] flex-1 rounded-b-none md:min-w-auto',
+          container:
+            'min-w-auto flex-1 rounded-b-none sm:min-w-[343px] md:min-w-auto',
           content: 'px-5 py-8 md:p-10'
         }}
       >
         <ValueMetricField
-          value={formatPrice(metrics.total, 1)}
+          value={Format.price(metrics.total, 'compact')}
           label='Total Annualised Expenses'
         />
       </Card>
@@ -106,12 +107,12 @@ const RunwayMetrics = () => {
         className={{
           loading: 'min-h-[130px] md:min-h-[153px]',
           container:
-            'border-secondary-26 min-w-[343px] flex-1 rounded-none border-t-1 border-b-1 md:min-w-auto md:border-none',
+            'border-secondary-26 min-w-auto flex-1 rounded-none border-t-1 border-b-1 sm:min-w-[343px] md:min-w-auto md:border-none',
           content: 'px-5 py-8 md:p-10'
         }}
       >
         <ValueMetricField
-          value={formatPrice(metrics.provider, 1)}
+          value={Format.price(metrics.provider, 'compact')}
           label='Service Provider Expenses'
         />
       </Card>
@@ -120,12 +121,13 @@ const RunwayMetrics = () => {
         isError={isError}
         className={{
           loading: 'min-h-[130px] md:min-h-[153px]',
-          container: 'min-w-[343px] flex-1 rounded-b-sm md:min-w-auto',
+          container:
+            'min-w-auto flex-1 rounded-b-sm sm:min-w-[343px] md:min-w-auto',
           content: 'px-5 py-8 md:p-10'
         }}
       >
         <ValueMetricField
-          value={formatPrice(metrics.initiative, 1)}
+          value={Format.price(metrics.initiative, 'compact')}
           label='DAO Initiatives Expenses'
         />
       </Card>

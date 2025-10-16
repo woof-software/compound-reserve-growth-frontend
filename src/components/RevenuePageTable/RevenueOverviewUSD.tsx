@@ -1,17 +1,21 @@
 import React, { FC, useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { capitalizeFirstLetter, formatUSD } from '@/shared/lib/utils/utils';
+import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { OnlyStringKeys } from '@/shared/lib/utils/types';
+import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-export interface TableRowData {
+export type RevenueTableRowData = {
   chain: string;
+} & OnlyStringKeys<{
   [key: string]: string | number;
-}
+}>;
 
 export type PeriodMap = { [key: string]: number };
 
@@ -31,9 +35,9 @@ export const toDateHeaderMap: Record<ToDateTab, string> = {
 };
 
 interface RevenueOverviewUSDProps {
-  data: TableRowData[];
+  data: RevenueTableRowData[];
 
-  columns: ExtendedColumnDef<TableRowData>[];
+  columns: ExtendedColumnDef<RevenueTableRowData>[];
 
   footerContent: React.ReactNode;
 
@@ -41,7 +45,7 @@ interface RevenueOverviewUSDProps {
 
   dateType: DateType;
 
-  sortType: { key: string; type: string };
+  sortType: SortAdapter<RevenueTableRowData>;
 }
 
 const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
@@ -57,7 +61,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
       return data;
     }
 
-    const key = sortType.key as keyof TableRowData;
+    const key = sortType.key as keyof RevenueTableRowData;
     return [...data].sort((a, b) => {
       const firstValue = a[key];
       const secondValue = b[key];
@@ -96,7 +100,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                 )}
               >
                 {columns.map((column, index) => {
-                  const key = column.accessorKey as keyof TableRowData;
+                  const key = column.accessorKey as keyof RevenueTableRowData;
                   const cellValue = row[key];
 
                   return (
@@ -127,7 +131,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                         >
                           {key === 'chain'
                             ? capitalizeFirstLetter(cellValue as string)
-                            : formatUSD(cellValue as number)}
+                            : Format.price(cellValue as number, 'standard')}
                         </Text>
                       </div>
                     </div>
@@ -176,7 +180,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                         weight='500'
                         className='truncate'
                       >
-                        {formatUSD(el[1] || 0)}
+                        {Format.price(el[1] || 0, 'standard')}
                       </Text>
                     </div>
                   )

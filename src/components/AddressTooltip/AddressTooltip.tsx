@@ -5,10 +5,10 @@ import {
   explorers,
   sliceAddress
 } from '@/shared/lib/utils/utils';
+import { ClipboardButton } from '@/shared/ui/AnimationProvider/CopyButton/CopyButton';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
-import { ClipboardButton } from '../CopyButton/CopyButton';
 import HoverCard from '../HoverCard/HoverCard';
 
 interface AddressTooltipProps {
@@ -18,6 +18,7 @@ interface AddressTooltipProps {
   triggerWidth?: number;
   className?: string;
   chain: string;
+  isRedirectContent?: boolean;
 }
 
 export const AddressTooltip: React.FC<AddressTooltipProps> = ({
@@ -26,13 +27,33 @@ export const AddressTooltip: React.FC<AddressTooltipProps> = ({
   chain,
   side = 'top',
   triggerWidth = 120,
-  className = ''
+  className = '',
+  isRedirectContent = false
 }) => {
   const explorerUrl =
     (chain && explorers[chain.toLowerCase()]) || defaultExplorer;
+
   const fullExplorerLink = `${explorerUrl}${address}`;
 
-  const triggerContent = (
+  const triggerContent = isRedirectContent ? (
+    <a
+      href={fullExplorerLink}
+      target='_blank'
+      rel='noopener noreferrer'
+    >
+      <div
+        className={`flex items-start ${className}`}
+        style={{ width: `${triggerWidth}px` }}
+      >
+        <Text
+          size='13'
+          className='text-primary-11 inline-block max-w-full cursor-pointer truncate border-b border-dotted border-gray-500 leading-none'
+        >
+          {text}
+        </Text>
+      </div>
+    </a>
+  ) : (
     <div
       className={`flex items-start ${className}`}
       style={{ width: `${triggerWidth}px` }}
@@ -45,11 +66,12 @@ export const AddressTooltip: React.FC<AddressTooltipProps> = ({
       </Text>
     </div>
   );
+
   const tooltipContent = (
     <div className='flex w-50 flex-col items-start gap-2'>
       <Text
         size='12'
-        className='text-primary-11'
+        className='text-primary-11 break-all'
       >
         {text}
       </Text>

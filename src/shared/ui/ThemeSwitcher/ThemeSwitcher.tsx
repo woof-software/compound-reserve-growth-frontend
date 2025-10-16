@@ -11,13 +11,16 @@ const ThemeSwitcher = () => {
 
   return (
     <Switch
-      className='data-[state=checked]:bg-gray-10 data-[state=unchecked]:bg-white-11 w-[58px] p-0'
-      thumbClassName={cn(
-        'w-[30px] h-[30px] !shadow-11 data-[state=unchecked]:translate-x-[-2px]',
-        {
-          '!bg-gray-13': Boolean(theme === 'dark')
-        }
-      )}
+      className={{
+        block:
+          'data-[state=checked]:bg-gray-10 data-[state=unchecked]:bg-white-11 w-[58px] p-0',
+        thumb: cn(
+          '!shadow-11 h-[30px] w-[30px] data-[state=unchecked]:translate-x-[-2px]',
+          {
+            '!bg-gray-13': Boolean(theme === 'dark')
+          }
+        )
+      }}
       checked={Boolean(theme === 'dark')}
       onCheckedChange={onToggleTheme}
     />
