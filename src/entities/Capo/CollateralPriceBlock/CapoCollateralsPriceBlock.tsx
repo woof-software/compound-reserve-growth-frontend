@@ -23,12 +23,14 @@ export interface CollateralsPriceBlockProps {
   isLoading?: boolean;
   isError?: boolean;
   tableData: CapoTableItem[];
+  onSelectCollateralRow: (network: string, collateral: string) => void;
 }
 
 const CapoCollateralsPriceBlock = ({
   isLoading = false,
   isError = false,
-  tableData
+  tableData,
+  onSelectCollateralRow
 }: CollateralsPriceBlockProps) => {
   const {
     selectedOptions,
@@ -106,6 +108,7 @@ const CapoCollateralsPriceBlock = ({
         <CollateralsPriceTable
           sortType={sortType}
           tableData={processedData}
+          onSelectCollateralRow={onSelectCollateralRow}
         />
       </View.Condition>
       <View.Condition if={!processedData.length}>

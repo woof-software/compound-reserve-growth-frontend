@@ -25,3 +25,8 @@ export interface CapoNormalizedChartData {
   capValue: string;
   dateOfAggregation: number;
 }
+
+export type CapoSelectedRow = {
+  network: string;
+  collateral: string;
+};

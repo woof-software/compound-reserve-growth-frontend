@@ -21,6 +21,7 @@ import Text from '@/shared/ui/Text/Text';
 export interface CollateralsPriceProps {
   tableData: CapoTableItem[];
   sortType: SortAdapter<CapoTableItem>;
+  onSelectCollateralRow: (network: string, collateral: string) => void;
 }
 
 const collateralTableColumns: ExtendedColumnDef<CapoTableItem>[] = [
@@ -188,7 +189,8 @@ const collateralTableColumns: ExtendedColumnDef<CapoTableItem>[] = [
 
 const CollateralsPriceTable = ({
   tableData,
-  sortType
+  sortType,
+  onSelectCollateralRow
 }: CollateralsPriceProps) => {
   const mobileTableData = useMemo(() => {
     if (!sortType?.key) {
@@ -236,6 +238,9 @@ const CollateralsPriceTable = ({
                     'border-none': dataRows.length - 1 === index
                   }
                 )}
+                onClick={() =>
+                  onSelectCollateralRow(row.network, row.collateral)
+                }
               >
                 <div className='grid w-full'>
                   <Text
@@ -386,6 +391,7 @@ const CollateralsPriceTable = ({
         headerTextClassName='text-primary-14 font-medium'
         paginationClassName='py-0 px-[5px]'
         tableClassName='table-fixed w-full'
+        onRowClick={(row) => onSelectCollateralRow(row.network, row.collateral)}
       />
     </>
   );

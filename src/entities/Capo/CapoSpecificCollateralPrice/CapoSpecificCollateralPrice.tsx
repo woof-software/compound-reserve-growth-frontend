@@ -31,12 +31,13 @@ interface CapoSpecificCollateralPriceProps {
   rawData: CapoNormalizedChartData[];
   isLoading?: boolean;
   isError?: boolean;
+  selectedCollateralRow: { network: string; collateral: string } | null;
 }
 
 export const CapoSpecificCollateralPrice = (
   props: CapoSpecificCollateralPriceProps
 ) => {
-  const { rawData, isLoading, isError } = props;
+  const { rawData, isLoading, isError, selectedCollateralRow } = props;
 
   const {
     selectedChain,
@@ -47,7 +48,7 @@ export const CapoSpecificCollateralPrice = (
     collateralOptions,
     filteredData,
     groupBy
-  } = useChartFilters(rawData);
+  } = useChartFilters(rawData, selectedCollateralRow);
 
   const {
     isOpen: isFilterOpen,

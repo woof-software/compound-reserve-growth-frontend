@@ -1,15 +1,27 @@
+import { useState } from 'react';
+
 import { CapoSpecificCollateralPrice } from '@/entities/Capo/CapoSpecificCollateralPrice/CapoSpecificCollateralPrice';
 import { useNormalizedChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useNormalizedChartData';
 import CapoCollateralsPriceBlock from '@/entities/Capo/CollateralPriceBlock/CapoCollateralsPriceBlock';
 import { useNormalizedTableData } from '@/entities/Capo/CollateralPriceBlock/lib/useNormalizedTableData';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
+import { CapoSelectedRow } from '@/shared/types/Capo/types';
 import Text from '@/shared/ui/Text/Text';
 
 const CapoPage = () => {
   const { data, isError, isLoading } = useNormalizedTableData();
   const { chartData } = useNormalizedChartData();
 
+  const [selectedCollateralRow, setSelectedCollateralRow] =
+    useState<CapoSelectedRow | null>(null);
+
   useScrollToHash(!isLoading);
+
+  const onSelectCollateralRow = (network: string, collateral: string) => {
+    setSelectedCollateralRow({ network, collateral });
+  };
+
+  console.log('selectedCollateralRow=>', selectedCollateralRow);
 
   return (
     <div className='flex flex-col gap-6 md:gap-[40px] xl:gap-[50px]'>
@@ -36,11 +48,13 @@ const CapoPage = () => {
             tableData={data}
             isError={isError}
             isLoading={isLoading}
+            onSelectCollateralRow={onSelectCollateralRow}
           />
           <CapoSpecificCollateralPrice
             isError={isError}
             isLoading={isLoading}
             rawData={chartData}
+            selectedCollateralRow={selectedCollateralRow}
           />
         </div>
       </section>

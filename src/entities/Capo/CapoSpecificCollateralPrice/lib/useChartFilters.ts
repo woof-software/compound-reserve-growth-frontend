@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
-import { CapoNormalizedChartData } from '@/shared/types/Capo/types';
+import {
+  CapoNormalizedChartData,
+  CapoSelectedRow
+} from '@/shared/types/Capo/types';
 
 export type Option = {
   id: string;
@@ -31,22 +34,90 @@ const findOptionById = (
   return options.find((opt) => opt.id === id) || null;
 };
 
-export const useChartFilters = (rawData: CapoNormalizedChartData[]) => {
-  const [selectedChain, setSelectedChain] = useState<Option | null>(null);
-  const [selectedCollateral, setSelectedCollateral] = useState<Option | null>(
-    null
-  );
-
+export const useChartFilters = (
+  rawData: CapoNormalizedChartData[],
+  defaultSelectedValues: CapoSelectedRow | null = null
+) => {
   const chainOptions = getOptions(rawData, 'network', capitalizeFirstLetter);
+
+  const initialChain = defaultSelectedValues?.network
+    ? findOptionById(chainOptions, defaultSelectedValues.network)
+    : null;
+
+  const [selectedChain, setSelectedChain] = useState<Option | null>(
+    initialChain
+  );
 
   const collateralOptions = getOptions(
     rawData.filter(({ network }) => {
       if (!selectedChain) return true;
-
       return network === selectedChain.id;
     }),
     'collateral'
   );
+
+  const initialCollateral = defaultSelectedValues?.collateral
+    ? findOptionById(collateralOptions, defaultSelectedValues.collateral)
+    : null;
+
+  const [selectedCollateral, setSelectedCollateral] = useState<Option | null>(
+    initialCollateral
+  );
+
+  const lastAppliedExternalRef = useRef<string | null>(null);
+  const externalKey = JSON.stringify(
+    defaultSelectedValues
+      ? {
+          n: defaultSelectedValues.network || null,
+          c: defaultSelectedValues.collateral || null
+        }
+      : null
+  );
+
+  useEffect(() => {
+    if (!defaultSelectedValues) return;
+    if (externalKey === lastAppliedExternalRef.current) return;
+
+    const nextChain = defaultSelectedValues.network
+      ? findOptionById(chainOptions, defaultSelectedValues.network)
+      : null;
+
+    if (nextChain && nextChain.id !== selectedChain?.id) {
+      setSelectedChain(nextChain);
+    }
+
+    const nextCollateral = defaultSelectedValues.collateral
+      ? findOptionById(collateralOptions, defaultSelectedValues.collateral)
+      : null;
+
+    if (nextCollateral && nextCollateral.id !== selectedCollateral?.id) {
+      setSelectedCollateral(nextCollateral);
+    }
+
+    lastAppliedExternalRef.current = externalKey;
+  }, [
+    externalKey,
+    defaultSelectedValues,
+    chainOptions,
+    collateralOptions,
+    selectedChain?.id,
+    selectedCollateral?.id
+  ]);
+
+  useEffect(() => {
+    if (selectedChain && !chainOptions.some((o) => o.id === selectedChain.id)) {
+      setSelectedChain(null);
+    }
+  }, [chainOptions, selectedChain]);
+
+  useEffect(() => {
+    if (
+      selectedCollateral &&
+      !collateralOptions.some((o) => o.id === selectedCollateral.id)
+    ) {
+      setSelectedCollateral(null);
+    }
+  }, [collateralOptions, selectedCollateral]);
 
   const setSelectedChainWrapper = (
     value: Option | null | string | OptionSetter
