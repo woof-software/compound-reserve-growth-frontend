@@ -21,8 +21,6 @@ const CapoPage = () => {
     setSelectedCollateralRow({ network, collateral });
   };
 
-  console.log('selectedCollateralRow=>', selectedCollateralRow);
-
   return (
     <div className='flex flex-col gap-6 md:gap-[40px] xl:gap-[50px]'>
       <section className='mt-5 flex flex-col gap-[15px] px-3 md:mt-0 md:px-0'>

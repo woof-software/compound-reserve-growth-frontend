@@ -171,6 +171,7 @@ const collateralTableColumns: ExtendedColumnDef<CapoTableItem>[] = [
             href={fullExplorerLink}
             target='_blank'
             rel='noopener noreferrer'
+            onClick={(e) => e.stopPropagation()}
           >
             <div className='flex justify-end'>
               <Text
@@ -358,6 +359,7 @@ const CollateralsPriceTable = ({
                     href={fullExplorerLink}
                     target='_blank'
                     rel='noopener noreferrer'
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <Text
                       size='13'
