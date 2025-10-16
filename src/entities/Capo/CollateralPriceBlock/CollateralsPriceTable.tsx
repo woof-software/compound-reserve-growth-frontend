@@ -62,28 +62,26 @@ const collateralTableColumns: ExtendedColumnDef<CapoTableItem>[] = [
     )
   },
   {
-    id: 'collateralPrice',
-    accessorFn: (row) => row.collateralPrice,
-    header: 'Collateral Price',
-    enableSorting: true,
-    sortDescFirst: true,
-    size: 215,
-    cell: ({ row }) => (
-      <Text size='13'>
-        {Format.price(row.original.collateralPrice, 'standard')}
-      </Text>
-    )
-  },
-  {
     id: 'priceRestriction',
     accessorFn: (row) => row.priceRestriction,
     header: 'Price Restriction',
     enableSorting: true,
     sortDescFirst: true,
-    size: 215,
     cell: ({ row }) => (
       <Text size='13'>
         {Format.price(row.original.priceRestriction, 'standard')}
+      </Text>
+    )
+  },
+  {
+    id: 'collateralPrice',
+    accessorFn: (row) => row.collateralPrice,
+    header: 'Collateral Price',
+    enableSorting: true,
+    sortDescFirst: true,
+    cell: ({ row }) => (
+      <Text size='13'>
+        {Format.price(row.original.collateralPrice, 'standard')}
       </Text>
     )
   },
@@ -92,7 +90,6 @@ const collateralTableColumns: ExtendedColumnDef<CapoTableItem>[] = [
     accessorFn: (row) => row.priceBuffer,
     header: 'Price Buffer',
     enableSorting: true,
-    size: 215,
     cell: ({ row }) => {
       const bufferValue = Number(row.original.priceBuffer.toFixed(2));
 
@@ -293,14 +290,14 @@ const CollateralsPriceTable = ({
                     weight='500'
                     className='text-primary-14'
                   >
-                    Collateral Price
+                    Price Restriction
                   </Text>
                   <Text
                     size='13'
                     lineHeight='21'
                     className='truncate'
                   >
-                    {Format.price(row.collateralPrice, 'standard')}
+                    {Format.price(row.priceRestriction, 'standard')}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -310,14 +307,14 @@ const CollateralsPriceTable = ({
                     weight='500'
                     className='text-primary-14'
                   >
-                    Price Restriction
+                    Collateral Price
                   </Text>
                   <Text
                     size='13'
                     lineHeight='21'
                     className='truncate'
                   >
-                    {Format.price(row.priceRestriction, 'standard')}
+                    {Format.price(row.collateralPrice, 'standard')}
                   </Text>
                 </div>
                 <div className='grid w-full'>
