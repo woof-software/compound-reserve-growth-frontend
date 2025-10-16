@@ -3,13 +3,10 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import { LineChartSeries } from '@/components/Charts/Line/Line';
-import { filterForRange } from '@/shared/lib/utils/chart';
+import { aggregateByBarSize, filterForRange } from '@/shared/lib/utils/chart';
 import {
   capitalizeFirstLetter,
-  getStableColorForSeries,
-  startOfUTCDay,
-  startOfUTCMonth,
-  startOfUTCWeekMon
+  getStableColorForSeries
 } from '@/shared/lib/utils/utils';
 
 interface LineChartProps {
@@ -24,34 +21,6 @@ export interface EventDataItem {
   x: number;
   title: string;
   text: string;
-}
-
-type XY = [number, number];
-
-function aggregateByBarSize(
-  points: { x: number; y: number }[],
-  barSize: 'D' | 'W' | 'M'
-): XY[] {
-  if (!points?.length) return [];
-
-  const sorted = [...points].sort((a, b) => a.x - b.x);
-
-  const bucketFn =
-    barSize === 'M'
-      ? startOfUTCMonth
-      : barSize === 'W'
-        ? startOfUTCWeekMon
-        : startOfUTCDay;
-
-  const map = new Map<number, number>();
-
-  for (const p of sorted) {
-    const key = bucketFn(p.x);
-
-    map.set(key, (map.get(key) || 0) + (Number.isFinite(p.y) ? p.y : 0));
-  }
-
-  return Array.from(map.entries()).sort((a, b) => a[0] - b[0]);
 }
 
 const useLineChart = ({
@@ -74,7 +43,12 @@ const useLineChart = ({
 
     return data.map((series) => {
       const seriesData = isAggregate
-        ? aggregateByBarSize(series.data, barSize)
+        ? aggregateByBarSize({
+            data: series.data,
+            getDate: ({ x }) => new Date(x),
+            transform: ({ x, y }) => [x, y],
+            range: barSize
+          })
         : filterForRange({
             data: series.data,
             getDate: ({ x }) => new Date(x),

@@ -1,3 +1,4 @@
+import { getSummarizedCsvData } from '@/entities/Insentive/getSummarizedCsvData';
 import React, { useState } from 'react';
 
 import Line from '@/components/Charts/Line/Line';
@@ -9,7 +10,6 @@ import {
 } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/customTooltipFormatter';
 import { useHistoricalExpensesChartSeries } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/useHistoricalExpensesChartSeries';
 import { useChartControls } from '@/shared/hooks/useChartControls';
-import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
@@ -75,13 +75,8 @@ const HistoricalExpensesByNetworks = (
 
   useFilterSyncSingle('historicalExpByNetworkPeriod', barSize, onBarSizeChange);
 
-  const { csvData } = useCSVExport({
-    chartSeries,
-    barSize,
-    groupBy: 'None',
-    filePrefix: 'historical_expenses_by_networks',
-    aggregationType: 'sum'
-  });
+  console.log('historical aggregated', aggregatedSeries);
+  const csvData = getSummarizedCsvData(aggregatedSeries);
 
   const onEyeClick = () => {
     if (areAllSeriesHidden) {

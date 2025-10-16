@@ -8,9 +8,9 @@ import {
   customTooltipFormatter
 } from '@/entities/Insentive/FeesGeneratedIncentives/lib/customTooltipFormatter';
 import { getGeneratedIncentivesChartSeries } from '@/entities/Insentive/FeesGeneratedIncentives/lib/getGeneratedIncentivesChartSeries';
+import { getSummarizedCsvData } from '@/entities/Insentive/getSummarizedCsvData';
 import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
 import { useChartControls } from '@/shared/hooks/useChartControls';
-import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import {
   useFiltersSync,
   useFilterSyncSingle
@@ -73,14 +73,6 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
     ? chartSeries.filter((series) => series.name === 'Revenue')
     : chartSeries;
 
-  const { csvData } = useCSVExport({
-    chartSeries,
-    barSize,
-    groupBy: 'None',
-    filePrefix: 'fees_generated_vs_incentives',
-    aggregationType: 'sum'
-  });
-
   const {
     chartRef,
     showEvents,
@@ -97,6 +89,8 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
     barSize,
     isAggregate: true
   });
+
+  const csvData = getSummarizedCsvData(aggregatedSeries);
 
   return (
     <Card
