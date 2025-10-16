@@ -33,6 +33,7 @@ export const normalizeCapoData = (
       collateralPrice: capoItem?.price,
       priceRestriction: capoItem?.capValue,
       priceFeed: capoItem?.oracleAddress,
+      priceBuffer: Number(capoItem?.capValue) - Number(capoItem?.price),
       oracleName: capoItem?.oracleName
     });
 

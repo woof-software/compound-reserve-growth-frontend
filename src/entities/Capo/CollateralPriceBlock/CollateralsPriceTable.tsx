@@ -225,6 +225,8 @@ const CollateralsPriceTable = ({
 
             const fullExplorerLink = `${explorerUrl}${row.priceFeed}`;
 
+            const bufferValue = Number(row.priceBuffer.toFixed(2));
+
             return (
               <div
                 key={row.network + index}
@@ -316,6 +318,26 @@ const CollateralsPriceTable = ({
                     className='truncate'
                   >
                     {Format.price(row.priceRestriction, 'standard')}
+                  </Text>
+                </div>
+                <div className='grid w-full'>
+                  <Text
+                    size='11'
+                    lineHeight='18'
+                    weight='500'
+                    className='text-primary-14'
+                  >
+                    Price Buffer
+                  </Text>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                    className={cn('truncate', {
+                      '!text-red-500': bufferValue < 0,
+                      '!text-green-400': bufferValue > 0
+                    })}
+                  >
+                    {Format.price(row.priceBuffer, 'standard')}
                   </Text>
                 </div>
                 <div className='grid w-full'>
