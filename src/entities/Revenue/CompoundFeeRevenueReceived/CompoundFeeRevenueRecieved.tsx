@@ -1,7 +1,3 @@
-import {
-  customChartOptions,
-  customTooltipFormatter
-} from '@/entities/Revenue/CompoundFeeRevenueReceived/customChartOptions';
 import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
@@ -10,13 +6,17 @@ import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/Compoun
 import Filter from '@/components/Filter/Filter';
 import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
+import {
+  customChartOptions,
+  customTooltipFormatter
+} from '@/entities/Revenue/CompoundFeeRevenueReceived/customChartOptions';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCompoundReceivedBars } from '@/shared/hooks/useCompoundReceivedBars';
-import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
+import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import {
   capitalizeFirstLetter,
   filterAndSortMarkets,
@@ -33,6 +33,7 @@ import SingleDropdown from '@/shared/ui/SingleDropdown/SingleDropdown';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
+import { getSummarizedCsvData } from '@/entities/Insentive/getSummarizedCsvData';
 
 interface SelectedOptionsState {
   chain: OptionType[];
@@ -291,23 +292,11 @@ const CompoundFeeRevenueRecieved = ({
     };
   }, [rawData, selectedOptions, groupBy]);
 
-  const { csvData, csvFilename } = useCSVExport({
-    stackedData: chartData,
-    barSize,
-    groupBy,
-    filePrefix: 'Compound_Fee_Revenue',
-    aggregationType: 'sum',
-    rawData,
-    selectedChains: selectedOptions.chain,
-    selectedMarkets: selectedOptions.market,
-    groupByPathMapping,
-    getValueByPath
-  });
-
   const {
     chartRef,
     seriesData,
     aggregatedData,
+    aggregatedSeries,
     areAllSeriesHidden,
     hiddenItems,
     setHiddenItems,
@@ -319,6 +308,9 @@ const CompoundFeeRevenueRecieved = ({
     barSize,
     data: chartData
   });
+
+  // @ts-expect-error TODO: fix types
+  const csvData = getSummarizedCsvData(aggregatedSeries);
 
   const deploymentOptionsFilter = useMemo(() => {
     return filterAndSortMarkets(
@@ -420,7 +412,7 @@ const CompoundFeeRevenueRecieved = ({
         isLoading={isLoading || false}
         barSize={barSize}
         csvData={csvData}
-        csvFilename={csvFilename}
+        csvFilename={getCsvFileName('compound-fee-revenue-received')}
         openSingle={isGroupByOpen}
         onSelectChain={onSelectChain}
         onSelectAssetType={onSelectAssetType}

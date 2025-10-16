@@ -2,6 +2,8 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
+import { aggregateByBarSize } from '@/shared/lib/utils/chart';
+
 export interface StackedChartData {
   date: string;
   [key: string]: string | number;
@@ -18,6 +20,15 @@ interface CompoundReceivedBarProps {
   barSize?: 'D' | 'W' | 'M';
 }
 
+const capitalizeFirstLetter = (s: string) =>
+  s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+
+const getStableColorForSeries = (name: string, allNames: string[]) => {
+  const palette = Highcharts.getOptions().colors || [];
+  const idx = allNames.indexOf(name);
+  return palette[idx % palette.length];
+};
+
 const useCompoundReceivedBars = ({
   data,
   barSize
@@ -28,11 +39,12 @@ const useCompoundReceivedBars = ({
 
   const [hiddenItems, setHiddenItems] = useState<string[]>([]);
 
-  const { seriesData, aggregatedData } = useMemo(() => {
+  const { seriesData, aggregatedData, aggregatedSeries } = useMemo(() => {
     if (!data || data.length === 0) {
-      return { seriesData: [], aggregatedData: [] };
+      return { seriesData: [], aggregatedData: [], aggregatedSeries: [] };
     }
 
+    // collect all non-date keys (these will become series)
     const allKeys = new Set<string>();
     data.forEach((item) => {
       Object.keys(item).forEach((key) => {
@@ -42,84 +54,77 @@ const useCompoundReceivedBars = ({
       });
     });
 
-    const aggregated = new Map<number, AggregatedPoint>();
+    const allSeriesNames = Array.from(allKeys);
 
-    data.forEach((item) => {
-      const date = new Date(item.date);
-      let keyDate: Date;
+    // build raw per-key series (array of {x: timestamp, y: value})
+    const rawSeriesMap = new Map<string, { x: number; y: number }[]>();
 
-      switch (barSize) {
-        case 'D': {
-          keyDate = new Date(
-            Date.UTC(
-              date.getUTCFullYear(),
-              date.getUTCMonth(),
-              date.getUTCDate()
-            )
-          );
-          break;
+    allSeriesNames.forEach((key) => {
+      const points = data.map((row) => ({
+        x: new Date(row.date).getTime(),
+        y: Number((row[key] as number) || 0)
+      }));
+      rawSeriesMap.set(key, points);
+    });
+
+    // Always use aggregateByBarSize (filterForRange removed)
+    const effectiveRange = barSize ?? 'D';
+
+    const aggregatedSeries = allSeriesNames.map((name) => {
+      const raw = rawSeriesMap.get(name) || [];
+
+      const seriesData = aggregateByBarSize({
+        data: raw,
+        getDate: ({ x }) => new Date(x),
+        transform: ({ x, y }) => [x, y],
+        range: effectiveRange
+      });
+
+      return {
+        data: seriesData,
+        id: name,
+        type: 'column' as const,
+        name: capitalizeFirstLetter(name),
+        color: getStableColorForSeries(name, allSeriesNames)
+      } as Highcharts.SeriesColumnOptions;
+    });
+
+    // build aggregatedData: sum of all series per timestamp
+    const totalsMap = new Map<number, AggregatedPoint>();
+
+    aggregatedSeries.forEach((sr) => {
+      (sr.data || []).forEach((p: any) => {
+        let x: number;
+        let y: number;
+
+        if (Array.isArray(p)) {
+          x = Number(p[0]);
+          y = Number(p[1]) || 0;
+        } else if (p && typeof p === 'object') {
+          x = Number(p.x);
+          y = Number(p.y) || 0;
+        } else {
+          return;
         }
-        case 'W': {
-          const day = date.getUTCDay();
-          const diff = date.getUTCDate() - day + (day === 0 ? -6 : 1);
-          keyDate = new Date(
-            Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), diff)
-          );
-          break;
+
+        if (!totalsMap.has(x)) {
+          totalsMap.set(x, { x });
         }
-        case 'M': {
-          keyDate = new Date(
-            Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)
-          );
-          break;
-        }
-        default:
-          keyDate = date;
-      }
 
-      const keyTimestamp = keyDate.getTime();
-
-      if (!aggregated.has(keyTimestamp)) {
-        aggregated.set(keyTimestamp, { x: keyTimestamp });
-      }
-
-      const aggregatedPoint = aggregated.get(keyTimestamp)!;
-
-      allKeys.forEach((key) => {
-        const value = (item[key] as number) || 0;
-        aggregatedPoint[key] = (aggregatedPoint[key] || 0) + value;
+        const entry = totalsMap.get(x)!;
+        entry['total'] = (entry['total'] || 0) + y;
       });
     });
 
-    const sortedAggregated = Array.from(aggregated.values()).sort(
+    const sortedAggregated = Array.from(totalsMap.values()).sort(
       (a, b) => a.x - b.x
     );
 
-    const activeSeriesKeys = new Set<string>();
-    sortedAggregated.forEach((point) => {
-      Object.keys(point).forEach((key) => {
-        if (key !== 'x' && point[key] !== 0) {
-          activeSeriesKeys.add(key);
-        }
-      });
-    });
-
-    const palette = Highcharts.getOptions().colors || [];
-
-    const finalSeries = Array.from(activeSeriesKeys).map(
-      (key, idx): Highcharts.SeriesColumnOptions => ({
-        type: 'column',
-        color: palette[idx % palette.length],
-        name: key.charAt(0).toUpperCase() + key.slice(1),
-        data: sortedAggregated.map((item) => [
-          item.x,
-          (item[key] as number) || 0
-        ]),
-        showInLegend: true
-      })
-    );
-
-    return { seriesData: finalSeries, aggregatedData: sortedAggregated };
+    return {
+      seriesData: aggregatedSeries,
+      aggregatedData: sortedAggregated,
+      aggregatedSeries
+    };
   }, [data, barSize]);
 
   const toggleSeriesByName = useCallback((name: string) => {
@@ -175,6 +180,7 @@ const useCompoundReceivedBars = ({
     chartRef,
     seriesData,
     aggregatedData,
+    aggregatedSeries,
     areAllSeriesHidden,
     hiddenItems,
 
