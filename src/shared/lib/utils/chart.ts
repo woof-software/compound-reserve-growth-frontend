@@ -158,11 +158,10 @@ export function aggregateByBarSize<T, R>(args: FilterForRangeArgs<T, R>): R[] {
           : key + 6 * 24 * 60 * 60 * 1000;
 
     const finalKey = endOfPeriod > now ? now : endOfPeriod;
-    // @ts-expect-error TODO: fix item type
-    map.set(finalKey, (map.get(finalKey) || 0) + item.y);
+    map.set(finalKey, (map.get(finalKey) || 0) + (item as any).y);
   }
 
-  return Array.from(map.entries()).map(([x, y]) => transform({ x, y } as T));
+  return Array.from(map.entries()).map((item) => transform(item as T));
 }
 
 const startOfUTCDay = (timestamp: number): number => {

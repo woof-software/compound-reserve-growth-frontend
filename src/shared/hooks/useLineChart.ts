@@ -37,7 +37,7 @@ const useLineChart = ({
         ? aggregateByBarSize({
             data: series.data,
             getDate: ({ x }) => new Date(x),
-            transform: ({ x, y }) => [x, y],
+            transform: (item) => item,
             range: barSize
           })
         : filterForRange({
