@@ -2,7 +2,7 @@ import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
-import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/CompoundFeeRecieved';
+import CompoundFeeRecievedChart from '@/components/Charts/CompoundFeeRecieved/CompoundFeeRecievedChart';
 import Filter from '@/components/Filter/Filter';
 import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
@@ -12,7 +12,7 @@ import {
 } from '@/entities/Revenue/CompoundFeeRevenueReceived/customChartOptions';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useChartControls } from '@/shared/hooks/useChartControls';
-import { useCompoundReceivedBars } from '@/shared/hooks/useCompoundReceivedBars';
+import { useCompoundChartBars } from '@/shared/hooks/useCompoundChartBars';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
@@ -304,7 +304,7 @@ const CompoundFeeRevenueRecieved = ({
     toggleSeriesByName,
     onSelectAll,
     onDeselectAll
-  } = useCompoundReceivedBars({
+  } = useCompoundChartBars({
     barSize,
     data: chartData
   });
@@ -431,7 +431,7 @@ const CompoundFeeRevenueRecieved = ({
           text={noDataMessage}
         />
       ) : (
-        <CompoundFeeRecieved
+        <CompoundFeeRecievedChart
           customTooltipFormatter={customTooltipFormatter}
           customOptions={customChartOptions}
           chartRef={chartRef}

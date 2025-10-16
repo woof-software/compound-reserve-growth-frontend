@@ -12,7 +12,7 @@ import HighchartsReact from 'highcharts-react-official';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
-import { AggregatedPoint } from '@/shared/hooks/useCompoundReceivedBars';
+import { AggregatedPoint } from '@/shared/hooks/useCompoundChartBars';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { noop } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
@@ -44,7 +44,7 @@ interface CompoundFeeRecievedProps {
   customOptions?: Partial<Options>;
 }
 
-const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
+const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
   chartRef,
   groupBy,
   seriesData = [],
@@ -565,4 +565,4 @@ const CompoundFeeRecieved: React.FC<CompoundFeeRecievedProps> = ({
   );
 };
 
-export default CompoundFeeRecieved;
+export default CompoundFeeRecievedChart;

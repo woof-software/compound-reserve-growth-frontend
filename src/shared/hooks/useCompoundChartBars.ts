@@ -3,6 +3,10 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import { aggregateByBarSize } from '@/shared/lib/utils/chart';
+import {
+  capitalizeFirstLetter,
+  getStableColorForSeries
+} from '@/shared/lib/utils/utils';
 
 export interface StackedChartData {
   date: string;
@@ -16,22 +20,14 @@ export interface AggregatedPoint {
 
 interface CompoundReceivedBarProps {
   data: StackedChartData[];
-
-  barSize?: 'D' | 'W' | 'M';
+  barSize: 'D' | 'W' | 'M';
+  customBarColor?: string;
 }
 
-const capitalizeFirstLetter = (s: string) =>
-  s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-
-const getStableColorForSeries = (name: string, allNames: string[]) => {
-  const palette = Highcharts.getOptions().colors || [];
-  const idx = allNames.indexOf(name);
-  return palette[idx % palette.length];
-};
-
-const useCompoundReceivedBars = ({
+const useCompoundChartBars = ({
   data,
-  barSize
+  barSize,
+  customBarColor
 }: CompoundReceivedBarProps) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
 
@@ -85,7 +81,7 @@ const useCompoundReceivedBars = ({
         id: name,
         type: 'column' as const,
         name: capitalizeFirstLetter(name),
-        color: getStableColorForSeries(name, allSeriesNames)
+        color: customBarColor ?? getStableColorForSeries(name, allSeriesNames)
       } as Highcharts.SeriesColumnOptions;
     });
 
@@ -183,7 +179,6 @@ const useCompoundReceivedBars = ({
     aggregatedSeries,
     areAllSeriesHidden,
     hiddenItems,
-
     toggleSeriesByName,
     setHiddenItems,
     setAreAllSeriesHidden,
@@ -192,4 +187,4 @@ const useCompoundReceivedBars = ({
   };
 };
 
-export { useCompoundReceivedBars };
+export { useCompoundChartBars };
