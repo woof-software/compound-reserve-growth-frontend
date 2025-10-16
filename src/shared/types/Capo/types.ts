@@ -30,3 +30,10 @@ export type CapoSelectedRow = {
   network: string;
   collateral: string;
 };
+
+export type Option = {
+  id: string;
+  label: string;
+};
+
+export type OptionSetter = (previous: Option | null) => Option | null;

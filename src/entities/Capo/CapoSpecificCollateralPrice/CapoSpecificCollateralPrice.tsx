@@ -9,7 +9,7 @@ import {
   customOptions
 } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/chartConfig';
 import { getCsvDataNormalizer } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/getCsvData';
-import { useChartFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useChartFilters';
+import { useChartFiltersWithBus } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useChartFiltersWithBus';
 import { useCollateralChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useCollateralChartData';
 import { useRelativeFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useRelativeFilters';
 import { useChartControls } from '@/shared/hooks/useChartControls';
@@ -31,24 +31,23 @@ interface CapoSpecificCollateralPriceProps {
   rawData: CapoNormalizedChartData[];
   isLoading?: boolean;
   isError?: boolean;
-  selectedCollateralRow: { network: string; collateral: string } | null;
 }
 
 export const CapoSpecificCollateralPrice = (
   props: CapoSpecificCollateralPriceProps
 ) => {
-  const { rawData, isLoading, isError, selectedCollateralRow } = props;
+  const { rawData, isLoading, isError } = props;
 
   const {
     selectedChain,
     selectedCollateral,
-    setSelectedChain,
-    setSelectedCollateral,
     chainOptions,
     collateralOptions,
+    setSelectedChain,
+    setSelectedCollateral,
     filteredData,
     groupBy
-  } = useChartFilters(rawData, selectedCollateralRow);
+  } = useChartFiltersWithBus(rawData);
 
   const {
     isOpen: isFilterOpen,
@@ -66,48 +65,26 @@ export const CapoSpecificCollateralPrice = (
    * A variable holding filter configurations for mobile devices.
    * The bridge between useChartFilters and Filter component.
    */
-  const mobileFilters = ((): FilterOptions[] => {
-    return [
-      {
-        id: 'chain',
-        placeholder: 'Chain',
-        total: chainOptions.length,
-        options: chainOptions,
-        selectedOptions: selectedChain ? [selectedChain] : [],
-        disableSelectAll: true,
-        onChange: (options) => {
-          /**
-           * The Filter component throws the selected filter as the latest one,
-           * so it is used to implement a 'single' element behavior
-           */
-          const option = options.at(-1);
-
-          if (!option) return;
-
-          setSelectedChain(option);
-        }
-      },
-      {
-        id: 'collateral',
-        placeholder: 'Collaterals',
-        total: chainOptions.length,
-        options: collateralOptions,
-        selectedOptions: selectedCollateral ? [selectedCollateral] : [],
-        disableSelectAll: true,
-        onChange: (options) => {
-          /**
-           * The Filter component throws the selected filter as the latest one,
-           * so it is used to implement a 'single' element behavior
-           */
-          const option = options.at(-1);
-
-          if (!option) return;
-
-          setSelectedCollateral(option);
-        }
-      }
-    ];
-  })();
+  const mobileFilters: FilterOptions[] = [
+    {
+      id: 'chain',
+      placeholder: 'Chain',
+      total: chainOptions.length,
+      options: chainOptions,
+      selectedOptions: selectedChain ? [selectedChain] : [],
+      disableSelectAll: true,
+      onChange: (opts) => setSelectedChain(opts.at(-1) ?? null)
+    },
+    {
+      id: 'collateral',
+      placeholder: 'Collaterals',
+      total: collateralOptions.length,
+      options: collateralOptions,
+      selectedOptions: selectedCollateral ? [selectedCollateral] : [],
+      disableSelectAll: true,
+      onChange: (opts) => setSelectedCollateral(opts.at(-1) ?? null)
+    }
+  ];
 
   const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: 'D'
@@ -140,17 +117,17 @@ export const CapoSpecificCollateralPrice = (
   const csvData = getCsvDataNormalizer(chartSeries, barSize);
 
   const { aggregatedSeries } = useLineChart({
-    groupBy: groupBy(),
+    groupBy: groupBy,
     data: chartSeries,
     barSize
   });
 
   const resetFilters = () => {
-    const firstChain = chainOptions[0];
-
-    if (!firstChain) return;
+    const firstChain = chainOptions[0] || null;
 
     setSelectedChain(firstChain);
+
+    setSelectedCollateral(null);
   };
 
   return (
@@ -267,8 +244,8 @@ export const CapoSpecificCollateralPrice = (
       </div>
       {hasData && (
         <Line
-          key={groupBy()}
-          groupBy={groupBy()}
+          key={groupBy}
+          groupBy={groupBy}
           aggregatedSeries={aggregatedSeries}
           className='max-h-fit'
           // @ts-expect-error TODO: fix context type for Line component customTooltipFormatter
