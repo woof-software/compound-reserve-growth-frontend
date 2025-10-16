@@ -8,7 +8,7 @@ import {
   customTooltipFormatter
 } from '@/entities/Insentive/FeesGeneratedIncentives/lib/customTooltipFormatter';
 import { getGeneratedIncentivesChartSeries } from '@/entities/Insentive/FeesGeneratedIncentives/lib/getGeneratedIncentivesChartSeries';
-import { getSummarizedCsvData } from '@/entities/Insentive/getSummarizedCsvData';
+import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
 import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import {

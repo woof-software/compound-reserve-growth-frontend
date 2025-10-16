@@ -1,4 +1,3 @@
-import { getSummarizedCsvData } from '@/entities/Insentive/getSummarizedCsvData';
 import React, { useState } from 'react';
 
 import Line from '@/components/Charts/Line/Line';
@@ -13,6 +12,7 @@ import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
+import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
@@ -75,7 +75,6 @@ const HistoricalExpensesByNetworks = (
 
   useFilterSyncSingle('historicalExpByNetworkPeriod', barSize, onBarSizeChange);
 
-  console.log('historical aggregated', aggregatedSeries);
   const csvData = getSummarizedCsvData(aggregatedSeries);
 
   const onEyeClick = () => {

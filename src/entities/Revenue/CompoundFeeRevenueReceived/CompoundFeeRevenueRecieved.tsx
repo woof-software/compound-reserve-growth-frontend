@@ -17,6 +17,7 @@ import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
+import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
 import {
   capitalizeFirstLetter,
   filterAndSortMarkets,
@@ -33,7 +34,6 @@ import SingleDropdown from '@/shared/ui/SingleDropdown/SingleDropdown';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
-import { getSummarizedCsvData } from '@/entities/Insentive/getSummarizedCsvData';
 
 interface SelectedOptionsState {
   chain: OptionType[];
@@ -309,7 +309,6 @@ const CompoundFeeRevenueRecieved = ({
     data: chartData
   });
 
-  // @ts-expect-error TODO: fix types
   const csvData = getSummarizedCsvData(aggregatedSeries);
 
   const deploymentOptionsFilter = useMemo(() => {
