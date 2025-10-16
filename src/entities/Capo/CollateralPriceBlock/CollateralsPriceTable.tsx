@@ -56,7 +56,6 @@ const collateralTableColumns: ExtendedColumnDef<CapoTableItem>[] = [
           name={row.original.collateral || 'not-found-icon'}
           className='h-6 w-6'
           folder='collaterals'
-          type={row.original.collateral === 'weETH' ? 'webp' : 'svg'}
         />
         <Text size='13'>{row.original.collateral}</Text>
       </div>
@@ -274,7 +273,6 @@ const CollateralsPriceTable = ({
                       name={row.collateral || 'not-found-icon'}
                       className='h-4 w-4'
                       folder='collaterals'
-                      type={row.collateral === 'weETH' ? 'webp' : 'svg'}
                     />
                     <Text
                       size='13'

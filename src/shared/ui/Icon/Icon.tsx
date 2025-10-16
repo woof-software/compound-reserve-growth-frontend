@@ -1,25 +1,16 @@
-import {
-  ComponentType,
-  ImgHTMLAttributes,
-  SVGProps,
-  useEffect,
-  useState
-} from 'react';
+import { ComponentType, SVGProps, useEffect, useState } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
 
 type IconFolder = 'token' | 'collaterals' | 'network';
 
-interface BaseIconProps {
+interface IconProps extends SVGProps<SVGSVGElement> {
   name: string;
   className?: string;
   color?: string;
   folder?: IconFolder;
   isRound?: boolean;
-  type?: 'svg' | 'webp';
 }
-
-type SvgIconProps = BaseIconProps & SVGProps<SVGSVGElement>;
 
 const Icon = ({
   name,
@@ -27,22 +18,8 @@ const Icon = ({
   color,
   folder,
   isRound = true,
-  type = 'svg',
   ...props
-}: SvgIconProps) => {
-  if (type === 'webp') {
-    const src = `/src/shared/assets/svg/collaterals/${name}.webp`;
-    return (
-      <img
-        src={src}
-        alt={name}
-        className={cn({ 'rounded-full': isRound }, className)}
-        style={color ? { color: `var(--${color})` } : undefined}
-        {...(props as ImgHTMLAttributes<HTMLImageElement>)}
-      />
-    );
-  }
-
+}: IconProps) => {
   const [SvgComponent, setSvgComponent] = useState<ComponentType<
     SVGProps<SVGSVGElement>
   > | null>(null);
@@ -88,8 +65,9 @@ const Icon = ({
 
   return (
     <SvgComponent
+      // className={cn('fill-current', { 'rounded-full': isRound }, className)}
       className={cn({ 'rounded-full': isRound }, className)}
-      style={color ? { color: `var(--${color})` } : undefined}
+      style={{ color: color ? `var(--${color})` : undefined }}
       {...props}
     />
   );
