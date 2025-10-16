@@ -1,6 +1,6 @@
 import { useMemo, useSyncExternalStore } from 'react';
 
-import { selectionBus } from '@/shared/lib/eventBus/eventBus';
+import { selectionBus } from '@/shared/lib/eventBus/Capo/CapoEventBus';
 import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import { CapoNormalizedChartData } from '@/shared/types/Capo/types';
 

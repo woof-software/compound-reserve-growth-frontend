@@ -5,7 +5,7 @@ import { useNormalizedChartData } from '@/entities/Capo/CapoSpecificCollateralPr
 import CapoCollateralsPriceBlock from '@/entities/Capo/CollateralPriceBlock/CapoCollateralsPriceBlock';
 import { useNormalizedTableData } from '@/entities/Capo/CollateralPriceBlock/lib/useNormalizedTableData';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
-import { selectionBus } from '@/shared/lib/eventBus/eventBus';
+import { selectionBus } from '@/shared/lib/eventBus/Capo/CapoEventBus';
 import Text from '@/shared/ui/Text/Text';
 
 const CapoPage = () => {

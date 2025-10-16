@@ -1,39 +1,81 @@
-type SelectionState = {
-  chainId: string | null;
-  collateralId: string | null;
-};
+export type Listener = () => void;
+export type CompareFn<S> = (a: S, b: S) => boolean;
 
-type Listener = () => void;
+function shallowEqual<T extends Record<string, unknown>>(a: T, b: T) {
+  if (Object.is(a, b)) return true;
+  if (
+    typeof a !== 'object' ||
+    a === null ||
+    typeof b !== 'object' ||
+    b === null
+  )
+    return false;
 
-class SelectionBus {
-  private state: SelectionState = { chainId: null, collateralId: null };
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  if (keysA.length !== keysB.length) return false;
+
+  for (const k of keysA) {
+    if (!Object.prototype.hasOwnProperty.call(b, k) || !Object.is(a[k], b[k])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export class EventBus<S extends Record<string, unknown>> {
+  private state: S;
   private listeners = new Set<Listener>();
+  private compare: CompareFn<S>;
 
-  getSnapshot = () => this.state;
+  constructor(initialState: S, compare: CompareFn<S> = shallowEqual) {
+    this.state = initialState;
+    this.compare = compare;
 
-  subscribe = (fn: Listener) => {
+    this.getSnapshot = this.getSnapshot.bind(this);
+    this.subscribe = this.subscribe.bind(this);
+  }
+
+  /** React useSyncExternalStore: get current state snapshot */
+  getSnapshot(): S {
+    return this.state;
+  }
+
+  /** React useSyncExternalStore: subscribe to changes */
+  subscribe(fn: Listener): () => void {
     this.listeners.add(fn);
     return () => this.listeners.delete(fn);
-  };
+  }
 
-  selectChain = (chainId: string | null) => {
-    this.state = { ...this.state, chainId };
-    this.emit();
-  };
+  /** Replace whole state (emit only if changed by compare) */
+  replace(next: S): void {
+    if (!this.compare(this.state, next)) {
+      this.state = next;
+      this.emit();
+    }
+  }
 
-  selectCollateral = (collateralId: string | null) => {
-    this.state = { ...this.state, collateralId };
-    this.emit();
-  };
+  /** set via updater function (prev => next) */
+  update(updater: (prev: S) => S): void {
+    this.replace(updater(this.state));
+  }
 
-  setBoth = (chainId: string | null, collateralId: string | null) => {
-    this.state = { chainId, collateralId };
-    this.emit();
-  };
+  /** shallow patch: merge partial into state */
+  patch(partial: Partial<S>): void {
+    const next = {
+      ...(this.state as Record<string, unknown>),
+      ...partial
+    } as S;
+    this.replace(next);
+  }
 
-  private emit() {
+  /** alias for patch */
+  set(value: Partial<S>): void {
+    this.patch(value);
+  }
+
+  /** Notify subscribers */
+  protected emit(): void {
     for (const l of this.listeners) l();
   }
 }
-
-export const selectionBus = new SelectionBus();
