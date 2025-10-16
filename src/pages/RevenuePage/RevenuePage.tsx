@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import CompoundCumulativeRevenue from '@/entities/Revenue/CompoundCumulativeRevenue/CompoundCumulativeRevenue';
 import CompoundFeeRevenueByChain from '@/entities/Revenue/CompoundFeeRevenueByChain';
 import CompoundFeeRevenueRecieved from '@/entities/Revenue/CompoundFeeRevenueReceived/CompoundFeeRevenueRecieved';
-import CompoundRevenueBlock from '@/entities/Revenue/CompoundRevenue';
+import CompoundRevenueBlock from '@/entities/Revenue/CompoundRevenue/CompoundRevenue';
 import RevenueBreakDownBlock from '@/entities/Revenue/RevenueBreakdown';
 import RevenueMetrics from '@/entities/Revenue/RevenueMetrics';
 import RevenueOverview from '@/entities/Revenue/RevenueOverview';

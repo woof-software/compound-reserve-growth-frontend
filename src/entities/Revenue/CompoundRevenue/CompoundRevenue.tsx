@@ -6,10 +6,12 @@ import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useChartControls } from '@/shared/hooks/useChartControls';
-import { useCSVExport } from '@/shared/hooks/useCSVExport';
+import { useCompoundChartBars } from '@/shared/hooks/useCompoundChartBars';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { type RevenuePageProps } from '@/shared/hooks/useRevenue';
+import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
+import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
 import {
   capitalizeFirstLetter,
   ChartDataItem,
@@ -45,47 +47,30 @@ interface FilterOptions {
 interface PreprocessedResult {
   filterOptions: FilterOptions;
   processedItems: PreprocessedItem[];
-  initialAggregatedData: { date: string; value: number }[];
+  initialAggregatedData: { date: string; Revenue: number }[];
   sortedDates: string[];
 }
 
 interface FiltersProps {
   chainOptions: OptionType[];
-
   deploymentOptionsFilter: OptionType[];
-
   sourceOptions: OptionType[];
-
   symbolOptions: OptionType[];
-
   barSize: BarSize;
-
   isLoading: boolean;
-
   csvFilename: string;
-
   csvData: Record<string, string | number>[];
-
   selectedOptions: {
     chain: OptionType[];
-
     source: OptionType[];
-
     deployment: OptionType[];
-
     symbol: OptionType[];
   };
-
   onSelectChain: (chain: OptionType[]) => void;
-
   onSelectSource: (source: OptionType[]) => void;
-
   onSelectMarket: (deployment: OptionType[]) => void;
-
   onSelectSymbol: (symbol: OptionType[]) => void;
-
   onBarSizeChange: (value: string) => void;
-
   onClearAll: () => void;
 }
 
@@ -173,7 +158,7 @@ function preprocessData(rawData: ChartDataItem[]): PreprocessedResult {
   const sortedDates = Object.keys(dailyTotals).sort();
   const initialAggregatedData = sortedDates.map((date) => ({
     date,
-    value: dailyTotals[date]
+    Revenue: dailyTotals[date]
   }));
 
   return {
@@ -274,46 +259,23 @@ const CompoundRevenueBlock = ({
       dailyTotals[item.date] = (dailyTotals[item.date] || 0) + item.value;
     }
 
-    const result: { date: string; value: number }[] = [];
+    const result: { date: string; Revenue: number }[] = [];
     for (const date of sortedDates) {
       if (dailyTotals[date] !== undefined) {
-        result.push({ date, value: dailyTotals[date] });
+        result.push({ date, Revenue: dailyTotals[date] });
       }
     }
     return result;
   }, [processedItems, initialAggregatedData, sortedDates, selectedOptions]);
 
-  const chartSeriesForCSV = useMemo(() => {
-    if (!processedChartData || processedChartData.length === 0) return [];
+  const { aggregatedData, aggregatedSeries, seriesData, chartRef } =
+    useCompoundChartBars({
+      barSize,
+      data: processedChartData,
+      customBarColor: '#4DEDB5'
+    });
 
-    return [
-      {
-        name: 'Revenue',
-        data: processedChartData.map((item) => ({
-          x: new Date(item.date).getTime(),
-          y: item.value
-        }))
-      }
-    ];
-  }, [processedChartData]);
-
-  const groupBy = useMemo(() => {
-    const hasFilters =
-      selectedOptions.chain.length > 0 ||
-      selectedOptions.deployment.length > 0 ||
-      selectedOptions.source.length > 0 ||
-      selectedOptions.symbol.length > 0;
-    return hasFilters ? 'Filtered' : 'Total';
-  }, [selectedOptions]);
-
-  const { csvData, csvFilename } = useCSVExport({
-    chartSeries: chartSeriesForCSV,
-    barSize,
-    groupBy,
-    filePrefix: 'Compound_Revenue',
-    aggregationType: 'sum'
-  });
-
+  const csvData = getSummarizedCsvData(aggregatedSeries);
   const hasData = processedChartData.length > 0;
 
   const noDataMessage =
@@ -384,7 +346,7 @@ const CompoundRevenueBlock = ({
       <Filters
         barSize={barSize}
         csvData={csvData}
-        csvFilename={csvFilename}
+        csvFilename={getCsvFileName('compound_revenue')}
         chainOptions={chainOptions}
         selectedOptions={selectedOptions}
         deploymentOptionsFilter={deploymentOptionsFilter}
@@ -401,7 +363,9 @@ const CompoundRevenueBlock = ({
       <View.Condition if={!isLoading && !isError && hasData}>
         <div className='h-[400px]'>
           <CompoundRevenueChart
-            data={processedChartData}
+            chartRef={chartRef}
+            seriesData={seriesData}
+            aggregatedData={aggregatedData}
             barSize={barSize}
           />
         </div>

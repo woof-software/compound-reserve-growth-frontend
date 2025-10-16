@@ -1,22 +1,23 @@
-import {
-  customChartOptions,
-  customTooltipFormatter
-} from '@/entities/Revenue/CompoundFeeRevenueReceived/customChartOptions';
 import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
-import CompoundFeeRecieved from '@/components/Charts/CompoundFeeRecieved/CompoundFeeRecieved';
+import CompoundFeeRecievedChart from '@/components/Charts/CompoundFeeRecieved/CompoundFeeRecievedChart';
 import Filter from '@/components/Filter/Filter';
 import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
+import {
+  customChartOptions,
+  customTooltipFormatter
+} from '@/entities/Revenue/CompoundFeeRevenueReceived/customChartOptions';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useChartControls } from '@/shared/hooks/useChartControls';
-import { useCompoundReceivedBars } from '@/shared/hooks/useCompoundReceivedBars';
-import { useCSVExport } from '@/shared/hooks/useCSVExport';
+import { useCompoundChartBars } from '@/shared/hooks/useCompoundChartBars';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
+import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
+import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
 import {
   capitalizeFirstLetter,
   filterAndSortMarkets,
@@ -291,23 +292,11 @@ const CompoundFeeRevenueRecieved = ({
     };
   }, [rawData, selectedOptions, groupBy]);
 
-  const { csvData, csvFilename } = useCSVExport({
-    stackedData: chartData,
-    barSize,
-    groupBy,
-    filePrefix: 'Compound_Fee_Revenue',
-    aggregationType: 'sum',
-    rawData,
-    selectedChains: selectedOptions.chain,
-    selectedMarkets: selectedOptions.market,
-    groupByPathMapping,
-    getValueByPath
-  });
-
   const {
     chartRef,
     seriesData,
     aggregatedData,
+    aggregatedSeries,
     areAllSeriesHidden,
     hiddenItems,
     setHiddenItems,
@@ -315,10 +304,12 @@ const CompoundFeeRevenueRecieved = ({
     toggleSeriesByName,
     onSelectAll,
     onDeselectAll
-  } = useCompoundReceivedBars({
+  } = useCompoundChartBars({
     barSize,
     data: chartData
   });
+
+  const csvData = getSummarizedCsvData(aggregatedSeries);
 
   const deploymentOptionsFilter = useMemo(() => {
     return filterAndSortMarkets(
@@ -420,7 +411,7 @@ const CompoundFeeRevenueRecieved = ({
         isLoading={isLoading || false}
         barSize={barSize}
         csvData={csvData}
-        csvFilename={csvFilename}
+        csvFilename={getCsvFileName('compound-fee-revenue-received')}
         openSingle={isGroupByOpen}
         onSelectChain={onSelectChain}
         onSelectAssetType={onSelectAssetType}
@@ -440,7 +431,7 @@ const CompoundFeeRevenueRecieved = ({
           text={noDataMessage}
         />
       ) : (
-        <CompoundFeeRecieved
+        <CompoundFeeRecievedChart
           customTooltipFormatter={customTooltipFormatter}
           customOptions={customChartOptions}
           chartRef={chartRef}

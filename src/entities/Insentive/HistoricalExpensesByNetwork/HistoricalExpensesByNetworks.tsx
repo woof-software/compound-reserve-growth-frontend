@@ -9,11 +9,11 @@ import {
 } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/customTooltipFormatter';
 import { useHistoricalExpensesChartSeries } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/useHistoricalExpensesChartSeries';
 import { useChartControls } from '@/shared/hooks/useChartControls';
-import { useCSVExport } from '@/shared/hooks/useCSVExport';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
+import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
@@ -83,13 +83,7 @@ const HistoricalExpensesByNetworks = (
 
   useFilterSyncSingle('historicalExpByNetworkPeriod', barSize, onBarSizeChange);
 
-  const { csvData } = useCSVExport({
-    chartSeries,
-    barSize,
-    groupBy: 'None',
-    filePrefix: 'historical_expenses_by_networks',
-    aggregationType: 'sum'
-  });
+  const csvData = getSummarizedCsvData(aggregatedSeries);
 
   const onEyeClick = () => {
     if (isSeriesHidden) {
