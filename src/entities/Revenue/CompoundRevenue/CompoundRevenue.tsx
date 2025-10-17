@@ -198,7 +198,7 @@ const CompoundRevenueBlock = ({
   ]);
 
   const { barSize, onBarSizeChange } = useChartControls({
-    initialBarSize: 'D'
+    initialBarSize: 'M'
   });
 
   const { filterOptions, processedItems, initialAggregatedData, sortedDates } =
