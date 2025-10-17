@@ -41,11 +41,11 @@ export const CapoSpecificCollateralPrice = (
 
   const {
     selectedChain,
+    setSelectedChain,
+    setSelectedCollateral,
     selectedCollateral,
     chainOptions,
     collateralOptions,
-    setSelectedChain,
-    setSelectedCollateral,
     filteredData,
     groupBy
   } = useChartFilters(rawData);
@@ -153,11 +153,11 @@ export const CapoSpecificCollateralPrice = (
   });
 
   const resetFilters = () => {
-    const firstChain = chainOptions[0] || null;
+    const firstChain = chainOptions[0];
+
+    if (!firstChain) return;
 
     setSelectedChain(firstChain);
-
-    setSelectedCollateral(null);
   };
 
   return (
