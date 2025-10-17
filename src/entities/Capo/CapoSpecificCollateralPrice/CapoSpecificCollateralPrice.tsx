@@ -92,7 +92,7 @@ export const CapoSpecificCollateralPrice = (
 
         if (!option) return;
 
-        setSelectedCollateral(option);
+        setSelectedChain(option);
       }
     },
     {
