@@ -1,11 +1,9 @@
-import { useEffect } from 'react';
-
 import { CapoSpecificCollateralPrice } from '@/entities/Capo/CapoSpecificCollateralPrice/CapoSpecificCollateralPrice';
 import { useNormalizedChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useNormalizedChartData';
 import CapoCollateralsPriceBlock from '@/entities/Capo/CollateralPriceBlock/CapoCollateralsPriceBlock';
 import { useNormalizedTableData } from '@/entities/Capo/CollateralPriceBlock/lib/useNormalizedTableData';
+import { CapoEventBusEventsContext } from '@/entities/Capo/lib/CapoEventBusContext';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
-import { selectionBus } from '@/shared/lib/eventBus/Capo/CapoEventBus';
 import Text from '@/shared/ui/Text/Text';
 
 const CapoPage = () => {
@@ -13,19 +11,6 @@ const CapoPage = () => {
   const { chartData } = useNormalizedChartData();
 
   useScrollToHash(!isLoading);
-
-  useEffect(() => {
-    if (!chartData?.length) return;
-    const snap = selectionBus.getSnapshot();
-    if (snap.chainId || snap.collateralId) return;
-
-    const firstChainId = chartData[0]?.network ?? null;
-    selectionBus.setBoth(firstChainId, null);
-  }, [chartData]);
-
-  const onSelectCollateralRow = (network: string, collateral: string) => {
-    selectionBus.setBoth(network, collateral);
-  };
 
   return (
     <div className='flex flex-col gap-6 md:gap-[40px] xl:gap-[50px]'>
@@ -48,17 +33,18 @@ const CapoPage = () => {
       </section>
       <section className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
         <div className='grid gap-3'>
-          <CapoCollateralsPriceBlock
-            tableData={data}
-            isError={isError}
-            isLoading={isLoading}
-            onSelectCollateralRow={onSelectCollateralRow}
-          />
-          <CapoSpecificCollateralPrice
-            isError={isError}
-            isLoading={isLoading}
-            rawData={chartData}
-          />
+          <CapoEventBusEventsContext.Provider>
+            <CapoCollateralsPriceBlock
+              tableData={data}
+              isError={isError}
+              isLoading={isLoading}
+            />
+            <CapoSpecificCollateralPrice
+              isError={isError}
+              isLoading={isLoading}
+              rawData={chartData}
+            />
+          </CapoEventBusEventsContext.Provider>
         </div>
       </section>
     </div>

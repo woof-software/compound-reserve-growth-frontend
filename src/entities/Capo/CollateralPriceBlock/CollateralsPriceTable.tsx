@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 
 import HoverCard from '@/components/HoverCard/HoverCard';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { CapoEventBusEventsContext } from '@/entities/Capo/lib/CapoEventBusContext';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
@@ -21,7 +22,6 @@ import Text from '@/shared/ui/Text/Text';
 export interface CollateralsPriceProps {
   tableData: CapoTableItem[];
   sortType: SortAdapter<CapoTableItem>;
-  onSelectCollateralRow: (network: string, collateral: string) => void;
 }
 
 const collateralTableColumns: ExtendedColumnDef<CapoTableItem>[] = [
@@ -190,8 +190,7 @@ const collateralTableColumns: ExtendedColumnDef<CapoTableItem>[] = [
 
 const CollateralsPriceTable = ({
   tableData,
-  sortType,
-  onSelectCollateralRow
+  sortType
 }: CollateralsPriceProps) => {
   const mobileTableData = useMemo(() => {
     if (!sortType?.key) {
@@ -216,6 +215,15 @@ const CollateralsPriceTable = ({
       return 0;
     });
   }, [tableData, sortType]);
+
+  const capoEvents = CapoEventBusEventsContext.use();
+
+  const onSelectCollateralRow = (network: string, collateral: string) => {
+    capoEvents.emit('on-collateral-select', {
+      network,
+      collateral
+    });
+  };
 
   return (
     <>
