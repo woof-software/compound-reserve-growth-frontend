@@ -41,9 +41,9 @@ export const CapoSpecificCollateralPrice = (
 
   const {
     selectedChain,
+    selectedCollateral,
     setSelectedChain,
     setSelectedCollateral,
-    selectedCollateral,
     chainOptions,
     collateralOptions,
     filteredData,
