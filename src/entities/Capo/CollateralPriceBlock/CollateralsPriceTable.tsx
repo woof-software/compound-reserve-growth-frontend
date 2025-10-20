@@ -220,6 +220,16 @@ const CollateralsPriceTable = ({
       network,
       collateral
     });
+    const mobileRow = document.getElementById(
+      `mobileRow${collateral}${network}`
+    );
+
+    if (mobileRow) {
+      mobileRow.classList.add('bg-white/5');
+      setTimeout(() => {
+        mobileRow?.classList.remove('bg-white/5');
+      }, 200);
+    }
   };
 
   return (
@@ -237,9 +247,10 @@ const CollateralsPriceTable = ({
 
             return (
               <div
+                id={`mobileRow${row.collateral}${row.network}`}
                 key={row.network + index}
                 className={cn(
-                  'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                  'border-secondary-23 grid cursor-pointer grid-cols-3 gap-x-10 gap-y-3 border-b p-5 transition-colors duration-200 md:gap-x-[63px] md:px-10',
                   {
                     'border-none': dataRows.length - 1 === index
                   }
