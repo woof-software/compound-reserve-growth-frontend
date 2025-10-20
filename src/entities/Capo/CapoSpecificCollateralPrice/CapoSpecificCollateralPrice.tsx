@@ -79,7 +79,7 @@ export const CapoSpecificCollateralPrice = (
     {
       id: 'chain',
       placeholder: 'Chain',
-      total: chainOptions.length,
+      total: selectedChain ? 1 : 0,
       options: chainOptions,
       selectedOptions: selectedChain ? [selectedChain] : [],
       disableSelectAll: true,
@@ -98,7 +98,7 @@ export const CapoSpecificCollateralPrice = (
     {
       id: 'collateral',
       placeholder: 'Collaterals',
-      total: collateralOptions.length,
+      total: selectedCollateral ? 1 : 0,
       options: collateralOptions,
       selectedOptions: selectedCollateral ? [selectedCollateral] : [],
       disableSelectAll: true,
