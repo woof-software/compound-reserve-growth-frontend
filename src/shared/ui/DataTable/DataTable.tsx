@@ -231,7 +231,10 @@ const DataTable = <T,>({
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className={cn(onRowClick && 'cursor-pointer', rowClassName)}
+                  className={cn(
+                    onRowClick && 'group cursor-pointer',
+                    rowClassName
+                  )}
                   onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell, index) => {
@@ -243,7 +246,7 @@ const DataTable = <T,>({
                       <td
                         key={cell.id}
                         className={cn(
-                          'text-[13px] whitespace-nowrap',
+                          'text-[13px] whitespace-nowrap group-hover:bg-white/5 first:rounded-l-lg last:rounded-r-lg',
                           { 'font-medium': index === 0 },
                           getAlignmentClass(columnAlign),
                           cellClassName

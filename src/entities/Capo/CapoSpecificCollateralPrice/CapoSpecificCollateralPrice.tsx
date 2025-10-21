@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CSVLink } from 'react-csv';
 
 import Line from '@/components/Charts/Line/Line';
@@ -12,6 +12,7 @@ import { getCsvData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/getC
 import { useChartFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useChartFilters';
 import { useCollateralChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useCollateralChartData';
 import { useRelativeFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useRelativeFilters';
+import { CapoEventBusEventsContext } from '@/entities/Capo/lib/CapoEventBusContext';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
@@ -61,52 +62,59 @@ export const CapoSpecificCollateralPrice = (
     onCloseModal: onMoreClose
   } = useModal();
 
+  const capoEvents = CapoEventBusEventsContext.use();
+
+  useEffect(() => {
+    return capoEvents.on('on-collateral-select', ({ collateral, network }) => {
+      setSelectedCollateral(collateral);
+      setSelectedChain(network);
+    });
+  }, [capoEvents, setSelectedCollateral, setSelectedChain]);
+
   /**
    * A variable holding filter configurations for mobile devices.
    * The bridge between useChartFilters and Filter component.
    */
-  const mobileFilters = ((): FilterOptions[] => {
-    return [
-      {
-        id: 'chain',
-        placeholder: 'Chain',
-        total: chainOptions.length,
-        options: chainOptions,
-        selectedOptions: selectedChain ? [selectedChain] : [],
-        disableSelectAll: true,
-        onChange: (options) => {
-          /**
-           * The Filter component throws the selected filter as the latest one,
-           * so it is used to implement a 'single' element behavior
-           */
-          const option = options.at(-1);
+  const mobileFilters: FilterOptions[] = [
+    {
+      id: 'chain',
+      placeholder: 'Chain',
+      total: selectedChain ? 1 : 0,
+      options: chainOptions,
+      selectedOptions: selectedChain ? [selectedChain] : [],
+      disableSelectAll: true,
+      onChange: (options) => {
+        /**
+         * The Filter component throws the selected filter as the latest one,
+         * so it is used to implement a 'single' element behavior
+         */
+        const option = options.at(-1);
 
-          if (!option) return;
+        if (!option) return;
 
-          setSelectedChain(option);
-        }
-      },
-      {
-        id: 'collateral',
-        placeholder: 'Collaterals',
-        total: chainOptions.length,
-        options: collateralOptions,
-        selectedOptions: selectedCollateral ? [selectedCollateral] : [],
-        disableSelectAll: true,
-        onChange: (options) => {
-          /**
-           * The Filter component throws the selected filter as the latest one,
-           * so it is used to implement a 'single' element behavior
-           */
-          const option = options.at(-1);
-
-          if (!option) return;
-
-          setSelectedCollateral(option);
-        }
+        setSelectedChain(option);
       }
-    ];
-  })();
+    },
+    {
+      id: 'collateral',
+      placeholder: 'Collaterals',
+      total: selectedCollateral ? 1 : 0,
+      options: collateralOptions,
+      selectedOptions: selectedCollateral ? [selectedCollateral] : [],
+      disableSelectAll: true,
+      onChange: (options) => {
+        /**
+         * The Filter component throws the selected filter as the latest one,
+         * so it is used to implement a 'single' element behavior
+         */
+        const option = options.at(-1);
+
+        if (!option) return;
+
+        setSelectedCollateral(option);
+      }
+    }
+  ];
 
   const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: 'D'

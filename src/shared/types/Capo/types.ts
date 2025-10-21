@@ -25,3 +25,10 @@ export interface CapoNormalizedChartData {
   capValue: string;
   dateOfAggregation: number;
 }
+
+export type Option = {
+  id: string;
+  label: string;
+};
+
+export type OptionSetter = (previous: Option | null) => Option | null;

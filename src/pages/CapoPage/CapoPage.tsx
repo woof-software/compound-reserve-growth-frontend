@@ -2,6 +2,7 @@ import { CapoSpecificCollateralPrice } from '@/entities/Capo/CapoSpecificCollate
 import { useNormalizedChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useNormalizedChartData';
 import CapoCollateralsPriceBlock from '@/entities/Capo/CollateralPriceBlock/CapoCollateralsPriceBlock';
 import { useNormalizedTableData } from '@/entities/Capo/CollateralPriceBlock/lib/useNormalizedTableData';
+import { CapoEventBusEventsContext } from '@/entities/Capo/lib/CapoEventBusContext';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import Text from '@/shared/ui/Text/Text';
 
@@ -32,16 +33,18 @@ const CapoPage = () => {
       </section>
       <section className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
         <div className='grid gap-3'>
-          <CapoCollateralsPriceBlock
-            tableData={data}
-            isError={isError}
-            isLoading={isLoading}
-          />
-          <CapoSpecificCollateralPrice
-            isError={isError}
-            isLoading={isLoading}
-            rawData={chartData}
-          />
+          <CapoEventBusEventsContext.Provider>
+            <CapoCollateralsPriceBlock
+              tableData={data}
+              isError={isError}
+              isLoading={isLoading}
+            />
+            <CapoSpecificCollateralPrice
+              isError={isError}
+              isLoading={isLoading}
+              rawData={chartData}
+            />
+          </CapoEventBusEventsContext.Provider>
         </div>
       </section>
     </div>

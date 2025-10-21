@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 
 import HoverCard from '@/components/HoverCard/HoverCard';
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
+import { CapoEventBusEventsContext } from '@/entities/Capo/lib/CapoEventBusContext';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
@@ -167,6 +168,7 @@ const collateralTableColumns: ExtendedColumnDef<CapoTableItem>[] = [
             href={fullExplorerLink}
             target='_blank'
             rel='noopener noreferrer'
+            onClick={(e) => e.stopPropagation()}
           >
             <div className='flex justify-end'>
               <Text
@@ -211,6 +213,25 @@ const CollateralsPriceTable = ({
     });
   }, [tableData, sortType]);
 
+  const capoEvents = CapoEventBusEventsContext.use();
+
+  const onSelectCollateralRow = (network: string, collateral: string) => {
+    capoEvents.emit('on-collateral-select', {
+      network,
+      collateral
+    });
+    const mobileRow = document.getElementById(
+      `mobileRow${collateral}${network}`
+    );
+
+    if (mobileRow) {
+      mobileRow.classList.add('bg-white/5');
+      setTimeout(() => {
+        mobileRow?.classList.remove('bg-white/5');
+      }, 200);
+    }
+  };
+
   return (
     <>
       <MobileDataTable tableData={mobileTableData}>
@@ -226,13 +247,17 @@ const CollateralsPriceTable = ({
 
             return (
               <div
+                id={`mobileRow${row.collateral}${row.network}`}
                 key={row.network + index}
                 className={cn(
-                  'border-secondary-23 grid grid-cols-3 gap-x-10 gap-y-3 border-b p-5 md:gap-x-[63px] md:px-10',
+                  'border-secondary-23 grid cursor-pointer grid-cols-3 gap-x-10 gap-y-3 border-b p-5 transition-colors duration-200 md:gap-x-[63px] md:px-10',
                   {
                     'border-none': dataRows.length - 1 === index
                   }
                 )}
+                onClick={() =>
+                  onSelectCollateralRow(row.network, row.collateral)
+                }
               >
                 <div className='grid w-full'>
                   <Text
@@ -350,6 +375,7 @@ const CollateralsPriceTable = ({
                     href={fullExplorerLink}
                     target='_blank'
                     rel='noopener noreferrer'
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <Text
                       size='13'
@@ -383,6 +409,7 @@ const CollateralsPriceTable = ({
         headerTextClassName='text-primary-14 font-medium'
         paginationClassName='py-0 px-[5px]'
         tableClassName='table-fixed w-full'
+        onRowClick={(row) => onSelectCollateralRow(row.network, row.collateral)}
       />
     </>
   );

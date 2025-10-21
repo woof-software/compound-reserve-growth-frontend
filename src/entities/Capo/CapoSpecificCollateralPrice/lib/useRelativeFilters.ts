@@ -1,10 +1,7 @@
 import { useEffect } from 'react';
 import { hashKey } from '@tanstack/react-query';
 
-import {
-  Option,
-  OptionSetter
-} from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useChartFilters';
+import { Option, OptionSetter } from '@/shared/types/Capo/types';
 
 export type UseRelativeFiltersArgs = {
   chain: Option | null;
