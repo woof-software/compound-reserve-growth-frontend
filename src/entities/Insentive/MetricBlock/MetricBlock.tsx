@@ -270,7 +270,7 @@ const MetricBlock = (props: MetricBlockProps) => {
             loading: 'h-[200px]',
             header: 'px-5 py-4',
             content:
-              'relative flex items-center overflow-clip bg-[linear-gradient(270deg,#B9E6D9_2.63%,#FFFFFF_100%)] px-5 py-10 md:px-10 md:py-13 dark:bg-[linear-gradient(270deg,#154F48_2.63%,#1D2833_100%)]'
+              'bg-[url(./incentivesRevenueGeneratedLight.png)] bg-cover bg-no-repeat pb-[65px] dark:bg-[url(./incentivesRevenueGenerated.png)]'
           }}
         >
           <div className='grid gap-3'>
@@ -286,12 +286,6 @@ const MetricBlock = (props: MetricBlockProps) => {
               </TooltipIncentive>
             </div>
           </div>
-          <Icon
-            name={
-              theme === 'dark' ? 'compound-metric-logo' : 'comp-metric-light'
-            }
-            className='absolute top-[-25px] right-5 z-[1] h-[190px] w-[180px]'
-          />
         </Card>
       </div>
     </div>
