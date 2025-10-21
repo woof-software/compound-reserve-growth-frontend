@@ -270,7 +270,7 @@ const MetricBlock = (props: MetricBlockProps) => {
             loading: 'h-[200px]',
             header: 'px-5 py-4',
             content:
-              'bg-[url(/incentivesRevenueGeneratedLight.png)] bg-cover bg-no-repeat pb-[65px] dark:bg-[url(/incentivesRevenueGenerated.png)]'
+              'bg-[url(/incentivesRevenueGeneratedLight.png)] bg-cover bg-center bg-no-repeat pb-[65px] dark:bg-[url(/incentivesRevenueGenerated.png)]'
           }}
         >
           <div className='grid gap-3'>
