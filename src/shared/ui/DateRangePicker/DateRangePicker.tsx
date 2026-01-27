@@ -1,13 +1,10 @@
 import React, { ChangeEvent, FC } from 'react';
 
+import { useModal } from '@/shared/hooks/useModal';
 import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
+import { Dropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/shared/ui/Popover/Popover';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
@@ -49,6 +46,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   placeholder = 'Date range',
   variant = 'inline'
 }) => {
+  const { isOpen, onOpenModal, onCloseModal } = useModal();
   const startMax = value.endDate || max;
   const endMin = value.startDate || min;
 
@@ -160,42 +158,44 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     );
 
     return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            className={triggerClasses}
-            disabled={disabled}
-          >
-            <div className='p-0.5'>
-              <Icon
-                name={iconName}
-                className='h-4 w-4'
-                isRound={false}
-              />
-            </div>
-            <Text
-              size='11'
-              weight='500'
-              className={
-                hasSelection
-                  ? '!text-[var(--color-secondary-10)]'
-                  : '!text-[var(--color-gray-11)]'
-              }
+      <div className={cn({ 'pointer-events-none': disabled })}>
+        <Dropdown
+          open={isOpen}
+          onOpen={onOpenModal}
+          onClose={onCloseModal}
+          triggerContent={
+            <Button
+              className={triggerClasses}
+              disabled={disabled}
             >
-              {rangeLabel()}
-            </Text>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          align='end'
-          className={cn(
-            'bg-primary-15 shadow-15 w-auto min-w-[168px] rounded-lg border-none p-0',
+              <div className='p-0.5'>
+                <Icon
+                  name={iconName}
+                  className='h-4 w-4'
+                  isRound={false}
+                />
+              </div>
+              <Text
+                size='11'
+                weight='500'
+                className={
+                  hasSelection
+                    ? '!text-[var(--color-secondary-10)]'
+                    : '!text-[var(--color-gray-11)]'
+                }
+              >
+                {rangeLabel()}
+              </Text>
+            </Button>
+          }
+          contentClassName={cn(
+            'p-0 border-none shadow-15 max-h-[300px]',
             popoverContentClassName
           )}
         >
           <div className='p-2'>{renderInputs()}</div>
-        </PopoverContent>
-      </Popover>
+        </Dropdown>
+      </div>
     );
   }
 
