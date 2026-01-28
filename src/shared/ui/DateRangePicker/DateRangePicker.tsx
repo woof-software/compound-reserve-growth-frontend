@@ -47,27 +47,14 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   variant = 'inline'
 }) => {
   const { isOpen, onOpenModal, onCloseModal } = useModal();
-  const startMax = value.endDate || max;
-  const endMin = value.startDate || min;
-
   const onStartChange = (e: ChangeEvent<HTMLInputElement>) => {
     const nextStart = e.target.value;
-    const nextEnd =
-      value.endDate && nextStart && nextStart > value.endDate
-        ? nextStart
-        : value.endDate;
-
-    onChange({ startDate: nextStart, endDate: nextEnd });
+    onChange({ startDate: nextStart, endDate: value.endDate });
   };
 
   const onEndChange = (e: ChangeEvent<HTMLInputElement>) => {
     const nextEnd = e.target.value;
-    const nextStart =
-      value.startDate && nextEnd && nextEnd < value.startDate
-        ? nextEnd
-        : value.startDate;
-
-    onChange({ startDate: nextStart, endDate: nextEnd });
+    onChange({ startDate: value.startDate, endDate: nextEnd });
   };
 
   const onClear = () => onChange({ startDate: '', endDate: '' });
@@ -107,7 +94,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
           type='date'
           value={value.startDate}
           min={min || undefined}
-          max={startMax || undefined}
+          max={max || undefined}
           onChange={onStartChange}
           disabled={disabled}
           className={inputClasses}
@@ -126,7 +113,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         <input
           type='date'
           value={value.endDate}
-          min={endMin || undefined}
+          min={min || undefined}
           max={max || undefined}
           onChange={onEndChange}
           disabled={disabled}

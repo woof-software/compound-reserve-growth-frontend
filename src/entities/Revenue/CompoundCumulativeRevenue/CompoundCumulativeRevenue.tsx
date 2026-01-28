@@ -179,13 +179,10 @@ const CompoundCumulativeRevenue = ({
 
     if (startSeconds === null && endSeconds === null) return rawData;
 
-    const normalizedStart =
-      startSeconds !== null && endSeconds !== null && startSeconds > endSeconds
-        ? endSeconds
-        : startSeconds;
+    const normalizedStart = startSeconds;
     const normalizedEnd =
       startSeconds !== null && endSeconds !== null && startSeconds > endSeconds
-        ? startSeconds
+        ? null
         : endSeconds;
 
     return rawData.filter((item) => {
