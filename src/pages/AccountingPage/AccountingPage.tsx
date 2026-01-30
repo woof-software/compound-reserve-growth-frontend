@@ -11,7 +11,7 @@ import { RevenueItem, useRevenue } from '@/shared/hooks/useRevenue';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import Text from '@/shared/ui/Text/Text';
 
-const RevenuePage = () => {
+const AccountingPage = () => {
   const { data: revenueData, isPending: isLoading, isError } = useRevenue();
 
   const pageData: RevenueItem[] = useMemo(
@@ -29,7 +29,7 @@ const RevenuePage = () => {
           size='32'
           weight='500'
         >
-          Revenue
+          Accounting
         </Text>
         <Text
           tag='p'
@@ -82,4 +82,4 @@ const RevenuePage = () => {
   );
 };
 
-export default RevenuePage;
+export default AccountingPage;
