@@ -28,6 +28,11 @@ const navLinks: NavLinkProps[] = [
   { to: commonRoutes.RUNWAY, title: routeTitles.RUNWAY, icon: 'lightning' },
   { to: commonRoutes.REVENUE, title: routeTitles.REVENUE, icon: 'storage' },
   {
+    to: commonRoutes.SPENDINGS,
+    title: routeTitles.SPENDINGS,
+    icon: 'group-grid'
+  },
+  {
     to: commonRoutes.INCENTIVES,
     title: routeTitles.INCENTIVES,
     icon: 'incentives-header-icon'
