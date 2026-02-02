@@ -26,7 +26,11 @@ type NavLinkProps = {
 const navLinks: NavLinkProps[] = [
   { to: commonRoutes.TREASURY, title: routeTitles.TREASURY, icon: 'wallet' },
   { to: commonRoutes.RUNWAY, title: routeTitles.RUNWAY, icon: 'lightning' },
-  { to: commonRoutes.REVENUE, title: routeTitles.REVENUE, icon: 'storage' },
+  {
+    to: commonRoutes.ACCOUNTING,
+    title: routeTitles.ACCOUNTING,
+    icon: 'storage'
+  },
   {
     to: commonRoutes.INCENTIVES,
     title: routeTitles.INCENTIVES,
