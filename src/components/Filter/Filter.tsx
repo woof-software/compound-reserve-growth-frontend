@@ -4,6 +4,9 @@ import { cn } from '@/shared/lib/classNames/classNames';
 import { noop } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
+import DateRangePicker, {
+  DateRangeValue
+} from '@/shared/ui/DateRangePicker/DateRangePicker';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -20,6 +23,16 @@ export type FilterOptions = {
   selectedOptions: OptionType[];
 
   options: OptionType[];
+
+  type?: 'select' | 'dateRange';
+
+  dateRange?: DateRangeValue;
+
+  minDate?: string;
+
+  maxDate?: string;
+
+  onDateRangeChange?: (next: DateRangeValue) => void;
 
   disableSelectAll?: boolean;
 
@@ -58,14 +71,16 @@ const Filter: FC<FilterProps> = ({
     );
   }, [filterOptions, selectedKey]);
 
+  const isDateRangeFilter = activeFilter?.type === 'dateRange';
+
   const filteredOptions = useMemo(
     () =>
-      activeFilter
-        ? activeFilter?.options.filter((option) =>
+      activeFilter && !isDateRangeFilter
+        ? activeFilter.options.filter((option) =>
             option.label.toLowerCase().includes(searchValue.toLowerCase())
           )
         : [],
-    [activeFilter, searchValue]
+    [activeFilter, isDateRangeFilter, searchValue]
   );
 
   const onChangeSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -74,7 +89,7 @@ const Filter: FC<FilterProps> = ({
 
   const onSelectOptionInFilter = useCallback(
     (optionToToggle: OptionType) => {
-      if (!activeFilter?.onChange) return;
+      if (!activeFilter?.onChange || isDateRangeFilter) return;
 
       const isSelected = activeFilter?.selectedOptions.some(
         (v) => v.id === optionToToggle.id
@@ -112,7 +127,7 @@ const Filter: FC<FilterProps> = ({
   }, [onClose]);
 
   const onSelectAll = () => {
-    if (!activeFilter) return;
+    if (!activeFilter || isDateRangeFilter) return;
 
     const setFilterValue = activeFilter.onChange;
 
@@ -213,87 +228,102 @@ const Filter: FC<FilterProps> = ({
             {activeFilter?.placeholder}
           </Text>
         </div>
-        <View.Condition
-          if={Boolean(activeFilter && activeFilter?.options?.length > 5)}
-        >
-          <div
-            className={cn(
-              'outline-secondary-19 rounded-lg py-2 pr-5 pl-3 outline',
-              {
-                'outline-red-11':
-                  !Boolean(filteredOptions?.length) &&
-                  Boolean(searchValue.length)
-              }
-            )}
+        <View.Condition if={Boolean(!isDateRangeFilter)}>
+          <View.Condition
+            if={Boolean(activeFilter && activeFilter?.options?.length > 5)}
           >
-            <input
-              className='placeholder:text-secondary-21 h-[19px] w-full focus-visible:outline-none'
-              placeholder='Search'
-              value={searchValue}
-              onChange={onChangeSearch}
+            <div
+              className={cn(
+                'outline-secondary-19 rounded-lg py-2 pr-5 pl-3 outline',
+                {
+                  'outline-red-11':
+                    !Boolean(filteredOptions?.length) &&
+                    Boolean(searchValue.length)
+                }
+              )}
+            >
+              <input
+                className='placeholder:text-secondary-21 h-[19px] w-full focus-visible:outline-none'
+                placeholder='Search'
+                value={searchValue}
+                onChange={onChangeSearch}
+              />
+            </div>
+            <View.Condition if={Boolean(!filteredOptions?.length)}>
+              <div className='mt-3'>
+                <Text
+                  size='12'
+                  weight='400'
+                  lineHeight='100'
+                  className='text-red-11'
+                >
+                  No results found
+                </Text>
+              </div>
+            </View.Condition>
+          </View.Condition>
+          <div className='hide-scrollbar mt-8 max-h-80 overflow-y-auto'>
+            <Each
+              data={filteredOptions}
+              render={(option, index) => {
+                const isSelected = activeFilter?.selectedOptions.some(
+                  (v) => v.id === option.id
+                );
+
+                return (
+                  <div
+                    key={index}
+                    className={cn(
+                      'hover:bg-secondary-12 flex cursor-pointer items-center justify-between rounded-lg px-2 py-3'
+                    )}
+                    onClick={() => onSelectOptionInFilter(option)}
+                  >
+                    <div className='flex items-end gap-1'>
+                      <span
+                        className={cn(
+                          'text-primary-14 rounded-sm text-sm font-medium',
+                          {
+                            'text-secondary-10': isSelected
+                          }
+                        )}
+                      >
+                        {option.label}
+                      </span>
+                    </div>
+                    <View.Condition if={Boolean(isSelected)}>
+                      <Icon
+                        name='check-stroke'
+                        className='h-4 w-4'
+                      />
+                    </View.Condition>
+                  </div>
+                );
+              }}
             />
           </div>
-          <View.Condition if={Boolean(!filteredOptions?.length)}>
-            <div className='mt-3'>
-              <Text
-                size='12'
-                weight='400'
-                lineHeight='100'
-                className='text-red-11'
+          <View.Condition if={!activeFilter?.disableSelectAll}>
+            <div className='w-full px-2 pt-8 pb-4'>
+              <Button
+                className='text-primary-14 flex w-full items-center justify-center rounded-lg text-[11px] font-medium'
+                onClick={onSelectAll}
               >
-                No results found
-              </Text>
+                {!!activeFilter?.selectedOptions?.length && 'Clear Selection'}
+                {!activeFilter?.selectedOptions?.length && 'Select All'}
+              </Button>
             </div>
           </View.Condition>
         </View.Condition>
-        <div className='hide-scrollbar mt-8 max-h-80 overflow-y-auto'>
-          <Each
-            data={filteredOptions}
-            render={(option, index) => {
-              const isSelected = activeFilter?.selectedOptions.some(
-                (v) => v.id === option.id
-              );
-
-              return (
-                <div
-                  key={index}
-                  className={cn(
-                    'hover:bg-secondary-12 flex cursor-pointer items-center justify-between rounded-lg px-2 py-3'
-                  )}
-                  onClick={() => onSelectOptionInFilter(option)}
-                >
-                  <div className='flex items-end gap-1'>
-                    <span
-                      className={cn(
-                        'text-primary-14 rounded-sm text-sm font-medium',
-                        {
-                          'text-secondary-10': isSelected
-                        }
-                      )}
-                    >
-                      {option.label}
-                    </span>
-                  </div>
-                  <View.Condition if={Boolean(isSelected)}>
-                    <Icon
-                      name='check-stroke'
-                      className='h-4 w-4'
-                    />
-                  </View.Condition>
-                </div>
-              );
-            }}
-          />
-        </div>
-        <View.Condition if={!activeFilter?.disableSelectAll}>
-          <div className='w-full px-2 pt-8 pb-4'>
-            <Button
-              className='text-primary-14 flex w-full items-center justify-center rounded-lg text-[11px] font-medium'
-              onClick={onSelectAll}
-            >
-              {!!activeFilter?.selectedOptions?.length && 'Clear Selection'}
-              {!activeFilter?.selectedOptions?.length && 'Select All'}
-            </Button>
+        <View.Condition if={Boolean(isDateRangeFilter)}>
+          <div className='mt-4 px-2'>
+            <DateRangePicker
+              value={activeFilter?.dateRange || { startDate: '', endDate: '' }}
+              min={activeFilter?.minDate}
+              max={activeFilter?.maxDate}
+              onChange={(next) => activeFilter?.onDateRangeChange?.(next)}
+              showLabels
+              showClear
+              className='flex-col items-stretch gap-3'
+            />
           </div>
         </View.Condition>
       </View.Condition>

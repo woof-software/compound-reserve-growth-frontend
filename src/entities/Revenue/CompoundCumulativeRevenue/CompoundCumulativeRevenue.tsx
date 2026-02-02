@@ -29,6 +29,9 @@ import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSele
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
+import DateRangePicker, {
+  DateRangeValue
+} from '@/shared/ui/DateRangePicker/DateRangePicker';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
@@ -56,6 +59,12 @@ interface FiltersProps {
 
   csvData: Record<string, string | number>[];
 
+  dateRange: DateRangeValue;
+
+  minDate?: string;
+
+  maxDate?: string;
+
   selectedOptions: {
     chain: OptionType[];
 
@@ -80,6 +89,8 @@ interface FiltersProps {
 
   onBarSizeChange: (value: string) => void;
 
+  onDateRangeChange: (next: DateRangeValue) => void;
+
   onClearAll: () => void;
 
   onShowEvents: (value: boolean) => void;
@@ -88,6 +99,25 @@ interface FiltersProps {
 
   onDeselectAll: () => void;
 }
+
+const toUtcDateSeconds = (dateString: string, isEndOfDay = false) => {
+  const [year, month, day] = dateString.split('-').map(Number);
+
+  if (!year || !month || !day) return null;
+
+  const startMs = Date.UTC(year, month - 1, day);
+
+  if (!isEndOfDay) {
+    return Math.floor(startMs / 1000);
+  }
+
+  const endMs = Date.UTC(year, month - 1, day + 1) - 1;
+  return Math.floor(endMs / 1000);
+};
+
+const formatDateInputValue = (timestampSeconds: number) => {
+  return new Date(timestampSeconds * 1000).toISOString().split('T')[0];
+};
 
 const CompoundCumulativeRevenue = ({
   revenueData,
@@ -118,9 +148,49 @@ const CompoundCumulativeRevenue = ({
     initialBarSize: 'D'
   });
 
+  const [dateRange, setDateRange] = useState<DateRangeValue>({
+    startDate: '',
+    endDate: ''
+  });
+
   const rawData: ChartDataItem[] = useMemo(() => {
     return [...revenueData].sort((a, b) => a.date - b.date);
   }, [revenueData]);
+
+  const dateBounds = useMemo(() => {
+    if (!rawData.length) return { min: '', max: '' };
+
+    return {
+      min: formatDateInputValue(rawData[0].date),
+      max: formatDateInputValue(rawData[rawData.length - 1].date)
+    };
+  }, [rawData]);
+
+  const filteredRawData = useMemo(() => {
+    const hasRange = Boolean(dateRange.startDate || dateRange.endDate);
+    if (!hasRange) return rawData;
+
+    const startSeconds = dateRange.startDate
+      ? toUtcDateSeconds(dateRange.startDate)
+      : null;
+    const endSeconds = dateRange.endDate
+      ? toUtcDateSeconds(dateRange.endDate, true)
+      : null;
+
+    if (startSeconds === null && endSeconds === null) return rawData;
+
+    const normalizedStart = startSeconds;
+    const normalizedEnd =
+      startSeconds !== null && endSeconds !== null && startSeconds > endSeconds
+        ? null
+        : endSeconds;
+
+    return rawData.filter((item) => {
+      if (normalizedStart !== null && item.date < normalizedStart) return false;
+      if (normalizedEnd !== null && item.date > normalizedEnd) return false;
+      return true;
+    });
+  }, [dateRange, rawData]);
 
   const filterOptionsConfig = useMemo(
     () => ({
@@ -152,7 +222,7 @@ const CompoundCumulativeRevenue = ({
   }, [selectedOptions]);
 
   const { chartSeries } = useChartDataProcessor({
-    rawData,
+    rawData: filteredRawData,
     filters: {
       network: selectedOptions.chain.map((opt) => opt.id),
       market: selectedOptions.deployment.map((opt) => opt.id),
@@ -273,7 +343,9 @@ const CompoundCumulativeRevenue = ({
     selectedOptions.chain.length > 0 ||
     selectedOptions.deployment.length > 0 ||
     selectedOptions.symbol.length > 0 ||
-    selectedOptions.assetType.length > 0
+    selectedOptions.assetType.length > 0 ||
+    dateRange.startDate ||
+    dateRange.endDate
       ? 'No data for selected filters'
       : 'No data available';
 
@@ -336,6 +408,11 @@ const CompoundCumulativeRevenue = ({
       deployment: [],
       symbol: []
     });
+    setDateRange({ startDate: '', endDate: '' });
+  }, []);
+
+  const onDateRangeChange = useCallback((next: DateRangeValue) => {
+    setDateRange(next);
   }, []);
 
   return (
@@ -358,6 +435,9 @@ const CompoundCumulativeRevenue = ({
         showEvents={isShowEvents}
         csvFilename={getCsvFileName('compound_cumulative_revenue')}
         chainOptions={chainOptions}
+        dateRange={dateRange}
+        minDate={dateBounds.min}
+        maxDate={dateBounds.max}
         selectedOptions={selectedOptions}
         isShowCalendarIcon={!!events?.length}
         deploymentOptionsFilter={deploymentOptionsFilter}
@@ -369,6 +449,7 @@ const CompoundCumulativeRevenue = ({
         onSelectMarket={onSelectMarket}
         onSelectSymbol={onSelectSymbol}
         onBarSizeChange={onBarSizeChange}
+        onDateRangeChange={onDateRangeChange}
         onClearAll={onClearSelectedOptions}
         onShowEvents={setIsShowEvents}
         onSelectAll={onSelectAllLegends}
@@ -389,6 +470,7 @@ const CompoundCumulativeRevenue = ({
           showEvents={isShowEvents}
           customOptions={customChartOptions}
           customTooltipFormatter={customTooltipFormatter}
+          resetZoomKey={`${barSize}-${dateRange.startDate}-${dateRange.endDate}`}
           legends={legends}
           onSelectAllLegends={onSelectAllLegends}
           onDeselectAllLegends={onDeselectAllLegends}
@@ -407,6 +489,9 @@ const Filters = ({
   csvData,
   csvFilename,
   chainOptions,
+  dateRange,
+  minDate,
+  maxDate,
   selectedOptions,
   deploymentOptionsFilter,
   isShowEyeIcon,
@@ -421,6 +506,7 @@ const Filters = ({
   onSelectMarket,
   onSelectSymbol,
   onBarSizeChange,
+  onDateRangeChange,
   onClearAll,
   onShowEvents,
   onSelectAll,
@@ -473,7 +559,22 @@ const Filters = ({
       onChange: onSelectSymbol
     };
 
+    const dateRangeFilterOptions = {
+      id: 'dateRange',
+      placeholder: 'Date range',
+      total: dateRange.startDate || dateRange.endDate ? 1 : 0,
+      selectedOptions: [],
+      options: [],
+      disableSelectAll: true,
+      type: 'dateRange' as const,
+      dateRange,
+      minDate,
+      maxDate,
+      onDateRangeChange
+    };
+
     return [
+      dateRangeFilterOptions,
       chainFilterOptions,
       marketFilterOptions,
       assetTypeFilterOptions,
@@ -483,10 +584,14 @@ const Filters = ({
     assetTypeOptions,
     chainOptions,
     deploymentOptionsFilter,
+    onDateRangeChange,
     onSelectAssetType,
     onSelectChain,
     onSelectMarket,
     onSelectSymbol,
+    dateRange,
+    maxDate,
+    minDate,
     selectedOptions,
     symbolOptions
   ]);
@@ -516,6 +621,18 @@ const Filters = ({
             value={barSize}
             onTabChange={onBarSizeChange}
             disabled={isLoading}
+          />
+          <DateRangePicker
+            value={dateRange}
+            min={minDate}
+            max={maxDate}
+            onChange={onDateRangeChange}
+            disabled={isLoading}
+            variant='popover'
+            showLabels
+            showClear
+            className='flex-col items-stretch gap-3'
+            inputClassName='w-full'
           />
           <div className='flex gap-2'>
             <MultiSelect
@@ -561,6 +678,18 @@ const Filters = ({
         </div>
         <div className='flex flex-col items-end justify-end gap-2 px-0 py-3 lg:hidden'>
           <div className='z-[1] flex items-center gap-2'>
+            <DateRangePicker
+              value={dateRange}
+              min={minDate}
+              max={maxDate}
+              onChange={onDateRangeChange}
+              disabled={isLoading}
+              variant='popover'
+              showLabels
+              showClear
+              className='flex-col items-stretch gap-3'
+              inputClassName='w-full'
+            />
             <MultiSelect
               options={chainOptions || []}
               value={selectedOptions.chain}
