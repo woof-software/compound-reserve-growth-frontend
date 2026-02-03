@@ -87,41 +87,66 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
   const minDate = useMemo(() => parseDate(min), [min]);
   const maxDate = useMemo(() => parseDate(max), [max]);
 
-  const [baseMonth, setBaseMonth] = useState<Date>(() => {
+  const [leftMonth, setLeftMonth] = useState<Date>(() => {
     const initial = startDate ?? endDate ?? new Date();
     return getMonthStart(initial);
   });
+  const [rightMonth, setRightMonth] = useState<Date>(() =>
+    addMonths(getMonthStart(startDate ?? endDate ?? new Date()), 1)
+  );
+
+  const isStartLocked = Boolean(startDate && !endDate);
 
   useEffect(() => {
-    const activeDate = startDate ?? endDate;
-    if (!activeDate) return;
+    if (!isStartLocked || !startDate) return;
+    const startMonth = getMonthStart(startDate);
+    if (!isSameMonth(startMonth, leftMonth)) {
+      setLeftMonth(startMonth);
+    }
+    const minRight = startMonth;
+    if (rightMonth.getTime() < minRight.getTime()) {
+      setRightMonth(minRight);
+    }
+  }, [isStartLocked, leftMonth, rightMonth, startDate]);
 
-    const activeMonth = getMonthStart(activeDate);
-    const nextMonth = addMonths(baseMonth, 1);
+  useEffect(() => {
+    if (!endDate) return;
+    const endMonth = getMonthStart(endDate);
     const isVisible =
-      isSameMonth(activeMonth, baseMonth) ||
-      isSameMonth(activeMonth, nextMonth);
+      isSameMonth(endMonth, leftMonth) || isSameMonth(endMonth, rightMonth);
 
     if (!isVisible) {
-      setBaseMonth(activeMonth);
+      setRightMonth(endMonth);
     }
-  }, [baseMonth, endDate, startDate]);
+  }, [endDate, leftMonth, rightMonth]);
 
   const minMonth = minDate ? getMonthStart(minDate) : null;
   const maxMonth = maxDate ? getMonthStart(maxDate) : null;
-  const nextMonth = useMemo(() => addMonths(baseMonth, 1), [baseMonth]);
-
-  const canGoPrev = !minMonth || baseMonth.getTime() > minMonth.getTime();
-  const canGoNext = !maxMonth || nextMonth.getTime() <= maxMonth.getTime();
+  const canGoPrev = isStartLocked
+    ? rightMonth.getTime() > leftMonth.getTime()
+    : !minMonth || leftMonth.getTime() > minMonth.getTime();
+  const canGoNext = isStartLocked
+    ? !maxMonth || rightMonth.getTime() < maxMonth.getTime()
+    : !maxMonth || addMonths(rightMonth, 1).getTime() <= maxMonth.getTime();
 
   const onPrevMonth = () => {
     if (disabled || !canGoPrev) return;
-    setBaseMonth((prev) => addMonths(prev, -1));
+    if (isStartLocked) {
+      setRightMonth((prev) => addMonths(prev, -1));
+      return;
+    }
+    setLeftMonth((prev) => addMonths(prev, -1));
+    setRightMonth((prev) => addMonths(prev, -1));
   };
 
   const onNextMonth = () => {
     if (disabled || !canGoNext) return;
-    setBaseMonth((prev) => addMonths(prev, 1));
+    if (isStartLocked) {
+      setRightMonth((prev) => addMonths(prev, 1));
+      return;
+    }
+    setLeftMonth((prev) => addMonths(prev, 1));
+    setRightMonth((prev) => addMonths(prev, 1));
   };
 
   const handleDaySelect = (date: Date) => {
@@ -130,14 +155,31 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     const isAfterMax = maxDate && date.getTime() > maxDate.getTime();
     if (isBeforeMin || isAfterMax) return;
 
+    const isStartSame = isSameDay(date, startDate);
+    const isEndSame = isSameDay(date, endDate);
+    if (isStartSame) {
+      onChange({ startDate: '', endDate: value.endDate });
+      return;
+    }
+    if (isEndSame) {
+      onChange({ startDate: value.startDate, endDate: '' });
+      return;
+    }
+
     const formatted = formatDate(date);
 
     if (!startDate || endDate) {
+      const startMonth = getMonthStart(date);
+      setLeftMonth(startMonth);
+      setRightMonth(addMonths(startMonth, 1));
       onChange({ startDate: formatted, endDate: '' });
       return;
     }
 
     if (date.getTime() < startDate.getTime()) {
+      const startMonth = getMonthStart(date);
+      setLeftMonth(startMonth);
+      setRightMonth(addMonths(startMonth, 1));
       onChange({ startDate: formatted, endDate: '' });
       return;
     }
@@ -329,7 +371,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
       )}
     >
       <div className='flex w-full max-w-[608px] flex-col gap-4 md:flex-row md:gap-0'>
-        {renderMonth(baseMonth, {
+        {renderMonth(leftMonth, {
           showPrev: true,
           showNext: false,
           onPrev: onPrevMonth,
@@ -337,7 +379,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
           canPrev: canGoPrev,
           canNext: canGoNext
         })}
-        {renderMonth(nextMonth, {
+        {renderMonth(rightMonth, {
           showPrev: false,
           showNext: true,
           onPrev: onPrevMonth,
