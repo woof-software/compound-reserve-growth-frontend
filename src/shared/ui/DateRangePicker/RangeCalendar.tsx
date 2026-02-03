@@ -8,6 +8,13 @@ import type { DateRangeValue } from './DateRangePicker';
 
 const WEEK_DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
+const formatMonthLabel = (monthStart: Date) =>
+  monthStart.toLocaleString('en-US', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC'
+  });
+
 const parseDate = (value?: string) => {
   if (!value) return null;
   const [year, month, day] = value.split('-').map(Number);
@@ -86,6 +93,22 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
   const endDate = useMemo(() => parseDate(value.endDate), [value.endDate]);
   const minDate = useMemo(() => parseDate(min), [min]);
   const maxDate = useMemo(() => parseDate(max), [max]);
+  const startTime = useMemo(
+    () => (startDate ? startDate.getTime() : null),
+    [startDate]
+  );
+  const endTime = useMemo(
+    () => (endDate ? endDate.getTime() : null),
+    [endDate]
+  );
+  const minTime = useMemo(
+    () => (minDate ? minDate.getTime() : null),
+    [minDate]
+  );
+  const maxTime = useMemo(
+    () => (maxDate ? maxDate.getTime() : null),
+    [maxDate]
+  );
 
   const [leftMonth, setLeftMonth] = useState<Date>(() => {
     const initial = startDate ?? endDate ?? new Date();
@@ -171,10 +194,16 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     setRightMonth((prev) => addMonths(prev, 1));
   };
 
+  const leftWeeks = useMemo(() => buildMonthWeeks(leftMonth), [leftMonth]);
+  const rightWeeks = useMemo(() => buildMonthWeeks(rightMonth), [rightMonth]);
+  const leftLabel = useMemo(() => formatMonthLabel(leftMonth), [leftMonth]);
+  const rightLabel = useMemo(() => formatMonthLabel(rightMonth), [rightMonth]);
+
   const handleDaySelect = (date: Date) => {
     if (disabled) return;
-    const isBeforeMin = minDate && date.getTime() < minDate.getTime();
-    const isAfterMax = maxDate && date.getTime() > maxDate.getTime();
+    const dateTime = date.getTime();
+    const isBeforeMin = minTime !== null && dateTime < minTime;
+    const isAfterMax = maxTime !== null && dateTime > maxTime;
     if (isBeforeMin || isAfterMax) return;
 
     const isStartSame = isSameDay(date, startDate);
@@ -191,7 +220,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     const formatted = formatDate(date);
 
     if (!startDate && endDate) {
-      if (date.getTime() <= endDate.getTime()) {
+      if (endTime !== null && dateTime <= endTime) {
         const startMonth = getMonthStart(date);
         setLeftMonth(startMonth);
         onChange({ startDate: formatted, endDate: value.endDate });
@@ -212,7 +241,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
       return;
     }
 
-    if (date.getTime() < startDate.getTime()) {
+    if (startTime !== null && dateTime < startTime) {
       const startMonth = getMonthStart(date);
       setLeftMonth(startMonth);
       setRightMonth(addMonths(startMonth, 1));
@@ -225,6 +254,8 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
 
   const renderMonth = (
     monthStart: Date,
+    monthLabel: string,
+    weeks: Date[][],
     controls: {
       showPrev: boolean;
       showNext: boolean;
@@ -234,13 +265,6 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
       canNext: boolean;
     }
   ) => {
-    const weeks = buildMonthWeeks(monthStart);
-    const monthLabel = monthStart.toLocaleString('en-US', {
-      month: 'long',
-      year: 'numeric',
-      timeZone: 'UTC'
-    });
-
     return (
       <div className='bg-primary-15 flex w-full flex-col items-center gap-2 p-2 md:w-[304px]'>
         <div className='relative flex h-10 w-full items-center justify-center px-1'>
@@ -323,15 +347,14 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                     day.getUTCMonth() === monthStart.getUTCMonth();
                   const isRangeStart = isSameDay(day, startDate);
                   const isRangeEnd = isSameDay(day, endDate);
+                  const dayTime = day.getTime();
                   const isInRange =
-                    startDate &&
-                    endDate &&
-                    day.getTime() >= startDate.getTime() &&
-                    day.getTime() <= endDate.getTime();
-                  const isOutsideMin =
-                    minDate && day.getTime() < minDate.getTime();
-                  const isOutsideMax =
-                    maxDate && day.getTime() > maxDate.getTime();
+                    startTime !== null &&
+                    endTime !== null &&
+                    dayTime >= startTime &&
+                    dayTime <= endTime;
+                  const isOutsideMin = minTime !== null && dayTime < minTime;
+                  const isOutsideMax = maxTime !== null && dayTime > maxTime;
                   const isDayDisabled = Boolean(
                     disabled || isOutsideMin || isOutsideMax
                   );
@@ -407,7 +430,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
       )}
     >
       <div className='flex w-full max-w-[608px] flex-col gap-4 md:flex-row md:gap-0'>
-        {renderMonth(leftMonth, {
+        {renderMonth(leftMonth, leftLabel, leftWeeks, {
           showPrev: true,
           showNext: false,
           onPrev: onPrevMonth,
@@ -415,7 +438,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
           canPrev: canGoPrev,
           canNext: canGoNext
         })}
-        {renderMonth(rightMonth, {
+        {renderMonth(rightMonth, rightLabel, rightWeeks, {
           showPrev: false,
           showNext: true,
           onPrev: onPrevMonth,

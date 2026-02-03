@@ -1,4 +1,12 @@
-import React, { ChangeEvent, FC, useEffect, useRef, useState } from 'react';
+import React, {
+  ChangeEvent,
+  FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 
 import { useModal } from '@/shared/hooks/useModal';
 import { cn } from '@/shared/lib/classNames/classNames';
@@ -65,25 +73,38 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     left: 0,
     scale: 1
   });
-  const onStartChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const nextStart = e.target.value;
-    onChange({ startDate: nextStart, endDate: value.endDate });
-  };
-
-  const onEndChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const nextEnd = e.target.value;
-    onChange({ startDate: value.startDate, endDate: nextEnd });
-  };
-
-  const onClear = () => onChange({ startDate: '', endDate: '' });
-
-  const inputClasses = cn(
-    'date-range-input outline-secondary-19 bg-custom-trigger text-primary-14 h-10 w-full rounded-lg px-3 pr-10 text-[11px] font-medium leading-4 focus-visible:outline-none',
-    { 'cursor-not-allowed opacity-60': disabled },
-    inputClassName
+  const onStartChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const nextStart = e.target.value;
+      onChange({ startDate: nextStart, endDate: value.endDate });
+    },
+    [onChange, value.endDate]
   );
 
-  const rangeLabel = () => {
+  const onEndChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const nextEnd = e.target.value;
+      onChange({ startDate: value.startDate, endDate: nextEnd });
+    },
+    [onChange, value.startDate]
+  );
+
+  const onClear = useCallback(
+    () => onChange({ startDate: '', endDate: '' }),
+    [onChange]
+  );
+
+  const inputClasses = useMemo(
+    () =>
+      cn(
+        'date-range-input outline-secondary-19 bg-custom-trigger text-primary-14 h-10 w-full rounded-lg px-3 pr-10 text-[11px] font-medium leading-4 focus-visible:outline-none',
+        { 'cursor-not-allowed opacity-60': disabled },
+        inputClassName
+      ),
+    [disabled, inputClassName]
+  );
+
+  const rangeLabel = useMemo(() => {
     if (value.startDate && value.endDate) {
       return `${value.startDate} — ${value.endDate}`;
     }
@@ -94,12 +115,23 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
       return `Until ${value.endDate}`;
     }
     return placeholder;
-  };
+  }, [placeholder, value.endDate, value.startDate]);
 
-  const handleCloseDropdown = () => {
+  const handleCloseDropdown = useCallback(() => {
     onCloseDropdown();
     onCloseCalendar();
-  };
+  }, [onCloseCalendar, onCloseDropdown]);
+
+  const handleContainerPointerDown = useCallback(
+    (target: HTMLElement) => {
+      if (!isCalendarOpen) return;
+      if (target.closest('[data-calendar-toggle="true"]')) {
+        return;
+      }
+      onCloseCalendar();
+    },
+    [isCalendarOpen, onCloseCalendar]
+  );
 
   useEffect(() => {
     if (!isCalendarOpen) return;
@@ -152,22 +184,12 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         className,
         { 'z-[50]': isCalendarOpen }
       )}
-      onMouseDown={(event: React.MouseEvent<HTMLDivElement>) => {
-        if (!isCalendarOpen) return;
-        const target = event.target as HTMLElement;
-        if (target.closest('[data-calendar-toggle="true"]')) {
-          return;
-        }
-        onCloseCalendar();
-      }}
-      onTouchStart={(event: React.TouchEvent<HTMLDivElement>) => {
-        if (!isCalendarOpen) return;
-        const target = event.target as HTMLElement;
-        if (target.closest('[data-calendar-toggle="true"]')) {
-          return;
-        }
-        onCloseCalendar();
-      }}
+      onMouseDown={(event: React.MouseEvent<HTMLDivElement>) =>
+        handleContainerPointerDown(event.target as HTMLElement)
+      }
+      onTouchStart={(event: React.TouchEvent<HTMLDivElement>) =>
+        handleContainerPointerDown(event.target as HTMLElement)
+      }
     >
       <div className='flex flex-col gap-0'>
         <View.Condition if={showLabels}>
@@ -315,7 +337,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
                       : '!text-[var(--color-gray-11)]'
                   }
                 >
-                  {rangeLabel()}
+                  {rangeLabel}
                 </Text>
               </Button>
             }
