@@ -28,12 +28,12 @@ const SpendingsLedger = () => {
       title='Spendings Ledger'
       id='spendings-ledger'
       className={{
-        content: 'px-0 py-0 lg:px-10 lg:py-10',
+        content: 'px-0 py-0 lg:px-8 lg:py-5',
         container: 'border-background border'
       }}
     >
-      <div className='flex flex-col gap-6'>
-        <div className='flex flex-wrap items-center justify-between gap-4 px-5 pt-5 lg:px-0 lg:pt-0'>
+      <div className='flex flex-col gap-2'>
+        <div className='border-secondary-23/60 flex flex-wrap items-center justify-between gap-3 border-b px-4 py-2 lg:px-0'>
           <TabsGroup
             tabs={YEAR_TABS}
             value={activeYear}
@@ -42,9 +42,10 @@ const SpendingsLedger = () => {
           <Text
             size='13'
             weight='500'
-            className='text-primary-14'
+            className='text-primary-11 tabular-nums'
+            title={Format.price(totalAllocate, 'standard')}
           >
-            Sum: {Format.price(totalAllocate, 'standard')}
+            Sum: {Format.price(totalAllocate, 'compact')}
           </Text>
         </div>
         <SpendingsTable

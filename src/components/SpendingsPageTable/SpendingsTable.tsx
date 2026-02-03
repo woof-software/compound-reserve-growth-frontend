@@ -1,13 +1,14 @@
 import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
-import { UrlTooltip } from '@/components/UrlTooltip/UrlTooltip';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { Format } from '@/shared/lib/utils/numbersFormatter';
 import { formatDateWithOrdinal } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
+import { UrlTooltip } from '@/components/UrlTooltip/UrlTooltip';
 import Text from '@/shared/ui/Text/Text';
 import { TextTooltip } from '@/shared/ui/TextTooltip/TextTooltip';
+import { Tooltip } from '@/shared/ui/Tooltip/Tooltip';
 
 import type { SpendingsRow } from '@/entities/Spendings/data/spendingsData';
 
@@ -17,164 +18,185 @@ interface SpendingsTableProps {
   totalAllocate: number;
 }
 
+const getCompactCurrency = (value: number | null | undefined) => {
+  if (value === null || value === undefined) return '-';
+
+  return Format.price(value, 'compact');
+};
+
+const renderCompactCurrency = (value: number | null | undefined) => {
+  if (value === null || value === undefined) return '-';
+
+  const compactValue = getCompactCurrency(value);
+  const fullValue = Format.price(value, 'standard');
+
+  return (
+    <Tooltip content={fullValue}>
+      <span className='text-primary-11 inline-flex cursor-default items-center whitespace-nowrap tabular-nums'>
+        {compactValue}
+      </span>
+    </Tooltip>
+  );
+};
+
+const formatDateLabel = (value: string | null | undefined) => {
+  if (!value) return '-';
+  const parsedDate = new Date(value);
+  return Number.isNaN(parsedDate.getTime()) ? value : formatDateWithOrdinal(value);
+};
+
+const formatDateShort = (value: string | null | undefined) => {
+  if (!value) return '-';
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) return value;
+  return parsedDate.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+};
+
+const createSpendingsColumns = (
+  allocateHeader: string
+): ExtendedColumnDef<SpendingsRow>[] => [
+  {
+        accessorKey: 'number',
+        header: '#',
+        size: 40,
+        cell: ({ getValue }) => (
+          <Text
+            size='12'
+            className='text-primary-14 tabular-nums'
+          >
+            {(getValue() as string) || '-'}
+          </Text>
+        )
+  },
+  {
+        accessorKey: 'counterpartyService',
+        header: 'Counterparty / Service',
+        size: 280,
+        cell: ({ row }) => {
+          const value = row.original.counterpartyService || '-';
+          const notesValue = row.original.notes || '';
+          return (
+            <div className='flex min-w-0 flex-col gap-1'>
+              {value.length > 28 ? (
+                <TextTooltip
+                  text={value}
+                  triggerWidth={210}
+                  className={{ text: '!font-medium' }}
+                />
+              ) : (
+                <Text
+                  size='13'
+                  weight='500'
+                  className='whitespace-normal leading-5'
+                >
+                  {value}
+                </Text>
+              )}
+              {notesValue ? (
+                <Text
+                  size='11'
+                  className='text-primary-14 line-clamp-1 leading-4'
+                  title={notesValue}
+                >
+                  {notesValue}
+                </Text>
+              ) : null}
+            </div>
+          );
+        }
+  },
+  {
+        accessorKey: 'contractValue',
+        header: 'Contract',
+        align: 'left',
+        size: 160,
+        cell: ({ row }) => (
+          <div className='flex flex-col items-start gap-1'>
+            <Text
+              size='13'
+              weight='500'
+              className='tabular-nums'
+            >
+              {renderCompactCurrency(row.original.contractValue)}
+            </Text>
+            <Text
+              size='11'
+              className='text-primary-14 max-w-full truncate whitespace-nowrap leading-4'
+            >
+              {formatDateShort(row.original.contractStartDate)} –{' '}
+              {formatDateShort(row.original.contractEndDate)}
+            </Text>
+          </div>
+        )
+  },
+  {
+        accessorKey: 'allocate',
+        header: allocateHeader,
+        align: 'left',
+        size: 150,
+        cell: ({ getValue }) => {
+          const value = getValue() as number | null;
+          return renderCompactCurrency(value);
+        }
+  },
+  {
+        accessorKey: 'renewalExpiry',
+        header: 'Renewal / Status',
+        align: 'left',
+        size: 160,
+        cell: ({ row }) => (
+          <div className='flex flex-col items-start gap-1'>
+            <Text
+              size='12'
+              className='tabular-nums leading-4'
+            >
+              {formatDateLabel(row.original.renewalExpiry)}
+            </Text>
+            <span className='bg-secondary-23/30 text-primary-11 rounded-full px-2 py-0.5 text-[11px] leading-4 font-medium'>
+              {row.original.status || '-'}
+            </span>
+          </div>
+        )
+      },
+      {
+        id: 'details',
+        header: 'Details',
+        size: 150,
+        cell: ({ row }) => (
+          <div className='flex min-h-[22px] items-center gap-2'>
+            {row.original.lastRenewalProposalUrl ? (
+              <a
+                href={row.original.lastRenewalProposalUrl}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='bg-secondary-23/20 text-primary-11/80 inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] leading-4'
+              >
+                {row.original.lastRenewalProposalLabel || 'Proposal'}
+              </a>
+            ) : null}
+            <Text
+              size='11'
+              className='text-primary-14 truncate'
+            >
+              {row.original.activeDaysInFY ?? '-'}d
+            </Text>
+          </div>
+        )
+  }
+];
+
 const SpendingsTable: React.FC<SpendingsTableProps> = ({
   data,
   allocateHeader,
   totalAllocate
 }) => {
-  const columns: ExtendedColumnDef<SpendingsRow>[] = useMemo(
-    () => [
-      {
-        accessorKey: 'number',
-        header: 'Number',
-        size: 70
-      },
-      {
-        accessorKey: 'counterpartyService',
-        header: 'Counterparty / Service',
-        size: 220,
-        cell: ({ getValue }) => {
-          const value = (getValue() as string) || '-';
-          return value.length > 28 ? (
-            <TextTooltip
-              text={value}
-              triggerWidth={180}
-              className={{ text: '!font-medium' }}
-            />
-          ) : (
-            <Text
-              size='13'
-              weight='500'
-            >
-              {value}
-            </Text>
-          );
-        }
-      },
-      {
-        accessorKey: 'contractValue',
-        header: 'Contract Value',
-        align: 'right',
-        cell: ({ getValue }) => {
-          const value = getValue() as number | null;
-          return value === null || value === undefined
-            ? '-'
-            : Format.price(value, 'standard');
-        }
-      },
-      {
-        accessorKey: 'contractStartDate',
-        header: 'Contract Start Date',
-        align: 'right',
-        cell: ({ getValue }) => {
-          const value = getValue() as string | null;
-          return value ? formatDateWithOrdinal(value) : '-';
-        }
-      },
-      {
-        accessorKey: 'contractEndDate',
-        header: 'Contract End Date',
-        align: 'right',
-        cell: ({ getValue }) => {
-          const value = getValue() as string | null;
-          return value ? formatDateWithOrdinal(value) : '-';
-        }
-      },
-      {
-        accessorKey: 'activeDaysInFY',
-        header: 'Active Days in FY',
-        align: 'center',
-        cell: ({ getValue }) => {
-          const value = getValue() as number | null;
-          return value === null || value === undefined ? '-' : value;
-        }
-      },
-      {
-        accessorKey: 'allocate',
-        header: allocateHeader,
-        align: 'right',
-        cell: ({ getValue }) => {
-          const value = getValue() as number | null;
-          return value === null || value === undefined
-            ? '-'
-            : Format.price(value, 'standard');
-        }
-      },
-      {
-        accessorKey: 'renewalExpiry',
-        header: 'Renewal / Expiry',
-        align: 'right',
-        cell: ({ getValue }) => {
-          const value = (getValue() as string) || '-';
-          return formatDateWithOrdinal(value);
-        }
-      },
-      {
-        accessorKey: 'status',
-        header: 'Status',
-        align: 'center',
-        cell: ({ getValue }) => (getValue() as string) || '-'
-      },
-      {
-        accessorKey: 'notes',
-        header: 'Notes',
-        size: 220,
-        cell: ({ getValue }) => {
-          const value = (getValue() as string) || '-';
-          return value.length > 28 ? (
-            <TextTooltip
-              text={value}
-              triggerWidth={180}
-            />
-          ) : (
-            <Text size='13'>{value}</Text>
-          );
-        }
-      },
-      {
-        accessorKey: 'recurring',
-        header: 'Recurring',
-        align: 'center',
-        cell: ({ getValue }) => (getValue() as string) || '-'
-      },
-      {
-        accessorKey: 'lastRenewalProposalUrl',
-        header: 'Last Renewal Proposal',
-        size: 170,
-        cell: ({ row }) => {
-          if (!row.original.lastRenewalProposalUrl) return '-';
-          return (
-            <UrlTooltip
-              isRedirectContent
-              text={row.original.lastRenewalProposalLabel || 'Proposal'}
-              url={row.original.lastRenewalProposalUrl}
-            />
-          );
-        }
-      }
-    ],
+  const columns = useMemo(
+    () => createSpendingsColumns(allocateHeader),
     [allocateHeader]
-  );
-
-  const footerRow = (
-    <tr>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
-        Sum
-      </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'></td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px]'></td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px]'></td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px]'></td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-center text-[13px]'></td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px] font-medium'>
-        {Format.price(totalAllocate, 'standard')}
-      </td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-right text-[13px]'></td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-center text-[13px]'></td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'></td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-center text-[13px]'></td>
-      <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px]'></td>
-    </tr>
   );
 
   return (
@@ -238,11 +260,14 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                   <Text
                     size='13'
                     lineHeight='21'
-                    className='truncate'
+                    className='truncate tabular-nums'
+                    title={
+                      row.contractValue === null || row.contractValue === undefined
+                        ? undefined
+                        : Format.price(row.contractValue, 'standard')
+                    }
                   >
-                    {row.contractValue === null || row.contractValue === undefined
-                      ? '-'
-                      : Format.price(row.contractValue, 'standard')}
+                    {getCompactCurrency(row.contractValue)}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -259,9 +284,7 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {row.contractStartDate
-                      ? formatDateWithOrdinal(row.contractStartDate)
-                      : '-'}
+                    {formatDateLabel(row.contractStartDate)}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -278,9 +301,7 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {row.contractEndDate
-                      ? formatDateWithOrdinal(row.contractEndDate)
-                      : '-'}
+                    {formatDateLabel(row.contractEndDate)}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -312,11 +333,14 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                   <Text
                     size='13'
                     lineHeight='21'
-                    className='truncate'
+                    className='truncate tabular-nums'
+                    title={
+                      row.allocate === null || row.allocate === undefined
+                        ? undefined
+                        : Format.price(row.allocate, 'standard')
+                    }
                   >
-                    {row.allocate === null || row.allocate === undefined
-                      ? '-'
-                      : Format.price(row.allocate, 'standard')}
+                    {getCompactCurrency(row.allocate)}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -333,7 +357,7 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {formatDateWithOrdinal(row.renewalExpiry)}
+                    {formatDateLabel(row.renewalExpiry)}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -416,28 +440,6 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                 </div>
               </div>
             ))}
-            <div className='border-secondary-23 grid grid-cols-2 gap-x-10 gap-y-3 border-t p-5 md:gap-x-[63px] md:px-10'>
-              <div className='grid min-h-[39px] w-full'>
-                <Text
-                  size='13'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  Sum
-                </Text>
-              </div>
-              <div className='grid w-full'>
-                <Text
-                  size='13'
-                  lineHeight='18'
-                  weight='500'
-                  className='text-primary-14'
-                >
-                  {Format.price(totalAllocate, 'standard')}
-                </Text>
-              </div>
-            </div>
           </>
         )}
       </MobileDataTable>
@@ -445,18 +447,20 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
         <DataTable
           data={data}
           columns={columns}
-          pageSize={10}
+          pageSize={20}
           className={cn('flex flex-col justify-between', {
             'min-h-[505px]': data.length > 10
           })}
-          containerTableClassName='min-h-[473px] overflow-x-auto'
-          tableClassName='min-w-[1400px]'
-          headerCellClassName='py-[13px] px-[5px]'
-          cellClassName='py-3 px-[5px]'
-          headerTextClassName='text-primary-14 font-medium'
+          containerTableClassName='min-h-[473px]'
+          tableClassName='w-full table-fixed'
+          headerClassName='bg-secondary-23/20'
+          headerRowClassName='border-secondary-23/60 border-b'
+          headerCellClassName='py-2.5 px-2'
+          cellClassName='py-2 px-2 align-top whitespace-normal'
+          headerTextClassName='text-primary-11 text-[12px] font-semibold'
+          rowClassName='border-secondary-23/40 border-b odd:bg-secondary-23/10 hover:bg-secondary-23/20'
           enablePagination={data.length > 10}
-          paginationClassName='py-0 px-[5px]'
-          footerContent={footerRow}
+          paginationClassName='py-2 px-2'
         />
       </div>
     </>
