@@ -56,8 +56,8 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   } = useModal();
   const {
     isOpen: isCalendarOpen,
-    onOpenModal: onOpenCalendar,
-    onCloseModal: onCloseCalendar
+    onCloseModal: onCloseCalendar,
+    onToggleModal: onToggleCalendar
   } = useModal();
   const anchorRef = useRef<HTMLDivElement>(null);
   const [calendarTransform, setCalendarTransform] = useState({
@@ -152,10 +152,21 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         className,
         { 'z-[50]': isCalendarOpen }
       )}
-      onMouseDown={() => {
-        if (isCalendarOpen) {
-          onCloseCalendar();
+      onMouseDown={(event: React.MouseEvent<HTMLDivElement>) => {
+        if (!isCalendarOpen) return;
+        const target = event.target as HTMLElement;
+        if (target.closest('[data-calendar-toggle="true"]')) {
+          return;
         }
+        onCloseCalendar();
+      }}
+      onTouchStart={(event: React.TouchEvent<HTMLDivElement>) => {
+        if (!isCalendarOpen) return;
+        const target = event.target as HTMLElement;
+        if (target.closest('[data-calendar-toggle="true"]')) {
+          return;
+        }
+        onCloseCalendar();
       }}
     >
       <div className='flex flex-col gap-0'>
@@ -183,9 +194,10 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
           <Button
             type='button'
             className='absolute top-1/2 right-3 z-10 h-6 w-6 -translate-y-1/2'
-            onClick={onOpenCalendar}
+            onClick={onToggleCalendar}
             disabled={disabled}
             aria-label='Open calendar'
+            data-calendar-toggle='true'
           />
         </div>
       </div>
@@ -214,9 +226,10 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
           <Button
             type='button'
             className='absolute top-1/2 right-3 z-10 h-6 w-6 -translate-y-1/2'
-            onClick={onOpenCalendar}
+            onClick={onToggleCalendar}
             disabled={disabled}
             aria-label='Open calendar'
+            data-calendar-toggle='true'
           />
         </div>
       </div>

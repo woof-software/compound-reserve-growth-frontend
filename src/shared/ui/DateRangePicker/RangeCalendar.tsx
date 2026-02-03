@@ -96,6 +96,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
   );
 
   const isStartLocked = Boolean(startDate && !endDate);
+  const isEndLocked = Boolean(endDate && !startDate);
 
   useEffect(() => {
     if (!isStartLocked || !startDate) return;
@@ -112,13 +113,24 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
   useEffect(() => {
     if (!endDate) return;
     const endMonth = getMonthStart(endDate);
+
+    if (isEndLocked) {
+      if (!isSameMonth(endMonth, rightMonth)) {
+        setRightMonth(endMonth);
+      }
+      if (leftMonth.getTime() > endMonth.getTime()) {
+        setLeftMonth(endMonth);
+      }
+      return;
+    }
+
     const isVisible =
       isSameMonth(endMonth, leftMonth) || isSameMonth(endMonth, rightMonth);
 
     if (!isVisible) {
       setRightMonth(endMonth);
     }
-  }, [endDate, leftMonth, rightMonth]);
+  }, [endDate, isEndLocked, leftMonth, rightMonth]);
 
   const minMonth = minDate ? getMonthStart(minDate) : null;
   const maxMonth = maxDate ? getMonthStart(maxDate) : null;
@@ -127,12 +139,18 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     : !minMonth || leftMonth.getTime() > minMonth.getTime();
   const canGoNext = isStartLocked
     ? !maxMonth || rightMonth.getTime() < maxMonth.getTime()
-    : !maxMonth || addMonths(rightMonth, 1).getTime() <= maxMonth.getTime();
+    : isEndLocked
+      ? leftMonth.getTime() < rightMonth.getTime()
+      : !maxMonth || addMonths(rightMonth, 1).getTime() <= maxMonth.getTime();
 
   const onPrevMonth = () => {
     if (disabled || !canGoPrev) return;
     if (isStartLocked) {
       setRightMonth((prev) => addMonths(prev, -1));
+      return;
+    }
+    if (isEndLocked) {
+      setLeftMonth((prev) => addMonths(prev, -1));
       return;
     }
     setLeftMonth((prev) => addMonths(prev, -1));
@@ -143,6 +161,10 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     if (disabled || !canGoNext) return;
     if (isStartLocked) {
       setRightMonth((prev) => addMonths(prev, 1));
+      return;
+    }
+    if (isEndLocked) {
+      setLeftMonth((prev) => addMonths(prev, 1));
       return;
     }
     setLeftMonth((prev) => addMonths(prev, 1));
@@ -167,6 +189,20 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     }
 
     const formatted = formatDate(date);
+
+    if (!startDate && endDate) {
+      if (date.getTime() <= endDate.getTime()) {
+        const startMonth = getMonthStart(date);
+        setLeftMonth(startMonth);
+        onChange({ startDate: formatted, endDate: value.endDate });
+        return;
+      }
+      const startMonth = getMonthStart(endDate);
+      setLeftMonth(startMonth);
+      setRightMonth(getMonthStart(date));
+      onChange({ startDate: formatDate(endDate), endDate: formatted });
+      return;
+    }
 
     if (!startDate || endDate) {
       const startMonth = getMonthStart(date);
