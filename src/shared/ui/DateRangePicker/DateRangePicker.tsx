@@ -1,12 +1,15 @@
-import React, { ChangeEvent, FC } from 'react';
+import React, { ChangeEvent, FC, useEffect, useRef, useState } from 'react';
 
 import { useModal } from '@/shared/hooks/useModal';
 import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
 import { Dropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
+import Portal from '@/shared/ui/Portal/Portal';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
+
+import RangeCalendar from './RangeCalendar';
 
 export type DateRangeValue = {
   startDate: string;
@@ -46,7 +49,22 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   placeholder = 'Date range',
   variant = 'inline'
 }) => {
-  const { isOpen, onOpenModal, onCloseModal } = useModal();
+  const {
+    isOpen: isDropdownOpen,
+    onOpenModal: onOpenDropdown,
+    onCloseModal: onCloseDropdown
+  } = useModal();
+  const {
+    isOpen: isCalendarOpen,
+    onOpenModal: onOpenCalendar,
+    onCloseModal: onCloseCalendar
+  } = useModal();
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const [calendarTransform, setCalendarTransform] = useState({
+    top: 0,
+    left: 0,
+    scale: 1
+  });
   const onStartChange = (e: ChangeEvent<HTMLInputElement>) => {
     const nextStart = e.target.value;
     onChange({ startDate: nextStart, endDate: value.endDate });
@@ -78,12 +96,67 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     return placeholder;
   };
 
+  const handleCloseDropdown = () => {
+    onCloseDropdown();
+    onCloseCalendar();
+  };
+
+  useEffect(() => {
+    if (!isCalendarOpen) return;
+
+    const updatePosition = () => {
+      if (!anchorRef.current) return;
+      const rect = anchorRef.current.getBoundingClientRect();
+      const margin = 16;
+      const calendarWidth = 640;
+      const calendarHeight = 380;
+      const scaleWidth = (window.innerWidth - margin * 2) / calendarWidth;
+      const scaleHeight = (window.innerHeight - margin * 2) / calendarHeight;
+      const scale = Math.min(1, scaleWidth, scaleHeight);
+      const scaledWidth = calendarWidth * scale;
+      const scaledHeight = calendarHeight * scale;
+      let left = rect.left;
+      let top = rect.bottom + 8;
+
+      if (left + scaledWidth + margin > window.innerWidth) {
+        left = window.innerWidth - scaledWidth - margin;
+      }
+      if (left < margin) {
+        left = margin;
+      }
+      if (top + scaledHeight + margin > window.innerHeight) {
+        top = rect.top - scaledHeight - 8;
+      }
+      if (top < margin) {
+        top = margin;
+      }
+
+      setCalendarTransform({ top, left, scale });
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [isCalendarOpen]);
+
   const renderInputs = () => (
     <div
+      ref={anchorRef}
       className={cn(
-        'bg-primary-15 flex w-[168px] flex-col items-stretch gap-2 rounded-lg p-2 shadow-[inset_0_0_0_0.25px_var(--secondary-39),0px_8px_16px_rgba(13,19,26,0.1),0px_16px_32px_rgba(13,19,26,0.05)]',
-        className
+        'bg-primary-15 relative flex w-[168px] flex-col items-stretch gap-2 rounded-lg p-2 shadow-[inset_0_0_0_0.25px_var(--secondary-39),0px_8px_16px_rgba(13,19,26,0.1),0px_16px_32px_rgba(13,19,26,0.05)]',
+        className,
+        { 'z-[50]': isCalendarOpen }
       )}
+      onMouseDown={() => {
+        if (isCalendarOpen) {
+          onCloseCalendar();
+        }
+      }}
     >
       <div className='flex flex-col gap-0'>
         <View.Condition if={showLabels}>
@@ -97,15 +170,24 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
             </Text>
           </div>
         </View.Condition>
-        <input
-          type='date'
-          value={value.startDate}
-          min={min || undefined}
-          max={max || undefined}
-          onChange={onStartChange}
-          disabled={disabled}
-          className={inputClasses}
-        />
+        <div className='relative'>
+          <input
+            type='date'
+            value={value.startDate}
+            min={min || undefined}
+            max={max || undefined}
+            onChange={onStartChange}
+            disabled={disabled}
+            className={inputClasses}
+          />
+          <Button
+            type='button'
+            className='absolute top-1/2 right-3 z-10 h-6 w-6 -translate-y-1/2'
+            onClick={onOpenCalendar}
+            disabled={disabled}
+            aria-label='Open calendar'
+          />
+        </div>
       </div>
       <div className='flex flex-col gap-0'>
         <View.Condition if={showLabels}>
@@ -119,15 +201,24 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
             </Text>
           </div>
         </View.Condition>
-        <input
-          type='date'
-          value={value.endDate}
-          min={min || undefined}
-          max={max || undefined}
-          onChange={onEndChange}
-          disabled={disabled}
-          className={inputClasses}
-        />
+        <div className='relative'>
+          <input
+            type='date'
+            value={value.endDate}
+            min={min || undefined}
+            max={max || undefined}
+            onChange={onEndChange}
+            disabled={disabled}
+            className={inputClasses}
+          />
+          <Button
+            type='button'
+            className='absolute top-1/2 right-3 z-10 h-6 w-6 -translate-y-1/2'
+            onClick={onOpenCalendar}
+            disabled={disabled}
+            aria-label='Open calendar'
+          />
+        </div>
       </div>
       <View.Condition
         if={Boolean(showClear && (value.startDate || value.endDate))}
@@ -144,6 +235,35 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     </div>
   );
 
+  const renderCalendarOverlay = () => (
+    <Portal>
+      <div
+        className='fixed inset-0 z-[40] bg-black/15 backdrop-blur-[2px] dark:bg-black/40'
+        onMouseDown={onCloseCalendar}
+        onTouchStart={onCloseCalendar}
+      />
+      <div
+        className='shadow-15 fixed z-[60]'
+        style={{
+          top: `${calendarTransform.top}px`,
+          left: `${calendarTransform.left}px`,
+          transform: `scale(${calendarTransform.scale})`,
+          transformOrigin: 'top left'
+        }}
+        onMouseDown={(event) => event.stopPropagation()}
+        onTouchStart={(event) => event.stopPropagation()}
+      >
+        <RangeCalendar
+          value={value}
+          onChange={onChange}
+          min={min}
+          max={max}
+          disabled={disabled}
+        />
+      </div>
+    </Portal>
+  );
+
   if (variant === 'popover') {
     const hasSelection = Boolean(value.startDate || value.endDate);
     const iconName = hasSelection ? 'calendar-check' : 'calendar-uncheck';
@@ -155,48 +275,60 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     );
 
     return (
-      <div className={cn({ 'pointer-events-none': disabled })}>
-        <Dropdown
-          open={isOpen}
-          onOpen={onOpenModal}
-          onClose={onCloseModal}
-          triggerContent={
-            <Button
-              className={triggerClasses}
-              disabled={disabled}
-            >
-              <div className='p-0.5'>
-                <Icon
-                  name={iconName}
-                  className='h-4 w-4'
-                  isRound={false}
-                />
-              </div>
-              <Text
-                size='11'
-                weight='500'
-                className={
-                  hasSelection
-                    ? '!text-[var(--color-secondary-10)]'
-                    : '!text-[var(--color-gray-11)]'
-                }
+      <>
+        <div className={cn({ 'pointer-events-none': disabled })}>
+          <Dropdown
+            open={isDropdownOpen}
+            onOpen={onOpenDropdown}
+            onClose={handleCloseDropdown}
+            triggerContent={
+              <Button
+                className={triggerClasses}
+                disabled={disabled}
               >
-                {rangeLabel()}
-              </Text>
-            </Button>
-          }
-          contentClassName={cn(
-            'bg-transparent p-0 border-none shadow-none max-h-[300px]',
-            popoverContentClassName
-          )}
-        >
-          {renderInputs()}
-        </Dropdown>
-      </div>
+                <div className='p-0.5'>
+                  <Icon
+                    name={iconName}
+                    className='h-4 w-4'
+                    isRound={false}
+                  />
+                </div>
+                <Text
+                  size='11'
+                  weight='500'
+                  className={
+                    hasSelection
+                      ? '!text-[var(--color-secondary-10)]'
+                      : '!text-[var(--color-gray-11)]'
+                  }
+                >
+                  {rangeLabel()}
+                </Text>
+              </Button>
+            }
+            contentClassName={cn(
+              'bg-transparent p-0 border-none shadow-none max-h-none overflow-visible !overflow-visible !z-[50]',
+              popoverContentClassName
+            )}
+          >
+            {renderInputs()}
+          </Dropdown>
+        </div>
+        <View.Condition if={isCalendarOpen}>
+          {renderCalendarOverlay()}
+        </View.Condition>
+      </>
     );
   }
 
-  return renderInputs();
+  return (
+    <>
+      {renderInputs()}
+      <View.Condition if={isCalendarOpen}>
+        {renderCalendarOverlay()}
+      </View.Condition>
+    </>
+  );
 };
 
 export default DateRangePicker;
