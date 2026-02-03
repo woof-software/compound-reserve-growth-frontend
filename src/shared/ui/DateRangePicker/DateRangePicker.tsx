@@ -42,7 +42,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   popoverContentClassName,
   showLabels = false,
   showClear = false,
-  clearLabel = 'Clear',
+  clearLabel = 'Clear Filter',
   placeholder = 'Date range',
   variant = 'inline'
 }) => {
@@ -60,7 +60,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   const onClear = () => onChange({ startDate: '', endDate: '' });
 
   const inputClasses = cn(
-    'outline-secondary-19 bg-custom-trigger text-primary-14 h-9 rounded-lg px-3 text-[11px] font-medium focus-visible:outline-none',
+    'date-range-input outline-secondary-19 bg-custom-trigger text-primary-14 h-10 w-full rounded-lg px-3 pr-10 text-[11px] font-medium leading-4 focus-visible:outline-none',
     { 'cursor-not-allowed opacity-60': disabled },
     inputClassName
   );
@@ -79,16 +79,23 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   };
 
   const renderInputs = () => (
-    <div className={cn('flex items-center gap-2', className)}>
-      <div className='flex flex-col gap-1'>
+    <div
+      className={cn(
+        'bg-primary-15 flex w-[168px] flex-col items-stretch gap-2 rounded-lg p-2 shadow-[inset_0_0_0_0.25px_var(--secondary-39),0px_8px_16px_rgba(13,19,26,0.1),0px_16px_32px_rgba(13,19,26,0.05)]',
+        className
+      )}
+    >
+      <div className='flex flex-col gap-0'>
         <View.Condition if={showLabels}>
-          <Text
-            size='11'
-            weight='500'
-            className='text-secondary-21'
-          >
-            Start
-          </Text>
+          <div className='flex h-6 items-center rounded-lg px-3 py-1'>
+            <Text
+              size='11'
+              weight='500'
+              className='text-secondary-41 dark:text-secondary-33'
+            >
+              Start
+            </Text>
+          </div>
         </View.Condition>
         <input
           type='date'
@@ -100,15 +107,17 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
           className={inputClasses}
         />
       </div>
-      <div className='flex flex-col gap-1'>
+      <div className='flex flex-col gap-0'>
         <View.Condition if={showLabels}>
-          <Text
-            size='11'
-            weight='500'
-            className='text-secondary-21'
-          >
-            End
-          </Text>
+          <div className='flex h-6 items-center rounded-lg px-3 py-1'>
+            <Text
+              size='11'
+              weight='500'
+              className='text-secondary-41 dark:text-secondary-33'
+            >
+              End
+            </Text>
+          </div>
         </View.Condition>
         <input
           type='date'
@@ -123,8 +132,9 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
       <View.Condition
         if={Boolean(showClear && (value.startDate || value.endDate))}
       >
+        <div className='-mx-2 h-[0.25px] w-[calc(100%+16px)] self-stretch bg-[var(--color-secondary-39)]' />
         <Button
-          className='text-primary-14 hover:bg-secondary-22 h-9 rounded-lg px-3 text-[11px] font-medium'
+          className='text-primary-14 hover:bg-secondary-22 hover:shadow-15 h-[30px] w-full rounded-lg text-[11px] font-medium'
           onClick={onClear}
           disabled={disabled}
         >
@@ -176,11 +186,11 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
             </Button>
           }
           contentClassName={cn(
-            'p-0 border-none shadow-15 max-h-[300px]',
+            'bg-transparent p-0 border-none shadow-none max-h-[300px]',
             popoverContentClassName
           )}
         >
-          <div className='p-2'>{renderInputs()}</div>
+          {renderInputs()}
         </Dropdown>
       </div>
     );

@@ -322,7 +322,6 @@ const Filter: FC<FilterProps> = ({
               onChange={(next) => activeFilter?.onDateRangeChange?.(next)}
               showLabels
               showClear
-              className='flex-col items-stretch gap-3'
             />
           </div>
         </View.Condition>

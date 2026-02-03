@@ -394,3 +394,21 @@ body::-webkit-scrollbar {
 .animate-drawer-out {
   animation: drawer-out 0.35s cubic-bezier(0.7,0,0.84,0);
 }
+
+.date-range-input {
+  background-image: url('./shared/assets/svg/calendar-uncheck.svg');
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 24px 24px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.date-range-input::-webkit-calendar-picker-indicator {
+  opacity: 0;
+}
+
+.date-range-input::-webkit-inner-spin-button,
+.date-range-input::-webkit-clear-button {
+  display: none;
+}

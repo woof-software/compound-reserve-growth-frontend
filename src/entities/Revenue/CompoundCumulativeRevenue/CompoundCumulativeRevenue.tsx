@@ -631,7 +631,6 @@ const Filters = ({
             variant='popover'
             showLabels
             showClear
-            className='flex-col items-stretch gap-3'
             inputClassName='w-full'
           />
           <div className='flex gap-2'>
@@ -687,7 +686,6 @@ const Filters = ({
               variant='popover'
               showLabels
               showClear
-              className='flex-col items-stretch gap-3'
               inputClassName='w-full'
             />
             <MultiSelect
