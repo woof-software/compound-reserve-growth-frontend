@@ -396,6 +396,7 @@ body::-webkit-scrollbar {
 }
 
 .date-range-input {
+  position: relative;
   background-image: url('./shared/assets/svg/calendar-uncheck.svg');
   background-position: right 12px center;
   background-repeat: no-repeat;
@@ -405,7 +406,12 @@ body::-webkit-scrollbar {
 }
 
 .date-range-input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 12px;
+  width: 24px;
+  height: 24px;
   opacity: 0;
+  cursor: pointer;
 }
 
 .date-range-input::-webkit-inner-spin-button,
