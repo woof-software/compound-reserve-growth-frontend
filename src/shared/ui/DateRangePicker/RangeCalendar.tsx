@@ -266,8 +266,8 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     }
   ) => {
     return (
-      <div className='bg-primary-15 flex w-full flex-col items-center gap-2 p-2 md:w-[304px]'>
-        <div className='relative flex h-10 w-full items-center justify-center px-1'>
+      <div className='bg-primary-15 flex h-[348px] w-[304px] flex-col items-center gap-2 p-2'>
+        <div className='relative flex h-10 w-full items-center justify-center px-1 py-3'>
           <button
             type='button'
             className={cn(
@@ -324,16 +324,20 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
         <div className='flex w-full flex-col gap-1'>
           <div className='grid w-full grid-cols-7 px-1 py-2'>
             {WEEK_DAYS.map((day) => (
-              <Text
+              <div
                 key={day}
-                size='11'
-                weight='500'
-                lineHeight='12'
-                align='center'
-                className='text-secondary-10 tracking-[0.03em] capitalize'
+                className='flex w-10 items-center justify-center px-2 py-0.5'
               >
-                {day}
-              </Text>
+                <Text
+                  size='11'
+                  weight='500'
+                  lineHeight='12'
+                  align='center'
+                  className='text-secondary-10 tracking-[0.03em] capitalize'
+                >
+                  {day}
+                </Text>
+              </div>
             ))}
           </div>
           <div className='flex w-full flex-col'>
@@ -384,7 +388,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                         !isRangeStart &&
                         !isRangeEnd &&
                         (!isDayDisabled || isInRange),
-                      'text-secondary-33 opacity-60':
+                      'text-secondary-33 opacity-[0.58]':
                         !isCurrentMonth && !isRangeStart && !isRangeEnd,
                       'text-secondary-33 opacity-40':
                         isDayDisabled && !isRangeStart && !isRangeEnd
@@ -424,12 +428,12 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
   return (
     <div
       className={cn(
-        'bg-primary-15 flex w-full max-w-[640px] flex-col items-center gap-4 rounded-lg p-4',
+        'bg-primary-15 flex h-[380px] w-[640px] flex-col items-center gap-4 rounded-lg p-4',
         className,
         { 'pointer-events-none opacity-60': disabled }
       )}
     >
-      <div className='flex w-full max-w-[608px] flex-col gap-4 md:flex-row md:gap-0'>
+      <div className='flex h-[348px] w-[608px] flex-row'>
         {renderMonth(leftMonth, leftLabel, leftWeeks, {
           showPrev: true,
           showNext: false,

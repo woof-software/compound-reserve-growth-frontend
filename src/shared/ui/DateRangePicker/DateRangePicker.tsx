@@ -97,7 +97,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   const inputClasses = useMemo(
     () =>
       cn(
-        'date-range-input outline-secondary-19 bg-custom-trigger text-primary-14 h-10 w-full rounded-lg px-3 pr-10 text-[11px] font-medium leading-4 focus-visible:outline-none',
+        'date-range-input outline-secondary-19 bg-custom-trigger text-primary-14 h-10 w-full rounded-lg px-3 py-3 pr-14 text-[11px] font-medium leading-4 focus-visible:outline-none',
         { 'cursor-not-allowed opacity-60': disabled },
         inputClassName
       ),
@@ -197,6 +197,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
             <Text
               size='11'
               weight='500'
+              lineHeight='16'
               className='text-secondary-41 dark:text-secondary-33'
             >
               Start
@@ -229,6 +230,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
             <Text
               size='11'
               weight='500'
+              lineHeight='16'
               className='text-secondary-41 dark:text-secondary-33'
             >
               End
@@ -260,7 +262,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
       >
         <div className='-mx-2 h-[0.25px] w-[calc(100%+16px)] self-stretch bg-[var(--color-secondary-39)]' />
         <Button
-          className='text-primary-14 hover:bg-secondary-22 hover:shadow-15 h-[30px] w-full rounded-lg text-[11px] font-medium'
+          className='text-primary-14 hover:bg-secondary-22 hover:shadow-15 h-[30px] w-full rounded-lg px-3 text-[11px] leading-4 font-medium'
           onClick={onClear}
           disabled={disabled}
         >
@@ -331,6 +333,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
                 <Text
                   size='11'
                   weight='500'
+                  lineHeight='16'
                   className={
                     hasSelection
                       ? '!text-[var(--color-secondary-10)]'
