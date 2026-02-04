@@ -265,6 +265,13 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
       canNext: boolean;
     }
   ) => {
+    const isSixWeeks = weeks.length === 6;
+    const weekDaysPadding = isSixWeeks ? 'py-1' : 'py-2';
+    const weekRowPadding = isSixWeeks ? 'py-0.5' : 'py-1';
+    const weekDayCellSize = isSixWeeks ? 'w-9' : 'w-10';
+    const dayButtonSize = isSixWeeks ? 'h-9 w-9' : 'h-10 w-10';
+    const dividerClass = isSixWeeks ? 'bg-secondary-39/60' : 'bg-secondary-39';
+
     return (
       <div className='bg-primary-15 flex h-[348px] w-[304px] flex-col items-center gap-2 p-2'>
         <div className='relative flex h-10 w-full items-center justify-center px-1 py-3'>
@@ -320,13 +327,16 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
             />
           </button>
         </div>
-        <div className='bg-secondary-39 h-px w-full' />
+        <div className={cn('h-px w-full', dividerClass)} />
         <div className='flex w-full flex-col gap-1'>
-          <div className='grid w-full grid-cols-7 px-1 py-2'>
+          <div className={cn('grid w-full grid-cols-7 px-1', weekDaysPadding)}>
             {WEEK_DAYS.map((day) => (
               <div
                 key={day}
-                className='flex w-10 items-center justify-center px-2 py-0.5'
+                className={cn(
+                  'flex items-center justify-center px-2 py-0.5',
+                  weekDayCellSize
+                )}
               >
                 <Text
                   size='11'
@@ -344,7 +354,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
             {weeks.map((week, weekIndex) => (
               <div
                 key={weekIndex}
-                className='grid grid-cols-7 px-1 py-1'
+                className={cn('grid grid-cols-7 px-1', weekRowPadding)}
               >
                 {week.map((day) => {
                   const isCurrentMonth =
@@ -400,7 +410,8 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                       key={day.toISOString()}
                       type='button'
                       className={cn(
-                        'flex h-10 w-10 items-center justify-center focus-visible:outline-none',
+                        'flex items-center justify-center focus-visible:outline-none',
+                        dayButtonSize,
                         dayBackground,
                         dayRadius,
                         {
