@@ -68,6 +68,8 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     onToggleModal: onToggleCalendar
   } = useModal();
   const anchorRef = useRef<HTMLDivElement>(null);
+  const placementRef = useRef<'below' | 'above' | null>(null);
+  const rafRef = useRef<number | null>(null);
   const [calendarTransform, setCalendarTransform] = useState({
     top: 0,
     left: 0,
@@ -136,10 +138,11 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   useEffect(() => {
     if (!isCalendarOpen) return;
 
-    const updatePosition = () => {
+    const updatePosition = (forcePlacement = false) => {
       if (!anchorRef.current) return;
       const rect = anchorRef.current.getBoundingClientRect();
       const margin = 16;
+      const offset = 8;
       const calendarWidth = 640;
       const calendarHeight = 380;
       const scaleWidth = (window.innerWidth - margin * 2) / calendarWidth;
@@ -147,8 +150,24 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
       const scale = Math.min(1, scaleWidth, scaleHeight);
       const scaledWidth = calendarWidth * scale;
       const scaledHeight = calendarHeight * scale;
+      const spaceBelow = window.innerHeight - rect.bottom - offset - margin;
+      const spaceAbove = rect.top - offset - margin;
+
+      if (!placementRef.current || forcePlacement) {
+        if (spaceBelow >= scaledHeight) {
+          placementRef.current = 'below';
+        } else if (spaceAbove >= scaledHeight) {
+          placementRef.current = 'above';
+        } else {
+          placementRef.current = spaceBelow >= spaceAbove ? 'below' : 'above';
+        }
+      }
+
       let left = rect.left;
-      let top = rect.bottom + 8;
+      let top =
+        placementRef.current === 'above'
+          ? rect.top - scaledHeight - offset
+          : rect.bottom + offset;
 
       if (left + scaledWidth + margin > window.innerWidth) {
         left = window.innerWidth - scaledWidth - margin;
@@ -157,22 +176,44 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         left = margin;
       }
       if (top + scaledHeight + margin > window.innerHeight) {
-        top = rect.top - scaledHeight - 8;
+        top = window.innerHeight - scaledHeight - margin;
       }
       if (top < margin) {
         top = margin;
       }
 
-      setCalendarTransform({ top, left, scale });
+      setCalendarTransform((prev) => {
+        const isSame =
+          Math.abs(prev.top - top) < 0.5 &&
+          Math.abs(prev.left - left) < 0.5 &&
+          Math.abs(prev.scale - scale) < 0.001;
+        return isSame ? prev : { top, left, scale };
+      });
     };
 
-    updatePosition();
-    window.addEventListener('resize', updatePosition);
-    window.addEventListener('scroll', updatePosition, true);
+    const scheduleUpdate = (forcePlacement = false) => {
+      if (rafRef.current !== null) return;
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null;
+        updatePosition(forcePlacement);
+      });
+    };
+
+    scheduleUpdate(true);
+    const handleResize = () => scheduleUpdate(true);
+    const handleScroll = () => scheduleUpdate(false);
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('scroll', handleScroll, true);
 
     return () => {
-      window.removeEventListener('resize', updatePosition);
-      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll, true);
+      placementRef.current = null;
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
     };
   }, [isCalendarOpen]);
 
@@ -280,11 +321,9 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         onTouchStart={onCloseCalendar}
       />
       <div
-        className='shadow-15 fixed z-[60]'
+        className='shadow-15 fixed top-0 left-0 z-[60] will-change-transform'
         style={{
-          top: `${calendarTransform.top}px`,
-          left: `${calendarTransform.left}px`,
-          transform: `scale(${calendarTransform.scale})`,
+          transform: `translate3d(${calendarTransform.left}px, ${calendarTransform.top}px, 0) scale(${calendarTransform.scale})`,
           transformOrigin: 'top left'
         }}
         onMouseDown={(event) => event.stopPropagation()}
