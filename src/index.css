@@ -411,7 +411,7 @@ body::-webkit-scrollbar {
   width: 24px;
   height: 24px;
   opacity: 0;
-  cursor: pointer;
+  pointer-events: none;
 }
 
 .date-range-input::-webkit-inner-spin-button,

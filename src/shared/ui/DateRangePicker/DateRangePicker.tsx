@@ -96,6 +96,19 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     [onChange]
   );
 
+  const handleInputPointerDown = useCallback(
+    (
+      event:
+        | React.MouseEvent<HTMLInputElement>
+        | React.TouchEvent<HTMLInputElement>
+    ) => {
+      if (disabled) return;
+      event.preventDefault();
+      event.currentTarget.focus({ preventScroll: true });
+    },
+    [disabled]
+  );
+
   const inputClasses = useMemo(
     () =>
       cn(
@@ -253,6 +266,8 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
             max={max || undefined}
             onChange={onStartChange}
             disabled={disabled}
+            onMouseDown={handleInputPointerDown}
+            onTouchStart={handleInputPointerDown}
             className={inputClasses}
           />
           <Button
@@ -286,6 +301,8 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
             max={max || undefined}
             onChange={onEndChange}
             disabled={disabled}
+            onMouseDown={handleInputPointerDown}
+            onTouchStart={handleInputPointerDown}
             className={inputClasses}
           />
           <Button
