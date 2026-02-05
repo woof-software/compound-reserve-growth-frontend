@@ -24,10 +24,8 @@ const YEAR_TABS: SpendingsYear[] = ['2024', '2025'];
 
 const spendingsSortColumns: SortAccessor<SpendingsRow>[] = [
   { accessorKey: 'counterpartyService', header: 'Counterparty / Service' },
-  { accessorKey: 'contractValue', header: 'Contract' },
-  { accessorKey: 'allocate', header: 'Allocate' },
   { accessorKey: 'renewalExpiry', header: 'Renewal / Status' },
-  { accessorKey: 'activeDaysInFY', header: 'Active Days' }
+  { accessorKey: 'activeDaysInFY', header: 'Details' }
 ];
 
 const SpendingsLedger = () => {

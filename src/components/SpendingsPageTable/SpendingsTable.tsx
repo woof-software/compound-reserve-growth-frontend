@@ -70,6 +70,7 @@ const createSpendingsColumns = (
   {
         accessorKey: 'counterpartyService',
         header: 'Counterparty / Service',
+        enableSorting: true,
         size: 320,
         cell: ({ row }) => {
           const value = row.original.counterpartyService || '-';
@@ -108,6 +109,7 @@ const createSpendingsColumns = (
         accessorKey: 'contractValue',
         header: 'Contract',
         align: 'left',
+        enableSorting: false,
         size: 170,
         cell: ({ row }) => (
           <div className='flex flex-col items-start gap-1'>
@@ -132,6 +134,7 @@ const createSpendingsColumns = (
         accessorKey: 'allocate',
         header: allocateHeader,
         align: 'left',
+        enableSorting: false,
         size: 160,
         cell: ({ getValue }) => {
           const value = getValue() as number | null;
@@ -142,6 +145,7 @@ const createSpendingsColumns = (
         accessorKey: 'renewalExpiry',
         header: 'Renewal / Status',
         align: 'left',
+        enableSorting: true,
         size: 190,
         cell: ({ row }) => (
           <div className='flex items-center gap-2'>
@@ -161,6 +165,8 @@ const createSpendingsColumns = (
       {
         id: 'details',
         header: 'Details',
+        accessorFn: (row) => row.activeDaysInFY ?? null,
+        enableSorting: true,
         size: 170,
         cell: ({ row }) => (
           <div className='flex min-h-[22px] items-center gap-2.5'>
@@ -454,9 +460,10 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
           headerRowClassName=''
           headerCellClassName='pt-3 pb-2.5 px-3'
           cellClassName='py-2.5 px-3 align-top whitespace-normal'
-          headerTextClassName='text-primary-14/60 text-[10px] font-medium'
+          headerTextClassName='text-primary-14 font-medium'
           rowClassName='hover:bg-transparent'
           enableRowHoverHighlight={false}
+          enableSorting
           useColgroup
           enablePagination={data.length > 10}
           paginationClassName='py-2 px-2'
