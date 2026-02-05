@@ -24,7 +24,10 @@ const getCompactCurrency = (value: number | null | undefined) => {
   return Format.price(value, 'compact');
 };
 
-const renderCompactCurrency = (value: number | null | undefined) => {
+const renderCompactCurrency = (
+  value: number | null | undefined,
+  className?: string
+) => {
   if (value === null || value === undefined) return '-';
 
   const compactValue = getCompactCurrency(value);
@@ -32,7 +35,12 @@ const renderCompactCurrency = (value: number | null | undefined) => {
 
   return (
     <Tooltip content={fullValue}>
-      <span className='text-primary-11 inline-flex cursor-default items-center whitespace-nowrap tabular-nums'>
+      <span
+        className={cn(
+          'text-primary-11 inline-flex cursor-default items-center whitespace-nowrap tabular-nums',
+          className
+        )}
+      >
         {compactValue}
       </span>
     </Tooltip>
@@ -60,22 +68,9 @@ const createSpendingsColumns = (
   allocateHeader: string
 ): ExtendedColumnDef<SpendingsRow>[] => [
   {
-        accessorKey: 'number',
-        header: '#',
-        size: 40,
-        cell: ({ getValue }) => (
-          <Text
-            size='12'
-            className='text-primary-14 tabular-nums'
-          >
-            {(getValue() as string) || '-'}
-          </Text>
-        )
-  },
-  {
         accessorKey: 'counterpartyService',
         header: 'Counterparty / Service',
-        size: 280,
+        size: 320,
         cell: ({ row }) => {
           const value = row.original.counterpartyService || '-';
           const notesValue = row.original.notes || '';
@@ -85,12 +80,11 @@ const createSpendingsColumns = (
                 <TextTooltip
                   text={value}
                   triggerWidth={210}
-                  className={{ text: '!font-medium' }}
+                  className={{ text: '!font-normal' }}
                 />
               ) : (
                 <Text
-                  size='13'
-                  weight='500'
+                  size='12'
                   className='whitespace-normal leading-5'
                 >
                   {value}
@@ -99,6 +93,7 @@ const createSpendingsColumns = (
               {notesValue ? (
                 <Text
                   size='11'
+                  weight='500'
                   className='text-primary-14 line-clamp-1 leading-4'
                   title={notesValue}
                 >
@@ -113,18 +108,18 @@ const createSpendingsColumns = (
         accessorKey: 'contractValue',
         header: 'Contract',
         align: 'left',
-        size: 160,
+        size: 170,
         cell: ({ row }) => (
           <div className='flex flex-col items-start gap-1'>
             <Text
-              size='13'
-              weight='500'
+              size='12'
               className='tabular-nums'
             >
-              {renderCompactCurrency(row.original.contractValue)}
+              {renderCompactCurrency(row.original.contractValue, 'text-[12px]')}
             </Text>
             <Text
               size='11'
+              weight='500'
               className='text-primary-14 max-w-full truncate whitespace-nowrap leading-4'
             >
               {formatDateShort(row.original.contractStartDate)} –{' '}
@@ -137,26 +132,27 @@ const createSpendingsColumns = (
         accessorKey: 'allocate',
         header: allocateHeader,
         align: 'left',
-        size: 150,
+        size: 160,
         cell: ({ getValue }) => {
           const value = getValue() as number | null;
-          return renderCompactCurrency(value);
+          return renderCompactCurrency(value, 'text-[12px]');
         }
   },
   {
         accessorKey: 'renewalExpiry',
         header: 'Renewal / Status',
         align: 'left',
-        size: 160,
+        size: 190,
         cell: ({ row }) => (
-          <div className='flex flex-col items-start gap-1'>
+          <div className='flex items-center gap-2'>
             <Text
               size='12'
-              className='tabular-nums leading-4'
+              weight='500'
+              className='tabular-nums'
             >
               {formatDateLabel(row.original.renewalExpiry)}
             </Text>
-            <span className='bg-secondary-23/30 text-primary-11 rounded-full px-2 py-0.5 text-[11px] leading-4 font-medium'>
+            <span className='bg-secondary-23/30 text-primary-14 rounded-md px-2 py-0.5 text-[10px] leading-4 font-medium'>
               {row.original.status || '-'}
             </span>
           </div>
@@ -165,22 +161,23 @@ const createSpendingsColumns = (
       {
         id: 'details',
         header: 'Details',
-        size: 150,
+        size: 170,
         cell: ({ row }) => (
-          <div className='flex min-h-[22px] items-center gap-2'>
+          <div className='flex min-h-[22px] items-center gap-2.5'>
             {row.original.lastRenewalProposalUrl ? (
               <a
                 href={row.original.lastRenewalProposalUrl}
                 target='_blank'
                 rel='noopener noreferrer'
-                className='bg-secondary-23/20 text-primary-11/80 inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] leading-4'
+                className='bg-secondary-23/30 text-primary-14 inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md px-2 py-0.5 text-[10px] leading-4 font-medium'
               >
                 {row.original.lastRenewalProposalLabel || 'Proposal'}
               </a>
             ) : null}
             <Text
-              size='11'
-              className='text-primary-14 truncate'
+              size='12'
+              weight='500'
+              className='text-primary-14/70 truncate'
             >
               {row.original.activeDaysInFY ?? '-'}d
             </Text>
@@ -453,12 +450,14 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
           })}
           containerTableClassName='min-h-[473px]'
           tableClassName='w-full table-fixed'
-          headerClassName='bg-secondary-23/20'
-          headerRowClassName='border-secondary-23/60 border-b'
-          headerCellClassName='py-2.5 px-2'
-          cellClassName='py-2 px-2 align-top whitespace-normal'
-          headerTextClassName='text-primary-11 text-[12px] font-semibold'
-          rowClassName='border-secondary-23/40 border-b odd:bg-secondary-23/10 hover:bg-secondary-23/20'
+          headerClassName='bg-transparent'
+          headerRowClassName=''
+          headerCellClassName='pt-3 pb-2.5 px-3'
+          cellClassName='py-2.5 px-3 align-top whitespace-normal'
+          headerTextClassName='text-primary-14/60 text-[10px] font-medium'
+          rowClassName='hover:bg-transparent'
+          enableRowHoverHighlight={false}
+          useColgroup
           enablePagination={data.length > 10}
           paginationClassName='py-2 px-2'
         />

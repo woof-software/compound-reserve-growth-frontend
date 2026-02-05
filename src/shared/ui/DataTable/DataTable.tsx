@@ -50,6 +50,8 @@ interface DataTableProps<T> {
   paginationButtonClassName?: string;
   footerContent?: ReactNode;
   initialSort?: { id: string; desc: boolean };
+  enableRowHoverHighlight?: boolean;
+  useColgroup?: boolean;
 }
 
 const DataTable = <T,>({
@@ -78,7 +80,9 @@ const DataTable = <T,>({
   paginationButtonsClassName,
   paginationButtonClassName,
   footerContent,
-  initialSort
+  initialSort,
+  enableRowHoverHighlight = true,
+  useColgroup = false
 }: DataTableProps<T>) => {
   const [sorting, setSorting] = useState<SortingState>(
     initialSort ? [{ id: initialSort.id, desc: initialSort.desc }] : []
@@ -134,6 +138,20 @@ const DataTable = <T,>({
     <div className={cn('w-full gap-[26px]', className)}>
       <div className={cn(containerTableClassName)}>
         <table className={cn('w-full', tableClassName)}>
+          {useColgroup && (
+            <colgroup>
+              {table.getHeaderGroups()[0]?.headers.map((header) => (
+                <col
+                  key={header.id}
+                  style={{
+                    width: header.column.columnDef.size,
+                    maxWidth: header.column.columnDef.maxSize,
+                    minWidth: header.column.columnDef.minSize
+                  }}
+                />
+              ))}
+            </colgroup>
+          )}
           <thead className={cn('bg-transparent', headerClassName)}>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
@@ -246,8 +264,11 @@ const DataTable = <T,>({
                       <td
                         key={cell.id}
                         className={cn(
-                          'text-[13px] whitespace-nowrap group-hover:bg-white/5 first:rounded-l-lg last:rounded-r-lg',
+                          'text-[13px] whitespace-nowrap first:rounded-l-lg last:rounded-r-lg',
                           { 'font-medium': index === 0 },
+                          {
+                            'group-hover:bg-white/5': enableRowHoverHighlight
+                          },
                           getAlignmentClass(columnAlign),
                           cellClassName
                         )}

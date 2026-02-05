@@ -30,7 +30,7 @@ const navLinks: NavLinkProps[] = [
   {
     to: commonRoutes.SPENDINGS,
     title: routeTitles.SPENDINGS,
-    icon: 'group-grid'
+    icon: 'nav-spendings'
   },
   {
     to: commonRoutes.INCENTIVES,

@@ -3,7 +3,7 @@ import Text from '@/shared/ui/Text/Text';
 
 const SpendingsPage = () => {
   return (
-    <div className='flex flex-col gap-6 md:gap-[40px] lg:gap-[50px]'>
+    <div className='mx-auto flex w-full max-w-[1084px] flex-col gap-6 md:gap-[40px] lg:gap-[50px]'>
       <div className='mt-5 flex flex-col gap-[15px] px-3 md:mt-0 md:px-0'>
         <Text
           tag='h1'
