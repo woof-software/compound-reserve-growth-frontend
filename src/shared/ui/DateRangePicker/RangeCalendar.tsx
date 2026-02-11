@@ -120,8 +120,6 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
 
   const isStartLocked = Boolean(startDate && !endDate);
   const isEndLocked = Boolean(endDate && !startDate);
-  const isRangeComplete = Boolean(startDate && endDate);
-
   useEffect(() => {
     if (!isStartLocked || !startDate) return;
     const startMonth = getMonthStart(startDate);
@@ -158,18 +156,14 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
 
   const minMonth = minDate ? getMonthStart(minDate) : null;
   const maxMonth = maxDate ? getMonthStart(maxDate) : null;
-  const canGoPrev = !isRangeComplete
-    ? isStartLocked
-      ? rightMonth.getTime() > leftMonth.getTime()
-      : !minMonth || leftMonth.getTime() > minMonth.getTime()
-    : false;
-  const canGoNext = !isRangeComplete
-    ? isStartLocked
-      ? !maxMonth || rightMonth.getTime() < maxMonth.getTime()
-      : isEndLocked
-        ? leftMonth.getTime() < rightMonth.getTime()
-        : !maxMonth || addMonths(rightMonth, 1).getTime() <= maxMonth.getTime()
-    : false;
+  const canGoPrev = isStartLocked
+    ? rightMonth.getTime() > leftMonth.getTime()
+    : !minMonth || leftMonth.getTime() > minMonth.getTime();
+  const canGoNext = isStartLocked
+    ? !maxMonth || rightMonth.getTime() < maxMonth.getTime()
+    : isEndLocked
+      ? leftMonth.getTime() < rightMonth.getTime()
+      : !maxMonth || addMonths(rightMonth, 1).getTime() <= maxMonth.getTime();
 
   const onPrevMonth = () => {
     if (disabled || !canGoPrev) return;
