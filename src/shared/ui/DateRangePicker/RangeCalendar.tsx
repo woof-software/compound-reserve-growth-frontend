@@ -251,7 +251,10 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
         const startMonth = getMonthStart(date);
         setLeftMonth(startMonth);
         setRightMonth(addMonths(startMonth, 1));
-        onChange({ startDate: formatted, endDate: '' });
+        onChange({
+          startDate: formatted,
+          endDate: formatDate(startDate)
+        });
         return;
       }
 
