@@ -301,7 +301,6 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     const weekRowPadding = 'py-1';
     const weekDayCellSize = 'w-10';
     const dayButtonSize = 'h-10 w-10';
-    const dividerClass = 'bg-secondary-39';
 
     return (
       <div className='bg-primary-15 flex h-[372px] w-[304px] flex-col items-center gap-2 p-2'>
@@ -358,7 +357,6 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
             />
           </button>
         </div>
-        <div className={cn('h-px w-full', dividerClass)} />
         <div className='flex w-full flex-col gap-1'>
           <div className={cn('grid w-full grid-cols-7 px-1', weekDaysPadding)}>
             {WEEK_DAYS.map((day) => (
