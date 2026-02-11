@@ -35,6 +35,8 @@ interface DateRangePickerProps {
   showLabels?: boolean;
   showClear?: boolean;
   clearLabel?: string;
+  /** Called when content wants to close the container (e.g. after Clear), same as in SortDrawer/Filter */
+  onClose?: () => void;
 }
 
 interface DateRangePickerPopoverProps extends DateRangePickerProps {
@@ -66,7 +68,8 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   inputClassName,
   showLabels = false,
   showClear = false,
-  clearLabel = 'Clear Filter'
+  clearLabel = 'Clear Filter',
+  onClose: onCloseContainer
 }) => {
   const {
     isOpen: isCalendarOpen,
@@ -97,10 +100,10 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     [onChange, value.startDate]
   );
 
-  const onClear = useCallback(
-    () => onChange({ startDate: '', endDate: '' }),
-    [onChange]
-  );
+  const onClear = useCallback(() => {
+    onChange({ startDate: '', endDate: '' });
+    onCloseContainer?.();
+  }, [onChange, onCloseContainer]);
 
   const handleInputClick = useCallback(
     (event: React.MouseEvent<HTMLInputElement>) => {
@@ -403,7 +406,10 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
           popoverContentClassName
         )}
       >
-        <DateRangePicker {...pickerProps} />
+        <DateRangePicker
+          {...pickerProps}
+          onClose={onCloseModal}
+        />
       </Dropdown>
     </div>
   );
