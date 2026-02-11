@@ -457,7 +457,15 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                         {
                           'cursor-not-allowed': isDayDisabled,
                           'hover:bg-secondary-22':
-                            !isDayDisabled && !isInRange && !disabled
+                            !isDayDisabled &&
+                            !isInRange &&
+                            !disabled &&
+                            !isRangeStart &&
+                            !isRangeEnd,
+                          'hover:brightness-125':
+                            (isRangeStart || isRangeEnd) &&
+                            !isDayDisabled &&
+                            !disabled
                         }
                       )}
                       onClick={() => handleDaySelect(day)}
