@@ -396,7 +396,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                 key={weekIndex}
                 className={cn('grid grid-cols-7 px-1', weekRowPadding)}
               >
-                {week.map((day) => {
+                {week.map((day, dayIndex) => {
                   const isCurrentMonth =
                     day.getUTCMonth() === monthStart.getUTCMonth();
                   const isRangeStart = isSameDay(day, startDate);
@@ -423,12 +423,42 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                         ? 'bg-primary-18'
                         : '';
 
-                  const dayRadius = isSingleSelection
-                    ? 'rounded-lg'
-                    : cn({
-                        'rounded-l-lg': isRangeStart,
-                        'rounded-r-lg': isRangeEnd
+                  let dayRadius: string | undefined;
+
+                  if (isSingleSelection || !startDate || !endDate) {
+                    dayRadius = 'rounded-lg';
+                  } else if (startTime !== null && endTime !== null) {
+                    const prevDay = dayIndex > 0 ? week[dayIndex - 1] : null;
+
+                    const nextDay =
+                      dayIndex < week.length - 1 ? week[dayIndex + 1] : null;
+
+                    const prevTime = prevDay ? prevDay.getTime() : null;
+                    const nextTime = nextDay ? nextDay.getTime() : null;
+
+                    const isPrevInRange =
+                      prevTime !== null &&
+                      prevTime >= startTime &&
+                      prevTime <= endTime;
+                    const isNextInRange =
+                      nextTime !== null &&
+                      nextTime >= startTime &&
+                      nextTime <= endTime;
+
+                    const isSegmentCell =
+                      isRangeStart || isRangeEnd || isInRange;
+                    const isSegmentStart = isSegmentCell && !isPrevInRange;
+                    const isSegmentEnd = isSegmentCell && !isNextInRange;
+
+                    if (isSegmentStart && isSegmentEnd) {
+                      dayRadius = 'rounded-lg';
+                    } else {
+                      dayRadius = cn({
+                        'rounded-l-lg': isSegmentStart,
+                        'rounded-r-lg': isSegmentEnd
                       });
+                    }
+                  }
 
                   const textClass = cn(
                     'text-[13px] font-medium leading-[22px]',
@@ -457,6 +487,12 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                         {
                           'cursor-not-allowed': isDayDisabled,
                           'hover:bg-secondary-22':
+                            !isDayDisabled &&
+                            !isInRange &&
+                            !disabled &&
+                            !isRangeStart &&
+                            !isRangeEnd,
+                          'hover:rounded-lg':
                             !isDayDisabled &&
                             !isInRange &&
                             !disabled &&
