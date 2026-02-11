@@ -61,11 +61,6 @@ const buildMonthWeeks = (monthStart: Date) => {
     weeks.push(week);
   }
 
-  const lastWeek = weeks[weeks.length - 1];
-  if (lastWeek.every((day) => day.getUTCMonth() !== monthStart.getUTCMonth())) {
-    weeks.pop();
-  }
-
   return weeks;
 };
 
@@ -302,15 +297,14 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
       canNext: boolean;
     }
   ) => {
-    const isSixWeeks = weeks.length === 6;
-    const weekDaysPadding = isSixWeeks ? 'py-1' : 'py-2';
-    const weekRowPadding = isSixWeeks ? 'py-0.5' : 'py-1';
-    const weekDayCellSize = isSixWeeks ? 'w-9' : 'w-10';
-    const dayButtonSize = isSixWeeks ? 'h-9 w-9' : 'h-10 w-10';
-    const dividerClass = isSixWeeks ? 'bg-secondary-39/60' : 'bg-secondary-39';
+    const weekDaysPadding = 'py-2';
+    const weekRowPadding = 'py-1';
+    const weekDayCellSize = 'w-10';
+    const dayButtonSize = 'h-10 w-10';
+    const dividerClass = 'bg-secondary-39';
 
     return (
-      <div className='bg-primary-15 flex h-[348px] w-[304px] flex-col items-center gap-2 p-2'>
+      <div className='bg-primary-15 flex h-[372px] w-[304px] flex-col items-center gap-2 p-2'>
         <div className='relative flex h-10 w-full items-center justify-center px-1 py-3'>
           <button
             type='button'
@@ -520,12 +514,12 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
   return (
     <div
       className={cn(
-        'bg-primary-15 flex h-[380px] w-[640px] flex-col items-center gap-4 rounded-lg p-4',
+        'bg-primary-15 flex h-[420px] w-[640px] flex-col items-center gap-4 rounded-lg p-4',
         className,
         { 'pointer-events-none opacity-60': disabled }
       )}
     >
-      <div className='flex h-[348px] w-[608px] flex-row'>
+      <div className='flex h-[388px] w-[608px] flex-row'>
         {renderMonth(leftMonth, leftLabel, leftWeeks, {
           showPrev: true,
           showNext: false,
