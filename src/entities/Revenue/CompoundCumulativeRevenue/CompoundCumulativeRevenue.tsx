@@ -29,7 +29,8 @@ import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSele
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
-import DateRangePicker, {
+import {
+  DateRangePickerPopover,
   DateRangeValue
 } from '@/shared/ui/DateRangePicker/DateRangePicker';
 import Drawer from '@/shared/ui/Drawer/Drawer';
@@ -622,13 +623,12 @@ const Filters = ({
             onTabChange={onBarSizeChange}
             disabled={isLoading}
           />
-          <DateRangePicker
+          <DateRangePickerPopover
             value={dateRange}
             min={minDate}
             max={maxDate}
             onChange={onDateRangeChange}
             disabled={isLoading}
-            variant='popover'
             showLabels
             showClear
             inputClassName='w-full'
@@ -677,13 +677,12 @@ const Filters = ({
         </div>
         <div className='flex flex-col items-end justify-end gap-2 px-0 py-3 lg:hidden'>
           <div className='z-[1] flex items-center gap-2'>
-            <DateRangePicker
+            <DateRangePickerPopover
               value={dateRange}
               min={minDate}
               max={maxDate}
               onChange={onDateRangeChange}
               disabled={isLoading}
-              variant='popover'
               showLabels
               showClear
               inputClassName='w-full'

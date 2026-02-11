@@ -32,14 +32,29 @@ interface DateRangePickerProps {
   disabled?: boolean;
   className?: string;
   inputClassName?: string;
-  triggerClassName?: string;
-  popoverContentClassName?: string;
   showLabels?: boolean;
   showClear?: boolean;
   clearLabel?: string;
-  placeholder?: string;
-  variant?: 'inline' | 'popover';
 }
+
+interface DateRangePickerPopoverProps extends DateRangePickerProps {
+  triggerClassName?: string;
+  popoverContentClassName?: string;
+  placeholder?: string;
+}
+
+const getRangeLabel = (value: DateRangeValue, placeholder: string) => {
+  if (value.startDate && value.endDate) {
+    return `${value.startDate} — ${value.endDate}`;
+  }
+  if (value.startDate) {
+    return `From ${value.startDate}`;
+  }
+  if (value.endDate) {
+    return `Until ${value.endDate}`;
+  }
+  return placeholder;
+};
 
 const DateRangePicker: FC<DateRangePickerProps> = ({
   value,
@@ -49,19 +64,10 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   disabled = false,
   className,
   inputClassName,
-  triggerClassName,
-  popoverContentClassName,
   showLabels = false,
   showClear = false,
-  clearLabel = 'Clear Filter',
-  placeholder = 'Date range',
-  variant = 'inline'
+  clearLabel = 'Clear Filter'
 }) => {
-  const {
-    isOpen: isDropdownOpen,
-    onOpenModal: onOpenDropdown,
-    onCloseModal: onCloseDropdown
-  } = useModal();
   const {
     isOpen: isCalendarOpen,
     onCloseModal: onCloseCalendar,
@@ -118,24 +124,6 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
       ),
     [disabled, inputClassName]
   );
-
-  const rangeLabel = useMemo(() => {
-    if (value.startDate && value.endDate) {
-      return `${value.startDate} — ${value.endDate}`;
-    }
-    if (value.startDate) {
-      return `From ${value.startDate}`;
-    }
-    if (value.endDate) {
-      return `Until ${value.endDate}`;
-    }
-    return placeholder;
-  }, [placeholder, value.endDate, value.startDate]);
-
-  const handleCloseDropdown = useCallback(() => {
-    onCloseDropdown();
-    onCloseCalendar();
-  }, [onCloseCalendar, onCloseDropdown]);
 
   const handleContainerPointerDown = useCallback(
     (target: HTMLElement) => {
@@ -357,64 +345,6 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     </Portal>
   );
 
-  if (variant === 'popover') {
-    const hasSelection = Boolean(value.startDate || value.endDate);
-    const iconName = hasSelection ? 'calendar-check' : 'calendar-uncheck';
-
-    const triggerClasses = cn(
-      'bg-custom-trigger flex h-[32px] items-center gap-1.5 rounded-lg p-1.5 pr-3 text-[11px] font-medium',
-      { 'opacity-60': disabled },
-      triggerClassName
-    );
-
-    return (
-      <>
-        <div className={cn({ 'pointer-events-none': disabled })}>
-          <Dropdown
-            open={isDropdownOpen}
-            onOpen={onOpenDropdown}
-            onClose={handleCloseDropdown}
-            triggerContent={
-              <Button
-                className={triggerClasses}
-                disabled={disabled}
-              >
-                <div className='p-0.5'>
-                  <Icon
-                    name={iconName}
-                    className='h-4 w-4'
-                    isRound={false}
-                  />
-                </div>
-                <Text
-                  size='11'
-                  weight='500'
-                  lineHeight='16'
-                  className={
-                    hasSelection
-                      ? '!text-[var(--color-secondary-10)]'
-                      : '!text-[var(--color-gray-11)]'
-                  }
-                >
-                  {rangeLabel}
-                </Text>
-              </Button>
-            }
-            contentClassName={cn(
-              'bg-transparent p-0 border-none shadow-none max-h-none overflow-visible !overflow-visible !z-[50]',
-              popoverContentClassName
-            )}
-          >
-            {renderInputs()}
-          </Dropdown>
-        </div>
-        <View.Condition if={isCalendarOpen}>
-          {renderCalendarOverlay()}
-        </View.Condition>
-      </>
-    );
-  }
-
   return (
     <>
       {renderInputs()}
@@ -425,4 +355,66 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   );
 };
 
+const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
+  placeholder = 'Date range',
+  triggerClassName,
+  popoverContentClassName,
+  ...pickerProps
+}) => {
+  const { value, disabled = false } = pickerProps;
+  const { isOpen, onOpenModal, onCloseModal } = useModal();
+  const hasSelection = Boolean(value.startDate || value.endDate);
+  const iconName = hasSelection ? 'calendar-check' : 'calendar-uncheck';
+  const rangeLabel = getRangeLabel(value, placeholder);
+
+  const triggerClasses = cn(
+    'bg-custom-trigger flex h-[32px] items-center gap-1.5 rounded-lg p-1.5 pr-3 text-[11px] font-medium',
+    { 'opacity-60': disabled },
+    triggerClassName
+  );
+
+  return (
+    <div className={cn({ 'pointer-events-none': disabled })}>
+      <Dropdown
+        open={isOpen}
+        onOpen={onOpenModal}
+        onClose={onCloseModal}
+        triggerContent={
+          <Button
+            className={triggerClasses}
+            disabled={disabled}
+          >
+            <div className='p-0.5'>
+              <Icon
+                name={iconName}
+                className='h-4 w-4'
+                isRound={false}
+              />
+            </div>
+            <Text
+              size='11'
+              weight='500'
+              lineHeight='16'
+              className={
+                hasSelection
+                  ? '!text-[var(--color-secondary-10)]'
+                  : '!text-[var(--color-gray-11)]'
+              }
+            >
+              {rangeLabel}
+            </Text>
+          </Button>
+        }
+        contentClassName={cn(
+          'bg-transparent p-0 border-none shadow-none max-h-none overflow-visible !overflow-visible !z-[50]',
+          popoverContentClassName
+        )}
+      >
+        <DateRangePicker {...pickerProps} />
+      </Dropdown>
+    </div>
+  );
+};
+
+export { DateRangePickerPopover };
 export default DateRangePicker;
