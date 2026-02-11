@@ -224,6 +224,14 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
 
     const formatted = formatDate(date);
 
+    if (!startDate && !endDate) {
+      const startMonth = getMonthStart(date);
+      setLeftMonth(startMonth);
+      setRightMonth(addMonths(startMonth, 1));
+      onChange({ startDate: formatted, endDate: '' });
+      return;
+    }
+
     if (!startDate && endDate) {
       if (endTime !== null && dateTime <= endTime) {
         const startMonth = getMonthStart(date);
@@ -238,23 +246,50 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
       return;
     }
 
-    if (!startDate || endDate) {
-      const startMonth = getMonthStart(date);
-      setLeftMonth(startMonth);
-      setRightMonth(addMonths(startMonth, 1));
-      onChange({ startDate: formatted, endDate: '' });
+    if (startDate && !endDate) {
+      if (startTime !== null && dateTime < startTime) {
+        const startMonth = getMonthStart(date);
+        setLeftMonth(startMonth);
+        setRightMonth(addMonths(startMonth, 1));
+        onChange({ startDate: formatted, endDate: '' });
+        return;
+      }
+
+      onChange({ startDate: formatDate(startDate), endDate: formatted });
       return;
     }
 
-    if (startTime !== null && dateTime < startTime) {
-      const startMonth = getMonthStart(date);
+    if (startDate && endDate && startTime !== null && endTime !== null) {
+      if (dateTime < startTime) {
+        const startMonth = getMonthStart(date);
+        setLeftMonth(startMonth);
+        setRightMonth(addMonths(startMonth, 1));
+        onChange({
+          startDate: formatted,
+          endDate: formatDate(endDate)
+        });
+        return;
+      }
+
+      if (dateTime > endTime) {
+        const startMonth = getMonthStart(startDate);
+        setLeftMonth(startMonth);
+        setRightMonth(addMonths(startMonth, 1));
+        onChange({
+          startDate: formatDate(startDate),
+          endDate: formatted
+        });
+        return;
+      }
+
+      const startMonth = getMonthStart(startDate);
       setLeftMonth(startMonth);
       setRightMonth(addMonths(startMonth, 1));
-      onChange({ startDate: formatted, endDate: '' });
-      return;
+      onChange({
+        startDate: formatDate(startDate),
+        endDate: formatted
+      });
     }
-
-    onChange({ startDate: formatDate(startDate), endDate: formatted });
   };
 
   const renderMonth = (

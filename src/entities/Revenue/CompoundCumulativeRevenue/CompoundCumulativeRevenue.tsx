@@ -171,24 +171,33 @@ const CompoundCumulativeRevenue = ({
     const hasRange = Boolean(dateRange.startDate || dateRange.endDate);
     if (!hasRange) return rawData;
 
-    const startSeconds = dateRange.startDate
-      ? toUtcDateSeconds(dateRange.startDate)
-      : null;
-    const endSeconds = dateRange.endDate
-      ? toUtcDateSeconds(dateRange.endDate, true)
-      : null;
+    const startStr = dateRange.startDate || '';
+    const endStr = dateRange.endDate || '';
 
-    if (startSeconds === null && endSeconds === null) return rawData;
+    if (!startStr && !endStr) return rawData;
 
-    const normalizedStart = startSeconds;
-    const normalizedEnd =
-      startSeconds !== null && endSeconds !== null && startSeconds > endSeconds
-        ? null
-        : endSeconds;
+    let fromStr = startStr;
+    let toStr = endStr;
+
+    if (fromStr && toStr) {
+      const fromSec = toUtcDateSeconds(fromStr);
+      const toSec = toUtcDateSeconds(toStr);
+
+      if (fromSec !== null && toSec !== null && fromSec > toSec) {
+        const tmp = fromStr;
+        fromStr = toStr;
+        toStr = tmp;
+      }
+    }
+
+    const fromSeconds = fromStr ? toUtcDateSeconds(fromStr) : null;
+    const toSeconds = toStr ? toUtcDateSeconds(toStr, true) : null;
+
+    if (fromSeconds === null && toSeconds === null) return rawData;
 
     return rawData.filter((item) => {
-      if (normalizedStart !== null && item.date < normalizedStart) return false;
-      if (normalizedEnd !== null && item.date > normalizedEnd) return false;
+      if (fromSeconds !== null && item.date < fromSeconds) return false;
+      if (toSeconds !== null && item.date > toSeconds) return false;
       return true;
     });
   }, [dateRange, rawData]);
