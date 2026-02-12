@@ -779,7 +779,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
   return (
     <div
       className={cn(
-        'bg-primary-15 flex h-[420px] w-[640px] flex-col items-center gap-4 rounded-lg p-4',
+        'bg-primary-15 outline-secondary-19 flex h-[420px] w-[640px] flex-col items-center gap-4 rounded-lg p-4 outline',
         className,
         { 'pointer-events-none opacity-60': disabled }
       )}
