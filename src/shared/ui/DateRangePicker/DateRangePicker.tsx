@@ -84,6 +84,60 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     left: 0,
     scale: 1
   });
+
+  const updateCalendarPosition = useCallback((forcePlacement = false) => {
+    if (!anchorRef.current) return;
+
+    const rect = anchorRef.current.getBoundingClientRect();
+    const margin = 16;
+    const offset = 8;
+    const calendarWidth = 640;
+    const calendarHeight = 420;
+    const scaleWidth = (window.innerWidth - margin * 2) / calendarWidth;
+    const scaleHeight = (window.innerHeight - margin * 2) / calendarHeight;
+    const scale = Math.min(1, scaleWidth, scaleHeight);
+    const scaledWidth = calendarWidth * scale;
+    const scaledHeight = calendarHeight * scale;
+    const spaceBelow = window.innerHeight - rect.bottom - offset - margin;
+    const spaceAbove = rect.top - offset - margin;
+
+    if (!placementRef.current || forcePlacement) {
+      if (spaceBelow >= scaledHeight) {
+        placementRef.current = 'below';
+      } else if (spaceAbove >= scaledHeight) {
+        placementRef.current = 'above';
+      } else {
+        placementRef.current = spaceBelow >= spaceAbove ? 'below' : 'above';
+      }
+    }
+
+    let left = rect.left;
+    let top =
+      placementRef.current === 'above'
+        ? rect.top - scaledHeight - offset
+        : rect.bottom + offset;
+
+    if (left + scaledWidth + margin > window.innerWidth) {
+      left = window.innerWidth - scaledWidth - margin;
+    }
+    if (left < margin) {
+      left = margin;
+    }
+    if (top + scaledHeight + margin > window.innerHeight) {
+      top = window.innerHeight - scaledHeight - margin;
+    }
+    if (top < margin) {
+      top = margin;
+    }
+
+    setCalendarTransform((prev) => {
+      const isSame =
+        Math.abs(prev.top - top) < 0.5 &&
+        Math.abs(prev.left - left) < 0.5 &&
+        Math.abs(prev.scale - scale) < 0.001;
+      return isSame ? prev : { top, left, scale };
+    });
+  }, []);
   const onStartChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const nextStart = e.target.value;
@@ -113,6 +167,16 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     [disabled]
   );
 
+  const handleCalendarToggleClick = useCallback(() => {
+    if (disabled) return;
+
+    if (!isCalendarOpen) {
+      updateCalendarPosition(true);
+    }
+
+    onToggleCalendar();
+  }, [disabled, isCalendarOpen, onToggleCalendar, updateCalendarPosition]);
+
   const inputClasses = useMemo(
     () =>
       cn(
@@ -137,64 +201,11 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   useEffect(() => {
     if (!isCalendarOpen) return;
 
-    const updatePosition = (forcePlacement = false) => {
-      if (!anchorRef.current) return;
-      const rect = anchorRef.current.getBoundingClientRect();
-      const margin = 16;
-      const offset = 8;
-      const calendarWidth = 640;
-      const calendarHeight = 420;
-      const scaleWidth = (window.innerWidth - margin * 2) / calendarWidth;
-      const scaleHeight = (window.innerHeight - margin * 2) / calendarHeight;
-      const scale = Math.min(1, scaleWidth, scaleHeight);
-      const scaledWidth = calendarWidth * scale;
-      const scaledHeight = calendarHeight * scale;
-      const spaceBelow = window.innerHeight - rect.bottom - offset - margin;
-      const spaceAbove = rect.top - offset - margin;
-
-      if (!placementRef.current || forcePlacement) {
-        if (spaceBelow >= scaledHeight) {
-          placementRef.current = 'below';
-        } else if (spaceAbove >= scaledHeight) {
-          placementRef.current = 'above';
-        } else {
-          placementRef.current = spaceBelow >= spaceAbove ? 'below' : 'above';
-        }
-      }
-
-      let left = rect.left;
-      let top =
-        placementRef.current === 'above'
-          ? rect.top - scaledHeight - offset
-          : rect.bottom + offset;
-
-      if (left + scaledWidth + margin > window.innerWidth) {
-        left = window.innerWidth - scaledWidth - margin;
-      }
-      if (left < margin) {
-        left = margin;
-      }
-      if (top + scaledHeight + margin > window.innerHeight) {
-        top = window.innerHeight - scaledHeight - margin;
-      }
-      if (top < margin) {
-        top = margin;
-      }
-
-      setCalendarTransform((prev) => {
-        const isSame =
-          Math.abs(prev.top - top) < 0.5 &&
-          Math.abs(prev.left - left) < 0.5 &&
-          Math.abs(prev.scale - scale) < 0.001;
-        return isSame ? prev : { top, left, scale };
-      });
-    };
-
     const scheduleUpdate = (forcePlacement = false) => {
       if (rafRef.current !== null) return;
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = null;
-        updatePosition(forcePlacement);
+        updateCalendarPosition(forcePlacement);
       });
     };
 
@@ -214,7 +225,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         rafRef.current = null;
       }
     };
-  }, [isCalendarOpen]);
+  }, [isCalendarOpen, updateCalendarPosition]);
 
   const renderInputs = () => (
     <div
@@ -258,7 +269,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
           <Button
             type='button'
             className='absolute top-1/2 right-3 z-10 h-6 w-6 -translate-y-1/2'
-            onClick={onToggleCalendar}
+            onClick={handleCalendarToggleClick}
             disabled={disabled}
             aria-label='Open calendar'
             data-calendar-toggle='true'
@@ -292,7 +303,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
           <Button
             type='button'
             className='absolute top-1/2 right-3 z-10 h-6 w-6 -translate-y-1/2'
-            onClick={onToggleCalendar}
+            onClick={handleCalendarToggleClick}
             disabled={disabled}
             aria-label='Open calendar'
             data-calendar-toggle='true'
