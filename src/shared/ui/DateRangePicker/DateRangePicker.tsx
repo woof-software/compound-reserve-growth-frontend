@@ -212,7 +212,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     <div
       ref={anchorRef}
       className={cn(
-        'bg-primary-15 relative flex w-[168px] flex-col items-stretch gap-2 rounded-lg p-2 shadow-[inset_0_0_0_0.25px_var(--secondary-39),0px_8px_16px_rgba(13,19,26,0.1),0px_16px_32px_rgba(13,19,26,0.05)]',
+        'bg-primary-15 relative mx-auto flex w-full max-w-[359px] flex-col items-stretch gap-3 rounded-lg p-4 pb-8 shadow-[inset_0_0_0_0.25px_var(--secondary-39),0px_8px_16px_rgba(13,19,26,0.1),0px_16px_32px_rgba(13,19,26,0.05)] lg:mx-0 lg:w-[168px] lg:max-w-none lg:gap-2 lg:p-2 lg:pb-2',
         className,
         { 'z-[50]': isCalendarOpen }
       )}
@@ -294,7 +294,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
       <View.Condition
         if={Boolean(showClear && (value.startDate || value.endDate))}
       >
-        <div className='-mx-2 h-[0.25px] w-[calc(100%+16px)] self-stretch bg-[var(--color-secondary-39)]' />
+        <div className='-mx-4 h-[0.25px] w-[calc(100%+32px)] self-stretch bg-[var(--color-secondary-39)] lg:-mx-2 lg:w-[calc(100%+16px)]' />
         <Button
           className='text-primary-14 hover:bg-secondary-22 hover:shadow-15 h-[30px] w-full rounded-lg px-3 text-[11px] leading-4 font-medium'
           onClick={onClear}
@@ -401,6 +401,8 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
         }
         contentClassName={cn(
           'bg-transparent p-0 border-none shadow-none max-h-none overflow-visible !overflow-visible !z-[50]',
+          '!fixed !left-1/2 !bottom-2 !top-auto !w-[calc(100vw-16px)] !max-w-[359px] !-translate-x-1/2',
+          'lg:!absolute lg:!left-auto lg:!right-0 lg:!bottom-auto lg:!top-10 lg:!w-auto lg:!max-w-none lg:!translate-x-0',
           popoverContentClassName
         )}
       >
