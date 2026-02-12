@@ -392,7 +392,7 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
               className={
                 hasSelection
                   ? '!text-[var(--color-secondary-10)]'
-                  : '!text-[var(--color-gray-11)]'
+                  : '!text-[var(--color-primary-14)]'
               }
             >
               {rangeLabel}
