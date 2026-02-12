@@ -78,6 +78,8 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   } = useModal();
   const anchorRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
+  const [calendarInitialValue, setCalendarInitialValue] =
+    useState<DateRangeValue>(value);
   const [calendarTransform, setCalendarTransform] = useState({
     top: 0,
     left: 0,
@@ -91,7 +93,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     const margin = 16;
     const offset = 8;
     const calendarWidth = 640;
-    const calendarHeight = 420;
+    const calendarHeight = 460;
     const scaleWidth = (window.innerWidth - margin * 2) / calendarWidth;
     const scaleHeight = (window.innerHeight - margin * 2) / calendarHeight;
     const scale = Math.min(1, scaleWidth, scaleHeight);
@@ -151,10 +153,18 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     if (disabled) return;
 
     if (!isCalendarOpen) {
+      setCalendarInitialValue(value);
+
       updateCalendarPosition();
       onToggleCalendar();
     }
-  }, [disabled, isCalendarOpen, onToggleCalendar, updateCalendarPosition]);
+  }, [
+    disabled,
+    isCalendarOpen,
+    onToggleCalendar,
+    updateCalendarPosition,
+    value
+  ]);
 
   const inputClasses = useMemo(
     () =>
@@ -308,34 +318,60 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
 
   const renderCalendarOverlay = () => (
     <Portal>
-      <div
-        className='fixed inset-0 z-[40] bg-black/15 backdrop-blur-[2px] dark:bg-black/40'
-        onMouseDown={() => {
-          onCloseCalendar();
-          onCloseContainer?.();
-        }}
-        onTouchStart={() => {
-          onCloseCalendar();
-          onCloseContainer?.();
-        }}
-      />
-      <div
-        className='shadow-15 absolute top-0 left-0 z-[60] will-change-transform'
-        style={{
-          transform: `translate3d(${calendarTransform.left}px, ${calendarTransform.top}px, 0) scale(${calendarTransform.scale})`,
-          transformOrigin: 'top left'
-        }}
-        onMouseDown={(event) => event.stopPropagation()}
-        onTouchStart={(event) => event.stopPropagation()}
-      >
-        <RangeCalendar
-          value={value}
-          onChange={onChange}
-          min={min}
-          max={max}
-          disabled={disabled}
-        />
-      </div>
+      <View.TabletMobile>
+        <div
+          className='shadow-15 fixed bottom-2 left-1/2 z-[60] w-[359px] max-w-[calc(100vw-16px)] -translate-x-1/2'
+          onMouseDown={(event) => event.stopPropagation()}
+          onTouchStart={(event) => event.stopPropagation()}
+        >
+          <RangeCalendar
+            variant='mobile'
+            value={value}
+            onChange={onChange}
+            min={min}
+            max={max}
+            disabled={disabled}
+            onCancel={() => {
+              onChange(calendarInitialValue);
+              onCloseCalendar();
+              onCloseContainer?.();
+            }}
+            onClose={() => {
+              onCloseCalendar();
+              onCloseContainer?.();
+            }}
+          />
+        </div>
+      </View.TabletMobile>
+      <View.Desktop>
+        <div
+          className='shadow-15 absolute top-0 left-0 z-[60] will-change-transform'
+          style={{
+            transform: `translate3d(${calendarTransform.left}px, ${calendarTransform.top}px, 0) scale(${calendarTransform.scale})`,
+            transformOrigin: 'top left'
+          }}
+          onMouseDown={(event) => event.stopPropagation()}
+          onTouchStart={(event) => event.stopPropagation()}
+        >
+          <RangeCalendar
+            variant='desktop'
+            value={value}
+            onChange={onChange}
+            min={min}
+            max={max}
+            disabled={disabled}
+            onCancel={() => {
+              onChange(calendarInitialValue);
+              onCloseCalendar();
+              onCloseContainer?.();
+            }}
+            onClose={() => {
+              onCloseCalendar();
+              onCloseContainer?.();
+            }}
+          />
+        </div>
+      </View.Desktop>
     </Portal>
   );
 

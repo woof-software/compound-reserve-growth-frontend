@@ -74,23 +74,34 @@ const buildMonthWeeks = (monthStart: Date) => {
   return weeks;
 };
 
+type CalendarVariant = 'mobile' | 'desktop';
+
 interface RangeCalendarProps {
+  variant?: CalendarVariant;
   value: DateRangeValue;
   onChange: (next: DateRangeValue) => void;
   min?: string;
   max?: string;
   disabled?: boolean;
   className?: string;
+  /** Called when user taps Cancel (mobile/adaptive). */
+  onCancel?: () => void;
+  /** Called when user taps Select / closes calendar (mobile/adaptive). */
+  onClose?: () => void;
 }
 
 const RangeCalendar: FC<RangeCalendarProps> = ({
+  variant = 'desktop',
   value,
   onChange,
   min,
   max,
   disabled = false,
-  className
+  className,
+  onCancel,
+  onClose
 }) => {
+  const isMobile = variant === 'mobile';
   const startDate = useMemo(
     () => parseDate(value.startDate),
     [value.startDate]
@@ -268,20 +279,35 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     },
     options?: {
       onLabelClick?: () => void;
+      layout?: 'desktop' | 'mobile';
     }
   ) => {
-    const weekDaysPadding = 'py-2';
-    const weekRowPadding = 'py-1';
-    const weekDayCellSize = 'w-10';
-    const dayButtonSize = 'h-10 w-10';
+    const isMobileLayout = options?.layout === 'mobile';
+    const weekDaysPadding = isMobileLayout ? 'py-2 px-1' : 'py-2';
+    const weekRowPadding = isMobileLayout ? 'py-1' : 'py-1';
+    const weekDayCellSize = isMobileLayout ? 'min-w-0' : 'w-10';
+    const dayButtonSize = isMobileLayout
+      ? 'h-[42px] aspect-square'
+      : 'h-10 w-10';
 
     return (
-      <div className='bg-primary-15 flex h-[372px] w-[304px] flex-col items-center gap-2 p-2'>
-        <div className='relative flex h-10 w-full items-center justify-center px-1 py-3'>
+      <div
+        className={cn(
+          'bg-primary-15 flex flex-col items-center gap-2 p-2',
+          isMobileLayout ? 'h-[390px] w-[295px] gap-2' : 'h-[420px] w-[304px]'
+        )}
+      >
+        <div
+          className={cn(
+            'relative flex w-full items-center justify-center px-1 py-3',
+            isMobileLayout ? 'h-10' : 'h-10'
+          )}
+        >
           <button
             type='button'
             className={cn(
               'absolute top-1/2 left-1 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md transition-opacity',
+              isMobileLayout && 'left-0',
               {
                 'text-secondary-22 cursor-default opacity-40':
                   !controls.canPrev || disabled,
@@ -325,6 +351,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
             type='button'
             className={cn(
               'absolute top-1/2 right-1 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md transition-opacity',
+              isMobileLayout && 'right-0',
               {
                 'text-secondary-22 cursor-default opacity-40':
                   !controls.canNext || disabled,
@@ -344,6 +371,12 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
             />
           </button>
         </div>
+        {isMobileLayout && (
+          <div
+            className='w-full shrink-0 border-t border-[rgba(255,255,255,0.15)]'
+            style={{ borderTopWidth: '0.5px' }}
+          />
+        )}
         <div className='flex w-full flex-col gap-1'>
           <div className={cn('grid w-full grid-cols-7 px-1', weekDaysPadding)}>
             {WEEK_DAYS.map((day) => (
@@ -734,6 +767,20 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     if (viewMode === 'year') {
       return renderYearPicker();
     }
+    if (isMobile) {
+      return renderMonth(
+        leftMonth,
+        leftLabel,
+        leftWeeks,
+        {
+          onPrev: onPrevLeftMonth,
+          onNext: onNextLeftMonth,
+          canPrev: canGoPrevLeft,
+          canNext: canGoNextLeft
+        },
+        { layout: 'mobile' }
+      );
+    }
     return (
       <>
         {renderMonth(
@@ -776,15 +823,61 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     );
   };
 
+  const mobileFooter = isMobile && (onClose || onCancel) && (
+    <>
+      <div
+        className='w-full shrink-0 border-t border-white/15'
+        style={{ borderTopWidth: '0.5px' }}
+      />
+      <div className='flex h-11 w-full gap-2'>
+        <button
+          type='button'
+          className='bg-secondary-16 text-secondary-10 flex h-11 flex-1 items-center justify-center rounded-full text-[13px] leading-[18px] font-medium'
+          onClick={() => {
+            if (onCancel) {
+              onCancel();
+            } else if (onClose) {
+              onClose();
+            }
+          }}
+        >
+          Cancel
+        </button>
+        <button
+          type='button'
+          className='bg-success-11 text-secondary-10 flex h-11 flex-1 items-center justify-center rounded-full text-[13px] leading-[18px] font-medium'
+          onClick={onClose}
+        >
+          Select
+        </button>
+      </div>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <div
+        className={cn(
+          'bg-primary-15 flex w-[359px] max-w-[calc(100vw-16px)] flex-col items-center gap-4 rounded-2xl px-8 pt-4 pb-8',
+          className,
+          { 'pointer-events-none opacity-60': disabled }
+        )}
+      >
+        {renderContent()}
+        {mobileFooter}
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(
-        'bg-primary-15 outline-secondary-19 flex h-[420px] w-[640px] flex-col items-center gap-4 rounded-lg p-4 outline',
+        'bg-primary-15 outline-secondary-19 flex h-[460px] w-[640px] flex-col items-center gap-4 rounded-lg p-4 outline',
         className,
         { 'pointer-events-none opacity-60': disabled }
       )}
     >
-      <div className='flex h-[388px] w-[608px] flex-row'>{renderContent()}</div>
+      <div className='flex h-[436px] w-[608px] flex-row'>{renderContent()}</div>
     </div>
   );
 };
