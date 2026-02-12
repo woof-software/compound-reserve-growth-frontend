@@ -294,7 +294,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
       <div
         className={cn(
           'bg-primary-15 flex flex-col items-center gap-2 p-2',
-          isMobileLayout ? 'h-[390px] w-[295px] gap-2' : 'h-[420px] w-[304px]'
+          isMobileLayout ? 'h-[390px] w-[295px] gap-2' : 'h-[372px] w-[304px]'
         )}
       >
         <div
@@ -342,7 +342,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
               weight='500'
               lineHeight='16'
               align='center'
-              className='text-secondary-10'
+              className='text-secondary-10 dark:text-white'
             >
               {monthLabel}
             </Text>
@@ -488,7 +488,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                   }
 
                   const textClass = cn(
-                    'text-[13px] font-medium leading-[22px]',
+                    'text-[13px] font-[500] leading-[22px] text-center',
                     {
                       'text-white': isRangeStart || isRangeEnd,
                       'text-secondary-10':
@@ -507,7 +507,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                       key={day.toISOString()}
                       type='button'
                       className={cn(
-                        'flex items-center justify-center focus-visible:outline-none',
+                        'flex items-center justify-center font-[500] focus-visible:outline-none',
                         dayButtonSize,
                         dayBackground,
                         dayRadius,
@@ -850,7 +850,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
         </button>
         <button
           type='button'
-          className='bg-success-11 text-secondary-10 flex h-11 flex-1 items-center justify-center rounded-full text-[13px] leading-[18px] font-medium'
+          className='bg-success-11 flex h-11 flex-1 items-center justify-center rounded-full text-[13px] leading-[18px] font-medium text-white'
           onClick={onClose}
         >
           Select
@@ -877,12 +877,12 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
   return (
     <div
       className={cn(
-        'bg-primary-15 outline-secondary-19 flex h-[460px] w-[640px] flex-col items-center gap-4 rounded-lg p-4 outline',
+        'bg-primary-15 outline-secondary-19 flex h-[412px] w-[640px] flex-col items-center gap-4 rounded-lg p-4 outline',
         className,
         { 'pointer-events-none opacity-60': disabled }
       )}
     >
-      <div className='flex h-[436px] w-[608px] flex-row'>{renderContent()}</div>
+      <div className='flex h-[372px] w-[608px] flex-row'>{renderContent()}</div>
     </div>
   );
 };
