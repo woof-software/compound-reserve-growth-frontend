@@ -375,8 +375,22 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                 {week.map((day, dayIndex) => {
                   const isCurrentMonth =
                     day.getUTCMonth() === monthStart.getUTCMonth();
-                  const isRangeStart = isSameDay(day, startDate);
-                  const isRangeEnd = isSameDay(day, endDate);
+                  const isStartMonthPanel =
+                    !!startDate &&
+                    monthStart.getUTCFullYear() ===
+                      startDate.getUTCFullYear() &&
+                    monthStart.getUTCMonth() === startDate.getUTCMonth();
+                  const isEndMonthPanel =
+                    !!endDate &&
+                    monthStart.getUTCFullYear() === endDate.getUTCFullYear() &&
+                    monthStart.getUTCMonth() === endDate.getUTCMonth();
+
+                  const isRangeStartRaw = isSameDay(day, startDate);
+                  const isRangeEndRaw = isSameDay(day, endDate);
+
+                  const isRangeStart = isRangeStartRaw && isStartMonthPanel;
+                  const isRangeEnd = isRangeEndRaw && isEndMonthPanel;
+
                   const dayTime = day.getTime();
                   const isInRange =
                     startTime !== null &&
