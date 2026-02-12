@@ -218,6 +218,8 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     showClear
   ]);
 
+  const hasRange = Boolean(value.startDate || value.endDate);
+
   const renderInputs = () => (
     <div
       ref={anchorRef}
@@ -301,12 +303,13 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
           />
         </div>
       </div>
-      <View.Condition
-        if={Boolean(showClear && (value.startDate || value.endDate))}
-      >
+      <View.Condition if={showClear && hasRange}>
         <div className='-mx-4 h-[0.25px] w-[calc(100%+32px)] self-stretch bg-[var(--color-secondary-39)] lg:-mx-2 lg:w-[calc(100%+16px)]' />
         <Button
-          className='text-primary-14 hover:bg-secondary-22 hover:shadow-15 h-[30px] w-full rounded-lg px-3 text-[11px] leading-4 font-medium'
+          className={cn(
+            'text-primary-14 h-[30px] w-full rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white',
+            'bg-secondary-12 hover:bg-secondary-40'
+          )}
           onClick={onClear}
           disabled={disabled}
         >
@@ -396,6 +399,7 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
   const hasSelection = Boolean(value.startDate || value.endDate);
   const iconName = hasSelection ? 'calendar-check' : 'calendar-uncheck';
   const rangeLabel = getRangeLabel(value, placeholder);
+  const iconColor = hasSelection ? 'secondary-10' : 'color-gray-11';
 
   const triggerClasses = cn(
     'bg-custom-trigger flex h-[32px] items-center gap-1.5 rounded-lg p-1.5 pr-3 text-[11px] font-medium',
@@ -418,6 +422,7 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
               <Icon
                 name={iconName}
                 className='h-4 w-4'
+                color={iconColor}
                 isRound={false}
               />
             </div>
@@ -428,7 +433,7 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
               className={
                 hasSelection
                   ? '!text-[var(--color-secondary-10)]'
-                  : '!text-[var(--color-primary-14)]'
+                  : '!text-[var(--color-gray-11)]'
               }
             >
               {rangeLabel}
