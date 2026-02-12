@@ -17,6 +17,7 @@ import Portal from '@/shared/ui/Portal/Portal';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
+import { CALENDAR_DESKTOP } from './constants';
 import RangeCalendar from './RangeCalendar';
 
 export type DateRangeValue = {
@@ -35,7 +36,6 @@ interface DateRangePickerProps {
   showLabels?: boolean;
   showClear?: boolean;
   clearLabel?: string;
-  /** Called when content wants to close the container (e.g. after Clear), same as in SortDrawer/Filter */
   onClose?: () => void;
 }
 
@@ -45,18 +45,14 @@ interface DateRangePickerPopoverProps extends DateRangePickerProps {
   placeholder?: string;
 }
 
-const getRangeLabel = (value: DateRangeValue, placeholder: string) => {
+function getRangeLabel(value: DateRangeValue, placeholder: string): string {
   if (value.startDate && value.endDate) {
     return `${value.startDate} — ${value.endDate}`;
   }
-  if (value.startDate) {
-    return `From ${value.startDate}`;
-  }
-  if (value.endDate) {
-    return `Until ${value.endDate}`;
-  }
+  if (value.startDate) return `From ${value.startDate}`;
+  if (value.endDate) return `Until ${value.endDate}`;
   return placeholder;
-};
+}
 
 const DateRangePicker: FC<DateRangePickerProps> = ({
   value,
@@ -90,12 +86,14 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     if (!anchorRef.current) return;
 
     const rect = anchorRef.current.getBoundingClientRect();
-    const margin = 16;
-    const offset = 8;
-    const calendarWidth = 640;
-    const calendarHeight = 460;
-    const scaleWidth = (window.innerWidth - margin * 2) / calendarWidth;
-    const scaleHeight = (window.innerHeight - margin * 2) / calendarHeight;
+    const {
+      WIDTH: calendarWidth,
+      HEIGHT: calendarHeight,
+      MARGIN,
+      OFFSET_Y
+    } = CALENDAR_DESKTOP;
+    const scaleWidth = (window.innerWidth - MARGIN * 2) / calendarWidth;
+    const scaleHeight = (window.innerHeight - MARGIN * 2) / calendarHeight;
     const scale = Math.min(1, scaleWidth, scaleHeight);
     const scaledWidth = calendarWidth * scale;
 
@@ -103,13 +101,13 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     const scrollY = window.scrollY || window.pageYOffset;
 
     let left = rect.left + scrollX;
-    const top = rect.bottom + offset + scrollY;
+    const top = rect.bottom + OFFSET_Y + scrollY;
 
-    if (left + scaledWidth + margin > scrollX + window.innerWidth) {
-      left = scrollX + window.innerWidth - scaledWidth - margin;
+    if (left + scaledWidth + MARGIN > scrollX + window.innerWidth) {
+      left = scrollX + window.innerWidth - scaledWidth - MARGIN;
     }
-    if (left < scrollX + margin) {
-      left = scrollX + margin;
+    if (left < scrollX + MARGIN) {
+      left = scrollX + MARGIN;
     }
 
     setCalendarTransform((prev) => {
@@ -200,7 +198,6 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
 
     scheduleUpdate();
     const handleResize = () => scheduleUpdate();
-
     window.addEventListener('resize', handleResize);
 
     return () => {
@@ -210,13 +207,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         rafRef.current = null;
       }
     };
-  }, [
-    isCalendarOpen,
-    updateCalendarPosition,
-    value.startDate,
-    value.endDate,
-    showClear
-  ]);
+  }, [isCalendarOpen, updateCalendarPosition, value.startDate, value.endDate]);
 
   const hasRange = Boolean(value.startDate || value.endDate);
 
