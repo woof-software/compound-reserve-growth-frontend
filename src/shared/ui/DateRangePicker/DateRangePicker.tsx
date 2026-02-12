@@ -172,9 +172,8 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
 
     if (!isCalendarOpen) {
       updateCalendarPosition(true);
+      onToggleCalendar();
     }
-
-    onToggleCalendar();
   }, [disabled, isCalendarOpen, onToggleCalendar, updateCalendarPosition]);
 
   const inputClasses = useMemo(
@@ -329,8 +328,14 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     <Portal>
       <div
         className='fixed inset-0 z-[40] bg-black/15 backdrop-blur-[2px] dark:bg-black/40'
-        onMouseDown={onCloseCalendar}
-        onTouchStart={onCloseCalendar}
+        onMouseDown={() => {
+          onCloseCalendar();
+          onCloseContainer?.();
+        }}
+        onTouchStart={() => {
+          onCloseCalendar();
+          onCloseContainer?.();
+        }}
       />
       <div
         className='shadow-15 fixed top-0 left-0 z-[60] will-change-transform'
