@@ -77,7 +77,6 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     onToggleModal: onToggleCalendar
   } = useModal();
   const anchorRef = useRef<HTMLDivElement>(null);
-  const placementRef = useRef<'below' | 'above' | null>(null);
   const rafRef = useRef<number | null>(null);
   const [calendarTransform, setCalendarTransform] = useState({
     top: 0,
@@ -85,7 +84,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     scale: 1
   });
 
-  const updateCalendarPosition = useCallback((forcePlacement = false) => {
+  const updateCalendarPosition = useCallback(() => {
     if (!anchorRef.current) return;
 
     const rect = anchorRef.current.getBoundingClientRect();
@@ -97,37 +96,18 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     const scaleHeight = (window.innerHeight - margin * 2) / calendarHeight;
     const scale = Math.min(1, scaleWidth, scaleHeight);
     const scaledWidth = calendarWidth * scale;
-    const scaledHeight = calendarHeight * scale;
-    const spaceBelow = window.innerHeight - rect.bottom - offset - margin;
-    const spaceAbove = rect.top - offset - margin;
 
-    if (!placementRef.current || forcePlacement) {
-      if (spaceBelow >= scaledHeight) {
-        placementRef.current = 'below';
-      } else if (spaceAbove >= scaledHeight) {
-        placementRef.current = 'above';
-      } else {
-        placementRef.current = spaceBelow >= spaceAbove ? 'below' : 'above';
-      }
-    }
+    const scrollX = window.scrollX || window.pageXOffset;
+    const scrollY = window.scrollY || window.pageYOffset;
 
-    let left = rect.left;
-    let top =
-      placementRef.current === 'above'
-        ? rect.top - scaledHeight - offset
-        : rect.bottom + offset;
+    let left = rect.left + scrollX;
+    const top = rect.bottom + offset + scrollY;
 
-    if (left + scaledWidth + margin > window.innerWidth) {
-      left = window.innerWidth - scaledWidth - margin;
+    if (left + scaledWidth + margin > scrollX + window.innerWidth) {
+      left = scrollX + window.innerWidth - scaledWidth - margin;
     }
-    if (left < margin) {
-      left = margin;
-    }
-    if (top + scaledHeight + margin > window.innerHeight) {
-      top = window.innerHeight - scaledHeight - margin;
-    }
-    if (top < margin) {
-      top = margin;
+    if (left < scrollX + margin) {
+      left = scrollX + margin;
     }
 
     setCalendarTransform((prev) => {
@@ -171,7 +151,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     if (disabled) return;
 
     if (!isCalendarOpen) {
-      updateCalendarPosition(true);
+      updateCalendarPosition();
       onToggleCalendar();
     }
   }, [disabled, isCalendarOpen, onToggleCalendar, updateCalendarPosition]);
@@ -200,31 +180,33 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   useEffect(() => {
     if (!isCalendarOpen) return;
 
-    const scheduleUpdate = (forcePlacement = false) => {
+    const scheduleUpdate = () => {
       if (rafRef.current !== null) return;
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = null;
-        updateCalendarPosition(forcePlacement);
+        updateCalendarPosition();
       });
     };
 
-    scheduleUpdate(true);
-    const handleResize = () => scheduleUpdate(true);
-    const handleScroll = () => scheduleUpdate(false);
+    scheduleUpdate();
+    const handleResize = () => scheduleUpdate();
 
     window.addEventListener('resize', handleResize);
-    window.addEventListener('scroll', handleScroll, true);
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('scroll', handleScroll, true);
-      placementRef.current = null;
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
       }
     };
-  }, [isCalendarOpen, updateCalendarPosition]);
+  }, [
+    isCalendarOpen,
+    updateCalendarPosition,
+    value.startDate,
+    value.endDate,
+    showClear
+  ]);
 
   const renderInputs = () => (
     <div
@@ -338,7 +320,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         }}
       />
       <div
-        className='shadow-15 fixed top-0 left-0 z-[60] will-change-transform'
+        className='shadow-15 absolute top-0 left-0 z-[60] will-change-transform'
         style={{
           transform: `translate3d(${calendarTransform.left}px, ${calendarTransform.top}px, 0) scale(${calendarTransform.scale})`,
           transformOrigin: 'top left'
