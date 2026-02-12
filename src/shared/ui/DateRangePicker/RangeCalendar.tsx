@@ -399,11 +399,11 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
               </div>
             ))}
           </div>
-          <div className='flex w-full flex-col'>
+          <div className='flex w-full flex-col gap-0'>
             {weeks.map((week, weekIndex) => (
               <div
                 key={weekIndex}
-                className={cn('grid grid-cols-7 px-1', weekRowPadding)}
+                className={cn('grid grid-cols-7 gap-0 px-1', weekRowPadding)}
               >
                 {week.map((day, dayIndex) => {
                   const isCurrentMonth =
@@ -446,33 +446,37 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                         ? 'bg-primary-18'
                         : '';
 
-                  let dayRadius: string | undefined;
+                  const prevDay = dayIndex > 0 ? week[dayIndex - 1] : null;
+                  const nextDay =
+                    dayIndex < week.length - 1 ? week[dayIndex + 1] : null;
+                  const prevTime = prevDay ? prevDay.getTime() : null;
+                  const nextTime = nextDay ? nextDay.getTime() : null;
+                  const isPrevInRange =
+                    startTime !== null &&
+                    endTime !== null &&
+                    prevTime !== null &&
+                    prevTime >= startTime &&
+                    prevTime <= endTime;
+                  const isNextInRange =
+                    startTime !== null &&
+                    endTime !== null &&
+                    nextTime !== null &&
+                    nextTime >= startTime &&
+                    nextTime <= endTime;
+                  const isSegmentCell = isRangeStart || isRangeEnd || isInRange;
+                  const isSegmentStart = isSegmentCell && !isPrevInRange;
+                  const isSegmentEnd = isSegmentCell && !isNextInRange;
+                  const rangeFillShadow =
+                    isSegmentCell &&
+                    isNextInRange &&
+                    (isRangeStart || isRangeEnd
+                      ? 'shadow-[1px_0_0_0_var(--color-success-11)]'
+                      : 'shadow-[1px_0_0_0_var(--color-primary-18)]');
 
+                  let dayRadius: string | undefined;
                   if (isSingleSelection || !startDate || !endDate) {
                     dayRadius = 'rounded-lg';
                   } else if (startTime !== null && endTime !== null) {
-                    const prevDay = dayIndex > 0 ? week[dayIndex - 1] : null;
-
-                    const nextDay =
-                      dayIndex < week.length - 1 ? week[dayIndex + 1] : null;
-
-                    const prevTime = prevDay ? prevDay.getTime() : null;
-                    const nextTime = nextDay ? nextDay.getTime() : null;
-
-                    const isPrevInRange =
-                      prevTime !== null &&
-                      prevTime >= startTime &&
-                      prevTime <= endTime;
-                    const isNextInRange =
-                      nextTime !== null &&
-                      nextTime >= startTime &&
-                      nextTime <= endTime;
-
-                    const isSegmentCell =
-                      isRangeStart || isRangeEnd || isInRange;
-                    const isSegmentStart = isSegmentCell && !isPrevInRange;
-                    const isSegmentEnd = isSegmentCell && !isNextInRange;
-
                     if (isSegmentStart && isSegmentEnd) {
                       dayRadius = 'rounded-lg';
                     } else {
@@ -507,6 +511,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                         dayButtonSize,
                         dayBackground,
                         dayRadius,
+                        rangeFillShadow,
                         {
                           'cursor-not-allowed': isDayDisabled,
                           'hover:bg-secondary-22':
