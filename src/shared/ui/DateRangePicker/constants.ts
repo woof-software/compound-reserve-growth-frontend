@@ -15,6 +15,10 @@ export const MONTH_LABELS = [
   'Dec'
 ] as const;
 
+export const DESKTOP_MIN_WIDTH_PX = 1024;
+
+export const MEDIA_QUERY_DESKTOP = `(min-width: ${DESKTOP_MIN_WIDTH_PX}px)`;
+
 /** Desktop calendar overlay dimensions (used for positioning and layout). */
 export const CALENDAR_DESKTOP = {
   WIDTH: 640,

@@ -17,7 +17,7 @@ import Portal from '@/shared/ui/Portal/Portal';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-import { CALENDAR_DESKTOP } from './constants';
+import { CALENDAR_DESKTOP, MEDIA_QUERY_DESKTOP } from './constants';
 import RangeCalendar from './RangeCalendar';
 
 export type DateRangeValue = {
@@ -74,6 +74,14 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   } = useModal();
   const anchorRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
+  const isCalendarOpenRef = useRef(isCalendarOpen);
+  const isDesktopRef = useRef(
+    typeof window !== 'undefined' &&
+      window.matchMedia(MEDIA_QUERY_DESKTOP).matches
+  );
+
+  isCalendarOpenRef.current = isCalendarOpen;
+
   const [calendarInitialValue, setCalendarInitialValue] =
     useState<DateRangeValue>(value);
   const [calendarTransform, setCalendarTransform] = useState({
@@ -207,7 +215,38 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         rafRef.current = null;
       }
     };
-  }, [isCalendarOpen, updateCalendarPosition, value.startDate, value.endDate]);
+  }, [
+    isCalendarOpen,
+    updateCalendarPosition,
+    value.startDate,
+    value.endDate,
+    showClear
+  ]);
+
+  useEffect(() => {
+    const mql =
+      typeof window !== 'undefined'
+        ? window.matchMedia(MEDIA_QUERY_DESKTOP)
+        : null;
+    if (!mql) return;
+
+    const checkViewportAndClose = () => {
+      const isDesktop = mql.matches;
+      const wasDesktop = isDesktopRef.current;
+      if (wasDesktop !== isDesktop && isCalendarOpenRef.current) {
+        onCloseCalendar();
+      }
+      isDesktopRef.current = isDesktop;
+    };
+
+    isDesktopRef.current = mql.matches;
+    mql.addEventListener('change', checkViewportAndClose);
+    window.addEventListener('resize', checkViewportAndClose);
+    return () => {
+      mql.removeEventListener('change', checkViewportAndClose);
+      window.removeEventListener('resize', checkViewportAndClose);
+    };
+  }, [onCloseCalendar]);
 
   const hasRange = Boolean(value.startDate || value.endDate);
 
@@ -294,19 +333,26 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
           />
         </div>
       </div>
-      <View.Condition if={showClear && hasRange}>
-        <div className='-mx-4 h-[0.25px] w-[calc(100%+32px)] self-stretch bg-[var(--color-secondary-39)] lg:-mx-2 lg:w-[calc(100%+16px)]' />
-        <Button
-          className={cn(
-            'text-primary-14 h-[30px] w-full rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white',
-            'bg-secondary-12 hover:bg-secondary-40'
-          )}
-          onClick={onClear}
-          disabled={disabled}
+      {showClear && (
+        <div
+          className='min-h-[30.25px]'
+          aria-hidden={!hasRange}
         >
-          {clearLabel}
-        </Button>
-      </View.Condition>
+          <View.Condition if={hasRange}>
+            <div className='-mx-4 h-[0.25px] w-[calc(100%+32px)] self-stretch bg-[var(--color-secondary-39)] lg:-mx-2 lg:w-[calc(100%+16px)]' />
+            <Button
+              className={cn(
+                'text-primary-14 h-[30px] w-full rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white',
+                'bg-secondary-12 hover:bg-secondary-40'
+              )}
+              onClick={onClear}
+              disabled={disabled}
+            >
+              {clearLabel}
+            </Button>
+          </View.Condition>
+        </div>
+      )}
     </div>
   );
 

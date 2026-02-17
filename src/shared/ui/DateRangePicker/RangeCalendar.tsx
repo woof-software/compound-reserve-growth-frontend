@@ -68,11 +68,34 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
   const minTime = minDate?.getTime() ?? null;
   const maxTime = maxDate?.getTime() ?? null;
 
-  const [leftMonth, setLeftMonth] = useState<Date>(() =>
-    getInitialMonthStart(startDate, endDate)
+  const getInitialMonths = useCallback((): { left: Date; right: Date } => {
+    const hasSelection = Boolean(startDate || endDate);
+    const minMonthStart = minDate ? getMonthStart(minDate) : null;
+    const maxMonthStart = maxDate ? getMonthStart(maxDate) : null;
+
+    if (!hasSelection && maxMonthStart) {
+      let right = maxMonthStart;
+      let left = addMonths(right, -1);
+
+      if (minMonthStart && left.getTime() < minMonthStart.getTime()) {
+        left = minMonthStart;
+      }
+      if (left.getTime() >= right.getTime()) {
+        right = left;
+      }
+
+      return { left, right };
+    }
+
+    const base = getInitialMonthStart(startDate, endDate);
+    return { left: base, right: addMonths(base, 1) };
+  }, [endDate, maxDate, minDate, startDate]);
+
+  const [leftMonth, setLeftMonth] = useState<Date>(
+    () => getInitialMonths().left
   );
-  const [rightMonth, setRightMonth] = useState<Date>(() =>
-    addMonths(getInitialMonthStart(startDate, endDate), 1)
+  const [rightMonth, setRightMonth] = useState<Date>(
+    () => getInitialMonths().right
   );
   const [viewMode, setViewMode] = useState<ViewMode>('day');
   const [activeSide, setActiveSide] = useState<ActiveSide>('left');
@@ -84,12 +107,50 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
   const minMonth = minDate ? getMonthStart(minDate) : null;
   const maxMonth = maxDate ? getMonthStart(maxDate) : null;
 
+  const clampMonthToRange = useCallback(
+    (monthStart: Date): Date => {
+      if (minMonth && monthStart.getTime() < minMonth.getTime())
+        return new Date(minMonth.getTime());
+      if (maxMonth && monthStart.getTime() > maxMonth.getTime())
+        return new Date(maxMonth.getTime());
+      return monthStart;
+    },
+    [maxMonth, minMonth]
+  );
+
+  const isMonthInRange = useCallback(
+    (monthStart: Date): boolean => {
+      if (minMonth && monthStart.getTime() < minMonth.getTime()) return false;
+      if (maxMonth && monthStart.getTime() > maxMonth.getTime()) return false;
+      return true;
+    },
+    [maxMonth, minMonth]
+  );
+
+  const isYearInRange = useCallback(
+    (year: number): boolean => {
+      const yearFirstMonth = new Date(Date.UTC(year, 0, 1));
+      const yearLastMonth = new Date(Date.UTC(year, 11, 1));
+      if (maxMonth && yearFirstMonth.getTime() > maxMonth.getTime())
+        return false;
+      if (minMonth && yearLastMonth.getTime() < minMonth.getTime())
+        return false;
+      return true;
+    },
+    [maxMonth, minMonth]
+  );
+
   const canGoPrevLeft = !minMonth || leftMonth.getTime() > minMonth.getTime();
   const canGoNextLeft =
     !maxMonth || addMonths(leftMonth, 1).getTime() <= maxMonth.getTime();
   const canGoPrevRight = !minMonth || rightMonth.getTime() > minMonth.getTime();
   const canGoNextRight =
     !maxMonth || addMonths(rightMonth, 1).getTime() <= maxMonth.getTime();
+
+  useEffect(() => {
+    setLeftMonth((prev) => clampMonthToRange(prev));
+    setRightMonth((prev) => clampMonthToRange(prev));
+  }, [clampMonthToRange]);
 
   useEffect(() => {
     setYearPageStart((prev) => {
@@ -143,29 +204,21 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
       const formatted = formatDate(date);
 
       if (!startDate && !endDate) {
-        const startMonth = getMonthStart(date);
-        setLeftMonth(startMonth);
-        setRightMonth(addMonths(startMonth, 1));
         onChange({ startDate: formatted, endDate: '' });
         return;
       }
 
       if (!startDate && endDate) {
         if (endTime !== null && dateTime <= endTime) {
-          setLeftMonth(getMonthStart(date));
           onChange({ startDate: formatted, endDate: value.endDate });
           return;
         }
-        setLeftMonth(addMonths(getMonthStart(date), -1));
-        setRightMonth(getMonthStart(date));
         onChange({ startDate: formatDate(endDate!), endDate: formatted });
         return;
       }
 
       if (startDate && !endDate) {
         if (startTime !== null && dateTime < startTime) {
-          setLeftMonth(getMonthStart(date));
-          setRightMonth(addMonths(getMonthStart(date), 1));
           onChange({
             startDate: formatted,
             endDate: formatDate(startDate)
@@ -178,7 +231,6 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
 
       if (startDate && endDate && startTime !== null && endTime !== null) {
         if (dateTime < startTime) {
-          setLeftMonth(getMonthStart(date));
           onChange({
             startDate: formatted,
             endDate: formatDate(endDate)
@@ -507,17 +559,23 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
   const renderMonthPicker = useCallback(() => {
     const activeMonth = activeSide === 'left' ? leftMonth : rightMonth;
     const year = activeMonth.getUTCFullYear();
+    const monthIndex = activeMonth.getUTCMonth();
+
+    const prevYearMonth = new Date(Date.UTC(year - 1, monthIndex, 1));
+    const nextYearMonth = new Date(Date.UTC(year + 1, monthIndex, 1));
+    const canGoPrevYear = isYearInRange(year - 1);
+    const canGoNextYear = isYearInRange(year + 1);
 
     const handlePrevYear = () => {
-      if (disabled) return;
-      const next = new Date(Date.UTC(year - 1, activeMonth.getUTCMonth(), 1));
+      if (disabled || !canGoPrevYear) return;
+      const next = clampMonthToRange(prevYearMonth);
       if (activeSide === 'left') setLeftMonth(next);
       else setRightMonth(next);
     };
 
     const handleNextYear = () => {
-      if (disabled) return;
-      const next = new Date(Date.UTC(year + 1, activeMonth.getUTCMonth(), 1));
+      if (disabled || !canGoNextYear) return;
+      const next = clampMonthToRange(nextYearMonth);
       if (activeSide === 'left') setLeftMonth(next);
       else setRightMonth(next);
     };
@@ -529,7 +587,9 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
 
     const handleMonthSelect = (monthIndex: number) => {
       if (disabled) return;
-      const next = new Date(Date.UTC(year, monthIndex, 1));
+      const candidate = new Date(Date.UTC(year, monthIndex, 1));
+      if (!isMonthInRange(candidate)) return;
+      const next = candidate;
       if (activeSide === 'left') setLeftMonth(next);
       else setRightMonth(next);
       setViewMode('day');
@@ -548,10 +608,16 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
         <div className='relative flex h-10 w-full items-center justify-center px-1 py-3'>
           <button
             type='button'
-            className='hover:bg-secondary-22 absolute top-1/2 left-1 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md'
+            className={cn(
+              'absolute top-1/2 left-1 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md transition-opacity',
+              {
+                'cursor-default opacity-40': !canGoPrevYear || disabled,
+                'hover:bg-secondary-22': canGoPrevYear && !disabled
+              }
+            )}
             onClick={handlePrevYear}
             aria-label='Previous year'
-            disabled={disabled}
+            disabled={!canGoPrevYear || disabled}
           >
             <Icon
               name='arrow-left'
@@ -578,10 +644,16 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
           </button>
           <button
             type='button'
-            className='hover:bg-secondary-22 absolute top-1/2 right-1 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md'
+            className={cn(
+              'absolute top-1/2 right-1 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md transition-opacity',
+              {
+                'cursor-default opacity-40': !canGoNextYear || disabled,
+                'hover:bg-secondary-22': canGoNextYear && !disabled
+              }
+            )}
             onClick={handleNextYear}
             aria-label='Next year'
-            disabled={disabled}
+            disabled={!canGoNextYear || disabled}
           >
             <Icon
               name='arrow-right'
@@ -592,48 +664,79 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
           </button>
         </div>
         <div className='grid h-full w-full grid-cols-4 place-items-center gap-y-6'>
-          {MONTH_LABELS.map((label, index) => (
-            <button
-              key={label}
-              type='button'
-              className={cn(
-                'text-secondary-10 hover:bg-secondary-22 flex h-9 w-16 items-center justify-center rounded-lg text-[13px] leading-[22px] font-medium',
-                { 'bg-success-11 text-white': isSelectedMonth(index) }
-              )}
-              onClick={() => handleMonthSelect(index)}
-              disabled={disabled}
-            >
-              {label}
-            </button>
-          ))}
+          {MONTH_LABELS.map((label, index) => {
+            const monthStart = new Date(Date.UTC(year, index, 1));
+            const isDisabledMonth = !isMonthInRange(monthStart);
+            return (
+              <button
+                key={label}
+                type='button'
+                className={cn(
+                  'text-secondary-10 flex h-9 w-16 items-center justify-center rounded-lg text-[13px] leading-[22px] font-medium',
+                  {
+                    'bg-success-11 text-white': isSelectedMonth(index),
+                    'cursor-not-allowed opacity-40':
+                      isDisabledMonth || disabled,
+                    'hover:bg-secondary-22': !isDisabledMonth && !disabled
+                  }
+                )}
+                onClick={() => handleMonthSelect(index)}
+                disabled={isDisabledMonth || disabled}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
     );
-  }, [activeSide, disabled, leftMonth, rightMonth]);
+  }, [
+    activeSide,
+    clampMonthToRange,
+    disabled,
+    isMonthInRange,
+    isYearInRange,
+    leftMonth,
+    rightMonth
+  ]);
 
   const renderYearPicker = useCallback(() => {
     const years = Array.from({ length: 12 }, (_, idx) => yearPageStart + idx);
+    const baseMonth =
+      activeSide === 'left'
+        ? leftMonth.getUTCMonth()
+        : rightMonth.getUTCMonth();
+    const minYear = minDate?.getUTCFullYear() ?? null;
+    const maxYear = maxDate?.getUTCFullYear() ?? null;
+    const canGoPrevPage = minYear === null || yearPageStart > minYear;
+    const canGoNextPage = maxYear === null || yearPageStart + 11 < maxYear;
 
     const handlePrevPage = () => {
-      if (disabled) return;
+      if (disabled || !canGoPrevPage) return;
       setYearPageStart((prev) => prev - 12);
     };
 
     const handleNextPage = () => {
-      if (disabled) return;
+      if (disabled || !canGoNextPage) return;
       setYearPageStart((prev) => prev + 12);
     };
 
     const handleYearSelect = (year: number) => {
       if (disabled) return;
-      const baseMonth =
-        activeSide === 'left'
-          ? leftMonth.getUTCMonth()
-          : rightMonth.getUTCMonth();
-      const next = new Date(Date.UTC(year, baseMonth, 1));
+      const candidate = new Date(Date.UTC(year, baseMonth, 1));
+      const next = clampMonthToRange(candidate);
       if (activeSide === 'left') setLeftMonth(next);
       else setRightMonth(next);
       setViewMode('month');
+    };
+
+    const isYearDisabled = (year: number): boolean => {
+      const yearFirstMonth = new Date(Date.UTC(year, 0, 1));
+      const yearLastMonth = new Date(Date.UTC(year, 11, 1));
+      if (maxMonth && yearFirstMonth.getTime() > maxMonth.getTime())
+        return true;
+      if (minMonth && yearLastMonth.getTime() < minMonth.getTime()) return true;
+      return false;
     };
 
     const isSelectedYear = (y: number) =>
@@ -647,10 +750,16 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
         <div className='relative flex h-10 w-full items-center justify-center px-1 py-3'>
           <button
             type='button'
-            className='hover:bg-secondary-22 absolute top-1/2 left-1 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md'
+            className={cn(
+              'absolute top-1/2 left-1 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md transition-opacity',
+              {
+                'cursor-default opacity-40': !canGoPrevPage || disabled,
+                'hover:bg-secondary-22': canGoPrevPage && !disabled
+              }
+            )}
             onClick={handlePrevPage}
             aria-label='Previous years'
-            disabled={disabled}
+            disabled={!canGoPrevPage || disabled}
           >
             <Icon
               name='arrow-left'
@@ -670,10 +779,16 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
           </Text>
           <button
             type='button'
-            className='hover:bg-secondary-22 absolute top-1/2 right-1 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md'
+            className={cn(
+              'absolute top-1/2 right-1 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md transition-opacity',
+              {
+                'cursor-default opacity-40': !canGoNextPage || disabled,
+                'hover:bg-secondary-22': canGoNextPage && !disabled
+              }
+            )}
             onClick={handleNextPage}
             aria-label='Next years'
-            disabled={disabled}
+            disabled={!canGoNextPage || disabled}
           >
             <Icon
               name='arrow-right'
@@ -684,24 +799,42 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
           </button>
         </div>
         <div className='grid h-full w-full grid-cols-4 place-items-center gap-y-6'>
-          {years.map((year) => (
-            <button
-              key={year}
-              type='button'
-              className={cn(
-                'text-secondary-10 hover:bg-secondary-22 flex h-9 w-16 items-center justify-center rounded-lg text-[13px] leading-[22px] font-medium',
-                { 'bg-success-11 text-white': isSelectedYear(year) }
-              )}
-              onClick={() => handleYearSelect(year)}
-              disabled={disabled}
-            >
-              {year}
-            </button>
-          ))}
+          {years.map((year) => {
+            const yearDisabled = isYearDisabled(year);
+            return (
+              <button
+                key={year}
+                type='button'
+                className={cn(
+                  'text-secondary-10 flex h-9 w-16 items-center justify-center rounded-lg text-[13px] leading-[22px] font-medium',
+                  {
+                    'bg-success-11 text-white': isSelectedYear(year),
+                    'cursor-not-allowed opacity-40': yearDisabled || disabled,
+                    'hover:bg-secondary-22': !yearDisabled && !disabled
+                  }
+                )}
+                onClick={() => handleYearSelect(year)}
+                disabled={yearDisabled || disabled}
+              >
+                {year}
+              </button>
+            );
+          })}
         </div>
       </div>
     );
-  }, [activeSide, disabled, leftMonth, rightMonth, yearPageStart]);
+  }, [
+    activeSide,
+    clampMonthToRange,
+    disabled,
+    leftMonth,
+    maxDate,
+    maxMonth,
+    minDate,
+    minMonth,
+    rightMonth,
+    yearPageStart
+  ]);
 
   const renderContent = () => {
     if (viewMode === 'month') return renderMonthPicker();
