@@ -121,8 +121,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
   const isMonthInRange = useCallback(
     (monthStart: Date): boolean => {
       if (minMonth && monthStart.getTime() < minMonth.getTime()) return false;
-      if (maxMonth && monthStart.getTime() > maxMonth.getTime()) return false;
-      return true;
+      return !(maxMonth && monthStart.getTime() > maxMonth.getTime());
     },
     [maxMonth, minMonth]
   );
@@ -133,9 +132,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
       const yearLastMonth = new Date(Date.UTC(year, 11, 1));
       if (maxMonth && yearFirstMonth.getTime() > maxMonth.getTime())
         return false;
-      if (minMonth && yearLastMonth.getTime() < minMonth.getTime())
-        return false;
-      return true;
+      return !(minMonth && yearLastMonth.getTime() < minMonth.getTime());
     },
     [maxMonth, minMonth]
   );
@@ -735,8 +732,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
       const yearLastMonth = new Date(Date.UTC(year, 11, 1));
       if (maxMonth && yearFirstMonth.getTime() > maxMonth.getTime())
         return true;
-      if (minMonth && yearLastMonth.getTime() < minMonth.getTime()) return true;
-      return false;
+      return !!(minMonth && yearLastMonth.getTime() < minMonth.getTime());
     };
 
     const isSelectedYear = (y: number) =>
