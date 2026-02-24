@@ -275,21 +275,26 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
       options?: { onLabelClick?: () => void; layout?: 'desktop' | 'mobile' }
     ) => {
       const isMobileLayout = options?.layout === 'mobile';
-      const weekDaysPadding = isMobileLayout ? 'py-2 px-1' : 'py-2';
+      const weekDaysPadding = 'py-2';
       const weekRowPadding = 'py-1';
       const weekDayCellSize = isMobileLayout ? 'min-w-0' : 'w-10';
-      const dayButtonSize = isMobileLayout
-        ? 'h-[42px] aspect-square'
-        : 'h-10 w-10';
+      const dayButtonSize = isMobileLayout ? 'h-[42px] w-full' : 'h-10 w-10';
 
       return (
         <div
           className={cn(
-            'bg-primary-15 flex flex-col items-center gap-2 p-2',
-            isMobileLayout ? 'h-[390px] w-[295px] gap-2' : 'h-[372px] w-[304px]'
+            'bg-primary-15 flex flex-col items-center gap-2',
+            isMobileLayout
+              ? 'h-auto min-h-[390px] w-full gap-2 p-0'
+              : 'h-[372px] w-[304px] p-2'
           )}
         >
-          <div className='relative flex h-10 w-full items-center justify-center px-1 py-3'>
+          <div
+            className={cn(
+              'relative flex h-10 w-full items-center justify-center py-3',
+              isMobileLayout ? 'px-0' : 'px-1'
+            )}
+          >
             <button
               type='button'
               className={cn(
@@ -358,15 +363,11 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
               />
             </button>
           </div>
-          {isMobileLayout && (
-            <div
-              className='w-full shrink-0 border-t border-white/15'
-              style={{ borderTopWidth: '0.5px' }}
-            />
-          )}
           <div className='flex w-full flex-col gap-1'>
             <div
-              className={cn('grid w-full grid-cols-7 px-1', weekDaysPadding)}
+              className={cn('grid w-full grid-cols-7', weekDaysPadding, {
+                'px-1': !isMobileLayout
+              })}
             >
               {WEEK_DAYS.map((day) => (
                 <div
@@ -392,7 +393,9 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
               {weeks.map((week, weekIndex) => (
                 <div
                   key={weekIndex}
-                  className={cn('grid grid-cols-7 gap-0 px-1', weekRowPadding)}
+                  className={cn('grid grid-cols-7 gap-0', weekRowPadding, {
+                    'px-1': !isMobileLayout
+                  })}
                 >
                   {week.map((day, dayIndex) => {
                     const isCurrentMonth =
@@ -411,6 +414,15 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                     const isRangeEndRaw = isSameDay(day, endDate);
                     const isRangeStart = isRangeStartRaw && isStartMonthPanel;
                     const isRangeEnd = isRangeEndRaw && isEndMonthPanel;
+                    const isSingleDateInOtherMonth =
+                      (!endDate &&
+                        !!startDate &&
+                        isRangeStartRaw &&
+                        !isStartMonthPanel) ||
+                      (!startDate &&
+                        !!endDate &&
+                        isRangeEndRaw &&
+                        !isEndMonthPanel);
                     const dayTime = day.getTime();
                     const isInRange =
                       startTime !== null &&
@@ -428,7 +440,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                     const dayBackground =
                       isRangeStart || isRangeEnd
                         ? 'bg-success-11'
-                        : isInRange
+                        : isInRange || isSingleDateInOtherMonth
                           ? 'bg-primary-18'
                           : '';
                     const prevDay = dayIndex > 0 ? week[dayIndex - 1] : null;
@@ -459,7 +471,12 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                         ? 'shadow-[1px_0_0_0_var(--color-success-11)]'
                         : 'shadow-[1px_0_0_0_var(--color-primary-18)]');
                     let dayRadius: string | undefined;
-                    if (isSingleSelection || !startDate || !endDate) {
+                    if (
+                      isSingleSelection ||
+                      !startDate ||
+                      !endDate ||
+                      isSingleDateInOtherMonth
+                    ) {
                       dayRadius = 'rounded-lg';
                     } else if (startTime !== null && endTime !== null) {
                       dayRadius =
@@ -477,11 +494,16 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                         'text-secondary-10':
                           !isRangeStart &&
                           !isRangeEnd &&
-                          (!isDayDisabled || isInRange),
+                          (!isDayDisabled || isInRange) &&
+                          !isSingleDateInOtherMonth,
                         'text-secondary-33 opacity-[0.58]':
-                          !isCurrentMonth && !isRangeStart && !isRangeEnd,
+                          (!isCurrentMonth && !isRangeStart && !isRangeEnd) ||
+                          isSingleDateInOtherMonth,
                         'text-secondary-33 opacity-40':
-                          isDayDisabled && !isRangeStart && !isRangeEnd
+                          isDayDisabled &&
+                          !isRangeStart &&
+                          !isRangeEnd &&
+                          !isSingleDateInOtherMonth
                       }
                     );
                     return (
@@ -499,12 +521,14 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                             'hover:bg-secondary-22':
                               !isDayDisabled &&
                               !isInRange &&
+                              !isSingleDateInOtherMonth &&
                               !disabled &&
                               !isRangeStart &&
                               !isRangeEnd,
                             'hover:rounded-lg':
                               !isDayDisabled &&
                               !isInRange &&
+                              !isSingleDateInOtherMonth &&
                               !disabled &&
                               !isRangeStart &&
                               !isRangeEnd,
@@ -601,12 +625,23 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
         rightMonth.getUTCMonth() === index);
 
     return (
-      <div className='bg-primary-15 flex h-[372px] w-[608px] flex-col items-center gap-4 p-2'>
-        <div className='relative flex h-10 w-full items-center justify-center px-1 py-3'>
+      <div
+        className={cn(
+          'bg-primary-15 flex flex-col items-center',
+          isMobile ? 'h-auto w-full gap-3 p-0' : 'h-[372px] w-[608px] gap-4 p-2'
+        )}
+      >
+        <div
+          className={cn(
+            'relative flex h-10 w-full items-center justify-center py-3',
+            isMobile ? 'px-0' : 'px-1'
+          )}
+        >
           <button
             type='button'
             className={cn(
               'absolute top-1/2 left-1 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md transition-opacity',
+              isMobile && 'left-0',
               {
                 'cursor-default opacity-40': !canGoPrevYear || disabled,
                 'hover:bg-secondary-22': canGoPrevYear && !disabled
@@ -643,6 +678,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
             type='button'
             className={cn(
               'absolute top-1/2 right-1 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md transition-opacity',
+              isMobile && 'right-0',
               {
                 'cursor-default opacity-40': !canGoNextYear || disabled,
                 'hover:bg-secondary-22': canGoNextYear && !disabled
@@ -660,7 +696,12 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
             />
           </button>
         </div>
-        <div className='grid h-full w-full grid-cols-4 place-items-center gap-y-6'>
+        <div
+          className={cn('grid w-full grid-cols-4 place-items-center', {
+            'h-full gap-y-6': !isMobile,
+            'gap-y-4 pb-2': isMobile
+          })}
+        >
           {MONTH_LABELS.map((label, index) => {
             const monthStart = new Date(Date.UTC(year, index, 1));
             const isDisabledMonth = !isMonthInRange(monthStart);
@@ -691,6 +732,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     activeSide,
     clampMonthToRange,
     disabled,
+    isMobile,
     isMonthInRange,
     isYearInRange,
     leftMonth,
@@ -742,12 +784,23 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     const rangeLabel = `${years[0]} - ${years[years.length - 1]}`;
 
     return (
-      <div className='bg-primary-15 flex h-[372px] w-[608px] flex-col items-center gap-4 p-2'>
-        <div className='relative flex h-10 w-full items-center justify-center px-1 py-3'>
+      <div
+        className={cn(
+          'bg-primary-15 flex flex-col items-center',
+          isMobile ? 'h-auto w-full gap-3 p-0' : 'h-[372px] w-[608px] gap-4 p-2'
+        )}
+      >
+        <div
+          className={cn(
+            'relative flex h-10 w-full items-center justify-center py-3',
+            isMobile ? 'px-0' : 'px-1'
+          )}
+        >
           <button
             type='button'
             className={cn(
               'absolute top-1/2 left-1 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md transition-opacity',
+              isMobile && 'left-0',
               {
                 'cursor-default opacity-40': !canGoPrevPage || disabled,
                 'hover:bg-secondary-22': canGoPrevPage && !disabled
@@ -777,6 +830,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
             type='button'
             className={cn(
               'absolute top-1/2 right-1 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md transition-opacity',
+              isMobile && 'right-0',
               {
                 'cursor-default opacity-40': !canGoNextPage || disabled,
                 'hover:bg-secondary-22': canGoNextPage && !disabled
@@ -794,7 +848,12 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
             />
           </button>
         </div>
-        <div className='grid h-full w-full grid-cols-4 place-items-center gap-y-6'>
+        <div
+          className={cn('grid w-full grid-cols-4 place-items-center', {
+            'h-full gap-y-6': !isMobile,
+            'gap-y-4 pb-2': isMobile
+          })}
+        >
           {years.map((year) => {
             const yearDisabled = isYearDisabled(year);
             return (
@@ -823,6 +882,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     activeSide,
     clampMonthToRange,
     disabled,
+    isMobile,
     leftMonth,
     maxDate,
     maxMonth,
@@ -846,7 +906,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
           canPrev: canGoPrevLeft,
           canNext: canGoNextLeft
         },
-        { layout: 'mobile' }
+        { layout: 'mobile', onLabelClick: handleMonthLabelClickLeft }
       );
     }
     return (
@@ -881,10 +941,6 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
 
   const mobileFooter = isMobile && (onClose || onCancel) && (
     <>
-      <div
-        className='w-full shrink-0 border-t border-white/15'
-        style={{ borderTopWidth: '0.5px' }}
-      />
       <div className='flex h-11 w-full gap-2'>
         <button
           type='button'
@@ -894,7 +950,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
             else onClose?.();
           }}
         >
-          Cancel
+          Clear
         </button>
         <button
           type='button'
@@ -911,7 +967,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     return (
       <div
         className={cn(
-          'bg-primary-15 flex w-[359px] max-w-[calc(100vw-16px)] flex-col items-center gap-4 rounded-2xl px-8 pt-4 pb-8',
+          'bg-primary-15 flex w-full flex-col items-center gap-4 px-0 pt-0 pb-0',
           className,
           { 'pointer-events-none opacity-60': disabled }
         )}

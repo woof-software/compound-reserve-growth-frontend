@@ -103,7 +103,7 @@ const Filter: FC<FilterProps> = ({
 
       activeFilter?.onChange(newSelectedValue);
     },
-    [activeFilter]
+    [activeFilter, isDateRangeFilter]
   );
 
   const onSelectFilter = useCallback((selectedFilter: FilterOptions) => {
@@ -314,12 +314,14 @@ const Filter: FC<FilterProps> = ({
           </View.Condition>
         </View.Condition>
         <View.Condition if={Boolean(isDateRangeFilter)}>
-          <div className='mt-4 px-2'>
+          <div className='mt-4 px-2 pb-24'>
             <DateRangePicker
               value={activeFilter?.dateRange || { startDate: '', endDate: '' }}
               min={activeFilter?.minDate}
               max={activeFilter?.maxDate}
               onChange={(next) => activeFilter?.onDateRangeChange?.(next)}
+              onClose={onSelectedFilterClose}
+              inlineCalendar
               showLabels
               showClear
             />

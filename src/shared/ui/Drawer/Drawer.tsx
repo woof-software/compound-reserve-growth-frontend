@@ -12,6 +12,7 @@ import {
   AnimationProvider,
   useAnimationLibs
 } from '@/shared/ui/AnimationProvider/AnimationProvider';
+import { MEDIA_QUERY_DESKTOP } from '@/shared/lib/viewport/viewport';
 import Portal from '@/shared/ui/Portal/Portal';
 
 interface DrawerProps extends PropsWithChildren {
@@ -61,7 +62,7 @@ const DrawerContent = memo(
         to: { y: 0 },
         config: { duration: DURATION_OPEN, easing: EASE_OPEN }
       });
-    }, [api]);
+    }, [EASE_OPEN, api]);
 
     const animateClose = useCallback(
       (notify = false) => {
@@ -84,7 +85,7 @@ const DrawerContent = memo(
           }
         });
       },
-      [api, onClose]
+      [EASE_CLOSE, api, onClose]
     );
 
     useEffect(() => {
@@ -95,6 +96,37 @@ const DrawerContent = memo(
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen]);
+
+    useEffect(() => {
+      if (!isOpen || typeof window === 'undefined') return;
+
+      const mql = window.matchMedia(MEDIA_QUERY_DESKTOP);
+      const handleViewportChange = () => {
+        if (!mql.matches) return;
+
+        api.stop();
+        setMounted(false);
+        setMeasured(false);
+        closingRef.current = false;
+        document.body.classList.remove('disable-scroll-vertical');
+        onClose?.();
+      };
+
+      mql.addEventListener('change', handleViewportChange);
+      window.addEventListener('resize', handleViewportChange);
+      handleViewportChange();
+
+      return () => {
+        mql.removeEventListener('change', handleViewportChange);
+        window.removeEventListener('resize', handleViewportChange);
+      };
+    }, [api, isOpen, onClose]);
+
+    useEffect(() => {
+      return () => {
+        document.body.classList.remove('disable-scroll-vertical');
+      };
+    }, []);
 
     useEffect(() => {
       if (!mounted) return;

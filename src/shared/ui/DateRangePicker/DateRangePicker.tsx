@@ -17,7 +17,9 @@ import Portal from '@/shared/ui/Portal/Portal';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-import { CALENDAR_DESKTOP, MEDIA_QUERY_DESKTOP } from './constants';
+import { MEDIA_QUERY_DESKTOP } from '@/shared/lib/viewport/viewport';
+
+import { CALENDAR_DESKTOP } from './constants';
 import RangeCalendar from './RangeCalendar';
 
 export type DateRangeValue = {
@@ -37,6 +39,7 @@ interface DateRangePickerProps {
   showClear?: boolean;
   clearLabel?: string;
   onClose?: () => void;
+  inlineCalendar?: boolean;
 }
 
 interface DateRangePickerPopoverProps extends DateRangePickerProps {
@@ -54,6 +57,19 @@ function getRangeLabel(value: DateRangeValue, placeholder: string): string {
   return placeholder;
 }
 
+const subscribeToMediaQuery = (
+  mql: MediaQueryList,
+  listener: () => void
+): (() => void) => {
+  if (typeof mql.addEventListener === 'function') {
+    mql.addEventListener('change', listener);
+    return () => mql.removeEventListener('change', listener);
+  }
+
+  mql.addListener(listener);
+  return () => mql.removeListener(listener);
+};
+
 const DateRangePicker: FC<DateRangePickerProps> = ({
   value,
   onChange,
@@ -65,7 +81,8 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   showLabels = false,
   showClear = false,
   clearLabel = 'Clear Filter',
-  onClose: onCloseContainer
+  onClose: onCloseContainer,
+  inlineCalendar = false
 }) => {
   const {
     isOpen: isCalendarOpen,
@@ -82,8 +99,6 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
 
   isCalendarOpenRef.current = isCalendarOpen;
 
-  const [calendarInitialValue, setCalendarInitialValue] =
-    useState<DateRangeValue>(value);
   const [calendarTransform, setCalendarTransform] = useState({
     top: 0,
     left: 0,
@@ -159,18 +174,10 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     if (disabled) return;
 
     if (!isCalendarOpen) {
-      setCalendarInitialValue(value);
-
       updateCalendarPosition();
       onToggleCalendar();
     }
-  }, [
-    disabled,
-    isCalendarOpen,
-    onToggleCalendar,
-    updateCalendarPosition,
-    value
-  ]);
+  }, [disabled, isCalendarOpen, onToggleCalendar, updateCalendarPosition]);
 
   const inputClasses = useMemo(
     () =>
@@ -240,10 +247,10 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     };
 
     isDesktopRef.current = mql.matches;
-    mql.addEventListener('change', checkViewportAndClose);
+    const unsubscribe = subscribeToMediaQuery(mql, checkViewportAndClose);
     window.addEventListener('resize', checkViewportAndClose);
     return () => {
-      mql.removeEventListener('change', checkViewportAndClose);
+      unsubscribe();
       window.removeEventListener('resize', checkViewportAndClose);
     };
   }, [onCloseCalendar]);
@@ -254,7 +261,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     <div
       ref={anchorRef}
       className={cn(
-        'bg-primary-15 relative mx-auto flex w-full max-w-[359px] flex-col items-stretch gap-3 rounded-lg p-4 pb-8 shadow-[inset_0_0_0_0.25px_var(--secondary-39),0px_8px_16px_rgba(13,19,26,0.1),0px_16px_32px_rgba(13,19,26,0.05)] lg:mx-0 lg:w-[168px] lg:max-w-none lg:gap-2 lg:p-2 lg:pb-2',
+        'bg-primary-15 relative mx-auto flex w-full max-w-[359px] flex-col items-stretch gap-3 rounded-lg p-4 shadow-[inset_0_0_0_0.25px_var(--secondary-39),0px_8px_16px_rgba(13,19,26,0.1),0px_16px_32px_rgba(13,19,26,0.05)] lg:mx-0 lg:w-[168px] lg:max-w-none lg:gap-2 lg:p-2',
         className,
         { 'z-[50]': isCalendarOpen }
       )}
@@ -333,25 +340,20 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
           />
         </div>
       </div>
-      {showClear && (
-        <div
-          className='min-h-[30.25px]'
-          aria-hidden={!hasRange}
-        >
-          <View.Condition if={hasRange}>
-            <div className='-mx-4 h-[0.25px] w-[calc(100%+32px)] self-stretch bg-[var(--color-secondary-39)] lg:-mx-2 lg:w-[calc(100%+16px)]' />
-            <Button
-              className={cn(
-                'text-primary-14 h-[30px] w-full rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white',
-                'bg-secondary-12 hover:bg-secondary-40'
-              )}
-              onClick={onClear}
-              disabled={disabled}
-            >
-              {clearLabel}
-            </Button>
-          </View.Condition>
-        </div>
+      {showClear && hasRange && (
+        <>
+          <div className='-mx-4 h-[0.25px] w-[calc(100%+32px)] self-stretch bg-[var(--color-secondary-39)] lg:-mx-2 lg:w-[calc(100%+16px)]' />
+          <Button
+            className={cn(
+              'text-primary-14 mt-0 h-[30px] w-full rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white',
+              'bg-secondary-12 hover:bg-secondary-40'
+            )}
+            onClick={onClear}
+            disabled={disabled}
+          >
+            {clearLabel}
+          </Button>
+        </>
       )}
     </div>
   );
@@ -372,9 +374,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
             max={max}
             disabled={disabled}
             onCancel={() => {
-              onChange(calendarInitialValue);
-              onCloseCalendar();
-              onCloseContainer?.();
+              onChange({ startDate: '', endDate: '' });
             }}
             onClose={() => {
               onCloseCalendar();
@@ -401,9 +401,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
             max={max}
             disabled={disabled}
             onCancel={() => {
-              onChange(calendarInitialValue);
-              onCloseCalendar();
-              onCloseContainer?.();
+              onChange({ startDate: '', endDate: '' });
             }}
             onClose={() => {
               onCloseCalendar();
@@ -414,6 +412,24 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
       </View.Desktop>
     </Portal>
   );
+
+  if (inlineCalendar) {
+    return (
+      <RangeCalendar
+        variant='mobile'
+        value={value}
+        onChange={onChange}
+        min={min}
+        max={max}
+        disabled={disabled}
+        className={className}
+        onCancel={() => {
+          onChange({ startDate: '', endDate: '' });
+        }}
+        onClose={onCloseContainer}
+      />
+    );
+  }
 
   return (
     <>
@@ -437,6 +453,36 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
   const iconName = hasSelection ? 'calendar-check' : 'calendar-uncheck';
   const rangeLabel = getRangeLabel(value, placeholder);
   const iconColor = hasSelection ? 'secondary-10' : 'color-gray-11';
+  const isDesktopRef = useRef(
+    typeof window !== 'undefined' &&
+      window.matchMedia(MEDIA_QUERY_DESKTOP).matches
+  );
+
+  useEffect(() => {
+    const mql =
+      typeof window !== 'undefined'
+        ? window.matchMedia(MEDIA_QUERY_DESKTOP)
+        : null;
+    if (!mql) return;
+
+    const checkViewportAndClose = () => {
+      const isDesktop = mql.matches;
+      const wasDesktop = isDesktopRef.current;
+      if (wasDesktop !== isDesktop && isOpen) {
+        onCloseModal();
+      }
+      isDesktopRef.current = isDesktop;
+    };
+
+    isDesktopRef.current = mql.matches;
+    const unsubscribe = subscribeToMediaQuery(mql, checkViewportAndClose);
+    window.addEventListener('resize', checkViewportAndClose);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener('resize', checkViewportAndClose);
+    };
+  }, [isOpen, onCloseModal]);
 
   const triggerClasses = cn(
     'bg-custom-trigger flex h-[32px] items-center gap-1.5 rounded-lg p-1.5 pr-3 text-[11px] font-medium',
