@@ -1,17 +1,14 @@
 import { useMemo, useState } from 'react';
 
 import SpendingsTable from '@/components/SpendingsPageTable/SpendingsTable';
+import { spendingsSortColumns, YEAR_TABS } from '@/entities/Spendings/consts';
 import {
-  type SpendingsRow,
   spendingsByYear,
+  type SpendingsRow,
   SpendingsYear
 } from '@/entities/Spendings/data/spendingsData';
 import { useModal } from '@/shared/hooks/useModal';
-import {
-  SortAccessor,
-  SortAdapter,
-  useSorting
-} from '@/shared/hooks/useSorting';
+import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
 import { Format } from '@/shared/lib/utils/numbersFormatter';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
@@ -20,32 +17,24 @@ import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 
-const YEAR_TABS: SpendingsYear[] = ['2024', '2025'];
-
-const spendingsSortColumns: SortAccessor<SpendingsRow>[] = [
-  { accessorKey: 'counterpartyService', header: 'Counterparty / Service' },
-  { accessorKey: 'renewalExpiry', header: 'Renewal / Status' },
-  { accessorKey: 'activeDaysInFY', header: 'Details' }
-];
-
 const SpendingsLedger = () => {
   const [activeYear, setActiveYear] = useState<SpendingsYear>('2024');
+
   const { sortDirection, sortKey, onKeySelect, onTypeSelect, applySorting } =
     useSorting<SpendingsRow>('asc', null);
+
   const sortType: SortAdapter<SpendingsRow> = {
     key: sortKey,
     type: sortDirection
   };
+
   const {
     isOpen: isSortOpen,
     onOpenModal: onSortOpen,
     onCloseModal: onSortClose
   } = useModal();
 
-  const tableData = useMemo(() => {
-    const spendingsYearData = spendingsByYear[activeYear] || [];
-    return applySorting(spendingsYearData);
-  }, [activeYear, applySorting, sortDirection, sortKey]);
+  const tableData = applySorting(spendingsByYear[activeYear] || []);
 
   const totalAllocate = useMemo(() => {
     return tableData.reduce((acc, row) => acc + (row.allocate ?? 0), 0);
@@ -57,12 +46,12 @@ const SpendingsLedger = () => {
       id='spendings-ledger'
       className={{
         header: 'px-5 md:px-10',
-        content: 'px-0 py-2 lg:px-10 lg:py-7',
+        content: 'px-0 pt-0 pb-2 lg:px-10 lg:pb-7',
         container: 'border-background border'
       }}
     >
       <div className='flex flex-col'>
-        <div className='flex flex-wrap items-center justify-between gap-3 px-5 py-3 md:px-10 lg:px-0 mb-2 md:mb-3'>
+        <div className='mb-2 flex flex-wrap items-center justify-between gap-3 px-5 py-3 md:mb-3 md:px-10 lg:px-0'>
           <TabsGroup
             tabs={YEAR_TABS}
             value={activeYear}
