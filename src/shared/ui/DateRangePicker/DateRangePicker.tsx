@@ -340,16 +340,17 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
           />
         </div>
       </div>
-      {showClear && hasRange && (
+      {showClear && (
         <>
           <div className='-mx-4 h-[0.25px] w-[calc(100%+32px)] self-stretch bg-[var(--color-secondary-39)] lg:-mx-2 lg:w-[calc(100%+16px)]' />
           <Button
             className={cn(
               'text-primary-14 mt-0 h-[30px] w-full rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white',
-              'bg-secondary-12 hover:bg-secondary-40'
+              'bg-secondary-12 hover:bg-secondary-40',
+              !hasRange && 'hover:bg-secondary-12 cursor-not-allowed opacity-50'
             )}
             onClick={onClear}
-            disabled={disabled}
+            disabled={disabled || !hasRange}
           >
             {clearLabel}
           </Button>
