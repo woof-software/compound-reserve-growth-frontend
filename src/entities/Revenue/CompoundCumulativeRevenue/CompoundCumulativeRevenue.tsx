@@ -145,13 +145,14 @@ const CompoundCumulativeRevenue = ({
     'symbol'
   ]);
 
-  const { barSize, onBarSizeChange } = useChartControls({
-    initialBarSize: 'D'
-  });
-
   const [dateRange, setDateRange] = useState<DateRangeValue>({
     startDate: '',
     endDate: ''
+  });
+
+  const { barSize, onBarSizeChange } = useChartControls({
+    initialBarSize: 'D',
+    dateRange
   });
 
   const rawData: ChartDataItem[] = useMemo(() => {
