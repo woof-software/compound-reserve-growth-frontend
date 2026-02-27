@@ -10,6 +10,13 @@ import React, {
 
 import { useModal } from '@/shared/hooks/useModal';
 import { cn } from '@/shared/lib/classNames/classNames';
+import {
+  formatTimestampForLabel,
+  inputDateToTimestamp,
+  timestampToInputDate
+} from '@/shared/lib/date/dateUtils';
+import { noop } from '@/shared/lib/utils/utils';
+import { MEDIA_QUERY_DESKTOP } from '@/shared/lib/viewport/viewport';
 import Button from '@/shared/ui/Button/Button';
 import { Dropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -17,21 +24,18 @@ import Portal from '@/shared/ui/Portal/Portal';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-import { MEDIA_QUERY_DESKTOP } from '@/shared/lib/viewport/viewport';
+import Calendar from './Calendar';
+import { DateRangeValue } from './types';
 
-import { CALENDAR_DESKTOP } from './constants';
-import RangeCalendar from './RangeCalendar';
+const CALENDAR_DESKTOP_WIDTH = 640;
+const CALENDAR_DESKTOP_MARGIN = 16;
+const CALENDAR_DESKTOP_OFFSET_Y = 8;
 
-export type DateRangeValue = {
-  startDate: string;
-  endDate: string;
-};
-
-interface DateRangePickerProps {
+export interface DateRangePickerProps {
   value: DateRangeValue;
-  onChange: (next: DateRangeValue) => void;
-  min?: string;
-  max?: string;
+  onChange?: (next: DateRangeValue) => void;
+  min?: number | null;
+  max?: number | null;
   disabled?: boolean;
   className?: string;
   inputClassName?: string;
@@ -42,39 +46,17 @@ interface DateRangePickerProps {
   inlineCalendar?: boolean;
 }
 
-interface DateRangePickerPopoverProps extends DateRangePickerProps {
+export interface DateRangePickerPopoverProps extends DateRangePickerProps {
   triggerClassName?: string;
   popoverContentClassName?: string;
   placeholder?: string;
 }
 
-function getRangeLabel(value: DateRangeValue, placeholder: string): string {
-  if (value.startDate && value.endDate) {
-    return `${value.startDate} — ${value.endDate}`;
-  }
-  if (value.startDate) return `From ${value.startDate}`;
-  if (value.endDate) return `Until ${value.endDate}`;
-  return placeholder;
-}
-
-const subscribeToMediaQuery = (
-  mql: MediaQueryList,
-  listener: () => void
-): (() => void) => {
-  if (typeof mql.addEventListener === 'function') {
-    mql.addEventListener('change', listener);
-    return () => mql.removeEventListener('change', listener);
-  }
-
-  mql.addListener(listener);
-  return () => mql.removeListener(listener);
-};
-
 const DateRangePicker: FC<DateRangePickerProps> = ({
   value,
-  onChange,
-  min,
-  max,
+  onChange = noop,
+  min = null,
+  max = null,
   disabled = false,
   className,
   inputClassName,
@@ -89,78 +71,77 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     onCloseModal: onCloseCalendar,
     onToggleModal: onToggleCalendar
   } = useModal();
+
   const anchorRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
-  const isCalendarOpenRef = useRef(isCalendarOpen);
-  const isDesktopRef = useRef(
-    typeof window !== 'undefined' &&
-      window.matchMedia(MEDIA_QUERY_DESKTOP).matches
-  );
-
-  isCalendarOpenRef.current = isCalendarOpen;
 
   const [calendarTransform, setCalendarTransform] = useState({
     top: 0,
-    left: 0,
-    scale: 1
+    left: 0
   });
 
   const updateCalendarPosition = useCallback(() => {
     if (!anchorRef.current) return;
 
     const rect = anchorRef.current.getBoundingClientRect();
-    const {
-      WIDTH: calendarWidth,
-      HEIGHT: calendarHeight,
-      MARGIN,
-      OFFSET_Y
-    } = CALENDAR_DESKTOP;
-    const scaleWidth = (window.innerWidth - MARGIN * 2) / calendarWidth;
-    const scaleHeight = (window.innerHeight - MARGIN * 2) / calendarHeight;
-    const scale = Math.min(1, scaleWidth, scaleHeight);
-    const scaledWidth = calendarWidth * scale;
 
     const scrollX = window.scrollX || window.pageXOffset;
     const scrollY = window.scrollY || window.pageYOffset;
 
     let left = rect.left + scrollX;
-    const top = rect.bottom + OFFSET_Y + scrollY;
+    const top = rect.bottom + CALENDAR_DESKTOP_OFFSET_Y + scrollY;
 
-    if (left + scaledWidth + MARGIN > scrollX + window.innerWidth) {
-      left = scrollX + window.innerWidth - scaledWidth - MARGIN;
+    if (
+      left + CALENDAR_DESKTOP_WIDTH + CALENDAR_DESKTOP_MARGIN >
+      scrollX + window.innerWidth
+    ) {
+      left =
+        scrollX +
+        window.innerWidth -
+        CALENDAR_DESKTOP_WIDTH -
+        CALENDAR_DESKTOP_MARGIN;
     }
-    if (left < scrollX + MARGIN) {
-      left = scrollX + MARGIN;
+
+    if (left < scrollX + CALENDAR_DESKTOP_MARGIN) {
+      left = scrollX + CALENDAR_DESKTOP_MARGIN;
     }
 
     setCalendarTransform((prev) => {
       const isSame =
-        Math.abs(prev.top - top) < 0.5 &&
-        Math.abs(prev.left - left) < 0.5 &&
-        Math.abs(prev.scale - scale) < 0.001;
-      return isSame ? prev : { top, left, scale };
+        Math.abs(prev.top - top) < 0.5 && Math.abs(prev.left - left) < 0.5;
+      return isSame ? prev : { top, left };
     });
   }, []);
+
   const onStartChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const nextStart = e.target.value;
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const nextStart = inputDateToTimestamp(event.target.value);
       onChange({ startDate: nextStart, endDate: value.endDate });
     },
     [onChange, value.endDate]
   );
 
   const onEndChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const nextEnd = e.target.value;
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const nextEnd = inputDateToTimestamp(event.target.value);
       onChange({ startDate: value.startDate, endDate: nextEnd });
     },
     [onChange, value.startDate]
   );
 
   const onClear = useCallback(() => {
-    onChange({ startDate: '', endDate: '' });
+    onChange({ startDate: null, endDate: null });
     onCloseContainer?.();
   }, [onChange, onCloseContainer]);
+
+  const handleCalendarCancel = useCallback(() => {
+    onChange({ startDate: null, endDate: null });
+  }, [onChange]);
+
+  const handleCalendarClose = useCallback(() => {
+    onCloseCalendar();
+    onCloseContainer?.();
+  }, [onCloseCalendar, onCloseContainer]);
 
   const handleInputClick = useCallback(
     (event: React.MouseEvent<HTMLInputElement>) => {
@@ -171,12 +152,10 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   );
 
   const handleCalendarToggleClick = useCallback(() => {
-    if (disabled) return;
+    if (disabled || isCalendarOpen) return;
 
-    if (!isCalendarOpen) {
-      updateCalendarPosition();
-      onToggleCalendar();
-    }
+    updateCalendarPosition();
+    onToggleCalendar();
   }, [disabled, isCalendarOpen, onToggleCalendar, updateCalendarPosition]);
 
   const inputClasses = useMemo(
@@ -192,19 +171,29 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   const handleContainerPointerDown = useCallback(
     (target: HTMLElement) => {
       if (!isCalendarOpen) return;
-      if (target.closest('[data-calendar-toggle="true"]')) {
-        return;
-      }
+      if (target.closest('[data-calendar-toggle="true"]')) return;
       onCloseCalendar();
     },
     [isCalendarOpen, onCloseCalendar]
   );
+
+  const handleContainerPointerEvent = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      handleContainerPointerDown(event.target as HTMLElement);
+    },
+    [handleContainerPointerDown]
+  );
+
+  const stopPropagation = useCallback((event: React.SyntheticEvent) => {
+    event.stopPropagation();
+  }, []);
 
   useEffect(() => {
     if (!isCalendarOpen) return;
 
     const scheduleUpdate = () => {
       if (rafRef.current !== null) return;
+
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = null;
         updateCalendarPosition();
@@ -212,50 +201,35 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     };
 
     scheduleUpdate();
-    const handleResize = () => scheduleUpdate();
-    window.addEventListener('resize', handleResize);
+
+    const controller = new AbortController();
+    window.addEventListener('resize', scheduleUpdate, {
+      signal: controller.signal
+    });
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      controller.abort();
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
       }
     };
-  }, [
-    isCalendarOpen,
-    updateCalendarPosition,
-    value.startDate,
-    value.endDate,
-    showClear
-  ]);
+  }, [isCalendarOpen, updateCalendarPosition]);
 
-  useEffect(() => {
-    const mql =
-      typeof window !== 'undefined'
-        ? window.matchMedia(MEDIA_QUERY_DESKTOP)
-        : null;
-    if (!mql) return;
-
-    const checkViewportAndClose = () => {
-      const isDesktop = mql.matches;
-      const wasDesktop = isDesktopRef.current;
-      if (wasDesktop !== isDesktop && isCalendarOpenRef.current) {
-        onCloseCalendar();
-      }
-      isDesktopRef.current = isDesktop;
-    };
-
-    isDesktopRef.current = mql.matches;
-    const unsubscribe = subscribeToMediaQuery(mql, checkViewportAndClose);
-    window.addEventListener('resize', checkViewportAndClose);
-    return () => {
-      unsubscribe();
-      window.removeEventListener('resize', checkViewportAndClose);
-    };
-  }, [onCloseCalendar]);
-
-  const hasRange = Boolean(value.startDate || value.endDate);
+  const hasRange = value.startDate !== null || value.endDate !== null;
+  const startInputValue = timestampToInputDate(value.startDate);
+  const endInputValue = timestampToInputDate(value.endDate);
+  const minInput = timestampToInputDate(min);
+  const maxInput = timestampToInputDate(max);
+  const sharedOverlayCalendarProps = {
+    value,
+    onChange,
+    min,
+    max,
+    disabled,
+    onCancel: handleCalendarCancel,
+    onClose: handleCalendarClose
+  };
 
   const renderInputs = () => (
     <div
@@ -265,12 +239,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         className,
         { 'z-[50]': isCalendarOpen }
       )}
-      onMouseDown={(event: React.MouseEvent<HTMLDivElement>) =>
-        handleContainerPointerDown(event.target as HTMLElement)
-      }
-      onTouchStart={(event: React.TouchEvent<HTMLDivElement>) =>
-        handleContainerPointerDown(event.target as HTMLElement)
-      }
+      onPointerDown={handleContainerPointerEvent}
     >
       <div className='flex flex-col gap-0'>
         <View.Condition if={showLabels}>
@@ -288,9 +257,9 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         <div className='relative'>
           <input
             type='date'
-            value={value.startDate}
-            min={min || undefined}
-            max={max || undefined}
+            value={startInputValue}
+            min={minInput}
+            max={maxInput}
             onChange={onStartChange}
             disabled={disabled}
             onClick={handleInputClick}
@@ -322,9 +291,9 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         <div className='relative'>
           <input
             type='date'
-            value={value.endDate}
-            min={min || undefined}
-            max={max || undefined}
+            value={endInputValue}
+            min={minInput}
+            max={maxInput}
             onChange={onEndChange}
             disabled={disabled}
             onClick={handleInputClick}
@@ -364,50 +333,25 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
       <View.TabletMobile>
         <div
           className='shadow-15 fixed bottom-2 left-1/2 z-[60] w-[359px] max-w-[calc(100vw-16px)] -translate-x-1/2'
-          onMouseDown={(event) => event.stopPropagation()}
-          onTouchStart={(event) => event.stopPropagation()}
+          onPointerDown={stopPropagation}
         >
-          <RangeCalendar
+          <Calendar
             variant='mobile'
-            value={value}
-            onChange={onChange}
-            min={min}
-            max={max}
-            disabled={disabled}
-            onCancel={() => {
-              onChange({ startDate: '', endDate: '' });
-            }}
-            onClose={() => {
-              onCloseCalendar();
-              onCloseContainer?.();
-            }}
+            {...sharedOverlayCalendarProps}
           />
         </div>
       </View.TabletMobile>
       <View.Desktop>
         <div
-          className='shadow-15 absolute top-0 left-0 z-[60] will-change-transform'
+          className='shadow-15 absolute top-0 left-0 z-[60]'
           style={{
-            transform: `translate3d(${calendarTransform.left}px, ${calendarTransform.top}px, 0) scale(${calendarTransform.scale})`,
-            transformOrigin: 'top left'
+            transform: `translate3d(${calendarTransform.left}px, ${calendarTransform.top}px, 0)`
           }}
-          onMouseDown={(event) => event.stopPropagation()}
-          onTouchStart={(event) => event.stopPropagation()}
+          onPointerDown={stopPropagation}
         >
-          <RangeCalendar
+          <Calendar
             variant='desktop'
-            value={value}
-            onChange={onChange}
-            min={min}
-            max={max}
-            disabled={disabled}
-            onCancel={() => {
-              onChange({ startDate: '', endDate: '' });
-            }}
-            onClose={() => {
-              onCloseCalendar();
-              onCloseContainer?.();
-            }}
+            {...sharedOverlayCalendarProps}
           />
         </div>
       </View.Desktop>
@@ -416,7 +360,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
 
   if (inlineCalendar) {
     return (
-      <RangeCalendar
+      <Calendar
         variant='mobile'
         value={value}
         onChange={onChange}
@@ -424,9 +368,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         max={max}
         disabled={disabled}
         className={className}
-        onCancel={() => {
-          onChange({ startDate: '', endDate: '' });
-        }}
+        onCancel={handleCalendarCancel}
         onClose={onCloseContainer}
       />
     );
@@ -450,38 +392,44 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
 }) => {
   const { value, disabled = false } = pickerProps;
   const { isOpen, onOpenModal, onCloseModal } = useModal();
-  const hasSelection = Boolean(value.startDate || value.endDate);
-  const iconName = hasSelection ? 'calendar-check' : 'calendar-uncheck';
-  const rangeLabel = getRangeLabel(value, placeholder);
-  const iconColor = hasSelection ? 'secondary-10' : 'color-gray-11';
-  const isDesktopRef = useRef(
-    typeof window !== 'undefined' &&
-      window.matchMedia(MEDIA_QUERY_DESKTOP).matches
-  );
+  const wasDesktopRef = useRef<boolean | null>(null);
+
+  const hasSelection = value.startDate !== null || value.endDate !== null;
+
+  const rangeLabel = useMemo(() => {
+    if (value.startDate !== null && value.endDate !== null) {
+      return `${formatTimestampForLabel(value.startDate)} - ${formatTimestampForLabel(value.endDate)}`;
+    }
+    if (value.startDate !== null) {
+      return `${formatTimestampForLabel(value.startDate)} - ...`;
+    }
+    if (value.endDate !== null) {
+      return `... - ${formatTimestampForLabel(value.endDate)}`;
+    }
+    return placeholder;
+  }, [placeholder, value.endDate, value.startDate]);
 
   useEffect(() => {
-    const mql =
-      typeof window !== 'undefined'
-        ? window.matchMedia(MEDIA_QUERY_DESKTOP)
-        : null;
-    if (!mql) return;
+    if (!isOpen) return;
 
-    const checkViewportAndClose = () => {
+    const mql = window.matchMedia(MEDIA_QUERY_DESKTOP);
+    wasDesktopRef.current = mql.matches;
+
+    const closeOnViewportTransition = () => {
       const isDesktop = mql.matches;
-      const wasDesktop = isDesktopRef.current;
-      if (wasDesktop !== isDesktop && isOpen) {
+      const wasDesktop = wasDesktopRef.current;
+
+      if (wasDesktop !== null && wasDesktop !== isDesktop) {
         onCloseModal();
       }
-      isDesktopRef.current = isDesktop;
+
+      wasDesktopRef.current = isDesktop;
     };
 
-    isDesktopRef.current = mql.matches;
-    const unsubscribe = subscribeToMediaQuery(mql, checkViewportAndClose);
-    window.addEventListener('resize', checkViewportAndClose);
+    mql.addEventListener('change', closeOnViewportTransition);
 
     return () => {
-      unsubscribe();
-      window.removeEventListener('resize', checkViewportAndClose);
+      mql.removeEventListener('change', closeOnViewportTransition);
     };
   }, [isOpen, onCloseModal]);
 
@@ -492,21 +440,19 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
   );
 
   return (
-    <div className={cn({ 'pointer-events-none': disabled })}>
+    <div>
       <Dropdown
         open={isOpen}
+        isDisabled={disabled}
         onOpen={onOpenModal}
         onClose={onCloseModal}
         triggerContent={
-          <Button
-            className={triggerClasses}
-            disabled={disabled}
-          >
+          <div className={triggerClasses}>
             <div className='p-0.5'>
               <Icon
-                name={iconName}
+                name={hasSelection ? 'calendar-check' : 'calendar-uncheck'}
                 className='h-4 w-4'
-                color={iconColor}
+                color={hasSelection ? 'secondary-10' : 'color-gray-11'}
                 isRound={false}
               />
             </div>
@@ -516,18 +462,18 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
               lineHeight='16'
               className={
                 hasSelection
-                  ? '!text-[var(--color-secondary-10)]'
-                  : '!text-[var(--color-gray-11)]'
+                  ? 'text-[var(--color-secondary-10)]'
+                  : 'text-[var(--color-gray-11)]'
               }
             >
               {rangeLabel}
             </Text>
-          </Button>
+          </div>
         }
         contentClassName={cn(
-          'bg-transparent p-0 border-none shadow-none max-h-none overflow-visible !overflow-visible !z-[50]',
-          '!fixed !left-1/2 !bottom-2 !top-auto !w-[calc(100vw-16px)] !max-w-[359px] !-translate-x-1/2',
-          'lg:!absolute lg:!left-auto lg:!right-0 lg:!bottom-auto lg:!top-10 lg:!w-auto lg:!max-w-none lg:!translate-x-0',
+          'bg-transparent border-none p-0 shadow-none max-h-none overflow-visible z-[50]',
+          'fixed left-1/2 bottom-2 top-auto w-[calc(100vw-16px)] max-w-[359px] -translate-x-1/2',
+          'lg:absolute lg:left-auto lg:right-0 lg:bottom-auto lg:top-10 lg:w-auto lg:max-w-none lg:translate-x-0',
           popoverContentClassName
         )}
       >

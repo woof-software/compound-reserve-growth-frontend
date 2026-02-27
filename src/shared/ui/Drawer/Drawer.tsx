@@ -8,11 +8,11 @@ import {
 } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
+import { MEDIA_QUERY_DESKTOP } from '@/shared/lib/viewport/viewport';
 import {
   AnimationProvider,
   useAnimationLibs
 } from '@/shared/ui/AnimationProvider/AnimationProvider';
-import { MEDIA_QUERY_DESKTOP } from '@/shared/lib/viewport/viewport';
 import Portal from '@/shared/ui/Portal/Portal';
 
 interface DrawerProps extends PropsWithChildren {
@@ -23,10 +23,18 @@ interface DrawerProps extends PropsWithChildren {
   isOpen?: boolean;
 
   onClose?: () => void;
+
+  desktopMediaQuery?: string;
 }
 
 const DrawerContent = memo(
-  ({ className, children, onClose, isOpen = false }: DrawerProps) => {
+  ({
+    className,
+    children,
+    onClose,
+    isOpen = false,
+    desktopMediaQuery = MEDIA_QUERY_DESKTOP
+  }: DrawerProps) => {
     const { Spring, Gesture } = useAnimationLibs();
 
     const DURATION_OPEN = 250;
@@ -98,9 +106,9 @@ const DrawerContent = memo(
     }, [isOpen]);
 
     useEffect(() => {
-      if (!isOpen || typeof window === 'undefined') return;
+      if (!isOpen) return;
 
-      const mql = window.matchMedia(MEDIA_QUERY_DESKTOP);
+      const mql = window.matchMedia(desktopMediaQuery);
       const handleViewportChange = () => {
         if (!mql.matches) return;
 
@@ -112,15 +120,18 @@ const DrawerContent = memo(
         onClose?.();
       };
 
+      const controller = new AbortController();
       mql.addEventListener('change', handleViewportChange);
-      window.addEventListener('resize', handleViewportChange);
+      window.addEventListener('resize', handleViewportChange, {
+        signal: controller.signal
+      });
       handleViewportChange();
 
       return () => {
+        controller.abort();
         mql.removeEventListener('change', handleViewportChange);
-        window.removeEventListener('resize', handleViewportChange);
       };
-    }, [api, isOpen, onClose]);
+    }, [api, desktopMediaQuery, isOpen, onClose]);
 
     useEffect(() => {
       return () => {
@@ -194,7 +205,7 @@ const DrawerContent = memo(
       <Portal element={document.getElementById('drawer') ?? document.body}>
         <div
           className={cn(
-            'fixed inset-0 z-10 flex items-end overflow-hidden lg:hidden',
+            'fixed inset-0 z-10 flex items-end overflow-hidden',
             className
           )}
         >

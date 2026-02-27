@@ -1,57 +1,74 @@
 import React, { ChangeEvent, FC, useCallback, useMemo, useState } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
+import { formatTimestampForLabel } from '@/shared/lib/date/dateUtils';
 import { noop } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
-import DateRangePicker, {
-  DateRangeValue
-} from '@/shared/ui/DateRangePicker/DateRangePicker';
+import DateRangePicker from '@/shared/ui/DateRangePicker/DateRangePicker';
+import { DateRangeValue } from '@/shared/ui/DateRangePicker/types';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-export type FilterOptions = {
+type BaseFilterOptions = {
   id: string;
-
   placeholder: string;
-
   total: number;
-
-  selectedOptions: OptionType[];
-
-  options: OptionType[];
-
-  type?: 'select' | 'dateRange';
-
-  dateRange?: DateRangeValue;
-
-  minDate?: string;
-
-  maxDate?: string;
-
-  onDateRangeChange?: (next: DateRangeValue) => void;
-
   disableSelectAll?: boolean;
+};
 
+type SelectFilterOptions = BaseFilterOptions & {
+  type?: 'select';
+  selectedOptions: OptionType[];
+  options: OptionType[];
   onChange?: (selectedOptions: OptionType[]) => void;
 };
 
+type DateRangeFilterOptions = BaseFilterOptions & {
+  type: 'dateRange';
+  dateRange: DateRangeValue;
+  minDate: number | null;
+  maxDate: number | null;
+  onDateRangeChange: (next: DateRangeValue) => void;
+  selectedOptions: OptionType[];
+  options: OptionType[];
+};
+
+export type FilterOptions = SelectFilterOptions | DateRangeFilterOptions;
+
 interface FilterProps {
   isOpen: boolean;
-
   filterOptions: FilterOptions[];
-
   onClose: () => void;
-
   onClearAll?: () => void;
-
   disableClearFilters?: boolean;
 }
 
-const getKey = (f: FilterOptions) => f.id ?? f.placeholder;
+const EMPTY_DATE_RANGE: DateRangeValue = {
+  startDate: null,
+  endDate: null
+};
+
+const isDateRangeFilterOption = (
+  filter: FilterOptions
+): filter is DateRangeFilterOptions => filter.type === 'dateRange';
+
+const getDateRangeLabel = (dateRange: DateRangeValue): string | null => {
+  if (dateRange.startDate !== null && dateRange.endDate !== null) {
+    return `${formatTimestampForLabel(dateRange.startDate)} - ${formatTimestampForLabel(dateRange.endDate)}`;
+  }
+  if (dateRange.startDate !== null) {
+    return `${formatTimestampForLabel(dateRange.startDate)} - ...`;
+  }
+  if (dateRange.endDate !== null) {
+    return `... - ${formatTimestampForLabel(dateRange.endDate)}`;
+  }
+
+  return null;
+};
 
 const Filter: FC<FilterProps> = ({
   isOpen,
@@ -61,86 +78,91 @@ const Filter: FC<FilterProps> = ({
   disableClearFilters = false
 }) => {
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
-
   const [searchValue, setSearchValue] = useState('');
 
   const activeFilter = useMemo<FilterOptions | null>(() => {
     if (!filterOptions.length) return null;
+
     return (
-      filterOptions.find((f) => getKey(f) === selectedKey) ?? filterOptions[0]
+      filterOptions.find((filter) => filter.id === selectedKey) ??
+      filterOptions[0]
     );
   }, [filterOptions, selectedKey]);
 
-  const isDateRangeFilter = activeFilter?.type === 'dateRange';
+  const activeDateRangeFilter = useMemo<DateRangeFilterOptions | null>(() => {
+    if (!activeFilter || !isDateRangeFilterOption(activeFilter)) return null;
+
+    return activeFilter;
+  }, [activeFilter]);
+
+  const activeSelectFilter = useMemo<SelectFilterOptions | null>(() => {
+    if (!activeFilter || isDateRangeFilterOption(activeFilter)) return null;
+
+    return activeFilter;
+  }, [activeFilter]);
 
   const filteredOptions = useMemo(
     () =>
-      activeFilter && !isDateRangeFilter
-        ? activeFilter.options.filter((option) =>
+      activeSelectFilter
+        ? activeSelectFilter.options.filter((option) =>
             option.label.toLowerCase().includes(searchValue.toLowerCase())
           )
         : [],
-    [activeFilter, isDateRangeFilter, searchValue]
+    [activeSelectFilter, searchValue]
   );
 
-  const onChangeSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value);
+  const onChangeSearch = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(event.target.value);
   }, []);
 
   const onSelectOptionInFilter = useCallback(
     (optionToToggle: OptionType) => {
-      if (!activeFilter?.onChange || isDateRangeFilter) return;
+      if (!activeSelectFilter?.onChange) return;
 
-      const isSelected = activeFilter?.selectedOptions.some(
-        (v) => v.id === optionToToggle.id
+      const isSelected = activeSelectFilter.selectedOptions.some(
+        (value) => value.id === optionToToggle.id
       );
-
-      const newSelectedValue = isSelected
-        ? activeFilter?.selectedOptions.filter(
-            (v) => v.id !== optionToToggle.id
+      const nextValue = isSelected
+        ? activeSelectFilter.selectedOptions.filter(
+            (value) => value.id !== optionToToggle.id
           )
-        : [...(activeFilter?.selectedOptions || []), optionToToggle];
+        : [...activeSelectFilter.selectedOptions, optionToToggle];
 
-      activeFilter?.onChange(newSelectedValue);
+      activeSelectFilter.onChange(nextValue);
     },
-    [activeFilter, isDateRangeFilter]
+    [activeSelectFilter]
   );
 
   const onSelectFilter = useCallback((selectedFilter: FilterOptions) => {
-    setSelectedKey(getKey(selectedFilter));
-
+    setSelectedKey(selectedFilter.id);
     setSearchValue('');
   }, []);
 
   const onSelectedFilterClose = useCallback(() => {
     setSearchValue('');
-
     setSelectedKey(null);
   }, []);
 
   const onDrawerClose = useCallback(() => {
     onClose();
-
     setSearchValue('');
-
     setSelectedKey(null);
   }, [onClose]);
 
-  const onSelectAll = () => {
-    if (!activeFilter || isDateRangeFilter) return;
+  const onSelectAll = useCallback(() => {
+    if (!activeSelectFilter?.onChange) return;
 
-    const setFilterValue = activeFilter.onChange;
-
-    if (!setFilterValue) return;
-
-    const selectedItemsNumber = activeFilter.selectedOptions.length ?? 0;
-
-    const relatedOptions = filterOptions.find(({ id }) => id === selectedKey);
-
-    setFilterValue(
-      selectedItemsNumber > 0 ? [] : (relatedOptions?.options ?? [])
+    const hasSelectedItems = activeSelectFilter.selectedOptions.length > 0;
+    activeSelectFilter.onChange(
+      hasSelectedItems ? [] : activeSelectFilter.options
     );
-  };
+  }, [activeSelectFilter]);
+
+  const hasManySelectOptions =
+    activeSelectFilter !== null && activeSelectFilter.options.length > 5;
+  const isSelectionNotEmpty =
+    activeSelectFilter !== null &&
+    activeSelectFilter.selectedOptions.length > 0;
 
   return (
     <Drawer
@@ -160,43 +182,61 @@ const Filter: FC<FilterProps> = ({
         <div className='grid gap-3'>
           <Each
             data={filterOptions}
-            render={(option, index) => (
-              <div
-                key={index}
-                className='flex h-[42px] cursor-pointer items-center justify-between px-3 py-2.5'
-                onClick={() => onSelectFilter(option)}
-              >
-                <div className='flex items-center gap-1.5'>
-                  <Icon
-                    name='plus'
-                    className='h-2.5 w-2.5'
-                    color={cn('primary-14', {
-                      'secondary-41': Boolean(option.total)
-                    })}
-                  />
-                  <Text
-                    size='14'
-                    weight='500'
-                    className={cn('text-primary-14 text-sm font-medium', {
-                      'text-secondary-41': Boolean(option.total)
-                    })}
-                  >
-                    {option.placeholder}
-                  </Text>
-                </div>
-                <View.Condition if={Boolean(option.total)}>
-                  <div className='bg-secondary-46 flex h-6 w-6 items-center justify-center rounded-sm'>
+            render={(option, index) => {
+              const dateRangeLabel = isDateRangeFilterOption(option)
+                ? getDateRangeLabel(option.dateRange)
+                : null;
+              const hasCounter = isDateRangeFilterOption(option)
+                ? Boolean(dateRangeLabel)
+                : option.total > 0;
+
+              return (
+                <div
+                  key={index}
+                  className='flex h-[42px] cursor-pointer items-center justify-between px-3 py-2.5'
+                  onClick={() => onSelectFilter(option)}
+                >
+                  <div className='flex items-center gap-1.5'>
+                    <Icon
+                      name='plus'
+                      className='h-2.5 w-2.5'
+                      color={cn('primary-14', {
+                        'secondary-41': hasCounter
+                      })}
+                    />
                     <Text
-                      size='11'
+                      size='14'
                       weight='500'
-                      className='text-primary-18 leading-none tabular-nums'
+                      className={cn('text-primary-14 text-sm font-medium', {
+                        'text-secondary-41': hasCounter
+                      })}
                     >
-                      {option.total}
+                      {option.placeholder}
                     </Text>
                   </div>
-                </View.Condition>
-              </div>
-            )}
+                  <View.Condition if={hasCounter}>
+                    <div
+                      className={cn(
+                        'bg-secondary-46 flex h-6 items-center justify-center rounded-sm',
+                        isDateRangeFilterOption(option)
+                          ? 'max-w-[200px] px-2'
+                          : 'w-6'
+                      )}
+                    >
+                      <Text
+                        size='11'
+                        weight='500'
+                        className='text-primary-18 leading-none tabular-nums'
+                      >
+                        {isDateRangeFilterOption(option)
+                          ? dateRangeLabel
+                          : option.total}
+                      </Text>
+                    </div>
+                  </View.Condition>
+                </div>
+              );
+            }}
           />
         </div>
         <View.Condition if={!disableClearFilters}>
@@ -228,16 +268,14 @@ const Filter: FC<FilterProps> = ({
             {activeFilter?.placeholder}
           </Text>
         </div>
-        <View.Condition if={Boolean(!isDateRangeFilter)}>
-          <View.Condition
-            if={Boolean(activeFilter && activeFilter?.options?.length > 5)}
-          >
+        <View.Condition if={Boolean(activeSelectFilter)}>
+          <View.Condition if={hasManySelectOptions}>
             <div
               className={cn(
                 'outline-secondary-19 rounded-lg py-2 pr-5 pl-3 outline',
                 {
                   'outline-red-11':
-                    !Boolean(filteredOptions?.length) &&
+                    !Boolean(filteredOptions.length) &&
                     Boolean(searchValue.length)
                 }
               )}
@@ -249,7 +287,7 @@ const Filter: FC<FilterProps> = ({
                 onChange={onChangeSearch}
               />
             </div>
-            <View.Condition if={Boolean(!filteredOptions?.length)}>
+            <View.Condition if={!Boolean(filteredOptions.length)}>
               <div className='mt-3'>
                 <Text
                   size='12'
@@ -266,9 +304,11 @@ const Filter: FC<FilterProps> = ({
             <Each
               data={filteredOptions}
               render={(option, index) => {
-                const isSelected = activeFilter?.selectedOptions.some(
-                  (v) => v.id === option.id
-                );
+                const isSelected = activeSelectFilter
+                  ? activeSelectFilter.selectedOptions.some(
+                      (value) => value.id === option.id
+                    )
+                  : false;
 
                 return (
                   <div
@@ -290,7 +330,7 @@ const Filter: FC<FilterProps> = ({
                         {option.label}
                       </span>
                     </div>
-                    <View.Condition if={Boolean(isSelected)}>
+                    <View.Condition if={isSelected}>
                       <Icon
                         name='check-stroke'
                         className='h-4 w-4'
@@ -301,25 +341,27 @@ const Filter: FC<FilterProps> = ({
               }}
             />
           </div>
-          <View.Condition if={!activeFilter?.disableSelectAll}>
+          <View.Condition if={!activeSelectFilter?.disableSelectAll}>
             <div className='w-full px-2 pt-8 pb-4'>
               <Button
                 className='text-primary-14 flex w-full items-center justify-center rounded-lg text-[11px] font-medium'
                 onClick={onSelectAll}
               >
-                {!!activeFilter?.selectedOptions?.length && 'Clear Selection'}
-                {!activeFilter?.selectedOptions?.length && 'Select All'}
+                {isSelectionNotEmpty && 'Clear Selection'}
+                {!isSelectionNotEmpty && 'Select All'}
               </Button>
             </div>
           </View.Condition>
         </View.Condition>
-        <View.Condition if={Boolean(isDateRangeFilter)}>
+        <View.Condition if={Boolean(activeDateRangeFilter)}>
           <div className='mt-4 px-2 pb-24'>
             <DateRangePicker
-              value={activeFilter?.dateRange || { startDate: '', endDate: '' }}
-              min={activeFilter?.minDate}
-              max={activeFilter?.maxDate}
-              onChange={(next) => activeFilter?.onDateRangeChange?.(next)}
+              value={activeDateRangeFilter?.dateRange ?? EMPTY_DATE_RANGE}
+              min={activeDateRangeFilter?.minDate ?? null}
+              max={activeDateRangeFilter?.maxDate ?? null}
+              onChange={(next) =>
+                activeDateRangeFilter?.onDateRangeChange(next)
+              }
               onClose={onSelectedFilterClose}
               inlineCalendar
               showLabels

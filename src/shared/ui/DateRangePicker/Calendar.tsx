@@ -1,31 +1,29 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
-import Icon from '@/shared/ui/Icon/Icon';
-import Text from '@/shared/ui/Text/Text';
-
 import {
   addMonths,
   buildMonthWeeks,
-  formatDate,
   formatMonthLabel,
   getMonthStart,
-  isSameDay,
-  parseDate
-} from './lib/calendarDateUtils';
-import { MONTH_LABELS, WEEK_DAYS } from './constants';
-import type { DateRangeValue } from './DateRangePicker';
+  isSameDay
+} from '@/shared/lib/date/dateUtils';
+import { noop } from '@/shared/lib/utils/utils';
+import Icon from '@/shared/ui/Icon/Icon';
+import Text from '@/shared/ui/Text/Text';
+
+import type { DateRangeValue } from './types';
 
 type CalendarVariant = 'mobile' | 'desktop';
 type ViewMode = 'day' | 'month' | 'year';
 type ActiveSide = 'left' | 'right';
 
-interface RangeCalendarProps {
+interface CalendarProps {
   variant?: CalendarVariant;
   value: DateRangeValue;
-  onChange: (next: DateRangeValue) => void;
-  min?: string;
-  max?: string;
+  onChange?: (next: DateRangeValue) => void;
+  min?: number | null;
+  max?: number | null;
   disabled?: boolean;
   className?: string;
   onCancel?: () => void;
@@ -39,15 +37,29 @@ interface MonthNavControls {
   canNext: boolean;
 }
 
-const getInitialMonthStart = (start: Date | null, end: Date | null): Date =>
-  getMonthStart(start ?? end ?? new Date());
+const MONTH_LABELS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec'
+] as const;
 
-const RangeCalendar: FC<RangeCalendarProps> = ({
+const WEEK_DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] as const;
+
+const Calendar: FC<CalendarProps> = ({
   variant = 'desktop',
   value,
-  onChange,
-  min,
-  max,
+  onChange = noop,
+  min = null,
+  max = null,
   disabled = false,
   className,
   onCancel,
@@ -56,17 +68,20 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
   const isMobile = variant === 'mobile';
 
   const startDate = useMemo(
-    () => parseDate(value.startDate),
+    () => (value.startDate === null ? null : new Date(value.startDate)),
     [value.startDate]
   );
-  const endDate = useMemo(() => parseDate(value.endDate), [value.endDate]);
-  const minDate = useMemo(() => parseDate(min), [min]);
-  const maxDate = useMemo(() => parseDate(max), [max]);
+  const endDate = useMemo(
+    () => (value.endDate === null ? null : new Date(value.endDate)),
+    [value.endDate]
+  );
+  const minDate = useMemo(() => (min === null ? null : new Date(min)), [min]);
+  const maxDate = useMemo(() => (max === null ? null : new Date(max)), [max]);
 
-  const startTime = startDate?.getTime() ?? null;
-  const endTime = endDate?.getTime() ?? null;
-  const minTime = minDate?.getTime() ?? null;
-  const maxTime = maxDate?.getTime() ?? null;
+  const startTime = value.startDate;
+  const endTime = value.endDate;
+  const minTime = min;
+  const maxTime = max;
 
   const getInitialMonths = useCallback((): { left: Date; right: Date } => {
     const hasSelection = Boolean(startDate || endDate);
@@ -87,7 +102,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
       return { left, right };
     }
 
-    const base = getInitialMonthStart(startDate, endDate);
+    const base = getMonthStart(startDate ?? endDate ?? new Date());
     return { left: base, right: addMonths(base, 1) };
   }, [endDate, maxDate, minDate, startDate]);
 
@@ -110,9 +125,9 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
   const clampMonthToRange = useCallback(
     (monthStart: Date): Date => {
       if (minMonth && monthStart.getTime() < minMonth.getTime())
-        return new Date(minMonth.getTime());
+        return minMonth;
       if (maxMonth && monthStart.getTime() > maxMonth.getTime())
-        return new Date(maxMonth.getTime());
+        return maxMonth;
       return monthStart;
     },
     [maxMonth, minMonth]
@@ -126,23 +141,61 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     [maxMonth, minMonth]
   );
 
-  const isYearInRange = useCallback(
+  const isYearOutOfRange = useCallback(
     (year: number): boolean => {
       const yearFirstMonth = new Date(Date.UTC(year, 0, 1));
       const yearLastMonth = new Date(Date.UTC(year, 11, 1));
       if (maxMonth && yearFirstMonth.getTime() > maxMonth.getTime())
-        return false;
-      return !(minMonth && yearLastMonth.getTime() < minMonth.getTime());
+        return true;
+      return !!(minMonth && yearLastMonth.getTime() < minMonth.getTime());
     },
     [maxMonth, minMonth]
   );
 
-  const canGoPrevLeft = !minMonth || leftMonth.getTime() > minMonth.getTime();
-  const canGoNextLeft =
-    !maxMonth || addMonths(leftMonth, 1).getTime() <= maxMonth.getTime();
-  const canGoPrevRight = !minMonth || rightMonth.getTime() > minMonth.getTime();
-  const canGoNextRight =
-    !maxMonth || addMonths(rightMonth, 1).getTime() <= maxMonth.getTime();
+  const isYearInRange = useCallback(
+    (year: number): boolean => !isYearOutOfRange(year),
+    [isYearOutOfRange]
+  );
+
+  const getMonthNavigation = useCallback(
+    (month: Date): Pick<MonthNavControls, 'canPrev' | 'canNext'> => ({
+      canPrev: !minMonth || month.getTime() > minMonth.getTime(),
+      canNext: !maxMonth || addMonths(month, 1).getTime() <= maxMonth.getTime()
+    }),
+    [maxMonth, minMonth]
+  );
+
+  const leftMonthControls = useMemo<MonthNavControls>(() => {
+    const { canPrev, canNext } = getMonthNavigation(leftMonth);
+    return {
+      canPrev,
+      canNext,
+      onPrev: () => {
+        if (disabled || !canPrev) return;
+        setLeftMonth((prev) => addMonths(prev, -1));
+      },
+      onNext: () => {
+        if (disabled || !canNext) return;
+        setLeftMonth((prev) => addMonths(prev, 1));
+      }
+    };
+  }, [disabled, getMonthNavigation, leftMonth]);
+
+  const rightMonthControls = useMemo<MonthNavControls>(() => {
+    const { canPrev, canNext } = getMonthNavigation(rightMonth);
+    return {
+      canPrev,
+      canNext,
+      onPrev: () => {
+        if (disabled || !canPrev) return;
+        setRightMonth((prev) => addMonths(prev, -1));
+      },
+      onNext: () => {
+        if (disabled || !canNext) return;
+        setRightMonth((prev) => addMonths(prev, 1));
+      }
+    };
+  }, [disabled, getMonthNavigation, rightMonth]);
 
   useEffect(() => {
     setLeftMonth((prev) => clampMonthToRange(prev));
@@ -160,25 +213,16 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     });
   }, [activeSide, leftMonth, rightMonth]);
 
-  const onPrevLeftMonth = useCallback(() => {
-    if (disabled || !canGoPrevLeft) return;
-    setLeftMonth((prev) => addMonths(prev, -1));
-  }, [disabled, canGoPrevLeft]);
-
-  const onNextLeftMonth = useCallback(() => {
-    if (disabled || !canGoNextLeft) return;
-    setLeftMonth((prev) => addMonths(prev, 1));
-  }, [disabled, canGoNextLeft]);
-
-  const onPrevRightMonth = useCallback(() => {
-    if (disabled || !canGoPrevRight) return;
-    setRightMonth((prev) => addMonths(prev, -1));
-  }, [disabled, canGoPrevRight]);
-
-  const onNextRightMonth = useCallback(() => {
-    if (disabled || !canGoNextRight) return;
-    setRightMonth((prev) => addMonths(prev, 1));
-  }, [disabled, canGoNextRight]);
+  const setMonthForActiveSide = useCallback(
+    (month: Date) => {
+      if (activeSide === 'left') {
+        setLeftMonth(month);
+        return;
+      }
+      setRightMonth(month);
+    },
+    [activeSide]
+  );
 
   const handleDaySelect = useCallback(
     (date: Date) => {
@@ -187,75 +231,45 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
       if (minTime !== null && dateTime < minTime) return;
       if (maxTime !== null && dateTime > maxTime) return;
 
-      const isStartSame = isSameDay(date, startDate);
-      const isEndSame = isSameDay(date, endDate);
+      const isStartSame = startDate !== null && isSameDay(date, startDate);
+      const isEndSame = endDate !== null && isSameDay(date, endDate);
+
+      let nextRange: DateRangeValue;
+
       if (isStartSame) {
-        onChange({ startDate: '', endDate: value.endDate });
-        return;
-      }
-      if (isEndSame) {
-        onChange({ startDate: value.startDate, endDate: '' });
-        return;
-      }
-
-      const formatted = formatDate(date);
-
-      if (!startDate && !endDate) {
-        onChange({ startDate: formatted, endDate: '' });
-        return;
-      }
-
-      if (!startDate && endDate) {
-        if (endTime !== null && dateTime <= endTime) {
-          onChange({ startDate: formatted, endDate: value.endDate });
-          return;
-        }
-        onChange({ startDate: formatDate(endDate!), endDate: formatted });
-        return;
-      }
-
-      if (startDate && !endDate) {
-        if (startTime !== null && dateTime < startTime) {
-          onChange({
-            startDate: formatted,
-            endDate: formatDate(startDate)
-          });
-          return;
-        }
-        onChange({ startDate: formatDate(startDate), endDate: formatted });
+        nextRange = { startDate: null, endDate: value.endDate };
+      } else if (isEndSame) {
+        nextRange = { startDate: value.startDate, endDate: null };
+      } else if (value.startDate === null && value.endDate === null) {
+        nextRange = { startDate: dateTime, endDate: null };
+      } else if (value.startDate === null && value.endDate !== null) {
+        nextRange =
+          dateTime <= value.endDate
+            ? { startDate: dateTime, endDate: value.endDate }
+            : { startDate: value.endDate, endDate: dateTime };
+      } else if (value.startDate !== null && value.endDate === null) {
+        nextRange =
+          dateTime < value.startDate
+            ? { startDate: dateTime, endDate: value.startDate }
+            : { startDate: value.startDate, endDate: dateTime };
+      } else if (value.startDate !== null && value.endDate !== null) {
+        nextRange =
+          dateTime < value.startDate
+            ? { startDate: dateTime, endDate: value.endDate }
+            : { startDate: value.startDate, endDate: dateTime };
+      } else {
         return;
       }
 
-      if (startDate && endDate && startTime !== null && endTime !== null) {
-        if (dateTime < startTime) {
-          onChange({
-            startDate: formatted,
-            endDate: formatDate(endDate)
-          });
-          return;
-        }
-        if (dateTime > endTime) {
-          onChange({
-            startDate: formatDate(startDate),
-            endDate: formatted
-          });
-          return;
-        }
-        onChange({
-          startDate: formatDate(startDate),
-          endDate: formatted
-        });
-      }
+      onChange(nextRange);
     },
     [
       disabled,
       endDate,
-      endTime,
       maxTime,
       minTime,
       onChange,
       startDate,
-      startTime,
       value.endDate,
       value.startDate
     ]
@@ -410,8 +424,10 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                       monthStart.getUTCFullYear() ===
                         endDate.getUTCFullYear() &&
                       monthStart.getUTCMonth() === endDate.getUTCMonth();
-                    const isRangeStartRaw = isSameDay(day, startDate);
-                    const isRangeEndRaw = isSameDay(day, endDate);
+                    const isRangeStartRaw =
+                      startDate !== null && isSameDay(day, startDate);
+                    const isRangeEndRaw =
+                      endDate !== null && isSameDay(day, endDate);
                     const isRangeStart = isRangeStartRaw && isStartMonthPanel;
                     const isRangeEnd = isRangeEndRaw && isEndMonthPanel;
                     const isSingleDateInOtherMonth =
@@ -470,6 +486,13 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                       (isRangeStart || isRangeEnd
                         ? 'shadow-[1px_0_0_0_var(--color-success-11)]'
                         : 'shadow-[1px_0_0_0_var(--color-primary-18)]');
+                    const isHoverablePlainDay =
+                      !isDayDisabled &&
+                      !isInRange &&
+                      !isSingleDateInOtherMonth &&
+                      !disabled &&
+                      !isRangeStart &&
+                      !isRangeEnd;
                     let dayRadius: string | undefined;
                     if (
                       isSingleSelection ||
@@ -518,20 +541,8 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
                           rangeFillShadow,
                           {
                             'cursor-not-allowed': isDayDisabled,
-                            'hover:bg-secondary-22':
-                              !isDayDisabled &&
-                              !isInRange &&
-                              !isSingleDateInOtherMonth &&
-                              !disabled &&
-                              !isRangeStart &&
-                              !isRangeEnd,
-                            'hover:rounded-lg':
-                              !isDayDisabled &&
-                              !isInRange &&
-                              !isSingleDateInOtherMonth &&
-                              !disabled &&
-                              !isRangeStart &&
-                              !isRangeEnd,
+                            'hover:bg-secondary-22': isHoverablePlainDay,
+                            'hover:rounded-lg': isHoverablePlainDay,
                             'hover:brightness-125':
                               (isRangeStart || isRangeEnd) &&
                               !isDayDisabled &&
@@ -589,16 +600,12 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
 
     const handlePrevYear = () => {
       if (disabled || !canGoPrevYear) return;
-      const next = clampMonthToRange(prevYearMonth);
-      if (activeSide === 'left') setLeftMonth(next);
-      else setRightMonth(next);
+      setMonthForActiveSide(clampMonthToRange(prevYearMonth));
     };
 
     const handleNextYear = () => {
       if (disabled || !canGoNextYear) return;
-      const next = clampMonthToRange(nextYearMonth);
-      if (activeSide === 'left') setLeftMonth(next);
-      else setRightMonth(next);
+      setMonthForActiveSide(clampMonthToRange(nextYearMonth));
     };
 
     const handleYearLabelClick = () => {
@@ -608,11 +615,9 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
 
     const handleMonthSelect = (monthIndex: number) => {
       if (disabled) return;
-      const candidate = new Date(Date.UTC(year, monthIndex, 1));
-      if (!isMonthInRange(candidate)) return;
-      const next = candidate;
-      if (activeSide === 'left') setLeftMonth(next);
-      else setRightMonth(next);
+      const nextMonth = new Date(Date.UTC(year, monthIndex, 1));
+      if (!isMonthInRange(nextMonth)) return;
+      setMonthForActiveSide(nextMonth);
       setViewMode('day');
     };
 
@@ -736,7 +741,8 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     isMonthInRange,
     isYearInRange,
     leftMonth,
-    rightMonth
+    rightMonth,
+    setMonthForActiveSide
   ]);
 
   const renderYearPicker = useCallback(() => {
@@ -745,8 +751,8 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
       activeSide === 'left'
         ? leftMonth.getUTCMonth()
         : rightMonth.getUTCMonth();
-    const minYear = minDate?.getUTCFullYear() ?? null;
-    const maxYear = maxDate?.getUTCFullYear() ?? null;
+    const minYear = minMonth?.getUTCFullYear() ?? null;
+    const maxYear = maxMonth?.getUTCFullYear() ?? null;
     const canGoPrevPage = minYear === null || yearPageStart > minYear;
     const canGoNextPage = maxYear === null || yearPageStart + 11 < maxYear;
 
@@ -762,19 +768,11 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
 
     const handleYearSelect = (year: number) => {
       if (disabled) return;
-      const candidate = new Date(Date.UTC(year, baseMonth, 1));
-      const next = clampMonthToRange(candidate);
-      if (activeSide === 'left') setLeftMonth(next);
-      else setRightMonth(next);
+      const nextMonth = clampMonthToRange(
+        new Date(Date.UTC(year, baseMonth, 1))
+      );
+      setMonthForActiveSide(nextMonth);
       setViewMode('month');
-    };
-
-    const isYearDisabled = (year: number): boolean => {
-      const yearFirstMonth = new Date(Date.UTC(year, 0, 1));
-      const yearLastMonth = new Date(Date.UTC(year, 11, 1));
-      if (maxMonth && yearFirstMonth.getTime() > maxMonth.getTime())
-        return true;
-      return !!(minMonth && yearLastMonth.getTime() < minMonth.getTime());
     };
 
     const isSelectedYear = (y: number) =>
@@ -855,7 +853,7 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
           })}
         >
           {years.map((year) => {
-            const yearDisabled = isYearDisabled(year);
+            const yearDisabled = isYearOutOfRange(year);
             return (
               <button
                 key={year}
@@ -884,11 +882,11 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     disabled,
     isMobile,
     leftMonth,
-    maxDate,
     maxMonth,
-    minDate,
     minMonth,
     rightMonth,
+    isYearOutOfRange,
+    setMonthForActiveSide,
     yearPageStart
   ]);
 
@@ -896,45 +894,19 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
     if (viewMode === 'month') return renderMonthPicker();
     if (viewMode === 'year') return renderYearPicker();
     if (isMobile) {
-      return renderMonth(
-        leftMonth,
-        leftLabel,
-        leftWeeks,
-        {
-          onPrev: onPrevLeftMonth,
-          onNext: onNextLeftMonth,
-          canPrev: canGoPrevLeft,
-          canNext: canGoNextLeft
-        },
-        { layout: 'mobile', onLabelClick: handleMonthLabelClickLeft }
-      );
+      return renderMonth(leftMonth, leftLabel, leftWeeks, leftMonthControls, {
+        layout: 'mobile',
+        onLabelClick: handleMonthLabelClickLeft
+      });
     }
     return (
       <>
-        {renderMonth(
-          leftMonth,
-          leftLabel,
-          leftWeeks,
-          {
-            onPrev: onPrevLeftMonth,
-            onNext: onNextLeftMonth,
-            canPrev: canGoPrevLeft,
-            canNext: canGoNextLeft
-          },
-          { onLabelClick: handleMonthLabelClickLeft }
-        )}
-        {renderMonth(
-          rightMonth,
-          rightLabel,
-          rightWeeks,
-          {
-            onPrev: onPrevRightMonth,
-            onNext: onNextRightMonth,
-            canPrev: canGoPrevRight,
-            canNext: canGoNextRight
-          },
-          { onLabelClick: handleMonthLabelClickRight }
-        )}
+        {renderMonth(leftMonth, leftLabel, leftWeeks, leftMonthControls, {
+          onLabelClick: handleMonthLabelClickLeft
+        })}
+        {renderMonth(rightMonth, rightLabel, rightWeeks, rightMonthControls, {
+          onLabelClick: handleMonthLabelClickRight
+        })}
       </>
     );
   };
@@ -991,4 +963,4 @@ const RangeCalendar: FC<RangeCalendarProps> = ({
   );
 };
 
-export default RangeCalendar;
+export default Calendar;
