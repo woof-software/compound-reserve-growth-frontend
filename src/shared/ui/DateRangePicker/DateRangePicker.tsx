@@ -74,6 +74,8 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
 
   const anchorRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
+  const startInputRef = useRef<HTMLInputElement>(null);
+  const endInputRef = useRef<HTMLInputElement>(null);
 
   const [calendarTransform, setCalendarTransform] = useState({
     top: 0,
@@ -113,30 +115,54 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     });
   }, []);
 
+  const updateRange = useCallback(
+    (startDate: number | null, endDate: number | null) => {
+      if (value.startDate === startDate && value.endDate === endDate) return;
+      onChange({ startDate, endDate });
+    },
+    [onChange, value.endDate, value.startDate]
+  );
+
   const onStartChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      const nextStart = inputDateToTimestamp(event.target.value);
-      onChange({ startDate: nextStart, endDate: value.endDate });
+      const nextStart = inputDateToTimestamp(event.currentTarget.value);
+      if (nextStart === null) return;
+      updateRange(nextStart, value.endDate);
     },
-    [onChange, value.endDate]
+    [updateRange, value.endDate]
   );
 
   const onEndChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      const nextEnd = inputDateToTimestamp(event.target.value);
-      onChange({ startDate: value.startDate, endDate: nextEnd });
+      const nextEnd = inputDateToTimestamp(event.currentTarget.value);
+      if (nextEnd === null) return;
+      updateRange(value.startDate, nextEnd);
     },
-    [onChange, value.startDate]
+    [updateRange, value.startDate]
   );
 
+  const onStartBlur = useCallback(() => {
+    if (startInputRef.current?.value) return;
+    if (value.startDate === null) return;
+
+    updateRange(null, value.endDate);
+  }, [updateRange, value.endDate, value.startDate]);
+
+  const onEndBlur = useCallback(() => {
+    if (endInputRef.current?.value) return;
+    if (value.endDate === null) return;
+
+    updateRange(value.startDate, null);
+  }, [updateRange, value.endDate, value.startDate]);
+
   const onClear = useCallback(() => {
-    onChange({ startDate: null, endDate: null });
+    updateRange(null, null);
     onCloseContainer?.();
-  }, [onChange, onCloseContainer]);
+  }, [onCloseContainer, updateRange]);
 
   const handleCalendarCancel = useCallback(() => {
-    onChange({ startDate: null, endDate: null });
-  }, [onChange]);
+    updateRange(null, null);
+  }, [updateRange]);
 
   const handleCalendarClose = useCallback(() => {
     onCloseCalendar();
@@ -216,9 +242,24 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     };
   }, [isCalendarOpen, updateCalendarPosition]);
 
+  useEffect(() => {
+    const syncInputValue = (
+      input: HTMLInputElement | null,
+      timestamp: number | null
+    ) => {
+      if (!input || document.activeElement === input) return;
+
+      const nextValue = timestampToInputDate(timestamp);
+      if (input.value !== nextValue) {
+        input.value = nextValue;
+      }
+    };
+
+    syncInputValue(startInputRef.current, value.startDate);
+    syncInputValue(endInputRef.current, value.endDate);
+  }, [value.endDate, value.startDate]);
+
   const hasRange = value.startDate !== null || value.endDate !== null;
-  const startInputValue = timestampToInputDate(value.startDate);
-  const endInputValue = timestampToInputDate(value.endDate);
   const minInput = timestampToInputDate(min);
   const maxInput = timestampToInputDate(max);
   const sharedOverlayCalendarProps = {
@@ -256,11 +297,13 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         </View.Condition>
         <div className='relative'>
           <input
+            ref={startInputRef}
             type='date'
-            value={startInputValue}
+            defaultValue={timestampToInputDate(value.startDate)}
             min={minInput}
             max={maxInput}
             onChange={onStartChange}
+            onBlur={onStartBlur}
             disabled={disabled}
             onClick={handleInputClick}
             className={inputClasses}
@@ -290,11 +333,13 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         </View.Condition>
         <div className='relative'>
           <input
+            ref={endInputRef}
             type='date'
-            value={endInputValue}
+            defaultValue={timestampToInputDate(value.endDate)}
             min={minInput}
             max={maxInput}
             onChange={onEndChange}
+            onBlur={onEndBlur}
             disabled={disabled}
             onClick={handleInputClick}
             className={inputClasses}
