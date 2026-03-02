@@ -70,7 +70,7 @@ const TabsGroup = <T extends string = string>({
                   className?.activeTrigger &&
                     `data-[state=active]:${className?.activeTrigger}`,
                   {
-                    '!shadow-13': value === tab,
+                    'shadow-13': value === tab,
                     'cursor-not-allowed opacity-40 hover:bg-transparent hover:opacity-40':
                       isTabDisabled
                   }
