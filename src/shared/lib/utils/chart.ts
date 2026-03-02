@@ -1,4 +1,5 @@
 import { Transformer } from '@/shared/lib/utils/types';
+
 export type ChartRange = 'D' | 'W' | 'M';
 
 export type FilterForRangeArgs<T, R> = {
