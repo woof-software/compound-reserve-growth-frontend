@@ -457,17 +457,10 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
     if (!isOpen) return;
 
     const mql = window.matchMedia(MEDIA_QUERY_DESKTOP);
-
-    const closeOnViewportTransition = () => {
-      if (mql.matches) {
-        onCloseModal();
-      }
-    };
-
-    mql.addEventListener('change', closeOnViewportTransition);
+    mql.addEventListener('change', onCloseModal);
 
     return () => {
-      mql.removeEventListener('change', closeOnViewportTransition);
+      mql.removeEventListener('change', onCloseModal);
     };
   }, [isOpen, onCloseModal]);
 
