@@ -26,10 +26,7 @@ import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { getEndOfDayTimestamp } from '@/shared/lib/date/dateUtils';
-import {
-  filterForRange,
-  getMaxBarSizeForRange
-} from '@/shared/lib/utils/chart';
+import { filterForRange } from '@/shared/lib/utils/chart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import {
   ChartDataItem,
@@ -119,6 +116,7 @@ interface FiltersProps {
 }
 
 const SECOND_IN_MS = 1000;
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const BAR_SIZE_ORDER = {
   [BAR_SIZE.D]: 0,
   [BAR_SIZE.W]: 1,
@@ -128,6 +126,41 @@ const BAR_SIZE_ORDER = {
 const toUtcDayStartTimestamp = (timestampSeconds: number): number => {
   const date = new Date(timestampSeconds * SECOND_IN_MS);
   return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+};
+
+const getUtcDayStart = (timestamp: number): number => {
+  const date = new Date(timestamp);
+  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+};
+
+const addUtcMonthsClamped = (timestamp: number, months: number): number => {
+  const date = new Date(timestamp);
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const day = date.getUTCDate();
+
+  const targetMonthIndex = month + months;
+  const targetYear = year + Math.floor(targetMonthIndex / 12);
+  const normalizedTargetMonth = ((targetMonthIndex % 12) + 12) % 12;
+  const daysInTargetMonth = new Date(
+    Date.UTC(targetYear, normalizedTargetMonth + 1, 0)
+  ).getUTCDate();
+  const clampedDay = Math.min(day, daysInTargetMonth);
+
+  return Date.UTC(targetYear, normalizedTargetMonth, clampedDay);
+};
+
+const getMaxBarSizeForRange = (startDate: number, endDate: number): BarSize => {
+  const from = Math.min(getUtcDayStart(startDate), getUtcDayStart(endDate));
+  const to = Math.max(getUtcDayStart(startDate), getUtcDayStart(endDate));
+  const endExclusive = to + DAY_IN_MS;
+
+  const weekBoundary = from + 7 * DAY_IN_MS;
+  const monthBoundary = addUtcMonthsClamped(from, 1) + DAY_IN_MS;
+
+  if (endExclusive < weekBoundary) return BAR_SIZE.D;
+  if (endExclusive < monthBoundary) return BAR_SIZE.W;
+  return BAR_SIZE.M;
 };
 
 const CompoundCumulativeRevenue = ({

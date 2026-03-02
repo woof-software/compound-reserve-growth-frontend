@@ -437,7 +437,6 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
 }) => {
   const { value, disabled = false } = pickerProps;
   const { isOpen, onOpenModal, onCloseModal } = useModal();
-  const wasDesktopRef = useRef<boolean | null>(null);
 
   const hasSelection = value.startDate !== null || value.endDate !== null;
 
@@ -458,17 +457,11 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
     if (!isOpen) return;
 
     const mql = window.matchMedia(MEDIA_QUERY_DESKTOP);
-    wasDesktopRef.current = mql.matches;
 
     const closeOnViewportTransition = () => {
-      const isDesktop = mql.matches;
-      const wasDesktop = wasDesktopRef.current;
-
-      if (wasDesktop !== null && wasDesktop !== isDesktop) {
+      if (mql.matches) {
         onCloseModal();
       }
-
-      wasDesktopRef.current = isDesktop;
     };
 
     mql.addEventListener('change', closeOnViewportTransition);
