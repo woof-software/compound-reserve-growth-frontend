@@ -456,18 +456,14 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
                 isRound={false}
               />
             </div>
-            <Text
-              size='11'
-              weight='500'
-              lineHeight='16'
-              className={
-                hasSelection
-                  ? 'text-[var(--color-secondary-10)]'
-                  : 'text-[var(--color-gray-11)]'
-              }
+            <span
+              className={cn(
+                'text-[11px] leading-[16px] font-medium',
+                hasSelection ? 'text-secondary-10' : 'text-gray-11'
+              )}
             >
               {rangeLabel}
-            </Text>
+            </span>
           </div>
         }
         contentClassName={cn(
