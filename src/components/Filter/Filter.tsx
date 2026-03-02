@@ -47,11 +47,6 @@ interface FilterProps {
   disableClearFilters?: boolean;
 }
 
-const EMPTY_DATE_RANGE: DateRangeValue = {
-  startDate: null,
-  endDate: null
-};
-
 const isDateRangeFilterOption = (
   filter: FilterOptions
 ): filter is DateRangeFilterOptions => filter.type === 'dateRange';
@@ -169,7 +164,7 @@ const Filter: FC<FilterProps> = ({
       isOpen={isOpen}
       onClose={onDrawerClose}
     >
-      <View.Condition if={!Boolean(selectedKey)}>
+      <View.Condition if={!selectedKey}>
         <Text
           size='17'
           weight='700'
@@ -187,7 +182,7 @@ const Filter: FC<FilterProps> = ({
                 ? getDateRangeLabel(option.dateRange)
                 : null;
               const hasCounter = isDateRangeFilterOption(option)
-                ? Boolean(dateRangeLabel)
+                ? !!dateRangeLabel
                 : option.total > 0;
 
               return (
@@ -250,7 +245,7 @@ const Filter: FC<FilterProps> = ({
           </div>
         </View.Condition>
       </View.Condition>
-      <View.Condition if={Boolean(selectedKey)}>
+      <View.Condition if={!!selectedKey}>
         <div className='mb-8 flex items-center'>
           <Button onClick={onSelectedFilterClose}>
             <Icon
@@ -268,15 +263,14 @@ const Filter: FC<FilterProps> = ({
             {activeFilter?.placeholder}
           </Text>
         </div>
-        <View.Condition if={Boolean(activeSelectFilter)}>
+        <View.Condition if={!!activeSelectFilter}>
           <View.Condition if={hasManySelectOptions}>
             <div
               className={cn(
                 'outline-secondary-19 rounded-lg py-2 pr-5 pl-3 outline',
                 {
                   'outline-red-11':
-                    !Boolean(filteredOptions.length) &&
-                    Boolean(searchValue.length)
+                    !filteredOptions.length && !!searchValue.length
                 }
               )}
             >
@@ -287,7 +281,7 @@ const Filter: FC<FilterProps> = ({
                 onChange={onChangeSearch}
               />
             </div>
-            <View.Condition if={!Boolean(filteredOptions.length)}>
+            <View.Condition if={!filteredOptions.length}>
               <div className='mt-3'>
                 <Text
                   size='12'
@@ -353,22 +347,20 @@ const Filter: FC<FilterProps> = ({
             </div>
           </View.Condition>
         </View.Condition>
-        <View.Condition if={Boolean(activeDateRangeFilter)}>
+        {activeDateRangeFilter ? (
           <div className='mt-4 px-2 pb-24'>
             <DateRangePicker
-              value={activeDateRangeFilter?.dateRange ?? EMPTY_DATE_RANGE}
-              min={activeDateRangeFilter?.minDate ?? null}
-              max={activeDateRangeFilter?.maxDate ?? null}
-              onChange={(next) =>
-                activeDateRangeFilter?.onDateRangeChange(next)
-              }
+              value={activeDateRangeFilter.dateRange}
+              min={activeDateRangeFilter.minDate}
+              max={activeDateRangeFilter.maxDate}
+              onChange={activeDateRangeFilter.onDateRangeChange}
               onClose={onSelectedFilterClose}
               inlineCalendar
               showLabels
               showClear
             />
           </div>
-        </View.Condition>
+        ) : null}
       </View.Condition>
     </Drawer>
   );

@@ -84,7 +84,7 @@ const Calendar: FC<CalendarProps> = ({
   const maxTime = max;
 
   const getInitialMonths = useCallback((): { left: Date; right: Date } => {
-    const hasSelection = Boolean(startDate || endDate);
+    const hasSelection = !!(startDate || endDate);
     const minMonthStart = minDate ? getMonthStart(minDate) : null;
     const maxMonthStart = maxDate ? getMonthStart(maxDate) : null;
 
@@ -447,8 +447,10 @@ const Calendar: FC<CalendarProps> = ({
                       dayTime <= endTime;
                     const isOutsideMin = minTime !== null && dayTime < minTime;
                     const isOutsideMax = maxTime !== null && dayTime > maxTime;
-                    const isDayDisabled = Boolean(
-                      disabled || isOutsideMin || isOutsideMax
+                    const isDayDisabled = !!(
+                      disabled ||
+                      isOutsideMin ||
+                      isOutsideMax
                     );
                     const isSingleSelection =
                       (isRangeStart && (!endDate || isRangeEnd)) ||
