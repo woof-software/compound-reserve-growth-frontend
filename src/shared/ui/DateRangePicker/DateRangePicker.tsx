@@ -259,7 +259,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     syncInputValue(endInputRef.current, value.endDate);
   }, [value.endDate, value.startDate]);
 
-  const hasRange = value.startDate !== null || value.endDate !== null;
+  const hasRange = !!(value.startDate || value.endDate);
   const minInput = timestampToInputDate(min);
   const maxInput = timestampToInputDate(max);
   const sharedOverlayCalendarProps = {
@@ -438,7 +438,7 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
   const { value, disabled = false } = pickerProps;
   const { isOpen, onOpenModal, onCloseModal } = useModal();
 
-  const hasSelection = value.startDate !== null || value.endDate !== null;
+  const hasSelection = !!(value.startDate || value.endDate);
 
   const rangeLabel = useMemo(() => {
     if (value.startDate !== null && value.endDate !== null) {
