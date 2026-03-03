@@ -447,11 +447,8 @@ const Calendar: FC<CalendarProps> = ({
                       dayTime <= endTime;
                     const isOutsideMin = minTime !== null && dayTime < minTime;
                     const isOutsideMax = maxTime !== null && dayTime > maxTime;
-                    const isDayDisabled = !!(
-                      disabled ||
-                      isOutsideMin ||
-                      isOutsideMax
-                    );
+                    const isDayDisabled =
+                      disabled || isOutsideMin || isOutsideMax;
                     const isSingleSelection =
                       (isRangeStart && (!endDate || isRangeEnd)) ||
                       (isRangeEnd && !startDate);
