@@ -61,8 +61,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   className,
   inputClassName,
   showLabels = false,
-  showClear = false,
-  clearLabel = 'Clear Filter',
+  clearLabel = 'Clear filters',
   onClose: onCloseContainer,
   inlineCalendar = false
 }) => {
@@ -76,6 +75,10 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   const rafRef = useRef<number | null>(null);
   const startInputRef = useRef<HTMLInputElement>(null);
   const endInputRef = useRef<HTMLInputElement>(null);
+
+  const isShowClearButton = Object.values(value).some(
+    (value) => value !== null
+  );
 
   const [calendarTransform, setCalendarTransform] = useState({
     top: 0,
@@ -354,9 +357,9 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
           />
         </div>
       </div>
-      {showClear && (
+      {isShowClearButton && (
         <>
-          <div className='-mx-4 h-[0.25px] w-[calc(100%+32px)] self-stretch bg-[var(--color-secondary-39)] lg:-mx-2 lg:w-[calc(100%+16px)]' />
+          <div className='-mx-4 h-[0.25px] w-[calc(100%+32px)] self-stretch bg-[var(--color-gray-10)] lg:-mx-2 lg:w-[calc(100%+16px)]' />
           <Button
             className={cn(
               'text-primary-14 mt-0 h-[30px] w-full rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white',
