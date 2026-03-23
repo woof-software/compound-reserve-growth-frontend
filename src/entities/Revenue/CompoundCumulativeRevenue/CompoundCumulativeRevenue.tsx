@@ -33,12 +33,7 @@ import {
   extractFilterOptions,
   filterAndSortMarkets
 } from '@/shared/lib/utils/utils';
-import {
-  BAR_SIZE,
-  BAR_SIZE_OPTIONS,
-  BarSize,
-  OptionType
-} from '@/shared/types/types';
+import { BAR_SIZE, BAR_SIZE_OPTIONS, OptionType } from '@/shared/types/types';
 import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
@@ -60,9 +55,9 @@ interface FiltersProps {
 
   symbolOptions: OptionType[];
 
-  barSize: BarSize;
+  barSize: BAR_SIZE;
 
-  disabledBarSizes: BarSize[];
+  disabledBarSizes: BAR_SIZE[];
 
   isLoading: boolean;
 
@@ -150,7 +145,10 @@ const addUtcMonthsClamped = (timestamp: number, months: number): number => {
   return Date.UTC(targetYear, normalizedTargetMonth, clampedDay);
 };
 
-const getMaxBarSizeForRange = (startDate: number, endDate: number): BarSize => {
+const getMaxBarSizeForRange = (
+  startDate: number,
+  endDate: number
+): BAR_SIZE => {
   const from = Math.min(getUtcDayStart(startDate), getUtcDayStart(endDate));
   const to = Math.max(getUtcDayStart(startDate), getUtcDayStart(endDate));
   const endExclusive = to + DAY_IN_MS;
@@ -224,13 +222,13 @@ const CompoundCumulativeRevenue = ({
     };
   }, [dateRange]);
 
-  const maxSelectableBarSize = useMemo<BarSize>(() => {
+  const maxSelectableBarSize = useMemo<BAR_SIZE>(() => {
     const { start, end } = normalizedDateRange;
     if (start === null || end === null) return BAR_SIZE.M;
     return getMaxBarSizeForRange(start, end);
   }, [normalizedDateRange]);
 
-  const disabledBarSizes = useMemo<BarSize[]>(
+  const disabledBarSizes = useMemo<BAR_SIZE[]>(
     () =>
       BAR_SIZE_OPTIONS.filter(
         (size) => BAR_SIZE_ORDER[size] > BAR_SIZE_ORDER[maxSelectableBarSize]

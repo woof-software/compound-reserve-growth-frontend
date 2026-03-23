@@ -8,7 +8,7 @@ import {
 } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
-import { MEDIA_QUERY_DESKTOP } from '@/shared/lib/viewport/viewport';
+
 import {
   AnimationProvider,
   useAnimationLibs
@@ -28,13 +28,7 @@ interface DrawerProps extends PropsWithChildren {
 }
 
 const DrawerContent = memo(
-  ({
-    className,
-    children,
-    onClose,
-    isOpen = false,
-    desktopMediaQuery = MEDIA_QUERY_DESKTOP
-  }: DrawerProps) => {
+  ({ className, children, onClose, isOpen = false }: DrawerProps) => {
     const { Spring, Gesture } = useAnimationLibs();
 
     const DURATION_OPEN = 250;
@@ -106,40 +100,6 @@ const DrawerContent = memo(
     }, [isOpen]);
 
     useEffect(() => {
-      if (!isOpen) return;
-
-      const mql = window.matchMedia(desktopMediaQuery);
-      const handleViewportChange = () => {
-        if (!mql.matches) return;
-
-        api.stop();
-        setMounted(false);
-        setMeasured(false);
-        closingRef.current = false;
-        document.body.classList.remove('disable-scroll-vertical');
-        onClose?.();
-      };
-
-      const controller = new AbortController();
-      mql.addEventListener('change', handleViewportChange);
-      window.addEventListener('resize', handleViewportChange, {
-        signal: controller.signal
-      });
-      handleViewportChange();
-
-      return () => {
-        controller.abort();
-        mql.removeEventListener('change', handleViewportChange);
-      };
-    }, [api, desktopMediaQuery, isOpen, onClose]);
-
-    useEffect(() => {
-      return () => {
-        document.body.classList.remove('disable-scroll-vertical');
-      };
-    }, []);
-
-    useEffect(() => {
       if (!mounted) return;
 
       setMeasured(false);
@@ -205,7 +165,7 @@ const DrawerContent = memo(
       <Portal element={document.getElementById('drawer') ?? document.body}>
         <div
           className={cn(
-            'fixed inset-0 z-10 flex items-end overflow-hidden',
+            'fixed inset-0 z-10 flex items-end overflow-hidden lg:hidden',
             className
           )}
         >

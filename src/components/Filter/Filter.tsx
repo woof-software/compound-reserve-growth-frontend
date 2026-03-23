@@ -348,7 +348,7 @@ const Filter: FC<FilterProps> = ({
           </View.Condition>
         </View.Condition>
         {activeDateRangeFilter ? (
-          <div className='mt-4 px-2 pb-24'>
+          <div>
             <DateRangePicker
               value={activeDateRangeFilter.dateRange}
               min={activeDateRangeFilter.minDate}
