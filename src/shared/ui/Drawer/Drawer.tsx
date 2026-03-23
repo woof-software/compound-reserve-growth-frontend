@@ -8,6 +8,7 @@ import {
 } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
+
 import {
   AnimationProvider,
   useAnimationLibs
@@ -22,6 +23,8 @@ interface DrawerProps extends PropsWithChildren {
   isOpen?: boolean;
 
   onClose?: () => void;
+
+  desktopMediaQuery?: string;
 }
 
 const DrawerContent = memo(
@@ -61,7 +64,7 @@ const DrawerContent = memo(
         to: { y: 0 },
         config: { duration: DURATION_OPEN, easing: EASE_OPEN }
       });
-    }, [api]);
+    }, [EASE_OPEN, api]);
 
     const animateClose = useCallback(
       (notify = false) => {
@@ -84,7 +87,7 @@ const DrawerContent = memo(
           }
         });
       },
-      [api, onClose]
+      [EASE_CLOSE, api, onClose]
     );
 
     useEffect(() => {

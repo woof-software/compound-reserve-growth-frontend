@@ -8,7 +8,13 @@ export type FilterItem = {
   options: string[];
 };
 
-export type BarSize = 'D' | 'W' | 'M';
+export const enum BAR_SIZE {
+  D = 'D',
+  W = 'W',
+  M = 'M'
+}
+
+export const BAR_SIZE_OPTIONS = [BAR_SIZE.D, BAR_SIZE.W, BAR_SIZE.M];
 
 export type OptionType = {
   id: string;

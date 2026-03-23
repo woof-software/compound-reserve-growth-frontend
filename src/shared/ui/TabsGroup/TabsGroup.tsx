@@ -15,6 +15,7 @@ interface TabsGroupProps<T extends string = string> {
     activeTrigger?: string;
   };
   disabled?: boolean;
+  disabledTabs?: T[];
 }
 
 const TabsGroup = <T extends string = string>({
@@ -23,15 +24,21 @@ const TabsGroup = <T extends string = string>({
   value,
   onTabChange,
   className,
-  disabled
+  disabled,
+  disabledTabs
 }: TabsGroupProps<T>) => {
   const internalValue = value === null ? '' : value;
+  const disabledSet = new Set(disabledTabs);
 
   return (
     <Tabs
       value={internalValue}
       defaultValue={defaultTab || tabs[0]}
-      onValueChange={(a) => onTabChange?.(a as T)}
+      onValueChange={(a) => {
+        const nextValue = a as T;
+        if (disabledSet.has(nextValue)) return;
+        onTabChange?.(nextValue);
+      }}
       className={cn(className?.container, {
         'pointer-events-none': disabled
       })}
@@ -45,28 +52,34 @@ const TabsGroup = <T extends string = string>({
       >
         <Each
           data={tabs}
-          render={(tab) => (
-            <TabsTrigger
-              key={tab}
-              value={tab}
-              className={cn(
-                'hover:bg-card-content flex cursor-pointer items-center justify-center rounded-sm px-3 py-1 text-[11px] font-medium transition-opacity hover:opacity-70',
-                'h-7 leading-6 md:h-6',
-                'text-primary-11',
-                'data-[state=active]:bg-card-content',
-                'data-[state=active]:text-primary-11',
-                'border-none',
-                className?.trigger,
-                className?.activeTrigger &&
-                  `data-[state=active]:${className?.activeTrigger}`,
-                {
-                  '!shadow-13': value === tab
-                }
-              )}
-            >
-              {tab}
-            </TabsTrigger>
-          )}
+          render={(tab) => {
+            const isTabDisabled = disabledSet.has(tab);
+            return (
+              <TabsTrigger
+                key={tab}
+                value={tab}
+                disabled={isTabDisabled}
+                className={cn(
+                  'hover:bg-card-content flex cursor-pointer items-center justify-center rounded-sm px-3 py-1 text-[11px] font-medium transition-opacity hover:opacity-70',
+                  'h-7 leading-6 md:h-6',
+                  'text-primary-11',
+                  'data-[state=active]:bg-card-content',
+                  'data-[state=active]:text-primary-11',
+                  'border-none',
+                  className?.trigger,
+                  className?.activeTrigger &&
+                    `data-[state=active]:${className?.activeTrigger}`,
+                  {
+                    'shadow-13': value === tab,
+                    'cursor-not-allowed opacity-40 hover:bg-transparent hover:opacity-40':
+                      isTabDisabled
+                  }
+                )}
+              >
+                {tab}
+              </TabsTrigger>
+            );
+          }}
         />
       </TabsList>
     </Tabs>
