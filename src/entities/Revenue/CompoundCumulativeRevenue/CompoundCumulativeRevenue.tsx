@@ -1,3 +1,5 @@
+import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
+import { getMaxBarSizeForRange } from '@/shared/lib/date/dateUtils';
 import React, {
   Dispatch,
   SetStateAction,
@@ -25,7 +27,6 @@ import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
-import { getEndOfDayTimestamp } from '@/shared/lib/date/dateUtils';
 import { filterForRange } from '@/shared/lib/utils/chart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import {
@@ -110,56 +111,11 @@ interface FiltersProps {
   onDeselectAll: () => void;
 }
 
-const SECOND_IN_MS = 1000;
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const BAR_SIZE_ORDER = {
   [BAR_SIZE.D]: 0,
   [BAR_SIZE.W]: 1,
   [BAR_SIZE.M]: 2
 } as const;
-
-const toUtcDayStartTimestamp = (timestampSeconds: number): number => {
-  const date = new Date(timestampSeconds * SECOND_IN_MS);
-  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-};
-
-const getUtcDayStart = (timestamp: number): number => {
-  const date = new Date(timestamp);
-  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-};
-
-const addUtcMonthsClamped = (timestamp: number, months: number): number => {
-  const date = new Date(timestamp);
-  const year = date.getUTCFullYear();
-  const month = date.getUTCMonth();
-  const day = date.getUTCDate();
-
-  const targetMonthIndex = month + months;
-  const targetYear = year + Math.floor(targetMonthIndex / 12);
-  const normalizedTargetMonth = ((targetMonthIndex % 12) + 12) % 12;
-  const daysInTargetMonth = new Date(
-    Date.UTC(targetYear, normalizedTargetMonth + 1, 0)
-  ).getUTCDate();
-  const clampedDay = Math.min(day, daysInTargetMonth);
-
-  return Date.UTC(targetYear, normalizedTargetMonth, clampedDay);
-};
-
-const getMaxBarSizeForRange = (
-  startDate: number,
-  endDate: number
-): BAR_SIZE => {
-  const from = Math.min(getUtcDayStart(startDate), getUtcDayStart(endDate));
-  const to = Math.max(getUtcDayStart(startDate), getUtcDayStart(endDate));
-  const endExclusive = to + DAY_IN_MS;
-
-  const weekBoundary = from + 7 * DAY_IN_MS;
-  const monthBoundary = addUtcMonthsClamped(from, 1) + DAY_IN_MS;
-
-  if (endExclusive < weekBoundary) return BAR_SIZE.D;
-  if (endExclusive < monthBoundary) return BAR_SIZE.W;
-  return BAR_SIZE.M;
-};
 
 const CompoundCumulativeRevenue = ({
   revenueData,
@@ -186,10 +142,14 @@ const CompoundCumulativeRevenue = ({
     'symbol'
   ]);
 
-  const [dateRange, setDateRange] = useState<DateRangeValue>({
-    startDate: null,
-    endDate: null
-  });
+  const {
+    dateRange,
+    setDateRange,
+    normalizedDateRange,
+    dateBounds,
+    resetDateRange,
+    mobileFilterOption: dateRangeMobileOption
+  } = useDateRangeFilter();
 
   const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: BAR_SIZE.D
@@ -198,29 +158,6 @@ const CompoundCumulativeRevenue = ({
   const rawData: ChartDataItem[] = useMemo(() => {
     return [...revenueData].sort((a, b) => a.date - b.date);
   }, [revenueData]);
-
-  const dateBounds = useMemo(() => {
-    if (!rawData.length) return { min: null, max: null };
-
-    return {
-      min: toUtcDayStartTimestamp(rawData[0].date),
-      max: toUtcDayStartTimestamp(rawData[rawData.length - 1].date)
-    };
-  }, [rawData]);
-
-  const normalizedDateRange = useMemo(() => {
-    let rangeStart = dateRange.startDate;
-    let rangeEnd = dateRange.endDate;
-
-    if (rangeStart !== null && rangeEnd !== null && rangeStart > rangeEnd) {
-      [rangeStart, rangeEnd] = [rangeEnd, rangeStart];
-    }
-
-    return {
-      start: rangeStart,
-      end: rangeEnd !== null ? getEndOfDayTimestamp(rangeEnd) : null
-    };
-  }, [dateRange]);
 
   const maxSelectableBarSize = useMemo<BAR_SIZE>(() => {
     const { start, end } = normalizedDateRange;
@@ -454,8 +391,8 @@ const CompoundCumulativeRevenue = ({
       deployment: [],
       symbol: []
     });
-    setDateRange({ startDate: null, endDate: null });
-  }, []);
+    resetDateRange();
+  }, [resetDateRange]);
 
   return (
     <Card
@@ -497,6 +434,7 @@ const CompoundCumulativeRevenue = ({
         onShowEvents={setIsShowEvents}
         onSelectAll={onSelectAllLegends}
         onDeselectAll={onDeselectAllLegends}
+        dateRangeMobileOption={dateRangeMobileOption}
       />
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder
@@ -545,6 +483,7 @@ const Filters = ({
   showEvents,
   isShowCalendarIcon,
   isLoading,
+  dateRangeMobileOption,
   onSelectChain,
   onSelectAssetType,
   onSelectMarket,
@@ -555,7 +494,11 @@ const Filters = ({
   onShowEvents,
   onSelectAll,
   onDeselectAll
-}: FiltersProps) => {
+}: FiltersProps & {
+  dateRangeMobileOption: ReturnType<
+    typeof useDateRangeFilter
+  >['mobileFilterOption'];
+}) => {
   const { isOpen, onOpenModal, onCloseModal } = useModal();
 
   const {
@@ -603,22 +546,8 @@ const Filters = ({
       onChange: onSelectSymbol
     };
 
-    const dateRangeFilterOptions = {
-      id: 'dateRange',
-      placeholder: 'Date range',
-      total: Number(dateRange.startDate !== null || dateRange.endDate !== null),
-      selectedOptions: [],
-      options: [],
-      disableSelectAll: true,
-      type: 'dateRange' as const,
-      dateRange,
-      minDate,
-      maxDate,
-      onDateRangeChange
-    };
-
     return [
-      dateRangeFilterOptions,
+      dateRangeMobileOption,
       chainFilterOptions,
       marketFilterOptions,
       assetTypeFilterOptions,
@@ -627,22 +556,18 @@ const Filters = ({
   }, [
     assetTypeOptions,
     chainOptions,
+    dateRangeMobileOption,
     deploymentOptionsFilter,
-    onDateRangeChange,
     onSelectAssetType,
     onSelectChain,
     onSelectMarket,
     onSelectSymbol,
-    dateRange,
-    maxDate,
-    minDate,
     selectedOptions,
     symbolOptions
   ]);
 
   const onCalendarClick = () => {
     onShowEvents(!showEvents);
-
     onMoreClose();
   };
 
@@ -652,7 +577,6 @@ const Filters = ({
     } else {
       onDeselectAll();
     }
-
     onMoreClose();
   };
 

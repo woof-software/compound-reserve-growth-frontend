@@ -1,4 +1,12 @@
-import React, { useCallback, useMemo, useReducer } from 'react';
+import { getMaxBarSizeForRange } from '@/shared/lib/date/dateUtils';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer
+} from 'react';
 import { CSVLink } from 'react-csv';
 
 import CompoundRevenueChart from '@/components/Charts/CompoundRevenue/CompoundRevenueChart';
@@ -7,6 +15,7 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCompoundChartBars } from '@/shared/hooks/useCompoundChartBars';
+import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { type RevenuePageProps } from '@/shared/hooks/useRevenue';
@@ -17,11 +26,13 @@ import {
   ChartDataItem,
   filterAndSortMarkets
 } from '@/shared/lib/utils/utils';
-import { BarSize, OptionType } from '@/shared/types/types';
+import { BAR_SIZE, BAR_SIZE_OPTIONS, OptionType } from '@/shared/types/types';
 import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
+import { DateRangePickerPopover } from '@/shared/ui/DateRangePicker/DateRangePicker';
+import { DateRangeValue } from '@/shared/ui/DateRangePicker/types';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
@@ -56,10 +67,17 @@ interface FiltersProps {
   deploymentOptionsFilter: OptionType[];
   sourceOptions: OptionType[];
   symbolOptions: OptionType[];
-  barSize: BarSize;
+  barSize: BAR_SIZE;
+  disabledBarSizes: BAR_SIZE[];
   isLoading: boolean;
   csvFilename: string;
   csvData: Record<string, string | number>[];
+  dateRange: DateRangeValue;
+  minDate: number | null;
+  maxDate: number | null;
+  dateRangeMobileOption: ReturnType<
+    typeof useDateRangeFilter
+  >['mobileFilterOption'];
   selectedOptions: {
     chain: OptionType[];
     source: OptionType[];
@@ -71,8 +89,15 @@ interface FiltersProps {
   onSelectMarket: (deployment: OptionType[]) => void;
   onSelectSymbol: (symbol: OptionType[]) => void;
   onBarSizeChange: (value: string) => void;
+  onDateRangeChange: Dispatch<SetStateAction<DateRangeValue>>;
   onClearAll: () => void;
 }
+
+const BAR_SIZE_ORDER = {
+  [BAR_SIZE.D]: 0,
+  [BAR_SIZE.W]: 1,
+  [BAR_SIZE.M]: 2
+} as const;
 
 function preprocessData(rawData: ChartDataItem[]): PreprocessedResult {
   const emptyResult: PreprocessedResult = {
@@ -198,8 +223,41 @@ const CompoundRevenueBlock = ({
   ]);
 
   const { barSize, onBarSizeChange } = useChartControls({
-    initialBarSize: 'M'
+    initialBarSize: BAR_SIZE.M
   });
+
+  const {
+    dateRange,
+    setDateRange,
+    normalizedDateRange,
+    dateBounds,
+    resetDateRange,
+    mobileFilterOption: dateRangeMobileOption
+  } = useDateRangeFilter();
+
+  const maxSelectableBarSize = useMemo<BAR_SIZE>(() => {
+    const { start, end } = normalizedDateRange;
+    if (start === null || end === null) return BAR_SIZE.M;
+    return getMaxBarSizeForRange(start, end);
+  }, [normalizedDateRange]);
+
+  const disabledBarSizes = useMemo<BAR_SIZE[]>(
+    () =>
+      BAR_SIZE_OPTIONS.filter(
+        (size) => BAR_SIZE_ORDER[size] > BAR_SIZE_ORDER[maxSelectableBarSize]
+      ),
+    [maxSelectableBarSize]
+  );
+
+  useEffect(() => {
+    const { start, end } = normalizedDateRange;
+    if (start === null || end === null) return;
+
+    const nextBarSize = getMaxBarSizeForRange(start, end);
+    if (BAR_SIZE_ORDER[nextBarSize] < BAR_SIZE_ORDER[barSize]) {
+      onBarSizeChange(nextBarSize);
+    }
+  }, [barSize, normalizedDateRange, onBarSizeChange]);
 
   const { filterOptions, processedItems, initialAggregatedData, sortedDates } =
     useMemo(() => preprocessData(data || []), [data]);
@@ -215,11 +273,15 @@ const CompoundRevenueBlock = ({
   }, [marketOptions, selectedOptions]);
 
   const processedChartData = useMemo(() => {
+    const { start: dateStart, end: dateEnd } = normalizedDateRange;
+
     const hasActiveFilters =
       selectedOptions.chain.length > 0 ||
       selectedOptions.deployment.length > 0 ||
       selectedOptions.source.length > 0 ||
-      selectedOptions.symbol.length > 0;
+      selectedOptions.symbol.length > 0 ||
+      dateStart !== null ||
+      dateEnd !== null;
 
     if (!hasActiveFilters) {
       return initialAggregatedData;
@@ -256,6 +318,10 @@ const CompoundRevenueBlock = ({
       )
         continue;
 
+      const itemTime = new Date(item.date).getTime();
+      if (dateStart !== null && itemTime < dateStart) continue;
+      if (dateEnd !== null && itemTime > dateEnd) continue;
+
       dailyTotals[item.date] = (dailyTotals[item.date] || 0) + item.value;
     }
 
@@ -266,7 +332,13 @@ const CompoundRevenueBlock = ({
       }
     }
     return result;
-  }, [processedItems, initialAggregatedData, sortedDates, selectedOptions]);
+  }, [
+    processedItems,
+    initialAggregatedData,
+    sortedDates,
+    selectedOptions,
+    normalizedDateRange
+  ]);
 
   const { aggregatedData, aggregatedSeries, seriesData, chartRef } =
     useCompoundChartBars({
@@ -282,7 +354,9 @@ const CompoundRevenueBlock = ({
     selectedOptions.chain.length > 0 ||
     selectedOptions.deployment.length > 0 ||
     selectedOptions.source.length > 0 ||
-    selectedOptions.symbol.length > 0
+    selectedOptions.symbol.length > 0 ||
+    dateRange.startDate !== null ||
+    dateRange.endDate !== null
       ? 'No data for selected filters'
       : 'No data available';
 
@@ -325,11 +399,12 @@ const CompoundRevenueBlock = ({
   const onClearSelectedOptions = useCallback(() => {
     setSelectedOptions({
       chain: [],
-      assetType: [],
+      source: [],
       deployment: [],
       symbol: []
     });
-  }, []);
+    resetDateRange();
+  }, [resetDateRange]);
 
   return (
     <Card
@@ -345,6 +420,7 @@ const CompoundRevenueBlock = ({
     >
       <Filters
         barSize={barSize}
+        disabledBarSizes={disabledBarSizes}
         csvData={csvData}
         csvFilename={getCsvFileName('compound_revenue')}
         chainOptions={chainOptions}
@@ -353,11 +429,16 @@ const CompoundRevenueBlock = ({
         sourceOptions={sourceOptions}
         symbolOptions={symbolOptions}
         isLoading={isLoading}
+        dateRange={dateRange}
+        minDate={dateBounds.min}
+        maxDate={dateBounds.max}
+        dateRangeMobileOption={dateRangeMobileOption}
         onSelectChain={onSelectChain}
         onSelectSource={onSelectSource}
         onSelectMarket={onSelectMarket}
         onSelectSymbol={onSelectSymbol}
         onBarSizeChange={onBarSizeChange}
+        onDateRangeChange={setDateRange}
         onClearAll={onClearSelectedOptions}
       />
       <View.Condition if={!isLoading && !isError && hasData}>
@@ -382,6 +463,7 @@ const CompoundRevenueBlock = ({
 
 const Filters = ({
   barSize,
+  disabledBarSizes,
   csvData,
   csvFilename,
   chainOptions,
@@ -390,11 +472,16 @@ const Filters = ({
   sourceOptions,
   symbolOptions,
   isLoading,
+  dateRange,
+  minDate,
+  maxDate,
+  dateRangeMobileOption,
   onSelectChain,
   onSelectSource,
   onSelectMarket,
   onSelectSymbol,
   onBarSizeChange,
+  onDateRangeChange,
   onClearAll
 }: FiltersProps) => {
   const { isOpen, onOpenModal, onCloseModal } = useModal();
@@ -445,6 +532,7 @@ const Filters = ({
     };
 
     return [
+      dateRangeMobileOption,
       chainFilterOptions,
       marketFilterOptions,
       sourceFilterOptions,
@@ -453,11 +541,13 @@ const Filters = ({
   }, [
     sourceOptions,
     chainOptions,
+    dateRangeMobileOption,
     deploymentOptionsFilter,
     onSelectSource,
     onSelectChain,
     onSelectMarket,
-    selectedOptions
+    selectedOptions,
+    symbolOptions
   ]);
 
   return (
@@ -465,10 +555,21 @@ const Filters = ({
       <div className='hidden lg:block'>
         <div className='hidden items-center justify-end gap-2 px-0 py-3 lg:flex'>
           <TabsGroup
-            tabs={['D', 'W', 'M']}
+            tabs={BAR_SIZE_OPTIONS}
             value={barSize}
             onTabChange={onBarSizeChange}
             disabled={isLoading}
+            disabledTabs={disabledBarSizes}
+          />
+          <DateRangePickerPopover
+            value={dateRange}
+            min={minDate}
+            max={maxDate}
+            onChange={onDateRangeChange}
+            disabled={isLoading}
+            showLabels
+            showClear
+            inputClassName='w-full'
           />
           <div className='flex gap-2'>
             <MultiSelect
@@ -513,6 +614,16 @@ const Filters = ({
         </div>
         <div className='flex flex-col items-end justify-end gap-2 px-0 py-3 lg:hidden'>
           <div className='z-[1] flex items-center gap-2'>
+            <DateRangePickerPopover
+              value={dateRange}
+              min={minDate}
+              max={maxDate}
+              onChange={onDateRangeChange}
+              disabled={isLoading}
+              showLabels
+              showClear
+              inputClassName='w-full'
+            />
             <MultiSelect
               options={chainOptions || []}
               value={selectedOptions.chain}
@@ -550,10 +661,11 @@ const Filters = ({
           </div>
           <div className='flex items-center gap-2'>
             <TabsGroup
-              tabs={['D', 'W', 'M']}
+              tabs={BAR_SIZE_OPTIONS}
               value={barSize}
               onTabChange={onBarSizeChange}
               disabled={isLoading}
+              disabledTabs={disabledBarSizes}
             />
             <CSVDownloadButton
               data={csvData}
@@ -570,10 +682,11 @@ const Filters = ({
                 container: 'w-full sm:w-auto',
                 list: 'w-full sm:w-auto'
               }}
-              tabs={['D', 'W', 'M']}
+              tabs={BAR_SIZE_OPTIONS}
               value={barSize}
               onTabChange={onBarSizeChange}
               disabled={isLoading}
+              disabledTabs={disabledBarSizes}
             />
             <Button
               onClick={onOpenModal}

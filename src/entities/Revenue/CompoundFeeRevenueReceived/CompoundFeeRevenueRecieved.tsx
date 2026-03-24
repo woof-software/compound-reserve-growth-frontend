@@ -1,4 +1,14 @@
-import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
+import { getMaxBarSizeForRange } from '@/shared/lib/date/dateUtils';
+import React, {
+  Dispatch,
+  memo,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState
+} from 'react';
 import { CSVLink } from 'react-csv';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
@@ -13,6 +23,7 @@ import {
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useCompoundChartBars } from '@/shared/hooks/useCompoundChartBars';
+import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
@@ -23,11 +34,13 @@ import {
   filterAndSortMarkets,
   groupOptionsDto
 } from '@/shared/lib/utils/utils';
-import { BarSize, OptionType } from '@/shared/types/types';
+import { BAR_SIZE, BAR_SIZE_OPTIONS, OptionType } from '@/shared/types/types';
 import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
+import { DateRangePickerPopover } from '@/shared/ui/DateRangePicker/DateRangePicker';
+import { DateRangeValue } from '@/shared/ui/DateRangePicker/types';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import SingleDropdown from '@/shared/ui/SingleDropdown/SingleDropdown';
@@ -59,6 +72,12 @@ interface StackedChartData {
   [key: string]: string | number;
 }
 
+const BAR_SIZE_ORDER = {
+  [BAR_SIZE.D]: 0,
+  [BAR_SIZE.W]: 1,
+  [BAR_SIZE.M]: 2
+} as const;
+
 interface FiltersProps {
   chainOptions: OptionType[];
 
@@ -68,7 +87,9 @@ interface FiltersProps {
 
   symbolOptions: OptionType[];
 
-  barSize: BarSize;
+  barSize: BAR_SIZE;
+
+  disabledBarSizes: BAR_SIZE[];
 
   isShowEyeIcon: boolean;
 
@@ -83,6 +104,16 @@ interface FiltersProps {
   areAllSeriesHidden: boolean;
 
   csvData: Record<string, string | number>[];
+
+  dateRange: DateRangeValue;
+
+  minDate: number | null;
+
+  maxDate: number | null;
+
+  dateRangeMobileOption: ReturnType<
+    typeof useDateRangeFilter
+  >['mobileFilterOption'];
 
   selectedOptions: {
     chain: OptionType[];
@@ -104,6 +135,8 @@ interface FiltersProps {
 
   onBarSizeChange: (value: string) => void;
 
+  onDateRangeChange: Dispatch<SetStateAction<DateRangeValue>>;
+
   toggleSingle: () => void;
 
   closeSingle: () => void;
@@ -123,10 +156,43 @@ const CompoundFeeRevenueRecieved = ({
   isError
 }: RevenuePageProps) => {
   const { barSize, onBarSizeChange } = useChartControls({
-    initialBarSize: 'D'
+    initialBarSize: BAR_SIZE.D
   });
 
   const [resetHiddenKey, setResetHiddenKey] = useState(0);
+
+  const {
+    dateRange,
+    setDateRange,
+    normalizedDateRange,
+    dateBounds,
+    resetDateRange,
+    mobileFilterOption: dateRangeMobileOption
+  } = useDateRangeFilter();
+
+  const maxSelectableBarSize = useMemo<BAR_SIZE>(() => {
+    const { start, end } = normalizedDateRange;
+    if (start === null || end === null) return BAR_SIZE.M;
+    return getMaxBarSizeForRange(start, end);
+  }, [normalizedDateRange]);
+
+  const disabledBarSizes = useMemo<BAR_SIZE[]>(
+    () =>
+      BAR_SIZE_OPTIONS.filter(
+        (size) => BAR_SIZE_ORDER[size] > BAR_SIZE_ORDER[maxSelectableBarSize]
+      ),
+    [maxSelectableBarSize]
+  );
+
+  useEffect(() => {
+    const { start, end } = normalizedDateRange;
+    if (start === null || end === null) return;
+
+    const nextBarSize = getMaxBarSizeForRange(start, end);
+    if (BAR_SIZE_ORDER[nextBarSize] < BAR_SIZE_ORDER[barSize]) {
+      onBarSizeChange(nextBarSize);
+    }
+  }, [barSize, normalizedDateRange, onBarSizeChange]);
 
   const initialState: SelectedOptionsState = useMemo(
     () => ({
@@ -201,6 +267,9 @@ const CompoundFeeRevenueRecieved = ({
     const isSymbolFilterActive = selectedSymbolSet.size > 0;
     const isAssetTypeFilterActive = selectedAssetTypeSet.size > 0;
 
+    const dateStart = normalizedDateRange.start;
+    const dateEnd = normalizedDateRange.end;
+
     const uniqueChains = new Set<string>();
     const uniqueMarkets = new Set<string>();
     const uniqueSymbols = new Set<string>();
@@ -234,7 +303,11 @@ const CompoundFeeRevenueRecieved = ({
         !isAssetTypeFilterActive || selectedAssetTypeSet.has(assetTypeName);
       if (!assetTypeMatch) continue;
 
-      const date = new Date(item.date * 1000).toISOString().split('T')[0];
+      const itemTime = item.date * 1000;
+      if (dateStart !== null && itemTime < dateStart) continue;
+      if (dateEnd !== null && itemTime > dateEnd) continue;
+
+      const date = new Date(itemTime).toISOString().split('T')[0];
 
       let seriesKey: string;
       if (groupBy === 'None') {
@@ -290,7 +363,7 @@ const CompoundFeeRevenueRecieved = ({
       marketOptions: createOptions(uniqueMarkets, 'market'),
       chartData: finalChartData
     };
-  }, [rawData, selectedOptions, groupBy]);
+  }, [rawData, selectedOptions, groupBy, normalizedDateRange]);
 
   const {
     chartRef,
@@ -323,7 +396,9 @@ const CompoundFeeRevenueRecieved = ({
     selectedOptions.chain.length > 0 ||
     selectedOptions.market.length > 0 ||
     selectedOptions.symbol.length > 0 ||
-    selectedOptions.assetType.length > 0
+    selectedOptions.assetType.length > 0 ||
+    dateRange.startDate !== null ||
+    dateRange.endDate !== null
       ? 'No data for selected filters'
       : 'No data available';
 
@@ -381,11 +456,10 @@ const CompoundFeeRevenueRecieved = ({
 
   const handleResetFilters = useCallback(() => {
     setSelectedOptions(initialState);
-
     setGroupBy('Chain');
-
     setResetHiddenKey((k) => k + 1);
-  }, [initialState]);
+    resetDateRange();
+  }, [initialState, resetDateRange]);
 
   return (
     <Card
@@ -410,14 +484,20 @@ const CompoundFeeRevenueRecieved = ({
         deploymentOptionsFilter={deploymentOptionsFilter}
         isLoading={isLoading || false}
         barSize={barSize}
+        disabledBarSizes={disabledBarSizes}
         csvData={csvData}
         csvFilename={getCsvFileName('compound-fee-revenue-received')}
         openSingle={isGroupByOpen}
+        dateRange={dateRange}
+        minDate={dateBounds.min}
+        maxDate={dateBounds.max}
+        dateRangeMobileOption={dateRangeMobileOption}
         onSelectChain={onSelectChain}
         onSelectAssetType={onSelectAssetType}
         onSelectMarket={onSelectMarket}
         onSelectSymbol={onSelectSymbol}
         onBarSizeChange={onBarSizeChange}
+        onDateRangeChange={setDateRange}
         toggleSingle={onGroupByOpen}
         closeSingle={onGroupByClose}
         selectSingle={handleSelectGroupBy}
@@ -456,6 +536,7 @@ const CompoundFeeRevenueRecieved = ({
 const Filters = memo(
   ({
     barSize,
+    disabledBarSizes,
     openSingle,
     groupBy,
     csvData,
@@ -468,11 +549,16 @@ const Filters = memo(
     assetTypeOptions,
     symbolOptions,
     isLoading,
+    dateRange,
+    minDate,
+    maxDate,
+    dateRangeMobileOption,
     onSelectChain,
     onSelectAssetType,
     onSelectMarket,
     onSelectSymbol,
     onBarSizeChange,
+    onDateRangeChange,
     toggleSingle,
     closeSingle,
     selectSingle,
@@ -535,6 +621,7 @@ const Filters = memo(
       };
 
       return [
+        dateRangeMobileOption,
         chainFilterOptions,
         marketFilterOptions,
         assetTypeFilterOptions,
@@ -543,11 +630,13 @@ const Filters = memo(
     }, [
       assetTypeOptions,
       chainOptions,
+      dateRangeMobileOption,
       deploymentOptionsFilter,
       onSelectAssetType,
       onSelectChain,
       onSelectMarket,
-      selectedOptions
+      selectedOptions,
+      symbolOptions
     ]);
 
     const onEyeClick = () => {
@@ -565,10 +654,21 @@ const Filters = memo(
         <div className='hidden lg:block'>
           <div className='flex items-center justify-end gap-2 px-0 py-3'>
             <TabsGroup
-              tabs={['D', 'W', 'M']}
+              tabs={BAR_SIZE_OPTIONS}
               value={barSize}
               onTabChange={onBarSizeChange}
               disabled={isLoading}
+              disabledTabs={disabledBarSizes}
+            />
+            <DateRangePickerPopover
+              value={dateRange}
+              min={minDate}
+              max={maxDate}
+              onChange={onDateRangeChange}
+              disabled={isLoading}
+              showLabels
+              showClear
+              inputClassName='w-full'
             />
             <MultiSelect
               options={chainOptions || []}
@@ -641,10 +741,11 @@ const Filters = memo(
                     container: 'hidden w-1/2 sm:block sm:w-auto',
                     list: 'w-full sm:w-auto'
                   }}
-                  tabs={['D', 'W', 'M']}
+                  tabs={BAR_SIZE_OPTIONS}
                   value={barSize}
                   onTabChange={onBarSizeChange}
                   disabled={isLoading}
+                  disabledTabs={disabledBarSizes}
                 />
                 <Button
                   onClick={onGroupOpen}
@@ -683,10 +784,11 @@ const Filters = memo(
                     container: 'block w-full sm:hidden sm:w-auto',
                     list: 'w-full sm:w-auto'
                   }}
-                  tabs={['D', 'W', 'M']}
+                  tabs={BAR_SIZE_OPTIONS}
                   value={barSize}
                   onTabChange={onBarSizeChange}
                   disabled={isLoading}
+                  disabledTabs={disabledBarSizes}
                 />
                 <Button
                   onClick={onMoreOpen}

@@ -1,4 +1,13 @@
-import React, { memo, useCallback, useMemo, useReducer, useState } from 'react';
+import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
+import React, {
+  Dispatch,
+  memo,
+  SetStateAction,
+  useCallback,
+  useMemo,
+  useReducer,
+  useState
+} from 'react';
 import { CSVLink } from 'react-csv';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
@@ -26,11 +35,13 @@ import {
   groupOptionsDto
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
-import { BarSize, OptionType } from '@/shared/types/types';
+import { BAR_SIZE, OptionType } from '@/shared/types/types';
 import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
+import { DateRangePickerPopover } from '@/shared/ui/DateRangePicker/DateRangePicker';
+import { DateRangeValue } from '@/shared/ui/DateRangePicker/types';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -63,7 +74,7 @@ interface FiltersProps {
 
   symbolOptions: OptionType[];
 
-  barSize: BarSize;
+  barSize: BAR_SIZE;
 
   showEvents: boolean;
 
@@ -82,6 +93,12 @@ interface FiltersProps {
   csvData: Record<string, string | number>[];
 
   areAllSeriesHidden: boolean;
+
+  dateRange: DateRangeValue;
+
+  minDate: number | null;
+
+  maxDate: number | null;
 
   selectedOptions: {
     chain: OptionType[];
@@ -118,6 +135,12 @@ interface FiltersProps {
   selectSingleClose: (value: string) => void;
 
   onShowEvents: (value: boolean) => void;
+
+  onDateRangeChange: Dispatch<SetStateAction<DateRangeValue>>;
+
+  dateRangeMobileOption: ReturnType<
+    typeof useDateRangeFilter
+  >['mobileFilterOption'];
 }
 
 const TotalTreasuryValue = ({
@@ -155,8 +178,17 @@ const TotalTreasuryValue = ({
   } = useDropdown('single');
 
   const { barSize, onBarSizeChange } = useChartControls({
-    initialBarSize: 'D'
+    initialBarSize: BAR_SIZE.D
   });
+
+  const {
+    dateRange,
+    setDateRange,
+    normalizedDateRange,
+    dateBounds,
+    resetDateRange,
+    mobileFilterOption: dateRangeMobileOption
+  } = useDateRangeFilter();
 
   const rawData: ChartDataItem[] = useMemo(() => {
     if (!treasuryApiResponse) {
@@ -218,7 +250,8 @@ const TotalTreasuryValue = ({
         : filterOptionsConfig[
             groupByMapping[groupBy] as keyof typeof filterOptionsConfig
           ].path,
-    defaultSeriesName: 'Treasury Value'
+    defaultSeriesName: 'Treasury Value',
+    dateRange: normalizedDateRange
   });
 
   const correctedChartSeries = useMemo(() => {
@@ -342,11 +375,11 @@ const TotalTreasuryValue = ({
       deployment: [],
       symbol: []
     });
-  }, []);
+    resetDateRange();
+  }, [resetDateRange]);
 
   const onClearAll = useCallback(() => {
     onClearSelectedOptions();
-
     selectSingle('None');
   }, [onClearSelectedOptions, selectSingle]);
 
@@ -378,6 +411,10 @@ const TotalTreasuryValue = ({
         csvData={csvData}
         csvFilename={getCsvFileName('total_treasury_value')}
         isOpenSingle={isOpenSingle}
+        dateRange={dateRange}
+        minDate={dateBounds.min}
+        maxDate={dateBounds.max}
+        dateRangeMobileOption={dateRangeMobileOption}
         onSelectChain={onSelectChain}
         onSelectAssetType={onSelectAssetType}
         onSelectMarket={onSelectMarket}
@@ -391,6 +428,7 @@ const TotalTreasuryValue = ({
         onSelectAll={onSelectAllLegends}
         onDeselectAll={onDeselectAllLegends}
         onShowEvents={setIsShowEvents}
+        onDateRangeChange={setDateRange}
       />
       {!isLoading && !isError && !hasData ? (
         <NoDataPlaceholder onButtonClick={onClearAll} />
@@ -434,6 +472,10 @@ const Filters = memo(
     assetTypeOptions,
     symbolOptions,
     isLoading,
+    dateRange,
+    minDate,
+    maxDate,
+    dateRangeMobileOption,
     onSelectChain,
     onSelectAssetType,
     onSelectMarket,
@@ -446,7 +488,8 @@ const Filters = memo(
     onClearAll,
     onSelectAll,
     onDeselectAll,
-    onShowEvents
+    onShowEvents,
+    onDateRangeChange
   }: FiltersProps) => {
     const { isOpen, onOpenModal, onCloseModal } = useModal();
 
@@ -492,10 +535,16 @@ const Filters = memo(
         onChange: onSelectAssetType
       };
 
-      return [chainFilterOptions, marketFilterOptions, assetTypeFilterOptions];
+      return [
+        dateRangeMobileOption,
+        chainFilterOptions,
+        marketFilterOptions,
+        assetTypeFilterOptions
+      ];
     }, [
       assetTypeOptions,
       chainOptions,
+      dateRangeMobileOption,
       deploymentOptionsFilter,
       onSelectAssetType,
       onSelectChain,
@@ -671,6 +720,16 @@ const Filters = memo(
               value={barSize}
               onTabChange={onBarSizeChange}
               disabled={isLoading}
+            />
+            <DateRangePickerPopover
+              value={dateRange}
+              min={minDate}
+              max={maxDate}
+              onChange={onDateRangeChange}
+              disabled={isLoading}
+              showLabels
+              showClear
+              inputClassName='w-full'
             />
             <MultiSelect
               options={chainOptions || []}
