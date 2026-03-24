@@ -16,6 +16,10 @@ interface ChartDataProcessorConfig {
   groupBy: string;
   groupByKeyPath: string | null;
   defaultSeriesName: string;
+  dateRange?: {
+    start: number | null;
+    end: number | null;
+  };
 }
 
 export const useChartDataProcessor = ({
@@ -24,7 +28,8 @@ export const useChartDataProcessor = ({
   filterPaths,
   groupBy,
   groupByKeyPath,
-  defaultSeriesName
+  defaultSeriesName,
+  dateRange
 }: ChartDataProcessorConfig): {
   chartSeries: LineChartSeries[];
   hasData: boolean;
@@ -32,7 +37,15 @@ export const useChartDataProcessor = ({
   const chartSeries = useMemo((): LineChartSeries[] => {
     if (!rawData?.length) return [];
 
+    const rangeStart = dateRange?.start ?? null;
+    const rangeEnd = dateRange?.end ?? null;
+
     const filteredData = rawData.filter((item) => {
+      const itemTimestamp = item.date * 1000;
+
+      if (rangeStart !== null && itemTimestamp < rangeStart) return false;
+      if (rangeEnd !== null && itemTimestamp > rangeEnd) return false;
+
       return Object.entries(filters).every(([key, selectedValues]) => {
         if (selectedValues.length === 0) return true;
         let itemValue = getValueByPath(item, filterPaths[key]);
@@ -54,7 +67,7 @@ export const useChartDataProcessor = ({
     if (shouldAggregate) {
       const aggregatedByDate = new Map<number, number>();
       filteredData.forEach((item) => {
-        if (item.date && typeof item.value === 'number') {
+        if (item.date) {
           const dateKey = item.date * 1000;
           const currentValue = aggregatedByDate.get(dateKey) || 0;
           aggregatedByDate.set(dateKey, currentValue + item.value);
@@ -69,7 +82,7 @@ export const useChartDataProcessor = ({
     } else {
       const aggregatedData = new Map<string, Map<number, number>>();
       filteredData.forEach((item) => {
-        if (!item.date || typeof item.value !== 'number') return;
+        if (!item.date) return;
 
         const key = getValueByPath(item, groupByKeyPath) || NOT_MARKET;
 
@@ -95,7 +108,9 @@ export const useChartDataProcessor = ({
     groupBy,
     groupByKeyPath,
     defaultSeriesName,
-    filterPaths
+    filterPaths,
+    dateRange?.start,
+    dateRange?.end
   ]);
 
   const hasData = useMemo(

@@ -4,7 +4,7 @@ import CapoPage from '@/pages/CapoPage/CapoPage';
 import IncentivePage from '@/pages/InsentivePage/IncentivePage';
 // TODO: OEV Page has to be hidden until it is finalized
 // import OEVPage from '@/pages/OEVPage/OEVPage';
-import RevenuePage from '@/pages/RevenuePage/RevenuePage';
+import AccountingPage from '@/pages/AccountingPage/AccountingPage';
 import RunwayPage from '@/pages/RunwayPage/RunwayPage';
 import SpendingsPage from '@/pages/SpendingsPage/SpendingsPage';
 import TreasuryPage from '@/pages/TreasuryPage/TreasuryPage';
@@ -15,7 +15,7 @@ export interface RouteConfig {
 }
 
 export enum commonRoutes {
-  REVENUE = '/revenue',
+  ACCOUNTING = '/accounting',
   RUNWAY = '/runway',
   TREASURY = '/treasury',
   SPENDINGS = '/spendings',
@@ -29,7 +29,7 @@ export enum commonRoutes {
 export const VALID_NAVIGATION_ROUTES = [
   commonRoutes.TREASURY,
   commonRoutes.RUNWAY,
-  commonRoutes.REVENUE,
+  commonRoutes.ACCOUNTING,
   commonRoutes.SPENDINGS,
   commonRoutes.INCENTIVES,
   // TODO: OEV Page has to be hidden until it is finalized
@@ -40,7 +40,7 @@ export const VALID_NAVIGATION_ROUTES = [
 export const enum routeTitles {
   TREASURY = 'Treasury',
   RUNWAY = 'Runway',
-  REVENUE = 'Revenue',
+  ACCOUNTING = 'Accounting',
   SPENDINGS = 'Spendings',
   INCENTIVES = 'Incentives',
   CAPO = 'CAPO'
@@ -53,9 +53,9 @@ export const routesConfig: Record<commonRoutes, RouteConfig> = {
     path: commonRoutes.TREASURY,
     element: <TreasuryPage />
   },
-  [commonRoutes.REVENUE]: {
-    path: commonRoutes.REVENUE,
-    element: <RevenuePage />
+  [commonRoutes.ACCOUNTING]: {
+    path: commonRoutes.ACCOUNTING,
+    element: <AccountingPage />
   },
   [commonRoutes.RUNWAY]: {
     path: commonRoutes.RUNWAY,

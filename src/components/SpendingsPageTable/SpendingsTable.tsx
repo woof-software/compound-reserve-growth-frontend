@@ -10,7 +10,7 @@ import Text from '@/shared/ui/Text/Text';
 import { TextTooltip } from '@/shared/ui/TextTooltip/TextTooltip';
 import { Tooltip } from '@/shared/ui/Tooltip/Tooltip';
 
-interface SpendingsTableProps {
+export interface SpendingsTableProps {
   data: SpendingsRow[];
   allocateHeader: string;
 }
