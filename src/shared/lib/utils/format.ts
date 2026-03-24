@@ -1,5 +1,6 @@
 export namespace Format {
   export type FormatView = 'standard' | 'compact';
+  export type DateFormat = 'ordinal' | 'short';
   /**
    * Formats a number as a USD price.
    * @example
@@ -76,4 +77,42 @@ export namespace Format {
     }
     return token(value, options.view, options.symbol);
   }
+
+  /**
+   * Formats date
+   * @example
+   * e.g., Format.date('2024-01-15') -> "Jan 15th 2024"
+   * e.g., Format.date('2024-01-15', 'short') -> 'Jan 15, 2024'
+   */
+  const getOrdinalSuffix = (day: number): string => {
+    const s = ['th', 'st', 'nd', 'rd'];
+    const v = day % 100;
+    return s[(v - 20) % 10] ?? s[v] ?? s[0];
+  };
+
+  const DATE_FORMATTERS: Record<DateFormat, (d: Date) => string> = {
+    ordinal: (d) => {
+      const day = d.getDate();
+      const month = d.toLocaleString('en-US', { month: 'short' });
+      return `${month} ${day}${getOrdinalSuffix(day)} ${d.getFullYear()}`;
+    },
+    short: (d) =>
+      d.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      })
+  };
+
+  export const date = (
+    value: string | null | undefined,
+    format: DateFormat = 'ordinal',
+    fallback = '-'
+  ): string => {
+    if (!value) return fallback;
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime())
+      ? value
+      : DATE_FORMATTERS[format](parsed);
+  };
 }

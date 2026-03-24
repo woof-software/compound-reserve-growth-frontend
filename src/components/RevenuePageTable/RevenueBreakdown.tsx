@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 import { OnlyStringKeys } from '@/shared/lib/utils/types';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';

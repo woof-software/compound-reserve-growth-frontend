@@ -190,36 +190,6 @@ export const units = [
   { value: 1e3, symbol: 'K' }
 ];
 
-const getOrdinalSuffix = (day: number) => {
-  if (day > 3 && day < 21) return 'th';
-  switch (day % 10) {
-    case 1:
-      return 'st';
-    case 2:
-      return 'nd';
-    case 3:
-      return 'rd';
-    default:
-      return 'th';
-  }
-};
-
-export const formatDateWithOrdinal = (dateString: string) => {
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      throw new Error('Invalid date');
-    }
-    const day = date.getDate();
-    const month = date.toLocaleString('en-US', { month: 'short' });
-    const year = date.getFullYear();
-    const suffix = getOrdinalSuffix(day);
-    return `${month} ${day}${suffix} ${year}`;
-  } catch {
-    return dateString;
-  }
-};
-
 export const sliceAddress = (
   address?: string,
   before: number = 4,

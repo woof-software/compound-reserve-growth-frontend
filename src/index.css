@@ -3,6 +3,8 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ======================= */
+/* Fonts */
 @font-face {
   font-family: 'Haas Grot Text R';
   font-style: normal;
@@ -30,12 +32,13 @@
   font-display: swap;
 }
 
+/* ======================= */
+/* Light theme */
 :root {
-  /*=======================*/
   /* Layout */
   --background: #F0F2F5;
+  --border-color: #D8DFE5;
 
-  /*=======================*/
   /* Primary Colors */
   --primary-10: #F9FAFB;
   --primary-11: #17212B;
@@ -109,10 +112,12 @@
   --custom-trigger: #f1f2f6;
 }
 
+/* ======================= */
+/* Dark theme */
 .dark {
-  /*=======================*/
-  /* Layout */
   --background: #0D131A;
+
+  --border-color: rgba(249, 250, 251, 0.15);
 
   --blur-background: #AFBBC780;
 
@@ -191,8 +196,9 @@
   --custom-trigger: #17212b;
 }
 
+/* ======================= */
+/* Tailwind theme */
 @theme inline {
-  /*=======================*/
   /* Shadows */
   --shadow-10: 0 0 12px 0 #0000000D;
   --shadow-11: 0px 1px 3px 0px #00000040, 0px 1px 1px 0px #00000040, 0px 2px 1px -1px #00000040;
@@ -203,7 +209,8 @@
   --shadow-16: inset 0 0 0 0.25px #17212B26;
   --shadow-17: 0px 2px 9px 0px #00000040;
 
-  /*=======================*/
+  --color-border: var(--border-color);
+
   /* Layout */
   --color-background: var(--background);
 
@@ -282,15 +289,6 @@
   --color-custom-trigger: var(--custom-trigger);
 
   /*=======================*/
-  /* Static Colors */
-  --color-white-10: #FFFFFF;
-  --color-white-11: #D8DFE5;
-  --color-gray-10: #2B3947;
-  --color-gray-11: #516070;
-  --color-gray-12: #17212B;
-  --color-gray-13: #1D2833;
-
-  /*=======================*/
   /* Decorative Colors */
   --color-bluish-purple: #6F42EB;
   --color-dodger-blue: #3877FF;
@@ -312,8 +310,19 @@
   --color-hot-pink: #FAB3FF;
   --color-greenish-cyan: #58F0C5;
   --color-grey-teal: #62B1FF;
+
+  /*=======================*/
+  /* Static Colors */
+  --color-white-10: #FFFFFF;
+  --color-white-11: #D8DFE5;
+  --color-gray-10: #2B3947;
+  --color-gray-11: #516070;
+  --color-gray-12: #17212B;
+  --color-gray-13: #1D2833;
 }
 
+/* ======================= */
+/* Base */
 @layer base {
   * {
     font-size: 1rem;
@@ -325,7 +334,6 @@
 
   body {
     @apply bg-background text-primary-11;
-
     font-family: 'Haas Grot Text R', sans-serif;
   }
 }

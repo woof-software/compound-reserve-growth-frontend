@@ -4,11 +4,8 @@ import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { dateSortingFn, parseDateToUTC } from '@/shared/lib/utils/dateSorting';
-import { Format } from '@/shared/lib/utils/numbersFormatter';
-import {
-  capitalizeFirstLetter,
-  formatDateWithOrdinal
-} from '@/shared/lib/utils/utils';
+import { Format } from '@/shared/lib/utils/format';
+import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Text from '@/shared/ui/Text/Text';
 import { TextTooltip } from '@/shared/ui/TextTooltip/TextTooltip';
@@ -139,7 +136,7 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
     align: 'right',
     cell: ({ getValue }) => {
       const value = getValue() as string;
-      return value ? formatDateWithOrdinal(value) : '-';
+      return value ? Format.date(value) : '-';
     },
     sortingFn: dateSortingFn((row) => row.original.startDate)
   },
@@ -149,7 +146,7 @@ const columns: ExtendedColumnDef<FullDAOCommitmentRow>[] = [
     align: 'right',
     cell: ({ getValue }) => {
       const value = getValue() as string;
-      return value ? formatDateWithOrdinal(value) : '-';
+      return value ? Format.date(value) : '-';
     },
     sortingFn: dateSortingFn((row) => row.original.streamEndDate)
   }
@@ -353,7 +350,7 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {row.startDate ? formatDateWithOrdinal(row.startDate) : '-'}
+                    {row.startDate ? Format.date(row.startDate) : '-'}
                   </Text>
                 </div>
                 <div className='grid w-full max-w-[100px]'>
@@ -370,9 +367,7 @@ const FullDAOCommitments: React.FC<FullDAOCommitmentsProps> = ({
                     lineHeight='21'
                     className='truncate'
                   >
-                    {row.streamEndDate
-                      ? formatDateWithOrdinal(row.streamEndDate)
-                      : '-'}
+                    {row.streamEndDate ? Format.date(row.streamEndDate) : '-'}
                   </Text>
                 </div>
               </div>

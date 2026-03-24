@@ -16,7 +16,7 @@ import {
   SortAdapter,
   useSorting
 } from '@/shared/hooks/useSorting';
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 import {
   capitalizeFirstLetter,
   extractFilterOptions,

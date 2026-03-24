@@ -15,7 +15,7 @@ import RevenueOverviewUSD, {
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 import {
   capitalizeFirstLetter,
   networkColorMap

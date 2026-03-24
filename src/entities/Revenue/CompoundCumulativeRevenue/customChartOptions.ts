@@ -1,6 +1,6 @@
 import Highcharts, { Point } from 'highcharts';
 
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 
 export const customTooltipFormatter = (context: Point, groupBy?: string) => {
   const header = `<div class="font-medium mb-3 text-[11px] font-haas">

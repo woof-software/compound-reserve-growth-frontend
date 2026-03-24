@@ -11,7 +11,7 @@ import HighchartsReact from 'highcharts-react-official';
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { AggregatedPoint } from '@/shared/hooks/useCompoundChartBars';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 import { noop } from '@/shared/lib/utils/utils';
 import Icon from '@/shared/ui/Icon/Icon';
 

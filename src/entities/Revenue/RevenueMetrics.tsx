@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 import { formatGrowth } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import ValueMetricField from '@/shared/ui/ValueMetricField/ValueMetricField';

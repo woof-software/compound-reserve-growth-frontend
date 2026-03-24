@@ -1,6 +1,6 @@
 import Highcharts from 'highcharts';
 
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 import { formatUSD } from '@/shared/lib/utils/utils';
 
 export const customFormatter = (context: { x: number; points: any[] }) => {

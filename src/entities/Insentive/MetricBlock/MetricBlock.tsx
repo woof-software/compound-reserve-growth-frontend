@@ -11,7 +11,7 @@ import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import { getTotalMetricValues } from '@/entities/Insentive/MetricBlock/lib/utils';
 import { useClickOutside } from '@/shared/hooks/useClickOutside';
 import { useModal } from '@/shared/hooks/useModal';
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';

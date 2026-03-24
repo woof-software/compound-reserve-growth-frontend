@@ -1,7 +1,7 @@
 import { memo } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 import { sumValues } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import { AssetType } from '@/shared/types/types';

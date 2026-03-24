@@ -2,7 +2,7 @@ import React, { FC, useEffect, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 import Button from '@/shared/ui/Button/Button';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';

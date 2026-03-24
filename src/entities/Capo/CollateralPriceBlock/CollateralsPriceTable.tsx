@@ -7,7 +7,7 @@ import { CapoEventBusEventsContext } from '@/entities/Capo/lib/CapoEventBusConte
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 import {
   defaultExplorer,
   explorers,

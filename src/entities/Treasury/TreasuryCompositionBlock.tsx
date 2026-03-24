@@ -1,4 +1,4 @@
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 import React, { memo, useMemo, useState } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';

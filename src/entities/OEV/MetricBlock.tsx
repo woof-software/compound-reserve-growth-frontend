@@ -1,4 +1,4 @@
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 import { memo } from 'react';
 
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';

@@ -32,6 +32,11 @@ const navLinks: NavLinkProps[] = [
     icon: 'storage'
   },
   {
+    to: commonRoutes.SPENDINGS,
+    title: routeTitles.SPENDINGS,
+    icon: 'nav-spendings'
+  },
+  {
     to: commonRoutes.INCENTIVES,
     title: routeTitles.INCENTIVES,
     icon: 'incentives-header-icon'
