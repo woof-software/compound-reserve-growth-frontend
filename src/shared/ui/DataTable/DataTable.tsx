@@ -265,8 +265,8 @@ const DataTable = <T,>({
                         key={cell.id}
                         className={cn(
                           'text-[13px] whitespace-nowrap first:rounded-l-lg last:rounded-r-lg',
-                          { 'font-medium': index === 0 },
                           {
+                            'font-medium': index === 0,
                             'group-hover:bg-white/5': enableRowHoverHighlight
                           },
                           getAlignmentClass(columnAlign),

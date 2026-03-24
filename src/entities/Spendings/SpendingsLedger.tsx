@@ -1,21 +1,32 @@
 import { useMemo, useState } from 'react';
 
 import SpendingsTable from '@/components/SpendingsPageTable/SpendingsTable';
-import { spendingsSortColumns, YEAR_TABS } from '@/entities/Spendings/consts';
 import {
   spendingsByYear,
   type SpendingsRow,
   SpendingsYear
 } from '@/entities/Spendings/data/spendingsData';
 import { useModal } from '@/shared/hooks/useModal';
-import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import {
+  SortAccessor,
+  SortAdapter,
+  useSorting
+} from '@/shared/hooks/useSorting';
+import { Format } from '@/shared/lib/utils/format';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
+
+export const YEAR_TABS: SpendingsYear[] = ['2024', '2025'];
+
+export const spendingsSortColumns: SortAccessor<SpendingsRow>[] = [
+  { accessorKey: 'counterpartyService', header: 'Counterparty / Service' },
+  { accessorKey: 'renewalExpiry', header: 'Renewal / Status' },
+  { accessorKey: 'activeDaysInFY', header: 'Details' }
+];
 
 const SpendingsLedger = () => {
   const [activeYear, setActiveYear] = useState<SpendingsYear>('2024');
@@ -34,7 +45,10 @@ const SpendingsLedger = () => {
     onCloseModal: onSortClose
   } = useModal();
 
-  const tableData = applySorting(spendingsByYear[activeYear] || []);
+  const tableData = useMemo(
+    () => applySorting(spendingsByYear[activeYear] || []),
+    [activeYear]
+  );
 
   const totalAllocate = useMemo(() => {
     return tableData.reduce((acc, row) => acc + (row.allocate ?? 0), 0);

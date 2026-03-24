@@ -1,6 +1,6 @@
 import Highcharts from 'highcharts';
 
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 
 export const customTooltipFormatter =
   (view: string) => (context: { x: number; points: any[] }) => {

@@ -5,7 +5,7 @@ Calculation logic for the "Current Service Providers" block:
 3. Pie Chart Data: The total values (`item.value`) are grouped and summed by the provider's name to show the total expense per provider.
 4. Values Used: The full contract values (`item.value` and `item.amount`) are used, not the annualised equivalents.
 */
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 import React, { useMemo } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';

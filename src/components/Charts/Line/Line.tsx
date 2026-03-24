@@ -19,7 +19,7 @@ import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { CompoundEvent } from '@/shared/hooks/useEventsApi';
 import { Legend } from '@/shared/hooks/useLegends';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 import { noop } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Each from '@/shared/ui/Each/Each';

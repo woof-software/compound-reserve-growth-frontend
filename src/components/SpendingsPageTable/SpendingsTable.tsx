@@ -1,10 +1,9 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import type { SpendingsRow } from '@/entities/Spendings/data/spendingsData';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { Format } from '@/shared/lib/utils/numbersFormatter';
-import { formatDateWithOrdinal } from '@/shared/lib/utils/utils';
+import { Format } from '@/shared/lib/utils/format';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Text from '@/shared/ui/Text/Text';
 import { TextTooltip } from '@/shared/ui/TextTooltip/TextTooltip';
@@ -15,54 +14,6 @@ export interface SpendingsTableProps {
   allocateHeader: string;
 }
 
-const getCompactCurrency = (value: number | null | undefined) => {
-  if (value === null || value === undefined) return '-';
-
-  return Format.price(value, 'compact');
-};
-
-const renderCompactCurrency = (
-  value: number | null | undefined,
-  className?: string
-) => {
-  if (value === null || value === undefined) return '-';
-
-  const compactValue = getCompactCurrency(value);
-  const fullValue = Format.price(value, 'standard');
-
-  return (
-    <Tooltip content={fullValue}>
-      <span
-        className={cn(
-          'text-primary-11 inline-flex cursor-default items-center whitespace-nowrap tabular-nums',
-          className
-        )}
-      >
-        {compactValue}
-      </span>
-    </Tooltip>
-  );
-};
-
-const formatDateLabel = (value: string | null | undefined) => {
-  if (!value) return '-';
-  const parsedDate = new Date(value);
-  return Number.isNaN(parsedDate.getTime())
-    ? value
-    : formatDateWithOrdinal(value);
-};
-
-const formatDateShort = (value: string | null | undefined) => {
-  if (!value) return '-';
-  const parsedDate = new Date(value);
-  if (Number.isNaN(parsedDate.getTime())) return value;
-  return parsedDate.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
-};
-
 const createSpendingsColumns = (
   allocateHeader: string
 ): ExtendedColumnDef<SpendingsRow>[] => [
@@ -70,22 +21,20 @@ const createSpendingsColumns = (
     accessorKey: 'counterpartyService',
     header: 'Counterparty / Service',
     enableSorting: true,
-    size: 280,
     cell: ({ row }) => {
       const value = row.original.counterpartyService || '-';
       const notesValue = row.original.notes || '';
       return (
-        <div className='flex min-w-0 flex-col gap-1'>
+        <div className='flex min-w-0 flex-col'>
           {value.length > 28 ? (
             <TextTooltip
               text={value}
-              triggerWidth={210}
               className={{ text: '!font-normal' }}
             />
           ) : (
             <Text
               size='13'
-              className='leading-5 whitespace-normal'
+              lineHeight='21'
             >
               {value}
             </Text>
@@ -93,8 +42,9 @@ const createSpendingsColumns = (
           {notesValue ? (
             <Text
               size='11'
+              lineHeight='18'
               weight='500'
-              className='text-primary-14 line-clamp-1 leading-4'
+              className='text-primary-14'
             >
               {notesValue}
             </Text>
@@ -106,55 +56,78 @@ const createSpendingsColumns = (
   {
     accessorKey: 'contractValue',
     header: 'Contract',
-    align: 'left',
-    enableSorting: false,
-    size: 170,
-    cell: ({ row }) => (
-      <div className='flex flex-col items-start gap-1'>
-        <Text
-          size='13'
-          className='tabular-nums'
-        >
-          {renderCompactCurrency(row.original.contractValue, 'text-[13px]')}
-        </Text>
-        <Text
-          size='11'
-          weight='500'
-          className='text-primary-14 max-w-full truncate leading-4 whitespace-nowrap'
-        >
-          {formatDateShort(row.original.contractStartDate)} –{' '}
-          {formatDateShort(row.original.contractEndDate)}
-        </Text>
-      </div>
-    )
+    enableSorting: true,
+    cell: ({ row }) => {
+      const compactValue = Format.price(
+        row.original.contractValue || 0,
+        'compact'
+      );
+      const fullValue = Format.price(
+        row.original.contractValue || 0,
+        'standard'
+      );
+
+      return (
+        <div className='flex flex-col items-start'>
+          <>
+            <Tooltip content={fullValue}>
+              <Text
+                size='13'
+                lineHeight='21'
+              >
+                {compactValue}
+              </Text>
+            </Tooltip>
+          </>
+          <Text
+            size='11'
+            lineHeight='18'
+            weight='500'
+            className='text-primary-14'
+          >
+            {Format.date(row.original.contractStartDate, 'short')} –{' '}
+            {Format.date(row.original.contractEndDate, 'short')}
+          </Text>
+        </div>
+      );
+    }
   },
   {
     accessorKey: 'allocate',
     header: allocateHeader,
-    align: 'left',
-    enableSorting: false,
-    size: 160,
+    enableSorting: true,
     cell: ({ getValue }) => {
       const value = getValue() as number | null;
-      return renderCompactCurrency(value, 'text-[12px]');
+
+      const compactValue = Format.price(value || 0, 'compact');
+      const fullValue = Format.price(value || 0, 'standard');
+
+      return (
+        <Tooltip content={fullValue}>
+          <Text
+            size='13'
+            lineHeight='21'
+          >
+            {compactValue}
+          </Text>
+        </Tooltip>
+      );
     }
   },
   {
     accessorKey: 'renewalExpiry',
     header: 'Renewal / Status',
-    align: 'left',
     enableSorting: true,
-    size: 190,
     cell: ({ row }) => (
-      <div className='flex items-center gap-2'>
+      <div className='flex items-center gap-[6px]'>
         <Text
           size='13'
-          weight='500'
-          className='min-w-20.5 tabular-nums'
+          lineHeight='21'
+          className='min-w-[80px] tabular-nums'
         >
-          {formatDateLabel(row.original.renewalExpiry)}
+          {Format.date(row.original.renewalExpiry)}
         </Text>
-        <span className='bg-secondary-27 text-primary-14 flex min-w-14.25 items-center justify-center rounded-md px-2 py-0.5 text-[10px] leading-4 font-medium'>
+        <span className='bg-secondary-27 border-border text-primary-14 flex h-[20px] items-center justify-center rounded-md border px-[12px] text-[11px] leading-[16px] font-medium'>
           {row.original.status || '-'}
         </span>
       </div>
@@ -165,23 +138,22 @@ const createSpendingsColumns = (
     header: 'Details',
     accessorFn: (row) => row.activeDaysInFY ?? null,
     enableSorting: true,
-    size: 170,
     cell: ({ row }) => (
-      <div className='flex min-h-[22px] items-center gap-2.5'>
+      <div className='flex items-center gap-[6px]'>
         {row.original.lastRenewalProposalUrl ? (
           <a
             href={row.original.lastRenewalProposalUrl}
             target='_blank'
             rel='noopener noreferrer'
-            className='bg-secondary-27 text-primary-14 min-w-17.7 inline-flex shrink-0 items-center justify-center rounded-md px-2 py-0.5 text-[10px] leading-4 font-medium whitespace-nowrap'
+            className='bg-secondary-27 border-border text-primary-14 flex h-[20px] items-center justify-center rounded-md border px-[12px] text-[11px] leading-[16px] font-medium'
           >
             {row.original.lastRenewalProposalLabel || 'Proposal'}
           </a>
         ) : null}
         <Text
-          size='12'
-          weight='500'
-          className='text-primary-14/70 truncate'
+          size='13'
+          lineHeight='21'
+          className='text-primary-14'
         >
           {row.original.activeDaysInFY ?? '-'}d
         </Text>
@@ -194,24 +166,18 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
   data,
   allocateHeader
 }) => {
-  const columns = useMemo(
-    () => createSpendingsColumns(allocateHeader),
-    [allocateHeader]
-  );
+  const columns = createSpendingsColumns(allocateHeader);
 
   return (
     <>
       <MobileDataTable tableData={data}>
         {(dataRows) => (
           <>
-            {dataRows.map((row, index) => (
+            {dataRows.map((row) => (
               <div
-                key={`${row.number}-${row.counterpartyService}-${index}`}
+                key={`${row.number}-${row.counterpartyService}`}
                 className={cn(
-                  'border-secondary-23 grid grid-cols-2 gap-x-10 gap-y-3 border-b p-5 md:grid-cols-3 md:gap-x-[63px] md:px-10',
-                  {
-                    'border-b-0': dataRows.length - 1 === index
-                  }
+                  'border-secondary-23 grid grid-cols-2 gap-x-10 gap-y-3 border-b p-5 md:grid-cols-3 md:gap-x-[63px] md:px-10'
                 )}
               >
                 <div className='col-span-2 grid w-full md:col-span-1'>
@@ -228,7 +194,7 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                       lineHeight='21'
                       className='truncate'
                     >
-                      {row.counterpartyService}
+                      {row.counterpartyService || '-'}
                     </Text>
                     <Text
                       size='11'
@@ -255,15 +221,15 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                       lineHeight='21'
                       className='truncate tabular-nums'
                     >
-                      {getCompactCurrency(row.contractValue)}
+                      {Format.price(row.contractValue || 0, 'compact')}
                     </Text>
                     <Text
                       size='11'
                       weight='500'
                       className='text-primary-14 max-w-full truncate leading-4 whitespace-nowrap'
                     >
-                      {formatDateShort(row.contractStartDate)} –{' '}
-                      {formatDateShort(row.contractEndDate)}
+                      {Format.date(row.contractStartDate, 'short')} –{' '}
+                      {Format.date(row.contractEndDate, 'short')}
                     </Text>
                   </div>
                 </div>
@@ -274,14 +240,14 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                     weight='500'
                     className='text-primary-14'
                   >
-                    {allocateHeader}
+                    {allocateHeader || 'Allocate'}
                   </Text>
                   <Text
                     size='13'
                     lineHeight='21'
                     className='mt-2.5 truncate tabular-nums'
                   >
-                    {getCompactCurrency(row.allocate)}
+                    {Format.price(row.allocate || 0, 'compact')}
                   </Text>
                 </div>
                 <div className='grid w-full'>
@@ -299,9 +265,9 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                       lineHeight='21'
                       className='truncate'
                     >
-                      {formatDateLabel(row.renewalExpiry)}
+                      {Format.date(row.renewalExpiry)}
                     </Text>
-                    <span className='bg-secondary-27 text-primary-14 flex min-w-14.25 items-center justify-center rounded-md px-2 py-0.5 text-[11px] leading-4 font-medium'>
+                    <span className='bg-secondary-27 text-primary-14 flex items-center justify-center rounded-md px-2 py-0.5 text-[11px] leading-4 font-medium'>
                       {row.status || '-'}
                     </span>
                   </div>
@@ -316,16 +282,16 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                     Details
                   </Text>
                   <div className='mt-2.5 flex min-h-[22px] items-center gap-2.5'>
-                    {row.lastRenewalProposalUrl ? (
+                    {row.lastRenewalProposalUrl && (
                       <a
                         href={row.lastRenewalProposalUrl}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='bg-secondary-27 text-primary-14 min-w-17.7 inline-flex shrink-0 items-center justify-center rounded-md px-2 py-0.5 text-[10px] leading-4 font-medium whitespace-nowrap'
+                        className='bg-secondary-27 text-primary-14 inline-flex shrink-0 items-center justify-center rounded-md px-2 py-0.5 text-[10px] leading-4 font-medium whitespace-nowrap'
                       >
                         {row.lastRenewalProposalLabel || 'Proposal'}
                       </a>
-                    ) : null}
+                    )}
                     <Text
                       size='13'
                       weight='500'
@@ -349,9 +315,8 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
             'min-h-[505px]': data.length > 10
           })}
           containerTableClassName='min-h-[473px]'
-          tableClassName='w-full table-fixed'
+          tableClassName='w-full'
           headerClassName='bg-transparent'
-          headerRowClassName=''
           headerCellClassName='pt-3 pb-2.5 pr-3 pl-0'
           cellClassName='py-2.5 pr-3 pl-0 align-top whitespace-normal'
           headerTextClassName='text-primary-14 font-medium'

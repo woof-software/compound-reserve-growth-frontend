@@ -6,7 +6,7 @@ import { MobileDataTable } from '@/components/MobileDataTable/MobileDataTable';
 import { NormalizedTableData } from '@/entities/Insentive/DailyExpenses/lib/types';
 import { SortAdapter } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
-import { Format } from '@/shared/lib/utils/numbersFormatter';
+import { Format } from '@/shared/lib/utils/format';
 import {
   capitalizeFirstLetter,
   defaultExplorer,

@@ -163,7 +163,8 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       plotBackgroundColor: undefined,
       plotBorderWidth: undefined,
       plotShadow: false,
-      type: 'pie'
+      type: 'pie',
+      backgroundColor: 'transparent'
     },
     credits: {
       enabled: false
