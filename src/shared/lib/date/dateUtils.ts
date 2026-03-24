@@ -1,4 +1,5 @@
 /** Date utilities that operate in UTC to avoid timezone shifts. */
+import { BAR_SIZE } from '@/shared/types/types';
 
 export const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -91,4 +92,43 @@ export const buildMonthWeeks = (monthStart: Date): Date[][] => {
   }
 
   return weeks;
+};
+
+// USED FOR CALENDAR
+const getUtcDayStart = (timestamp: number): number => {
+  const date = new Date(timestamp);
+  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+};
+
+const addUtcMonthsClamped = (timestamp: number, months: number): number => {
+  const date = new Date(timestamp);
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const day = date.getUTCDate();
+
+  const targetMonthIndex = month + months;
+  const targetYear = year + Math.floor(targetMonthIndex / 12);
+  const normalizedTargetMonth = ((targetMonthIndex % 12) + 12) % 12;
+  const daysInTargetMonth = new Date(
+    Date.UTC(targetYear, normalizedTargetMonth + 1, 0)
+  ).getUTCDate();
+  const clampedDay = Math.min(day, daysInTargetMonth);
+
+  return Date.UTC(targetYear, normalizedTargetMonth, clampedDay);
+};
+
+export const getMaxBarSizeForRange = (
+  startDate: number,
+  endDate: number
+): BAR_SIZE => {
+  const from = Math.min(getUtcDayStart(startDate), getUtcDayStart(endDate));
+  const to = Math.max(getUtcDayStart(startDate), getUtcDayStart(endDate));
+  const endExclusive = to + DAY_IN_MS;
+
+  const weekBoundary = from + 7 * DAY_IN_MS;
+  const monthBoundary = addUtcMonthsClamped(from, 1) + DAY_IN_MS;
+
+  if (endExclusive < weekBoundary) return BAR_SIZE.D;
+  if (endExclusive < monthBoundary) return BAR_SIZE.W;
+  return BAR_SIZE.M;
 };
