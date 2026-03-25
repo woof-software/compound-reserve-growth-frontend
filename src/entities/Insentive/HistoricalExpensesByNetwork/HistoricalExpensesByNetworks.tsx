@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-
 import Line from '@/components/Charts/Line/Line';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { HistoricalExpensesMobileActions } from '@/entities/Insentive/HistoricalExpensesByNetwork/HistoricalExpensesMobileActions';
@@ -15,9 +13,11 @@ import { useLineChart } from '@/shared/hooks/useLineChart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
+import { BAR_SIZE } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import React, { useState } from 'react';
 
 interface HistoricalExpensesByNetworksProps {
   isLoading: boolean;
@@ -35,7 +35,7 @@ const HistoricalExpensesByNetworks = (
   >('Total');
   const [activeViewTab, setActiveViewTab] = useState<'COMP' | 'USD'>('COMP');
   const { barSize, onBarSizeChange } = useChartControls({
-    initialBarSize: 'D'
+    initialBarSize: BAR_SIZE.D
   });
   const groupBy = 'Network';
 
