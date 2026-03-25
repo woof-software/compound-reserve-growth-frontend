@@ -142,7 +142,10 @@ export const useChainMarketFilters = (
     let result = data;
 
     if (filterByLatestDate && result.length > 0) {
-      const latestDate = Math.max(...result.map((item) => item.date));
+      const latestDate = result.reduce(
+        (max, item) => (item.date > max ? item.date : max),
+        result[0].date
+      );
       result = result.filter((item) => item.date === latestDate);
     }
 

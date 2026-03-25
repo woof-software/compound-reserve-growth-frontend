@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import Line from '@/components/Charts/Line/Line';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
@@ -8,19 +8,23 @@ import {
   customTooltipFormatter
 } from '@/entities/Insentive/FeesGeneratedIncentives/lib/customTooltipFormatter';
 import { getGeneratedIncentivesChartSeries } from '@/entities/Insentive/FeesGeneratedIncentives/lib/getGeneratedIncentivesChartSeries';
-import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
 import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
+import { useBarSizeConstraints } from '@/shared/hooks/useBarSizeConstraints';
 import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
 import {
   useFiltersSync,
   useFilterSyncSingle
 } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
+import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
+import { BAR_SIZE, BAR_SIZE_OPTIONS } from '@/shared/types/types';
 import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
+import { DateRangePickerPopover } from '@/shared/ui/DateRangePicker/DateRangePicker';
 import Switch from '@/shared/ui/Switch/Switch';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
@@ -36,8 +40,23 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
   const groupBy = 'None';
 
   const { barSize, onBarSizeChange } = useChartControls({
-    initialBarSize: 'D'
+    initialBarSize: BAR_SIZE.D
   });
+
+  const {
+    dateRange,
+    setDateRange,
+    normalizedDateRange,
+    dateBounds,
+    resetDateRange,
+    mobileFilterOption: dateRangeMobileOption
+  } = useDateRangeFilter();
+
+  const { disabledBarSizes } = useBarSizeConstraints(
+    normalizedDateRange,
+    barSize,
+    onBarSizeChange
+  );
 
   const {
     chainOptions,
@@ -67,7 +86,19 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
     setIsRevenueOnly
   );
 
-  const chartSeries = getGeneratedIncentivesChartSeries(filteredData);
+  const dateFilteredData = useMemo(() => {
+    const { start, end } = normalizedDateRange;
+    if (start === null && end === null) return filteredData;
+
+    return filteredData.filter((item) => {
+      const itemTime = item.date * 1000;
+      if (start !== null && itemTime < start) return false;
+      if (end !== null && itemTime > end) return false;
+      return true;
+    });
+  }, [filteredData, normalizedDateRange]);
+
+  const chartSeries = getGeneratedIncentivesChartSeries(dateFilteredData);
 
   const displaySeries = isRevenueOnly
     ? chartSeries.filter((series) => series.name === 'Revenue')
@@ -81,6 +112,16 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
   });
 
   const csvData = getSummarizedCsvData(aggregatedSeries);
+
+  const handleClearAllFilters = () => {
+    clearAllFilters();
+    resetDateRange();
+  };
+
+  const mobileFilterOptionsWithDateRange = () => [
+    dateRangeMobileOption,
+    ...mobileFilterOptions()
+  ];
 
   return (
     <Card
@@ -97,8 +138,8 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
       <FeesGeneratedIncentivesMobileFilters
         barSize={barSize}
         onBarSizeChange={onBarSizeChange}
-        filterOptions={mobileFilterOptions}
-        onClearAll={clearAllFilters}
+        filterOptions={mobileFilterOptionsWithDateRange}
+        onClearAll={handleClearAllFilters}
         csvData={csvData}
         isRevenueOnly={isRevenueOnly}
         setIsRevenueOnly={setIsRevenueOnly}
@@ -106,10 +147,21 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
       <div className='hidden lg:block'>
         <div className='flex items-center justify-end gap-2 px-0 py-3'>
           <TabsGroup
-            tabs={['D', 'W', 'M']}
+            tabs={BAR_SIZE_OPTIONS}
             value={barSize}
             onTabChange={onBarSizeChange}
             disabled={isLoading}
+            disabledTabs={disabledBarSizes}
+          />
+          <DateRangePickerPopover
+            value={dateRange}
+            min={dateBounds.min}
+            max={dateBounds.max}
+            onChange={setDateRange}
+            disabled={isLoading}
+            showLabels
+            showClear
+            inputClassName='w-full'
           />
           <MultiSelect
             options={chainOptions || []}
@@ -140,7 +192,7 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
         </div>
       </div>
       {chartSeries.length === 0 ? (
-        <NoDataPlaceholder onButtonClick={clearAllFilters} />
+        <NoDataPlaceholder onButtonClick={handleClearAllFilters} />
       ) : (
         <Line
           className='max-h-fit'
