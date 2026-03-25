@@ -177,61 +177,57 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
               <div
                 key={`${row.number}-${row.counterpartyService}`}
                 className={cn(
-                  'border-secondary-23 grid grid-cols-2 gap-x-10 gap-y-3 border-b p-5 md:grid-cols-3 md:gap-x-[63px] md:px-10'
+                  'border-secondary-23 grid grid-cols-2 gap-x-10 gap-y-[40px] border-b p-5 md:grid-cols-3 md:gap-x-[63px] md:gap-y-[20px] md:px-10'
                 )}
               >
                 <div className='col-span-2 grid w-full md:col-span-1'>
                   <Text
                     size='11'
+                    lineHeight='18'
                     weight='500'
-                    className='text-primary-14'
+                    className='text-primary-14 mb-[10px]'
                   >
                     Counterparty / Service
                   </Text>
-                  <div className='mt-2.5'>
-                    <Text
-                      size='13'
-                      lineHeight='21'
-                      className='truncate'
-                    >
-                      {row.counterpartyService || '-'}
-                    </Text>
-                    <Text
-                      size='11'
-                      weight='500'
-                      lineHeight='18'
-                      className='text-primary-14 truncate'
-                    >
-                      {row.notes || '-'}
-                    </Text>
-                  </div>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                  >
+                    {row.counterpartyService || '-'}
+                  </Text>
+                  <Text
+                    size='11'
+                    weight='500'
+                    lineHeight='18'
+                    className='text-primary-14 truncate'
+                  >
+                    {row.notes || '-'}
+                  </Text>
                 </div>
                 <div className='grid w-full'>
                   <Text
                     size='11'
                     lineHeight='18'
                     weight='500'
-                    className='text-primary-14'
+                    className='text-primary-14 mb-[10px]'
                   >
                     Contract
                   </Text>
-                  <div className='mt-2.5'>
-                    <Text
-                      size='13'
-                      lineHeight='21'
-                      className='truncate tabular-nums'
-                    >
-                      {Format.price(row.contractValue || 0, 'compact')}
-                    </Text>
-                    <Text
-                      size='11'
-                      weight='500'
-                      className='text-primary-14 max-w-full truncate leading-4 whitespace-nowrap'
-                    >
-                      {Format.date(row.contractStartDate, 'short')} –{' '}
-                      {Format.date(row.contractEndDate, 'short')}
-                    </Text>
-                  </div>
+                  <Text
+                    size='13'
+                    lineHeight='21'
+                  >
+                    {Format.price(row.contractValue || 0, 'compact')}
+                  </Text>
+                  <Text
+                    size='11'
+                    weight='500'
+                    lineHeight='18'
+                    className='text-primary-14 max-w-full truncate whitespace-nowrap'
+                  >
+                    {Format.date(row.contractStartDate, 'short')} –{' '}
+                    {Format.date(row.contractEndDate, 'short')}
+                  </Text>
                 </div>
                 <div className='grid w-full'>
                   <Text
@@ -245,7 +241,7 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                   <Text
                     size='13'
                     lineHeight='21'
-                    className='mt-2.5 truncate tabular-nums'
+                    className='mt-[-10px]'
                   >
                     {Format.price(row.allocate || 0, 'compact')}
                   </Text>
@@ -255,11 +251,11 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                     size='11'
                     lineHeight='18'
                     weight='500'
-                    className='text-primary-14'
+                    className='text-primary-14 mb-[10px]'
                   >
                     Renewal / Status
                   </Text>
-                  <div className='mt-2.5 flex items-center gap-1.5'>
+                  <div className='flex items-center gap-1.5'>
                     <Text
                       size='13'
                       lineHeight='21'
@@ -267,7 +263,7 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                     >
                       {Format.date(row.renewalExpiry)}
                     </Text>
-                    <span className='bg-secondary-27 text-primary-14 flex items-center justify-center rounded-md px-2 py-0.5 text-[11px] leading-4 font-medium'>
+                    <span className='bg-secondary-27 border-border text-primary-14 flex h-[20px] items-center justify-center rounded-md border px-[12px] text-[11px] leading-[16px] font-medium'>
                       {row.status || '-'}
                     </span>
                   </div>
@@ -277,17 +273,17 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                     size='11'
                     lineHeight='18'
                     weight='500'
-                    className='text-primary-14'
+                    className='text-primary-14 mb-[10px]'
                   >
                     Details
                   </Text>
-                  <div className='mt-2.5 flex min-h-[22px] items-center gap-2.5'>
+                  <div className='flex items-center gap-2.5'>
                     {row.lastRenewalProposalUrl && (
                       <a
                         href={row.lastRenewalProposalUrl}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='bg-secondary-27 text-primary-14 inline-flex shrink-0 items-center justify-center rounded-md px-2 py-0.5 text-[10px] leading-4 font-medium whitespace-nowrap'
+                        className='bg-secondary-27 border-border text-primary-14 flex h-[20px] items-center justify-center rounded-md border px-[12px] text-[11px] leading-[16px] font-medium'
                       >
                         {row.lastRenewalProposalLabel || 'Proposal'}
                       </a>
