@@ -1,3 +1,5 @@
+import React, { useMemo, useState } from 'react';
+
 import Line from '@/components/Charts/Line/Line';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { HistoricalExpensesMobileActions } from '@/entities/Insentive/HistoricalExpensesByNetwork/HistoricalExpensesMobileActions';
@@ -6,18 +8,20 @@ import {
   customTooltipFormatter
 } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/customTooltipFormatter';
 import { useHistoricalExpensesChartSeries } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/useHistoricalExpensesChartSeries';
+import { useBarSizeConstraints } from '@/shared/hooks/useBarSizeConstraints';
 import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
-import { BAR_SIZE } from '@/shared/types/types';
+import { BAR_SIZE, BAR_SIZE_OPTIONS } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
+import { DateRangePickerPopover } from '@/shared/ui/DateRangePicker/DateRangePicker';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import React, { useState } from 'react';
 
 interface HistoricalExpensesByNetworksProps {
   isLoading: boolean;
@@ -34,13 +38,36 @@ const HistoricalExpensesByNetworks = (
     'Lend' | 'Borrow' | 'Total'
   >('Total');
   const [activeViewTab, setActiveViewTab] = useState<'COMP' | 'USD'>('COMP');
+
   const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: BAR_SIZE.D
   });
+
+  const { dateRange, setDateRange, normalizedDateRange, dateBounds } =
+    useDateRangeFilter();
+
+  const { disabledBarSizes } = useBarSizeConstraints(
+    normalizedDateRange,
+    barSize,
+    onBarSizeChange
+  );
+
   const groupBy = 'Network';
 
+  const dateFilteredData = useMemo(() => {
+    const { start, end } = normalizedDateRange;
+    if (start === null && end === null) return data;
+
+    return data.filter((item) => {
+      const itemTime = item.date * 1000;
+      if (start !== null && itemTime < start) return false;
+      if (end !== null && itemTime > end) return false;
+      return true;
+    });
+  }, [data, normalizedDateRange]);
+
   const { chartSeries, hasData } = useHistoricalExpensesChartSeries({
-    rawData: data,
+    rawData: dateFilteredData,
     mode: activeModeTab,
     view: activeViewTab
   });
@@ -107,6 +134,16 @@ const HistoricalExpensesByNetworks = (
     >
       <div className='flex flex-col justify-end gap-2 px-5 py-3 sm:flex-row md:px-0'>
         <div className='hidden flex-wrap items-center justify-end gap-2 sm:flex'>
+          <DateRangePickerPopover
+            value={dateRange}
+            min={dateBounds.min}
+            max={dateBounds.max}
+            onChange={setDateRange}
+            disabled={isLoading}
+            showLabels
+            showClear
+            inputClassName='w-full'
+          />
           <TabsGroup
             className={{
               container: 'w-full sm:w-auto',
@@ -132,10 +169,11 @@ const HistoricalExpensesByNetworks = (
                 container: 'w-full',
                 list: 'w-full'
               }}
-              tabs={['D', 'W', 'M']}
+              tabs={BAR_SIZE_OPTIONS}
               value={barSize}
               onTabChange={onBarSizeChange}
               disabled={isLoading}
+              disabledTabs={disabledBarSizes}
             />
             <HistoricalExpensesMobileActions
               csvData={csvData}
@@ -187,10 +225,11 @@ const HistoricalExpensesByNetworks = (
                 container: 'w-full',
                 list: 'w-full'
               }}
-              tabs={['D', 'W', 'M']}
+              tabs={BAR_SIZE_OPTIONS}
               value={barSize}
               onTabChange={onBarSizeChange}
               disabled={isLoading}
+              disabledTabs={disabledBarSizes}
             />
             <HistoricalExpensesMobileActions
               csvData={csvData}
