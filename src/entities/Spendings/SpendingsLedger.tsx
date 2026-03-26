@@ -24,6 +24,8 @@ export const YEAR_TABS: SpendingsYear[] = ['2024', '2025'];
 
 export const spendingsSortColumns: SortAccessor<SpendingsRow>[] = [
   { accessorKey: 'counterpartyService', header: 'Counterparty / Service' },
+  { accessorKey: 'contractValue', header: 'Contract Value' },
+  { accessorKey: 'allocate', header: 'Allocate' },
   { accessorKey: 'renewalExpiry', header: 'Renewal / Status' },
   { accessorKey: 'activeDaysInFY', header: 'Details' }
 ];
@@ -47,7 +49,7 @@ const SpendingsLedger = () => {
 
   const tableData = useMemo(
     () => applySorting(spendingsByYear[activeYear] || []),
-    [activeYear]
+    [activeYear, applySorting]
   );
 
   const totalAllocate = useMemo(() => {
