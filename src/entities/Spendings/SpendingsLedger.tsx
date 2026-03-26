@@ -24,6 +24,8 @@ export const YEAR_TABS: SpendingsYear[] = ['2024', '2025'];
 
 export const spendingsSortColumns: SortAccessor<SpendingsRow>[] = [
   { accessorKey: 'counterpartyService', header: 'Counterparty / Service' },
+  { accessorKey: 'contractValue', header: 'Contract Value' },
+  { accessorKey: 'allocate', header: 'Allocate' },
   { accessorKey: 'renewalExpiry', header: 'Renewal / Status' },
   { accessorKey: 'activeDaysInFY', header: 'Details' }
 ];
@@ -47,7 +49,7 @@ const SpendingsLedger = () => {
 
   const tableData = useMemo(
     () => applySorting(spendingsByYear[activeYear] || []),
-    [activeYear]
+    [activeYear, applySorting]
   );
 
   const totalAllocate = useMemo(() => {
@@ -60,7 +62,7 @@ const SpendingsLedger = () => {
       id='spendings-ledger'
       className={{
         header: 'px-5 md:px-10',
-        content: 'px-0 pt-0 pb-2 lg:px-10 lg:pb-7',
+        content: 'p-0 lg:px-10 lg:pt-0 lg:pb-[40px]',
         container: 'border-background border'
       }}
     >
@@ -71,7 +73,7 @@ const SpendingsLedger = () => {
             value={activeYear}
             onTabChange={setActiveYear}
           />
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-[20px]'>
             <Text
               size='13'
               weight='500'
@@ -81,13 +83,15 @@ const SpendingsLedger = () => {
             </Text>
             <Button
               onClick={onSortOpen}
-              className='bg-secondary-27 text-gray-11 shadow-13 hidden h-8 min-w-[74px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:flex lg:hidden'
+              className='bg-secondary-27 text-gray-11 shadow-13 h-8 w-[32px] gap-1.5 rounded-lg md:flex md:w-[110px] lg:hidden'
             >
               <Icon
                 name='sort-icon'
                 className='h-[14px] w-[14px]'
               />
-              Sort
+              <span className='hidden text-[11px] leading-4 font-semibold md:flex'>
+                Sort
+              </span>
             </Button>
           </div>
         </div>
