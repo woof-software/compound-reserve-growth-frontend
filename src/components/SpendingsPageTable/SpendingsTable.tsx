@@ -127,7 +127,7 @@ const createSpendingsColumns = (
         >
           {Format.date(row.original.renewalExpiry)}
         </Text>
-        <span className='bg-secondary-27 border-border text-primary-14 flex h-[20px] items-center justify-center rounded-md border px-[12px] text-[11px] leading-[16px] font-medium'>
+        <span className='bg-secondary-27 border-border text-primary-14 flex h-[20px] items-center justify-center rounded-sm border px-[12px] text-[11px] leading-[16px] font-medium'>
           {row.original.status || '-'}
         </span>
       </div>
@@ -145,7 +145,7 @@ const createSpendingsColumns = (
             href={row.original.lastRenewalProposalUrl}
             target='_blank'
             rel='noopener noreferrer'
-            className='bg-secondary-27 border-border text-primary-14 flex h-[20px] items-center justify-center rounded-md border px-[12px] text-[11px] leading-[16px] font-medium'
+            className='bg-secondary-27 border-border text-primary-14 flex h-[20px] items-center justify-center rounded-sm border px-[12px] text-[11px] leading-[16px] font-medium'
           >
             {row.original.lastRenewalProposalLabel || 'Proposal'}
           </a>
@@ -173,11 +173,12 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
       <MobileDataTable tableData={data}>
         {(dataRows) => (
           <>
-            {dataRows.map((row) => (
+            {dataRows.map((row, index) => (
               <div
                 key={`${row.number}-${row.counterpartyService}`}
                 className={cn(
-                  'border-secondary-23 grid grid-cols-2 gap-x-10 gap-y-[40px] border-b p-5 md:grid-cols-3 md:gap-x-[63px] md:gap-y-[20px] md:px-10'
+                  'border-secondary-23 grid grid-cols-2 gap-x-10 gap-y-[40px] border-b p-5 md:grid-cols-3 md:gap-x-[63px] md:gap-y-[20px] md:px-10',
+                  index === dataRows.length - 1 && 'border-b-0'
                 )}
               >
                 <div className='col-span-2 grid w-full md:col-span-1'>
@@ -255,7 +256,7 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                   >
                     Renewal / Status
                   </Text>
-                  <div className='flex items-center gap-1.5'>
+                  <div className='flex items-center gap-[6px]'>
                     <Text
                       size='13'
                       lineHeight='21'
@@ -263,7 +264,7 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                     >
                       {Format.date(row.renewalExpiry)}
                     </Text>
-                    <span className='bg-secondary-27 border-border text-primary-14 flex h-[20px] items-center justify-center rounded-md border px-[12px] text-[11px] leading-[16px] font-medium'>
+                    <span className='bg-secondary-27 border-border text-primary-14 flex h-[20px] items-center justify-center rounded-sm border px-[12px] text-[11px] leading-[16px] font-medium'>
                       {row.status || '-'}
                     </span>
                   </div>
@@ -277,13 +278,13 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                   >
                     Details
                   </Text>
-                  <div className='flex items-center gap-2.5'>
+                  <div className='flex items-center gap-[6px]'>
                     {row.lastRenewalProposalUrl && (
                       <a
                         href={row.lastRenewalProposalUrl}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='bg-secondary-27 border-border text-primary-14 flex h-[20px] items-center justify-center rounded-md border px-[12px] text-[11px] leading-[16px] font-medium'
+                        className='bg-secondary-27 border-border text-primary-14 flex h-[20px] items-center justify-center rounded-sm border px-[12px] text-[11px] leading-[16px] font-medium'
                       >
                         {row.lastRenewalProposalLabel || 'Proposal'}
                       </a>
@@ -306,7 +307,7 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
         <DataTable
           data={data}
           columns={columns}
-          pageSize={20}
+          pageSize={10}
           className={cn('flex flex-col justify-between', {
             'min-h-[505px]': data.length > 10
           })}
@@ -314,14 +315,13 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
           tableClassName='w-full'
           headerClassName='bg-transparent'
           headerCellClassName='pt-3 pb-2.5 pr-3 pl-0'
-          cellClassName='py-2.5 pr-3 pl-0 align-top whitespace-normal'
+          cellClassName='py-[12px] px-[5px] align-top whitespace-normal'
           headerTextClassName='text-primary-14 font-medium'
           rowClassName='hover:bg-transparent'
           enableRowHoverHighlight={false}
           enableSorting
           useColgroup
           enablePagination={data.length > 10}
-          paginationClassName='py-2 px-2'
         />
       </div>
     </>
