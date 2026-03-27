@@ -518,6 +518,7 @@ const CompoundFeeRevenueRecieved = ({
           resetHiddenKey={resetHiddenKey}
           hiddenItems={hiddenItems}
           areAllSeriesHidden={areAllSeriesHidden}
+          resetZoomKey={`${barSize}-${dateRange.startDate}-${dateRange.endDate}`}
           groupBy={groupBy}
           barSize={barSize}
           seriesData={seriesData}

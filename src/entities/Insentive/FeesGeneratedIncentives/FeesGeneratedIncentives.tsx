@@ -201,6 +201,7 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
           aggregatedSeries={aggregatedSeries}
           customOptions={customChartOptions}
           customTooltipFormatter={customTooltipFormatter}
+          resetZoomKey={`${barSize}-${dateRange.startDate}-${dateRange.endDate}`}
         />
       )}
     </Card>

@@ -246,11 +246,11 @@ const Filter: FC<FilterProps> = ({
         </View.Condition>
       </View.Condition>
       <View.Condition if={!!selectedKey}>
-        <div className='mb-8 flex items-center'>
+        <div className='relative mb-8 flex items-center justify-center'>
           <Button onClick={onSelectedFilterClose}>
             <Icon
               name='arrow-line'
-              className='h-6 w-6'
+              className='absolute h-6 w-6'
             />
           </Button>
           <Text

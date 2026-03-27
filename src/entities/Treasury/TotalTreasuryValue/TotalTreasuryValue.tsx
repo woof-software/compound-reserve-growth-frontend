@@ -442,6 +442,7 @@ const TotalTreasuryValue = ({
           aggregatedSeries={aggregatedSeries}
           className='max-h-fit'
           isLegendEnabled={isLegendEnabled}
+          resetZoomKey={`${barSize}-${dateRange.startDate}-${dateRange.endDate}`}
           events={events}
           showEvents={showEvents}
           onSelectAllLegends={onSelectAllLegends}

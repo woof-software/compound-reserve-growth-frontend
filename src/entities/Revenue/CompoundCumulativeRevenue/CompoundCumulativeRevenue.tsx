@@ -1,5 +1,3 @@
-import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
-import { getMaxBarSizeForRange } from '@/shared/lib/date/dateUtils';
 import React, {
   Dispatch,
   SetStateAction,
@@ -21,12 +19,14 @@ import {
 } from '@/entities/Revenue/CompoundCumulativeRevenue/customChartOptions';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
+import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
 import { useEventsApi } from '@/shared/hooks/useEventsApi';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
+import { getMaxBarSizeForRange } from '@/shared/lib/date/dateUtils';
 import { filterForRange } from '@/shared/lib/utils/chart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import {

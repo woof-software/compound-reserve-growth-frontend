@@ -257,6 +257,7 @@ const HistoricalExpensesByNetworks = (
           onLegendHover={onLegendHover}
           onLegendClick={onLegendToggle}
           customOptions={customChartOptions(activeViewTab)}
+          resetZoomKey={`${barSize}-${dateRange.startDate}-${dateRange.endDate}`}
           // @ts-expect-error TODO: fix customTooltip types
           customTooltipFormatter={customTooltipFormatter(activeViewTab)}
         />

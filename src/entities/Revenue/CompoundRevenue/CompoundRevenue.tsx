@@ -444,6 +444,7 @@ const CompoundRevenueBlock = ({
       <View.Condition if={!isLoading && !isError && hasData}>
         <div className='h-[400px]'>
           <CompoundRevenueChart
+            resetZoomKey={`${barSize}-${dateRange.startDate}-${dateRange.endDate}`}
             chartRef={chartRef}
             seriesData={seriesData}
             aggregatedData={aggregatedData}
