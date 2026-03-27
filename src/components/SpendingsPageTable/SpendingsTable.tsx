@@ -291,7 +291,7 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
                     )}
                     <Text
                       size='13'
-                      weight='500'
+                      weight='400'
                       className='text-primary-14 truncate'
                     >
                       {row.activeDaysInFY ?? '-'}d
@@ -315,7 +315,7 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
           tableClassName='w-full'
           headerClassName='bg-transparent'
           headerCellClassName='pt-3 pb-2.5 pr-3 pl-0'
-          cellClassName='py-[12px] px-[5px] align-top whitespace-normal'
+          cellClassName='py-[12px] px-[5px] first:pl-0 last:pr-0 align-top whitespace-normal'
           headerTextClassName='text-primary-14 font-medium'
           rowClassName='hover:bg-transparent'
           enableRowHoverHighlight={false}
