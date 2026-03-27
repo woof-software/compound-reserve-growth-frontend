@@ -160,7 +160,6 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
             onChange={setDateRange}
             disabled={isLoading}
             showLabels
-            showClear
             inputClassName='w-full'
           />
           <MultiSelect

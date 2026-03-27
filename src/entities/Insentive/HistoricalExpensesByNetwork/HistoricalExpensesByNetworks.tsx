@@ -141,7 +141,6 @@ const HistoricalExpensesByNetworks = (
             onChange={setDateRange}
             disabled={isLoading}
             showLabels
-            showClear
             inputClassName='w-full'
           />
           <TabsGroup

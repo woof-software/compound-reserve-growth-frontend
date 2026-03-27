@@ -667,7 +667,6 @@ const Filters = memo(
               onChange={onDateRangeChange}
               disabled={isLoading}
               showLabels
-              showClear
               inputClassName='w-full'
             />
             <MultiSelect

@@ -357,7 +357,6 @@ const Filter: FC<FilterProps> = ({
               onClose={onSelectedFilterClose}
               inlineCalendar
               showLabels
-              showClear
             />
           </div>
         ) : null}

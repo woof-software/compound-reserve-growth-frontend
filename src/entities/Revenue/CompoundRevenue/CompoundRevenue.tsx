@@ -568,7 +568,6 @@ const Filters = ({
             onChange={onDateRangeChange}
             disabled={isLoading}
             showLabels
-            showClear
             inputClassName='w-full'
           />
           <div className='flex gap-2'>
@@ -621,7 +620,6 @@ const Filters = ({
               onChange={onDateRangeChange}
               disabled={isLoading}
               showLabels
-              showClear
               inputClassName='w-full'
             />
             <MultiSelect

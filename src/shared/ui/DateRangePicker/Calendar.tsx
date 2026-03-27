@@ -77,6 +77,7 @@ const Calendar: FC<CalendarProps> = ({
   );
   const minDate = useMemo(() => (min === null ? null : new Date(min)), [min]);
   const maxDate = useMemo(() => (max === null ? null : new Date(max)), [max]);
+  const hasSelection = value.startDate !== null || value.endDate !== null;
 
   const startTime = value.startDate;
   const endTime = value.endDate;
@@ -84,7 +85,6 @@ const Calendar: FC<CalendarProps> = ({
   const maxTime = max;
 
   const getInitialMonths = useCallback((): { left: Date; right: Date } => {
-    const hasSelection = !!(startDate || endDate);
     const minMonthStart = minDate ? getMonthStart(minDate) : null;
     const maxMonthStart = maxDate ? getMonthStart(maxDate) : null;
 
@@ -454,7 +454,7 @@ const Calendar: FC<CalendarProps> = ({
                       (isRangeEnd && !startDate);
                     const dayBackground =
                       isRangeStart || isRangeEnd
-                        ? 'bg-success-11'
+                        ? 'bg-success-13'
                         : isInRange || isSingleDateInOtherMonth
                           ? 'bg-primary-18'
                           : '';
@@ -483,7 +483,7 @@ const Calendar: FC<CalendarProps> = ({
                       isSegmentCell &&
                       isNextInRange &&
                       (isRangeStart || isRangeEnd
-                        ? 'shadow-[1px_0_0_0_var(--color-success-11)]'
+                        ? 'shadow-[1px_0_0_0_var(--color-success-13)]'
                         : 'shadow-[1px_0_0_0_var(--color-primary-18)]');
                     const isHoverablePlainDay =
                       !isDayDisabled &&
@@ -716,7 +716,7 @@ const Calendar: FC<CalendarProps> = ({
                 className={cn(
                   'text-secondary-10 flex h-9 w-16 items-center justify-center rounded-lg text-[13px] leading-[22px] font-medium',
                   {
-                    'bg-success-11 text-white': isSelectedMonth(index),
+                    'bg-success-13 text-white': isSelectedMonth(index),
                     'cursor-not-allowed opacity-40':
                       isDisabledMonth || disabled,
                     'hover:bg-secondary-22': !isDisabledMonth && !disabled
@@ -860,7 +860,7 @@ const Calendar: FC<CalendarProps> = ({
                 className={cn(
                   'text-secondary-10 flex h-9 w-16 items-center justify-center rounded-lg text-[13px] leading-[22px] font-medium',
                   {
-                    'bg-success-11 text-white': isSelectedYear(year),
+                    'bg-success-13 text-white': isSelectedYear(year),
                     'cursor-not-allowed opacity-40': yearDisabled || disabled,
                     'hover:bg-secondary-22': !yearDisabled && !disabled
                   }
@@ -916,19 +916,17 @@ const Calendar: FC<CalendarProps> = ({
         <button
           type='button'
           className='bg-secondary-16 text-secondary-10 flex h-11 flex-1 items-center justify-center rounded-full text-[13px] leading-[18px] font-medium'
-          onClick={() => {
-            if (onCancel) onCancel();
-            else onClose?.();
-          }}
+          onClick={onClose}
         >
-          Clear
+          Close
         </button>
         <button
           type='button'
-          className='bg-success-11 flex h-11 flex-1 items-center justify-center rounded-full text-[13px] leading-[18px] font-medium text-white'
-          onClick={onClose}
+          className='bg-secondary-16 text-secondary-10 flex h-11 flex-1 items-center justify-center rounded-full text-[13px] leading-[18px] font-medium disabled:opacity-30'
+          onClick={onCancel}
+          disabled={!hasSelection}
         >
-          Select
+          Clear
         </button>
       </div>
     </>
