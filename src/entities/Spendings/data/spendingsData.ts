@@ -1,4 +1,4 @@
-export type SpendingsYear = '2024' | '2025';
+export type SpendingsYear = '2024' | '2025' | '2026';
 
 export type SpendingsRow = {
   number: string;
@@ -262,21 +262,6 @@ export const spendingsByYear: Record<SpendingsYear, SpendingsRow[]> = {
   ],
   '2025': [
     {
-      number: '1',
-      counterpartyService: 'Gauntlet / Risk Management',
-      contractValue: 2550000,
-      contractStartDate: '2025-01-01',
-      contractEndDate: '2025-12-31',
-      activeDaysInFY: 365,
-      allocate: 1200000,
-      renewalExpiry: '2026-01-01',
-      status: 'Active',
-      notes: 'Renewed scope for risk monitoring.',
-      recurring: 'Yes',
-      lastRenewalProposalLabel: 'Proposal',
-      lastRenewalProposalUrl: 'https://gov.compound.finance/t/gauntlet-2025-renewal'
-    },
-    {
       number: '2',
       counterpartyService: 'OpenZeppelin / Security Audits',
       contractValue: 1200000,
@@ -320,21 +305,6 @@ export const spendingsByYear: Record<SpendingsYear, SpendingsRow[]> = {
       recurring: 'Yes',
       lastRenewalProposalLabel: 'Contract',
       lastRenewalProposalUrl: 'https://gov.compound.finance/t/chainlink-2025'
-    },
-    {
-      number: '5',
-      counterpartyService: 'Llama / Treasury Operations',
-      contractValue: 620000,
-      contractStartDate: '2025-01-10',
-      contractEndDate: '2025-12-31',
-      activeDaysInFY: 356,
-      allocate: 540000,
-      renewalExpiry: '2026-01-10',
-      status: 'Active',
-      notes: 'Budgeting and reporting cadence.',
-      recurring: 'Yes',
-      lastRenewalProposalLabel: 'Proposal',
-      lastRenewalProposalUrl: 'https://gov.compound.finance/t/llama-2025'
     },
     {
       number: '6',
@@ -381,5 +351,37 @@ export const spendingsByYear: Record<SpendingsYear, SpendingsRow[]> = {
       lastRenewalProposalLabel: 'Proposal',
       lastRenewalProposalUrl: 'https://gov.compound.finance/t/protocol-guild-2025'
     }
+  ],
+  '2026': [
+    {
+      number: '1',
+      counterpartyService: 'Gauntlet / Risk Management',
+      contractValue: 2550000,
+      contractStartDate: '2025-01-01',
+      contractEndDate: '2025-12-31',
+      activeDaysInFY: 365,
+      allocate: 1200000,
+      renewalExpiry: '2026-01-01',
+      status: 'Active',
+      notes: 'Renewed scope for risk monitoring.',
+      recurring: 'Yes',
+      lastRenewalProposalLabel: 'Proposal',
+      lastRenewalProposalUrl: 'https://gov.compound.finance/t/gauntlet-2025-renewal'
+    },
+    {
+      number: '2',
+      counterpartyService: 'Llama / Treasury Operations',
+      contractValue: 620000,
+      contractStartDate: '2025-01-10',
+      contractEndDate: '2025-12-31',
+      activeDaysInFY: 356,
+      allocate: 540000,
+      renewalExpiry: '2026-01-10',
+      status: 'Active',
+      notes: 'Budgeting and reporting cadence.',
+      recurring: 'Yes',
+      lastRenewalProposalLabel: 'Proposal',
+      lastRenewalProposalUrl: 'https://gov.compound.finance/t/llama-2025'
+    },
   ]
 };

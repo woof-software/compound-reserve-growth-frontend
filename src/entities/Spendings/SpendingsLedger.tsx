@@ -20,7 +20,7 @@ import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 
-export const YEAR_TABS: SpendingsYear[] = ['2024', '2025'];
+export const YEAR_TABS: SpendingsYear[] = ['2024', '2025', '2026'];
 
 export const spendingsSortColumns: SortAccessor<SpendingsRow>[] = [
   { accessorKey: 'counterpartyService', header: 'Counterparty / Service' },
