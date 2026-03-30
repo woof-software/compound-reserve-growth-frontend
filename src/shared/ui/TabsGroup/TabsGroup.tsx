@@ -45,7 +45,7 @@ const TabsGroup = <T extends string = string>({
     >
       <TabsList
         className={cn(
-          'h-8 w-fit rounded-lg p-1',
+          'h-8 w-fit rounded-lg px-1 py-0',
           'bg-primary-18 dark:shadow-13 shadow-14 flex gap-[2px] border-none',
           className?.list
         )}
