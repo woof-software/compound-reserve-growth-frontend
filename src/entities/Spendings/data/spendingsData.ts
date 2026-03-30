@@ -20,21 +20,6 @@ export type SpendingsRow = {
 export const spendingsByYear: Record<SpendingsYear, SpendingsRow[]> = {
   '2024': [
     {
-      number: '1',
-      counterpartyService: 'Gauntlet / Risk Management',
-      contractValue: 2500000,
-      contractStartDate: '2024-01-01',
-      contractEndDate: '2024-12-31',
-      activeDaysInFY: 366,
-      allocate: 2300000,
-      renewalExpiry: '2025-01-01',
-      status: 'Active',
-      notes: 'Annual risk parameter review and optimization.',
-      recurring: 'Yes',
-      lastRenewalProposalLabel: 'Proposal',
-      lastRenewalProposalUrl: 'https://gov.compound.finance/t/gauntlet-2024-renewal'
-    },
-    {
       number: '2',
       counterpartyService: 'OpenZeppelin / Security Audits',
       contractValue: 1350000,
@@ -125,21 +110,6 @@ export const spendingsByYear: Record<SpendingsYear, SpendingsRow[]> = {
       lastRenewalProposalUrl: 'https://gov.compound.finance/t/coinbase-cloud-2024'
     },
     {
-      number: '8',
-      counterpartyService: 'Llama / Treasury Operations',
-      contractValue: 470000,
-      contractStartDate: '2024-01-10',
-      contractEndDate: '2024-12-31',
-      activeDaysInFY: 356,
-      allocate: 420000,
-      renewalExpiry: '2025-01-10',
-      status: 'Active',
-      notes: 'Accounting support and reporting cadence.',
-      recurring: 'Yes',
-      lastRenewalProposalLabel: 'Proposal',
-      lastRenewalProposalUrl: 'https://gov.compound.finance/t/llama-2024-renewal'
-    },
-    {
       number: '9',
       counterpartyService: 'Blockworks / Communications',
       contractValue: 440000,
@@ -168,21 +138,6 @@ export const spendingsByYear: Record<SpendingsYear, SpendingsRow[]> = {
       recurring: 'No',
       lastRenewalProposalLabel: 'Proposal',
       lastRenewalProposalUrl: 'https://gov.compound.finance/t/trail-of-bits-2024'
-    },
-    {
-      number: '11',
-      counterpartyService: 'Protocol Guild / Ecosystem Grants',
-      contractValue: 320000,
-      contractStartDate: '2024-01-01',
-      contractEndDate: '2024-12-31',
-      activeDaysInFY: 366,
-      allocate: 280000,
-      renewalExpiry: '2025-01-01',
-      status: 'Active',
-      notes: 'Contributor grant allocation.',
-      recurring: 'Yes',
-      lastRenewalProposalLabel: 'Proposal',
-      lastRenewalProposalUrl: 'https://gov.compound.finance/t/protocol-guild-2024'
     },
     {
       number: '12',
@@ -261,6 +216,21 @@ export const spendingsByYear: Record<SpendingsYear, SpendingsRow[]> = {
     }
   ],
   '2025': [
+    {
+      number: '1',
+      counterpartyService: 'Gauntlet / Risk Management',
+      contractValue: 2500000,
+      contractStartDate: '2024-01-01',
+      contractEndDate: '2024-12-31',
+      activeDaysInFY: 366,
+      allocate: 2300000,
+      renewalExpiry: '2025-01-01',
+      status: 'Active',
+      notes: 'Annual risk parameter review and optimization.',
+      recurring: 'Yes',
+      lastRenewalProposalLabel: 'Proposal',
+      lastRenewalProposalUrl: 'https://gov.compound.finance/t/gauntlet-2024-renewal'
+    },
     {
       number: '2',
       counterpartyService: 'OpenZeppelin / Security Audits',
@@ -350,7 +320,37 @@ export const spendingsByYear: Record<SpendingsYear, SpendingsRow[]> = {
       recurring: 'Yes',
       lastRenewalProposalLabel: 'Proposal',
       lastRenewalProposalUrl: 'https://gov.compound.finance/t/protocol-guild-2025'
-    }
+    },
+    {
+      number: '9',
+      counterpartyService: 'Llama / Treasury Operations',
+      contractValue: 470000,
+      contractStartDate: '2024-01-10',
+      contractEndDate: '2024-12-31',
+      activeDaysInFY: 356,
+      allocate: 420000,
+      renewalExpiry: '2025-01-10',
+      status: 'Active',
+      notes: 'Accounting support and reporting cadence.',
+      recurring: 'Yes',
+      lastRenewalProposalLabel: 'Proposal',
+      lastRenewalProposalUrl: 'https://gov.compound.finance/t/llama-2024-renewal'
+    },
+    {
+      number: '11',
+      counterpartyService: 'Protocol Guild / Ecosystem Grants',
+      contractValue: 320000,
+      contractStartDate: '2024-01-01',
+      contractEndDate: '2024-12-31',
+      activeDaysInFY: 366,
+      allocate: 280000,
+      renewalExpiry: '2025-01-01',
+      status: 'Active',
+      notes: 'Contributor grant allocation.',
+      recurring: 'Yes',
+      lastRenewalProposalLabel: 'Proposal',
+      lastRenewalProposalUrl: 'https://gov.compound.finance/t/protocol-guild-2024'
+    },
   ],
   '2026': [
     {

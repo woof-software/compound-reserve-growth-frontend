@@ -314,10 +314,11 @@ const SpendingsTable: React.FC<SpendingsTableProps> = ({
           containerTableClassName='min-h-[473px]'
           tableClassName='w-full'
           headerClassName='bg-transparent'
-          headerCellClassName='pt-3 pb-2.5 pr-3 pl-0'
-          cellClassName='py-[12px] px-[5px] first:pl-0 last:pr-0 align-top whitespace-normal'
+          headerCellClassName='py-[12px] px-[5px]'
+          cellClassName='py-[12px] px-[5px] align-top whitespace-normal'
           headerTextClassName='text-primary-14 font-medium'
           rowClassName='hover:bg-transparent'
+          paginationClassName='px-[5px]'
           enableRowHoverHighlight={false}
           enableSorting
           useColgroup
