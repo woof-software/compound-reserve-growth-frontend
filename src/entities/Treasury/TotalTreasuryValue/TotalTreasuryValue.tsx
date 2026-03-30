@@ -1,9 +1,11 @@
 import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
+import { getMaxBarSizeForRange } from '@/shared/lib/date/dateUtils';
 import React, {
   Dispatch,
   memo,
   SetStateAction,
   useCallback,
+  useEffect,
   useMemo,
   useReducer,
   useState
@@ -35,7 +37,7 @@ import {
   groupOptionsDto
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
-import { BAR_SIZE, OptionType } from '@/shared/types/types';
+import { BAR_SIZE, BAR_SIZE_OPTIONS, OptionType } from '@/shared/types/types';
 import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
@@ -141,7 +143,15 @@ interface FiltersProps {
   dateRangeMobileOption: ReturnType<
     typeof useDateRangeFilter
   >['mobileFilterOption'];
+
+  disabledBarSizes: BAR_SIZE[];
 }
+
+const BAR_SIZE_ORDER = {
+  [BAR_SIZE.D]: 0,
+  [BAR_SIZE.W]: 1,
+  [BAR_SIZE.M]: 2
+} as const;
 
 const TotalTreasuryValue = ({
   isLoading,
@@ -189,6 +199,30 @@ const TotalTreasuryValue = ({
     resetDateRange,
     mobileFilterOption: dateRangeMobileOption
   } = useDateRangeFilter();
+
+  const maxSelectableBarSize = useMemo<BAR_SIZE>(() => {
+    const { start, end } = normalizedDateRange;
+    if (start === null || end === null) return BAR_SIZE.M;
+    return getMaxBarSizeForRange(start, end);
+  }, [normalizedDateRange]);
+
+  const disabledBarSizes = useMemo<BAR_SIZE[]>(
+    () =>
+      BAR_SIZE_OPTIONS.filter(
+        (size) => BAR_SIZE_ORDER[size] > BAR_SIZE_ORDER[maxSelectableBarSize]
+      ),
+    [maxSelectableBarSize]
+  );
+
+  useEffect(() => {
+    const { start, end } = normalizedDateRange;
+    if (start === null || end === null) return;
+
+    const nextBarSize = getMaxBarSizeForRange(start, end);
+    if (BAR_SIZE_ORDER[nextBarSize] < BAR_SIZE_ORDER[barSize]) {
+      onBarSizeChange(nextBarSize);
+    }
+  }, [barSize, normalizedDateRange, onBarSizeChange]);
 
   const rawData: ChartDataItem[] = useMemo(() => {
     if (!treasuryApiResponse) {
@@ -314,6 +348,12 @@ const TotalTreasuryValue = ({
     barSize
   });
 
+  const hasAggregatedData = useMemo(
+    () =>
+      aggregatedSeries.some((s) => Array.isArray(s.data) && s.data.length > 0),
+    [aggregatedSeries]
+  );
+
   const {
     legends,
     toggle: onLegendToggle,
@@ -429,8 +469,9 @@ const TotalTreasuryValue = ({
         onDeselectAll={onDeselectAllLegends}
         onShowEvents={setIsShowEvents}
         onDateRangeChange={setDateRange}
+        disabledBarSizes={disabledBarSizes}
       />
-      {!isLoading && !isError && !hasData ? (
+      {!isLoading && !isError && (!hasData || !hasAggregatedData) ? (
         <NoDataPlaceholder onButtonClick={onClearAll} />
       ) : (
         <LineChart
@@ -442,6 +483,7 @@ const TotalTreasuryValue = ({
           aggregatedSeries={aggregatedSeries}
           className='max-h-fit'
           isLegendEnabled={isLegendEnabled}
+          resetZoomKey={`${barSize}-${dateRange.startDate}-${dateRange.endDate}`}
           events={events}
           showEvents={showEvents}
           onSelectAllLegends={onSelectAllLegends}
@@ -489,7 +531,8 @@ const Filters = memo(
     onSelectAll,
     onDeselectAll,
     onShowEvents,
-    onDateRangeChange
+    onDateRangeChange,
+    disabledBarSizes
   }: FiltersProps) => {
     const { isOpen, onOpenModal, onCloseModal } = useModal();
 
@@ -582,6 +625,7 @@ const Filters = memo(
                 value={barSize}
                 onTabChange={onBarSizeChange}
                 disabled={isLoading}
+                disabledTabs={disabledBarSizes}
               />
               <div className='flex w-full items-center gap-2 sm:w-auto'>
                 <Button
@@ -720,6 +764,7 @@ const Filters = memo(
               value={barSize}
               onTabChange={onBarSizeChange}
               disabled={isLoading}
+              disabledTabs={disabledBarSizes}
             />
             <DateRangePickerPopover
               value={dateRange}
@@ -728,7 +773,6 @@ const Filters = memo(
               onChange={onDateRangeChange}
               disabled={isLoading}
               showLabels
-              showClear
               inputClassName='w-full'
             />
             <MultiSelect

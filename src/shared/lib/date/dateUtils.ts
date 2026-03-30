@@ -1,7 +1,10 @@
 /** Date utilities that operate in UTC to avoid timezone shifts. */
 import { BAR_SIZE } from '@/shared/types/types';
+import { FormEvent } from 'react';
 
 export const DAY_IN_MS = 24 * 60 * 60 * 1000;
+export const MIN_YEAR = 1970;
+export const MAX_YEAR = 2100;
 
 const INPUT_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
@@ -12,6 +15,14 @@ const DATE_LABEL_FORMATTER = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'UTC'
 });
 
+export const limitYearTo4Digits = (e: FormEvent<HTMLInputElement>) => {
+  const input = e.currentTarget;
+  const [year, month = '', day = ''] = input.value.split('-');
+  if (year && year.length > 4) {
+    input.value = `${year.slice(0, 4)}-${month}-${day}`;
+  }
+};
+
 export const inputDateToTimestamp = (value: string): number | null => {
   if (!value) return null;
 
@@ -21,6 +32,9 @@ export const inputDateToTimestamp = (value: string): number | null => {
   const year = Number(match[1]);
   const month = Number(match[2]);
   const day = Number(match[3]);
+
+  if (year < MIN_YEAR || year > MAX_YEAR) return null;
+
   if (!year || month < 1 || month > 12 || day < 1 || day > 31) return null;
 
   const timestamp = Date.UTC(year, month - 1, day);
@@ -35,7 +49,13 @@ export const inputDateToTimestamp = (value: string): number | null => {
 
 export const timestampToInputDate = (timestamp: number | null): string => {
   if (timestamp === null) return '';
-  return new Date(timestamp).toISOString().slice(0, 10);
+
+  const date = new Date(timestamp);
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
 };
 
 export const formatTimestampForLabel = (timestamp: number | null): string => {

@@ -382,6 +382,12 @@ const CompoundFeeRevenueRecieved = ({
     data: chartData
   });
 
+  const hasAggregatedData = useMemo(
+    () =>
+      aggregatedSeries.some((s) => Array.isArray(s.data) && s.data.length > 0),
+    [aggregatedSeries]
+  );
+
   const csvData = getSummarizedCsvData(aggregatedSeries);
 
   const deploymentOptionsFilter = useMemo(() => {
@@ -505,7 +511,7 @@ const CompoundFeeRevenueRecieved = ({
         onSelectAll={onSelectAll}
         onDeselectAll={onDeselectAll}
       />
-      {!isLoading && !isError && !hasData ? (
+      {!isLoading && !isError && (!hasData || !hasAggregatedData) ? (
         <NoDataPlaceholder
           onButtonClick={handleResetFilters}
           text={noDataMessage}
@@ -667,7 +673,6 @@ const Filters = memo(
               onChange={onDateRangeChange}
               disabled={isLoading}
               showLabels
-              showClear
               inputClassName='w-full'
             />
             <MultiSelect

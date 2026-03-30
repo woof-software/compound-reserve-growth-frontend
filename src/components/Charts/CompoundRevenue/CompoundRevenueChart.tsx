@@ -26,6 +26,7 @@ interface CompoundRevenueChartProps {
   barSize?: 'D' | 'W' | 'M';
   className?: string;
   onVisibleBarsChange?: (count: number) => void;
+  resetZoomKey?: string;
 }
 
 const CompoundRevenueChart: React.FC<CompoundRevenueChartProps> = ({
@@ -35,10 +36,12 @@ const CompoundRevenueChart: React.FC<CompoundRevenueChartProps> = ({
   barCount = 90,
   barSize = 'D',
   className,
-  onVisibleBarsChange = noop
+  onVisibleBarsChange = noop,
+  resetZoomKey
 }) => {
   const { theme } = useTheme();
   const programmaticChange = useRef(false);
+  const currentZoom = useRef<{ min: number; max: number } | null>(null);
 
   let xAxisLabelFormat: string;
   switch (barSize) {
@@ -74,6 +77,28 @@ const CompoundRevenueChart: React.FC<CompoundRevenueChartProps> = ({
     return header + body;
   }, []);
 
+  const dataExtremes = useMemo(() => {
+    if (!aggregatedData.length) return null;
+    return {
+      min: aggregatedData[0].x,
+      max: aggregatedData[aggregatedData.length - 1].x
+    };
+  }, [aggregatedData]);
+
+  useEffect(() => {
+    if (resetZoomKey === undefined) return;
+    const chart = chartRef.current?.chart;
+    if (!chart || !dataExtremes) return;
+
+    const extremes = chart.xAxis[0].getExtremes();
+    if (extremes.min === dataExtremes.min && extremes.max === dataExtremes.max)
+      return;
+
+    currentZoom.current = null;
+    programmaticChange.current = true;
+    chart.xAxis[0].setExtremes(dataExtremes.min, dataExtremes.max, true, false);
+  }, [resetZoomKey, dataExtremes, chartRef]);
+
   useEffect(() => {
     const chart = chartRef.current?.chart;
     if (!chart || !barCount || aggregatedData.length === 0) return;
@@ -106,6 +131,17 @@ const CompoundRevenueChart: React.FC<CompoundRevenueChartProps> = ({
           type: undefined,
           pinchType: undefined,
           resetButton: { theme: { display: 'none' } }
+        },
+        events: {
+          load: function () {
+            if (currentZoom.current) {
+              this.xAxis[0].setExtremes(
+                currentZoom.current.min,
+                currentZoom.current.max,
+                false
+              );
+            }
+          }
         }
       },
       title: { text: undefined },
@@ -140,6 +176,11 @@ const CompoundRevenueChart: React.FC<CompoundRevenueChartProps> = ({
               ).length
             );
             onVisibleBarsChange(visibleCount);
+          },
+          afterSetExtremes: (e) => {
+            if (e.min !== undefined && e.max !== undefined) {
+              currentZoom.current = { min: e.min, max: e.max };
+            }
           }
         }
       },

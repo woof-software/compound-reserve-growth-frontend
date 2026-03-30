@@ -61,7 +61,7 @@ const TabsGroup = <T extends string = string>({
                 disabled={isTabDisabled}
                 className={cn(
                   'hover:bg-card-content flex cursor-pointer items-center justify-center rounded-sm px-3 py-1 text-[11px] font-medium transition-opacity hover:opacity-70',
-                  'h-7 leading-6 md:h-6',
+                  'h-[24px] leading-6',
                   'text-primary-11',
                   'data-[state=active]:bg-card-content',
                   'data-[state=active]:text-primary-11',

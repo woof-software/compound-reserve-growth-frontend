@@ -13,6 +13,7 @@ import { cn } from '@/shared/lib/classNames/classNames';
 import {
   formatTimestampForLabel,
   inputDateToTimestamp,
+  limitYearTo4Digits,
   timestampToInputDate
 } from '@/shared/lib/date/dateUtils';
 import { noop } from '@/shared/lib/utils/utils';
@@ -31,6 +32,74 @@ const CALENDAR_DESKTOP_WIDTH = 640;
 const CALENDAR_DESKTOP_MARGIN = 16;
 const CALENDAR_DESKTOP_OFFSET_Y = 8;
 
+interface DateInputProps {
+  inputRef: React.RefObject<HTMLInputElement | null>;
+  defaultValue: string;
+  min: string;
+  max: string;
+  disabled: boolean;
+  className: string;
+  label?: string;
+  showLabel: boolean;
+  onCalendarToggle: () => void;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onBlur: () => void;
+  onClick: (e: React.MouseEvent<HTMLInputElement>) => void;
+}
+
+const DateInput: FC<DateInputProps> = ({
+  inputRef,
+  defaultValue,
+  min,
+  max,
+  disabled,
+  className,
+  label,
+  showLabel,
+  onCalendarToggle,
+  onChange,
+  onBlur,
+  onClick
+}) => (
+  <div className='flex flex-col gap-0'>
+    <View.Condition if={showLabel && !!label}>
+      <div className='flex h-6 items-center rounded-lg px-3 py-1'>
+        <Text
+          size='11'
+          weight='500'
+          lineHeight='16'
+          className='text-secondary-41 dark:text-secondary-33'
+        >
+          {label}
+        </Text>
+      </div>
+    </View.Condition>
+    <div className='relative'>
+      <input
+        ref={inputRef}
+        type='date'
+        defaultValue={defaultValue}
+        min={min}
+        max={max}
+        onChange={onChange}
+        onBlur={onBlur}
+        onInput={limitYearTo4Digits}
+        disabled={disabled}
+        onClick={onClick}
+        className={className}
+      />
+      <Button
+        type='button'
+        className='absolute top-1/2 right-3 z-10 h-6 w-6 -translate-y-1/2'
+        onClick={onCalendarToggle}
+        disabled={disabled}
+        aria-label='Open calendar'
+        data-calendar-toggle='true'
+      />
+    </div>
+  </div>
+);
+
 export interface DateRangePickerProps {
   value: DateRangeValue;
   onChange?: (next: DateRangeValue) => void;
@@ -40,7 +109,6 @@ export interface DateRangePickerProps {
   className?: string;
   inputClassName?: string;
   showLabels?: boolean;
-  showClear?: boolean;
   clearLabel?: string;
   onClose?: () => void;
   inlineCalendar?: boolean;
@@ -76,25 +144,22 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   const startInputRef = useRef<HTMLInputElement>(null);
   const endInputRef = useRef<HTMLInputElement>(null);
 
-  const isShowClearButton = Object.values(value).some(
-    (value) => value !== null
-  );
-
   const [calendarTransform, setCalendarTransform] = useState({
     top: 0,
     left: 0
   });
 
+  const hasRange = value.startDate !== null || value.endDate !== null;
+
   const updateCalendarPosition = useCallback(() => {
     if (!anchorRef.current) return;
 
     const rect = anchorRef.current.getBoundingClientRect();
-
     const scrollX = window.scrollX || window.pageXOffset;
     const scrollY = window.scrollY || window.pageYOffset;
 
-    let left = rect.left + scrollX;
     const top = rect.bottom + CALENDAR_DESKTOP_OFFSET_Y + scrollY;
+    let left = rect.left + scrollX;
 
     if (
       left + CALENDAR_DESKTOP_WIDTH + CALENDAR_DESKTOP_MARGIN >
@@ -106,15 +171,14 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         CALENDAR_DESKTOP_WIDTH -
         CALENDAR_DESKTOP_MARGIN;
     }
-
     if (left < scrollX + CALENDAR_DESKTOP_MARGIN) {
       left = scrollX + CALENDAR_DESKTOP_MARGIN;
     }
 
     setCalendarTransform((prev) => {
-      const isSame =
+      const unchanged =
         Math.abs(prev.top - top) < 0.5 && Math.abs(prev.left - left) < 0.5;
-      return isSame ? prev : { top, left };
+      return unchanged ? prev : { top, left };
     });
   }, []);
 
@@ -123,49 +187,44 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
       if (value.startDate === startDate && value.endDate === endDate) return;
       onChange({ startDate, endDate });
     },
-    [onChange, value.endDate, value.startDate]
+    [onChange, value.startDate, value.endDate]
   );
 
   const onStartChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const nextStart = inputDateToTimestamp(event.currentTarget.value);
-      if (nextStart === null) return;
-      updateRange(nextStart, value.endDate);
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const next = inputDateToTimestamp(e.currentTarget.value);
+      if (next !== null) updateRange(next, value.endDate);
     },
     [updateRange, value.endDate]
   );
 
   const onEndChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const nextEnd = inputDateToTimestamp(event.currentTarget.value);
-      if (nextEnd === null) return;
-      updateRange(value.startDate, nextEnd);
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const next = inputDateToTimestamp(e.currentTarget.value);
+      if (next !== null) updateRange(value.startDate, next);
     },
     [updateRange, value.startDate]
   );
 
   const onStartBlur = useCallback(() => {
-    if (startInputRef.current?.value) return;
-    if (value.startDate === null) return;
-
+    if (startInputRef.current?.value || value.startDate === null) return;
     updateRange(null, value.endDate);
   }, [updateRange, value.endDate, value.startDate]);
 
   const onEndBlur = useCallback(() => {
-    if (endInputRef.current?.value) return;
-    if (value.endDate === null) return;
-
+    if (endInputRef.current?.value || value.endDate === null) return;
     updateRange(value.startDate, null);
-  }, [updateRange, value.endDate, value.startDate]);
+  }, [updateRange, value.startDate, value.endDate]);
 
   const onClear = useCallback(() => {
     updateRange(null, null);
     onCloseContainer?.();
   }, [onCloseContainer, updateRange]);
 
-  const handleCalendarCancel = useCallback(() => {
-    updateRange(null, null);
-  }, [updateRange]);
+  const handleCalendarCancel = useCallback(
+    () => updateRange(null, null),
+    [updateRange]
+  );
 
   const handleCalendarClose = useCallback(() => {
     onCloseCalendar();
@@ -173,21 +232,24 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   }, [onCloseCalendar, onCloseContainer]);
 
   const handleInputClick = useCallback(
-    (event: React.MouseEvent<HTMLInputElement>) => {
-      if (disabled) return;
-      event.preventDefault();
+    (e: React.MouseEvent<HTMLInputElement>) => {
+      if (disabled) e.preventDefault();
     },
     [disabled]
   );
 
   const handleCalendarToggleClick = useCallback(() => {
     if (disabled || isCalendarOpen) return;
-
     updateCalendarPosition();
     onToggleCalendar();
   }, [disabled, isCalendarOpen, onToggleCalendar, updateCalendarPosition]);
 
-  const inputClasses = useMemo(
+  const stopPropagation = useCallback(
+    (e: React.SyntheticEvent) => e.stopPropagation(),
+    []
+  );
+
+  const inputClassName_ = useMemo(
     () =>
       cn(
         'date-range-input outline-secondary-19 bg-custom-trigger text-primary-14 h-10 w-full rounded-lg px-3 py-3 pr-14 text-[11px] font-medium leading-4 focus-visible:outline-none',
@@ -197,32 +259,11 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     [disabled, inputClassName]
   );
 
-  const handleContainerPointerDown = useCallback(
-    (target: HTMLElement) => {
-      if (!isCalendarOpen) return;
-      if (target.closest('[data-calendar-toggle="true"]')) return;
-      onCloseCalendar();
-    },
-    [isCalendarOpen, onCloseCalendar]
-  );
-
-  const handleContainerPointerEvent = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      handleContainerPointerDown(event.target as HTMLElement);
-    },
-    [handleContainerPointerDown]
-  );
-
-  const stopPropagation = useCallback((event: React.SyntheticEvent) => {
-    event.stopPropagation();
-  }, []);
-
   useEffect(() => {
     if (!isCalendarOpen) return;
 
     const scheduleUpdate = () => {
       if (rafRef.current !== null) return;
-
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = null;
         updateCalendarPosition();
@@ -246,26 +287,20 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   }, [isCalendarOpen, updateCalendarPosition]);
 
   useEffect(() => {
-    const syncInputValue = (
-      input: HTMLInputElement | null,
-      timestamp: number | null
-    ) => {
+    const sync = (input: HTMLInputElement | null, timestamp: number | null) => {
       if (!input || document.activeElement === input) return;
-
-      const nextValue = timestampToInputDate(timestamp);
-      if (input.value !== nextValue) {
-        input.value = nextValue;
-      }
+      const next = timestampToInputDate(timestamp);
+      if (input.value !== next) input.value = next;
     };
 
-    syncInputValue(startInputRef.current, value.startDate);
-    syncInputValue(endInputRef.current, value.endDate);
-  }, [value.endDate, value.startDate]);
+    sync(startInputRef.current, value.startDate);
+    sync(endInputRef.current, value.endDate);
+  }, [value.startDate, value.endDate]);
 
-  const hasRange = !!(value.startDate || value.endDate);
   const minInput = timestampToInputDate(min);
   const maxInput = timestampToInputDate(max);
-  const sharedOverlayCalendarProps = {
+
+  const sharedCalendarProps = {
     value,
     onChange,
     min,
@@ -275,136 +310,15 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     onClose: handleCalendarClose
   };
 
-  const renderInputs = () => (
-    <div
-      ref={anchorRef}
-      className={cn(
-        'bg-primary-15 relative mx-auto flex w-full max-w-[359px] flex-col items-stretch gap-3 rounded-lg p-4 shadow-[inset_0_0_0_0.25px_var(--secondary-39),0px_8px_16px_rgba(13,19,26,0.1),0px_16px_32px_rgba(13,19,26,0.05)] lg:mx-0 lg:w-[168px] lg:max-w-none lg:gap-2 lg:p-2',
-        className,
-        { 'z-[50]': isCalendarOpen }
-      )}
-      onPointerDown={handleContainerPointerEvent}
-    >
-      <div className='flex flex-col gap-0'>
-        <View.Condition if={showLabels}>
-          <div className='flex h-6 items-center rounded-lg px-3 py-1'>
-            <Text
-              size='11'
-              weight='500'
-              lineHeight='16'
-              className='text-secondary-41 dark:text-secondary-33'
-            >
-              Start
-            </Text>
-          </div>
-        </View.Condition>
-        <div className='relative'>
-          <input
-            ref={startInputRef}
-            type='date'
-            defaultValue={timestampToInputDate(value.startDate)}
-            min={minInput}
-            max={maxInput}
-            onChange={onStartChange}
-            onBlur={onStartBlur}
-            disabled={disabled}
-            onClick={handleInputClick}
-            className={inputClasses}
-          />
-          <Button
-            type='button'
-            className='absolute top-1/2 right-3 z-10 h-6 w-6 -translate-y-1/2'
-            onClick={handleCalendarToggleClick}
-            disabled={disabled}
-            aria-label='Open calendar'
-            data-calendar-toggle='true'
-          />
-        </div>
-      </div>
-      <div className='flex flex-col gap-0'>
-        <View.Condition if={showLabels}>
-          <div className='flex h-6 items-center rounded-lg px-3 py-1'>
-            <Text
-              size='11'
-              weight='500'
-              lineHeight='16'
-              className='text-secondary-41 dark:text-secondary-33'
-            >
-              End
-            </Text>
-          </div>
-        </View.Condition>
-        <div className='relative'>
-          <input
-            ref={endInputRef}
-            type='date'
-            defaultValue={timestampToInputDate(value.endDate)}
-            min={minInput}
-            max={maxInput}
-            onChange={onEndChange}
-            onBlur={onEndBlur}
-            disabled={disabled}
-            onClick={handleInputClick}
-            className={inputClasses}
-          />
-          <Button
-            type='button'
-            className='absolute top-1/2 right-3 z-10 h-6 w-6 -translate-y-1/2'
-            onClick={handleCalendarToggleClick}
-            disabled={disabled}
-            aria-label='Open calendar'
-            data-calendar-toggle='true'
-          />
-        </div>
-      </div>
-      {isShowClearButton && (
-        <>
-          <div className='-mx-4 h-[0.25px] w-[calc(100%+32px)] self-stretch bg-[var(--color-gray-10)] lg:-mx-2 lg:w-[calc(100%+16px)]' />
-          <Button
-            className={cn(
-              'text-primary-14 mt-0 h-[30px] w-full rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white',
-              'bg-secondary-12 hover:bg-secondary-40',
-              !hasRange && 'hover:bg-secondary-12 cursor-not-allowed opacity-50'
-            )}
-            onClick={onClear}
-            disabled={disabled || !hasRange}
-          >
-            {clearLabel}
-          </Button>
-        </>
-      )}
-    </div>
-  );
-
-  const renderCalendarOverlay = () => (
-    <Portal>
-      <View.TabletMobile>
-        <div
-          className='shadow-15 fixed bottom-2 left-1/2 z-[60] w-[359px] max-w-[calc(100vw-16px)] -translate-x-1/2'
-          onPointerDown={stopPropagation}
-        >
-          <Calendar
-            variant='mobile'
-            {...sharedOverlayCalendarProps}
-          />
-        </div>
-      </View.TabletMobile>
-      <View.Desktop>
-        <div
-          className='shadow-15 absolute top-0 left-0 z-[60]'
-          style={{
-            transform: `translate3d(${calendarTransform.left}px, ${calendarTransform.top}px, 0)`
-          }}
-          onPointerDown={stopPropagation}
-        >
-          <Calendar
-            variant='desktop'
-            {...sharedOverlayCalendarProps}
-          />
-        </div>
-      </View.Desktop>
-    </Portal>
-  );
+  const sharedInputProps = {
+    min: minInput,
+    max: maxInput,
+    disabled,
+    className: inputClassName_,
+    showLabel: showLabels,
+    onClick: handleInputClick,
+    onCalendarToggle: handleCalendarToggleClick
+  };
 
   if (inlineCalendar) {
     return (
@@ -424,9 +338,82 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
 
   return (
     <>
-      {renderInputs()}
+      <div
+        ref={anchorRef}
+        className={cn(
+          'bg-primary-15 relative mx-auto flex w-full max-w-[359px] flex-col items-stretch gap-3 rounded-lg p-4 shadow-[inset_0_0_0_0.25px_var(--secondary-39),0px_8px_16px_rgba(13,19,26,0.1),0px_16px_32px_rgba(13,19,26,0.05)] lg:mx-0 lg:w-[168px] lg:max-w-none lg:gap-2 lg:p-2',
+          className,
+          { 'z-[50]': isCalendarOpen }
+        )}
+        onPointerDown={(e) => {
+          if (!isCalendarOpen) return;
+          if (
+            (e.target as HTMLElement).closest('[data-calendar-toggle="true"]')
+          )
+            return;
+          onCloseCalendar();
+        }}
+      >
+        <DateInput
+          inputRef={startInputRef}
+          defaultValue={timestampToInputDate(value.startDate)}
+          label='Start'
+          onChange={onStartChange}
+          onBlur={onStartBlur}
+          {...sharedInputProps}
+        />
+        <DateInput
+          inputRef={endInputRef}
+          defaultValue={timestampToInputDate(value.endDate)}
+          label='End'
+          onChange={onEndChange}
+          onBlur={onEndBlur}
+          {...sharedInputProps}
+        />
+        {hasRange && (
+          <>
+            <div className='bg-primary-12 dark:bg-secondary-24 -mx-4 h-[0.25px] w-[calc(100%+32px)] self-stretch lg:-mx-2 lg:w-[calc(100%+16px)]' />
+            <Button
+              className={cn(
+                'text-primary-14 mt-0 h-[30px] w-full rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white',
+                'bg-secondary-12 hover:bg-secondary-40'
+              )}
+              onClick={onClear}
+              disabled={disabled}
+            >
+              {clearLabel}
+            </Button>
+          </>
+        )}
+      </div>
       <View.Condition if={isCalendarOpen}>
-        {renderCalendarOverlay()}
+        <Portal>
+          <View.TabletMobile>
+            <div
+              className='shadow-15 fixed bottom-2 left-1/2 z-[60] w-[359px] max-w-[calc(100vw-16px)] -translate-x-1/2'
+              onPointerDown={stopPropagation}
+            >
+              <Calendar
+                variant='mobile'
+                {...sharedCalendarProps}
+              />
+            </div>
+          </View.TabletMobile>
+          <View.Desktop>
+            <div
+              className='shadow-15 absolute top-0 left-0 z-[60]'
+              style={{
+                transform: `translate3d(${calendarTransform.left}px, ${calendarTransform.top}px, 0)`
+              }}
+              onPointerDown={stopPropagation}
+            >
+              <Calendar
+                variant='desktop'
+                {...sharedCalendarProps}
+              />
+            </div>
+          </View.Desktop>
+        </Portal>
       </View.Condition>
     </>
   );
@@ -441,37 +428,24 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
   const { value, disabled = false } = pickerProps;
   const { isOpen, onOpenModal, onCloseModal } = useModal();
 
-  const hasSelection = !!(value.startDate || value.endDate);
+  const hasSelection = value.startDate !== null || value.endDate !== null;
 
   const rangeLabel = useMemo(() => {
-    if (value.startDate !== null && value.endDate !== null) {
-      return `${formatTimestampForLabel(value.startDate)} - ${formatTimestampForLabel(value.endDate)}`;
-    }
-    if (value.startDate !== null) {
-      return `${formatTimestampForLabel(value.startDate)} - ...`;
-    }
-    if (value.endDate !== null) {
-      return `... - ${formatTimestampForLabel(value.endDate)}`;
-    }
+    const { startDate, endDate } = value;
+    if (startDate !== null && endDate !== null)
+      return `${formatTimestampForLabel(startDate)} - ${formatTimestampForLabel(endDate)}`;
+    if (startDate !== null)
+      return `${formatTimestampForLabel(startDate)} - ...`;
+    if (endDate !== null) return `... - ${formatTimestampForLabel(endDate)}`;
     return placeholder;
-  }, [placeholder, value.endDate, value.startDate]);
+  }, [placeholder, value]);
 
   useEffect(() => {
     if (!isOpen) return;
-
     const mql = window.matchMedia(MEDIA_QUERY_DESKTOP);
     mql.addEventListener('change', onCloseModal);
-
-    return () => {
-      mql.removeEventListener('change', onCloseModal);
-    };
+    return () => mql.removeEventListener('change', onCloseModal);
   }, [isOpen, onCloseModal]);
-
-  const triggerClasses = cn(
-    'bg-custom-trigger flex h-[32px] items-center gap-1.5 rounded-lg p-1.5 pr-3 text-[11px] font-medium',
-    { 'opacity-60': disabled },
-    triggerClassName
-  );
 
   return (
     <div>
@@ -481,7 +455,13 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
         onOpen={onOpenModal}
         onClose={onCloseModal}
         triggerContent={
-          <div className={triggerClasses}>
+          <div
+            className={cn(
+              'bg-custom-trigger flex h-[32px] items-center gap-1.5 rounded-lg p-1.5 pr-3 text-[11px] font-medium',
+              { 'opacity-60': disabled },
+              triggerClassName
+            )}
+          >
             <div className='p-0.5'>
               <Icon
                 name={hasSelection ? 'calendar-check' : 'calendar-uncheck'}
