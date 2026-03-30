@@ -11,9 +11,8 @@ import React, {
 import { useModal } from '@/shared/hooks/useModal';
 import { cn } from '@/shared/lib/classNames/classNames';
 import {
-  formatTimestampForLabel,
+  handleDateInput,
   inputDateToTimestamp,
-  limitYearTo4Digits,
   timestampToInputDate
 } from '@/shared/lib/date/dateUtils';
 import { noop } from '@/shared/lib/utils/utils';
@@ -50,8 +49,6 @@ interface DateInputProps {
 const DateInput: FC<DateInputProps> = ({
   inputRef,
   defaultValue,
-  min,
-  max,
   disabled,
   className,
   label,
@@ -77,15 +74,17 @@ const DateInput: FC<DateInputProps> = ({
     <div className='relative'>
       <input
         ref={inputRef}
-        type='date'
+        type='text'
+        inputMode='numeric'
         defaultValue={defaultValue}
-        min={min}
-        max={max}
-        onChange={onChange}
+        onChange={(e) => {
+          handleDateInput(e);
+          onChange(e);
+        }}
         onBlur={onBlur}
-        onInput={limitYearTo4Digits}
         disabled={disabled}
         onClick={onClick}
+        placeholder='YYYY-MM-DD'
         className={className}
       />
       <Button
@@ -432,11 +431,14 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
 
   const rangeLabel = useMemo(() => {
     const { startDate, endDate } = value;
-    if (startDate !== null && endDate !== null)
-      return `${formatTimestampForLabel(startDate)} - ${formatTimestampForLabel(endDate)}`;
-    if (startDate !== null)
-      return `${formatTimestampForLabel(startDate)} - ...`;
-    if (endDate !== null) return `... - ${formatTimestampForLabel(endDate)}`;
+
+    const start = timestampToInputDate(startDate);
+    const end = timestampToInputDate(endDate);
+
+    if (start && end) return `${start} - ${end}`;
+    if (start) return `${start} - ...`;
+    if (end) return `... - ${end}`;
+
     return placeholder;
   }, [placeholder, value]);
 

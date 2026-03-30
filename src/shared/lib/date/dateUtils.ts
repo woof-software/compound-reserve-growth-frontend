@@ -1,6 +1,5 @@
 /** Date utilities that operate in UTC to avoid timezone shifts. */
 import { BAR_SIZE } from '@/shared/types/types';
-import { FormEvent } from 'react';
 
 export const DAY_IN_MS = 24 * 60 * 60 * 1000;
 export const MIN_YEAR = 1970;
@@ -15,12 +14,53 @@ const DATE_LABEL_FORMATTER = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'UTC'
 });
 
-export const limitYearTo4Digits = (e: FormEvent<HTMLInputElement>) => {
-  const input = e.currentTarget;
-  const [year, month = '', day = ''] = input.value.split('-');
-  if (year && year.length > 4) {
-    input.value = `${year.slice(0, 4)}-${month}-${day}`;
+const formatDate = (digits: string) => {
+  const trimmed = digits.slice(0, 8);
+
+  const y = trimmed.slice(0, 4);
+  const m = trimmed.slice(4, 6);
+  const d = trimmed.slice(6, 8);
+
+  let result = y;
+  if (m) result += `-${m}`;
+  if (d) result += `-${d}`;
+
+  return result;
+};
+
+export const handleDateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const input = e.target;
+
+  const raw = input.value;
+  const selectionStart = input.selectionStart || 0;
+
+  const digitsBeforeCursor = raw
+    .slice(0, selectionStart)
+    .replace(/\D/g, '').length;
+
+  const digits = raw.replace(/\D/g, '').slice(0, 8);
+
+  const formatted = formatDate(digits);
+
+  input.value = formatted;
+
+  let cursor = 0;
+  let digitCount = 0;
+
+  while (cursor < formatted.length && digitCount < digitsBeforeCursor) {
+    if (/\d/.test(formatted[cursor])) {
+      digitCount++;
+    }
+    cursor++;
   }
+
+  if (formatted[cursor] === '-') {
+    cursor++;
+  }
+
+  requestAnimationFrame(() => {
+    input.setSelectionRange(cursor, cursor);
+  });
 };
 
 export const inputDateToTimestamp = (value: string): number | null => {
