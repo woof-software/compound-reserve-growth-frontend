@@ -111,6 +111,12 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
     isAggregate: true
   });
 
+  const hasAggregatedData = useMemo(
+    () =>
+      aggregatedSeries.some((s) => Array.isArray(s.data) && s.data.length > 0),
+    [aggregatedSeries]
+  );
+
   const csvData = getSummarizedCsvData(aggregatedSeries);
 
   const handleClearAllFilters = () => {
@@ -190,7 +196,7 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
           />
         </div>
       </div>
-      {chartSeries.length === 0 ? (
+      {chartSeries.length === 0 || !hasAggregatedData ? (
         <NoDataPlaceholder onButtonClick={handleClearAllFilters} />
       ) : (
         <Line

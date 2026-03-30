@@ -303,6 +303,12 @@ const CompoundCumulativeRevenue = ({
     barSize
   });
 
+  const hasAggregatedData = useMemo(
+    () =>
+      aggregatedSeries.some((s) => Array.isArray(s.data) && s.data.length > 0),
+    [aggregatedSeries]
+  );
+
   const {
     legends,
     toggle: onLegendToggle,
@@ -436,7 +442,7 @@ const CompoundCumulativeRevenue = ({
         onDeselectAll={onDeselectAllLegends}
         dateRangeMobileOption={dateRangeMobileOption}
       />
-      {!isLoading && !isError && !hasData ? (
+      {!isLoading && !isError && (!hasData || !hasAggregatedData) ? (
         <NoDataPlaceholder
           onButtonClick={onClearSelectedOptions}
           text={noDataMessage}

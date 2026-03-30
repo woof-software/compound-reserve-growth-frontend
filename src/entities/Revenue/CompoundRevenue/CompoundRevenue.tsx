@@ -37,7 +37,6 @@ import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
 interface PreprocessedItem {
   date: string;
@@ -347,6 +346,12 @@ const CompoundRevenueBlock = ({
       customBarColor: '#4DEDB5'
     });
 
+  const hasAggregatedData = useMemo(
+    () =>
+      aggregatedSeries.some((s) => Array.isArray(s.data) && s.data.length > 0),
+    [aggregatedSeries]
+  );
+
   const csvData = getSummarizedCsvData(aggregatedSeries);
   const hasData = processedChartData.length > 0;
 
@@ -441,7 +446,12 @@ const CompoundRevenueBlock = ({
         onDateRangeChange={setDateRange}
         onClearAll={onClearSelectedOptions}
       />
-      <View.Condition if={!isLoading && !isError && hasData}>
+      {!isLoading && !isError && (!hasData || !hasAggregatedData) ? (
+        <NoDataPlaceholder
+          onButtonClick={onClearSelectedOptions}
+          text={noDataMessage}
+        />
+      ) : (
         <div className='h-[400px]'>
           <CompoundRevenueChart
             resetZoomKey={`${barSize}-${dateRange.startDate}-${dateRange.endDate}`}
@@ -451,13 +461,7 @@ const CompoundRevenueBlock = ({
             barSize={barSize}
           />
         </div>
-      </View.Condition>
-      <View.Condition if={!isLoading && !isError && !hasData}>
-        <NoDataPlaceholder
-          onButtonClick={onClearSelectedOptions}
-          text={noDataMessage}
-        />
-      </View.Condition>
+      )}
     </Card>
   );
 };

@@ -43,8 +43,13 @@ const HistoricalExpensesByNetworks = (
     initialBarSize: BAR_SIZE.D
   });
 
-  const { dateRange, setDateRange, normalizedDateRange, dateBounds } =
-    useDateRangeFilter();
+  const {
+    dateRange,
+    setDateRange,
+    normalizedDateRange,
+    dateBounds,
+    resetDateRange
+  } = useDateRangeFilter();
 
   const { disabledBarSizes } = useBarSizeConstraints(
     normalizedDateRange,
@@ -79,6 +84,12 @@ const HistoricalExpensesByNetworks = (
     isAggregate: true
   });
 
+  const hasAggregatedData = useMemo(
+    () =>
+      aggregatedSeries.some((s) => Array.isArray(s.data) && s.data.length > 0),
+    [aggregatedSeries]
+  );
+
   const {
     legends,
     toggle: onLegendToggle,
@@ -109,6 +120,13 @@ const HistoricalExpensesByNetworks = (
   );
 
   useFilterSyncSingle('historicalExpByNetworkPeriod', barSize, onBarSizeChange);
+
+  const handleClearAllFilters = () => {
+    setActiveModeTab('Total');
+    setActiveViewTab('COMP');
+    onBarSizeChange(BAR_SIZE.D);
+    resetDateRange();
+  };
 
   const csvData = getSummarizedCsvData(aggregatedSeries);
 
@@ -241,8 +259,8 @@ const HistoricalExpensesByNetworks = (
           </div>
         </div>
       </div>
-      {!isLoading && !isError && !hasData ? (
-        <NoDataPlaceholder isHideButton={true} />
+      {!isLoading && !isError && (!hasData || !hasAggregatedData) ? (
+        <NoDataPlaceholder onButtonClick={handleClearAllFilters} />
       ) : (
         <Line
           key={groupBy}
