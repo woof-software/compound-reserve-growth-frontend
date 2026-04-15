@@ -1,3 +1,4 @@
+import TotalTresuryValueRef from '@/refactor/TotalTresuryValueRef'
 import React, { useMemo } from 'react';
 
 import MetricBlock from '@/entities/Treasury/MetricBlock';
@@ -69,35 +70,40 @@ const TreasuryPage = () => {
         </Text>
       </div>
       <div className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
-        <MetricBlock
-          isLoading={isLoading}
-          data={{
-            uniqDataByCategory,
-            uniqData30DaysOldByCategory
-          }}
-        />
-        <TreasuryCompositionBlock
-          isLoading={isLoading}
-          data={{
-            uniqDataByCategory,
-            uniqData
-          }}
-        />
-        <TotalTreasuryValue
+        {/*<MetricBlock*/}
+        {/*  isLoading={isLoading}*/}
+        {/*  data={{*/}
+        {/*    uniqDataByCategory,*/}
+        {/*    uniqData30DaysOldByCategory*/}
+        {/*  }}*/}
+        {/*/>*/}
+        {/*<TreasuryCompositionBlock*/}
+        {/*  isLoading={isLoading}*/}
+        {/*  data={{*/}
+        {/*    uniqDataByCategory,*/}
+        {/*    uniqData*/}
+        {/*  }}*/}
+        {/*/>*/}
+        <TotalTresuryValueRef
           isLoading={isLoading}
           isError={isError}
           data={treasuryData}
         />
-        <TreasuryBalanceByNetworkBlock
-          data={uniqData}
-          isError={isError}
-          isLoading={isLoading}
-        />
-        <TreasuryHoldingsBlock
-          data={uniqData}
-          isError={isError}
-          isLoading={isLoading}
-        />
+        {/*<TotalTreasuryValue*/}
+        {/*  isLoading={isLoading}*/}
+        {/*  isError={isError}*/}
+        {/*  data={treasuryData}*/}
+        {/*/>*/}
+        {/*<TreasuryBalanceByNetworkBlock*/}
+        {/*  data={uniqData}*/}
+        {/*  isError={isError}*/}
+        {/*  isLoading={isLoading}*/}
+        {/*/>*/}
+        {/*<TreasuryHoldingsBlock*/}
+        {/*  data={uniqData}*/}
+        {/*  isError={isError}*/}
+        {/*  isLoading={isLoading}*/}
+        {/*/>*/}
       </div>
     </div>
   );

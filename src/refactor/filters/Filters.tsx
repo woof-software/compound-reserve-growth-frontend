@@ -1,0 +1,69 @@
+import React, { ReactNode, useState } from 'react';
+
+import { useMediaQuery } from '@/refactor/hooks/useMediaQuery';
+import Button from '@/shared/ui/Button/Button';
+import Drawer from '@/shared/ui/Drawer/Drawer';
+import Icon from '@/shared/ui/Icon/Icon';
+import Text from '@/shared/ui/Text/Text';
+
+interface FiltersProps {
+  children: ReactNode;
+  clearAllFilters: () => void;
+  hasSelectedFilters?: boolean;
+}
+
+export const Filters = (props: FiltersProps) => {
+  const { children, hasSelectedFilters, clearAllFilters } = props;
+  
+  const [isDrawer, setIsDrawer] = useState(false);
+  
+  const isMobile = useMediaQuery('(max-width: 63.938rem)');
+
+  if (isMobile) {
+    return (
+      <>
+        <Button
+          className='bg-secondary-27 text-gray-11 flex w-full min-w-[130px] max-w-[130px] gap-1.5 rounded-lg p-2.5 text-[14px] leading-4 font-semibold sm:w-auto h-[44px]'
+          onClick={() => setIsDrawer(true)}
+        >
+          <Icon
+            name='filters'
+            className='h-[18px] w-[18px] fill-none'
+          />
+          Filters
+        </Button>
+        <Drawer
+          onClose={() => setIsDrawer(false)}
+          isOpen={isDrawer}
+        >
+          <Text
+            size='17'
+            weight='700'
+            lineHeight='140'
+            align='center'
+            className='mb-5 w-full'
+          >
+            Filters
+          </Text>
+          {children}
+          {
+            hasSelectedFilters && (
+              <Button
+                className={'text-primary-14 w-[100%] hover:bg-secondary-40 h-[44px] lg:h-[30px] rounded-lg text-[11px] font-medium dark:hover:text-white'}
+                onClick={clearAllFilters}
+              >
+                Clear All
+              </Button>
+            )
+          }
+        </Drawer>
+      </>
+    );
+  }
+
+  return (
+    <div className={'flex items-center gap-2 py-3'}>
+      {children}
+    </div>
+  );
+};
