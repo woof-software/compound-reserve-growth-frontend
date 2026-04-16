@@ -286,6 +286,8 @@ const TotalTreasuryValue = ({
     setSelectedGroupOptions
   ] = useFilterOptions('ttv-group', groupByOptions, 'single', 'none');
 
+  const filterKeys = ['ttv-chain', 'ttv-market', 'ttv-asset-type', 'ttv-symbol', 'ttv-date'];
+
   return (
     <Card
       isLoading={isLoading}
@@ -310,7 +312,7 @@ const TotalTreasuryValue = ({
           disabled={isLoading}
           disabledTabs={disabledBarSizes}
         />
-        <FiltersProvider filterKeys={['ttv-chain', 'ttv-market', 'ttv-asset-type', 'ttv-symbol']}>
+        <FiltersProvider filterKeys={filterKeys}>
           <Filters>
             <DateRangePickerFilter
               triggerLabel='Date Range'
