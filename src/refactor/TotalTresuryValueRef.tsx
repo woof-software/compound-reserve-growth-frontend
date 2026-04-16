@@ -46,25 +46,16 @@ import { filterForRange } from '@/shared/lib/utils/chart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import {
   ChartDataItem,
-  extractFilterOptions,
-  filterAndSortMarkets,
-  groupOptionsDto
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
-import { BAR_SIZE, BAR_SIZE_OPTIONS, OptionType } from '@/shared/types/types';
+import { BAR_SIZE, BAR_SIZE_OPTIONS} from '@/shared/types/types';
 import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import { DateRangePickerPopover } from '@/shared/ui/DateRangePicker/DateRangePicker';
 import { DateRangeValue } from '@/shared/ui/DateRangePicker/types';
-import Drawer from '@/shared/ui/Drawer/Drawer';
-import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
-import Icon from '@/shared/ui/Icon/Icon';
-import SingleDropdown from '@/shared/ui/SingleDropdown/SingleDropdown';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 import { Filters } from './filters/Filters'
 
 interface TotalTreasuryValueProps {
@@ -81,18 +72,16 @@ const BAR_SIZE_ORDER = {
 } as const;
 
 const TotalTreasuryValue = ({
-                              isLoading,
-                              isError,
-                              data: treasuryApiResponse
-                            }: TotalTreasuryValueProps) => {
+  isLoading,
+  isError,
+  data: treasuryApiResponse
+}: TotalTreasuryValueProps) => {
 
   const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: BAR_SIZE.D
   });
 
   const {
-    // dateRange,
-    // setDateRange,
     normalizedDateRange,
     dateBounds,
     resetDateRange,
@@ -297,10 +286,10 @@ const TotalTreasuryValue = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-5 lg:px-10 lg:pb-10'
+        content: 'flex flex-col gap-3 pt-0 pb-0 px-5 lg:px-10 lg:pb-10'
       }}
     >
-      <div className={'flex items-center gap-2 py-3'}>
+      <div className={'flex items-center gap-2 py-3 justify-end flex-wrap'}>
         <TabsGroup
           className={{
             container: 'w-full sm:w-auto',
