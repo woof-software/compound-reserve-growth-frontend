@@ -1,3 +1,4 @@
+import { DateRangePickerFilter } from '@/refactor/DateRangePickerFilter/DateRangePickerFilter'
 import { DropdownFilter } from '@/refactor/DropdownFilter/DropdownFilter'
 import { DropdownFilterActions } from '@/refactor/DropdownFilter/DropdownFilterActions'
 import { DropdownFilterInput } from '@/refactor/DropdownFilter/DropdownFilterInput'
@@ -5,9 +6,10 @@ import { DropdownFilterTrigger } from '@/refactor/DropdownFilter/DropdownFilterT
 import { DropdownGroupFilterTrigger } from '@/refactor/DropdownFilter/DropdownGroupFilterTrigger'
 import { FiltersProvider } from '@/refactor/filters/FiltersProvider'
 import { GroupFilter } from '@/refactor/filters/GroupFilter'
+import { useDateRangeFilterOptions } from '@/refactor/hooks/useDateRangeFilterOptions'
 import { useFilterOptions } from '@/refactor/hooks/useFilterOptions'
 import { useUrlFilterSync } from '@/refactor/hooks/useUrlFilterSync'
-import { capitalize } from '@/refactor/shared/utils'
+import { capitalize, dataValuesToOptions } from '@/refactor/shared/utils'
 import React, {
   Dispatch,
   memo,
@@ -89,8 +91,8 @@ const TotalTreasuryValue = ({
   });
 
   const {
-    dateRange,
-    setDateRange,
+    // dateRange,
+    // setDateRange,
     normalizedDateRange,
     dateBounds,
     resetDateRange,
@@ -235,33 +237,12 @@ const TotalTreasuryValue = ({
 
   const [showEvents, setIsShowEvents] = useState<boolean>(true);
 
-
-  const getFilterOptions = () => {
-    const uniqueMarkets = [...new Set(rawData.map(d => d.source.market))]
-      .filter(m => m !== null && m !== undefined)
-      .sort();
-    const uniqueAssetTypes = [...new Set(rawData.map(d => d.source.asset.type))].sort();
-    const uniqueReserveSymbols = [...new Set(rawData.map(d => d.source.asset.symbol))].sort();
-    const uniqueChains = [...new Set(rawData.map(d => d.source.network))].sort();
-    return {
-      markets: uniqueMarkets.map(market => ({
-        label: capitalize(market),
-        value: market
-      })),
-      assetTypes: uniqueAssetTypes.map(assetType => ({
-        label: capitalize(assetType),
-        value: assetType
-      })),
-      reserveSymbols: uniqueReserveSymbols.map(reserveSymbol => ({
-        label: capitalize(reserveSymbol),
-        value: reserveSymbol
-      })),
-      chains: uniqueChains.map(chain => ({
-        label: capitalize(chain),
-        value: chain
-      }))
-    };
-  };
+  const getFilterOptions = () => ({
+    markets: dataValuesToOptions(rawData.map(d => d.source.market)),
+    assetTypes: dataValuesToOptions(rawData.map(d => d.source.asset.type)),
+    reserveSymbols: dataValuesToOptions(rawData.map(d => d.source.asset.symbol)),
+    chains: dataValuesToOptions(rawData.map(d => d.source.network)),
+  });
 
   const groupByOptions = [
     {label: 'None', value: 'none'},
@@ -327,16 +308,7 @@ const TotalTreasuryValue = ({
           disabled={isLoading}
           disabledTabs={disabledBarSizes}
         />
-        <DateRangePickerPopover
-          value={dateRange}
-          min={dateBounds.min}
-          max={dateBounds.max}
-          onChange={setDateRange}
-          disabled={isLoading}
-          showLabels
-          inputClassName='w-full'
-        />
-        <FiltersProvider filterKeys={['ttv-chain', 'ttv-market', 'ttv-asset-type', 'ttv-symbol', 'ttv-group']}>
+        <FiltersProvider filterKeys={['ttv-chain', 'ttv-market', 'ttv-asset-type', 'ttv-symbol']}>
           <Filters>
             <DropdownFilter
               triggerLabel={'Chain'}

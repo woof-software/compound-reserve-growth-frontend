@@ -36,6 +36,11 @@ export const GroupFilter = (props: GroupFiltersProps) => {
     if (option) setSelectedOptions(option);
   };
 
+  const handleReset = () => {
+    setSelectedOptions(options[0]);
+    setIsDrawer(false);
+  };
+
   if (isMobile) {
     return (
       <>
@@ -80,7 +85,7 @@ export const GroupFilter = (props: GroupFiltersProps) => {
           </Radio.Group>
           <Button
             className={'text-primary-14 w-[100%] hover:bg-secondary-40 h-[44px] lg:h-[30px] rounded-lg text-[11px] font-medium dark:hover:text-white'}
-            onClick={() => setSelectedOptions(options[0])}
+            onClick={handleReset}
           >
             Reset
           </Button>
