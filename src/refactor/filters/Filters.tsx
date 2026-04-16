@@ -1,5 +1,6 @@
 import React, { ReactNode, useState } from 'react';
 
+import { useFiltersContext } from '@/refactor/filters/FiltersProvider';
 import { useMediaQuery } from '@/refactor/hooks/useMediaQuery';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
@@ -8,12 +9,12 @@ import Text from '@/shared/ui/Text/Text';
 
 interface FiltersProps {
   children: ReactNode;
-  clearAllFilters: () => void;
-  hasSelectedFilters?: boolean;
 }
 
 export const Filters = (props: FiltersProps) => {
-  const { children, hasSelectedFilters, clearAllFilters } = props;
+  const { children } = props;
+
+  const { hasSelectedFilters, clearAll, isMobileFilterExpanded } = useFiltersContext();
   
   const [isDrawer, setIsDrawer] = useState(false);
   
@@ -46,11 +47,10 @@ export const Filters = (props: FiltersProps) => {
             Filters
           </Text>
           {children}
-          {
-            hasSelectedFilters && (
+          {(hasSelectedFilters && !isMobileFilterExpanded) && (
               <Button
                 className={'text-primary-14 w-[100%] hover:bg-secondary-40 h-[44px] lg:h-[30px] rounded-lg text-[11px] font-medium dark:hover:text-white'}
-                onClick={clearAllFilters}
+                onClick={clearAll}
               >
                 Clear All
               </Button>
@@ -61,9 +61,5 @@ export const Filters = (props: FiltersProps) => {
     );
   }
 
-  return (
-    <div className={'flex items-center gap-2 py-3'}>
-      {children}
-    </div>
-  );
+  return children;
 };

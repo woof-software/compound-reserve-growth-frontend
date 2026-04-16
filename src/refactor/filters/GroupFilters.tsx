@@ -73,6 +73,12 @@ export const GroupFilters = (props: GroupFiltersProps) => {
               />
             ))}
           </Radio.Group>
+          <Button
+            className={'text-primary-14 w-[100%] hover:bg-secondary-40 h-[44px] lg:h-[30px] rounded-lg text-[11px] font-medium dark:hover:text-white'}
+            onClick={() => setSelectedOptions(options[0])}
+          >
+            Reset
+          </Button>
         </Drawer>
       </>
     );

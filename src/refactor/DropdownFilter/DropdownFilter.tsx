@@ -1,3 +1,4 @@
+import { useFiltersContext } from '@/refactor/filters/FiltersProvider'
 import React, { Dispatch, ReactNode, SetStateAction, useState } from 'react';
 
 import { OptionsList } from '@/refactor/filters/OptionsList';
@@ -34,7 +35,7 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
 
   const [isDropdown, setIsDropdown] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  const [isMobileFilterShown, setIsMobileFilterShown] = useState(false);
+  const {isMobileFilterExpanded, setIsMobileFilterExpanded} = useFiltersContext();
 
   const toggle = () => setIsDropdown(prev => !prev);
 
@@ -49,9 +50,9 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
   if (isMobile) {
     return (
       <>
-        {isMobileFilterShown
+        {isMobileFilterExpanded
           ? <Button
-            onClick={() => setIsMobileFilterShown(false)}
+            onClick={() => setIsMobileFilterExpanded(false)}
             className={'absolute top-[30px] h-[44px] w-[44px]'}
           >
             <Icon
@@ -59,10 +60,10 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
               className='h-6 w-6'
             />
           </Button>
-          : renderTrigger(() => setIsMobileFilterShown(true), selectedOptions, isDropdown)
+          : renderTrigger(() => setIsMobileFilterExpanded(true), selectedOptions, isDropdown)
         }
 
-        {isMobileFilterShown && (
+        {isMobileFilterExpanded && (
           <>
             {renderSearch?.(searchValue, setSearchValue, isSearchResult)}
 

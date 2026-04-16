@@ -3,6 +3,7 @@ import { DropdownFilterActions } from '@/refactor/DropdownFilter/DropdownFilterA
 import { DropdownFilterInput } from '@/refactor/DropdownFilter/DropdownFilterInput'
 import { DropdownFilterTrigger } from '@/refactor/DropdownFilter/DropdownFilterTrigger'
 import { DropdownGroupFilterTrigger } from '@/refactor/DropdownFilter/DropdownGroupFilterTrigger'
+import { FiltersProvider } from '@/refactor/filters/FiltersProvider'
 import { GroupFilters } from '@/refactor/filters/GroupFilters'
 import { useFilterOptions } from '@/refactor/hooks/useFilterOptions'
 import { useUrlFilterSync } from '@/refactor/hooks/useUrlFilterSync'
@@ -64,99 +65,11 @@ import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 import { Filters } from './filters/Filters'
 
-const groupByOptions = ['None', 'Asset Type', 'Chain', 'Market'];
-
-const groupByMapping: Record<string, string> = {
-  'Asset Type': 'assetType',
-  Chain: 'chain',
-  Market: 'deployment'
-};
-
 interface TotalTreasuryValueProps {
   isLoading?: boolean;
   isError?: boolean;
   data?: TokenData[];
   onCopyLink?: (id: string) => void;
-}
-
-interface FiltersProps {
-  chainOptions: OptionType[];
-
-  deploymentOptionsFilter: OptionType[];
-
-  assetTypeOptions: OptionType[];
-
-  symbolOptions: OptionType[];
-
-  barSize: BAR_SIZE;
-
-  showEvents: boolean;
-
-  isLoading: boolean;
-
-  isOpenSingle: boolean;
-
-  groupBy: string;
-
-  csvFilename: string;
-
-  isShowEyeIcon: boolean;
-
-  isShowCalendarIcon: boolean;
-
-  csvData: Record<string, string | number>[];
-
-  areAllSeriesHidden: boolean;
-
-  dateRange: DateRangeValue;
-
-  minDate: number | null;
-
-  maxDate: number | null;
-
-  selectedOptions: {
-    chain: OptionType[];
-
-    assetType: OptionType[];
-
-    deployment: OptionType[];
-
-    symbol: OptionType[];
-  };
-
-  onSelectChain: (chain: OptionType[]) => void;
-
-  onSelectAssetType: (assetType: OptionType[]) => void;
-
-  onSelectMarket: (deployment: OptionType[]) => void;
-
-  onSelectSymbol: (symbol: OptionType[]) => void;
-
-  onBarSizeChange: (value: string) => void;
-
-  openSingleDropdown: () => void;
-
-  closeSingle: () => void;
-
-  onClearAll: () => void;
-
-  onSelectAll: () => void;
-
-  onDeselectAll: () => void;
-
-  selectSingle: (value: string) => void;
-
-  selectSingleClose: (value: string) => void;
-
-  onShowEvents: (value: boolean) => void;
-
-  onDateRangeChange: Dispatch<SetStateAction<DateRangeValue>>;
-
-  dateRangeMobileOption: ReturnType<
-    typeof useDateRangeFilter
-  >['mobileFilterOption'];
-
-  disabledBarSizes: BAR_SIZE[];
 }
 
 const BAR_SIZE_ORDER = {
@@ -170,34 +83,6 @@ const TotalTreasuryValue = ({
   isError,
   data: treasuryApiResponse
 }: TotalTreasuryValueProps) => {
-  // const [selectedOptions, setSelectedOptions] = useReducer(
-  //   (prev, next) => ({
-  //     ...prev,
-  //     ...next
-  //   }),
-  //   {
-  //     chain: [] as OptionType[],
-  //     assetType: [] as OptionType[],
-  //     deployment: [] as OptionType[],
-  //     symbol: [] as OptionType[]
-  //   }
-  // );
-
-  // useFiltersSync(selectedOptions, setSelectedOptions, 'ttv', [
-  //   'chain',
-  //   'assetType',
-  //   'deployment',
-  //   'symbol'
-  // ]);
-
-  // const {
-  //   isOpen: isOpenSingle,
-  //   selectedValue: selectedSingle,
-  //   close: closeSingle,
-  //   open: openSingleDropdown,
-  //   select: selectSingle,
-  //   selectClose: selectSingleClose
-  // } = useDropdown('single');
 
   const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: BAR_SIZE.D
@@ -242,43 +127,6 @@ const TotalTreasuryValue = ({
     }
     return [...treasuryApiResponse].sort((a, b) => a.date - b.date);
   }, [treasuryApiResponse]);
-
-  const filterOptionsConfig = useMemo(
-    () => ({
-      chain: { path: 'source.network' },
-      assetType: { path: 'source.asset.type' },
-      deployment: { path: 'source.market' },
-      symbol: { path: 'source.asset.symbol' }
-    }),
-    []
-  );
-
-  const { chainOptions, assetTypeOptions, symbolOptions, deploymentOptions } =
-    useMemo(
-      () => extractFilterOptions(rawData, filterOptionsConfig),
-      [rawData, filterOptionsConfig]
-    );
-
-  // const deploymentOptionsFilter = useMemo(() => {
-  //   return filterAndSortMarkets(
-  //     deploymentOptions,
-  //     selectedOptions.chain.map((o) => o.id)
-  //   );
-  // }, [deploymentOptions, selectedOptions]);
-
-  // const groupBy = selectedSingle?.[0] || 'None';
-
-  // const activeFilters = useMemo(
-  //   () =>
-  //     Object.entries(selectedOptions).reduce(
-  //       (acc, [key, options]) => {
-  //         acc[key] = options.map((option: OptionType) => option.id);
-  //         return acc;
-  //       },
-  //       {} as Record<string, string[]>
-  //     ),
-  //   [selectedOptions]
-  // );
 
   // const { chartSeries } = useChartDataProcessor({
   //   rawData,
@@ -387,69 +235,36 @@ const TotalTreasuryValue = ({
 
   const [showEvents, setIsShowEvents] = useState<boolean>(true);
 
-  // const onSelectChain = useCallback(
-  //   (chain: OptionType[]) => {
-  //     const selectedChainIds = chain.map((o) => o.id);
-  //
-  //     const filteredDeployment = selectedOptions.deployment.filter((el) =>
-  //       selectedChainIds.length === 0
-  //         ? true
-  //         : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
-  //     );
-  //
-  //     setSelectedOptions({ chain, deployment: filteredDeployment });
-  //   },
-  //   [selectedOptions.deployment]
-  // );
-  //
-  // const onSelectAssetType = useCallback((assetTypes: OptionType[]) => {
-  //   setSelectedOptions({
-  //     assetType: assetTypes
-  //   });
-  // }, []);
-  //
-  // const onSelectMarket = useCallback((deployments: OptionType[]) => {
-  //   setSelectedOptions({
-  //     deployment: deployments
-  //   });
-  // }, []);
-  //
-  // const onSelectSymbol = useCallback((symbols: OptionType[]) => {
-  //   setSelectedOptions({
-  //     symbol: symbols
-  //   });
-  // }, []);
 
-  // const onClearSelectedOptions = useCallback(() => {
-  //   setSelectedOptions({
-  //     chain: [],
-  //     assetType: [],
-  //     deployment: [],
-  //     symbol: []
-  //   });
-  //   resetDateRange();
-  // }, [resetDateRange]);
-  //
-  // const onClearAll = useCallback(() => {
-  //   onClearSelectedOptions();
-  //   selectSingle('None');
-  // }, [onClearSelectedOptions, selectSingle]);
-
-  // const [selectedChains, setSelectedChains] = useUrlFilterSync('ttv-chain');
-  //
-  // const selectedChainOptions = options.filter(o => selectedChains.includes(o.value));
-
-
-  const getChainOptions = () => {
+  const getFilterOptions = () => {
+    const uniqueMarkets = [...new Set(rawData.map(d => d.source.market))]
+      .filter(m => m !== null && m !== undefined)
+      .sort();
+    const uniqueAssetTypes = [...new Set(rawData.map(d => d.source.asset.type))].sort();
+    const uniqueReserveSymbols = [...new Set(rawData.map(d => d.source.asset.symbol))].sort();
     const uniqueChains = [...new Set(rawData.map(d => d.source.network))].sort();
-    return uniqueChains.map(chain => ({
-      label: capitalize(chain),
-      value: chain
-    }));
+    return {
+      markets: uniqueMarkets.map(market => ({
+        label: capitalize(market),
+        value: market
+      })),
+      assetTypes: uniqueAssetTypes.map(assetType => ({
+        label: capitalize(assetType),
+        value: assetType
+      })),
+      reserveSymbols: uniqueReserveSymbols.map(reserveSymbol => ({
+        label: capitalize(reserveSymbol),
+        value: reserveSymbol
+      })),
+      chains: uniqueChains.map(chain => ({
+        label: capitalize(chain),
+        value: chain
+      }))
+    };
   };
 
   const groupByOptions = [
-    {label: 'None', value: 'None'},
+    {label: 'None', value: 'none'},
     {label: 'Asset Type', value: 'assetType'},
     {label: 'Chain', value: 'chain'},
     {label: 'Market', value: 'deployment'}
@@ -460,15 +275,33 @@ const TotalTreasuryValue = ({
     setSelectedChainOptions,
     setAllChainOptions,
     clearAllChainOptions
-  ] = useFilterOptions('ttv-chain', getChainOptions(), 'multi');
+  ] = useFilterOptions('ttv-chain', getFilterOptions().chains, 'multi');
 
-  const [ selectedGroupOptions, setSelectedGroupOptions ] = useFilterOptions('ttv-group', groupByOptions, 'single');
+  const [
+    selectedMarketOptions,
+    setSelectedMarketOptions,
+    setAllMarketOptions,
+    clearAllMarketOptions
+  ] = useFilterOptions('ttv-market', getFilterOptions().markets, 'multi');
 
-  const hasSelectedFilters = selectedChainOptions.length > 0;
+  const [
+    selectedAssetTypeOptions,
+    setSelectedAssetTypeOptions,
+    setAllAssetTypeOptions,
+    clearAllAssetTypeOptions
+  ] = useFilterOptions('ttv-asset-type', getFilterOptions().assetTypes, 'multi');
 
-  const clearAllFilters = () => {
-    clearAllChainOptions();
-  };
+  const [
+    selectedSymbolOptions,
+    setSelectedSymbolOptions,
+    setAllSymbolOptions,
+    clearAllSymbolOptions
+  ] = useFilterOptions('ttv-symbol', getFilterOptions().reserveSymbols, 'multi');
+
+  const [
+    selectedGroupOptions,
+    setSelectedGroupOptions
+  ] = useFilterOptions('ttv-group', groupByOptions, 'single', 'none');
 
   return (
     <Card
@@ -482,101 +315,163 @@ const TotalTreasuryValue = ({
         content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-5 lg:px-10 lg:pb-10'
       }}
     >
-      <Filters
-        hasSelectedFilters={hasSelectedFilters}
-        clearAllFilters={clearAllFilters}
-      >
-        <DropdownFilter
-          renderTrigger={(handler, selectedOptions) => (
-            <DropdownFilterTrigger
-              label={'Chains'}
-              selectedOptions={selectedOptions}
-              handler={handler}
-            />
-          )}
-          renderSearch={(searchValue, setSearchValue, isSearchResult) => (
-            <DropdownFilterInput
-              searchValue={searchValue}
-              setSearchValue={setSearchValue}
-              isSearchResult={isSearchResult}
-            />
-          )}
-          renderActions={(clearAll, setAll, selectedOptions) => (
-            <DropdownFilterActions
-              clearAll={clearAll}
-              setAll={setAll}
-              selectedOptions={selectedOptions}
-            />
-          )}
-          options={getChainOptions()}
-          selectedOptions={selectedChainOptions}
-          setSelectedOptions={setSelectedChainOptions}
-          clearAll={clearAllChainOptions}
-          setAll={setAllChainOptions}
+      <div className={'flex items-center gap-2 py-3'}>
+        <TabsGroup
+          className={{
+            container: 'w-full sm:w-auto',
+            list: 'w-full sm:w-auto'
+          }}
+          tabs={['D', 'W', 'M']}
+          value={barSize}
+          onTabChange={onBarSizeChange}
+          disabled={isLoading}
+          disabledTabs={disabledBarSizes}
         />
-      </Filters>
-      <GroupFilters
-        options={groupByOptions}
-        selectedOptions={selectedGroupOptions}
-        setSelectedOptions={setSelectedGroupOptions}
-      >
-        <DropdownFilter
-          renderTrigger={(toggle, selectedOptions, isOpen) => (
-            <DropdownGroupFilterTrigger
-              isOpen={isOpen}
-              selectedOptions={selectedOptions}
-              toggle={toggle}
-            />
-          )}
-          options={groupByOptions}
-          selectedOptions={selectedGroupOptions}
-          setSelectedOptions={setSelectedGroupOptions}
+        <DateRangePickerPopover
+          value={dateRange}
+          min={dateBounds.min}
+          max={dateBounds.max}
+          onChange={setDateRange}
+          disabled={isLoading}
+          showLabels
+          inputClassName='w-full'
         />
-      </GroupFilters>
+        <FiltersProvider filterKeys={['ttv-chain']}>
+          <Filters>
+            <DropdownFilter
+              renderTrigger={(handler, selectedOptions) => (
+                <DropdownFilterTrigger
+                  label={'Chain'}
+                  selectedOptions={selectedOptions}
+                  handler={handler}
+                />
+              )}
+              renderSearch={(searchValue, setSearchValue, isSearchResult) => (
+                <DropdownFilterInput
+                  searchValue={searchValue}
+                  setSearchValue={setSearchValue}
+                  isSearchResult={isSearchResult}
+                />
+              )}
+              renderActions={(clearAll, setAll, selectedOptions) => (
+                <DropdownFilterActions
+                  clearAll={clearAll}
+                  setAll={setAll}
+                  selectedOptions={selectedOptions}
+                />
+              )}
+              options={getFilterOptions().chains}
+              selectedOptions={selectedChainOptions}
+              setSelectedOptions={setSelectedChainOptions}
+              clearAll={clearAllChainOptions}
+              setAll={setAllChainOptions}
+            />
+            <DropdownFilter
+              renderTrigger={(handler, selectedOptions) => (
+                <DropdownFilterTrigger
+                  label={'Market'}
+                  selectedOptions={selectedOptions}
+                  handler={handler}
+                />
+              )}
+              renderSearch={(searchValue, setSearchValue, isSearchResult) => (
+                <DropdownFilterInput
+                  searchValue={searchValue}
+                  setSearchValue={setSearchValue}
+                  isSearchResult={isSearchResult}
+                />
+              )}
+              renderActions={(clearAll, setAll, selectedOptions) => (
+                <DropdownFilterActions
+                  clearAll={clearAll}
+                  setAll={setAll}
+                  selectedOptions={selectedOptions}
+                />
+              )}
+              options={getFilterOptions().markets}
+              selectedOptions={selectedMarketOptions}
+              setSelectedOptions={setSelectedMarketOptions}
+              clearAll={clearAllMarketOptions}
+              setAll={setAllMarketOptions}
+            />
+            <DropdownFilter
+              renderTrigger={(handler, selectedOptions) => (
+                <DropdownFilterTrigger
+                  label={'Asset Type'}
+                  selectedOptions={selectedOptions}
+                  handler={handler}
+                />
+              )}
+              renderSearch={(searchValue, setSearchValue, isSearchResult) => (
+                <DropdownFilterInput
+                  searchValue={searchValue}
+                  setSearchValue={setSearchValue}
+                  isSearchResult={isSearchResult}
+                />
+              )}
+              renderActions={(clearAll, setAll, selectedOptions) => (
+                <DropdownFilterActions
+                  clearAll={clearAll}
+                  setAll={setAll}
+                  selectedOptions={selectedOptions}
+                />
+              )}
+              options={getFilterOptions().assetTypes}
+              selectedOptions={selectedAssetTypeOptions}
+              setSelectedOptions={setSelectedAssetTypeOptions}
+              clearAll={clearAllAssetTypeOptions}
+              setAll={setAllAssetTypeOptions}
+            />
+            <DropdownFilter
+              renderTrigger={(handler, selectedOptions) => (
+                <DropdownFilterTrigger
+                  label={'Reserve Symbol'}
+                  selectedOptions={selectedOptions}
+                  handler={handler}
+                />
+              )}
+              renderSearch={(searchValue, setSearchValue, isSearchResult) => (
+                <DropdownFilterInput
+                  searchValue={searchValue}
+                  setSearchValue={setSearchValue}
+                  isSearchResult={isSearchResult}
+                />
+              )}
+              renderActions={(clearAll, setAll, selectedOptions) => (
+                <DropdownFilterActions
+                  clearAll={clearAll}
+                  setAll={setAll}
+                  selectedOptions={selectedOptions}
+                />
+              )}
+              options={getFilterOptions().reserveSymbols}
+              selectedOptions={selectedSymbolOptions}
+              setSelectedOptions={setSelectedSymbolOptions}
+              clearAll={clearAllSymbolOptions}
+              setAll={setAllSymbolOptions}
+            />
+          </Filters>
+          <GroupFilters
+            options={groupByOptions}
+            selectedOptions={selectedGroupOptions}
+            setSelectedOptions={setSelectedGroupOptions}
+          >
+            <DropdownFilter
+              renderTrigger={(toggle, selectedOptions, isOpen) => (
+                <DropdownGroupFilterTrigger
+                  isOpen={isOpen}
+                  selectedOptions={selectedOptions}
+                  toggle={toggle}
+                />
+              )}
+              options={groupByOptions}
+              selectedOptions={selectedGroupOptions}
+              setSelectedOptions={setSelectedGroupOptions}
+            />
+          </GroupFilters>
+        </FiltersProvider>
+      </div>
 
-      {/*<MultiSelect*/}
-      {/*  options={chainOptions || []}*/}
-      {/*  value={selectedChains}*/}
-      {/*  onChange={setSelectedChains}*/}
-      {/*  placeholder='Chain'*/}
-      {/*  disabled={isLoading}*/}
-      {/*/>*/}
-      {/*<Filters*/}
-      {/*  groupBy={groupBy}*/}
-      {/*  showEvents={showEvents}*/}
-      {/*  areAllSeriesHidden={isSeriesHidden}*/}
-      {/*  isShowCalendarIcon={!!events?.length}*/}
-      {/*  isShowEyeIcon={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}*/}
-      {/*  assetTypeOptions={assetTypeOptions}*/}
-      {/*  selectedOptions={selectedOptions}*/}
-      {/*  chainOptions={chainOptions}*/}
-      {/*  symbolOptions={symbolOptions}*/}
-      {/*  deploymentOptionsFilter={deploymentOptionsFilter}*/}
-      {/*  isLoading={isLoading || false}*/}
-      {/*  barSize={barSize}*/}
-      {/*  csvData={csvData}*/}
-      {/*  csvFilename={getCsvFileName('total_treasury_value')}*/}
-      {/*  isOpenSingle={isOpenSingle}*/}
-      {/*  dateRange={dateRange}*/}
-      {/*  minDate={dateBounds.min}*/}
-      {/*  maxDate={dateBounds.max}*/}
-      {/*  dateRangeMobileOption={dateRangeMobileOption}*/}
-      {/*  onSelectChain={onSelectChain}*/}
-      {/*  onSelectAssetType={onSelectAssetType}*/}
-      {/*  onSelectMarket={onSelectMarket}*/}
-      {/*  onSelectSymbol={onSelectSymbol}*/}
-      {/*  onBarSizeChange={onBarSizeChange}*/}
-      {/*  openSingleDropdown={openSingleDropdown}*/}
-      {/*  closeSingle={closeSingle}*/}
-      {/*  selectSingle={selectSingle}*/}
-      {/*  selectSingleClose={selectSingleClose}*/}
-      {/*  onClearAll={onClearAll}*/}
-      {/*  onSelectAll={onSelectAllLegends}*/}
-      {/*  onDeselectAll={onDeselectAllLegends}*/}
-      {/*  onShowEvents={setIsShowEvents}*/}
-      {/*  onDateRangeChange={setDateRange}*/}
-      {/*  disabledBarSizes={disabledBarSizes}*/}
-      {/*/>*/}
       {/*{!isLoading && !isError && (!hasData || !hasAggregatedData) ? (*/}
       {/*  <NoDataPlaceholder onButtonClick={onClearAll} />*/}
       {/*) : (*/}
@@ -603,351 +498,5 @@ const TotalTreasuryValue = ({
     </Card>
   );
 };
-
-// const Filters = memo(
-//   ({
-//      barSize,
-//      isOpenSingle,
-//      isShowEyeIcon,
-//      isShowCalendarIcon,
-//      showEvents,
-//      groupBy,
-//      csvData,
-//      areAllSeriesHidden,
-//      chainOptions,
-//      selectedOptions,
-//      deploymentOptionsFilter,
-//      assetTypeOptions,
-//      symbolOptions,
-//      isLoading,
-//      dateRange,
-//      minDate,
-//      maxDate,
-//      dateRangeMobileOption,
-//      onSelectChain,
-//      onSelectAssetType,
-//      onSelectMarket,
-//      onSelectSymbol,
-//      onBarSizeChange,
-//      openSingleDropdown,
-//      closeSingle,
-//      selectSingle,
-//      selectSingleClose,
-//      onClearAll,
-//      onSelectAll,
-//      onDeselectAll,
-//      onShowEvents,
-//      onDateRangeChange,
-//      disabledBarSizes
-//    }: FiltersProps) => {
-//     const { isOpen, onOpenModal, onCloseModal } = useModal();
-//
-//     const {
-//       isOpen: isMoreOpen,
-//       onOpenModal: onMoreOpen,
-//       onCloseModal: onMoreClose
-//     } = useModal();
-//
-//     const {
-//       isOpen: isGroupOpen,
-//       onOpenModal: onGroupOpen,
-//       onCloseModal: onGroupClose
-//     } = useModal();
-//
-//     const filterOptions = useMemo(() => {
-//       const chainFilterOptions = {
-//         id: 'chain',
-//         placeholder: 'Chain',
-//         total: selectedOptions.chain.length,
-//         selectedOptions: selectedOptions.chain,
-//         options: chainOptions || [],
-//         onChange: onSelectChain
-//       };
-//
-//       const marketFilterOptions = {
-//         id: 'market',
-//         placeholder: 'Market',
-//         total: selectedOptions.deployment.length,
-//         selectedOptions: selectedOptions.deployment,
-//         options: deploymentOptionsFilter || [],
-//         onChange: onSelectMarket
-//       };
-//
-//       const assetTypeFilterOptions = {
-//         id: 'assetType',
-//         placeholder: 'Asset Type',
-//         total: selectedOptions.assetType.length,
-//         selectedOptions: selectedOptions.assetType,
-//         options:
-//           assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-//           [],
-//         onChange: onSelectAssetType
-//       };
-//
-//       return [
-//         dateRangeMobileOption,
-//         chainFilterOptions,
-//         marketFilterOptions,
-//         assetTypeFilterOptions
-//       ];
-//     }, [
-//       assetTypeOptions,
-//       chainOptions,
-//       dateRangeMobileOption,
-//       deploymentOptionsFilter,
-//       onSelectAssetType,
-//       onSelectChain,
-//       onSelectMarket,
-//       selectedOptions
-//     ]);
-//
-//     const onEyeClick = () => {
-//       if (areAllSeriesHidden) {
-//         onSelectAll();
-//       } else {
-//         onDeselectAll();
-//       }
-//
-//       onMoreClose();
-//     };
-//
-//     const onCalendarClick = () => {
-//       onShowEvents(!showEvents);
-//
-//       onMoreClose();
-//     };
-//
-//     return (
-//       <>
-//         <div className='block lg:hidden'>
-//           <div className='flex flex-col justify-end gap-2 px-5 py-3 md:px-0 lg:px-5'>
-//             <div className='flex flex-col-reverse items-center justify-end gap-2 sm:flex-row'>
-//               <TabsGroup
-//                 className={{
-//                   container: 'w-full sm:w-auto',
-//                   list: 'w-full sm:w-auto'
-//                 }}
-//                 tabs={['D', 'W', 'M']}
-//                 value={barSize}
-//                 onTabChange={onBarSizeChange}
-//                 disabled={isLoading}
-//                 disabledTabs={disabledBarSizes}
-//               />
-//               <div className='flex w-full items-center gap-2 sm:w-auto'>
-//                 <Button
-//                   onClick={onGroupOpen}
-//                   className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
-//                 >
-//                   <Icon
-//                     name='group-grid'
-//                     className='h-[14px] w-[14px] fill-none'
-//                   />
-//                   Group
-//                 </Button>
-//                 <Button
-//                   onClick={onOpenModal}
-//                   className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
-//                 >
-//                   <Icon
-//                     name='filters'
-//                     className='h-[14px] w-[14px] fill-none'
-//                   />
-//                   Filters
-//                 </Button>
-//                 <Button
-//                   onClick={onMoreOpen}
-//                   className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
-//                 >
-//                   <Icon
-//                     name='3-dots'
-//                     className='h-6 w-6 fill-none'
-//                   />
-//                 </Button>
-//               </div>
-//             </div>
-//           </div>
-//           <Filter
-//             isOpen={isOpen}
-//             filterOptions={filterOptions}
-//             onClose={onCloseModal}
-//             onClearAll={onClearAll}
-//           />
-//           <GroupDrawer
-//             isOpen={isGroupOpen}
-//             selectedOption={groupBy}
-//             options={groupOptionsDto(groupByOptions)}
-//             onClose={onGroupClose}
-//             onSelect={selectSingle}
-//           />
-//           <Drawer
-//             isOpen={isMoreOpen}
-//             onClose={onMoreClose}
-//           >
-//             <Text
-//               size='17'
-//               weight='700'
-//               align='center'
-//               className='mb-5'
-//             >
-//               Actions
-//             </Text>
-//             <div className='flex flex-col gap-1.5'>
-//               <div className='px-3 py-2'>
-//                 <CSVLink
-//                   data={csvData}
-//                   filename={getCsvFileName('total_treasury_value')}
-//                   onClick={onMoreClose}
-//                 >
-//                   <div className='flex items-center gap-1.5'>
-//                     <Icon
-//                       name='download'
-//                       className='h-[26px] w-[26px]'
-//                     />
-//                     <Text
-//                       size='14'
-//                       weight='500'
-//                     >
-//                       CSV with the entire historical data
-//                     </Text>
-//                   </div>
-//                 </CSVLink>
-//               </div>
-//               <View.Condition if={isShowEyeIcon}>
-//                 <div className='px-3 py-2'>
-//                   <ChartIconToggle
-//                     active={areAllSeriesHidden}
-//                     onIcon='eye'
-//                     offIcon='eye-closed'
-//                     ariaLabel='Toggle all series visibility'
-//                     className={{
-//                       container:
-//                         'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
-//                       icon: 'h-[26px] w-[26px]',
-//                       iconContainer: 'h-[26px] w-[26px]'
-//                     }}
-//                     onClick={onEyeClick}
-//                   >
-//                     <Text
-//                       size='14'
-//                       weight='500'
-//                     >
-//                       {areAllSeriesHidden ? 'Select All' : 'Unselect All'}
-//                     </Text>
-//                   </ChartIconToggle>
-//                 </div>
-//               </View.Condition>
-//               <View.Condition if={isShowCalendarIcon}>
-//                 <div className='px-3 py-2'>
-//                   <ChartIconToggle
-//                     active={!showEvents}
-//                     onIcon='calendar-check'
-//                     offIcon='calendar-uncheck'
-//                     ariaLabel='Toggle events'
-//                     className={{
-//                       container:
-//                         'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
-//                       icon: 'h-[26px] w-[26px]',
-//                       iconContainer: 'h-[26px] w-[26px]'
-//                     }}
-//                     onClick={onCalendarClick}
-//                   >
-//                     <Text
-//                       size='14'
-//                       weight='500'
-//                     >
-//                       Hide Events
-//                     </Text>
-//                   </ChartIconToggle>
-//                 </div>
-//               </View.Condition>
-//             </div>
-//           </Drawer>
-//         </div>
-//         <div className='hidden lg:block'>
-//           <div className='flex items-center justify-end gap-2 px-0 py-3'>
-//             <TabsGroup
-//               tabs={['D', 'W', 'M']}
-//               value={barSize}
-//               onTabChange={onBarSizeChange}
-//               disabled={isLoading}
-//               disabledTabs={disabledBarSizes}
-//             />
-//             <DateRangePickerPopover
-//               value={dateRange}
-//               min={minDate}
-//               max={maxDate}
-//               onChange={onDateRangeChange}
-//               disabled={isLoading}
-//               showLabels
-//               inputClassName='w-full'
-//             />
-//             <MultiSelect
-//               options={chainOptions || []}
-//               value={selectedOptions.chain}
-//               onChange={onSelectChain}
-//               placeholder='Chain'
-//               disabled={isLoading}
-//             />
-//             <MultiSelect
-//               options={deploymentOptionsFilter}
-//               value={selectedOptions.deployment}
-//               onChange={onSelectMarket}
-//               placeholder='Market'
-//               disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-//             />
-//             <MultiSelect
-//               options={
-//                 assetTypeOptions?.sort((a, b) =>
-//                   a.label.localeCompare(b.label)
-//                 ) || []
-//               }
-//               value={selectedOptions.assetType}
-//               onChange={onSelectAssetType}
-//               placeholder='Asset Type'
-//               disabled={isLoading}
-//             />
-//             <MultiSelect
-//               options={
-//                 symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-//                 []
-//               }
-//               value={selectedOptions.symbol}
-//               onChange={onSelectSymbol}
-//               placeholder='Reserve Symbols'
-//               disabled={isLoading}
-//             />
-//             <div className='flex items-center gap-1'>
-//               <Text
-//                 tag='span'
-//                 size='11'
-//                 weight='600'
-//                 lineHeight='16'
-//                 className='text-primary-14'
-//               >
-//                 Group by
-//               </Text>
-//               <SingleDropdown
-//                 options={groupByOptions}
-//                 isOpen={isOpenSingle}
-//                 selectedValue={groupBy}
-//                 onOpen={openSingleDropdown}
-//                 onClose={closeSingle}
-//                 onSelect={(value: string) => {
-//                   selectSingleClose(value);
-//                 }}
-//                 disabled={isLoading}
-//                 triggerContentClassName='p-[5px]'
-//               />
-//             </div>
-//             <CSVDownloadButton
-//               data={csvData}
-//               filename={getCsvFileName('total_treasury_value')}
-//             />
-//           </div>
-//         </div>
-//       </>
-//     );
-//   }
-// );
 
 export default TotalTreasuryValue;
