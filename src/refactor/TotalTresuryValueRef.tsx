@@ -81,10 +81,10 @@ const BAR_SIZE_ORDER = {
 } as const;
 
 const TotalTreasuryValue = ({
-  isLoading,
-  isError,
-  data: treasuryApiResponse
-}: TotalTreasuryValueProps) => {
+                              isLoading,
+                              isError,
+                              data: treasuryApiResponse
+                            }: TotalTreasuryValueProps) => {
 
   const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: BAR_SIZE.D
@@ -251,6 +251,8 @@ const TotalTreasuryValue = ({
     {label: 'Market', value: 'deployment'}
   ];
 
+  const { dateRange, setDateRange } = useDateRangeFilterOptions('ttv-date');
+
   const [
     selectedChainOptions,
     setSelectedChainOptions,
@@ -310,6 +312,11 @@ const TotalTreasuryValue = ({
         />
         <FiltersProvider filterKeys={['ttv-chain', 'ttv-market', 'ttv-asset-type', 'ttv-symbol']}>
           <Filters>
+            <DateRangePickerFilter
+              triggerLabel='Date Range'
+              value={dateRange}
+              onChange={setDateRange}
+            />
             <DropdownFilter
               triggerLabel={'Chain'}
               options={getFilterOptions().chains}
