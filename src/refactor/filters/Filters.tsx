@@ -14,7 +14,7 @@ interface FiltersProps {
 export const Filters = (props: FiltersProps) => {
   const { children } = props;
 
-  const { hasSelectedFilters, clearAll, isMobileFilterExpanded } = useFiltersContext();
+  const { hasSelectedFilters, clearAll, expandedFilter } = useFiltersContext();
   
   const [isDrawer, setIsDrawer] = useState(false);
   
@@ -46,8 +46,10 @@ export const Filters = (props: FiltersProps) => {
           >
             Filters
           </Text>
+
           {children}
-          {(hasSelectedFilters && !isMobileFilterExpanded) && (
+
+          {(hasSelectedFilters && expandedFilter === null) && (
               <Button
                 className={'text-primary-14 w-[100%] hover:bg-secondary-40 h-[44px] lg:h-[30px] rounded-lg text-[11px] font-medium dark:hover:text-white'}
                 onClick={clearAll}

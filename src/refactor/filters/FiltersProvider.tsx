@@ -9,8 +9,8 @@ interface FiltersProviderProps {
 type FiltersContextValue = {
   clearAll: () => void;
   hasSelectedFilters: boolean;
-  isMobileFilterExpanded: boolean;
-  setIsMobileFilterExpanded: (value: boolean) => void;
+  expandedFilter: string | null;
+  setExpandedFilter: (label: string | null) => void;
 };
 
 const FiltersContext = createContext<FiltersContextValue | null>(null);
@@ -19,7 +19,7 @@ export const FiltersProvider = (props: FiltersProviderProps) => {
   const { children, filterKeys } = props;
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isMobileFilterExpanded, setIsMobileFilterExpanded] = useState(false);
+  const [expandedFilter, setExpandedFilter] = useState<string | null>(null);
 
   const clearAll = () => {
     const next = new URLSearchParams(searchParams);
@@ -38,8 +38,8 @@ export const FiltersProvider = (props: FiltersProviderProps) => {
   const context = {
     clearAll,
     hasSelectedFilters,
-    isMobileFilterExpanded,
-    setIsMobileFilterExpanded
+    expandedFilter,
+    setExpandedFilter
   };
 
   return (

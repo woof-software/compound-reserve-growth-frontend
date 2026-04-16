@@ -4,7 +4,7 @@ import { DropdownFilterInput } from '@/refactor/DropdownFilter/DropdownFilterInp
 import { DropdownFilterTrigger } from '@/refactor/DropdownFilter/DropdownFilterTrigger'
 import { DropdownGroupFilterTrigger } from '@/refactor/DropdownFilter/DropdownGroupFilterTrigger'
 import { FiltersProvider } from '@/refactor/filters/FiltersProvider'
-import { GroupFilters } from '@/refactor/filters/GroupFilters'
+import { GroupFilter } from '@/refactor/filters/GroupFilter'
 import { useFilterOptions } from '@/refactor/hooks/useFilterOptions'
 import { useUrlFilterSync } from '@/refactor/hooks/useUrlFilterSync'
 import { capitalize } from '@/refactor/shared/utils'
@@ -336,30 +336,10 @@ const TotalTreasuryValue = ({
           showLabels
           inputClassName='w-full'
         />
-        <FiltersProvider filterKeys={['ttv-chain']}>
+        <FiltersProvider filterKeys={['ttv-chain', 'ttv-market', 'ttv-asset-type', 'ttv-symbol', 'ttv-group']}>
           <Filters>
             <DropdownFilter
-              renderTrigger={(handler, selectedOptions) => (
-                <DropdownFilterTrigger
-                  label={'Chain'}
-                  selectedOptions={selectedOptions}
-                  handler={handler}
-                />
-              )}
-              renderSearch={(searchValue, setSearchValue, isSearchResult) => (
-                <DropdownFilterInput
-                  searchValue={searchValue}
-                  setSearchValue={setSearchValue}
-                  isSearchResult={isSearchResult}
-                />
-              )}
-              renderActions={(clearAll, setAll, selectedOptions) => (
-                <DropdownFilterActions
-                  clearAll={clearAll}
-                  setAll={setAll}
-                  selectedOptions={selectedOptions}
-                />
-              )}
+              triggerLabel={'Chain'}
               options={getFilterOptions().chains}
               selectedOptions={selectedChainOptions}
               setSelectedOptions={setSelectedChainOptions}
@@ -367,27 +347,7 @@ const TotalTreasuryValue = ({
               setAll={setAllChainOptions}
             />
             <DropdownFilter
-              renderTrigger={(handler, selectedOptions) => (
-                <DropdownFilterTrigger
-                  label={'Market'}
-                  selectedOptions={selectedOptions}
-                  handler={handler}
-                />
-              )}
-              renderSearch={(searchValue, setSearchValue, isSearchResult) => (
-                <DropdownFilterInput
-                  searchValue={searchValue}
-                  setSearchValue={setSearchValue}
-                  isSearchResult={isSearchResult}
-                />
-              )}
-              renderActions={(clearAll, setAll, selectedOptions) => (
-                <DropdownFilterActions
-                  clearAll={clearAll}
-                  setAll={setAll}
-                  selectedOptions={selectedOptions}
-                />
-              )}
+              triggerLabel={'Market'}
               options={getFilterOptions().markets}
               selectedOptions={selectedMarketOptions}
               setSelectedOptions={setSelectedMarketOptions}
@@ -395,27 +355,7 @@ const TotalTreasuryValue = ({
               setAll={setAllMarketOptions}
             />
             <DropdownFilter
-              renderTrigger={(handler, selectedOptions) => (
-                <DropdownFilterTrigger
-                  label={'Asset Type'}
-                  selectedOptions={selectedOptions}
-                  handler={handler}
-                />
-              )}
-              renderSearch={(searchValue, setSearchValue, isSearchResult) => (
-                <DropdownFilterInput
-                  searchValue={searchValue}
-                  setSearchValue={setSearchValue}
-                  isSearchResult={isSearchResult}
-                />
-              )}
-              renderActions={(clearAll, setAll, selectedOptions) => (
-                <DropdownFilterActions
-                  clearAll={clearAll}
-                  setAll={setAll}
-                  selectedOptions={selectedOptions}
-                />
-              )}
+              triggerLabel={'Asset Type'}
               options={getFilterOptions().assetTypes}
               selectedOptions={selectedAssetTypeOptions}
               setSelectedOptions={setSelectedAssetTypeOptions}
@@ -423,27 +363,7 @@ const TotalTreasuryValue = ({
               setAll={setAllAssetTypeOptions}
             />
             <DropdownFilter
-              renderTrigger={(handler, selectedOptions) => (
-                <DropdownFilterTrigger
-                  label={'Reserve Symbol'}
-                  selectedOptions={selectedOptions}
-                  handler={handler}
-                />
-              )}
-              renderSearch={(searchValue, setSearchValue, isSearchResult) => (
-                <DropdownFilterInput
-                  searchValue={searchValue}
-                  setSearchValue={setSearchValue}
-                  isSearchResult={isSearchResult}
-                />
-              )}
-              renderActions={(clearAll, setAll, selectedOptions) => (
-                <DropdownFilterActions
-                  clearAll={clearAll}
-                  setAll={setAll}
-                  selectedOptions={selectedOptions}
-                />
-              )}
+              triggerLabel={'Reserve Symbol'}
               options={getFilterOptions().reserveSymbols}
               selectedOptions={selectedSymbolOptions}
               setSelectedOptions={setSelectedSymbolOptions}
@@ -451,24 +371,11 @@ const TotalTreasuryValue = ({
               setAll={setAllSymbolOptions}
             />
           </Filters>
-          <GroupFilters
+          <GroupFilter
             options={groupByOptions}
             selectedOptions={selectedGroupOptions}
             setSelectedOptions={setSelectedGroupOptions}
-          >
-            <DropdownFilter
-              renderTrigger={(toggle, selectedOptions, isOpen) => (
-                <DropdownGroupFilterTrigger
-                  isOpen={isOpen}
-                  selectedOptions={selectedOptions}
-                  toggle={toggle}
-                />
-              )}
-              options={groupByOptions}
-              selectedOptions={selectedGroupOptions}
-              setSelectedOptions={setSelectedGroupOptions}
-            />
-          </GroupFilters>
+          />
         </FiltersProvider>
       </div>
 

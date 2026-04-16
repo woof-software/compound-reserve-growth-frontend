@@ -1,6 +1,9 @@
-import React, { ReactNode, useState } from 'react';
+import React, { useState } from 'react';
 
+import { DropdownGroupFilterTrigger } from '@/refactor/DropdownFilter/DropdownGroupFilterTrigger';
+import { OptionsList } from '@/refactor/filters/OptionsList';
 import { useMediaQuery } from '@/refactor/hooks/useMediaQuery';
+import { Dropdown } from '@/refactor/shared/Dropdown';
 import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
@@ -11,20 +14,22 @@ import Text from '@/shared/ui/Text/Text';
 export type Option = { label: string; value: string };
 
 interface GroupFiltersProps {
-  children: ReactNode;
   options: Option[];
   selectedOptions: Option[];
   setSelectedOptions: (option: Option) => void;
 }
 
-export const GroupFilters = (props: GroupFiltersProps) => {
-  const { children, options, selectedOptions, setSelectedOptions } = props;
+export const GroupFilter = (props: GroupFiltersProps) => {
+  const { options, selectedOptions, setSelectedOptions } = props;
 
   const [isDrawer, setIsDrawer] = useState(false);
+  const [isDropdown, setIsDropdown] = useState(false);
 
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
 
   const radioValue = selectedOptions[0]?.value ?? null;
+
+  const toggle = () => setIsDropdown(prev => !prev);
 
   const handleChange = (val: string | number) => {
     const option = options.find((o) => o.value === String(val));
@@ -84,5 +89,25 @@ export const GroupFilters = (props: GroupFiltersProps) => {
     );
   }
 
-  return children;
+  return (
+    <Dropdown
+      isOpen={isDropdown}
+      setIsOpen={setIsDropdown}
+      trigger={
+        <DropdownGroupFilterTrigger
+          selectedOptions={selectedOptions}
+          handler={toggle}
+          isOpen={isDropdown}
+        />
+      }
+    >
+      <div className='my-2 mr-[3px] ml-2 max-h-[180px] overflow-auto'>
+        <OptionsList
+          options={options}
+          setSelectedOptions={setSelectedOptions}
+          selectedOptions={selectedOptions}
+        />
+      </div>
+    </Dropdown>
+  );
 };

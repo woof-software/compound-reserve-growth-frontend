@@ -1,6 +1,9 @@
-import { useFiltersContext } from '@/refactor/filters/FiltersProvider'
-import React, { Dispatch, ReactNode, SetStateAction, useState } from 'react';
+import React, { useState } from 'react';
 
+import { DropdownFilterActions } from '@/refactor/DropdownFilter/DropdownFilterActions';
+import { DropdownFilterInput } from '@/refactor/DropdownFilter/DropdownFilterInput';
+import { DropdownFilterTrigger } from '@/refactor/DropdownFilter/DropdownFilterTrigger';
+import { useFiltersContext } from '@/refactor/filters/FiltersProvider';
 import { OptionsList } from '@/refactor/filters/OptionsList';
 import { useMediaQuery } from '@/refactor/hooks/useMediaQuery';
 import { Dropdown } from '@/refactor/shared/Dropdown';
@@ -14,9 +17,7 @@ interface DropdownFilterProps {
   options: Option[]
   selectedOptions: Option[]
   setSelectedOptions: (option: Option) => void
-  renderTrigger: (handler: () => void, selectedOptions: Option[], isOpen?: boolean) => ReactNode
-  renderSearch?: (searchValue: string, setSearchValue: Dispatch<SetStateAction<string>>, isSearchResult: boolean) => ReactNode
-  renderActions?: (clearAll: () => void, setAll: () => void, selectedOptions: Option[]) => ReactNode
+  triggerLabel: string
   clearAll?: () => void
   setAll?: () => void
 }
@@ -26,16 +27,15 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
     options,
     selectedOptions,
     setSelectedOptions,
-    renderTrigger,
-    renderSearch,
-    renderActions,
+    triggerLabel,
     clearAll = noop,
     setAll = noop
   } = props;
 
   const [isDropdown, setIsDropdown] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  const {isMobileFilterExpanded, setIsMobileFilterExpanded} = useFiltersContext();
+
+  const { expandedFilter, setExpandedFilter } = useFiltersContext();
 
   const toggle = () => setIsDropdown(prev => !prev);
 
@@ -48,36 +48,47 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
 
   if (isMobile) {
+    const isExpanded = expandedFilter === triggerLabel;
+    const isOtherExpanded = expandedFilter !== null && !isExpanded;
+
+    if (isOtherExpanded) return null;
+
+    if (!isExpanded) {
+      return (
+        <DropdownFilterTrigger
+          label={triggerLabel}
+          selectedOptions={selectedOptions}
+          handler={() => setExpandedFilter(triggerLabel)}
+        />
+      );
+    }
+
     return (
       <>
-        {isMobileFilterExpanded
-          ? <Button
-            onClick={() => setIsMobileFilterExpanded(false)}
-            className={'absolute top-[30px] h-[44px] w-[44px]'}
-          >
-            <Icon
-              name='arrow-line'
-              className='h-6 w-6'
-            />
-          </Button>
-          : renderTrigger(() => setIsMobileFilterExpanded(true), selectedOptions, isDropdown)
-        }
+        <Button
+          onClick={() => setExpandedFilter(null)}
+          className='absolute top-[30px] h-[44px] w-[44px]'
+        >
+          <Icon name='arrow-line' className='h-6 w-6' />
+        </Button>
 
-        {isMobileFilterExpanded && (
-          <>
-            {renderSearch?.(searchValue, setSearchValue, isSearchResult)}
-
-            <div className='my-2 mr-[3px] ml-2 lg:max-h-[180px] max-h-[300px] overflow-auto'>
-              <OptionsList
-                options={filteredOptions}
-                setSelectedOptions={setSelectedOptions}
-                selectedOptions={selectedOptions}
-              />
-            </div>
-
-            {renderActions?.(clearAll, setAll, selectedOptions)}
-          </>
-        )}
+        <DropdownFilterInput
+          searchValue={searchValue}
+          setSearchValue={setSearchValue}
+          isSearchResult={isSearchResult}
+        />
+        <div className='my-2 mr-[3px] ml-2 max-h-[300px] overflow-auto'>
+          <OptionsList
+            options={filteredOptions}
+            setSelectedOptions={setSelectedOptions}
+            selectedOptions={selectedOptions}
+          />
+        </div>
+        <DropdownFilterActions
+          clearAll={clearAll}
+          setAll={setAll}
+          selectedOptions={selectedOptions}
+        />
       </>
     );
   }
@@ -86,9 +97,19 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
     <Dropdown
       isOpen={isDropdown}
       setIsOpen={setIsDropdown}
-      trigger={renderTrigger(toggle, selectedOptions)}
+      trigger={
+        <DropdownFilterTrigger
+          label={triggerLabel}
+          selectedOptions={selectedOptions}
+          handler={toggle}
+        />
+      }
     >
-      {renderSearch?.(searchValue, setSearchValue, isSearchResult)}
+      <DropdownFilterInput
+        searchValue={searchValue}
+        setSearchValue={setSearchValue}
+        isSearchResult={isSearchResult}
+      />
 
       <div className='my-2 mr-[3px] ml-2 max-h-[180px] overflow-auto'>
         <OptionsList
@@ -98,7 +119,11 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
         />
       </div>
 
-      {renderActions?.(clearAll, setAll, selectedOptions)}
+      <DropdownFilterActions
+        clearAll={clearAll}
+        setAll={setAll}
+        selectedOptions={selectedOptions}
+      />
     </Dropdown>
   );
 };
