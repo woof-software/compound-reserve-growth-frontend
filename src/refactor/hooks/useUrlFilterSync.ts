@@ -1,6 +1,27 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+/**
+ * Low-level hook that syncs a filter value with URL search params.
+ *
+ * @param key - URL search param key (e.g. `'ttv-chain'`)
+ * @param mode - Selection behavior:
+ *   - `'multi'` — toggles values in/out of a list
+ *   - `'single'` — replaces current value, deselects if same value clicked
+ *   - `'range'` — sets an array of values (e.g. date range `[start, end]`)
+ * @param defaultValue - Written to URL on mount if param is absent
+ *
+ * @returns
+ * - `selectedValues` - Raw string array read directly from URL params
+ * - `setSelectedValues` - Updates URL params according to current mode
+ *
+ * @example
+ * const { selectedValues, setSelectedValues } = useUrlFilterSync('ttv-chain', 'multi');
+ *
+ * @example
+ * // With default
+ * const { selectedValues } = useUrlFilterSync('ttv-group', 'single', 'none');
+ */
 
 export const useUrlFilterSync = (
   key: string,

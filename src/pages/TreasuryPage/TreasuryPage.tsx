@@ -87,7 +87,7 @@ const TreasuryPage = () => {
         <TotalTresuryValueRef
           isLoading={isLoading}
           isError={isError}
-          data={treasuryData}
+          data={treasuryData ?? []}
         />
         {/*<TotalTreasuryValue*/}
         {/*  isLoading={isLoading}*/}
