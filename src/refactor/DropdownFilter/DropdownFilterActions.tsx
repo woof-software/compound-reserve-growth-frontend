@@ -3,24 +3,24 @@ import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
 
 interface DropdownFilterActionsProps {
-  setAll: () => void;
-  clearAll: () => void;
-  selectedOptions: Option[];
+  setAll: () => void
+  clearAll: () => void
+  selectedOptions: Option[]
+  isAllSelected: boolean
 }
 
 export const DropdownFilterActions = (props: DropdownFilterActionsProps) => {
-  const { setAll, clearAll, selectedOptions } = props;
-  
+  const { setAll, clearAll, selectedOptions, isAllSelected } = props;
+
   return (
     <div className={'p-2 lg:border-t-[0.25px] lg:border-border'}>
       <Button
-        // disabled={isAllSelected}
+        disabled={isAllSelected}
         className={cn(
           'text-primary-14 w-[100%] hover:bg-secondary-40 h-[44px] lg:h-[30px] rounded-lg text-[11px] font-medium dark:hover:text-white',
-          // {
-          //   '!text-primary-14 !bg-transparent': isAllSelected,
-          //   'mb-0': Boolean(value.length > 0)
-          // }
+          {
+            'text-primary-14 bg-transparent opacity opacity-50': isAllSelected,
+          }
         )}
         onClick={setAll}
       >

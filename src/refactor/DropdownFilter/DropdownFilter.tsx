@@ -37,6 +37,8 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
 
   const { expandedFilter, setExpandedFilter } = useFiltersContext();
 
+  const isAllSelected = options.length > 0 && options.every(o => selectedOptions.some(s => s.value === o.value));
+
   const toggle = () => setIsDropdown(prev => !prev);
 
   const filteredOptions = options.filter(({label}) =>
@@ -85,6 +87,7 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
           />
         </div>
         <DropdownFilterActions
+          isAllSelected={isAllSelected}
           clearAll={clearAll}
           setAll={setAll}
           selectedOptions={selectedOptions}
@@ -120,6 +123,7 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
       </div>
 
       <DropdownFilterActions
+        isAllSelected={isAllSelected}
         clearAll={clearAll}
         setAll={setAll}
         selectedOptions={selectedOptions}
