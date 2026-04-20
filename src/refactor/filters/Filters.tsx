@@ -24,7 +24,7 @@ export const Filters = (props: FiltersProps) => {
     return (
       <>
         <Button
-          className='bg-secondary-27 text-gray-11 flex w-full min-w-[130px] max-w-[130px] gap-1.5 rounded-lg p-2.5 text-[14px] leading-4 font-semibold sm:w-auto h-[44px]'
+          className='bg-secondary-27 text-gray-11 flex w-full sm:max-w-[130px] flex-1 gap-1.5 rounded-lg p-2.5 text-[14px] leading-4 font-semibold sm:w-auto h-[44px]'
           onClick={() => setIsDrawer(true)}
         >
           <Icon

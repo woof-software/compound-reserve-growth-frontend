@@ -15,6 +15,7 @@ import { useDateRangeFilterOptions } from '@/refactor/hooks/useDateRangeFilterOp
 import { useFilterOptions } from '@/refactor/hooks/useFilterOptions';
 import { useGetFilterOptions } from '@/refactor/hooks/useGetFilterOptions';
 import { useProcessor } from '@/refactor/hooks/useProcessor';
+import { ChartActions } from '@/refactor/shared/ChartActions';
 import { capitalize,  matchesFilter } from '@/refactor/shared/utils';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useEventsApi } from '@/shared/hooks/useEventsApi';
@@ -44,7 +45,7 @@ const TotalTreasuryValue = ({
 
   const { data: events } = useEventsApi();
 
-  const [showEvents, setIsShowEvents] = useState<boolean>(true);
+  const [isShowEvents, setIsShowEvents] = useState<boolean>(true);
 
   const [chainOptions, marketOptions, assetTypeOptions, symbolOptions] = useGetFilterOptions({
     rawData: treasuryApiResponse,
@@ -261,10 +262,15 @@ const TotalTreasuryValue = ({
             selectedOptions={selectedGroupOptions}
             setSelectedOptions={setSelectedGroupOptions}
           />
-          <CSVDownloadButton
-            data={csvData}
-            filename={getCsvFileName('total_treasury_value')}
-          />
+          <ChartActions
+            isShowEvents={isShowEvents}
+            setIsShowEvents={setIsShowEvents}
+          >
+            <CSVDownloadButton
+              data={csvData}
+              filename={getCsvFileName('total_treasury_value')}
+            />
+          </ChartActions>
         </FiltersProvider>
       </div>
       {!isLoading && !isError && !hasAggregatedData ? (
@@ -281,7 +287,7 @@ const TotalTreasuryValue = ({
           isLegendEnabled={isLegendEnabled}
           resetZoomKey={`${barSize}-${dateRange.startDate}-${dateRange.endDate}`}
           events={events}
-          showEvents={showEvents}
+          showEvents={isShowEvents}
           onSelectAllLegends={onSelectAllLegends}
           onDeselectAllLegends={onDeselectAllLegends}
           onShowEvents={setIsShowEvents}
