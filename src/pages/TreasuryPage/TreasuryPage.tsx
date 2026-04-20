@@ -1,4 +1,3 @@
-import TotalTresuryValueRef from '@/refactor/TotalTresuryValueRef'
 import React, { useMemo } from 'react';
 
 import MetricBlock from '@/entities/Treasury/MetricBlock';
@@ -6,6 +5,7 @@ import TotalTreasuryValue from '@/entities/Treasury/TotalTreasuryValue/TotalTrea
 import TreasuryBalanceByNetworkBlock from '@/entities/Treasury/TreasuryBalanceByNetwork/TreasuryBalanceByNetwork';
 import TreasuryCompositionBlock from '@/entities/Treasury/TreasuryCompositionBlock';
 import TreasuryHoldingsBlock from '@/entities/Treasury/TreasuryHoldingsBlock';
+import TotalTresuryValueRef from '@/refactor/TotalTresuryValueRef';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
 import {
@@ -70,40 +70,35 @@ const TreasuryPage = () => {
         </Text>
       </div>
       <div className='flex flex-col gap-2.5 md:gap-2.5 lg:gap-5'>
-        {/*<MetricBlock*/}
-        {/*  isLoading={isLoading}*/}
-        {/*  data={{*/}
-        {/*    uniqDataByCategory,*/}
-        {/*    uniqData30DaysOldByCategory*/}
-        {/*  }}*/}
-        {/*/>*/}
-        {/*<TreasuryCompositionBlock*/}
-        {/*  isLoading={isLoading}*/}
-        {/*  data={{*/}
-        {/*    uniqDataByCategory,*/}
-        {/*    uniqData*/}
-        {/*  }}*/}
-        {/*/>*/}
+        <MetricBlock
+          isLoading={isLoading}
+          data={{
+            uniqDataByCategory,
+            uniqData30DaysOldByCategory
+          }}
+        />
+        <TreasuryCompositionBlock
+          isLoading={isLoading}
+          data={{
+            uniqDataByCategory,
+            uniqData
+          }}
+        />
         <TotalTresuryValueRef
           isLoading={isLoading}
           isError={isError}
           data={treasuryData ?? []}
         />
-        {/*<TotalTreasuryValue*/}
-        {/*  isLoading={isLoading}*/}
-        {/*  isError={isError}*/}
-        {/*  data={treasuryData}*/}
-        {/*/>*/}
-        {/*<TreasuryBalanceByNetworkBlock*/}
-        {/*  data={uniqData}*/}
-        {/*  isError={isError}*/}
-        {/*  isLoading={isLoading}*/}
-        {/*/>*/}
-        {/*<TreasuryHoldingsBlock*/}
-        {/*  data={uniqData}*/}
-        {/*  isError={isError}*/}
-        {/*  isLoading={isLoading}*/}
-        {/*/>*/}
+        <TreasuryBalanceByNetworkBlock
+          data={uniqData}
+          isError={isError}
+          isLoading={isLoading}
+        />
+        <TreasuryHoldingsBlock
+          data={uniqData}
+          isError={isError}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );
