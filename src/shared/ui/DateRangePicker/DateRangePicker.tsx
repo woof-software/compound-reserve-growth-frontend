@@ -44,6 +44,8 @@ interface DateInputProps {
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onBlur: () => void;
   onClick: (e: React.MouseEvent<HTMLInputElement>) => void;
+  error?: string;
+  errorClassName?: string;
 }
 
 const DateInput: FC<DateInputProps> = ({
@@ -56,7 +58,9 @@ const DateInput: FC<DateInputProps> = ({
   onCalendarToggle,
   onChange,
   onBlur,
-  onClick
+  onClick,
+  error,
+  errorClassName
 }) => (
   <div className='flex flex-col gap-0'>
     <View.Condition if={showLabel && !!label}>
@@ -96,6 +100,16 @@ const DateInput: FC<DateInputProps> = ({
         data-calendar-toggle='true'
       />
     </div>
+    <View.Condition if={!!error}>
+      <Text
+        size='11'
+        weight='500'
+        lineHeight='16'
+        className={cn('mt-1 px-3 text-red-500', errorClassName)}
+      >
+        {error}
+      </Text>
+    </View.Condition>
   </div>
 );
 
@@ -147,6 +161,13 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     top: 0,
     left: 0
   });
+
+  const dateRangeError =
+    value.startDate !== null &&
+    value.endDate !== null &&
+    value.endDate < value.startDate
+      ? 'End date must be greater than Start date'
+      : '';
 
   const hasRange = value.startDate !== null || value.endDate !== null;
 
@@ -367,6 +388,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
           label='End'
           onChange={onEndChange}
           onBlur={onEndBlur}
+          error={dateRangeError}
           {...sharedInputProps}
         />
         {hasRange && (
