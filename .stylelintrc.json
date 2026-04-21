@@ -1,5 +1,4 @@
 {
-  "plugins": ["stylelint-prettier", "stylelint-order"],
   "overrides": [
     {
       "files": ["**/*.scss"],
@@ -8,7 +7,6 @@
   ],
   "rules": {
     "no-empty-source": true,
-    "prettier/prettier": true,
     "block-no-empty": true,
     "order/properties-order": [
       "scss-mixin",
