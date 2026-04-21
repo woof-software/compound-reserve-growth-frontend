@@ -232,6 +232,8 @@ const CompoundCumulativeRevenue = ({
     dateRange: normalizedDateRange
   });
 
+  const a = chartSeries[0]!;
+
   const cumulativeChartSeries = useMemo(() => {
     if (!chartSeries || chartSeries.length === 0) {
       return [];

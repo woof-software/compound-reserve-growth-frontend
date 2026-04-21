@@ -1,19 +1,18 @@
 import React from 'react';
 
-import { Option } from '@/refactor/DropdownFilter/DropdownFilter';
 import { cn } from '@/shared/lib/classNames/classNames';
 import Text from '@/shared/ui/Text/Text';
 
 import ArrowDown from '@/shared/assets/svg/arrow-down.svg';
 
 interface DropdownGroupFilterTriggerProps {
-  selectedOptions: Option[]
-  handler: () => void
+  handler: () => void;
+  label?: string;
   isOpen?: boolean
 }
 
 export const DropdownGroupFilterTrigger = (props: DropdownGroupFilterTriggerProps) => {
-  const { selectedOptions, handler, isOpen = false } = props;
+  const { label, handler, isOpen = false } = props;
 
   return (
     <div className={'flex items-center gap-1.5 cursor-pointer'}>
@@ -37,7 +36,7 @@ export const DropdownGroupFilterTrigger = (props: DropdownGroupFilterTriggerProp
           lineHeight='16'
           className='text-secondary-10'
         >
-          {selectedOptions.length > 0 ? selectedOptions[0].label : 'None'}
+          { label || 'None' }
         </Text>
         <ArrowDown
           className={cn('transition-transform', {

@@ -1,3 +1,6 @@
+import React, { useEffect } from 'react';
+import { CSVLink } from 'react-csv';
+
 import Line from '@/components/Charts/Line/Line';
 import Filter, { FilterOptions } from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
@@ -25,8 +28,6 @@ import Icon from '@/shared/ui/Icon/Icon';
 import SingleSelect from '@/shared/ui/SingleSelect/SingleSelect';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
-import React, { useEffect } from 'react';
-import { CSVLink } from 'react-csv';
 
 interface CapoSpecificCollateralPriceProps {
   rawData: CapoNormalizedChartData[];

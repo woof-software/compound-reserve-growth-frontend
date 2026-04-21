@@ -82,6 +82,8 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
         <div className='my-2 mr-[3px] ml-2 max-h-[300px] overflow-auto'>
           <OptionsList
             options={filteredOptions}
+            getLabel={(option) => option.label}
+            getKey={(option) => option.value}
             setSelectedOptions={setSelectedOptions}
             selectedOptions={selectedOptions}
           />
@@ -117,6 +119,8 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
       <div className='my-2 mr-[3px] ml-2 max-h-[180px] overflow-auto'>
         <OptionsList
           options={filteredOptions}
+          getLabel={(option) => option.label}
+          getKey={(option) => option.value}
           setSelectedOptions={setSelectedOptions}
           selectedOptions={selectedOptions}
         />

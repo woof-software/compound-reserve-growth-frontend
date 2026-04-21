@@ -1,3 +1,4 @@
+import {useUrlSync} from "@/refactor/hooks/useUrlFilterSync";
 import React, { useMemo, useState } from 'react';
 
 import LineChart, { LineChartSeries } from '@/components/Charts/Line/Line';
@@ -11,7 +12,6 @@ import { DropdownFilter } from '@/refactor/DropdownFilter/DropdownFilter';
 import { FiltersProvider } from '@/refactor/filters/FiltersProvider';
 import { GroupFilter } from '@/refactor/filters/GroupFilter';
 import { useBarSizeWithDateRange } from '@/refactor/hooks/useBarSizeWithDateRange';
-import { useDateRangeFilterOptions } from '@/refactor/hooks/useDateRangeFilterOptions';
 import { useFilterOptions } from '@/refactor/hooks/useFilterOptions';
 import { useGetFilterOptions } from '@/refactor/hooks/useGetFilterOptions';
 import { useProcessor } from '@/refactor/hooks/useProcessor';
@@ -64,7 +64,15 @@ const TotalTreasuryValue = ({
     {label: 'Market', value: 'deployment'}
   ];
 
-  const { dateRange, setDateRange, clearDateRange } = useDateRangeFilterOptions('ttv-date');
+  const [startDate, setStartDate] = useUrlSync('ttv-date-s', null as number | null);
+  const [endDate, setEndDate] = useUrlSync('ttv-date-e', null as number | null);
+  
+  const dateRange = useMemo(() => {
+    return {
+      startDate,
+      endDate,
+    };
+  }, [startDate, endDate]);
 
   const { barSize, onBarSizeChange, disabledBarSizes } = useBarSizeWithDateRange(dateRange);
 
@@ -89,17 +97,21 @@ const TotalTreasuryValue = ({
     clearAllAssetTypeOptions
   ] = useFilterOptions('ttv-asset-type', assetTypeOptions, 'multi');
 
-  const [
-    selectedSymbolOptions,
-    setSelectedSymbolOptions,
-    setAllSymbolOptions,
-    clearAllSymbolOptions
-  ] = useFilterOptions('ttv-symbol', symbolOptions, 'multi');
-
-  const [
-    selectedGroupOptions,
-    setSelectedGroupOptions
-  ] = useFilterOptions('ttv-group', groupByOptions, 'single', 'none');
+  const [selectedSymbolKeys, setSelectedSymbolKeys] = useUrlSync<string[]>('ttv-symbol', []);
+  
+  const selectedSymbolOptions = useMemo(() => {
+    return symbolOptions.filter(({ value }) => selectedSymbolKeys.includes(value));
+  }, [selectedSymbolKeys, symbolOptions]);
+  
+  const [selectedGroupKey, setSelectedGroupKey] = useUrlSync('ttv-group', 'none');
+  
+  const selectedGroupOption = useMemo(() => {
+    const selectedElement = groupByOptions.find(({ value }) => value === selectedGroupKey);
+    
+    if (!selectedElement) throw new Error('Selected group option not found');
+    
+    return selectedElement;
+  }, [groupByOptions, selectedGroupKey]);
 
   const filterKeys = ['ttv-chain', 'ttv-market', 'ttv-asset-type', 'ttv-symbol', 'ttv-date'];
 
@@ -107,11 +119,10 @@ const TotalTreasuryValue = ({
     clearAllChainOptions();
     clearAllMarketOptions();
     clearAllAssetTypeOptions();
-    clearAllSymbolOptions();
-    clearDateRange();
+    setSelectedSymbolKeys([]);
+    setStartDate(0);
+    setEndDate(0);
   };
-
-  const selectedGroup = selectedGroupOptions[0]?.value ?? 'none';
 
   const { result } = useProcessor({
     array: treasuryApiResponse ?? [],
@@ -121,14 +132,14 @@ const TotalTreasuryValue = ({
       matchesFilter(selectedMarketOptions, v => v.source.market ?? NOT_MARKET),
       matchesFilter(selectedAssetTypeOptions, v => v.source.asset.type),
       matchesFilter(selectedSymbolOptions, v => v.source.asset.symbol),
-      (v) => dateRange.startDate === null || v.date * 1000 >= dateRange.startDate,
-      (v) => dateRange.endDate   === null || v.date * 1000 <= dateRange.endDate,
+      (v) => startDate === null || v.date * 1000 >= startDate,
+      (v) => endDate   === null || v.date * 1000 <= endDate,
     ],
     transformer: () => {
       const seriesMap: Record<string, Map<number, number>> = {};
 
       const getKey = (v: any): string => {
-        switch (selectedGroup) {
+        switch (selectedGroupKey) {
           case 'chain': return v.source.network;
           case 'assetType':  return v.source.asset.type;
           case 'deployment': return v.source.market ?? NOT_MARKET;
@@ -162,7 +173,7 @@ const TotalTreasuryValue = ({
 
   const { isLegendEnabled, aggregatedSeries } = useLineChart({
     data: chartSeries,
-    groupBy: selectedGroup,
+    groupBy: selectedGroupKey,
     barSize
   });
 
@@ -222,7 +233,10 @@ const TotalTreasuryValue = ({
             <DateRangePickerFilter
               triggerLabel='Date Range'
               value={dateRange}
-              onChange={setDateRange}
+              onChange={({ startDate, endDate }) => {
+                setStartDate(startDate);
+                setEndDate(endDate);
+              }}
             />
             <DropdownFilter
               triggerLabel={'Chain'}
@@ -252,15 +266,27 @@ const TotalTreasuryValue = ({
               triggerLabel={'Reserve Symbol'}
               options={symbolOptions}
               selectedOptions={selectedSymbolOptions}
-              setSelectedOptions={setSelectedSymbolOptions}
-              clearAll={clearAllSymbolOptions}
-              setAll={setAllSymbolOptions}
+              setSelectedOptions={(v) => {
+                const values = new Set(selectedSymbolKeys);
+                
+                if (values.has(v.value)) {
+                  values.delete(v.value);
+                } else {
+                  values.add(v.value);
+                }
+                
+                setSelectedSymbolKeys([...values]);
+              }}
+              clearAll={() => setSelectedSymbolKeys([])}
+              setAll={() => setSelectedSymbolKeys(symbolOptions.map(({ value }) => value))}
             />
           </Filters>
           <GroupFilter
             options={groupByOptions}
-            selectedOptions={selectedGroupOptions}
-            setSelectedOptions={setSelectedGroupOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            value={selectedGroupOption}
+            setValue={({ value }) => setSelectedGroupKey(value)}
           />
           <ChartActions
             isShowEvents={isShowEvents}
@@ -279,8 +305,8 @@ const TotalTreasuryValue = ({
         <LineChart
           customOptions={customChartOptions}
           customTooltipFormatter={customTooltipFormatter}
-          key={selectedGroup}
-          groupBy={selectedGroup}
+          key={selectedGroupKey}
+          groupBy={selectedGroupKey}
           legends={legends}
           aggregatedSeries={aggregatedSeries}
           className='max-h-fit'

@@ -62,3 +62,40 @@ export const useUrlFilterSync = (
 
   return { selectedValues, setSelectedValues };
 };
+
+export type Serializer<T> = {
+  parse: (v: string) => T;
+  stringify: (v: T) => string;
+}
+
+export function useUrlSync<T>(
+  key: string,
+  value: T,
+  serializer: Serializer<T> = JSON,
+): [T, (v: T) => void] {
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  let currentValue: T;
+  
+  const rawValue = searchParams.get(key);
+  
+  if (rawValue) {
+    currentValue = serializer.parse(rawValue);
+  } else {
+    currentValue = value;
+  }
+  
+  debugger;
+
+  return [currentValue, (newValue: T) => {
+    const next = new URLSearchParams(searchParams);
+
+    if (newValue !== value) {
+      next.set(key, serializer.stringify(newValue));
+    } else {
+      next.delete(key);
+    }
+
+    setSearchParams(next, { replace: true });
+  }];
+}

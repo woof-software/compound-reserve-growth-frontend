@@ -11,33 +11,43 @@ import Icon from '@/shared/ui/Icon/Icon';
 import { Radio } from '@/shared/ui/RadioButton/RadioButton';
 import Text from '@/shared/ui/Text/Text';
 
-export type Option = { label: string; value: string };
-
-interface GroupFiltersProps {
-  options: Option[];
-  selectedOptions: Option[];
-  setSelectedOptions: (option: Option) => void;
+interface GroupFiltersProps<T> {
+  options: T[];
+  value: T;
+  setValue: (v: T) => void;
+  getLabel: (o: T) => string;
+  getKey: (o: T) => string;
 }
 
-export const GroupFilter = (props: GroupFiltersProps) => {
-  const { options, selectedOptions, setSelectedOptions } = props;
+export function GroupFilter<T>(props: GroupFiltersProps<T>) {
+  const {
+    options,
+    value,
+    setValue,
+    getLabel,
+    getKey,
+  } = props;
 
   const [isDrawer, setIsDrawer] = useState(false);
   const [isDropdown, setIsDropdown] = useState(false);
 
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
 
-  const radioValue = selectedOptions[0]?.value ?? null;
-
   const toggle = () => setIsDropdown(prev => !prev);
 
   const handleChange = (val: string | number) => {
-    const option = options.find((o) => o.value === String(val));
-    if (option) setSelectedOptions(option);
+    const option = options.find((o) => getKey(o) === String(val));
+    
+    if (option) setValue(option);
   };
 
   const handleReset = () => {
-    setSelectedOptions(options[0]);
+    const [firstElement] = options;
+    
+    if (firstElement) {
+      setValue(firstElement);
+    }
+
     setIsDrawer(false);
   };
 
@@ -64,20 +74,20 @@ export const GroupFilter = (props: GroupFiltersProps) => {
           <Radio.Group
             direction='vertical'
             className='gap-1.5'
-            value={radioValue}
+            value={getKey(value)}
             onChange={handleChange}
           >
             {options.map((option) => (
               <Radio.Item
-                key={option.value}
-                value={option.value}
+                key={getKey(option)}
+                value={getKey(option)}
                 className={cn('p-3', {
-                  'bg-secondary-38 rounded-lg': radioValue === option.value
+                  'bg-secondary-38 rounded-lg': getKey(value) === getKey(option)
                 })}
                 label={
                   <Radio.Label
-                    className={cn({ 'text-secondary-28': radioValue === option.value })}
-                    label={option.label}
+                    className={cn({ 'text-secondary-28': getKey(value) === getKey(option) })}
+                    label={getLabel(option)}
                   />
                 }
               />
@@ -100,7 +110,7 @@ export const GroupFilter = (props: GroupFiltersProps) => {
       setIsOpen={setIsDropdown}
       trigger={
         <DropdownGroupFilterTrigger
-          selectedOptions={selectedOptions}
+          label={getLabel(value)}
           handler={toggle}
           isOpen={isDropdown}
         />
@@ -109,8 +119,10 @@ export const GroupFilter = (props: GroupFiltersProps) => {
       <div className='my-2 mr-[3px] ml-2 max-h-[180px] overflow-auto'>
         <OptionsList
           options={options}
-          setSelectedOptions={setSelectedOptions}
-          selectedOptions={selectedOptions}
+          getLabel={getLabel}
+          getKey={getKey}
+          setSelectedOptions={setValue}
+          selectedOptions={[value]}
         />
       </div>
     </Dropdown>
