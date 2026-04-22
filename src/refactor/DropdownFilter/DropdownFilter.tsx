@@ -16,26 +16,30 @@ export type Option = { label: string; value: string };
 interface DropdownFilterProps {
   options: Option[]
   selectedOptions: Option[]
-  setSelectedOptions: (option: Option) => void
+  onSelect: (option: Option | Option[]) => void
   triggerLabel: string
-  clearAll?: () => void
-  setAll?: () => void
 }
 
 export const DropdownFilter = (props: DropdownFilterProps) => {
   const {
     options,
     selectedOptions,
-    setSelectedOptions,
-    triggerLabel,
-    clearAll = noop,
-    setAll = noop
+    onSelect,
+    triggerLabel
   } = props;
 
   const [isDropdown, setIsDropdown] = useState(false);
   const [searchValue, setSearchValue] = useState('');
 
   const { expandedFilter, setExpandedFilter } = useFiltersContext();
+
+  const selectAllOptions = () => {
+    return onSelect(options)
+  }
+
+  const clearSelectedOptions = () => {
+    return onSelect([])
+  };
 
   const isAllSelected = options.length > 0 && options.every(o => selectedOptions.some(s => s.value === o.value));
 
@@ -84,14 +88,14 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
             options={filteredOptions}
             getLabel={(option) => option.label}
             getKey={(option) => option.value}
-            setSelectedOptions={setSelectedOptions}
+            onSelect={onSelect}
             selectedOptions={selectedOptions}
           />
         </div>
         <DropdownFilterActions
           isAllSelected={isAllSelected}
-          clearAll={clearAll}
-          setAll={setAll}
+          clearAll={clearSelectedOptions}
+          setAll={selectAllOptions}
           selectedOptions={selectedOptions}
         />
       </>
@@ -121,15 +125,15 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
           options={filteredOptions}
           getLabel={(option) => option.label}
           getKey={(option) => option.value}
-          setSelectedOptions={setSelectedOptions}
+          onSelect={onSelect}
           selectedOptions={selectedOptions}
         />
       </div>
 
       <DropdownFilterActions
         isAllSelected={isAllSelected}
-        clearAll={clearAll}
-        setAll={setAll}
+        clearAll={clearSelectedOptions}
+        setAll={selectAllOptions}
         selectedOptions={selectedOptions}
       />
     </Dropdown>

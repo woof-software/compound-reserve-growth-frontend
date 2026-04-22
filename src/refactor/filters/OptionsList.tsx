@@ -2,19 +2,19 @@ import React from 'react';
 
 import Icon from '@/shared/ui/Icon/Icon';
 
-interface OptionsListProps<T> {
-  options: T[];
-  getLabel: (v: T) => string;
-  getKey: (v: T) => string;
-  selectedOptions: T[];
-  setSelectedOptions: (option: T) => void
-}
+export type OptionsListProps<T> = T extends Array<infer N> ? {
+  options: T;
+  getLabel: (v: N) => string;
+  getKey: (v: N) => string;
+  selectedOptions: T;
+  onSelect: (option: N) => void
+} : never;
 
-export function OptionsList<T>(props: OptionsListProps<T>) {
+export function OptionsList<T extends Array<any>>(props: OptionsListProps<T>) {
   const {
     options,
     selectedOptions,
-    setSelectedOptions,
+    onSelect,
     getLabel,
     getKey,
   } = props;
@@ -23,12 +23,13 @@ export function OptionsList<T>(props: OptionsListProps<T>) {
     return selectedOptions?.some((o) => getKey(o) === getKey(option));
   };
 
+  // TODO: add button to li
   return (
     <ul>
       {options.map((option) => (
         <li 
           key={getKey(option)}
-          onClick={() => setSelectedOptions(option)}
+          onClick={() => onSelect(option)}
           className='flex justify-between items-center cursor-pointer rounded-lg px-3 h-[44px] lg:h-[40px] text-[11px] font-medium hover:bg-secondary-12 mr-[2px]'
         >
           {getLabel(option)}

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 
 type Filter<T> = (item: T) => boolean;
 type Transformer<T, R> = () => (item: T) => R;
@@ -74,14 +74,8 @@ const process = <T, R>(config: ProcessorConfig<T, R>): R => {
 export const useProcessor = <T, R>(config: ProcessorConfig<T, R>) => {
   const result = useMemo(() => process(config), [
     config.array,
-    config.filters,
-    config.transformer
+    config.filters
   ]);
 
-  const processData = useCallback(
-    (overrideConfig: ProcessorConfig<T, R>) => process(overrideConfig),
-    []
-  );
-
-  return { result, processData };
+  return { result };
 };

@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { stringify } from 'node:querystring'
+import { useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 /**
@@ -71,31 +72,35 @@ export type Serializer<T> = {
 export function useUrlSync<T>(
   key: string,
   value: T,
-  serializer: Serializer<T> = JSON,
+  serializer: Serializer<T>
 ): [T, (v: T) => void] {
-  const [searchParams, setSearchParams] = useSearchParams();
-  
-  let currentValue: T;
-  
-  const rawValue = searchParams.get(key);
-  
-  if (rawValue) {
-    currentValue = serializer.parse(rawValue);
-  } else {
-    currentValue = value;
-  }
-  
-  debugger;
+  const urlParams = useMemo(() => {
+    const url = new URLSearchParams(window.location.search);
+    url.set(key, serializer.stringify(value));
+    return url;
+  }, []);
 
-  return [currentValue, (newValue: T) => {
+  const [searchParams, setSearchParams] = useSearchParams(urlParams);
+
+  const rawValue = searchParams.get(key)
+
+  const currentValue = useMemo(() => {
+    if (!rawValue) return value;
+    return serializer.parse(rawValue);
+  }, [rawValue])
+
+  const setSelectedValue = (newValue: T) => {
     const next = new URLSearchParams(searchParams);
+    const rawValue = serializer.stringify(newValue);
 
-    if (newValue !== value) {
-      next.set(key, serializer.stringify(newValue));
-    } else {
+    if (rawValue === '' || newValue === value) {
       next.delete(key);
+    } else {
+      next.set(key, rawValue);
     }
 
     setSearchParams(next, { replace: true });
-  }];
+  }
+
+  return [currentValue, setSelectedValue];
 }

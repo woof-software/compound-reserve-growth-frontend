@@ -1,3 +1,4 @@
+import { XOR } from '@/shared/types/types'
 import React, {
   ChangeEvent,
   FC,
@@ -23,13 +24,16 @@ import Icon from '@/shared/ui/Icon/Icon';
 import Portal from '@/shared/ui/Portal/Portal';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
-
 import Calendar from './Calendar';
-import { DateRangeValue } from './types';
 
 const CALENDAR_DESKTOP_WIDTH = 640;
 const CALENDAR_DESKTOP_MARGIN = 16;
 const CALENDAR_DESKTOP_OFFSET_Y = 8;
+
+export type DateRangeValue = {
+  startDate: number | null;
+  endDate: number | null;
+};
 
 interface DateInputProps {
   inputRef: React.RefObject<HTMLInputElement | null>;
