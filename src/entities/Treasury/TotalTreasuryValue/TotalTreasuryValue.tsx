@@ -1,5 +1,3 @@
-import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
-import { getMaxBarSizeForRange } from '@/shared/lib/date/dateUtils';
 import React, {
   Dispatch,
   memo,
@@ -23,11 +21,16 @@ import {
 } from '@/entities/Treasury/TotalTreasuryValue/customChartOptions';
 import { useChartControls } from '@/shared/hooks/useChartControls';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
+import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
 import { useEventsApi } from '@/shared/hooks/useEventsApi';
-import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
+import {
+  useFiltersSync,
+  useFilterSyncSingle
+} from '@/shared/hooks/useFiltersSync';
 import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
+import { getMaxBarSizeForRange } from '@/shared/lib/date/dateUtils';
 import { filterForRange } from '@/shared/lib/utils/chart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import {
@@ -187,6 +190,14 @@ const TotalTreasuryValue = ({
     selectClose: selectSingleClose
   } = useDropdown('single');
 
+  const groupBy = selectedSingle?.[0] || 'None';
+
+  useFilterSyncSingle(
+    'ttv:groupBy',
+    groupBy === 'None' ? '' : groupBy,
+    (value) => selectSingle(value || 'None')
+  );
+
   const { barSize, onBarSizeChange } = useChartControls({
     initialBarSize: BAR_SIZE.D
   });
@@ -253,8 +264,6 @@ const TotalTreasuryValue = ({
       selectedOptions.chain.map((o) => o.id)
     );
   }, [deploymentOptions, selectedOptions]);
-
-  const groupBy = selectedSingle?.[0] || 'None';
 
   const activeFilters = useMemo(
     () =>
