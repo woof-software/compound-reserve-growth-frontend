@@ -23,17 +23,18 @@ export function OptionsList<T extends Array<any>>(props: OptionsListProps<T>) {
     return selectedOptions?.some((o) => getKey(o) === getKey(option));
   };
 
-  // TODO: add button to li
   return (
     <ul>
       {options.map((option) => (
-        <li 
+        <li
           key={getKey(option)}
           onClick={() => onSelect(option)}
           className='flex justify-between items-center cursor-pointer rounded-lg px-3 h-[44px] lg:h-[40px] text-[11px] font-medium hover:bg-secondary-12 mr-[2px]'
         >
-          {getLabel(option)}
-          {isSelected(option) && <Icon name='check-stroke' className='h-4 w-4'/>}
+          <button className={'w-full flex justify-between items-center cursor-pointer'}>
+            {getLabel(option)}
+            {isSelected(option) && <Icon name='check-stroke' className='h-4 w-4'/>}
+          </button>
         </li>
       ))}
     </ul>

@@ -2,22 +2,24 @@ import { useUrlSync } from '@/refactor/hooks/useUrlFilterSync'
 
 export type DateRange = [number | null, number | null];
 
-export function useUrlSyncDateRange(key: string, value: DateRange) {
+export const useUrlSyncDateRange = (key: string, value: DateRange) => {
   return useUrlSync<[number | null, number | null]>(key, value, {
-    parse: (val: string) => {
-      const parsedValue = JSON.parse(val)
+    parse: (raw) => {
+      if (!raw) return [null, null];
+
+      const parts = raw.split('_');
 
       return [
-        typeof parsedValue[0] === 'number' ? parsedValue[0] : null,
-        typeof parsedValue[1] === 'number' ? parsedValue[1] : null,
-      ]
+        parts[0] ? Number(parts[0]) : null,
+        parts[1] ? Number(parts[1]) : null,
+      ];
     },
     stringify: ([startDate, endDate]) => {
       if (startDate === null) return '';
 
-      if (endDate === null) return JSON.stringify([startDate]);
+      if (endDate === null) return startDate.toString();
 
-      return JSON.stringify([startDate, endDate]);
-    }
+      return [startDate, endDate].join('_');
+    },
   });
-}
+};
