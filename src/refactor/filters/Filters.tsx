@@ -1,6 +1,5 @@
-import React, { ReactNode, useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 
-import { useFiltersContext } from '@/refactor/filters/FiltersProvider';
 import { useMediaQuery } from '@/refactor/hooks/useMediaQuery';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
@@ -9,15 +8,14 @@ import Text from '@/shared/ui/Text/Text';
 import { useSearchParams } from 'react-router-dom'
 
 interface FiltersProps {
-  children: ReactNode;
   onClearAll: () => void;
   filterKeys: string[];
+  children: (extendedFilter: string | null, setExpandedFilter: Dispatch<SetStateAction<string | null>>) => React.ReactNode;
 }
 
 export const Filters = (props: FiltersProps) => {
   const { children, onClearAll, filterKeys } = props;
-
-  const { expandedFilter } = useFiltersContext();
+  const [expandedFilter, setExpandedFilter] = useState<string | null>(null);
 
   const [searchParams] = useSearchParams();
 
@@ -56,7 +54,7 @@ export const Filters = (props: FiltersProps) => {
             Filters
           </Text>
 
-          {children}
+          {children(expandedFilter, setExpandedFilter)}
 
           {(hasSelectedFilters && expandedFilter === null) && (
               <Button
@@ -72,5 +70,5 @@ export const Filters = (props: FiltersProps) => {
     );
   }
 
-  return children;
+  return children(expandedFilter, setExpandedFilter);
 };

@@ -12,7 +12,6 @@ import {
 } from '@/entities/Treasury/TotalTreasuryValue/customChartOptions';
 import { DateRangePickerFilter } from '@/refactor/DateRangePickerFilter/DateRangePickerFilter';
 import { DropdownFilter } from '@/refactor/DropdownFilter/DropdownFilter';
-import { FiltersProvider } from '@/refactor/filters/FiltersProvider';
 import { GroupFilter } from '@/refactor/filters/GroupFilter';
 import { useBarSizeWithDateRange } from '@/refactor/hooks/useBarSizeWithDateRange';
 import { useProcessor } from '@/refactor/hooks/useProcessor';
@@ -45,7 +44,7 @@ const TotalTreasuryValue = ({
   data: treasuryApiResponse
 }: TotalTreasuryValueProps) => {
 
-  const { data: events } = useEventsApi();
+  const {data: events} = useEventsApi();
 
   const [, setSearchParams] = useSearchParams()
 
@@ -60,7 +59,7 @@ const TotalTreasuryValue = ({
 
   const [[startDate, endDate], setDateRange] = useUrlSyncDateRange('ttv-date', [null, null])
 
-  const { barSize, onBarSizeChange, disabledBarSizes } = useBarSizeWithDateRange({startDate, endDate});
+  const {barSize, onBarSizeChange, disabledBarSizes} = useBarSizeWithDateRange({startDate, endDate});
 
   const [selectedChainKeys, setSelectedChainKeys] = useUrlSyncStingsArray('ttv-chain', []);
   const chainOptions = useMemo(() => (
@@ -120,14 +119,14 @@ const TotalTreasuryValue = ({
     selectedOptions: selectedSymbolOptions,
     setSelectedOptions: setSelectedSymbolOptions,
   } = useOptions(reserveSymbolOptions, selectedSymbolKeys, setSelectedSymbolKeys);
-  
+
   const [selectedGroupKey, setSelectedGroupKey] = useUrlSyncString('ttv-group', 'none');
-  
+
   const selectedGroupOption = useMemo(() => {
-    const selectedElement = groupByOptions.find(({ value }) => value === selectedGroupKey);
-    
+    const selectedElement = groupByOptions.find(({value}) => value === selectedGroupKey);
+
     if (!selectedElement) throw new Error('Selected group option not found');
-    
+
     return selectedElement;
   }, [groupByOptions, selectedGroupKey]);
 
@@ -135,7 +134,7 @@ const TotalTreasuryValue = ({
     setSearchParams({})
   };
 
-  const { result } = useProcessor({
+  const {result} = useProcessor({
     array: treasuryApiResponse,
     filters: [
       (v) => v.value > 0,
@@ -151,10 +150,14 @@ const TotalTreasuryValue = ({
 
       const getKey = (v: any): string => {
         switch (selectedGroupKey) {
-          case 'chain': return v.source.network;
-          case 'assetType':  return v.source.asset.type;
-          case 'deployment': return v.source.market ?? NOT_MARKET;
-          default: return 'Treasury Value';
+          case 'chain':
+            return v.source.network;
+          case 'assetType':
+            return v.source.asset.type;
+          case 'deployment':
+            return v.source.market ?? NOT_MARKET;
+          default:
+            return 'Treasury Value';
         }
       };
 
@@ -177,12 +180,12 @@ const TotalTreasuryValue = ({
     return Object.entries(result).map(([name, dateMap]) => ({
       name: capitalize(name),
       data: Array.from(dateMap.entries())
-        .map(([x, y]) => ({ x, y }))
+        .map(([x, y]) => ({x, y}))
         .sort((a, b) => a.x - b.x)
     }));
   }, [result]);
 
-  const { isLegendEnabled, aggregatedSeries } = useLineChart({
+  const {isLegendEnabled, aggregatedSeries} = useLineChart({
     data: chartSeries,
     groupBy: selectedGroupKey,
     barSize
@@ -197,7 +200,7 @@ const TotalTreasuryValue = ({
     deactivateAll: onDeselectAllLegends,
     highlight: onLegendHover,
     unhighlight: onLegendUnhover
-  } = useLegends(aggregatedSeries, ({ name, color }) => ({
+  } = useLegends(aggregatedSeries, ({name, color}) => ({
     id: `${name}`,
     name: `${name}`,
     isDisabled: false,
@@ -239,61 +242,73 @@ const TotalTreasuryValue = ({
           disabled={isLoading}
           disabledTabs={disabledBarSizes}
         />
-        <FiltersProvider>
-          <Filters
-            onClearAll={onClearAllFilters}
-            filterKeys={['ttv-chain', 'ttv-market', 'ttv-asset-type', 'ttv-symbol', 'ttv-date']}
-          >
-            <DateRangePickerFilter
-              triggerLabel='Date Range'
-              value={{startDate, endDate}}
-              onChange={({ startDate, endDate }) => setDateRange([startDate, endDate])}
-            />
-            <DropdownFilter
-              triggerLabel={'Chain'}
-              options={chainOptions}
-              selectedOptions={selectedChainOptions}
-              onSelect={setSelectedChainOptions}
-            />
-            <DropdownFilter
-              triggerLabel={'Market'}
-              options={marketOptions}
-              selectedOptions={selectedMarketOptions}
-              onSelect={setSelectedMarketOptions}
-            />
-            <DropdownFilter
-              triggerLabel={'Asset Type'}
-              options={assetTypesOptions}
-              selectedOptions={selectedAssetTypeOptions}
-              onSelect={setSelectedAssetTypeOptions}
-            />
-            <DropdownFilter
-              triggerLabel={'Reserve Symbol'}
-              options={reserveSymbolOptions}
-              selectedOptions={selectedSymbolOptions}
-              onSelect={setSelectedSymbolOptions}
-            />
-          </Filters>
-          <GroupFilter
-            options={groupByOptions}
-            getKey={(v) => v.value}
-            getLabel={(v) => v.label}
-            value={selectedGroupOption}
-            setValue={({ value }) => setSelectedGroupKey(value)}
+        <Filters
+          onClearAll={onClearAllFilters}
+          filterKeys={['ttv-chain', 'ttv-market', 'ttv-asset-type', 'ttv-symbol', 'ttv-date']}
+        >
+          {(extendedFilter, setExpandedFilter) => (
+            <>
+              <DateRangePickerFilter
+                triggerLabel='Date Range'
+                expandedFilter={extendedFilter}
+                setExpandedFilter={setExpandedFilter}
+                value={{startDate, endDate}}
+                onChange={({ startDate, endDate }) => setDateRange([startDate, endDate])}
+              />
+              <DropdownFilter
+                triggerLabel={'Chain'}
+                expandedFilter={extendedFilter}
+                setExpandedFilter={setExpandedFilter}
+                options={chainOptions}
+                selectedOptions={selectedChainOptions}
+                onSelect={setSelectedChainOptions}
+              />
+              <DropdownFilter
+                triggerLabel={'Market'}
+                expandedFilter={extendedFilter}
+                setExpandedFilter={setExpandedFilter}
+                options={marketOptions}
+                selectedOptions={selectedMarketOptions}
+                onSelect={setSelectedMarketOptions}
+              />
+              <DropdownFilter
+                triggerLabel={'Asset Type'}
+                expandedFilter={extendedFilter}
+                setExpandedFilter={setExpandedFilter}
+                options={assetTypesOptions}
+                selectedOptions={selectedAssetTypeOptions}
+                onSelect={setSelectedAssetTypeOptions}
+              />
+              <DropdownFilter
+                triggerLabel={'Reserve Symbol'}
+                expandedFilter={extendedFilter}
+                setExpandedFilter={setExpandedFilter}
+                options={reserveSymbolOptions}
+                selectedOptions={selectedSymbolOptions}
+                onSelect={setSelectedSymbolOptions}
+              />
+            </>
+          )}
+        </Filters>
+        <GroupFilter
+          options={groupByOptions}
+          getKey={(v) => v.value}
+          getLabel={(v) => v.label}
+          value={selectedGroupOption}
+          setValue={({value}) => setSelectedGroupKey(value)}
+        />
+        <ChartActions
+          isShowEvents={isShowEvents}
+          setIsShowEvents={setIsShowEvents}
+        >
+          <CSVDownloadButton
+            data={csvData}
+            filename={getCsvFileName('total_treasury_value')}
           />
-          <ChartActions
-            isShowEvents={isShowEvents}
-            setIsShowEvents={setIsShowEvents}
-          >
-            <CSVDownloadButton
-              data={csvData}
-              filename={getCsvFileName('total_treasury_value')}
-            />
-          </ChartActions>
-        </FiltersProvider>
+        </ChartActions>
       </div>
       {!isLoading && !isError && !hasAggregatedData ? (
-        <NoDataPlaceholder onButtonClick={onClearAllFilters} />
+        <NoDataPlaceholder onButtonClick={onClearAllFilters}/>
       ) : (
         <LineChart
           customOptions={customChartOptions}

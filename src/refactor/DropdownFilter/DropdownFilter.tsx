@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 
 import { DropdownFilterActions } from '@/refactor/DropdownFilter/DropdownFilterActions';
 import { DropdownFilterInput } from '@/refactor/DropdownFilter/DropdownFilterInput';
 import { DropdownFilterTrigger } from '@/refactor/DropdownFilter/DropdownFilterTrigger';
-import { useFiltersContext } from '@/refactor/filters/FiltersProvider';
 import { OptionsList } from '@/refactor/filters/OptionsList';
 import { useMediaQuery } from '@/refactor/hooks/useMediaQuery';
 import { Dropdown } from '@/refactor/shared/Dropdown';
-import { noop } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Icon from '@/shared/ui/Icon/Icon';
 
@@ -18,6 +16,8 @@ interface DropdownFilterProps {
   selectedOptions: Option[]
   onSelect: (option: Option | Option[]) => void
   triggerLabel: string
+  expandedFilter: string | null
+  setExpandedFilter: Dispatch<SetStateAction<string | null>>
 }
 
 export const DropdownFilter = (props: DropdownFilterProps) => {
@@ -25,13 +25,13 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
     options,
     selectedOptions,
     onSelect,
-    triggerLabel
+    triggerLabel,
+    expandedFilter,
+    setExpandedFilter,
   } = props;
 
   const [isDropdown, setIsDropdown] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-
-  const { expandedFilter, setExpandedFilter } = useFiltersContext();
 
   const selectAllOptions = () => {
     return onSelect(options)

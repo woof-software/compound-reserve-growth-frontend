@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 
 import { DropdownFilterTrigger } from '@/refactor/DropdownFilter/DropdownFilterTrigger';
-import { useFiltersContext } from '@/refactor/filters/FiltersProvider';
 import { useMediaQuery } from '@/refactor/hooks/useMediaQuery';
 import { timestampToInputDate } from '@/shared/lib/date/dateUtils';
 import Button from '@/shared/ui/Button/Button';
@@ -9,14 +8,15 @@ import DateRangePicker, { DateRangePickerPopover,DateRangePickerProps  } from '@
 import Icon from '@/shared/ui/Icon/Icon';
 
 interface DateRangePickerFilterProps extends DateRangePickerProps {
-  triggerLabel: string;
+  triggerLabel: string
+  expandedFilter: string | null
+  setExpandedFilter: Dispatch<SetStateAction<string | null>>
 }
 
 export const DateRangePickerFilter = ({ triggerLabel, ...pickerProps }: DateRangePickerFilterProps) => {
-  const { expandedFilter, setExpandedFilter } = useFiltersContext();
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
 
-  const { value } = pickerProps;
+  const { value, expandedFilter, setExpandedFilter } = pickerProps;
 
   const selectedOptions = [
     value.startDate && { label: timestampToInputDate(value.startDate), value: 'start' },
