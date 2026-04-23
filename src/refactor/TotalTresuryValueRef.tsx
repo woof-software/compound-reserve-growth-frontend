@@ -28,6 +28,7 @@ import { TokenData } from '@/shared/types/Treasury/types';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import { useSearchParams } from 'react-router-dom'
 
 import { Filters } from './filters/Filters';
 
@@ -45,6 +46,8 @@ const TotalTreasuryValue = ({
 }: TotalTreasuryValueProps) => {
 
   const { data: events } = useEventsApi();
+
+  const [, setSearchParams] = useSearchParams()
 
   const [isShowEvents, setIsShowEvents] = useState<boolean>(true);
 
@@ -128,14 +131,8 @@ const TotalTreasuryValue = ({
     return selectedElement;
   }, [groupByOptions, selectedGroupKey]);
 
-  const filterKeys = ['ttv-chain', 'ttv-market', 'ttv-asset-type', 'ttv-symbol', 'ttv-date'];
-
-  const onClearAll = () => {
-    setSelectedAssetTypesKeys([]);
-    setSelectedMarketKeys([])
-    setSelectedChainKeys([])
-    setSelectedSymbolKeys([]);
-    setDateRange([null, null]);
+  const onClearAllFilters = () => {
+    setSearchParams({})
   };
 
   const { result } = useProcessor({
@@ -242,8 +239,11 @@ const TotalTreasuryValue = ({
           disabled={isLoading}
           disabledTabs={disabledBarSizes}
         />
-        <FiltersProvider filterKeys={filterKeys}>
-          <Filters>
+        <FiltersProvider>
+          <Filters
+            onClearAll={onClearAllFilters}
+            filterKeys={['ttv-chain', 'ttv-market', 'ttv-asset-type', 'ttv-symbol', 'ttv-date']}
+          >
             <DateRangePickerFilter
               triggerLabel='Date Range'
               value={{startDate, endDate}}
@@ -293,7 +293,7 @@ const TotalTreasuryValue = ({
         </FiltersProvider>
       </div>
       {!isLoading && !isError && !hasAggregatedData ? (
-        <NoDataPlaceholder onButtonClick={onClearAll} />
+        <NoDataPlaceholder onButtonClick={onClearAllFilters} />
       ) : (
         <LineChart
           customOptions={customChartOptions}

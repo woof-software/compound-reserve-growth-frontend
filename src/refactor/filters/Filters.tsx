@@ -6,15 +6,24 @@ import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
+import { useSearchParams } from 'react-router-dom'
 
 interface FiltersProps {
   children: ReactNode;
+  onClearAll: () => void;
+  filterKeys: string[];
 }
 
 export const Filters = (props: FiltersProps) => {
-  const { children } = props;
+  const { children, onClearAll, filterKeys } = props;
 
-  const { hasSelectedFilters, clearAll, expandedFilter } = useFiltersContext();
+  const { expandedFilter } = useFiltersContext();
+
+  const [searchParams] = useSearchParams();
+
+  const hasSelectedFilters = filterKeys.some((key) => {
+    return searchParams.getAll(key).length > 0;
+  });
   
   const [isDrawer, setIsDrawer] = useState(false);
   
@@ -52,7 +61,7 @@ export const Filters = (props: FiltersProps) => {
           {(hasSelectedFilters && expandedFilter === null) && (
               <Button
                 className={'text-primary-14 w-[100%] hover:bg-secondary-40 h-[44px] lg:h-[30px] rounded-lg text-[11px] font-medium dark:hover:text-white'}
-                onClick={clearAll}
+                onClick={onClearAll}
               >
                 Clear All
               </Button>
