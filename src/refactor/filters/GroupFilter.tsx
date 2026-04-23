@@ -121,7 +121,10 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
           options={options}
           getLabel={getLabel}
           getKey={getKey}
-          onSelect={setValue}
+          onSelect={(v) => {
+            setValue(v)
+            setIsDropdown(false)
+          }}
           selectedOptions={[value]}
         />
       </div>
