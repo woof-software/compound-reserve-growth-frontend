@@ -217,7 +217,7 @@ const AnnualisedExpensesBlock = () => {
           footerData={processedData.footerData}
         />
         <PieChart
-          className='max-w-full lg:max-h-[400px] lg:max-w-[336.5px]'
+          className='w-full shrink-0 lg:max-h-[400px] lg:w-[336.5px]'
           data={processedData.pieData}
         />
       </div>
