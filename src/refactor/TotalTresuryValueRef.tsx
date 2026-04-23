@@ -246,18 +246,18 @@ const TotalTreasuryValue = ({
           onClearAll={onClearAllFilters}
           filterKeys={['ttv-chain', 'ttv-market', 'ttv-asset-type', 'ttv-symbol', 'ttv-date']}
         >
-          {(extendedFilter, setExpandedFilter) => (
+          {(expandedFilter, setExpandedFilter) => (
             <>
               <DateRangePickerFilter
                 triggerLabel='Date Range'
-                expandedFilter={extendedFilter}
+                expandedFilter={expandedFilter}
                 setExpandedFilter={setExpandedFilter}
                 value={{startDate, endDate}}
                 onChange={({ startDate, endDate }) => setDateRange([startDate, endDate])}
               />
               <DropdownFilter
                 triggerLabel={'Chain'}
-                expandedFilter={extendedFilter}
+                expandedFilter={expandedFilter}
                 setExpandedFilter={setExpandedFilter}
                 options={chainOptions}
                 selectedOptions={selectedChainOptions}
@@ -265,7 +265,7 @@ const TotalTreasuryValue = ({
               />
               <DropdownFilter
                 triggerLabel={'Market'}
-                expandedFilter={extendedFilter}
+                expandedFilter={expandedFilter}
                 setExpandedFilter={setExpandedFilter}
                 options={marketOptions}
                 selectedOptions={selectedMarketOptions}
@@ -273,7 +273,7 @@ const TotalTreasuryValue = ({
               />
               <DropdownFilter
                 triggerLabel={'Asset Type'}
-                expandedFilter={extendedFilter}
+                expandedFilter={expandedFilter}
                 setExpandedFilter={setExpandedFilter}
                 options={assetTypesOptions}
                 selectedOptions={selectedAssetTypeOptions}
@@ -281,7 +281,7 @@ const TotalTreasuryValue = ({
               />
               <DropdownFilter
                 triggerLabel={'Reserve Symbol'}
-                expandedFilter={extendedFilter}
+                expandedFilter={expandedFilter}
                 setExpandedFilter={setExpandedFilter}
                 options={reserveSymbolOptions}
                 selectedOptions={selectedSymbolOptions}
