@@ -8,7 +8,6 @@ import {
 } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
-
 import {
   AnimationProvider,
   useAnimationLibs
@@ -98,6 +97,18 @@ const DrawerContent = memo(
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen]);
+
+    useEffect(() => {
+      const handleResize = () => {
+        if (window.innerWidth >= 1024) {
+          document.body.classList.remove('disable-scroll-vertical');
+          animateClose(true);
+        }
+      };
+
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }, [animateClose]);
 
     useEffect(() => {
       if (!mounted) return;
@@ -208,3 +219,4 @@ const Drawer = (props: DrawerProps) => (
 );
 
 export default Drawer;
+
