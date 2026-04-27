@@ -14,9 +14,9 @@ interface ProcessorConfig<T, R> {
  * The transformer is a factory — called once before iteration so it can safely
  * close over a local accumulator without state leaking between runs.
  *
- * @param array - Raw data to process
- * @param filters - Predicate functions — item is excluded if any returns `false`
- * @param transformer - Factory that returns a reducer function `(item: T) => R`
+ * array - Raw data to process
+ * filters - Predicate functions — item is excluded if any returns `false`
+ * transformer - Factory that returns a reducer function `(item: T) => R`
  * @returns Final accumulated result of type `R`
  */
 
@@ -37,9 +37,6 @@ const process = <T, R>(config: ProcessorConfig<T, R>): R => {
  * `filters`, or `transformer` change. Also exposes a manual `processData`
  * for imperative usage (e.g. on button click).
  *
- * @param array - Raw data to process
- * @param filters - Predicate functions — item is excluded if any returns `false`
- * @param transformer - Factory that returns a reducer function `(item: T) => R`
  *
  * @returns
  * - `result` — latest processed value, recomputed on dependency change

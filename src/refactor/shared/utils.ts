@@ -1,4 +1,4 @@
-import { Option } from '@/refactor/hooks/useFilterOptions';
+import { Option } from '@/refactor/hooks/useOptions'
 
 export const capitalize = (str: string) => {
   return str.charAt(0).toUpperCase() + str?.slice(1);

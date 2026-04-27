@@ -1,6 +1,4 @@
-import { useState } from 'react'
-
-type Option = {label: string; value: string}
+export type Option = {label: string; value: string}
 
 export function useOptions(
   options: Option[],
