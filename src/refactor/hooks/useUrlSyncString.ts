@@ -1,4 +1,4 @@
-import { useUrlSync } from '@/refactor/hooks/useUrlFilterSync'
+import { useUrlSync } from '@/refactor/hooks/useUrlSync'
 
 /**
  * Synchronizes a string value with a URL query parameter.

@@ -1,7 +1,10 @@
+import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle'
 import { useOptions } from '@/refactor/hooks/useOptions'
 import { useUrlSyncDateRange } from '@/refactor/hooks/useUrlSyncDateRange'
 import { useUrlSyncStingsArray } from '@/refactor/hooks/useUrlSyncStingsArray'
 import { useUrlSyncString } from '@/refactor/hooks/useUrlSyncString'
+import { capitalizeFirstLetter } from '@/shared/lib/utils/utils'
+import Text from '@/shared/ui/Text/Text'
 import React, { useMemo, useState } from 'react';
 
 import LineChart, { LineChartSeries } from '@/components/Charts/Line/Line';
@@ -16,7 +19,6 @@ import { GroupFilter } from '@/refactor/filters/GroupFilter';
 import { useBarSizeWithDateRange } from '@/refactor/hooks/useBarSizeWithDateRange';
 import { useProcessor } from '@/refactor/hooks/useProcessor';
 import { ChartActions } from '@/refactor/shared/ChartActions';
-import { capitalize, dataValuesToOptions, matchesFilter } from '@/refactor/shared/utils';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useEventsApi } from '@/shared/hooks/useEventsApi';
 import { useLegends } from '@/shared/hooks/useLegends';
@@ -63,7 +65,9 @@ const TotalTreasuryValue = ({
 
   const [selectedChainKeys, setSelectedChainKeys] = useUrlSyncStingsArray('ttv-chain', []);
   const chainOptions = useMemo(() => (
-    dataValuesToOptions(treasuryApiResponse.map(d => d.source.network))
+    [...new Set(treasuryApiResponse.map(d => d.source.network))]
+      .sort()
+      .map(value => ({ label: capitalizeFirstLetter(value), value }))
   ), [treasuryApiResponse]);
 
   const {
@@ -80,7 +84,9 @@ const TotalTreasuryValue = ({
 
   const [selectedMarketKeys, setSelectedMarketKeys] = useUrlSyncStingsArray('ttv-market', []);
   const marketOptions = useMemo(() => (
-    dataValuesToOptions(byChain.map(d => d.source.market ?? NOT_MARKET))
+    [...new Set(byChain.map(d => d.source.market ?? NOT_MARKET))]
+      .sort()
+      .map(value => ({ label: capitalizeFirstLetter(value), value }))
   ), [byChain]);
 
   const {
@@ -96,7 +102,9 @@ const TotalTreasuryValue = ({
 
   const [selectedAssetTypesKeys, setSelectedAssetTypesKeys] = useUrlSyncStingsArray('ttv-asset-type', []);
   const assetTypesOptions = useMemo(() => (
-    dataValuesToOptions(byChainAndMarket.map(d => d.source.asset.type))
+    [...new Set(byChainAndMarket.map(d => d.source.asset.type))]
+      .sort()
+      .map(value => ({ label: capitalizeFirstLetter(value), value }))
   ), [byChainAndMarket]);
 
   const {
@@ -112,7 +120,10 @@ const TotalTreasuryValue = ({
 
   const [selectedSymbolKeys, setSelectedSymbolKeys] = useUrlSyncStingsArray('ttv-symbol', []);
   const reserveSymbolOptions = useMemo(() => (
-    dataValuesToOptions(byChainMarketAndAsset.map(d => d.source.asset.symbol))
+    [...new Set(byChainMarketAndAsset.map(d => d.source.asset.symbol))]
+      .filter(Boolean)
+      .sort()
+      .map(value => ({ label: capitalizeFirstLetter(value), value }))
   ), [byChainMarketAndAsset]);
 
   const {
@@ -134,14 +145,22 @@ const TotalTreasuryValue = ({
     setSearchParams({})
   };
 
+  const isAnyFiltersSelected =
+    startDate !== null ||
+    endDate !== null ||
+    !!selectedChainOptions.length ||
+    !!selectedMarketOptions.length ||
+    !!selectedAssetTypeOptions.length ||
+    !!selectedSymbolOptions.length;
+
   const {result} = useProcessor({
     array: treasuryApiResponse,
     filters: [
       (v) => v.value > 0,
-      matchesFilter(selectedChainOptions, v => v.source.network),
-      matchesFilter(selectedMarketOptions, v => v.source.market ?? NOT_MARKET),
-      matchesFilter(selectedAssetTypeOptions, v => v.source.asset.type),
-      matchesFilter(selectedSymbolOptions, v => v.source.asset.symbol),
+      (v) => !selectedChainOptions.length || selectedChainOptions.some(o => o.value === v.source.network),
+      (v) => !selectedMarketOptions.length || selectedMarketOptions.some(o => o.value === (v.source.market ?? NOT_MARKET)),
+      (v) => !selectedAssetTypeOptions.length || selectedAssetTypeOptions.some(o => o.value === v.source.asset.type),
+      (v) => !selectedSymbolOptions.length || selectedSymbolOptions.some(o => o.value === v.source.asset.symbol),
       (v) => startDate === null || v.date * 1000 >= startDate,
       (v) => endDate === null || v.date * 1000 <= endDate,
     ],
@@ -178,7 +197,7 @@ const TotalTreasuryValue = ({
     if (!result) return [];
 
     return Object.entries(result).map(([name, dateMap]) => ({
-      name: capitalize(name),
+      name: capitalizeFirstLetter(name),
       data: Array.from(dateMap.entries())
         .map(([x, y]) => ({x, y}))
         .sort((a, b) => a.x - b.x)
@@ -244,51 +263,37 @@ const TotalTreasuryValue = ({
         />
         <Filters
           onClearAll={onClearAllFilters}
-          filterKeys={['ttv-chain', 'ttv-market', 'ttv-asset-type', 'ttv-symbol', 'ttv-date']}
+          isShowClear={isAnyFiltersSelected}
         >
-          {(expandedFilter, setExpandedFilter) => (
-            <>
-              <DateRangePickerFilter
-                triggerLabel='Date Range'
-                expandedFilter={expandedFilter}
-                setExpandedFilter={setExpandedFilter}
-                value={{startDate, endDate}}
-                onChange={({ startDate, endDate }) => setDateRange([startDate, endDate])}
-              />
-              <DropdownFilter
-                triggerLabel={'Chain'}
-                expandedFilter={expandedFilter}
-                setExpandedFilter={setExpandedFilter}
-                options={chainOptions}
-                selectedOptions={selectedChainOptions}
-                onSelect={setSelectedChainOptions}
-              />
-              <DropdownFilter
-                triggerLabel={'Market'}
-                expandedFilter={expandedFilter}
-                setExpandedFilter={setExpandedFilter}
-                options={marketOptions}
-                selectedOptions={selectedMarketOptions}
-                onSelect={setSelectedMarketOptions}
-              />
-              <DropdownFilter
-                triggerLabel={'Asset Type'}
-                expandedFilter={expandedFilter}
-                setExpandedFilter={setExpandedFilter}
-                options={assetTypesOptions}
-                selectedOptions={selectedAssetTypeOptions}
-                onSelect={setSelectedAssetTypeOptions}
-              />
-              <DropdownFilter
-                triggerLabel={'Reserve Symbol'}
-                expandedFilter={expandedFilter}
-                setExpandedFilter={setExpandedFilter}
-                options={reserveSymbolOptions}
-                selectedOptions={selectedSymbolOptions}
-                onSelect={setSelectedSymbolOptions}
-              />
-            </>
-          )}
+          <DateRangePickerFilter
+            triggerLabel='Date Range'
+            value={{startDate, endDate}}
+            onChange={({startDate, endDate}) => setDateRange([startDate, endDate])}
+          />
+          <DropdownFilter
+            triggerLabel={'Chain'}
+            options={chainOptions}
+            selectedOptions={selectedChainOptions}
+            onSelect={setSelectedChainOptions}
+          />
+          <DropdownFilter
+            triggerLabel={'Market'}
+            options={marketOptions}
+            selectedOptions={selectedMarketOptions}
+            onSelect={setSelectedMarketOptions}
+          />
+          <DropdownFilter
+            triggerLabel={'Asset Type'}
+            options={assetTypesOptions}
+            selectedOptions={selectedAssetTypeOptions}
+            onSelect={setSelectedAssetTypeOptions}
+          />
+          <DropdownFilter
+            triggerLabel={'Reserve Symbol'}
+            options={reserveSymbolOptions}
+            selectedOptions={selectedSymbolOptions}
+            onSelect={setSelectedSymbolOptions}
+          />
         </Filters>
         <GroupFilter
           options={groupByOptions}
@@ -298,8 +303,31 @@ const TotalTreasuryValue = ({
           setValue={({value}) => setSelectedGroupKey(value)}
         />
         <ChartActions
-          isShowEvents={isShowEvents}
-          setIsShowEvents={setIsShowEvents}
+          mobileChildren={
+            <>
+              <CSVDownloadButton
+                data={csvData}
+                filename={getCsvFileName('total_treasury_value')}
+              />
+              <ChartIconToggle
+                active={!isShowEvents}
+                onIcon='calendar-check'
+                offIcon='calendar-uncheck'
+                ariaLabel='Toggle events'
+                className={{
+                  container:
+                    'flex items-center gap-1.5 bg-transparent p-0 !shadow-none h-[44px]',
+                  icon: 'h-[26px] w-[26px]',
+                  iconContainer: 'h-[26px] w-[26px]'
+                }}
+                onClick={() => setIsShowEvents(prev => !prev)}
+              >
+                <Text size='14' weight='500'>
+                  Hide Events
+                </Text>
+              </ChartIconToggle>
+            </>
+          }
         >
           <CSVDownloadButton
             data={csvData}

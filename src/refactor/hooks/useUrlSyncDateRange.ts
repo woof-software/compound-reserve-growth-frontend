@@ -1,4 +1,4 @@
-import { useUrlSync } from '@/refactor/hooks/useUrlFilterSync'
+import { useUrlSync } from '@/refactor/hooks/useUrlSync'
 
 export type DateRange = [number | null, number | null];
 
@@ -18,8 +18,8 @@ export const useUrlSyncDateRange = (key: string, value: DateRange) => {
       const parts = raw.split('_');
 
       return [
-        parts[0] ? Number(parts[0]) : null,
-        parts[1] ? Number(parts[1]) : null,
+        parts[0] ? (Number.isInteger(Number(parts[0])) ? Number(parts[0]) : null) : null,
+        parts[1] ? (Number.isInteger(Number(parts[1])) ? Number(parts[1]) : null) : null,
       ];
     },
     stringify: ([startDate, endDate]) => {

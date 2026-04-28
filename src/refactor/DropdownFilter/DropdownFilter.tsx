@@ -1,4 +1,6 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import { useFilterContext } from '@/refactor/filters/Filters'
+import Text from '@/shared/ui/Text/Text'
+import React, { useState } from 'react';
 
 import { DropdownFilterActions } from '@/refactor/DropdownFilter/DropdownFilterActions';
 import { DropdownFilterInput } from '@/refactor/DropdownFilter/DropdownFilterInput';
@@ -11,24 +13,22 @@ import Icon from '@/shared/ui/Icon/Icon';
 
 export type Option = { label: string; value: string };
 
-interface DropdownFilterProps {
-  options: Option[]
-  selectedOptions: Option[]
-  onSelect: (option: Option | Option[]) => void
+export interface DropdownFilterProps<T> {
+  options: T[]
+  selectedOptions: T[]
+  onSelect: (option: T | T[]) => void
   triggerLabel: string
-  expandedFilter: string | null
-  setExpandedFilter: Dispatch<SetStateAction<string | null>>
 }
 
-export const DropdownFilter = (props: DropdownFilterProps) => {
+export const DropdownFilter = <T extends Option>(props: DropdownFilterProps<T>) => {
   const {
     options,
     selectedOptions,
     onSelect,
-    triggerLabel,
-    expandedFilter,
-    setExpandedFilter,
+    triggerLabel
   } = props;
+
+  const { expandedFilter, setExpandedFilter } = useFilterContext()
 
   const [isDropdown, setIsDropdown] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -63,30 +63,41 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
       return (
         <DropdownFilterTrigger
           label={triggerLabel}
-          selectedOptions={selectedOptions}
-          handler={() => setExpandedFilter(triggerLabel)}
+          counter={selectedOptions.length}
+          onClick={() => setExpandedFilter(triggerLabel)}
         />
       );
     }
 
     return (
       <>
-        <Button
-          onClick={() => setExpandedFilter(null)}
-          className='absolute top-[30px] h-[44px] w-[44px]'
-        >
-          <Icon name='arrow-line' className='h-6 w-6' />
-        </Button>
+        <div className={'flex items-center justify-between'}>
+          <Button
+            onClick={() => setExpandedFilter(null)}
+            className='absolute top-[40px] h-[24px] w-[24px]'
+          >
+            <Icon name='arrow-line' className='h-6 w-6' />
+          </Button>
+          <Text
+            size='17'
+            weight='700'
+            lineHeight='140'
+            align='center'
+            className='mb-8 w-full'
+          >
+            {triggerLabel}
+          </Text>
+        </div>
 
         <DropdownFilterInput
           searchValue={searchValue}
           setSearchValue={setSearchValue}
-          isSearchResult={isSearchResult}
+          isError={isSearchResult}
         />
-        <div className='my-2 mr-[3px] ml-2 max-h-[300px] overflow-auto'>
+        <div className='hide-scrollbar mt-8 max-h-80 overflow-y-auto'>
           <OptionsList
             options={filteredOptions}
-            getLabel={(option) => option.label}
+            getLabel={(v) => v.label}
             getKey={(option) => option.value}
             onSelect={onSelect}
             selectedOptions={selectedOptions}
@@ -96,7 +107,7 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
           isAllSelected={isAllSelected}
           clearAll={clearSelectedOptions}
           setAll={selectAllOptions}
-          selectedOptions={selectedOptions}
+          isAnySelect={selectedOptions.length > 0}
         />
       </>
     );
@@ -106,35 +117,41 @@ export const DropdownFilter = (props: DropdownFilterProps) => {
     <Dropdown
       isOpen={isDropdown}
       setIsOpen={setIsDropdown}
+      onClose={() => setSearchValue('')}
       trigger={
         <DropdownFilterTrigger
           label={triggerLabel}
-          selectedOptions={selectedOptions}
-          handler={toggle}
+          counter={selectedOptions.length}
+          onClick={toggle}
         />
       }
     >
       <DropdownFilterInput
         searchValue={searchValue}
         setSearchValue={setSearchValue}
-        isSearchResult={isSearchResult}
+        isError={isSearchResult}
       />
 
-      <div className='my-2 mr-[3px] ml-2 max-h-[180px] overflow-auto'>
-        <OptionsList
-          options={filteredOptions}
-          getLabel={(option) => option.label}
-          getKey={(option) => option.value}
-          onSelect={onSelect}
-          selectedOptions={selectedOptions}
-        />
-      </div>
+      {isSearchResult && (
+        <>
+          <div className={'border-t-[0.25px] border-border'}></div>
+          <div className='my-2 mr-[3px] ml-2 grid max-h-[131px] gap-y-1 overflow-auto'>
+            <OptionsList
+              options={filteredOptions}
+              getLabel={(option) => option.label}
+              getKey={(option) => option.value}
+              onSelect={onSelect}
+              selectedOptions={selectedOptions}
+            />
+          </div>
+        </>
+      )}
 
       <DropdownFilterActions
         isAllSelected={isAllSelected}
         clearAll={clearSelectedOptions}
         setAll={selectAllOptions}
-        selectedOptions={selectedOptions}
+        isAnySelect={selectedOptions.length > 0}
       />
     </Dropdown>
   );

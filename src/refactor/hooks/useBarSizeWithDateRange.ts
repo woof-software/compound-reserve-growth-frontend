@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 
-import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useBarSize } from '@/shared/hooks/useBarSize';
 import { getMaxBarSizeForRange } from '@/shared/lib/date/dateUtils';
 import { BAR_SIZE, BAR_SIZE_OPTIONS } from '@/shared/types/types';
 
@@ -11,7 +11,7 @@ const BAR_SIZE_ORDER = {
 } as const;
 
 export const useBarSizeWithDateRange = (dateRange: { startDate: number | null; endDate: number | null }) => {
-  const { barSize, onBarSizeChange } = useChartControls({ initialBarSize: BAR_SIZE.D });
+  const { barSize, onBarSizeChange } = useBarSize({ initialBarSize: BAR_SIZE.D });
 
   const maxBarSize = useMemo<BAR_SIZE>(() => {
     const { startDate, endDate } = dateRange;
@@ -19,16 +19,14 @@ export const useBarSizeWithDateRange = (dateRange: { startDate: number | null; e
     return getMaxBarSizeForRange(startDate, endDate);
   }, [dateRange]);
 
+  if (BAR_SIZE_ORDER[barSize] > BAR_SIZE_ORDER[maxBarSize]) {
+    onBarSizeChange(maxBarSize);
+  }
+
   const disabledBarSizes = useMemo<BAR_SIZE[]>(
     () => BAR_SIZE_OPTIONS.filter(size => BAR_SIZE_ORDER[size] > BAR_SIZE_ORDER[maxBarSize]),
     [maxBarSize]
   );
-
-  useEffect(() => {
-    if (BAR_SIZE_ORDER[barSize] > BAR_SIZE_ORDER[maxBarSize]) {
-      onBarSizeChange(maxBarSize);
-    }
-  }, [maxBarSize]);
 
   return { barSize, onBarSizeChange, disabledBarSizes };
 };

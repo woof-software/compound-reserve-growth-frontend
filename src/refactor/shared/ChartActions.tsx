@@ -1,6 +1,5 @@
-import React, { Dispatch, ReactNode, SetStateAction, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 
-import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { useMediaQuery } from '@/refactor/hooks/useMediaQuery';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
@@ -9,12 +8,11 @@ import Text from '@/shared/ui/Text/Text';
 
 interface ChartActionsProps {
   children: ReactNode
-  isShowEvents: boolean
-  setIsShowEvents: Dispatch<SetStateAction<boolean>>
+  mobileChildren?: ReactNode
 }
 
 export const ChartActions = (props: ChartActionsProps) => {
-  const { children, isShowEvents, setIsShowEvents } = props;
+  const { children, mobileChildren } = props;
 
   const [isDrawer, setIsDrawer] = useState(false);
 
@@ -24,7 +22,7 @@ export const ChartActions = (props: ChartActionsProps) => {
     return (
       <>
         <Button
-          className='bg-secondary-27 text-gray-11 flex w-full max-w-[44px] gap-1.5 rounded-lg p-2.5 text-[14px] leading-4 font-semibold sm:w-auto h-[44px]'
+          className='cursor-pointer items-center justify-center transition bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
           onClick={() => setIsDrawer(true)}
         >
           <Icon
@@ -47,33 +45,12 @@ export const ChartActions = (props: ChartActionsProps) => {
             Actions
           </Text>
           <div className='flex flex-col gap-2.5'>
-            {children}
-
-            <ChartIconToggle
-              active={!isShowEvents}
-              onIcon='calendar-check'
-              offIcon='calendar-uncheck'
-              ariaLabel='Toggle events'
-              className={{
-                container:
-                  'flex items-center gap-1.5 bg-transparent p-0 !shadow-none h-[44px]',
-                icon: 'h-[26px] w-[26px]',
-                iconContainer: 'h-[26px] w-[26px]'
-              }}
-              onClick={() => setIsShowEvents(prev => !prev)}
-            >
-              <Text
-                size='14'
-                weight='500'
-              >
-                Hide Events
-              </Text>
-            </ChartIconToggle>
+            {mobileChildren}
           </div>
         </Drawer>
       </>
     );
-  };
+  }
   
   return (
     <div className={'flex items-center'}>

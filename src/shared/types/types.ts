@@ -44,18 +44,3 @@ export interface Asset {
   network: string;
   type: string;
 }
-
-export type Without<T, K> = {
-  [P in Exclude<keyof T, keyof K>]?: never;
-};
-
-export type XOR<T, U> =
-  | (T & Without<U, T>)
-  | (U & Without<T, U>);
-
-export type OneOf<T extends unknown[]> =
-  T extends [infer Only]
-    ? Only
-    : T extends [infer A, infer B, ...infer Rest]
-      ? OneOf<[XOR<A, B>, ...Rest]>
-      : never;

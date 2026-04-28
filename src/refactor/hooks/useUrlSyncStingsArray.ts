@@ -1,4 +1,4 @@
-import { useUrlSync } from '@/refactor/hooks/useUrlFilterSync'
+import { useUrlSync } from '@/refactor/hooks/useUrlSync'
 
 
 /**
@@ -15,7 +15,7 @@ export function useUrlSyncStingsArray(key: string, value: string[]) {
         return ''
       }
 
-      return value.map((v) => v.replace(/_/g, '-')).join('_');
+      return value.join('_');
     },
   });
 }

@@ -1,4 +1,3 @@
-import { XOR } from '@/shared/types/types'
 import React, {
   ChangeEvent,
   FC,

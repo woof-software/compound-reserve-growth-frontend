@@ -13,7 +13,7 @@ import { cn } from '@/shared/lib/classNames/classNames';
 
 import View from '../View/View';
 
-type Value = string | number;
+type Value = string;
 
 type Direction = 'horizontal' | 'vertical';
 
@@ -165,7 +165,7 @@ function RadioItem({
         checked={isChecked}
         defaultChecked={isChecked === undefined ? defaultChecked : undefined}
         onChange={(e) => {
-          if (ctx?.onChange) ctx.onChange(value);
+          if (ctx?.onChange) ctx.onChange(String(value));
           if (onChange) onChange(value, e);
         }}
         {...rest}

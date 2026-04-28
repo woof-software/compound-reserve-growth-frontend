@@ -45,8 +45,8 @@ const TabsGroup = <T extends string = string>({
     >
       <TabsList
         className={cn(
-          'h-[44px] lg:h-8 w-fit rounded-lg px-1 py-0',
-          'bg-primary-18 flex gap-[2px] border-none',
+          'h-8 w-fit rounded-lg px-1 py-0',
+          'bg-primary-18 dark:shadow-13 shadow-14 flex gap-[2px] border-none',
           className?.list
         )}
       >
@@ -60,19 +60,19 @@ const TabsGroup = <T extends string = string>({
                 value={tab}
                 disabled={isTabDisabled}
                 className={cn(
-                  'hover:bg-card-content flex cursor-pointer items-center justify-center rounded-sm px-5 lg:px-3 py-1 text-[11px] font-medium transition-opacity hover:opacity-70',
-                  'h-[35px] lg:h-[24px] leading-6',
+                  'hover:bg-card-content flex cursor-pointer items-center justify-center rounded-sm px-3 py-1 text-[11px] font-medium transition-opacity hover:opacity-70',
+                  'h-[24px] leading-6',
                   'text-primary-11',
                   'data-[state=active]:bg-card-content',
                   'data-[state=active]:text-primary-11',
                   'border-none',
                   className?.trigger,
                   className?.activeTrigger &&
-                    `data-[state=active]:${className?.activeTrigger}`,
+                  `data-[state=active]:${className?.activeTrigger}`,
                   {
                     'shadow-13': value === tab,
                     'cursor-not-allowed opacity-40 hover:bg-transparent hover:opacity-40':
-                      isTabDisabled
+                    isTabDisabled
                   }
                 )}
               >

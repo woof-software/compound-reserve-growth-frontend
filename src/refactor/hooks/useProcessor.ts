@@ -69,10 +69,6 @@ const process = <T, R>(config: ProcessorConfig<T, R>): R => {
  */
 
 export const useProcessor = <T, R>(config: ProcessorConfig<T, R>) => {
-  const result = useMemo(() => process(config), [
-    config.array,
-    config.filters
-  ]);
-
+  const result = useMemo(() => process(config), [config]);
   return { result };
 };

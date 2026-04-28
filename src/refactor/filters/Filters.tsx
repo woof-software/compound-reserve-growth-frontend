@@ -1,74 +1,89 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import { noop } from '@/shared/lib/utils/utils'
+import React, { createContext, Dispatch, SetStateAction, useContext, useState } from 'react';
 
 import { useMediaQuery } from '@/refactor/hooks/useMediaQuery';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
-import { useSearchParams } from 'react-router-dom'
 
-interface FiltersProps {
-  onClearAll: () => void;
-  filterKeys: string[];
-  children: (extendedFilter: string | null, setExpandedFilter: Dispatch<SetStateAction<string | null>>) => React.ReactNode;
+export interface FiltersProps {
+  isShowClear: boolean;
+  children: React.ReactNode;
+  onClearAll?: () => void;
 }
 
+export interface FilterContextValue {
+  expandedFilter: string | null;
+  setExpandedFilter: Dispatch<SetStateAction<string | null>>;
+}
+
+const FilterContext = createContext<FilterContextValue | null>(null);
+
+export const useFilterContext = () => {
+  const ctx = useContext(FilterContext);
+  if (!ctx) throw new Error('useExpandedFilter must be used within Filters');
+  return ctx;
+};
+
 export const Filters = (props: FiltersProps) => {
-  const { children, onClearAll, filterKeys } = props;
+  const { children, onClearAll = noop, isShowClear } = props;
   const [expandedFilter, setExpandedFilter] = useState<string | null>(null);
 
-  const [searchParams] = useSearchParams();
-
-  const hasSelectedFilters = filterKeys.some((key) => {
-    return searchParams.getAll(key).length > 0;
-  });
-  
   const [isDrawer, setIsDrawer] = useState(false);
-  
+
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
 
   if (isMobile) {
     return (
-      <>
+      <FilterContext.Provider value={{ expandedFilter, setExpandedFilter }}>
         <Button
-          className='bg-secondary-27 text-gray-11 flex w-full sm:max-w-[130px] flex-1 gap-1.5 rounded-lg p-2.5 text-[14px] leading-4 font-semibold sm:w-auto h-[44px]'
+          className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 grow md:max-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8'
           onClick={() => setIsDrawer(true)}
         >
           <Icon
             name='filters'
-            className='h-[18px] w-[18px] fill-none'
+            className='h-[14px] w-[14px] fill-none'
           />
           Filters
         </Button>
         <Drawer
-          onClose={() => setIsDrawer(false)}
+          onClose={() => {
+            setIsDrawer(false);
+            setExpandedFilter(null);
+          }}
           isOpen={isDrawer}
         >
-          <Text
-            size='17'
-            weight='700'
-            lineHeight='140'
-            align='center'
-            className='mb-5 w-full'
-          >
-            Filters
-          </Text>
+          {!expandedFilter && (
+            <Text
+              size='17'
+              weight='700'
+              lineHeight='140'
+              align='center'
+              className='mb-8 w-full'
+            >
+              Filters
+            </Text>
+          )}
 
-          {children(expandedFilter, setExpandedFilter)}
+          {children}
 
-          {(hasSelectedFilters && expandedFilter === null) && (
-              <Button
-                className={'text-primary-14 w-[100%] hover:bg-secondary-40 h-[44px] lg:h-[30px] rounded-lg text-[11px] font-medium dark:hover:text-white'}
-                onClick={onClearAll}
-              >
-                Clear All
-              </Button>
-            )
-          }
+          {(isShowClear && expandedFilter === null) && (
+            <Button
+              className={'cursor-pointer transition text-primary-14 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'}
+              onClick={onClearAll}
+            >
+              Clear Filters
+            </Button>
+          )}
         </Drawer>
-      </>
+      </FilterContext.Provider>
     );
   }
 
-  return children(expandedFilter, setExpandedFilter);
+  return (
+    <FilterContext.Provider value={{ expandedFilter, setExpandedFilter }}>
+      {children}
+    </FilterContext.Provider>
+  )
 };

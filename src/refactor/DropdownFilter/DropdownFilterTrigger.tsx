@@ -1,26 +1,25 @@
-import { Option } from '@/refactor/DropdownFilter/DropdownFilter';
 import { useMediaQuery } from '@/refactor/hooks/useMediaQuery'
 import { cn } from '@/shared/lib/classNames/classNames';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
-interface DropdownFilterTriggerProps {
+export interface DropdownFilterTriggerProps {
   label: string
-  selectedOptions: Option[]
-  handler: () => void
+  counter: number | string
+  onClick: () => void
 }
 
 export const DropdownFilterTrigger = (props: DropdownFilterTriggerProps) => {
-  const { label, selectedOptions, handler } = props;
+  const { label, counter, onClick } = props;
   
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
-  const hasSelectedOptions = selectedOptions.length > 0;
+  const hasSelectedOptions = counter !== null && counter !== 0 && counter !== '';
   
   if (isMobile) {
     return (
       <button
-        onClick={handler}
-        className={'flex w-full items-center cursor-pointer justify-between h-[44px]'}
+        onClick={onClick}
+        className={'flex w-full items-center cursor-pointer justify-between px-3 py-2.5 h-[42px] mb-3'}
       >
         <div className={'flex items-center gap-1.5'}>
           <Icon name='plus' className='h-2.5 w-2.5'  color={cn('primary-14', {
@@ -31,9 +30,12 @@ export const DropdownFilterTrigger = (props: DropdownFilterTriggerProps) => {
           </Text>
         </div>
         {hasSelectedOptions && (
-          <div className={'flex h-6 w-6 items-center justify-center rounded-sm bg-secondary-46'}>
+          <div className={cn(
+            'flex h-6 w-6 items-center justify-center rounded-sm bg-secondary-46',
+            { 'px-2 w-auto': typeof counter === 'string' }
+          )}>
             <Text size='11' weight='500' className='text-primary-18'>
-              {selectedOptions.length}
+              {counter}
             </Text>
           </div>
         )}
@@ -44,12 +46,12 @@ export const DropdownFilterTrigger = (props: DropdownFilterTriggerProps) => {
   return (
     <button
       className={cn('bg-custom-trigger flex items-center gap-1.5 rounded-lg px-3 h-8 cursor-pointer')}
-      onClick={handler}
+      onClick={onClick}
     >
       {hasSelectedOptions
         ? <div className={'flex h-4 w-4 items-center justify-center rounded-sm bg-secondary-46'}>
           <Text size='11' weight='500' className='text-primary-18'>
-            {selectedOptions.length}
+            {counter}
           </Text>
         </div>
         : <Icon name='plus' className='h-4 w-4' color='color-gray-11' />

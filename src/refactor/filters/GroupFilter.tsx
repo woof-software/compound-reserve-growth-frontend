@@ -1,3 +1,4 @@
+import { noop } from '@/shared/lib/utils/utils'
 import React, { useState } from 'react';
 
 import { DropdownGroupFilterTrigger } from '@/refactor/DropdownFilter/DropdownGroupFilterTrigger';
@@ -11,19 +12,19 @@ import Icon from '@/shared/ui/Icon/Icon';
 import { Radio } from '@/shared/ui/RadioButton/RadioButton';
 import Text from '@/shared/ui/Text/Text';
 
-interface GroupFiltersProps<T> {
+export interface GroupFiltersProps<T> {
   options: T[];
   value: T;
-  setValue: (v: T) => void;
   getLabel: (o: T) => string;
   getKey: (o: T) => string;
+  setValue?: (v: T) => void;
 }
 
 export function GroupFilter<T>(props: GroupFiltersProps<T>) {
   const {
     options,
     value,
-    setValue,
+    setValue = noop,
     getLabel,
     getKey,
   } = props;
@@ -35,7 +36,7 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
 
   const toggle = () => setIsDropdown(prev => !prev);
 
-  const handleChange = (val: string | number) => {
+  const handleChange = (val: string) => {
     const option = options.find((o) => getKey(o) === String(val));
     
     if (option) setValue(option);
@@ -55,10 +56,10 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
     return (
       <>
         <Button
-          className='bg-secondary-27 text-gray-11 flex w-full sm:max-w-[130px] flex-1 gap-1.5 rounded-lg p-2.5 text-[14px] leading-4 font-semibold sm:w-auto h-[44px]'
+          className='bg-secondary-27 text-gray-11 shadow-13 grow md:max-w-[130px] flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
           onClick={() => setIsDrawer(true)}
         >
-          <Icon name='group-grid' className='h-[18px] w-[18px] fill-none' />
+          <Icon name='group-grid' className='h-[14px] w-[14px] fill-none' />
           Group
         </Button>
         <Drawer onClose={() => setIsDrawer(false)} isOpen={isDrawer}>
@@ -111,7 +112,7 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
       trigger={
         <DropdownGroupFilterTrigger
           label={getLabel(value)}
-          handler={toggle}
+          onClick={toggle}
           isOpen={isDropdown}
         />
       }
@@ -130,4 +131,4 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
       </div>
     </Dropdown>
   );
-};
+}

@@ -1,4 +1,6 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import { useFilterContext } from '@/refactor/filters/Filters'
+import Text from '@/shared/ui/Text/Text'
+import React from 'react';
 
 import { DropdownFilterTrigger } from '@/refactor/DropdownFilter/DropdownFilterTrigger';
 import { useMediaQuery } from '@/refactor/hooks/useMediaQuery';
@@ -7,21 +9,21 @@ import Button from '@/shared/ui/Button/Button';
 import DateRangePicker, { DateRangePickerPopover,DateRangePickerProps  } from '@/shared/ui/DateRangePicker/DateRangePicker';
 import Icon from '@/shared/ui/Icon/Icon';
 
-interface DateRangePickerFilterProps extends DateRangePickerProps {
+export interface DateRangePickerFilterProps extends DateRangePickerProps {
   triggerLabel: string
-  expandedFilter: string | null
-  setExpandedFilter: Dispatch<SetStateAction<string | null>>
 }
 
-export const DateRangePickerFilter = ({ triggerLabel, ...pickerProps }: DateRangePickerFilterProps) => {
+export const DateRangePickerFilter = (props: DateRangePickerFilterProps) => {
+  const { triggerLabel, ...pickerProps } = props;
+  const { value } = pickerProps;
+
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
 
-  const { value, expandedFilter, setExpandedFilter } = pickerProps;
+  const { expandedFilter, setExpandedFilter } = useFilterContext()
 
-  const selectedOptions = [
-    value.startDate && { label: timestampToInputDate(value.startDate), value: 'start' },
-    value.endDate && { label: timestampToInputDate(value.endDate), value: 'end' }
-  ].filter(Boolean) as { label: string; value: string }[];
+  const counter = value.startDate || value.endDate
+    ? `${timestampToInputDate(value.startDate)} - ${timestampToInputDate(value.endDate) || 'Now'}`
+    : '';
 
   if (isMobile) {
     const isExpanded = expandedFilter === triggerLabel;
@@ -33,20 +35,32 @@ export const DateRangePickerFilter = ({ triggerLabel, ...pickerProps }: DateRang
       return (
         <DropdownFilterTrigger
           label={triggerLabel}
-          selectedOptions={selectedOptions}
-          handler={() => setExpandedFilter(triggerLabel)}
+          counter={counter}
+          onClick={() => setExpandedFilter(triggerLabel)}
         />
       );
     }
 
     return (
       <>
-        <Button
-          onClick={() => setExpandedFilter(null)}
-          className='absolute top-[30px] h-[44px] w-[44px]'
-        >
-          <Icon name='arrow-line' className='h-6 w-6' />
-        </Button>
+        <div className={'flex items-center justify-between'}>
+          <Button
+            onClick={() => setExpandedFilter(null)}
+            className='absolute top-[40px] h-[24px] w-[24px]'
+          >
+            <Icon name='arrow-line' className='h-6 w-6' />
+          </Button>
+          <Text
+            size='17'
+            weight='700'
+            lineHeight='140'
+            align='center'
+            className='mb-8 w-full'
+          >
+            {triggerLabel}
+          </Text>
+        </div>
+
         <DateRangePicker
           {...pickerProps}
           inlineCalendar

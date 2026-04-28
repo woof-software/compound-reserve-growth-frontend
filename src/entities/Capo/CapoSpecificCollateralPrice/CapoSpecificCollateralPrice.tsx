@@ -13,7 +13,7 @@ import { useChartFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib
 import { useCollateralChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useCollateralChartData';
 import { useRelativeFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useRelativeFilters';
 import { CapoEventBusEventsContext } from '@/entities/Capo/lib/CapoEventBusContext';
-import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useBarSize } from '@/shared/hooks/useBarSize';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
@@ -117,7 +117,7 @@ export const CapoSpecificCollateralPrice = (
     }
   ];
 
-  const { barSize, onBarSizeChange } = useChartControls({
+  const { barSize, onBarSizeChange } = useBarSize({
     initialBarSize: BAR_SIZE.D
   });
 

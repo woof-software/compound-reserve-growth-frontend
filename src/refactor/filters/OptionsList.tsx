@@ -1,23 +1,28 @@
+import { useMediaQuery } from '@/refactor/hooks/useMediaQuery'
+import { cn } from '@/shared/lib/classNames/classNames'
+import { noop } from '@/shared/lib/utils/utils'
 import React from 'react';
 
 import Icon from '@/shared/ui/Icon/Icon';
 
-export type OptionsListProps<T> = T extends Array<infer N> ? {
-  options: T;
-  getLabel: (v: N) => string;
-  getKey: (v: N) => string;
-  selectedOptions: T;
-  onSelect: (option: N) => void
-} : never;
+export type OptionsListProps<T> = {
+  options: T[];
+  getLabel: (v: T) => string;
+  getKey: (v: T) => string;
+  selectedOptions: T[];
+  onSelect?: (option: T) => void
+};
 
-export function OptionsList<T extends Array<any>>(props: OptionsListProps<T>) {
+export function OptionsList<T>(props: OptionsListProps<T>) {
   const {
     options,
     selectedOptions,
-    onSelect,
+    onSelect = noop,
     getLabel,
     getKey,
   } = props;
+
+  const isMobile = useMediaQuery('(max-width: 63.938rem)');
 
   const isSelected = (option: T) => {
     return selectedOptions?.some((o) => getKey(o) === getKey(option));
@@ -29,7 +34,11 @@ export function OptionsList<T extends Array<any>>(props: OptionsListProps<T>) {
         <li
           key={getKey(option)}
           onClick={() => onSelect(option)}
-          className='flex justify-between items-center cursor-pointer rounded-lg px-3 h-[44px] lg:h-[40px] text-[11px] font-medium hover:bg-secondary-12 mr-[2px]'
+          className={cn(
+            'mr-0.5 flex cursor-pointer items-center justify-between rounded-lg p-3 hover:bg-secondary-12 font-medium',
+            isMobile ? 'text-primary-13 text-[14px]' : 'text-[11px]',
+            isMobile && isSelected(option) && 'text-secondary-10',
+          )}
         >
           <button className={'w-full flex justify-between items-center cursor-pointer'}>
             {getLabel(option)}
@@ -39,4 +48,4 @@ export function OptionsList<T extends Array<any>>(props: OptionsListProps<T>) {
       ))}
     </ul>
   );
-};
+}
