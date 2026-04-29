@@ -4,7 +4,7 @@ import MetricBlock from '@/entities/Treasury/MetricBlock';
 import TreasuryBalanceByNetworkBlock from '@/entities/Treasury/TreasuryBalanceByNetwork/TreasuryBalanceByNetwork';
 import TreasuryCompositionBlock from '@/entities/Treasury/TreasuryCompositionBlock';
 import TreasuryHoldingsBlock from '@/entities/Treasury/TreasuryHoldingsBlock';
-import TotalTresuryValueRef from '@/entities/Treasury/TotalTreasuryValue/TotalTresuryValueRef';
+import TotalTreasuryValueRef from '@/entities/Treasury/TotalTreasuryValue/TotalTreasuryValueRef';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
 import {
@@ -83,7 +83,7 @@ const TreasuryPage = () => {
             uniqData
           }}
         />
-        <TotalTresuryValueRef
+        <TotalTreasuryValueRef
           isLoading={isLoading}
           isError={isError}
           data={treasuryData ?? []}
