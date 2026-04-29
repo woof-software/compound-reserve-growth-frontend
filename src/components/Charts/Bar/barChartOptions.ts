@@ -1,0 +1,170 @@
+import Highcharts from 'highcharts';
+
+import { Format } from '@/shared/lib/utils/format';
+
+interface ChartData {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface GetBarChartOptionsParams {
+  data: ChartData[];
+  customOptions?: Highcharts.Options;
+}
+
+export const getBarChartOptions = ({
+  data,
+  customOptions
+}: GetBarChartOptionsParams): Highcharts.Options => {
+  const baseOptions: Highcharts.Options = {
+    chart: {
+      type: 'column',
+      animation: false,
+      style: {
+        fontFamily: 'Inter, sans-serif'
+      }
+    },
+    title: {
+      text: undefined
+    },
+    xAxis: {
+      categories: data.map((item) => item.name),
+      labels: {
+        rotation: 0,
+        style: {
+          fontSize: '8px',
+          color: '#757682'
+        }
+      },
+      lineColor: '#7a8a99',
+      lineWidth: 0.4,
+      crosshair: {
+        width: 1,
+        color: '#7A8A99',
+        dashStyle: 'Dash'
+      }
+    },
+    yAxis: {
+      endOnTick: true,
+      maxPadding: 0,
+      title: {
+        text: undefined
+      },
+      gridLineDashStyle: 'Dash',
+      gridLineColor: 'var(--color-secondary-13)',
+      gridLineWidth: 1,
+      labels: {
+        style: {
+          fontSize: '11px',
+          color: '#757682'
+        },
+        formatter: function () {
+          const value = this.value as number;
+          return Format.token(value, 'standard');
+        }
+      }
+    },
+    legend: {
+      enabled: false
+    },
+    plotOptions: {
+      column: {
+        pointPadding: 0,
+        groupPadding: 0.02,
+        borderWidth: 0,
+        states: {
+          hover: {
+            brightness: 0.15,
+            animation: false
+          }
+        }
+      },
+      series: {
+        stickyTracking: true,
+        findNearestPointBy: 'x',
+        cursor: 'pointer',
+        enableMouseTracking: true,
+        point: {
+          events: {
+            mouseOver: function () {
+              this.setState('hover');
+            },
+            mouseOut: function () {
+              this.setState('');
+            }
+          }
+        }
+      }
+    },
+    credits: {
+      enabled: false
+    },
+    tooltip: {
+      outside: true,
+      backgroundColor: 'rgba(18, 24, 47, 0.55)',
+      borderColor: 'rgba(186, 187, 203, 0.2)',
+      borderRadius: 4,
+      borderWidth: 1,
+      style: {
+        color: '#FFFFFF',
+        fontSize: '12px'
+      },
+      shared: true,
+      useHTML: true,
+      followPointer: false,
+      hideDelay: 0,
+      animation: false,
+      positioner: function (labelWidth, labelHeight, point) {
+        const chart = this.chart;
+        const hoverPoint =
+          chart.hoverPoint || (chart.hoverPoints && chart.hoverPoints[0]);
+
+        if (hoverPoint && hoverPoint.graphic) {
+          const barBBox = hoverPoint.graphic.getBBox();
+          const x =
+            chart.plotLeft + barBBox.x + barBBox.width / 2 - labelWidth / 2;
+          const y = chart.plotTop + point.plotY - labelHeight - 10;
+          return { x, y };
+        }
+
+        return {
+          x: chart.plotLeft + point.plotX - labelWidth / 2,
+          y: chart.plotTop + point.plotY - labelHeight - 10
+        };
+      },
+      formatter: function () {
+        const point = this.points?.[0];
+        if (!point) return '';
+
+        const name = point.key;
+        const value = '$' + (point.y as number).toLocaleString();
+        const color = point.color;
+
+        return `
+          <div>
+            <p style="color: #BABBCB; font-weight: 600; font-size: 12px;">${name}</p>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="display: inline-block; width: 12px; height: 12px; background-color: ${color}; border-radius: 3px;"></span>
+              <strong style="font-size: 12px;">${value}</strong>
+            </div>
+          </div>
+        `;
+      }
+    },
+    series: [
+      {
+        type: 'column',
+        name: 'Value',
+        data: data.map((item) => ({
+          y: item.value,
+          color: item.color
+        }))
+      }
+    ]
+  };
+
+  return customOptions
+    ? Highcharts.merge(baseOptions, customOptions)
+    : baseOptions;
+};
