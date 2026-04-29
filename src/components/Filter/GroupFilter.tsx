@@ -1,5 +1,5 @@
 import { noop } from '@/shared/lib/utils/utils'
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { DropdownGroupFilterTrigger } from '@/components/Filter/DropdownFilter/DropdownGroupFilterTrigger';
 import { OptionsList } from '@/components/Filter/OptionsList';
@@ -31,24 +31,42 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
 
   const [isDrawer, setIsDrawer] = useState(false);
   const [isDropdown, setIsDropdown] = useState(false);
+  const [radioValue, setRadioValue] = useState(() => getKey(value));
 
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
+
+  useEffect(() => {
+    if (isDrawer) setRadioValue(getKey(value));
+  }, [isDrawer]);
+
+  const isApplyButtonChanged = radioValue !== getKey(value);
+  const isApplyButtonDisabled = Boolean(radioValue);
 
   const toggle = () => setIsDropdown(prev => !prev);
 
   const handleChange = (val: string) => {
-    const option = options.find((o) => getKey(o) === String(val));
-    
+    const option = options.find((o) => getKey(o) === val);
     if (option) setValue(option);
   };
 
-  const handleReset = () => {
-    const [firstElement] = options;
-    
-    if (firstElement) {
-      setValue(firstElement);
+  const onApply = () => {
+    handleChange(radioValue);
+    setIsDrawer(false);
+  };
+
+  const onClearAll = () => {
+    const [firstOption] = options;
+
+    if (firstOption) {
+      setRadioValue(getKey(firstOption));
+      setValue(firstOption);
     }
 
+    setIsDrawer(false);
+  };
+
+  const onDrawerClose = () => {
+    setRadioValue(getKey(value));
     setIsDrawer(false);
   };
 
@@ -62,7 +80,7 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
           <Icon name='group-grid' className='h-[14px] w-[14px] fill-none' />
           Group
         </Button>
-        <Drawer onClose={() => setIsDrawer(false)} isOpen={isDrawer}>
+        <Drawer onClose={onDrawerClose} isOpen={isDrawer}>
           <Text
             size='17'
             weight='700'
@@ -75,31 +93,46 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
           <Radio.Group
             direction='vertical'
             className='gap-1.5'
-            value={getKey(value)}
-            onChange={handleChange}
+            value={radioValue}
+            onChange={setRadioValue}
           >
             {options.map((option) => (
               <Radio.Item
                 key={getKey(option)}
                 value={getKey(option)}
                 className={cn('p-3', {
-                  'bg-secondary-38 rounded-lg': getKey(value) === getKey(option)
+                  'bg-secondary-38 rounded-lg': radioValue === getKey(option)
                 })}
                 label={
                   <Radio.Label
-                    className={cn({ 'text-secondary-28': getKey(value) === getKey(option) })}
+                    className={cn({ 'text-secondary-28': radioValue === getKey(option) })}
                     label={getLabel(option)}
                   />
                 }
               />
             ))}
           </Radio.Group>
-          <Button
-            className={'text-primary-14 w-[100%] hover:bg-secondary-40 h-[44px] lg:h-[30px] rounded-lg text-[11px] font-medium dark:hover:text-white'}
-            onClick={handleReset}
-          >
-            Reset
-          </Button>
+          <div className='mt-5 grid w-full gap-3'>
+            <Button
+              disabled={!Boolean(isApplyButtonDisabled && isApplyButtonChanged)}
+              onClick={onApply}
+              className={cn(
+                'bg-secondary-31 text-secondary-32 h-[45px] w-full rounded-lg text-[11px] leading-4 font-medium',
+                {
+                  'bg-success-13 text-white':
+                    isApplyButtonDisabled && isApplyButtonChanged
+                }
+              )}
+            >
+              Apply
+            </Button>
+            <Button
+              onClick={onClearAll}
+              className='text-primary-14 h-[45px] w-full rounded-lg text-[11px] leading-4 font-medium'
+            >
+              Clear All
+            </Button>
+          </div>
         </Drawer>
       </>
     );
