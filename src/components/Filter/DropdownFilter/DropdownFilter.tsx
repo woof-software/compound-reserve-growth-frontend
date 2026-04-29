@@ -1,13 +1,13 @@
-import { useFilterContext } from '@/refactor/filters/Filters'
+import { useFilterContext } from '@/components/Filter/Filters'
 import Text from '@/shared/ui/Text/Text'
 import React, { useState } from 'react';
 
-import { DropdownFilterActions } from '@/refactor/DropdownFilter/DropdownFilterActions';
-import { DropdownFilterInput } from '@/refactor/DropdownFilter/DropdownFilterInput';
-import { DropdownFilterTrigger } from '@/refactor/DropdownFilter/DropdownFilterTrigger';
-import { OptionsList } from '@/refactor/filters/OptionsList';
-import { useMediaQuery } from '@/refactor/hooks/useMediaQuery';
-import { Dropdown } from '@/refactor/shared/Dropdown';
+import { DropdownFilterActions } from '@/components/Filter/DropdownFilter/DropdownFilterActions';
+import { DropdownFilterInput } from '@/components/Filter/DropdownFilter/DropdownFilterInput';
+import { DropdownFilterTrigger } from '@/components/Filter/DropdownFilter/DropdownFilterTrigger';
+import { OptionsList } from '@/components/Filter/OptionsList';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
+import { Dropdown } from '@/shared/ui/DropdownRef/Dropdown';
 import Button from '@/shared/ui/Button/Button';
 import Icon from '@/shared/ui/Icon/Icon';
 

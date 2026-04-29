@@ -1,10 +1,10 @@
 import { noop } from '@/shared/lib/utils/utils'
 import React, { useState } from 'react';
 
-import { DropdownGroupFilterTrigger } from '@/refactor/DropdownFilter/DropdownGroupFilterTrigger';
-import { OptionsList } from '@/refactor/filters/OptionsList';
-import { useMediaQuery } from '@/refactor/hooks/useMediaQuery';
-import { Dropdown } from '@/refactor/shared/Dropdown';
+import { DropdownGroupFilterTrigger } from '@/components/Filter/DropdownFilter/DropdownGroupFilterTrigger';
+import { OptionsList } from '@/components/Filter/OptionsList';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
+import { Dropdown } from '@/shared/ui/DropdownRef/Dropdown';
 import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';

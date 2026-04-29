@@ -1,4 +1,4 @@
-import { useMediaQuery } from '@/refactor/hooks/useMediaQuery'
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import { cn } from '@/shared/lib/classNames/classNames';
 import { noop } from '@/shared/lib/utils/utils'
 import Button from '@/shared/ui/Button/Button';

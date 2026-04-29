@@ -1,4 +1,4 @@
-import { useMediaQuery } from '@/refactor/hooks/useMediaQuery'
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import { noop } from '@/shared/lib/utils/utils'
 import { Dispatch, SetStateAction } from 'react';
 

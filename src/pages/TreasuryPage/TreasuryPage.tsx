@@ -1,11 +1,10 @@
 import React, { useMemo } from 'react';
 
 import MetricBlock from '@/entities/Treasury/MetricBlock';
-import TotalTreasuryValue from '@/entities/Treasury/TotalTreasuryValue/TotalTreasuryValue';
 import TreasuryBalanceByNetworkBlock from '@/entities/Treasury/TreasuryBalanceByNetwork/TreasuryBalanceByNetwork';
 import TreasuryCompositionBlock from '@/entities/Treasury/TreasuryCompositionBlock';
 import TreasuryHoldingsBlock from '@/entities/Treasury/TreasuryHoldingsBlock';
-import TotalTresuryValueRef from '@/refactor/TotalTresuryValueRef';
+import TotalTresuryValueRef from '@/entities/Treasury/TotalTreasuryValue/TotalTresuryValueRef';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
 import {

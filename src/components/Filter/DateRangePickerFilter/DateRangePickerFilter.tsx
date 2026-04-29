@@ -1,9 +1,9 @@
-import { useFilterContext } from '@/refactor/filters/Filters'
+import { useFilterContext } from '@/components/Filter/Filters'
 import Text from '@/shared/ui/Text/Text'
 import React from 'react';
 
-import { DropdownFilterTrigger } from '@/refactor/DropdownFilter/DropdownFilterTrigger';
-import { useMediaQuery } from '@/refactor/hooks/useMediaQuery';
+import { DropdownFilterTrigger } from '@/components/Filter/DropdownFilter/DropdownFilterTrigger';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import { timestampToInputDate } from '@/shared/lib/date/dateUtils';
 import Button from '@/shared/ui/Button/Button';
 import DateRangePicker, { DateRangePickerPopover,DateRangePickerProps  } from '@/shared/ui/DateRangePicker/DateRangePicker';

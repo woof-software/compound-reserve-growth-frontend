@@ -1,4 +1,4 @@
-import { useUrlSync } from '@/refactor/hooks/useUrlSync'
+import { useUrlSync } from '@/shared/hooks/filters/useUrlSync'
 
 export type DateRange = [number | null, number | null];
 

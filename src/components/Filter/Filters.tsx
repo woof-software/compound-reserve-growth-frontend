@@ -1,7 +1,7 @@
 import { noop } from '@/shared/lib/utils/utils'
 import React, { createContext, Dispatch, SetStateAction, useContext, useState } from 'react';
 
-import { useMediaQuery } from '@/refactor/hooks/useMediaQuery';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';

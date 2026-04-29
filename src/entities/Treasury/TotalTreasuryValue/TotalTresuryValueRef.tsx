@@ -1,8 +1,8 @@
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle'
-import { useOptions } from '@/refactor/hooks/useOptions'
-import { useUrlSyncDateRange } from '@/refactor/hooks/useUrlSyncDateRange'
-import { useUrlSyncStingsArray } from '@/refactor/hooks/useUrlSyncStingsArray'
-import { useUrlSyncString } from '@/refactor/hooks/useUrlSyncString'
+import { useOptions } from '@/shared/hooks/filters/useOptions'
+import { useUrlSyncDateRange } from '@/shared/hooks/filters/useUrlSyncDateRange'
+import { useUrlSyncStingsArray } from '@/shared/hooks/filters/useUrlSyncStingsArray'
+import { useUrlSyncString } from '@/shared/hooks/filters/useUrlSyncString'
 import { capitalizeFirstLetter } from '@/shared/lib/utils/utils'
 import Text from '@/shared/ui/Text/Text'
 import React, { useMemo, useState } from 'react';
@@ -13,12 +13,12 @@ import {
   customChartOptions,
   customTooltipFormatter
 } from '@/entities/Treasury/TotalTreasuryValue/customChartOptions';
-import { DateRangePickerFilter } from '@/refactor/DateRangePickerFilter/DateRangePickerFilter';
-import { DropdownFilter } from '@/refactor/DropdownFilter/DropdownFilter';
-import { GroupFilter } from '@/refactor/filters/GroupFilter';
-import { useBarSizeWithDateRange } from '@/refactor/hooks/useBarSizeWithDateRange';
-import { useProcessor } from '@/refactor/hooks/useProcessor';
-import { ChartActions } from '@/refactor/shared/ChartActions';
+import { DateRangePickerFilter } from '@/components/Filter/DateRangePickerFilter/DateRangePickerFilter';
+import { DropdownFilter } from '@/components/Filter/DropdownFilter/DropdownFilter';
+import { GroupFilter } from '@/components/Filter/GroupFilter';
+import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange';
+import { useProcessor } from '@/shared/hooks/useProcessor';
+import { ChartActions } from '@/components/Charts/ChartActions';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useEventsApi } from '@/shared/hooks/useEventsApi';
 import { useLegends } from '@/shared/hooks/useLegends';
@@ -31,7 +31,7 @@ import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import { useSearchParams } from 'react-router-dom'
 
-import { Filters } from './filters/Filters';
+import { Filters } from '@/components/Filter/Filters';
 
 interface TotalTreasuryValueProps {
   data: TokenData[];

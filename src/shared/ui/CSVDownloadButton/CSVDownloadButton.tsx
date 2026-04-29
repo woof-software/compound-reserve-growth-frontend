@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { CSVLink } from 'react-csv';
 
-import { useMediaQuery } from '@/refactor/hooks/useMediaQuery';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
 import Icon from '@/shared/ui/Icon/Icon';
