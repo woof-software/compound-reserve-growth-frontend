@@ -1,12 +1,12 @@
+import { GroupFilter } from '@/components/Filter/GroupFilter'
+import { useUrlSyncString } from '@/shared/hooks/filters/useUrlSyncString'
 import { Format } from '@/shared/lib/utils/format';
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
-import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import { NOT_MARKET } from '@/shared/consts/consts';
-import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   SortAccessor,
@@ -16,21 +16,15 @@ import {
 import {
   capitalizeFirstLetter,
   groupByKey,
-  groupOptionsDto,
   removeDuplicates
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
-import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
-import SingleDropdown from '@/shared/ui/SingleDropdown/SingleDropdown';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Switch from '@/shared/ui/Switch/Switch';
-import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
-
-const options = ['Asset Type', 'Chain', 'Market'];
 
 export interface TreasuryCompositionType {
   id: number;
@@ -39,15 +33,21 @@ export interface TreasuryCompositionType {
   balance: number;
 }
 
-type CompositionData = {
+export type CompositionData = {
   uniqData: TokenData[];
   uniqDataByCategory: Record<string, TokenData[]>;
 };
 
-interface TreasuryCompositionBlockProps {
+export interface TreasuryCompositionBlockProps {
   isLoading?: boolean;
   data: CompositionData;
 }
+
+const groupByOptions = [
+  {label: 'Asset Type', value: 'assetType'},
+  {label: 'Chain', value: 'chain'},
+  {label: 'Market', value: 'deployment'}
+];
 
 const mapChartData = (
   data: Record<string, TokenData[]>,
@@ -92,24 +92,21 @@ const mapTableData = (data: Record<string, TokenData[]>) => {
 
 const TreasuryCompositionBlock = memo(
   ({ isLoading, data }: TreasuryCompositionBlockProps) => {
-    const {
-      isOpen: isOpenSingle,
-      selectedValue: selectedSingle,
-      close: closeSingle,
-      open: openSingle,
-      select: selectSingle,
-      setSelectedValue
-    } = useDropdown('single');
 
-    const [includeComp, setIncludeComp] = useState<boolean>(true);
+    const [selectedGroupKey, setSelectedGroupKey] = useUrlSyncString('tc-group', 'assetType');
 
-    const includeCompURl = !includeComp ? 'false' : undefined;
+    const selectedGroupOption = useMemo(() => {
+      const selectedElement = groupByOptions.find(({value}) => value === selectedGroupKey);
 
-    useFilterSyncSingle('includeComp', includeCompURl, (v) => {
-      setIncludeComp(v === 'true');
-    });
+      if (!selectedElement) throw new Error('Selected group option not found');
 
-    useFilterSyncSingle('treasuryCompGroup', selectedSingle, setSelectedValue);
+      return selectedElement;
+    }, [groupByOptions, selectedGroupKey]);
+
+    const [includeCompKey, setIncludeCompKey] = useUrlSyncString('tc-includeComp', 'true');
+
+    const includeComp = includeCompKey === 'true';
+    const setIncludeComp = (v: boolean) => setIncludeCompKey(v ? 'true' : 'false');
 
     const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
       useSorting<TreasuryCompositionType>('asc', null);
@@ -123,12 +120,6 @@ const TreasuryCompositionBlock = memo(
       isOpen: isSortOpen,
       onOpenModal: onSortOpen,
       onCloseModal: onSortClose
-    } = useModal();
-
-    const {
-      isOpen: isGroupOpen,
-      onOpenModal: onGroupOpen,
-      onCloseModal: onGroupClose
     } = useModal();
 
     const filteredData = useMemo(() => {
@@ -153,15 +144,14 @@ const TreasuryCompositionBlock = memo(
 
     const { uniqData, uniqDataByCategory } = filteredData;
 
-    const selectedGroup = selectedSingle?.toString() || 'Asset Type';
 
     const chartData = useMemo(() => {
-      if (selectedGroup === 'Chain') {
+      if (selectedGroupOption.value === 'chain') {
         const chains = groupByKey(uniqData, (item) => item.source.network);
         return mapChartData(chains, uniqData);
       }
 
-      if (selectedGroup === 'Market') {
+      if (selectedGroupOption.value === 'deployment') {
         const markets = groupByKey(
           uniqData,
           (item) => item.source.market || NOT_MARKET
@@ -170,10 +160,10 @@ const TreasuryCompositionBlock = memo(
       }
 
       return mapChartData(uniqDataByCategory, uniqData);
-    }, [selectedGroup, uniqData, uniqDataByCategory]);
+    }, [selectedGroupOption, uniqData, uniqDataByCategory]);
 
     const tableData = useMemo<TreasuryCompositionType[]>(() => {
-      if (selectedGroup === 'Chain') {
+      if (selectedGroupOption.value === 'chain') {
         const chains = groupByKey(uniqData, (item) => item.source.network);
         return Object.entries(chains)
           .map(([key, value], index) => {
@@ -194,7 +184,7 @@ const TreasuryCompositionBlock = memo(
           .sort((a, b) => b.balance - a.balance);
       }
 
-      if (selectedGroup === 'Market') {
+      if (selectedGroupOption.value === 'deployment') {
         const markets = groupByKey(
           uniqData,
           (item) => item.source.market || NOT_MARKET
@@ -215,7 +205,7 @@ const TreasuryCompositionBlock = memo(
       }
 
       return mapTableData(uniqDataByCategory);
-    }, [selectedGroup, uniqData, uniqDataByCategory]);
+    }, [selectedGroupOption, uniqData, uniqDataByCategory]);
 
     const totalBalance = useMemo(
       () => tableData.reduce((acc, item) => acc + item.balance, 0),
@@ -231,24 +221,18 @@ const TreasuryCompositionBlock = memo(
         () => [
           {
             accessorKey: 'name',
-            header: selectedGroup !== 'Asset Type' ? selectedGroup : 'Asset'
+            header: selectedGroupOption.value !== 'assetType' ? selectedGroupOption.value : 'Asset'
           },
           {
             accessorKey: 'balance',
             header: 'Total Balance USD'
           }
         ],
-        [selectedGroup]
+        [selectedGroupOption]
       );
 
-    const onGroupSelect = (value: string) => {
-      selectSingle(value);
-
-      closeSingle();
-    };
-
     const onClearAll = () => {
-      selectSingle('Asset Type');
+      setSelectedGroupKey('assetType')
 
       setIncludeComp(true);
     };
@@ -277,36 +261,13 @@ const TreasuryCompositionBlock = memo(
             />
           </div>
           <div className='flex w-full items-center gap-2 sm:w-auto'>
-            <Button
-              onClick={onGroupOpen}
-              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
-            >
-              <Icon
-                name='group-grid'
-                className='h-[14px] w-[14px] fill-none'
-              />
-              Group
-            </Button>
-            <div className='hidden items-center gap-1 lg:flex'>
-              <Text
-                tag='span'
-                size='11'
-                weight='600'
-                lineHeight='16'
-                className='text-primary-14'
-              >
-                Group by
-              </Text>
-              <SingleDropdown
-                options={options}
-                isOpen={isOpenSingle}
-                selectedValue={selectedGroup}
-                onOpen={openSingle}
-                onClose={closeSingle}
-                onSelect={onGroupSelect}
-                triggerContentClassName='p-[5px]'
-              />
-            </div>
+            <GroupFilter
+              options={groupByOptions}
+              getKey={(v) => v.value}
+              getLabel={(v) => v.label}
+              value={selectedGroupOption}
+              setValue={({value}) => setSelectedGroupKey(value)}
+            />
             <Button
               onClick={onSortOpen}
               className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:hidden md:h-8'
@@ -332,7 +293,7 @@ const TreasuryCompositionBlock = memo(
               sortType={sortType}
               tableData={tableData}
               totalBalance={totalBalance}
-              activeFilter={selectedGroup as 'Chain' | 'Asset Type' | 'Market'}
+              activeFilter={selectedGroupOption.label as 'Chain' | 'Asset Type' | 'Market'}
             />
           </View.Condition>
         </div>
@@ -343,13 +304,6 @@ const TreasuryCompositionBlock = memo(
           onClose={onSortClose}
           onKeySelect={onKeySelect}
           onTypeSelect={onTypeSelect}
-        />
-        <GroupDrawer
-          isOpen={isGroupOpen}
-          selectedOption={selectedGroup}
-          options={groupOptionsDto(options)}
-          onClose={onGroupClose}
-          onSelect={selectSingle}
         />
       </Card>
     );
