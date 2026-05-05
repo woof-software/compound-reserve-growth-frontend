@@ -26,7 +26,9 @@ export const DropdownGroupFilterTrigger = (props: DropdownGroupFilterTriggerProp
         Group by
       </Text>
       <button
-        className={'flex items-center rounded-lg pl-3 pr-1 h-8 hover:bg-secondary-12 cursor-pointer gap-1.5'}
+        className={cn('flex items-center rounded-lg pl-3 pr-1 h-8 hover:bg-primary-18 cursor-pointer gap-1.5', {
+          'bg-primary-18': isOpen
+        })}
         onClick={onClick}
       >
         <Text

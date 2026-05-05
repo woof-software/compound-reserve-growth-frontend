@@ -33,7 +33,7 @@ export const Dropdown = (props: DropdownProps) => {
     <div ref={wrapperRef} className={'relative'}>
       {trigger}
       <div className={cn(
-        'absolute z-10 mt-2 w-48 rounded-lg shadow-lg dark:bg-primary-15 border-[0.25px] border-border max-w-[168px]',
+        'absolute z-10 right-0 mt-2 w-48 rounded-lg shadow-lg dark:bg-primary-15 border-[0.25px] border-border max-w-[168px]',
         isOpen
           ? 'animate-dropdown-bounce pointer-events-auto'
           : 'hidden'
