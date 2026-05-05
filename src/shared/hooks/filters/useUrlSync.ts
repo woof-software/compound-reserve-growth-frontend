@@ -37,25 +37,27 @@ export function useUrlSync<T>(
 
   const [searchParams, setSearchParams] = useSearchParams(urlParams);
 
-  const rawValue = searchParams.get(key)
+  const rawValue = searchParams.get(key);
 
   const currentValue = useMemo(() => {
-    if (!rawValue) return value;
+    if (rawValue === null) return value;
     return serializer.parse(rawValue);
-  }, [rawValue])
+  }, [rawValue]);
 
   const setSelectedValue = (newValue: T) => {
     const next = new URLSearchParams(searchParams);
-    const rawValue = serializer.stringify(newValue);
 
-    if (rawValue === '' || newValue === value) {
+    const newRawValue = serializer.stringify(newValue);
+    const defaultRawValue = serializer.stringify(value);
+
+    if (newRawValue === defaultRawValue) {
       next.delete(key);
     } else {
-      next.set(key, rawValue);
+      next.set(key, newRawValue);
     }
 
     setSearchParams(next, { replace: true });
-  }
+  };
 
   return [currentValue, setSelectedValue];
 }
