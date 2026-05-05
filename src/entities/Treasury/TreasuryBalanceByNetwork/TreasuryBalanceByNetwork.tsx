@@ -286,17 +286,16 @@ const TreasuryBalanceByNetworkBlock = ({
             onSelect={setSelectedSymbolOptions}
           />
         </Filters>
-        <div className='block lg:hidden'>
-          <Button
-            onClick={onSortOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[36px] items-center justify-center rounded-lg sm:w-auto md:h-8'
-          >
-            <Icon
-              name='sort-icon'
-              className='h-[14px] w-[14px]'
-            />
-          </Button>
-        </div>
+        <Button
+          onClick={onSortOpen}
+          className="cursor-pointer lg:hidden items-center justify-center transition bg-secondary-27 text-gray-11 shadow-13 flex h-9 grow md:max-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8"
+        >
+          <Icon
+            name='sort-icon'
+            className='h-[14px] w-[14px]'
+          />
+          Sort
+        </Button>
         <SortDrawer
           isOpen={isSortOpen}
           sortType={sortType}
