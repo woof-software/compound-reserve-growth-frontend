@@ -1,7 +1,7 @@
-import { noop } from '@/shared/lib/utils/utils'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useRef } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
+import { noop } from '@/shared/lib/utils/utils';
 
 export interface DropdownProps {
   children: ReactNode;
@@ -33,7 +33,7 @@ export const Dropdown = (props: DropdownProps) => {
     <div ref={wrapperRef} className={'relative'}>
       {trigger}
       <div className={cn(
-        'absolute z-10 mt-2 w-48 rounded-lg shadow-lg dark:bg-primary-15 border-[0.25px] border-border',
+        'absolute z-10 mt-2 w-48 rounded-lg shadow-lg dark:bg-primary-15 border-[0.25px] border-border max-w-[168px]',
         isOpen
           ? 'animate-dropdown-bounce pointer-events-auto'
           : 'hidden'
