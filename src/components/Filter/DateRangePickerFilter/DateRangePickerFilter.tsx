@@ -1,13 +1,13 @@
-import { useFilterContext } from '@/components/Filter/Filters'
-import Text from '@/shared/ui/Text/Text'
 import React from 'react';
 
 import { DropdownFilterTrigger } from '@/components/Filter/DropdownFilter/DropdownFilterTrigger';
+import { useFilterContext } from '@/components/Filter/Filters';
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import { timestampToInputDate } from '@/shared/lib/date/dateUtils';
 import Button from '@/shared/ui/Button/Button';
 import DateRangePicker, { DateRangePickerPopover,DateRangePickerProps  } from '@/shared/ui/DateRangePicker/DateRangePicker';
 import Icon from '@/shared/ui/Icon/Icon';
+import Text from '@/shared/ui/Text/Text';
 
 export interface DateRangePickerFilterProps extends DateRangePickerProps {
   triggerLabel: string
@@ -19,9 +19,9 @@ export const DateRangePickerFilter = (props: DateRangePickerFilterProps) => {
 
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
 
-  const { expandedFilter, setExpandedFilter } = useFilterContext()
+  const { expandedFilter, setExpandedFilter } = useFilterContext();
 
-  const counter = value.startDate || value.endDate
+  const prefix = value.startDate || value.endDate
     ? `${timestampToInputDate(value.startDate)} - ${timestampToInputDate(value.endDate) || 'Now'}`
     : '';
 
@@ -35,7 +35,7 @@ export const DateRangePickerFilter = (props: DateRangePickerFilterProps) => {
       return (
         <DropdownFilterTrigger
           label={triggerLabel}
-          counter={counter}
+          prefix={prefix}
           onClick={() => setExpandedFilter(triggerLabel)}
         />
       );

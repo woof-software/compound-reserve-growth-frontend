@@ -274,25 +274,33 @@ const TotalTreasuryValue = ({
             triggerLabel={'Chain'}
             options={chainOptions}
             selectedOptions={selectedChainOptions}
-            onSelect={setSelectedChainOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedChainOptions}
           />
           <DropdownFilter
             triggerLabel={'Market'}
             options={marketOptions}
             selectedOptions={selectedMarketOptions}
-            onSelect={setSelectedMarketOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedMarketOptions}
           />
           <DropdownFilter
             triggerLabel={'Asset Type'}
             options={assetTypesOptions}
             selectedOptions={selectedAssetTypeOptions}
-            onSelect={setSelectedAssetTypeOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedAssetTypeOptions}
           />
           <DropdownFilter
             triggerLabel={'Reserve Symbol'}
             options={reserveSymbolOptions}
             selectedOptions={selectedSymbolOptions}
-            onSelect={setSelectedSymbolOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedSymbolOptions}
           />
         </Filters>
         <GroupFilter
