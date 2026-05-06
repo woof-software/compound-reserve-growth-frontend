@@ -38,7 +38,7 @@ export const Filters = (props: FiltersProps) => {
     return (
       <FilterContext.Provider value={{ expandedFilter, setExpandedFilter }}>
         <Button
-          className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 grow md:max-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8'
+          className='bg-secondary-27 text-gray-11 shadow-13 grow md:max-w-[130px] flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
           onClick={() => setIsDrawer(true)}
         >
           <Icon

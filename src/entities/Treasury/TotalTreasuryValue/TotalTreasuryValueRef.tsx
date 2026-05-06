@@ -249,99 +249,103 @@ const TotalTreasuryValue = ({
         content: 'flex flex-col gap-3 pt-0 pb-0 px-5 lg:px-10 lg:pb-10'
       }}
     >
-      <div className={'flex items-center gap-2 py-3 justify-end flex-wrap'}>
-        <TabsGroup
-          className={{
-            container: 'w-full sm:w-auto',
-            list: 'w-full sm:w-auto'
-          }}
-          tabs={['D', 'W', 'M']}
-          value={barSize}
-          onTabChange={onBarSizeChange}
-          disabled={isLoading}
-          disabledTabs={disabledBarSizes}
-        />
-        <Filters
-          onClearAll={onClearAllFilters}
-          isShowClear={isAnyFiltersSelected}
-        >
-          <DateRangePickerFilter
-            triggerLabel='Date Range'
-            value={{startDate, endDate}}
-            onChange={({startDate, endDate}) => setDateRange([startDate, endDate])}
+      <div className={'flex sm:flex-row sm:items-center flex-col-reverse gap-2 py-3 justify-end'}>
+        <div className={'w-full sm:w-auto'}>
+          <TabsGroup
+            className={{
+              container: 'w-full sm:w-auto',
+              list: 'w-full sm:w-auto'
+            }}
+            tabs={['D', 'W', 'M']}
+            value={barSize}
+            onTabChange={onBarSizeChange}
+            disabled={isLoading}
+            disabledTabs={disabledBarSizes}
           />
-          <DropdownFilter
-            triggerLabel={'Chain'}
-            options={chainOptions}
-            selectedOptions={selectedChainOptions}
+        </div>
+        <div className={'flex w-full sm:w-auto justify-end gap-2'}>
+          <Filters
+            onClearAll={onClearAllFilters}
+            isShowClear={isAnyFiltersSelected}
+          >
+            <DateRangePickerFilter
+              triggerLabel='Date Range'
+              value={{startDate, endDate}}
+              onChange={({startDate, endDate}) => setDateRange([startDate, endDate])}
+            />
+            <DropdownFilter
+              triggerLabel={'Chain'}
+              options={chainOptions}
+              selectedOptions={selectedChainOptions}
+              getKey={(v) => v.value}
+              getLabel={(v) => v.label}
+              setValue={setSelectedChainOptions}
+            />
+            <DropdownFilter
+              triggerLabel={'Market'}
+              options={marketOptions}
+              selectedOptions={selectedMarketOptions}
+              getKey={(v) => v.value}
+              getLabel={(v) => v.label}
+              setValue={setSelectedMarketOptions}
+            />
+            <DropdownFilter
+              triggerLabel={'Asset Type'}
+              options={assetTypesOptions}
+              selectedOptions={selectedAssetTypeOptions}
+              getKey={(v) => v.value}
+              getLabel={(v) => v.label}
+              setValue={setSelectedAssetTypeOptions}
+            />
+            <DropdownFilter
+              triggerLabel={'Reserve Symbol'}
+              options={reserveSymbolOptions}
+              selectedOptions={selectedSymbolOptions}
+              getKey={(v) => v.value}
+              getLabel={(v) => v.label}
+              setValue={setSelectedSymbolOptions}
+            />
+          </Filters>
+          <GroupFilter
+            options={groupByOptions}
             getKey={(v) => v.value}
             getLabel={(v) => v.label}
-            setValue={setSelectedChainOptions}
+            value={selectedGroupOption}
+            setValue={({value}) => setSelectedGroupKey(value)}
           />
-          <DropdownFilter
-            triggerLabel={'Market'}
-            options={marketOptions}
-            selectedOptions={selectedMarketOptions}
-            getKey={(v) => v.value}
-            getLabel={(v) => v.label}
-            setValue={setSelectedMarketOptions}
-          />
-          <DropdownFilter
-            triggerLabel={'Asset Type'}
-            options={assetTypesOptions}
-            selectedOptions={selectedAssetTypeOptions}
-            getKey={(v) => v.value}
-            getLabel={(v) => v.label}
-            setValue={setSelectedAssetTypeOptions}
-          />
-          <DropdownFilter
-            triggerLabel={'Reserve Symbol'}
-            options={reserveSymbolOptions}
-            selectedOptions={selectedSymbolOptions}
-            getKey={(v) => v.value}
-            getLabel={(v) => v.label}
-            setValue={setSelectedSymbolOptions}
-          />
-        </Filters>
-        <GroupFilter
-          options={groupByOptions}
-          getKey={(v) => v.value}
-          getLabel={(v) => v.label}
-          value={selectedGroupOption}
-          setValue={({value}) => setSelectedGroupKey(value)}
-        />
-        <ChartActions
-          mobileChildren={
-            <>
-              <CSVDownloadButton
-                data={csvData}
-                filename={getCsvFileName('total_treasury_value')}
-              />
-              <ChartIconToggle
-                active={!isShowEvents}
-                onIcon='calendar-check'
-                offIcon='calendar-uncheck'
-                ariaLabel='Toggle events'
-                className={{
-                  container:
-                    'flex items-center gap-1.5 bg-transparent p-0 !shadow-none h-[44px]',
-                  icon: 'h-[26px] w-[26px]',
-                  iconContainer: 'h-[26px] w-[26px]'
-                }}
-                onClick={() => setIsShowEvents(prev => !prev)}
-              >
-                <Text size='14' weight='500'>
-                  Hide Events
-                </Text>
-              </ChartIconToggle>
-            </>
-          }
-        >
-          <CSVDownloadButton
-            data={csvData}
-            filename={getCsvFileName('total_treasury_value')}
-          />
-        </ChartActions>
+          <ChartActions
+            mobileChildren={
+              <>
+                <CSVDownloadButton
+                  data={csvData}
+                  filename={getCsvFileName('total_treasury_value')}
+                />
+                <ChartIconToggle
+                  active={!isShowEvents}
+                  onIcon='calendar-check'
+                  offIcon='calendar-uncheck'
+                  ariaLabel='Toggle events'
+                  className={{
+                    container:
+                      'flex items-center gap-1.5 bg-transparent p-0 !shadow-none h-[44px]',
+                    icon: 'h-[26px] w-[26px]',
+                    iconContainer: 'h-[26px] w-[26px]'
+                  }}
+                  onClick={() => setIsShowEvents(prev => !prev)}
+                >
+                  <Text size='14' weight='500'>
+                    Hide Events
+                  </Text>
+                </ChartIconToggle>
+              </>
+            }
+          >
+            <CSVDownloadButton
+              data={csvData}
+              filename={getCsvFileName('total_treasury_value')}
+            />
+          </ChartActions>
+        </div>
       </div>
       {!isLoading && !isError && !hasAggregatedData ? (
         <NoDataPlaceholder onButtonClick={onClearAllFilters}/>
