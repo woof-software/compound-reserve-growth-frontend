@@ -1,9 +1,8 @@
-import { GroupFilter } from '@/components/Filter/GroupFilter'
-import { useUrlSyncString } from '@/shared/hooks/filters/useUrlSyncString'
-import { Format } from '@/shared/lib/utils/format';
 import React, { memo, useMemo } from 'react';
+import { parseAsBoolean, useQueryState } from 'nuqs';
 
 import PieChart from '@/components/Charts/Pie/Pie';
+import { GroupFilter } from '@/components/Filter/GroupFilter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import { NOT_MARKET } from '@/shared/consts/consts';
@@ -13,6 +12,7 @@ import {
   SortAdapter,
   useSorting
 } from '@/shared/hooks/useSorting';
+import { Format } from '@/shared/lib/utils/format';
 import {
   capitalizeFirstLetter,
   groupByKey,
@@ -92,8 +92,7 @@ const mapTableData = (data: Record<string, TokenData[]>) => {
 
 const TreasuryCompositionBlock = memo(
   ({ isLoading, data }: TreasuryCompositionBlockProps) => {
-
-    const [selectedGroupKey, setSelectedGroupKey] = useUrlSyncString('tc-group', 'assetType');
+    const [selectedGroupKey, setSelectedGroupKey] = useQueryState('tc-group', { defaultValue: 'assetType' });
 
     const selectedGroupOption = useMemo(() => {
       const selectedElement = groupByOptions.find(({value}) => value === selectedGroupKey);
@@ -103,10 +102,7 @@ const TreasuryCompositionBlock = memo(
       return selectedElement;
     }, [groupByOptions, selectedGroupKey]);
 
-    const [includeCompKey, setIncludeCompKey] = useUrlSyncString('tc-includeComp', 'true');
-
-    const includeComp = includeCompKey === 'true';
-    const setIncludeComp = (v: boolean) => setIncludeCompKey(v ? 'true' : 'false');
+    const [includeComp, setIncludeComp] = useQueryState('tc-includeComp',  parseAsBoolean.withDefault(true));
 
     const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
       useSorting<TreasuryCompositionType>('asc', null);
@@ -232,8 +228,7 @@ const TreasuryCompositionBlock = memo(
       );
 
     const onClearAll = () => {
-      setSelectedGroupKey('assetType')
-
+      setSelectedGroupKey('assetType');
       setIncludeComp(true);
     };
 
