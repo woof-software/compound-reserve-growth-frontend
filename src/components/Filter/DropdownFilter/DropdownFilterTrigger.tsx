@@ -1,19 +1,19 @@
-import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import { cn } from '@/shared/lib/classNames/classNames';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
 export interface DropdownFilterTriggerProps {
   label: string
-  counter: number | string
+  prefix: string
   onClick: () => void
 }
 
 export const DropdownFilterTrigger = (props: DropdownFilterTriggerProps) => {
-  const { label, counter, onClick } = props;
+  const { label, prefix, onClick } = props;
   
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
-  const hasSelectedOptions = counter !== null && counter !== 0 && counter !== '';
+  const hasSelectedOptions = prefix !== '';
   
   if (isMobile) {
     return (
@@ -32,10 +32,10 @@ export const DropdownFilterTrigger = (props: DropdownFilterTriggerProps) => {
         {hasSelectedOptions && (
           <div className={cn(
             'flex h-6 w-6 items-center justify-center rounded-sm bg-secondary-46',
-            { 'px-2 w-auto': typeof counter === 'string' }
+            { 'px-2 w-auto': typeof prefix === 'string' }
           )}>
             <Text size='11' weight='500' className='text-primary-18'>
-              {counter}
+              {prefix}
             </Text>
           </div>
         )}
@@ -51,7 +51,7 @@ export const DropdownFilterTrigger = (props: DropdownFilterTriggerProps) => {
       {hasSelectedOptions
         ? <div className={'flex h-4 w-4 items-center justify-center rounded-sm bg-secondary-46'}>
           <Text size='11' weight='500' className='text-primary-18'>
-            {counter}
+            {prefix}
           </Text>
         </div>
         : <Icon name='plus' className='h-4 w-4' color='color-gray-11' />

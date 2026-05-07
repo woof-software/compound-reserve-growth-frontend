@@ -4,7 +4,6 @@ import MetricBlock from '@/entities/Treasury/MetricBlock';
 import TreasuryBalanceByNetworkBlock from '@/entities/Treasury/TreasuryBalanceByNetwork/TreasuryBalanceByNetwork';
 import TreasuryCompositionBlock from '@/entities/Treasury/TreasuryCompositionBlock';
 import TreasuryHoldingsBlock from '@/entities/Treasury/TreasuryHoldingsBlock';
-import TotalTreasuryValueRef from '@/entities/Treasury/TotalTreasuryValue/TotalTreasuryValueRef';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import { useTreasuryHistory } from '@/shared/hooks/useTreasuryHistory';
 import {
@@ -14,6 +13,8 @@ import {
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Text from '@/shared/ui/Text/Text';
+
+import TotalTreasuryValueRef from '../../entities/Treasury/TotalTreasuryValue/TotalTreasuryValue';
 
 const TreasuryPage = () => {
   const {
