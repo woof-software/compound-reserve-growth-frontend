@@ -1,37 +1,36 @@
-import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle'
-import { useOptions } from '@/shared/hooks/filters/useOptions'
-import { useUrlSyncDateRange } from '@/shared/hooks/filters/useUrlSyncDateRange'
-import { useUrlSyncStingsArray } from '@/shared/hooks/filters/useUrlSyncStingsArray'
-import { useUrlSyncString } from '@/shared/hooks/filters/useUrlSyncString'
-import { capitalizeFirstLetter } from '@/shared/lib/utils/utils'
-import Text from '@/shared/ui/Text/Text'
 import React, { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
+import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
+import { ChartActions } from '@/components/Charts/ChartActions';
 import LineChart, { LineChartSeries } from '@/components/Charts/Line/Line';
+import { DateRangePickerFilter } from '@/components/Filter/DateRangePickerFilter/DateRangePickerFilter';
+import { DropdownFilter } from '@/components/Filter/DropdownFilter/DropdownFilter';
+import { Filters } from '@/components/Filter/Filters';
+import { GroupFilter } from '@/components/Filter/GroupFilter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import {
   customChartOptions,
   customTooltipFormatter
 } from '@/entities/Treasury/TotalTreasuryValue/customChartOptions';
-import { DateRangePickerFilter } from '@/components/Filter/DateRangePickerFilter/DateRangePickerFilter';
-import { DropdownFilter } from '@/components/Filter/DropdownFilter/DropdownFilter';
-import { GroupFilter } from '@/components/Filter/GroupFilter';
-import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange';
-import { useProcessor } from '@/shared/hooks/useProcessor';
-import { ChartActions } from '@/components/Charts/ChartActions';
 import { NOT_MARKET } from '@/shared/consts/consts';
+import { useOptions } from '@/shared/hooks/filters/useOptions';
+import { useUrlSyncDateRange } from '@/shared/hooks/filters/useUrlSyncDateRange';
+import { useUrlSyncStingsArray } from '@/shared/hooks/filters/useUrlSyncStingsArray';
+import { useUrlSyncString } from '@/shared/hooks/filters/useUrlSyncString';
+import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange';
 import { useEventsApi } from '@/shared/hooks/useEventsApi';
 import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
+import { useProcessor } from '@/shared/hooks/useProcessor';
 import { filterForRange } from '@/shared/lib/utils/chart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
+import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import { useSearchParams } from 'react-router-dom'
-
-import { Filters } from '@/components/Filter/Filters';
+import Text from '@/shared/ui/Text/Text';
 
 interface TotalTreasuryValueProps {
   data: TokenData[];
@@ -52,14 +51,14 @@ const TotalTreasuryValue = ({
 
   const [isShowEvents, setIsShowEvents] = useState<boolean>(true);
 
-  const groupByOptions = [
+  const groupByOptions = useMemo(() => [
     {label: 'None', value: 'none'},
     {label: 'Asset Type', value: 'assetType'},
     {label: 'Chain', value: 'chain'},
     {label: 'Market', value: 'deployment'}
-  ];
+  ], []);
 
-  const [[startDate, endDate], setDateRange] = useUrlSyncDateRange('ttv-date', [null, null])
+  const [[startDate, endDate], setDateRange] = useUrlSyncDateRange('ttv-date', [null, null]);
 
   const {barSize, onBarSizeChange, disabledBarSizes} = useBarSizeWithDateRange({startDate, endDate});
 
@@ -142,7 +141,7 @@ const TotalTreasuryValue = ({
   }, [groupByOptions, selectedGroupKey]);
 
   const onClearAllFilters = () => {
-    setSearchParams({})
+    setSearchParams({});
   };
 
   const isAnyFiltersSelected =
@@ -167,21 +166,13 @@ const TotalTreasuryValue = ({
     transformer: () => {
       const seriesMap: Record<string, Map<number, number>> = {};
 
-      const getKey = (v: any): string => {
-        switch (selectedGroupKey) {
-          case 'chain':
-            return v.source.network;
-          case 'assetType':
-            return v.source.asset.type;
-          case 'deployment':
-            return v.source.market ?? NOT_MARKET;
-          default:
-            return 'Treasury Value';
-        }
-      };
-
       return (v) => {
-        const key = getKey(v);
+        const key = {
+            chain: v.source.network,
+            assetType: v.source.asset.type,
+            deployment: v.source.market ?? NOT_MARKET,
+          }[selectedGroupKey] ?? 'Treasury Value';
+
         if (!seriesMap[key]) seriesMap[key] = new Map<number, number>();
 
         const dateKey = v.date * 1000;

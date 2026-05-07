@@ -1,4 +1,4 @@
-import { useUrlSync } from '@/shared/hooks/filters/useUrlSync'
+import { useUrlSync } from '@/shared/hooks/filters/useUrlSync';
 
 
 /**
@@ -12,7 +12,7 @@ export function useUrlSyncStingsArray(key: string, value: string[]) {
     parse: (raw) => raw.split('_'),
     stringify: (value) => {
       if (Array.isArray(value) && !value.length) {
-        return ''
+        return '';
       }
 
       return value.join('_');

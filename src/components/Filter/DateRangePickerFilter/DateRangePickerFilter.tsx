@@ -60,7 +60,6 @@ export const DateRangePickerFilter = (props: DateRangePickerFilterProps) => {
             {triggerLabel}
           </Text>
         </div>
-
         <DateRangePicker
           {...pickerProps}
           inlineCalendar

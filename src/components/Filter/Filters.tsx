@@ -1,7 +1,7 @@
-import { noop } from '@/shared/lib/utils/utils'
 import React, { createContext, Dispatch, SetStateAction, useContext, useState } from 'react';
 
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
+import { noop } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -65,9 +65,7 @@ export const Filters = (props: FiltersProps) => {
               Filters
             </Text>
           )}
-
           {children}
-
           {(isShowClear && expandedFilter === null) && (
             <Button
               className={'cursor-pointer transition text-primary-14 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'}
@@ -85,5 +83,5 @@ export const Filters = (props: FiltersProps) => {
     <FilterContext.Provider value={{ expandedFilter, setExpandedFilter }}>
       {children}
     </FilterContext.Provider>
-  )
+  );
 };

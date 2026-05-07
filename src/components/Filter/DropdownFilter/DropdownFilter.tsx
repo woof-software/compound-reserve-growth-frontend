@@ -93,7 +93,6 @@ export const DropdownFilter = <T,>(props: DropdownFilterProps<T>) => {
             {triggerLabel}
           </Text>
         </div>
-
         <DropdownFilterInput
           searchValue={searchValue}
           setSearchValue={setSearchValue}
@@ -136,7 +135,6 @@ export const DropdownFilter = <T,>(props: DropdownFilterProps<T>) => {
         setSearchValue={setSearchValue}
         isError={isSearchResult}
       />
-
       {isSearchResult && (
         <>
           <div className={'border-t-[0.25px] border-border'} />
@@ -151,7 +149,6 @@ export const DropdownFilter = <T,>(props: DropdownFilterProps<T>) => {
           </div>
         </>
       )}
-
       <DropdownFilterActions
         isAllSelected={isAllSelected}
         clearAll={clearSelectedOptions}
