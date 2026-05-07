@@ -109,7 +109,7 @@ interface RadioProps
     React.InputHTMLAttributes<HTMLInputElement>,
     'type' | 'onChange' | 'value' | 'checked' | 'defaultChecked'
   > {
-  value: string | number;
+  value: string;
 
   label?: ReactNode;
 
@@ -118,7 +118,7 @@ interface RadioProps
   defaultChecked?: boolean;
 
   onChange?: (
-    value: string | number,
+    value: string,
     e: React.ChangeEvent<HTMLInputElement>
   ) => void;
 
@@ -165,7 +165,7 @@ function RadioItem({
         checked={isChecked}
         defaultChecked={isChecked === undefined ? defaultChecked : undefined}
         onChange={(e) => {
-          if (ctx?.onChange) ctx.onChange(String(value));
+          if (ctx?.onChange) ctx.onChange(value);
           if (onChange) onChange(value, e);
         }}
         {...rest}

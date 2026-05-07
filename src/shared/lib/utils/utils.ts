@@ -1,4 +1,5 @@
 import { ChangeEvent, MouseEvent as ReactMouseEvent } from 'react';
+import { createParser, parseAsArrayOf, parseAsString } from 'nuqs';
 
 import { NOT_MARKET, THIRTY_DAYS } from '@/shared/consts/consts';
 import { TokenData } from '@/shared/types/Treasury/types';
@@ -507,4 +508,16 @@ export const filterAndSortMarkets = (
   }
 
   return sorted;
+};
+
+export const parseAsTimestampMs = createParser<number>({
+  parse: (value) => {
+    if (value === null) return null;
+    return Number(value);
+  },
+  serialize: (value) => String(value),
+});
+
+export const parseStingsArray = (defaultValue = []) => {
+  return parseAsArrayOf(parseAsString).withDefault(defaultValue);
 };

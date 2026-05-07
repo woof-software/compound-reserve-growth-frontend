@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 type Filter<T> = (item: T) => boolean;
 type Transformer<T, R> = () => (item: T) => R;
 
-interface ProcessorConfig<T, R> {
+export interface ProcessorConfig<T, R> {
   array: T[];
   filters: Filter<T>[];
   transformer: Transformer<T, R>;

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useQueryState } from 'nuqs';
 
 import BarChart from '@/components/Charts/Bar/Bar';
 import { DropdownFilter } from '@/components/Filter/DropdownFilter/DropdownFilter';
@@ -11,17 +11,13 @@ import TreasuryBalanceByNetworkTable, {
 import { customChartOptions } from '@/entities/Treasury/TreasuryBalanceByNetwork/customChartOptions';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useOptions } from '@/shared/hooks/filters/useOptions';
-import { useUrlSyncStingsArray } from '@/shared/hooks/filters/useUrlSyncStingsArray';
 import { useModal } from '@/shared/hooks/useModal';
 import {
   SortAccessor,
   SortAdapter,
   useSorting
 } from '@/shared/hooks/useSorting';
-import {
-  capitalizeFirstLetter,
-  colorPicker
-} from '@/shared/lib/utils/utils';
+import { capitalizeFirstLetter, colorPicker,  parseStingsArray } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
@@ -91,15 +87,24 @@ const TreasuryBalanceByNetworkBlock = ({
   isError,
   data
 }: TreasuryBalanceByNetworkBlockProps) => {
-  const [, setSearchParams] = useSearchParams();
-
   const {
     isOpen: isSortOpen,
     onOpenModal: onSortOpen,
     onCloseModal: onSortClose
   } = useModal();
 
-  const [selectedChainKeys, setSelectedChainKeys] = useUrlSyncStingsArray('tbbn-chain', ['mainnet']);
+  const [selectedChainKeys, setSelectedChainKeys] = useQueryState('tbbn-chain', parseStingsArray([]));
+  const [selectedMarketKeys, setSelectedMarketKeys] = useQueryState('tbbn-market', parseStingsArray([]));
+  const [selectedAssetTypesKeys, setSelectedAssetTypeKeys] = useQueryState('tbbn-asset-type', parseStingsArray([]));
+  const [selectedSymbolKeys, setSelectedSymbolKeys] = useQueryState('tbbn-symbol', parseStingsArray([]));
+
+
+  const clearAllFilters = () => {
+    setSelectedChainKeys([]);
+    setSelectedMarketKeys([]);
+    setSelectedAssetTypeKeys([]);
+    setSelectedSymbolKeys([]);
+  };
 
   const chainOptions = useMemo(() => (
     [...new Set(data.map(d => d.source.network))]
@@ -118,7 +123,6 @@ const TreasuryBalanceByNetworkBlock = ({
       : data.filter(d => selectedChainOptions.some(o => o.value === d.source.network))
   ), [data, selectedChainOptions]);
 
-  const [selectedMarketKeys, setSelectedMarketKeys] = useUrlSyncStingsArray('tbbn-market', []);
   const marketOptions = useMemo(() => (
     [...new Set(byChain.map(d => d.source.market ?? NOT_MARKET))]
       .sort()
@@ -136,7 +140,6 @@ const TreasuryBalanceByNetworkBlock = ({
       : byChain.filter(d => selectedMarketOptions.some(o => o.value === (d.source.market ?? NOT_MARKET)))
   ), [byChain, selectedMarketOptions]);
 
-  const [selectedAssetTypesKeys, setSelectedAssetTypesKeys] = useUrlSyncStingsArray('tbbn-asset-type', []);
   const assetTypesOptions = useMemo(() => (
     [...new Set(byChainAndMarket.map(d => d.source.asset.type))]
       .sort()
@@ -146,7 +149,7 @@ const TreasuryBalanceByNetworkBlock = ({
   const {
     selectedOptions: selectedAssetTypeOptions,
     setSelectedOptions: setSelectedAssetTypeOptions,
-  } = useOptions(assetTypesOptions, selectedAssetTypesKeys, setSelectedAssetTypesKeys);
+  } = useOptions(assetTypesOptions, selectedAssetTypesKeys, setSelectedAssetTypeKeys);
 
   const byChainMarketAndAsset = useMemo(() => (
     !selectedAssetTypeOptions.length
@@ -154,7 +157,6 @@ const TreasuryBalanceByNetworkBlock = ({
       : byChainAndMarket.filter(d => selectedAssetTypeOptions.some(o => o.value === d.source.asset.type))
   ), [byChainAndMarket, selectedAssetTypeOptions]);
 
-  const [selectedSymbolKeys, setSelectedSymbolKeys] = useUrlSyncStingsArray('tbbn-symbol', []);
   const reserveSymbolOptions = useMemo(() => (
     [...new Set(byChainMarketAndAsset.map(d => d.source.asset.symbol))]
       .filter(Boolean)
@@ -231,10 +233,6 @@ const TreasuryBalanceByNetworkBlock = ({
       .filter((el) => el.value > 0);
   }, [tableData]);
 
-  const onClearAll = () => {
-    setSearchParams({});
-  };
-
   const isAnyFiltersSelected =
     !!selectedChainOptions.length ||
     !!selectedMarketOptions.length ||
@@ -258,32 +256,40 @@ const TreasuryBalanceByNetworkBlock = ({
     >
       <div className='flex items-center justify-end gap-2 px-5 py-3 lg:px-0'>
         <Filters
-          onClearAll={onClearAll}
+          onClearAll={clearAllFilters}
           isShowClear={isAnyFiltersSelected}
         >
           <DropdownFilter
             triggerLabel={'Chain'}
             options={chainOptions}
             selectedOptions={selectedChainOptions}
-            onSelect={setSelectedChainOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedChainOptions}
           />
           <DropdownFilter
             triggerLabel={'Market'}
             options={marketOptions}
             selectedOptions={selectedMarketOptions}
-            onSelect={setSelectedMarketOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedMarketOptions}
           />
           <DropdownFilter
             triggerLabel={'Asset Type'}
             options={assetTypesOptions}
             selectedOptions={selectedAssetTypeOptions}
-            onSelect={setSelectedAssetTypeOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedAssetTypeOptions}
           />
           <DropdownFilter
             triggerLabel={'Reserve Symbol'}
             options={reserveSymbolOptions}
             selectedOptions={selectedSymbolOptions}
-            onSelect={setSelectedSymbolOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedSymbolOptions}
           />
         </Filters>
         <Button
@@ -310,7 +316,7 @@ const TreasuryBalanceByNetworkBlock = ({
           <BarChart
             customOptions={customChartOptions}
             data={chartData}
-            onClear={onClearAll}
+            onClear={clearAllFilters}
           />
           <TreasuryBalanceByNetworkTable
             sortType={sortType}
@@ -319,7 +325,7 @@ const TreasuryBalanceByNetworkBlock = ({
         </div>
       </View.Condition>
       <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
-        <NoDataPlaceholder onButtonClick={onClearAll} />
+        <NoDataPlaceholder onButtonClick={clearAllFilters} />
       </View.Condition>
     </Card>
   );

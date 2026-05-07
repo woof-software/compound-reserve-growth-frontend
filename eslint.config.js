@@ -133,7 +133,7 @@ export default defineConfig([
       'no-duplicate-imports': 'off',
       'react-hooks/rules-of-hooks': 'off',
       'plugin-checker/path-checker': 'off',
-      // 'react/jsx-newline': ['error', { prevent: true }]
+      'react/jsx-newline': ['error', { prevent: true }]
     }
   },
   {

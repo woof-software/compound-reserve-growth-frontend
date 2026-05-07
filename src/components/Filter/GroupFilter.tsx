@@ -1,13 +1,13 @@
-import { noop } from '@/shared/lib/utils/utils'
 import React, { useEffect, useState } from 'react';
 
 import { DropdownGroupFilterTrigger } from '@/components/Filter/DropdownFilter/DropdownGroupFilterTrigger';
 import { OptionsList } from '@/components/Filter/OptionsList';
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
-import { Dropdown } from '@/shared/ui/DropdownRef/Dropdown';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { noop } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
+import { Dropdown } from '@/shared/ui/DropdownRef/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
 import { Radio } from '@/shared/ui/RadioButton/RadioButton';
 import Text from '@/shared/ui/Text/Text';
@@ -28,46 +28,39 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
     getLabel,
     getKey,
   } = props;
-
-  const [isDrawer, setIsDrawer] = useState(false);
-  const [isDropdown, setIsDropdown] = useState(false);
-  const [radioValue, setRadioValue] = useState(() => getKey(value));
+  
+  const [radioValue, setRadioValue] = useState(value);
+  const [isOpen, setIsOpen] = useState(false);
 
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
 
   useEffect(() => {
-    if (isDrawer) setRadioValue(getKey(value));
-  }, [isDrawer]);
+    if (isOpen) setRadioValue(value);
+  }, [isOpen]);
 
-  const isApplyButtonChanged = radioValue !== getKey(value);
+  const isApplyButtonChanged = radioValue !== value;
   const isApplyButtonDisabled = Boolean(radioValue);
 
-  const toggle = () => setIsDropdown(prev => !prev);
-
-  const handleChange = (val: string) => {
-    const option = options.find((o) => getKey(o) === val);
-    if (option) setValue(option);
-  };
+  const toggle = () => setIsOpen(prev => !prev);
 
   const onApply = () => {
-    handleChange(radioValue);
-    setIsDrawer(false);
+    setValue(radioValue);
+    setIsOpen(false);
   };
 
   const onClearAll = () => {
     const [firstOption] = options;
 
     if (firstOption) {
-      setRadioValue(getKey(firstOption));
+      setRadioValue(firstOption);
       setValue(firstOption);
     }
 
-    setIsDrawer(false);
+    setIsOpen(false);
   };
 
   const onDrawerClose = () => {
-    setRadioValue(getKey(value));
-    setIsDrawer(false);
+    setIsOpen(false);
   };
 
   if (isMobile) {
@@ -75,12 +68,12 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
       <>
         <Button
           className='bg-secondary-27 text-gray-11 shadow-13 grow md:max-w-[130px] flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
-          onClick={() => setIsDrawer(true)}
+          onClick={() => setIsOpen(true)}
         >
           <Icon name='group-grid' className='h-[14px] w-[14px] fill-none' />
           Group
         </Button>
-        <Drawer onClose={onDrawerClose} isOpen={isDrawer}>
+        <Drawer onClose={onDrawerClose} isOpen={isOpen}>
           <Text
             size='17'
             weight='700'
@@ -93,8 +86,7 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
           <Radio.Group
             direction='vertical'
             className='gap-1.5'
-            value={radioValue}
-            onChange={setRadioValue}
+            value={getKey(radioValue)}
           >
             {options.map((option) => (
               <Radio.Item
@@ -109,6 +101,7 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
                     label={getLabel(option)}
                   />
                 }
+                onChange={() => setRadioValue(option)}
               />
             ))}
           </Radio.Group>
@@ -140,13 +133,13 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
 
   return (
     <Dropdown
-      isOpen={isDropdown}
-      setIsOpen={setIsDropdown}
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
       trigger={
         <DropdownGroupFilterTrigger
           label={getLabel(value)}
           onClick={toggle}
-          isOpen={isDropdown}
+          isOpen={isOpen}
         />
       }
     >
@@ -156,8 +149,8 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
           getLabel={getLabel}
           getKey={getKey}
           onSelect={(v) => {
-            setValue(v)
-            setIsDropdown(false)
+            setValue(v);
+            setIsOpen(false);
           }}
           selectedOptions={[value]}
         />

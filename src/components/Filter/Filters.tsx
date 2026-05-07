@@ -1,7 +1,7 @@
-import { noop } from '@/shared/lib/utils/utils'
 import React, { createContext, Dispatch, SetStateAction, useContext, useState } from 'react';
 
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
+import { noop } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -38,7 +38,7 @@ export const Filters = (props: FiltersProps) => {
     return (
       <FilterContext.Provider value={{ expandedFilter, setExpandedFilter }}>
         <Button
-          className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 grow md:max-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8'
+          className='bg-secondary-27 text-gray-11 shadow-13 grow md:max-w-[130px] flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
           onClick={() => setIsDrawer(true)}
         >
           <Icon
@@ -65,9 +65,7 @@ export const Filters = (props: FiltersProps) => {
               Filters
             </Text>
           )}
-
           {children}
-
           {(isShowClear && expandedFilter === null) && (
             <Button
               className={'cursor-pointer transition text-primary-14 mt-8 flex w-full items-center justify-center rounded-lg px-3 py-4 text-[11px] font-medium'}
@@ -85,5 +83,5 @@ export const Filters = (props: FiltersProps) => {
     <FilterContext.Provider value={{ expandedFilter, setExpandedFilter }}>
       {children}
     </FilterContext.Provider>
-  )
+  );
 };
