@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useQueryState } from 'nuqs';
 
 import { ChartActions } from '@/components/Charts/ChartActions';
 import { DropdownFilter } from '@/components/Filter/DropdownFilter/DropdownFilter';
@@ -11,12 +11,11 @@ import TreasuryHoldingsTable, {
 import { treasuryBalanceByNetworkColumns } from '@/entities/Treasury/TreasuryBalanceByNetwork/TreasuryBalanceByNetwork';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useOptions } from '@/shared/hooks/filters/useOptions';
-import { useUrlSyncStingsArray } from '@/shared/hooks/filters/useUrlSyncStingsArray';
 import { useModal } from '@/shared/hooks/useModal';
 import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import {
-  capitalizeFirstLetter,
+  capitalizeFirstLetter, parseStingsArray
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Button from '@/shared/ui/Button/Button';
@@ -56,15 +55,24 @@ const TreasuryHoldingsBlock = ({
   isError,
   data
 }: TreasuryHoldingsBlockProps) => {
-  const [, setSearchParams] = useSearchParams();
-
   const {
     isOpen: isSortOpen,
     onOpenModal: onSortOpen,
     onCloseModal: onSortClose
   } = useModal();
 
-  const [selectedChainKeys, setSelectedChainKeys] = useUrlSyncStingsArray('thb-chain', []);
+  const [selectedChainKeys, setSelectedChainKeys] = useQueryState('tnb-chain', parseStingsArray([]));
+  const [selectedMarketKeys, setSelectedMarketKeys] = useQueryState('tnb-market', parseStingsArray([]));
+  const [selectedAssetTypesKeys, setSelectedAssetTypeKeys] = useQueryState('tnb-asset-type', parseStingsArray([]));
+  const [selectedSymbolKeys, setSelectedSymbolKeys] = useQueryState('tnb-symbol', parseStingsArray([]));
+
+  const clearAllFilters = () => {
+    setSelectedChainKeys([]);
+    setSelectedMarketKeys([]);
+    setSelectedAssetTypeKeys([]);
+    setSelectedSymbolKeys([]);
+  };
+
   const chainOptions = useMemo(() => (
     [...new Set(data.map(d => d.source.network))]
       .sort()
@@ -82,7 +90,6 @@ const TreasuryHoldingsBlock = ({
       : data.filter(d => selectedChainOptions.some(o => o.value === d.source.network))
   ), [data, selectedChainOptions]);
 
-  const [selectedMarketKeys, setSelectedMarketKeys] = useUrlSyncStingsArray('thb-market', []);
   const marketOptions = useMemo(() => (
     [...new Set(byChain.map(d => d.source.market ?? NOT_MARKET))]
       .sort()
@@ -100,7 +107,6 @@ const TreasuryHoldingsBlock = ({
       : byChain.filter(d => selectedMarketOptions.some(o => o.value === (d.source.market ?? NOT_MARKET)))
   ), [byChain, selectedMarketOptions]);
 
-  const [selectedAssetTypesKeys, setSelectedAssetTypesKeys] = useUrlSyncStingsArray('thb-asset-type', []);
   const assetTypesOptions = useMemo(() => (
     [...new Set(byChainAndMarket.map(d => d.source.asset.type))]
       .sort()
@@ -110,7 +116,7 @@ const TreasuryHoldingsBlock = ({
   const {
     selectedOptions: selectedAssetTypeOptions,
     setSelectedOptions: setSelectedAssetTypeOptions,
-  } = useOptions(assetTypesOptions, selectedAssetTypesKeys, setSelectedAssetTypesKeys);
+  } = useOptions(assetTypesOptions, selectedAssetTypesKeys, setSelectedAssetTypeKeys);
 
   const byChainMarketAndAsset = useMemo(() => (
     !selectedAssetTypeOptions.length
@@ -118,7 +124,6 @@ const TreasuryHoldingsBlock = ({
       : byChainAndMarket.filter(d => selectedAssetTypeOptions.some(o => o.value === d.source.asset.type))
   ), [byChainAndMarket, selectedAssetTypeOptions]);
 
-  const [selectedSymbolKeys, setSelectedSymbolKeys] = useUrlSyncStingsArray('thb-symbol', []);
   const reserveSymbolOptions = useMemo(() => (
     [...new Set(byChainMarketAndAsset.map(d => d.source.asset.symbol))]
       .filter(Boolean)
@@ -144,10 +149,6 @@ const TreasuryHoldingsBlock = ({
     !!selectedMarketOptions.length ||
     !!selectedAssetTypeOptions.length ||
     !!selectedSymbolOptions.length;
-
-  const onClearAll = () => {
-    setSearchParams({});
-  };
 
   const tableData = useMemo<TreasuryBalanceByNetworkType[]>(() => {
     const filtered = data.filter((item) => {
@@ -209,32 +210,40 @@ const TreasuryHoldingsBlock = ({
     >
       <div className={'flex items-center gap-2 py-3 px-5 lg:px-0 justify-end flex-wrap'}>
         <Filters
-          onClearAll={onClearAll}
+          onClearAll={clearAllFilters}
           isShowClear={isAnyFiltersSelected}
         >
           <DropdownFilter
             triggerLabel={'Chain'}
             options={chainOptions}
             selectedOptions={selectedChainOptions}
-            onSelect={setSelectedChainOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedChainOptions}
           />
           <DropdownFilter
             triggerLabel={'Market'}
             options={marketOptions}
             selectedOptions={selectedMarketOptions}
-            onSelect={setSelectedMarketOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedMarketOptions}
           />
           <DropdownFilter
             triggerLabel={'Asset Type'}
             options={assetTypesOptions}
             selectedOptions={selectedAssetTypeOptions}
-            onSelect={setSelectedAssetTypeOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedAssetTypeOptions}
           />
           <DropdownFilter
             triggerLabel={'Reserve Symbol'}
             options={reserveSymbolOptions}
             selectedOptions={selectedSymbolOptions}
-            onSelect={setSelectedSymbolOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedSymbolOptions}
           />
         </Filters>
           <Button
@@ -277,7 +286,7 @@ const TreasuryHoldingsBlock = ({
         />
       </View.Condition>
       <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
-        <NoDataPlaceholder onButtonClick={onClearAll} />
+        <NoDataPlaceholder onButtonClick={clearAllFilters} />
       </View.Condition>
     </Card>
   );
