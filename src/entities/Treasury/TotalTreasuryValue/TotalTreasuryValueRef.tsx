@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { createParser, parseAsArrayOf, parseAsString, useQueryState, useQueryStates } from 'nuqs';
+import { useQueryState } from 'nuqs';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { ChartActions } from '@/components/Charts/ChartActions';
@@ -22,7 +22,7 @@ import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useProcessor } from '@/shared/hooks/useProcessor';
 import { filterForRange } from '@/shared/lib/utils/chart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
-import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
+import { capitalizeFirstLetter, parseAsTimestampMs, parseStingsArray } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
@@ -53,41 +53,23 @@ const TotalTreasuryValue = ({
     {label: 'Market', value: 'deployment'}
   ], []);
 
-  const parseAsTimestampMs = createParser<number>({
-    parse: (value) => {
-      if (value === null) return null;
-      return Number(value);
-    },
-    serialize: (value) => String(value),
-  });
-
-  const [filters, setFilters] = useQueryStates({
-    'ttv-chain': parseAsArrayOf(parseAsString).withDefault([]),
-    'ttv-market': parseAsArrayOf(parseAsString).withDefault([]),
-    'ttv-asset-type': parseAsArrayOf(parseAsString).withDefault([]),
-    'ttv-symbol': parseAsArrayOf(parseAsString).withDefault([]),
-    'ttv-start': parseAsTimestampMs,
-    'ttv-end': parseAsTimestampMs,
-  }, { history: 'replace' });
-  
   const [selectedGroupKey, setSelectedGroupKey] = useQueryState('ttv-group', { defaultValue: 'none' });
-
-  const {
-    'ttv-chain': selectedChainKeys,
-    'ttv-market': selectedMarketKeys,
-    'ttv-asset-type': selectedAssetTypesKeys,
-    'ttv-symbol': selectedSymbolKeys,
-    'ttv-start': startDate,
-    'ttv-end': endDate,
-  } = filters;
-
-  const setSelectedChainKeys = (v: string[]) => setFilters({ 'ttv-chain': v });
-  const setSelectedMarketKeys = (v: string[]) => setFilters({ 'ttv-market': v });
-  const setSelectedAssetTypeKeys = (v: string[]) => setFilters({ 'ttv-asset-type': v });
-  const setSelectedSymbolKeys = (v: string[]) => setFilters({ 'ttv-symbol': v });
-  const setStartDate = (v: number | null) => setFilters({ 'ttv-start': v });
-  const setEndDate = (v: number | null) => setFilters({ 'ttv-end': v });
+  const [selectedChainKeys, setSelectedChainKeys] = useQueryState('ttv-chain', parseStingsArray([]));
+  const [selectedMarketKeys, setSelectedMarketKeys] = useQueryState('ttv-market', parseStingsArray([]));
+  const [selectedAssetTypesKeys, setSelectedAssetTypeKeys] = useQueryState('ttv-asset-type', parseStingsArray([]));
+  const [selectedSymbolKeys, setSelectedSymbolKeys] = useQueryState('ttv-symbol', parseStingsArray([]));
+  const [startDate, setStartDate] = useQueryState('ttv-start', parseAsTimestampMs);
+  const [endDate, setEndDate] = useQueryState('ttv-end', parseAsTimestampMs);
   
+  const clearAllFilters = () => {
+    setSelectedChainKeys([]);
+    setSelectedMarketKeys([]);
+    setSelectedAssetTypeKeys([]);
+    setSelectedSymbolKeys([]);
+    setStartDate(null);
+    setEndDate(null);
+  };
+
   const {barSize, onBarSizeChange, disabledBarSizes} = useBarSizeWithDateRange({startDate, endDate});
 
   const chainOptions = useMemo(() => (
@@ -273,7 +255,7 @@ const TotalTreasuryValue = ({
         </div>
         <div className={'flex w-full sm:w-auto justify-end gap-2'}>
           <Filters
-            onClearAll={() => setFilters(null)}
+            onClearAll={clearAllFilters}
             isShowClear={isAnyFiltersSelected}
           >
             <DateRangePickerFilter
@@ -359,7 +341,7 @@ const TotalTreasuryValue = ({
         </div>
       </div>
       {!isLoading && !isError && !hasAggregatedData ? (
-        <NoDataPlaceholder onButtonClick={() => setFilters(null)}/>
+        <NoDataPlaceholder onButtonClick={clearAllFilters}/>
       ) : (
         <LineChart
           customOptions={customChartOptions}
