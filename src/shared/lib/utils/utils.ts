@@ -518,6 +518,6 @@ export const parseAsTimestampMs = createParser<number>({
   serialize: (value) => String(value),
 });
 
-export const parseStingsArray = (defaultValue = []) => {
+export const parseStingsArray = (defaultValue: string[] = []) => {
   return parseAsArrayOf(parseAsString).withDefault(defaultValue);
 };

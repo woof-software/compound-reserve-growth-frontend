@@ -93,7 +93,7 @@ const TreasuryBalanceByNetworkBlock = ({
     onCloseModal: onSortClose
   } = useModal();
 
-  const [selectedChainKeys, setSelectedChainKeys] = useQueryState('tbbn-chain', parseStingsArray([]));
+  const [selectedChainKeys, setSelectedChainKeys] = useQueryState('tbbn-chain', parseStingsArray(['mainnet']));
   const [selectedMarketKeys, setSelectedMarketKeys] = useQueryState('tbbn-market', parseStingsArray([]));
   const [selectedAssetTypesKeys, setSelectedAssetTypeKeys] = useQueryState('tbbn-asset-type', parseStingsArray([]));
   const [selectedSymbolKeys, setSelectedSymbolKeys] = useQueryState('tbbn-symbol', parseStingsArray([]));
