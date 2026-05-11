@@ -7,8 +7,18 @@ import MetricBlock from '@/entities/Insentive/MetricBlock/MetricBlock';
 import CurrentSpendingByChainBlock from '@/features/Insentive/CurrentSpendingByChain';
 import { useIncentivesApiData } from '@/shared/hooks/useIncentivesApiData';
 import { useSourceCombinator } from '@/shared/hooks/useSourceCombinator';
+import { Source } from '@/shared/types/types';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
+
+export type IncentiveData = {
+    source: Source
+    income: number
+    rewardsSupply: number
+    rewardsBorrow: number
+    compoundPrice: number
+    date: number
+}[]
 
 const IncentivePage = () => {
   const [activeTab, setActiveTab] = useState<string>('Day');

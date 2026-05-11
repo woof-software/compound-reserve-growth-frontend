@@ -1,45 +1,101 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
+import { useQueryState } from 'nuqs';
 
 import BarChart from '@/components/Charts/Bar/Bar';
+import { ChartActions } from '@/components/Charts/ChartActions';
+import { DropdownFilter } from '@/components/Filter/DropdownFilter/DropdownFilter';
+import { Filters } from '@/components/Filter/Filters';
 import CurrentSpendingByChainTable, {
   SpendingByChainTableColumns
 } from '@/entities/Insentive/CurrentSpendingByChainTable/CurrentSpendingByChainTable';
-import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
-import { CurrentSpendingByChainMobileFilters } from '@/features/Insentive/CurrentSpendingByChainMobileFilters';
 import { customChartOptions } from '@/features/Insentive/lib/customChartOptions';
 import { getChartData } from '@/features/Insentive/lib/getChartData';
 import { getCsvData } from '@/features/Insentive/lib/getCsvData';
 import { tableDataNormalizer } from '@/features/Insentive/lib/tableDataNormalizer';
+import { IncentiveData } from '@/pages/InsentivePage/IncentivePage';
+import { useOptions } from '@/shared/hooks/filters/useOptions';
+import { useModal } from '@/shared/hooks/useModal';
+import { SortAccessor, SortAdapter, useSorting } from '@/shared/hooks/useSorting';
+import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import {
-  useFiltersSync,
-  useFilterSyncSingle
-} from '@/shared/hooks/useFiltersSync';
-import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
-import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
+  capitalizeFirstLetter,
+  parseStingsArray
+} from '@/shared/lib/utils/utils';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
+import Icon from '@/shared/ui/Icon/Icon';
+import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import View from '@/shared/ui/View/View';
 
-const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
-  const [activeTab, setActiveTab] = useState<string>('Total');
+export interface CurrentSpendingByChainProps {
+  data: IncentiveData;
+  isLoading?: boolean;
+  isError?: boolean;
+}
+
+const sortColumns: SortAccessor<SpendingByChainTableColumns>[] = [
+  { accessorKey: 'network', header: 'Network' },
+  { accessorKey: 'valueComp', header: 'Value COMP' },
+  { accessorKey: 'valueUsd', header: 'Value USD' }
+];
+
+const CurrentSpendingByChainBlock = (props: CurrentSpendingByChainProps) => {
+  const {data, isLoading, isError } = props;
+
+  const [activeTab, setActiveTab] = useQueryState('icscb-tab', { defaultValue: 'Total' });
+  const [selectedChainKeys, setSelectedChainKeys] = useQueryState('icscb-chain', parseStingsArray([]));
+
+  const clearAllFilters = () => {
+    setSelectedChainKeys([]);
+  };
 
   const {
-    chainOptions,
-    selectedOptions,
-    setSelectedOptions,
-    onSelectChain,
-    filteredData,
-    clearAllFilters,
-    mobileFilterOptions
-  } = useChainMarketFilters(data, { filterByLatestDate: true });
+    isOpen: isSortOpen,
+    onOpenModal: onSortOpen,
+    onCloseModal: onSortClose
+  } = useModal();
 
-  const chartData = getChartData(filteredData, activeTab).sort((a, b) => {
-    return b.value - a.value;
-  });
+  const chainOptions = useMemo(() => {
+    if (!data?.length) return [];
 
+    const uniqueNetworks = [...new Set(data.map((item) => item.source.network))];
+
+    return uniqueNetworks.map((network) => ({
+      value: network,
+      label: capitalizeFirstLetter(network)
+    }));
+  }, [data]);
+
+  const {
+    selectedOptions: selectedChainOptions,
+    setSelectedOptions: setSelectedChainOptions
+  } = useOptions(chainOptions, selectedChainKeys, setSelectedChainKeys);
+
+  const filteredData = useMemo(() => {
+    if (!data?.length) return [];
+    let result = data;
+
+    const latestDate = result.reduce(
+      (max, item) => (item.date > max ? item.date : max),
+      result[0].date
+    );
+    result = result.filter((item) => item.date === latestDate);
+
+    if (selectedChainKeys.length > 0) {
+      result = result.filter((item) =>
+        selectedChainKeys.includes(item.source.network)
+      );
+    }
+
+    return result;
+  }, [data, selectedChainKeys]);
+
+  const chartData = getChartData(filteredData, activeTab);
   const tableData = tableDataNormalizer(filteredData, activeTab);
   const csvData = getCsvData(tableData);
+
   const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
     useSorting<SpendingByChainTableColumns>('desc', 'valueUsd');
 
@@ -47,12 +103,6 @@ const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
     type: sortDirection,
     key: sortKey
   };
-
-  useFilterSyncSingle('icscb', activeTab, setActiveTab);
-  useFiltersSync(selectedOptions, setSelectedOptions, 'icscb', [
-    'chain',
-    'deployment'
-  ]);
 
   return (
     <Card
@@ -69,34 +119,65 @@ const CurrentSpendingByChainBlock = ({ isLoading, isError, data }: any) => {
           'flex flex-col gap-3 rounded-b-lg px-0 pt-0 pb-0 lg:px-10 lg:pb-10'
       }}
     >
-      <div className='hidden items-center justify-end gap-2 px-10 py-3 lg:flex lg:px-0'>
-        <TabsGroup
-          tabs={['Lend', 'Borrow', 'Total']}
-          value={activeTab}
-          onTabChange={setActiveTab}
-        />
-        <MultiSelect
-          options={chainOptions || []}
-          value={selectedOptions.chain}
-          onChange={onSelectChain}
-          placeholder='Chain'
-          disabled={isLoading}
-        />
-        <CSVDownloadButton
-          data={csvData}
-          filename={'Incentive_Current_Spending_By_Chain'}
-        />
+      <div className={'flex sm:flex-row sm:items-center flex-col-reverse gap-2 py-3 px-5 lg:px-0 justify-end'}>
+        <div className={'w-full sm:w-auto'}>
+          <TabsGroup
+            className={{
+              container: 'w-full sm:w-auto',
+              list: 'w-full sm:w-auto'
+            }}
+            tabs={['Lend', 'Borrow', 'Total']}
+            value={activeTab!}
+            onTabChange={setActiveTab}
+          />
+        </div>
+        <div className={'flex w-full sm:w-auto justify-end gap-2'}>
+          <Filters
+            onClearAll={clearAllFilters}
+            isShowClear={!!selectedChainOptions.length}
+          >
+            <DropdownFilter
+              triggerLabel={'Chain'}
+              options={chainOptions}
+              selectedOptions={selectedChainOptions}
+              getKey={(v) => v.value}
+              getLabel={(v) => v.label}
+              setValue={setSelectedChainOptions}
+            />
+          </Filters>
+          <Button
+            onClick={onSortOpen}
+            className='bg-secondary-27 text-gray-11 shadow-13 grow md:max-w-[130px] flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
+          >
+            <Icon
+              name='sort-icon'
+              className='h-[14px] w-[14px]'
+            />
+            Sort
+          </Button>
+          <SortDrawer
+            isOpen={isSortOpen}
+            sortType={sortType}
+            columns={sortColumns}
+            onClose={onSortClose}
+            onKeySelect={onKeySelect}
+            onTypeSelect={onTypeSelect}
+          />
+          <ChartActions
+            mobileChildren={
+              <CSVDownloadButton
+                data={csvData}
+                filename={getCsvFileName('Incentive_Current_Spending_By_Chain')}
+              />
+            }
+          >
+            <CSVDownloadButton
+              data={csvData}
+              filename={getCsvFileName('Incentive_Current_Spending_By_Chain')}
+            />
+          </ChartActions>
+        </div>
       </div>
-      <CurrentSpendingByChainMobileFilters
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        sortType={sortType}
-        csvData={csvData}
-        onKeySelect={onKeySelect}
-        onTypeSelect={onTypeSelect}
-        filterOptions={mobileFilterOptions}
-        onClearFilters={clearAllFilters}
-      />
       <View.Condition if={Boolean(!isLoading && !isError)}>
         <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
           <BarChart
