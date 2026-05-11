@@ -12,7 +12,6 @@ import { customChartOptions } from '@/features/Insentive/lib/customChartOptions'
 import { getChartData } from '@/features/Insentive/lib/getChartData';
 import { getCsvData } from '@/features/Insentive/lib/getCsvData';
 import { tableDataNormalizer } from '@/features/Insentive/lib/tableDataNormalizer';
-import { IncentiveData } from '@/pages/InsentivePage/IncentivePage';
 import { useOptions } from '@/shared/hooks/filters/useOptions';
 import { useModal } from '@/shared/hooks/useModal';
 import { SortAccessor, SortAdapter, useSorting } from '@/shared/hooks/useSorting';
@@ -21,6 +20,7 @@ import {
   capitalizeFirstLetter,
   parseStingsArray
 } from '@/shared/lib/utils/utils';
+import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
@@ -30,7 +30,7 @@ import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import View from '@/shared/ui/View/View';
 
 export interface CurrentSpendingByChainProps {
-  data: IncentiveData;
+  data: CombinedIncentivesData[];
   isLoading?: boolean;
   isError?: boolean;
 }
