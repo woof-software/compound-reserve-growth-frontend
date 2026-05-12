@@ -41,8 +41,8 @@ const HistoricalExpensesByNetworks = (
 
   const [activeModeTab, setActiveModeTab] = useQueryState('hebn-mode', { defaultValue: 'Total' });
   const [activeCurrencyTab, setActiveCurrencyTab] = useQueryState('hebn-currency', { defaultValue: 'COMP' });
-  const [startDate, setStartDate] = useQueryState('ttv-start', parseAsTimestampMs);
-  const [endDate, setEndDate] = useQueryState('ttv-end', parseAsTimestampMs);
+  const [startDate, setStartDate] = useQueryState('hebn-start', parseAsTimestampMs);
+  const [endDate, setEndDate] = useQueryState('hebn-end', parseAsTimestampMs);
 
   const { barSize, onBarSizeChange, disabledBarSizes } = useBarSizeWithDateRange({ startDate, endDate });
 
