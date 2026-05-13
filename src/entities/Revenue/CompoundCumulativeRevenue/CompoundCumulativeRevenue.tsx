@@ -281,8 +281,8 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
       isError={isError}
       className={{
         loading: 'min-h-[inherit]',
-        container: 'border-background min-h-[550px] border',
-        content: 'flex flex-col gap-3 p-0 pb-5 md:px-5 lg:px-10 lg:pb-10',
+        container: 'min-h-[571px] rounded-lg',
+        content: 'flex flex-col gap-3 pt-0 pb-0 px-5 lg:px-10 lg:pb-10',
       }}
     >
       <div className={'flex sm:flex-row sm:items-center flex-col-reverse gap-2 py-3 justify-end'}>
