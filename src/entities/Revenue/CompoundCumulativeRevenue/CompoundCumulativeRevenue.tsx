@@ -12,10 +12,10 @@ import {
   customChartOptions,
   customTooltipFormatter,
 } from '@/entities/Revenue/CompoundCumulativeRevenue/customChartOptions';
+import { useCumulativeChartSeries } from '@/entities/Revenue/CompoundCumulativeRevenue/useCumulativeChartSeries';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useOptions } from '@/shared/hooks/filters/useOptions';
 import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange';
-import { useCumulativeChartSeries } from '@/entities/Revenue/CompoundCumulativeRevenue/useCumulativeChartSeries';
 import { useEventsApi } from '@/shared/hooks/useEventsApi';
 import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
