@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "outDir": "./dist/",
-    "rootDir": "./src",
     "noImplicitAny": true,
     "module": "ESNext",
     "target": "ES2023",
@@ -13,9 +12,14 @@
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "isolatedModules": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx"]
+  "include": [
+    "./src/**/*.ts",
+    "./src/**/*.tsx",
+    "src/components/HoverCard/HoverCard.tsx"
+  ]
 }
