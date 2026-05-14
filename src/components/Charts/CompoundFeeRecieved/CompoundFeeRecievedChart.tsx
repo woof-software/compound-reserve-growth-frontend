@@ -1,4 +1,3 @@
-import { Format } from '@/shared/lib/utils/format';
 import React, {
   RefObject,
   useCallback,
@@ -14,6 +13,7 @@ import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { AggregatedPoint } from '@/shared/hooks/useCompoundChartBars';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { Format } from '@/shared/lib/utils/format';
 import { noop } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Each from '@/shared/ui/Each/Each';
@@ -76,7 +76,17 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
 
   const currentSeriesNames = useMemo(
     () => seriesData.map((s) => s.name!).filter(Boolean) as string[],
-    [seriesData]
+    [seriesData],
+  );
+
+  const seriesNamesSignature = useMemo(
+    () =>
+      seriesData
+        .map((s) => String(s.name ?? ''))
+        .filter(Boolean)
+        .sort()
+        .join('|'),
+    [seriesData],
   );
 
   const currentHiddenSet = useMemo(() => {
@@ -109,6 +119,12 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
     el.scrollBy({ left: dir === 'left' ? -step : step, behavior: 'smooth' });
   };
 
+  const aggregatedRangeKey = useMemo(() => {
+    if (!aggregatedData.length) return '';
+    const d = aggregatedData;
+    return `${d.length}:${d[0].x}:${d[d.length - 1].x}`;
+  }, [aggregatedData]);
+
   useEffect(() => {
     const chart = chartRef.current?.chart;
     if (!chart || !barCount || aggregatedData.length === 0) return;
@@ -122,7 +138,7 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
       programmaticChange.current = true;
       chart.xAxis[0].setExtremes(min, max, true);
     }
-  }, [barCount, aggregatedData]);
+  }, [barCount, aggregatedRangeKey]);
 
   const highlightSeries = useCallback((name: string) => {
     const chart = chartRef.current?.chart;
@@ -377,14 +393,18 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
   }, [hiddenItems]);
 
   useEffect(() => {
-    if (onHiddenItems) {
-      const current = new Set(currentSeriesNames);
+    if (!onHiddenItems) return;
 
-      const filtered = hiddenItems.filter((name) => current.has(name));
+    const current = new Set(
+      seriesData.map((s) => String(s.name ?? '')).filter(Boolean),
+    );
+    const filtered = hiddenItems.filter((name) => current.has(name));
+    const nextKey = [...filtered].sort().join('\0');
+    const prevKey = [...hiddenItems].sort().join('\0');
+    if (nextKey === prevKey) return;
 
-      onHiddenItems(filtered);
-    }
-  }, [currentSeriesNames]);
+    onHiddenItems(filtered);
+  }, [seriesNamesSignature, hiddenItems, onHiddenItems]);
 
   useEffect(() => {
     if (resetHiddenKey !== undefined) {
