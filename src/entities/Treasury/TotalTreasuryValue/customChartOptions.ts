@@ -2,6 +2,8 @@ import Highcharts, { Point } from 'highcharts';
 
 import { Format } from '@/shared/lib/utils/format';
 
+const MOBILE_BREAKPOINT = 1023;
+
 const getSeriesColor = (color: Highcharts.ColorType): string =>
   typeof color === 'string' ? color : '#ccc';
 
@@ -19,17 +21,32 @@ const row = (point: Highcharts.Point) => `
     </span>
   </div>`;
 
+const chunkArray = <T>(arr: T[], size: number): T[][] =>
+  Array.from({ length: size }, (_, i) => {
+    const chunkSize = Math.ceil(arr.length / size);
+    return arr.slice(i * chunkSize, (i + 1) * chunkSize);
+  });
+
+const buildColumns = (sorted: Highcharts.Point[], columnCount: number): string => {
+  const columns = chunkArray(sorted, columnCount);
+
+  return `
+    <div style="display:flex;gap:24px;">
+      ${columns
+    .map(
+      (col) => `
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${col.map(row).join('')}
+        </div>`
+    )
+    .join('')}
+    </div>`;
+};
+
 const buildBody = (sorted: Highcharts.Point[], groupBy?: string): string => {
   if (groupBy === 'deployment') {
-    const mid = Math.ceil(sorted.length / 2);
-    const col1 = sorted.slice(0, mid);
-    const col2 = sorted.slice(mid);
-
-    return `
-      <div style="display:flex;gap:24px;">
-        <div style="display:flex;flex-direction:column;gap:8px;">${col1.map(row).join('')}</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">${col2.map(row).join('')}</div>
-      </div>`;
+    const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+    return buildColumns(sorted, isMobile ? 2 : 3);
   }
 
   return `<div style="display:flex;flex-direction:column;gap:8px;">${sorted.map(row).join('')}</div>`;
