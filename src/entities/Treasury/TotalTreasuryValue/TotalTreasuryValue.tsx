@@ -217,15 +217,33 @@ const TotalTreasuryValue = ({
     color: `${color}`
   }));
 
-  const csvData = filterForRange({
-    data: chartSeries[0]?.data ?? [],
-    getDate: (item) => new Date(item.x),
-    transform: (item) => ({
-      Date: new Date(item.x).toISOString().split('T')[0],
-      'Total treasury': item.y
-    }),
-    range: barSize
-  });
+  const csvData = useMemo(() => {
+    if (!result) return [];
+
+    const isSingleSeries = selectedGroupKey === 'none';
+
+    const dateMap = Object.entries(result).reduce<Record<number, Record<string, number | string>>>(
+      (acc, [name, valueMap]) => {
+        const columnName = isSingleSeries ? 'Total treasury' : capitalizeFirstLetter(name);
+        valueMap.forEach((value, timestamp) => {
+          acc[timestamp] = {
+            ...acc[timestamp],
+            Date: new Date(timestamp).toISOString().split('T')[0],
+            [columnName]: value,
+          };
+        });
+        return acc;
+      },
+      {}
+    );
+
+    return filterForRange({
+      data: Object.entries(dateMap).map(([x, row]) => ({ x: Number(x), row })),
+      getDate: ({ x }) => new Date(x),
+      transform: ({ row }) => row,
+      range: barSize,
+    });
+  }, [result, selectedGroupKey, barSize]);
 
   return (
     <Card
