@@ -35,8 +35,9 @@ export function OptionsList<T>(props: OptionsListProps<T>) {
           key={getKey(option)}
           onClick={() => onSelect(option)}
           className={cn(
-            'mr-0.5 flex cursor-pointer items-center justify-between rounded-lg p-3 hover:bg-secondary-12 font-medium',
+            'mr-0.5 flex cursor-pointer items-center justify-between rounded-lg p-3 font-medium hover:bg-secondary-12',
             isMobile ? 'text-primary-13 text-[14px]' : 'text-[11px]',
+            isSelected(option) && 'bg-secondary-38',
             isMobile && isSelected(option) && 'text-secondary-10',
           )}
         >

@@ -18,6 +18,8 @@ export interface GroupFiltersProps<T> {
   getLabel: (o: T) => string;
   getKey: (o: T) => string;
   setValue?: (v: T) => void;
+  triggerLabel?: string;
+  hideMobileTrigger?: boolean;
 }
 
 export function GroupFilter<T>(props: GroupFiltersProps<T>) {
@@ -27,8 +29,10 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
     setValue = noop,
     getLabel,
     getKey,
+    triggerLabel = 'Group by',
+    hideMobileTrigger = false,
   } = props;
-  
+
   const [radioValue, setRadioValue] = useState(value);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -36,12 +40,12 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
 
   useEffect(() => {
     if (isOpen) setRadioValue(value);
-  }, [isOpen]);
+  }, [isOpen, value]);
 
   const isApplyButtonChanged = radioValue !== value;
   const isApplyButtonDisabled = Boolean(radioValue);
 
-  const toggle = () => setIsOpen(prev => !prev);
+  const toggle = () => setIsOpen((prev) => !prev);
 
   const onApply = () => {
     setValue(radioValue);
@@ -63,7 +67,7 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
     setIsOpen(false);
   };
 
-  if (isMobile) {
+  if (isMobile && !hideMobileTrigger) {
     return (
       <>
         <Button
@@ -74,26 +78,16 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
           Group
         </Button>
         <Drawer onClose={onDrawerClose} isOpen={isOpen}>
-          <Text
-            size='17'
-            weight='700'
-            lineHeight='140'
-            align='center'
-            className='mb-5 w-full'
-          >
+          <Text size='17' weight='700' lineHeight='140' align='center' className='mb-5 w-full'>
             Group
           </Text>
-          <Radio.Group
-            direction='vertical'
-            className='gap-1.5'
-            value={getKey(radioValue)}
-          >
+          <Radio.Group direction='vertical' className='gap-1.5' value={getKey(radioValue)}>
             {options.map((option) => (
               <Radio.Item
                 key={getKey(option)}
                 value={getKey(option)}
                 className={cn('p-3', {
-                  'bg-secondary-38 rounded-lg': radioValue === getKey(option)
+                  'bg-secondary-38 rounded-lg': radioValue === getKey(option),
                 })}
                 label={
                   <Radio.Label
@@ -112,9 +106,8 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
               className={cn(
                 'bg-secondary-31 text-secondary-32 h-[45px] w-full rounded-lg text-[11px] leading-4 font-medium',
                 {
-                  'bg-success-13 text-white':
-                    isApplyButtonDisabled && isApplyButtonChanged
-                }
+                  'bg-success-13 text-white': isApplyButtonDisabled && isApplyButtonChanged,
+                },
               )}
             >
               Apply
@@ -131,6 +124,10 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
     );
   }
 
+  if (isMobile && hideMobileTrigger) {
+    return null;
+  }
+
   return (
     <Dropdown
       isOpen={isOpen}
@@ -138,6 +135,7 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
       trigger={
         <DropdownGroupFilterTrigger
           label={getLabel(value)}
+          triggerLabel={triggerLabel}
           onClick={toggle}
           isOpen={isOpen}
         />

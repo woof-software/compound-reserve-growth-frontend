@@ -8,11 +8,12 @@ import ArrowDown from '@/shared/assets/svg/arrow-down.svg';
 export interface DropdownGroupFilterTriggerProps {
   onClick: () => void;
   label?: string;
-  isOpen?: boolean
+  triggerLabel?: string;
+  isOpen?: boolean;
 }
 
 export const DropdownGroupFilterTrigger = (props: DropdownGroupFilterTriggerProps) => {
-  const { label, onClick, isOpen = false } = props;
+  const { label, onClick, isOpen = false, triggerLabel = 'Group by' } = props;
 
   return (
     <div className={'flex items-center gap-1.5 cursor-pointer'}>
@@ -23,7 +24,7 @@ export const DropdownGroupFilterTrigger = (props: DropdownGroupFilterTriggerProp
         lineHeight='16'
         className='text-primary-14'
       >
-        Group by
+        {triggerLabel}
       </Text>
       <button
         className={cn('flex items-center rounded-lg pl-3 pr-1 h-8 hover:bg-primary-18 cursor-pointer gap-1.5', {
