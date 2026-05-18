@@ -98,6 +98,18 @@ const DrawerContent = memo(
     }, [isOpen]);
 
     useEffect(() => {
+      const handleResize = () => {
+        if (window.innerWidth >= 1024) {
+          document.body.classList.remove('disable-scroll-vertical');
+          animateClose(true);
+        }
+      };
+
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }, [animateClose]);
+
+    useEffect(() => {
       if (!mounted) return;
 
       setMeasured(false);
@@ -204,3 +216,4 @@ const Drawer = (props: DrawerProps) => (
 );
 
 export default Drawer;
+
