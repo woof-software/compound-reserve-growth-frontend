@@ -34,7 +34,6 @@ export default defineConfig([
         'plugin:import/warnings',
         'plugin:import/errors',
         'plugin:@typescript-eslint/recommended',
-        'plugin:prettier/recommended'
       )
     ),
 

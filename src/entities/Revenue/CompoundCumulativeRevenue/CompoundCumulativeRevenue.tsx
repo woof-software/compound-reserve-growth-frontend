@@ -17,7 +17,7 @@ import {
   customChartOptions,
   customTooltipFormatter
 } from '@/entities/Revenue/CompoundCumulativeRevenue/customChartOptions';
-import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useBarSize } from '@/shared/hooks/useBarSize';
 import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
 import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
 import { useEventsApi } from '@/shared/hooks/useEventsApi';
@@ -40,7 +40,7 @@ import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import { DateRangePickerPopover } from '@/shared/ui/DateRangePicker/DateRangePicker';
-import { DateRangeValue } from '@/shared/ui/DateRangePicker/types';
+import { DateRangeValue } from '@/shared/ui/DateRangePicker/DateRangePicker';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
@@ -151,7 +151,7 @@ const CompoundCumulativeRevenue = ({
     mobileFilterOption: dateRangeMobileOption
   } = useDateRangeFilter();
 
-  const { barSize, onBarSizeChange } = useChartControls({
+  const { barSize, onBarSizeChange } = useBarSize({
     initialBarSize: BAR_SIZE.D
   });
 

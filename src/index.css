@@ -396,6 +396,17 @@ body::-webkit-scrollbar {
   to { transform: translateY(100%); }
 }
 
+@keyframes dropdown-bounce {
+  0%   { transform: translateY(-0.1875rem); }
+  30%  { transform: translateY(0.125rem); }
+  85%  { transform: translateY(-0.0625rem); }
+  100% { transform: translateY(0); }
+}
+
+.animate-dropdown-bounce {
+  animation: dropdown-bounce 0.3s ease;
+}
+
 .animate-drawer-in {
   animation: drawer-in 0.5s cubic-bezier(0.16,1,0.3,1);
 }
