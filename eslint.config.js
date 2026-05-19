@@ -8,7 +8,6 @@ dotenv.config();
 import { defineConfig, globalIgnores } from 'eslint/config';
 import importPlugin from 'eslint-plugin-import';
 import pluginChecker from 'eslint-plugin-plugin-checker';
-import prettier from 'eslint-plugin-prettier';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
@@ -33,20 +32,17 @@ export default defineConfig([
   {
     extends: fixupConfigRules(
       compat.extends(
-        'prettier',
         'eslint:recommended',
         'plugin:react/recommended',
         'plugin:react-hooks/recommended',
         'plugin:import/warnings',
         'plugin:import/errors',
         'plugin:@typescript-eslint/recommended',
-        'plugin:prettier/recommended'
       )
     ),
 
     plugins: {
       react: fixupPluginRules(react),
-      prettier: fixupPluginRules(prettier),
       'react-hooks': fixupPluginRules(reactHooks),
       import: fixupPluginRules(importPlugin),
       '@typescript-eslint': fixupPluginRules(typescriptEslint),

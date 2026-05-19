@@ -18,6 +18,9 @@ dist-ssr
 .idea
 .env
 
+# Local formatter config (optional per developer)
+.prettierrc
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
