@@ -1,20 +1,8 @@
-import React, {
-  ChangeEvent,
-  FC,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
+import React, { ChangeEvent, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useModal } from '@/shared/hooks/useModal';
 import { cn } from '@/shared/lib/classNames/classNames';
-import {
-  handleDateInput,
-  inputDateToTimestamp,
-  timestampToInputDate
-} from '@/shared/lib/date/dateUtils';
+import { handleDateInput, inputDateToTimestamp, timestampToInputDate } from '@/shared/lib/date/dateUtils';
 import { noop } from '@/shared/lib/utils/utils';
 import { MEDIA_QUERY_DESKTOP } from '@/shared/lib/viewport/viewport';
 import Button from '@/shared/ui/Button/Button';
@@ -23,13 +11,16 @@ import Icon from '@/shared/ui/Icon/Icon';
 import Portal from '@/shared/ui/Portal/Portal';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
-
 import Calendar from './Calendar';
-import { DateRangeValue } from './types';
 
 const CALENDAR_DESKTOP_WIDTH = 640;
 const CALENDAR_DESKTOP_MARGIN = 16;
 const CALENDAR_DESKTOP_OFFSET_Y = 8;
+
+export type DateRangeValue = {
+  startDate: number | null;
+  endDate: number | null;
+};
 
 interface DateInputProps {
   inputRef: React.RefObject<HTMLInputElement | null>;
@@ -60,17 +51,12 @@ const DateInput: FC<DateInputProps> = ({
   onBlur,
   onClick,
   error,
-  errorClassName
+  errorClassName,
 }) => (
   <div className='flex flex-col gap-0'>
     <View.Condition if={showLabel && !!label}>
       <div className='flex h-6 items-center rounded-lg px-3 py-1'>
-        <Text
-          size='11'
-          weight='500'
-          lineHeight='16'
-          className='text-secondary-41 dark:text-secondary-33'
-        >
+        <Text size='11' weight='500' lineHeight='16' className='text-secondary-41 dark:text-secondary-33'>
           {label}
         </Text>
       </div>
@@ -101,12 +87,7 @@ const DateInput: FC<DateInputProps> = ({
       />
     </div>
     <View.Condition if={!!error}>
-      <Text
-        size='11'
-        weight='500'
-        lineHeight='16'
-        className={cn('mt-1 px-3 text-red-500', errorClassName)}
-      >
+      <Text size='11' weight='500' lineHeight='16' className={cn('mt-1 px-3 text-red-500', errorClassName)}>
         {error}
       </Text>
     </View.Condition>
@@ -144,13 +125,9 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   showLabels = false,
   clearLabel = 'Clear filters',
   onClose: onCloseContainer,
-  inlineCalendar = false
+  inlineCalendar = false,
 }) => {
-  const {
-    isOpen: isCalendarOpen,
-    onCloseModal: onCloseCalendar,
-    onToggleModal: onToggleCalendar
-  } = useModal();
+  const { isOpen: isCalendarOpen, onCloseModal: onCloseCalendar, onToggleModal: onToggleCalendar } = useModal();
 
   const anchorRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
@@ -159,13 +136,11 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
 
   const [calendarTransform, setCalendarTransform] = useState({
     top: 0,
-    left: 0
+    left: 0,
   });
 
   const dateRangeError =
-    value.startDate !== null &&
-    value.endDate !== null &&
-    value.endDate < value.startDate
+    value.startDate !== null && value.endDate !== null && value.endDate < value.startDate
       ? 'End date must be greater than Start date'
       : '';
 
@@ -181,23 +156,15 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     const top = rect.bottom + CALENDAR_DESKTOP_OFFSET_Y + scrollY;
     let left = rect.left + scrollX;
 
-    if (
-      left + CALENDAR_DESKTOP_WIDTH + CALENDAR_DESKTOP_MARGIN >
-      scrollX + window.innerWidth
-    ) {
-      left =
-        scrollX +
-        window.innerWidth -
-        CALENDAR_DESKTOP_WIDTH -
-        CALENDAR_DESKTOP_MARGIN;
+    if (left + CALENDAR_DESKTOP_WIDTH + CALENDAR_DESKTOP_MARGIN > scrollX + window.innerWidth) {
+      left = scrollX + window.innerWidth - CALENDAR_DESKTOP_WIDTH - CALENDAR_DESKTOP_MARGIN;
     }
     if (left < scrollX + CALENDAR_DESKTOP_MARGIN) {
       left = scrollX + CALENDAR_DESKTOP_MARGIN;
     }
 
     setCalendarTransform((prev) => {
-      const unchanged =
-        Math.abs(prev.top - top) < 0.5 && Math.abs(prev.left - left) < 0.5;
+      const unchanged = Math.abs(prev.top - top) < 0.5 && Math.abs(prev.left - left) < 0.5;
       return unchanged ? prev : { top, left };
     });
   }, []);
@@ -207,7 +174,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
       if (value.startDate === startDate && value.endDate === endDate) return;
       onChange({ startDate, endDate });
     },
-    [onChange, value.startDate, value.endDate]
+    [onChange, value.startDate, value.endDate],
   );
 
   const onStartChange = useCallback(
@@ -215,7 +182,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
       const next = inputDateToTimestamp(e.currentTarget.value);
       if (next !== null) updateRange(next, value.endDate);
     },
-    [updateRange, value.endDate]
+    [updateRange, value.endDate],
   );
 
   const onEndChange = useCallback(
@@ -223,7 +190,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
       const next = inputDateToTimestamp(e.currentTarget.value);
       if (next !== null) updateRange(value.startDate, next);
     },
-    [updateRange, value.startDate]
+    [updateRange, value.startDate],
   );
 
   const onStartBlur = useCallback(() => {
@@ -241,10 +208,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     onCloseContainer?.();
   }, [onCloseContainer, updateRange]);
 
-  const handleCalendarCancel = useCallback(
-    () => updateRange(null, null),
-    [updateRange]
-  );
+  const handleCalendarCancel = useCallback(() => updateRange(null, null), [updateRange]);
 
   const handleCalendarClose = useCallback(() => {
     onCloseCalendar();
@@ -255,7 +219,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     (e: React.MouseEvent<HTMLInputElement>) => {
       if (disabled) e.preventDefault();
     },
-    [disabled]
+    [disabled],
   );
 
   const handleCalendarToggleClick = useCallback(() => {
@@ -264,19 +228,16 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     onToggleCalendar();
   }, [disabled, isCalendarOpen, onToggleCalendar, updateCalendarPosition]);
 
-  const stopPropagation = useCallback(
-    (e: React.SyntheticEvent) => e.stopPropagation(),
-    []
-  );
+  const stopPropagation = useCallback((e: React.SyntheticEvent) => e.stopPropagation(), []);
 
   const inputClassName_ = useMemo(
     () =>
       cn(
         'date-range-input outline-secondary-19 bg-custom-trigger text-primary-14 h-10 w-full rounded-lg px-3 py-3 pr-14 text-[11px] font-medium leading-4 focus-visible:outline-none',
         { 'cursor-not-allowed opacity-60': disabled },
-        inputClassName
+        inputClassName,
       ),
-    [disabled, inputClassName]
+    [disabled, inputClassName],
   );
 
   useEffect(() => {
@@ -294,7 +255,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
 
     const controller = new AbortController();
     window.addEventListener('resize', scheduleUpdate, {
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     return () => {
@@ -327,7 +288,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     max,
     disabled,
     onCancel: handleCalendarCancel,
-    onClose: handleCalendarClose
+    onClose: handleCalendarClose,
   };
 
   const sharedInputProps = {
@@ -337,7 +298,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
     className: inputClassName_,
     showLabel: showLabels,
     onClick: handleInputClick,
-    onCalendarToggle: handleCalendarToggleClick
+    onCalendarToggle: handleCalendarToggleClick,
   };
 
   if (inlineCalendar) {
@@ -363,14 +324,11 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         className={cn(
           'bg-primary-15 relative mx-auto flex w-full max-w-[359px] flex-col items-stretch gap-3 rounded-lg p-4 shadow-[inset_0_0_0_0.25px_var(--secondary-39),0px_8px_16px_rgba(13,19,26,0.1),0px_16px_32px_rgba(13,19,26,0.05)] lg:mx-0 lg:w-[168px] lg:max-w-none lg:gap-2 lg:p-2',
           className,
-          { 'z-[50]': isCalendarOpen }
+          { 'z-[50]': isCalendarOpen },
         )}
         onPointerDown={(e) => {
           if (!isCalendarOpen) return;
-          if (
-            (e.target as HTMLElement).closest('[data-calendar-toggle="true"]')
-          )
-            return;
+          if ((e.target as HTMLElement).closest('[data-calendar-toggle="true"]')) return;
           onCloseCalendar();
         }}
       >
@@ -397,7 +355,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
             <Button
               className={cn(
                 'text-primary-14 mt-0 h-[30px] w-full rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white',
-                'bg-secondary-12 hover:bg-secondary-40'
+                'bg-secondary-12 hover:bg-secondary-40',
               )}
               onClick={onClear}
               disabled={disabled}
@@ -414,24 +372,18 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
               className='shadow-15 fixed bottom-2 left-1/2 z-[60] w-[359px] max-w-[calc(100vw-16px)] -translate-x-1/2'
               onPointerDown={stopPropagation}
             >
-              <Calendar
-                variant='mobile'
-                {...sharedCalendarProps}
-              />
+              <Calendar variant='mobile' {...sharedCalendarProps} />
             </div>
           </View.TabletMobile>
           <View.Desktop>
             <div
               className='shadow-15 absolute top-0 left-0 z-[60]'
               style={{
-                transform: `translate3d(${calendarTransform.left}px, ${calendarTransform.top}px, 0)`
+                transform: `translate3d(${calendarTransform.left}px, ${calendarTransform.top}px, 0)`,
               }}
               onPointerDown={stopPropagation}
             >
-              <Calendar
-                variant='desktop'
-                {...sharedCalendarProps}
-              />
+              <Calendar variant='desktop' {...sharedCalendarProps} />
             </div>
           </View.Desktop>
         </Portal>
@@ -483,7 +435,7 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
             className={cn(
               'bg-custom-trigger flex h-[32px] items-center gap-1.5 rounded-lg p-1.5 pr-3 text-[11px] font-medium',
               { 'opacity-60': disabled },
-              triggerClassName
+              triggerClassName,
             )}
           >
             <div className='p-0.5'>
@@ -497,7 +449,7 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
             <span
               className={cn(
                 'text-[11px] leading-[16px] font-medium',
-                hasSelection ? 'text-secondary-10' : 'text-gray-11'
+                hasSelection ? 'text-secondary-10' : 'text-gray-11',
               )}
             >
               {rangeLabel}
@@ -508,13 +460,10 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
           'bg-transparent border-none p-0 shadow-none max-h-none overflow-visible z-[50]',
           'fixed left-1/2 bottom-2 top-auto w-[calc(100vw-16px)] max-w-[359px] -translate-x-1/2',
           'lg:absolute lg:left-auto lg:right-0 lg:bottom-auto lg:top-10 lg:w-auto lg:max-w-none lg:translate-x-0',
-          popoverContentClassName
+          popoverContentClassName,
         )}
       >
-        <DateRangePicker
-          {...pickerProps}
-          onClose={onCloseModal}
-        />
+        <DateRangePicker {...pickerProps} onClose={onCloseModal} />
       </Dropdown>
     </div>
   );

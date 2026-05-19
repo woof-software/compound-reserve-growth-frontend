@@ -1,3 +1,6 @@
+import React, { useEffect } from 'react';
+import { CSVLink } from 'react-csv';
+
 import Line from '@/components/Charts/Line/Line';
 import Filter, { FilterOptions } from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
@@ -10,7 +13,7 @@ import { useChartFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib
 import { useCollateralChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useCollateralChartData';
 import { useRelativeFilters } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useRelativeFilters';
 import { CapoEventBusEventsContext } from '@/entities/Capo/lib/CapoEventBusContext';
-import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useBarSize } from '@/shared/hooks/useBarSize';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useModal } from '@/shared/hooks/useModal';
@@ -25,8 +28,6 @@ import Icon from '@/shared/ui/Icon/Icon';
 import SingleSelect from '@/shared/ui/SingleSelect/SingleSelect';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
-import React, { useEffect } from 'react';
-import { CSVLink } from 'react-csv';
 
 interface CapoSpecificCollateralPriceProps {
   rawData: CapoNormalizedChartData[];
@@ -116,7 +117,7 @@ export const CapoSpecificCollateralPrice = (
     }
   ];
 
-  const { barSize, onBarSizeChange } = useChartControls({
+  const { barSize, onBarSizeChange } = useBarSize({
     initialBarSize: BAR_SIZE.D
   });
 
