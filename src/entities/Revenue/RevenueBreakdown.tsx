@@ -1,405 +1,247 @@
-import React, { useCallback, useMemo, useReducer } from 'react';
-import { CSVLink } from 'react-csv';
+import React, { useEffect, useMemo } from 'react';
+import { useQueryState } from 'nuqs';
 
-import Filter from '@/components/Filter/Filter';
-import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
+import { ChartActions } from '@/components/Charts/ChartActions';
+import { DropdownFilter } from '@/components/Filter/DropdownFilter/DropdownFilter';
+import { Filters } from '@/components/Filter/Filters';
+import { GroupFilter } from '@/components/Filter/GroupFilter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import RevenueBreakdown, {
-  FormattedRevenueData
-} from '@/components/RevenuePageTable/RevenueBreakdown';
+import RevenueBreakdown, { FormattedRevenueData } from '@/components/RevenuePageTable/RevenueBreakdown';
+import {
+  aggregateBreakdownItem,
+  buildBreakdownColumns,
+  createBreakdownTableContext,
+} from '@/entities/Revenue/buildRevenueBreakdownTable';
 import { NOT_MARKET } from '@/shared/consts/consts';
-import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
+import { useOptions } from '@/shared/hooks/filters/useOptions';
 import { useModal } from '@/shared/hooks/useModal';
+import { useProcessor } from '@/shared/hooks/useProcessor';
 import { RevenuePageProps } from '@/shared/hooks/useRevenue';
-import {
-  SortAccessor,
-  SortAdapter,
-  useSorting
-} from '@/shared/hooks/useSorting';
-import { Format } from '@/shared/lib/utils/format';
-import {
-  capitalizeFirstLetter,
-  extractFilterOptions,
-  filterAndSortMarkets,
-  groupOptionsDto
-} from '@/shared/lib/utils/utils';
-import { OptionType } from '@/shared/types/types';
-import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
+import { SortAccessor, SortAdapter, useSorting } from '@/shared/hooks/useSorting';
+import { capitalizeFirstLetter, parseStingsArray } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
-import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
-import Drawer from '@/shared/ui/Drawer/Drawer';
-import { useDropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
-import SingleDropdown from '@/shared/ui/SingleDropdown/SingleDropdown';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
-import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
-interface SelectedFiltersState {
-  chain: OptionType[];
-  deployment: OptionType[];
-  source: OptionType[];
-  symbol: OptionType[];
-}
-
-const RevenueBreakDownBlock = ({
-  revenueData: rawData,
-  isLoading,
-  isError
-}: RevenuePageProps) => {
-  const initialState: SelectedFiltersState = {
-    chain: [],
-    deployment: [],
-    source: [],
-    symbol: []
-  };
-
-  const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
-    useSorting<FormattedRevenueData>('asc', null);
+const RevenueBreakDownBlock = ({ revenueData: rawData, isLoading, isError }: RevenuePageProps) => {
+  const { sortDirection, sortKey, onKeySelect, onTypeSelect } = useSorting<FormattedRevenueData>('asc', null);
 
   const sortType: SortAdapter<FormattedRevenueData> = {
     type: sortDirection,
-    key: sortKey
+    key: sortKey,
   };
 
-  const {
-    isOpen: isFilterOpen,
-    onOpenModal: onFilterOpen,
-    onCloseModal: onFilterClose
-  } = useModal();
+  const { isOpen: isSortOpen, onOpenModal: onSortOpen, onCloseModal: onSortClose } = useModal();
 
-  const {
-    isOpen: isSortOpen,
-    onOpenModal: onSortOpen,
-    onCloseModal: onSortClose
-  } = useModal();
+  const [selectedChainKeys, setSelectedChainKeys] = useQueryState('rb-chain', parseStingsArray([]));
+  const [selectedMarketKeys, setSelectedMarketKeys] = useQueryState('rb-deployment', parseStingsArray([]));
+  const [selectedSourceKeys, setSelectedSourceKeys] = useQueryState('rb-source', parseStingsArray([]));
+  const [selectedSymbolKeys, setSelectedSymbolKeys] = useQueryState('rb-symbol', parseStingsArray([]));
+  const [selectedYearKey, setSelectedYearKey] = useQueryState('rb-year');
 
-  const {
-    isOpen: isMoreOpen,
-    onOpenModal: onMoreOpen,
-    onCloseModal: onMoreClose
-  } = useModal();
-
-  const {
-    isOpen: isGroupOpen,
-    onOpenModal: onGroupOpen,
-    onCloseModal: onGroupClose
-  } = useModal();
-
-  const [selectedOptions, setSelectedOptions] = useReducer(
-    (
-      prev: SelectedFiltersState,
-      next: Partial<SelectedFiltersState>
-    ): SelectedFiltersState => ({
-      ...prev,
-      ...next
-    }),
-    initialState
-  );
-
-  useFiltersSync(selectedOptions, setSelectedOptions, 'rb', [
-    'chain',
-    'deployment',
-    'source',
-    'symbol'
-  ]);
-
-  const {
-    isOpen: yearOpen,
-    selectedValue: selectedYear,
-    open: openYear,
-    close: closeYear,
-    select: selectYear,
-    selectClose: selectYearClose
-  } = useDropdown('single');
-
-  const onSelectChain = useCallback(
-    (chain: OptionType[]) => {
-      const selectedChainIds = chain.map((o) => o.id);
-
-      const filteredDeployment = selectedOptions.deployment.filter((el) =>
-        selectedChainIds.length === 0
-          ? true
-          : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
-      );
-      setSelectedOptions({ chain, deployment: filteredDeployment });
-    },
-    [selectedOptions.deployment]
-  );
-
-  const onSelectMarket = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ deployment: options });
-  }, []);
-
-  const onSelectSource = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ source: options });
-  }, []);
-
-  const onSelectSymbol = useCallback((options: OptionType[]) => {
-    setSelectedOptions({ symbol: options });
-  }, []);
-
-  const yearOptions = useMemo(() => {
-    if (!rawData || rawData.length === 0) {
+  const yearGroupOptions = useMemo(() => {
+    if (!rawData?.length) {
       return [];
     }
-    const years = new Set(
-      rawData.map((item) => new Date(item.date * 1000).getFullYear().toString())
-    );
-    return Array.from(years).sort((a, b) => Number(b) - Number(a));
+
+    const years = new Set(rawData.map((item) => new Date(item.date * 1000).getFullYear().toString()));
+
+    return Array.from(years)
+      .sort((a, b) => Number(b) - Number(a))
+      .map((year) => ({ label: year, value: year }));
   }, [rawData]);
 
-  const filterOptionsConfig = useMemo(
-    () => ({
-      chain: { path: 'source.network' },
-      deployment: { path: 'source.market' },
-      source: { path: 'source.type' },
-      symbol: { path: 'source.asset.symbol' }
-    }),
-    []
+  const selectedYearOption = useMemo(() => {
+    if (!yearGroupOptions.length) {
+      return { label: '', value: '' };
+    }
+
+    const key = selectedYearKey ?? yearGroupOptions[0].value;
+
+    return yearGroupOptions.find(({ value }) => value === key) ?? yearGroupOptions[0];
+  }, [yearGroupOptions, selectedYearKey]);
+
+  const chainOptions = useMemo(
+    () =>
+      [...new Set(rawData.map((item) => item.source.network))].sort().map((value) => ({
+        label: capitalizeFirstLetter(value),
+        value,
+      })),
+    [rawData],
   );
 
-  const { chainOptions, deploymentOptions, sourceOptions, symbolOptions } =
-    useMemo(
-      () => extractFilterOptions(rawData, filterOptionsConfig),
-      [rawData, filterOptionsConfig]
-    );
+  const { selectedOptions: selectedChainOptions, setSelectedOptions: setSelectedChainOptions } = useOptions(
+    chainOptions,
+    selectedChainKeys,
+    setSelectedChainKeys,
+  );
 
-  const deploymentOptionsFilter = useMemo(() => {
-    return filterAndSortMarkets(
-      deploymentOptions,
-      selectedOptions.chain.map((o) => o.id)
-    );
-  }, [deploymentOptions, selectedOptions]);
+  const byChain = useMemo(
+    () =>
+      !selectedChainOptions.length
+        ? rawData
+        : rawData.filter((item) => selectedChainOptions.some((o) => o.value === item.source.network)),
+    [rawData, selectedChainOptions],
+  );
 
-  const filteredData = useMemo(() => {
-    let data = rawData;
+  const marketOptions = useMemo(
+    () =>
+      [...new Set(byChain.map((item) => item.source.market ?? NOT_MARKET))].sort().map((value) => ({
+        label: capitalizeFirstLetter(value),
+        value,
+      })),
+    [byChain],
+  );
 
-    if (selectedOptions.chain.length > 0) {
-      const selectedValues = selectedOptions.chain.map((option) => option.id);
-      data = data.filter((item) =>
-        item.source.network
-          ? selectedValues.includes(item.source.network)
-          : false
-      );
-    }
+  const { selectedOptions: selectedMarketOptions, setSelectedOptions: setSelectedMarketOptions } = useOptions(
+    marketOptions,
+    selectedMarketKeys,
+    setSelectedMarketKeys,
+  );
 
-    if (selectedOptions.deployment.length > 0) {
-      const selectedValues = selectedOptions.deployment.map(
-        (option) => option.id
-      );
-      data = data.filter((item) => {
-        const marketValue = item.source.market || NOT_MARKET;
-        return selectedValues.includes(marketValue);
-      });
-    }
+  const byChainAndMarket = useMemo(
+    () =>
+      !selectedMarketOptions.length
+        ? byChain
+        : byChain.filter((item) => selectedMarketOptions.some((o) => o.value === (item.source.market ?? NOT_MARKET))),
+    [byChain, selectedMarketOptions],
+  );
 
-    if (selectedOptions.source.length > 0) {
-      const selectedValues = selectedOptions.source.map((option) => option.id);
-      data = data.filter((item) =>
-        item.source.type ? selectedValues.includes(item.source.type) : false
-      );
-    }
+  const sourceOptions = useMemo(
+    () =>
+      [...new Set(byChainAndMarket.map((item) => item.source.type))]
+        .filter(Boolean)
+        .sort()
+        .map((value) => ({
+          label: capitalizeFirstLetter(value),
+          value,
+        })),
+    [byChainAndMarket],
+  );
 
-    if (selectedOptions.symbol.length > 0) {
-      const selectedValues = selectedOptions.symbol.map((option) => option.id);
-      data = data.filter((item) =>
-        item.source.asset?.symbol
-          ? selectedValues.includes(item.source.asset.symbol)
-          : false
-      );
-    }
+  const { selectedOptions: selectedSourceOptions, setSelectedOptions: setSelectedSourceOptions } = useOptions(
+    sourceOptions,
+    selectedSourceKeys,
+    setSelectedSourceKeys,
+  );
 
-    return data;
-  }, [rawData, selectedOptions]);
+  const byChainMarketAndSource = useMemo(
+    () =>
+      !selectedSourceOptions.length
+        ? byChainAndMarket
+        : byChainAndMarket.filter((item) => selectedSourceOptions.some((o) => o.value === item.source.type)),
+    [byChainAndMarket, selectedSourceOptions],
+  );
 
-  const { tableData, dynamicColumns } = useMemo(() => {
-    const yearToDisplay = selectedYear?.[0] || yearOptions[0];
-    if (!yearToDisplay) {
-      return { tableData: [], dynamicColumns: [] };
-    }
+  const symbolOptions = useMemo(
+    () =>
+      [...new Set(byChainMarketAndSource.map((item) => item.source.asset.symbol))]
+        .filter(Boolean)
+        .sort()
+        .map((value) => ({
+          label: capitalizeFirstLetter(value),
+          value,
+        })),
+    [byChainMarketAndSource],
+  );
 
-    const dataForYear = filteredData.filter(
-      (item) =>
-        new Date(item.date * 1000).getFullYear().toString() === yearToDisplay
-    );
+  const { selectedOptions: selectedSymbolOptions, setSelectedOptions: setSelectedSymbolOptions } = useOptions(
+    symbolOptions,
+    selectedSymbolKeys,
+    setSelectedSymbolKeys,
+  );
 
-    const columns: ExtendedColumnDef<FormattedRevenueData>[] = [
-      { accessorKey: 'chain', header: 'Chain' }
-    ];
-    if (
-      selectedOptions.deployment.length > 0 ||
-      selectedOptions.source.length > 0
-    ) {
-      columns.push({ accessorKey: 'market', header: 'Market' });
-    }
-    if (selectedOptions.source.length > 0) {
-      columns.push({ accessorKey: 'source', header: 'Source' });
-    }
-    if (
-      selectedOptions.source.length > 0 ||
-      selectedOptions.symbol.length > 0
-    ) {
-      columns.push({ accessorKey: 'reserveAsset', header: 'Reserve Asset' });
-    }
-
-    columns.push(
-      {
-        accessorKey: `q1_${yearToDisplay}`,
-        header: `Q1 ${yearToDisplay}`,
-        cell: ({ getValue }) => Format.price(getValue() as number, 'standard')
-      },
-      {
-        accessorKey: `q2_${yearToDisplay}`,
-        header: `Q2 ${yearToDisplay}`,
-        cell: ({ getValue }) => Format.price(getValue() as number, 'standard')
-      },
-      {
-        accessorKey: `q3_${yearToDisplay}`,
-        header: `Q3 ${yearToDisplay}`,
-        cell: ({ getValue }) => Format.price(getValue() as number, 'standard')
-      },
-      {
-        accessorKey: `q4_${yearToDisplay}`,
-        header: `Q4 ${yearToDisplay}`,
-        cell: ({ getValue }) => {
-          const val = getValue<number>();
-          return val === 0 ? '-' : Format.price(val, 'standard');
-        }
+  useEffect(() => {
+    const prune = (options: { value: string }[], keys: string[], setKeys: (v: string[]) => void) => {
+      const valid = new Set(options.map((o) => o.value));
+      const next = keys.filter((key) => valid.has(key));
+      if (next.length !== keys.length) {
+        setKeys(next);
       }
-    );
+    };
 
-    if (dataForYear.length === 0) {
-      return { tableData: [], dynamicColumns: columns };
-    }
+    prune(marketOptions, selectedMarketKeys, setSelectedMarketKeys);
+    prune(sourceOptions, selectedSourceKeys, setSelectedSourceKeys);
+    prune(symbolOptions, selectedSymbolKeys, setSelectedSymbolKeys);
+  }, [
+    marketOptions,
+    sourceOptions,
+    symbolOptions,
+    selectedMarketKeys,
+    selectedSourceKeys,
+    selectedSymbolKeys,
+    setSelectedMarketKeys,
+    setSelectedSourceKeys,
+    setSelectedSymbolKeys,
+  ]);
 
-    const groupedData: Record<string, FormattedRevenueData> = {};
+  const yearToDisplay = selectedYearOption.value;
 
-    dataForYear.forEach((item) => {
-      const marketValue = item.source.market || NOT_MARKET;
+  const tableContext = useMemo(
+    () =>
+      createBreakdownTableContext(
+        yearToDisplay,
+        selectedMarketOptions.length > 0,
+        selectedSourceOptions.length > 0,
+        selectedSymbolOptions.length > 0,
+      ),
+    [yearToDisplay, selectedMarketOptions.length, selectedSourceOptions.length, selectedSymbolOptions.length],
+  );
 
-      const keyParts = [item.source.network];
-      if (
-        selectedOptions.deployment.length > 0 ||
-        selectedOptions.source.length > 0
-      ) {
-        keyParts.push(marketValue);
-      }
-      if (selectedOptions.source.length > 0) {
-        keyParts.push(item.source.type);
-      }
-      if (
-        selectedOptions.source.length > 0 ||
-        selectedOptions.symbol.length > 0
-      ) {
-        keyParts.push(item.source.asset.symbol);
-      }
-      const groupKey = keyParts.join('-');
+  const { result: groupedData } = useProcessor({
+    array: rawData ?? [],
+    filters: [
+      (v) => !selectedChainOptions.length || selectedChainOptions.some((o) => o.value === v.source.network),
+      (v) =>
+        !selectedMarketOptions.length || selectedMarketOptions.some((o) => o.value === (v.source.market ?? NOT_MARKET)),
+      (v) => !selectedSourceOptions.length || selectedSourceOptions.some((o) => o.value === v.source.type),
+      (v) => !selectedSymbolOptions.length || selectedSymbolOptions.some((o) => o.value === v.source.asset.symbol),
+      (v) => !yearToDisplay || new Date(v.date * 1000).getFullYear().toString() === yearToDisplay,
+    ],
+    transformer: () => {
+      const grouped: Record<string, FormattedRevenueData> = {};
 
-      if (!groupedData[groupKey]) {
-        groupedData[groupKey] = {
-          chain: capitalizeFirstLetter(item.source.network),
-          market: marketValue,
-          source: item.source.type,
-          reserveAsset: item.source.asset.symbol,
-          [`q1_${yearToDisplay}`]: 0,
-          [`q2_${yearToDisplay}`]: 0,
-          [`q3_${yearToDisplay}`]: 0,
-          [`q4_${yearToDisplay}`]: 0
-        };
-      }
+      return (item) => {
+        aggregateBreakdownItem(item, grouped, tableContext);
+        return grouped;
+      };
+    },
+  });
 
-      const date = new Date(item.date * 1000);
-      const quarter = Math.floor(date.getMonth() / 3) + 1;
-      const quarterKey = `q${quarter}_${yearToDisplay}`;
-      (groupedData[groupKey][quarterKey] as number) += item.value;
-    });
+  const dynamicColumns = useMemo(() => buildBreakdownColumns(tableContext), [tableContext]);
 
-    const finalData = Object.values(groupedData);
+  const tableData = useMemo(() => Object.values(groupedData ?? {}), [groupedData]);
 
-    return { tableData: finalData, dynamicColumns: columns };
-  }, [filteredData, selectedYear, yearOptions, selectedOptions]);
-
-  const revenueBreakdownColumns: SortAccessor<FormattedRevenueData>[] =
-    useMemo(() => {
-      return dynamicColumns.map((column) => ({
+  const revenueBreakdownColumns: SortAccessor<FormattedRevenueData>[] = useMemo(
+    () =>
+      dynamicColumns.map((column) => ({
         accessorKey: String(column.accessorKey),
-        header: typeof column.header === 'string' ? column.header : ''
-      }));
-    }, [dynamicColumns]);
+        header: typeof column.header === 'string' ? column.header : '',
+      })),
+    [dynamicColumns],
+  );
 
-  const handleResetFilters = useCallback(() => {
-    setSelectedOptions(initialState);
-  }, []);
+  const clearAllFilters = () => {
+    setSelectedChainKeys([]);
+    setSelectedMarketKeys([]);
+    setSelectedSourceKeys([]);
+    setSelectedSymbolKeys([]);
+  };
+
+  const isAnyFiltersSelected =
+    selectedChainOptions.length > 0 ||
+    selectedMarketOptions.length > 0 ||
+    selectedSourceOptions.length > 0 ||
+    selectedSymbolOptions.length > 0;
 
   const hasData = tableData.length > 0;
 
-  const noDataMessage =
-    selectedOptions.chain.length > 0 ||
-    selectedOptions.deployment.length > 0 ||
-    selectedOptions.source.length > 0 ||
-    selectedOptions.symbol.length > 0
-      ? 'No data for selected filters'
-      : 'No data available';
+  const noDataMessage = isAnyFiltersSelected ? 'No data for selected filters' : 'No data available';
 
-  const filterOptions = useMemo(() => {
-    const chainFilterOptions = {
-      id: 'chain',
-      placeholder: 'Chain',
-      total: selectedOptions.chain.length,
-      selectedOptions: selectedOptions.chain,
-      options: chainOptions || [],
-      onChange: onSelectChain
-    };
-
-    const marketFilterOptions = {
-      id: 'market',
-      placeholder: 'Market',
-      total: selectedOptions.deployment.length,
-      selectedOptions: selectedOptions.deployment,
-      options: deploymentOptionsFilter || [],
-      onChange: onSelectMarket
-    };
-
-    const sourceFilterOptions = {
-      id: 'source',
-      placeholder: 'Source',
-      total: selectedOptions.source.length,
-      selectedOptions: selectedOptions.source,
-      options:
-        sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
-      onChange: onSelectSource
-    };
-
-    const symbolFilterOptions = {
-      id: 'reserveSymbol',
-      placeholder: 'Reserve Symbols',
-      total: selectedOptions.symbol.length,
-      selectedOptions: selectedOptions.symbol,
-      options:
-        symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
-      onChange: onSelectSymbol
-    };
-
-    return [
-      chainFilterOptions,
-      marketFilterOptions,
-      sourceFilterOptions,
-      symbolFilterOptions
-    ];
-  }, [
-    chainOptions,
-    deploymentOptionsFilter,
-    onSelectChain,
-    onSelectMarket,
-    onSelectSource,
-    onSelectSymbol,
-    selectedOptions,
-    sourceOptions,
-    symbolOptions
-  ]);
+  const csvFilename = `Revenue Breakdown ${yearToDisplay}.csv`;
 
   return (
     <Card
@@ -410,134 +252,79 @@ const RevenueBreakDownBlock = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'border-background min-h-[571px] border',
-        content: 'flex flex-col gap-3 px-0 pt-0 pb-0 lg:px-10 lg:pb-10'
+        content: 'flex flex-col gap-3 p-0 px-0 pb-5 md:px-5 lg:pb-10',
       }}
     >
-      <div className='flex justify-end gap-2 px-5 py-3 lg:hidden'>
-        <div className='flex w-full flex-col items-center justify-end gap-2 sm:flex-row'>
-          <div className='flex w-full items-center gap-2 sm:w-auto'>
-            <Button
-              onClick={onGroupOpen}
-              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
-            >
-              <Icon
-                name='group-grid'
-                className='h-[14px] w-[14px] fill-none'
-              />
-              Group
-            </Button>
-            <Button
-              onClick={onFilterOpen}
-              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-1/2 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
-            >
-              <Icon
-                name='filters'
-                className='h-[14px] w-[14px] fill-none'
-              />
-              Filters
-            </Button>
+      <div className='flex flex-col gap-2 px-5 py-3 md:px-0 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end lg:flex-nowrap lg:gap-1.5'>
+        <div className='flex w-full gap-2 max-sm:flex sm:contents lg:flex lg:w-auto lg:items-center lg:gap-1.5'>
+          <div className='min-w-0 flex-1 sm:flex-none max-sm:[&_button]:w-full max-sm:[&_button]:min-w-0 lg:order-2 lg:flex-none'>
+            <GroupFilter
+              options={yearGroupOptions}
+              getKey={(v) => v.value}
+              getLabel={(v) => v.label}
+              value={selectedYearOption}
+              setValue={({ value }) => setSelectedYearKey(value)}
+            />
           </div>
-          <div className='flex w-full items-center gap-2 sm:w-auto'>
+          <div className='min-w-0 flex-1 sm:flex-none lg:order-1 lg:flex lg:flex-nowrap lg:items-center lg:gap-1.5 max-sm:[&_button]:w-full max-sm:[&_button]:min-w-0'>
+            <Filters onClearAll={clearAllFilters} isShowClear={isAnyFiltersSelected}>
+              <DropdownFilter
+                triggerLabel='Chain'
+                options={chainOptions}
+                selectedOptions={selectedChainOptions}
+                getKey={(v) => v.value}
+                getLabel={(v) => v.label}
+                setValue={setSelectedChainOptions}
+              />
+              <DropdownFilter
+                triggerLabel='Market'
+                options={marketOptions}
+                selectedOptions={selectedMarketOptions}
+                getKey={(v) => v.value}
+                getLabel={(v) => v.label}
+                setValue={setSelectedMarketOptions}
+              />
+              <DropdownFilter
+                triggerLabel='Source'
+                options={sourceOptions}
+                selectedOptions={selectedSourceOptions}
+                getKey={(v) => v.value}
+                getLabel={(v) => v.label}
+                setValue={setSelectedSourceOptions}
+              />
+              <DropdownFilter
+                triggerLabel='Reserve Symbols'
+                options={symbolOptions}
+                selectedOptions={selectedSymbolOptions}
+                getKey={(v) => v.value}
+                getLabel={(v) => v.label}
+                setValue={setSelectedSymbolOptions}
+              />
+            </Filters>
+          </div>
+        </div>
+        <div className='flex w-full gap-2 sm:contents'>
+          <div className='min-w-0 flex-1 sm:flex-none max-sm:[&_button]:w-full max-sm:[&_button]:min-w-0'>
             <Button
               onClick={onSortOpen}
-              className='bg-secondary-27 text-gray-11 sm:auto shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8'
+              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-0 gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:min-w-[130px] sm:w-auto md:h-8 lg:hidden'
             >
-              <Icon
-                name='sort-icon'
-                className='h-[14px] w-[14px]'
-              />
+              <Icon name='sort-icon' className='h-[14px] w-[14px]' />
               Sort
             </Button>
-            <Button
-              onClick={onMoreOpen}
-              className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
-            >
-              <Icon
-                name='3-dots'
-                className='h-6 w-6 fill-none'
-              />
-            </Button>
+          </div>
+          <div className='shrink-0 sm:flex-none'>
+            <ChartActions mobileChildren={<CSVDownloadButton data={tableData} filename={csvFilename} />}>
+              <CSVDownloadButton data={tableData} filename={csvFilename} />
+            </ChartActions>
           </div>
         </div>
-      </div>
-      <div className='hidden justify-end gap-2 px-10 py-3 lg:flex lg:px-0'>
-        <div className='flex items-center gap-2'>
-          <div className='flex items-center gap-2'>
-            <MultiSelect
-              options={chainOptions || []}
-              value={selectedOptions.chain}
-              onChange={onSelectChain}
-              placeholder='Chain'
-              disabled={isLoading}
-            />
-            <MultiSelect
-              options={deploymentOptionsFilter || []}
-              value={selectedOptions.deployment}
-              onChange={onSelectMarket}
-              placeholder='Market'
-              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-            />
-            <MultiSelect
-              options={
-                sourceOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-                []
-              }
-              value={selectedOptions.source}
-              onChange={onSelectSource}
-              placeholder='Source'
-              disabled={isLoading}
-            />
-            <MultiSelect
-              options={
-                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-                []
-              }
-              value={selectedOptions.symbol}
-              onChange={onSelectSymbol}
-              placeholder='Reserve Symbols'
-              disabled={isLoading}
-            />
-          </div>
-          <div className='flex items-center gap-1'>
-            <Text
-              tag='span'
-              size='11'
-              weight='600'
-              lineHeight='16'
-              className='text-primary-14'
-            >
-              Group by
-            </Text>
-            <SingleDropdown
-              options={yearOptions}
-              isOpen={yearOpen}
-              selectedValue={selectedYear?.[0] || yearOptions[0] || ''}
-              onOpen={openYear}
-              onClose={closeYear}
-              onSelect={selectYearClose}
-              // contentClassName='p-[5px]'
-              triggerContentClassName='p-[5px]'
-              disabled={isLoading}
-            />
-          </div>
-        </div>
-        <CSVDownloadButton
-          data={tableData}
-          filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
-        />
       </div>
       <View.Condition if={hasData}>
-        <RevenueBreakdown
-          data={tableData}
-          columns={dynamicColumns}
-          sortType={sortType}
-        />
+        <RevenueBreakdown data={tableData} columns={dynamicColumns} sortType={sortType} />
       </View.Condition>
       <View.Condition if={!hasData}>
-        <NoDataPlaceholder
-          onButtonClick={handleResetFilters}
-          text={noDataMessage}
-        />
+        <NoDataPlaceholder onButtonClick={clearAllFilters} text={noDataMessage} />
       </View.Condition>
       <SortDrawer
         isOpen={isSortOpen}
@@ -547,54 +334,6 @@ const RevenueBreakDownBlock = ({
         onKeySelect={onKeySelect}
         onTypeSelect={onTypeSelect}
       />
-      <Filter
-        isOpen={isFilterOpen}
-        filterOptions={filterOptions}
-        onClose={onFilterClose}
-        onClearAll={handleResetFilters}
-      />
-      <GroupDrawer
-        isOpen={isGroupOpen}
-        selectedOption={selectedYear?.[0] || yearOptions[0] || ''}
-        options={groupOptionsDto(yearOptions)}
-        onClose={onGroupClose}
-        onSelect={selectYear}
-      />
-      <Drawer
-        isOpen={isMoreOpen}
-        onClose={onMoreClose}
-      >
-        <Text
-          size='17'
-          weight='700'
-          align='center'
-          className='mb-5'
-        >
-          Actions
-        </Text>
-        <div className='flex flex-col gap-1.5'>
-          <div className='px-3 py-2'>
-            <CSVLink
-              data={tableData}
-              filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
-              onClick={onMoreClose}
-            >
-              <div className='flex items-center gap-1.5'>
-                <Icon
-                  name='download'
-                  className='h-[26px] w-[26px]'
-                />
-                <Text
-                  size='14'
-                  weight='500'
-                >
-                  CSV with the entire historical data
-                </Text>
-              </div>
-            </CSVLink>
-          </div>
-        </div>
-      </Drawer>
     </Card>
   );
 };
