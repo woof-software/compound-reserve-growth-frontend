@@ -61,7 +61,12 @@ const DateInput: FC<DateInputProps> = ({
         </Text>
       </div>
     </View.Condition>
-    <div className='relative'>
+    <div
+      className={cn('relative rounded-lg outline', {
+        'outline-red-11': !!error,
+        'outline-secondary-19': !error,
+      })}
+    >
       <input
         ref={inputRef}
         type='text'
@@ -87,7 +92,7 @@ const DateInput: FC<DateInputProps> = ({
       />
     </div>
     <View.Condition if={!!error}>
-      <Text size='11' weight='500' lineHeight='16' className={cn('mt-1 px-3 text-red-500', errorClassName)}>
+      <Text size='11' weight='500' lineHeight='16' className={cn('text-red-11 mt-1', errorClassName)}>
         {error}
       </Text>
     </View.Condition>
@@ -140,9 +145,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   });
 
   const dateRangeError =
-    value.startDate !== null && value.endDate !== null && value.endDate < value.startDate
-      ? 'End date must be greater than Start date'
-      : '';
+    value.startDate !== null && value.endDate !== null && value.endDate < value.startDate ? 'No results found' : '';
 
   const hasRange = value.startDate !== null || value.endDate !== null;
 
@@ -233,7 +236,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   const inputClassName_ = useMemo(
     () =>
       cn(
-        'date-range-input outline-secondary-19 bg-custom-trigger text-primary-14 h-10 w-full rounded-lg px-3 py-3 pr-14 text-[11px] font-medium leading-4 focus-visible:outline-none',
+        'date-range-input bg-custom-trigger text-primary-14 h-10 w-full rounded-lg px-3 py-3 pr-14 text-[11px] font-medium leading-4 focus-visible:outline-none',
         { 'cursor-not-allowed opacity-60': disabled },
         inputClassName,
       ),
