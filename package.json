@@ -6,7 +6,7 @@
   "main": "index.tsx",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc -b && vite build",
     "lint:ts": "eslint \"./src/**/*.{ts,tsx}\"",
     "lint:ts:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix",
     "dev:check": "concurrently \"npm run prettier\" \"npm run stylelint:css:fix\" \"npm run lint:ts:fix\"",
