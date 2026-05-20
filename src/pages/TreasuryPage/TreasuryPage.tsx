@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 
 import MetricBlock from '@/entities/Treasury/MetricBlock';
-import TotalTreasuryValue from '@/entities/Treasury/TotalTreasuryValue/TotalTreasuryValue';
 import TreasuryBalanceByNetworkBlock from '@/entities/Treasury/TreasuryBalanceByNetwork/TreasuryBalanceByNetwork';
 import TreasuryCompositionBlock from '@/entities/Treasury/TreasuryCompositionBlock';
 import TreasuryHoldingsBlock from '@/entities/Treasury/TreasuryHoldingsBlock';
@@ -14,6 +13,8 @@ import {
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Text from '@/shared/ui/Text/Text';
+
+import TotalTreasuryValueRef from '../../entities/Treasury/TotalTreasuryValue/TotalTreasuryValue';
 
 const TreasuryPage = () => {
   const {
@@ -83,10 +84,10 @@ const TreasuryPage = () => {
             uniqData
           }}
         />
-        <TotalTreasuryValue
+        <TotalTreasuryValueRef
           isLoading={isLoading}
           isError={isError}
-          data={treasuryData}
+          data={treasuryData ?? []}
         />
         <TreasuryBalanceByNetworkBlock
           data={uniqData}

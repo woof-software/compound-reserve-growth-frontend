@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+import { NuqsAdapter } from 'nuqs/adapters/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import App from './App';
@@ -37,8 +38,10 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <NuqsAdapter>
+      <BrowserRouter>
+          <App />
+      </BrowserRouter>
+    </NuqsAdapter>
   </QueryClientProvider>
 );
