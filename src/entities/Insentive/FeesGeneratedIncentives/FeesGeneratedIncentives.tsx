@@ -10,7 +10,7 @@ import {
 import { getGeneratedIncentivesChartSeries } from '@/entities/Insentive/FeesGeneratedIncentives/lib/getGeneratedIncentivesChartSeries';
 import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
 import { useBarSizeConstraints } from '@/shared/hooks/useBarSizeConstraints';
-import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useBarSize } from '@/shared/hooks/useBarSize';
 import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
 import {
   useFiltersSync,
@@ -39,7 +39,7 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
   const [isRevenueOnly, setIsRevenueOnly] = useState(false);
   const groupBy = 'None';
 
-  const { barSize, onBarSizeChange } = useChartControls({
+  const { barSize, onBarSizeChange } = useBarSize({
     initialBarSize: BAR_SIZE.D
   });
 

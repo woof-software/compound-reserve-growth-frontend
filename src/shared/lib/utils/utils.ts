@@ -1,3 +1,4 @@
+import { createParser, parseAsArrayOf, parseAsString } from 'nuqs';
 import { ChangeEvent, MouseEvent as ReactMouseEvent } from 'react';
 
 import { NOT_MARKET, THIRTY_DAYS } from '@/shared/consts/consts';
@@ -198,9 +199,9 @@ export const sliceAddress = (
   return address && `${address.slice(0, before)}...${address.slice(-after)}`;
 };
 
-export const formatGrowth = (growth: number) => {
+export const formatGrowth = (growth: number, decimals = 1) => {
   if (growth === 0) return '-';
-  return `${growth > 0 ? '+' : ''}${growth?.toFixed(1)}%`;
+  return `${growth > 0 ? '+' : ''}${growth.toFixed(decimals)}%`;
 };
 
 // TotalTresuaryValue and CompoundCumulativeRevenue helpers
@@ -507,4 +508,16 @@ export const filterAndSortMarkets = (
   }
 
   return sorted;
+};
+
+export const parseAsTimestampMs = createParser<number>({
+  parse: (value) => {
+    if (value === null) return null;
+    return Number(value);
+  },
+  serialize: (value) => String(value),
+});
+
+export const parseStingsArray = (defaultValue = []) => {
+  return parseAsArrayOf(parseAsString).withDefault(defaultValue);
 };

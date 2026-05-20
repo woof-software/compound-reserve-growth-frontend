@@ -9,7 +9,7 @@ import {
 } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/customTooltipFormatter';
 import { useHistoricalExpensesChartSeries } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/useHistoricalExpensesChartSeries';
 import { useBarSizeConstraints } from '@/shared/hooks/useBarSizeConstraints';
-import { useChartControls } from '@/shared/hooks/useChartControls';
+import { useBarSize } from '@/shared/hooks/useBarSize';
 import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useLegends } from '@/shared/hooks/useLegends';
@@ -39,7 +39,7 @@ const HistoricalExpensesByNetworks = (
   >('Total');
   const [activeViewTab, setActiveViewTab] = useState<'COMP' | 'USD'>('COMP');
 
-  const { barSize, onBarSizeChange } = useChartControls({
+  const { barSize, onBarSizeChange } = useBarSize({
     initialBarSize: BAR_SIZE.D
   });
 

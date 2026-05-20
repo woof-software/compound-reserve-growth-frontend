@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 
 import { getEndOfDayTimestamp } from '@/shared/lib/date/dateUtils';
-import { DateRangeValue } from '@/shared/ui/DateRangePicker/types';
+import { DateRangeValue } from '@/shared/ui/DateRangePicker/DateRangePicker';
 
 const SECOND_IN_MS = 1000;
 
