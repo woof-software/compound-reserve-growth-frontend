@@ -79,7 +79,6 @@ export default defineConfig([
     },
 
     rules: {
-      'prettier/prettier': ['warn', { endOfLine: 'auto' }],
       'kalimahAppsTailwind/sort': 'warn',
       'kalimahAppsTailwind/multiline': [
         'warn',
