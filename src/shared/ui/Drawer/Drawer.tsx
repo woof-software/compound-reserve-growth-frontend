@@ -8,12 +8,10 @@ import {
 } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
-
 import {
   AnimationProvider,
   useAnimationLibs
 } from '@/shared/ui/AnimationProvider/AnimationProvider';
-import Portal from '@/shared/ui/Portal/Portal';
 
 interface DrawerProps extends PropsWithChildren {
   className?: string;
@@ -100,6 +98,18 @@ const DrawerContent = memo(
     }, [isOpen]);
 
     useEffect(() => {
+      const handleResize = () => {
+        if (window.innerWidth >= 1024) {
+          document.body.classList.remove('disable-scroll-vertical');
+          animateClose(true);
+        }
+      };
+
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }, [animateClose]);
+
+    useEffect(() => {
       if (!mounted) return;
 
       setMeasured(false);
@@ -162,33 +172,31 @@ const DrawerContent = memo(
     if (!mounted) return null;
 
     return (
-      <Portal element={document.getElementById('drawer') ?? document.body}>
-        <div
+      <div
+        className={cn(
+          'fixed inset-0 z-10 flex items-end overflow-hidden lg:hidden',
+          className
+        )}
+      >
+        <Spring.a.div
+          className='bg-secondary-30 pointer-events-auto fixed inset-0 backdrop-blur-lg'
+          onClick={() => animateClose(true)}
+        />
+        <Spring.a.div
+          {...bind()}
+          ref={panelRef}
           className={cn(
-            'fixed inset-0 z-10 flex items-end overflow-hidden lg:hidden',
-            className
+            'bg-card-content pointer-events-auto fixed right-0 bottom-0 left-0 z-50 w-full touch-none rounded-t-3xl px-5 pt-10 pb-5 will-change-transform',
+            isOpen ? 'animate-drawer-in' : 'animate-drawer-out'
           )}
+          style={{
+            transform: y.to((py) => `translateY(${py}px)`),
+            visibility: measured ? 'visible' : 'hidden'
+          }}
         >
-          <Spring.a.div
-            className='bg-secondary-30 pointer-events-auto fixed inset-0 backdrop-blur-lg'
-            onClick={() => animateClose(true)}
-          />
-          <Spring.a.div
-            {...bind()}
-            ref={panelRef}
-            className={cn(
-              'bg-card-content pointer-events-auto fixed right-0 bottom-0 left-0 z-50 w-full touch-none rounded-t-3xl px-5 pt-10 pb-5 will-change-transform',
-              isOpen ? 'animate-drawer-in' : 'animate-drawer-out'
-            )}
-            style={{
-              transform: y.to((py) => `translateY(${py}px)`),
-              visibility: measured ? 'visible' : 'hidden'
-            }}
-          >
-            {children}
-          </Spring.a.div>
-        </div>
-      </Portal>
+          {children}
+        </Spring.a.div>
+      </div>
     );
   }
 );
@@ -208,3 +216,4 @@ const Drawer = (props: DrawerProps) => (
 );
 
 export default Drawer;
+

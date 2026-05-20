@@ -1,3 +1,4 @@
+import { DateRangeValue } from '@/shared/ui/DateRangePicker/DateRangePicker';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
@@ -11,8 +12,6 @@ import {
 import { noop } from '@/shared/lib/utils/utils';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
-
-import type { DateRangeValue } from './types';
 
 type CalendarVariant = 'mobile' | 'desktop';
 type ViewMode = 'day' | 'month' | 'year';

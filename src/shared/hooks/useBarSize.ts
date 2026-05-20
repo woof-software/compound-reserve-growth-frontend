@@ -6,7 +6,7 @@ interface UseChartControlsProps {
   initialBarSize?: BAR_SIZE;
 }
 
-export const useChartControls = ({
+export const useBarSize = ({
   initialBarSize = BAR_SIZE.D
 }: UseChartControlsProps = {}) => {
   const [barSize, setBarSize] = useState<BAR_SIZE>(initialBarSize);
