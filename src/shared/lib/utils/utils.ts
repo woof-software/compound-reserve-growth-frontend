@@ -521,16 +521,3 @@ export const parseAsTimestampMs = createParser<number>({
 export const parseStingsArray = (defaultValue = []) => {
   return parseAsArrayOf(parseAsString).withDefault(defaultValue);
 };
-
-export const throttle = <T extends (...args: Parameters<T>) => void>(
-  fn: T,
-  delay: number
-): ((...args: Parameters<T>) => void) => {
-  let lastCall = 0;
-
-  return (...args: Parameters<T>) => {
-    const now = Date.now();
-    if (now - lastCall < delay) return;
-    lastCall = now;
-    fn(...args);
-  }}

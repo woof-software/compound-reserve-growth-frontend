@@ -1,10 +1,11 @@
-import { noop, throttle } from "@/shared/lib/utils/utils";
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { noop } from '@/shared/lib/utils/utils';
+import React, { FC, useEffect, useRef, useState } from "react";
 import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import View from '@/shared/ui/View/View';
+import debounce from 'debounce';
 
 export type ChartLegendItem = {
   id: string;
@@ -34,13 +35,13 @@ const ChartLegends: FC<ChartLegendsProps> = ({
 
   const isLastActiveLegend = legends.filter(({ isDisabled }) => !isDisabled).length === 1;
 
-  const updateArrows = throttle(() => {
+  const updateArrows = debounce(() => {
     const el = viewportRef.current;
     if (!el) return;
     const { scrollLeft, scrollWidth, clientWidth } = el;
-    setCanScrollLeft(scrollLeft > 10);
+    setCanScrollLeft(scrollLeft >= 1);
     setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 10);
-  }, 100);
+  }, 1000 / 30);
 
   const scrollByDir = (dir: 'left' | 'right') => {
     const el = viewportRef.current;
