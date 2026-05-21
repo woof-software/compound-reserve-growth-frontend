@@ -18,18 +18,22 @@ import {
 import { noop } from '@/shared/lib/utils/utils';
 import { MEDIA_QUERY_DESKTOP } from '@/shared/lib/viewport/viewport';
 import Button from '@/shared/ui/Button/Button';
-import { Dropdown } from '@/shared/ui/Dropdown/Dropdown';
+import { Dropdown } from '@/shared/ui/DropdownRef/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
 import Portal from '@/shared/ui/Portal/Portal';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
 import Calendar from './Calendar';
-import { DateRangeValue } from './types';
 
 const CALENDAR_DESKTOP_WIDTH = 640;
 const CALENDAR_DESKTOP_MARGIN = 16;
 const CALENDAR_DESKTOP_OFFSET_Y = 8;
+
+export type DateRangeValue = {
+  startDate: number | null;
+  endDate: number | null;
+};
 
 interface DateInputProps {
   inputRef: React.RefObject<HTMLInputElement | null>;
@@ -127,7 +131,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   disabled = false,
   className,
   inputClassName,
-  showLabels = false,
+  showLabels = true,
   clearLabel = 'Clear filters',
   onClose: onCloseContainer,
   inlineCalendar = false
@@ -340,7 +344,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
       <div
         ref={anchorRef}
         className={cn(
-          'bg-primary-15 relative mx-auto flex w-full max-w-[359px] flex-col items-stretch gap-3 rounded-lg p-4 shadow-[inset_0_0_0_0.25px_var(--secondary-39),0px_8px_16px_rgba(13,19,26,0.1),0px_16px_32px_rgba(13,19,26,0.05)] lg:mx-0 lg:w-[168px] lg:max-w-none lg:gap-2 lg:p-2',
+          'relative mx-auto flex w-full max-w-[359px] flex-col items-stretch gap-3 rounded-lg p-4 lg:mx-0 lg:w-[168px] lg:max-w-none lg:gap-2 lg:p-2',
           className,
           { 'z-[50]': isCalendarOpen }
         )}
@@ -371,7 +375,8 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
         />
         {hasRange && (
           <>
-            <div className='bg-primary-12 dark:bg-secondary-24 -mx-4 h-[0.25px] w-[calc(100%+32px)] self-stretch lg:-mx-2 lg:w-[calc(100%+16px)]' />
+            <div
+              className='bg-primary-12 dark:bg-secondary-24 -mx-4 h-[0.25px] w-[calc(100%+32px)] self-stretch lg:-mx-2 lg:w-[calc(100%+16px)]' />
             <Button
               className={cn(
                 'text-primary-14 mt-0 h-[30px] w-full rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white',
@@ -421,11 +426,10 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
 const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
   placeholder = 'Date range',
   triggerClassName,
-  popoverContentClassName,
   ...pickerProps
 }) => {
   const { value, disabled = false } = pickerProps;
-  const { isOpen, onOpenModal, onCloseModal } = useModal();
+  const { isOpen, onOpenModal, onCloseModal, onToggleModal } = useModal();
 
   const hasSelection = value.startDate !== null || value.endDate !== null;
 
@@ -449,52 +453,50 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
     return () => mql.removeEventListener('change', onCloseModal);
   }, [isOpen, onCloseModal]);
 
-  return (
-    <div>
-      <Dropdown
-        open={isOpen}
-        isDisabled={disabled}
-        onOpen={onOpenModal}
-        onClose={onCloseModal}
-        triggerContent={
-          <div
-            className={cn(
-              'bg-custom-trigger flex h-[32px] items-center gap-1.5 rounded-lg p-1.5 pr-3 text-[11px] font-medium',
-              { 'opacity-60': disabled },
-              triggerClassName
-            )}
-          >
-            <div className='p-0.5'>
-              <Icon
-                name={hasSelection ? 'calendar-check' : 'calendar-uncheck'}
-                className='h-4 w-4'
-                color={hasSelection ? 'secondary-10' : 'color-gray-11'}
-                isRound={false}
-              />
-            </div>
-            <span
-              className={cn(
-                'text-[11px] leading-[16px] font-medium',
-                hasSelection ? 'text-secondary-10' : 'text-gray-11'
-              )}
-            >
-              {rangeLabel}
-            </span>
-          </div>
-        }
-        contentClassName={cn(
-          'bg-transparent border-none p-0 shadow-none max-h-none overflow-visible z-[50]',
-          'fixed left-1/2 bottom-2 top-auto w-[calc(100vw-16px)] max-w-[359px] -translate-x-1/2',
-          'lg:absolute lg:left-auto lg:right-0 lg:bottom-auto lg:top-10 lg:w-auto lg:max-w-none lg:translate-x-0',
-          popoverContentClassName
+  const trigger = (
+    <Button
+      className='cursor-pointer'
+      onClick={onToggleModal}
+    >
+      <div
+        className={cn(
+          'bg-custom-trigger flex h-[32px] items-center gap-1.5 rounded-lg p-1.5 pr-3 text-[11px] font-medium',
+          { 'opacity-60': disabled },
+          triggerClassName
         )}
       >
-        <DateRangePicker
-          {...pickerProps}
-          onClose={onCloseModal}
-        />
-      </Dropdown>
-    </div>
+        <div className='p-0.5'>
+          <Icon
+            name={hasSelection ? 'calendar-check' : 'calendar-uncheck'}
+            className='h-4 w-4'
+            color={hasSelection ? 'secondary-10' : 'color-gray-11'}
+            isRound={false}
+          />
+        </div>
+        <span
+          className={cn(
+            'text-[11px] leading-[16px] font-medium',
+            hasSelection ? 'text-secondary-10' : 'text-gray-11'
+          )}
+        >
+          {rangeLabel}
+        </span>
+      </div>
+    </Button>
+  );
+
+  return (
+    <Dropdown
+      isOpen={isOpen}
+      setIsOpen={onOpenModal}
+      onClose={onCloseModal}
+      trigger={trigger}
+    >
+      <DateRangePicker
+        {...pickerProps}
+        onClose={onCloseModal}
+      />
+    </Dropdown>
   );
 };
 

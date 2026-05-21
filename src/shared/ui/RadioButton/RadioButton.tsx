@@ -13,7 +13,7 @@ import { cn } from '@/shared/lib/classNames/classNames';
 
 import View from '../View/View';
 
-type Value = string | number;
+type Value = string;
 
 type Direction = 'horizontal' | 'vertical';
 
@@ -109,7 +109,7 @@ interface RadioProps
     React.InputHTMLAttributes<HTMLInputElement>,
     'type' | 'onChange' | 'value' | 'checked' | 'defaultChecked'
   > {
-  value: string | number;
+  value: string;
 
   label?: ReactNode;
 
@@ -118,7 +118,7 @@ interface RadioProps
   defaultChecked?: boolean;
 
   onChange?: (
-    value: string | number,
+    value: string,
     e: React.ChangeEvent<HTMLInputElement>
   ) => void;
 

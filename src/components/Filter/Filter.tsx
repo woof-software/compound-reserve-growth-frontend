@@ -6,7 +6,7 @@ import { noop } from '@/shared/lib/utils/utils';
 import { OptionType } from '@/shared/types/types';
 import Button from '@/shared/ui/Button/Button';
 import DateRangePicker from '@/shared/ui/DateRangePicker/DateRangePicker';
-import { DateRangeValue } from '@/shared/ui/DateRangePicker/types';
+import { DateRangeValue } from '@/shared/ui/DateRangePicker/DateRangePicker';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';

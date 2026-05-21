@@ -9,7 +9,7 @@
   font-family: 'Haas Grot Text R';
   font-style: normal;
   font-weight: 400;
-  src: url('./shared/fonts/NeueHaasGrotDispRound-55Roman.otf')
+  src: url('./shared/fonts/NeueHaasGrotDispRound-55Roman.woff2')
   format('opentype');
   font-display: swap;
 }
@@ -18,7 +18,7 @@
   font-family: 'Haas Grot Text R';
   font-style: normal;
   font-weight: 500 600;
-  src: url('./shared/fonts/NeueHaasGrotDispRound-65Medium.otf')
+  src: url('./shared/fonts/NeueHaasGrotDispRound-65Medium.woff2')
   format('opentype');
   font-display: swap;
 }
@@ -27,7 +27,7 @@
   font-family: 'Haas Grot Text R';
   font-style: normal;
   font-weight: 700;
-  src: url('./shared/fonts/NeueHaasGrotDispRound-75Bold.otf')
+  src: url('./shared/fonts/NeueHaasGrotDispRound-75Bold.woff2')
   format('opentype');
   font-display: swap;
 }
@@ -394,6 +394,17 @@ body::-webkit-scrollbar {
 @keyframes drawer-out {
   from { transform: translateY(0%); }
   to { transform: translateY(100%); }
+}
+
+@keyframes dropdown-bounce {
+  0%   { transform: translateY(-0.1875rem); }
+  30%  { transform: translateY(0.125rem); }
+  85%  { transform: translateY(-0.0625rem); }
+  100% { transform: translateY(0); }
+}
+
+.animate-dropdown-bounce {
+  animation: dropdown-bounce 0.3s ease;
 }
 
 .animate-drawer-in {
