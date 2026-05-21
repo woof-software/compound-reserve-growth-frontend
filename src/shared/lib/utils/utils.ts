@@ -482,9 +482,9 @@ export const filterAndSortMarkets = (
     const getOrder = (el: OptionType) => {
       const type = el.marketType?.toLowerCase();
 
-      if (type === 'v3') return 0;
+      if (type === "v3") return 0;
 
-      if (type === 'v2') return 1;
+      if (type === "v2") return 1;
 
       if (el.id.toLowerCase() === NOT_MARKET.toLowerCase()) return 2;
 
@@ -503,7 +503,7 @@ export const filterAndSortMarkets = (
     return sorted.filter((el) =>
       Array.isArray(el.chain)
         ? el.chain.some((c) => selectedChainIds.includes(c))
-        : false
+        : false,
     );
   }
 
