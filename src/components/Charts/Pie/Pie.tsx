@@ -1,13 +1,12 @@
-import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
-import Highcharts from 'highcharts';
-import HighchartsReact from 'highcharts-react-official';
+import React, { FC, useCallback, useMemo, useRef, useState } from "react";
+import Highcharts from "highcharts";
+import HighchartsReact from "highcharts-react-official";
 
-import PieChartLegend from '@/components/Charts/Pie/PieChartLegend';
-import { getPieChartOptions } from '@/components/Charts/Pie/pieChartOptions';
-import { cn } from '@/shared/lib/classNames/classNames';
-import { colorPicker } from '@/shared/lib/utils/utils';
-import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
+import ChartLegends from "@/components/Charts/ChartLegends";
+import { cn } from "@/shared/lib/classNames/classNames";
+import { colorPicker } from "@/shared/lib/utils/utils";
+import Text from "@/shared/ui/Text/Text";
+import View from "@/shared/ui/View/View";
 
 interface PieDataItem {
   name: string;
@@ -21,19 +20,33 @@ interface PieChartProps {
   isResponse?: boolean;
   responseOptions?: Highcharts.ResponsiveOptions;
   className?: string;
+  hiddenItems?: Set<string>;
+  onLegendClick?: (name: string) => void;
 }
 
-const PieChart: FC<PieChartProps> = ({ data, className }) => {
+const PieChart: FC<PieChartProps> = ({
+  data,
+  className,
+  hiddenItems: externalHiddenItems,
+  onLegendClick,
+}) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
-  const [hiddenItems, setHiddenItems] = useState<Set<string>>(new Set());
+  const [internalHiddenItems, setInternalHiddenItems] = useState<Set<string>>(
+    new Set(),
+  );
   const [hc, setHc] = useState<Highcharts.Chart | null>(null);
+
+  const hiddenItems = useMemo(
+    () => externalHiddenItems || internalHiddenItems,
+    [externalHiddenItems, internalHiddenItems],
+  );
 
   const findPointByName = useCallback(
     (name: string) =>
       hc?.series?.[0]?.points.find(
-        (p) => p.name === name && p.visible !== false
+        (p) => p.name === name && p.visible !== false,
       ),
-    [hc]
+    [hc],
   );
 
   const highlightPoint = useCallback(
@@ -41,29 +54,29 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
       const pt = findPointByName(name);
       if (!pt) return;
       pt.series.points.forEach((p) =>
-        p.setState(p === pt ? 'hover' : 'inactive')
+        p.setState(p === pt ? "hover" : "inactive"),
       );
       hc?.tooltip?.refresh(pt);
     },
-    [hc, findPointByName]
+    [hc, findPointByName],
   );
 
   const clearHighlight = useCallback(() => {
     const s = hc?.series?.[0];
     if (!s) return;
-    s.points.forEach((p) => p.setState(''));
+    s.points.forEach((p) => p.setState(""));
     hc?.tooltip?.hide(0);
   }, [hc]);
 
   useMemo(() => {
-    setHiddenItems(new Set());
+    setInternalHiddenItems(new Set());
   }, [data]);
 
   const chartData = useMemo(() => {
     const visibleItems = data.filter((item) => !hiddenItems.has(item.name));
     const totalVisiblePercent = visibleItems.reduce(
       (sum, item) => sum + item.percent,
-      0
+      0,
     );
 
     return data.map((el, index) => {
@@ -78,10 +91,21 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         y: newPercent,
         value: el.value,
         color: el.color || colorPicker(index),
-        visible: isVisible
+        visible: isVisible,
       };
     });
   }, [data, hiddenItems]);
+
+  const legends = useMemo(
+    () =>
+      chartData.map((item) => ({
+        id: item.name,
+        name: item.name,
+        color: item.color,
+        isDisabled: !item.visible,
+      })),
+    [chartData],
+  );
 
   const areAllSeriesHidden = useMemo(() => {
     if (!data || data.length === 0) return false;
@@ -102,8 +126,14 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
   }, [chartData]);
 
   const onLegendItemClick = (itemName: string) => {
+    if (onLegendClick) {
+      onLegendClick(itemName);
+      return;
+    }
+
     if (isLastActiveLegend && !hiddenItems.has(itemName)) return;
-    setHiddenItems((prev) => {
+
+    setInternalHiddenItems((prev) => {
       const next = new Set(prev);
       if (next.has(itemName)) {
         next.delete(itemName);
@@ -114,24 +144,115 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
     });
   };
 
-  const options = getPieChartOptions(
-    chartData as unknown as Highcharts.PointOptionsObject[]
-  );
+  const options = {
+    chart: {
+      plotBackgroundColor: undefined,
+      plotBorderWidth: undefined,
+      plotShadow: false,
+      type: "pie",
+    },
+    credits: {
+      enabled: false,
+    },
+    title: {
+      text: "",
+    },
+    tooltip: {
+      useHTML: true,
+      padding: 16,
+      borderRadius: 8,
+      backgroundColor: "#FFFFFF",
+      shadow: {
+        color: "#0000000A",
+        offsetX: 6,
+        offsetY: 0,
+        opacity: 1,
+        width: 12,
+      },
+      style: {
+        fontFamily: "Haas Grot Text R, sans-serif",
+        fontSize: "11px",
+        lineHeight: "16px",
+        letterSpacing: "0",
+      },
+      headerFormat: `
+      <div style="
+        font-weight: 500;
+        margin-bottom: 16px;
+        font-family: 'Haas Grot Text R', sans-serif;
+      ">
+        {point.name}
+      </div>
+    `,
+      pointFormat: `
+      <div style="display: flex; gap: 24px; align-items: center; justify-content: space-between; font-family: 'Haas Grot Text R', sans-serif;">
+        <div style="font-weight: 400;">
+          {point.y:.1f}%
+        </div>
+        <div style="font-weight: 400;">
+          {point.value}
+        </div>
+      </div>
+    `,
+    },
+    plotOptions: {
+      series: {
+        states: { inactive: { opacity: 0.25 } },
+      },
+      pie: {
+        innerSize: "70%",
+        allowPointSelect: false,
+        cursor: "default",
+        enableMouseTracking: true,
+        borderWidth: 0,
+        borderRadius: 0,
+        borderColor: undefined,
+        states: {
+          hover: {
+            enabled: true,
+            shadow: false,
+            halo: {
+              size: 0,
+            },
+          },
+        },
+        dataLabels: {
+          enabled: false,
+        },
+        showInLegend: true,
+        point: {
+          events: {
+            legendItemClick: function (this: Highcharts.Point): boolean {
+              return false;
+            },
+          },
+        },
+      },
+    },
+    legend: { enabled: false },
+    series: [
+      {
+        type: "pie",
+        borderWidth: 0,
+        data: chartData,
+      },
+    ],
+  };
 
   return (
-    <div className={cn('highcharts-container relative', className)}>
+    <div className={cn("highcharts-container relative", className)}>
       {areAllSeriesHidden && (
         <Text
-          size='11'
-          className='text-primary-14 pointer-events-none absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2'
+          size="11"
+          className="text-primary-14 pointer-events-none absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
         >
           All series are hidden
         </Text>
       )}
       {!areAllSeriesHidden && shouldShowNoDataMessage && (
         <Text
-          size='11'
-          className='text-primary-14 pointer-events-none absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2'
+          size="11"
+          className="text-primary-14 pointer-events-none absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
         >
           All visible values are zero
         </Text>
@@ -141,18 +262,16 @@ const PieChart: FC<PieChartProps> = ({ data, className }) => {
         highcharts={Highcharts}
         options={options}
         callback={(chart: any) => setHc(chart)}
-        containerProps={{ style: { width: '100%', maxHeight: '350px' } }}
+        containerProps={{ style: { width: "100%", maxHeight: "350px" } }}
       />
       <View.Condition
         if={Boolean(!areAllSeriesHidden && !shouldShowNoDataMessage)}
       >
-        <PieChartLegend
-          data={chartData}
-          hiddenItems={hiddenItems}
-          isLastActiveLegend={isLastActiveLegend}
-          onItemClick={onLegendItemClick}
-          onItemHover={highlightPoint}
-          onItemLeave={clearHighlight}
+        <ChartLegends
+          legends={legends}
+          onLegendClick={onLegendItemClick}
+          onLegendHover={highlightPoint}
+          onLegendLeave={clearHighlight}
         />
       </View.Condition>
     </div>

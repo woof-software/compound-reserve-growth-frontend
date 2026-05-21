@@ -1,38 +1,46 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
-
-import { Legend } from '@/shared/hooks/useLegends';
+import { noop } from "@/shared/lib/utils/utils";
+import React, { FC, useEffect, useRef, useState } from "react";
 import { cn } from '@/shared/lib/classNames/classNames';
 import Button from '@/shared/ui/Button/Button';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import View from '@/shared/ui/View/View';
 
-interface LineChartLegendProps {
-  legends: Legend[];
-  isLastActiveLegend: boolean;
-  onLegendHover: (id: string) => void;
-  onLegendLeave: (id?: string) => void;
-  onLegendClick: (id: string) => void;
+export type ChartLegendItem = {
+  id: string;
+  name: string;
+  isDisabled?: boolean;
+  color: string;
+};
+
+export interface ChartLegendsProps {
+  legends: ChartLegendItem[];
+  onLegendHover?: (id: string) => void;
+  onLegendLeave?: (id: string) => void;
+  onLegendClick?: (id: string) => void;
+  className?: string;
 }
 
-const LineChartLegend: FC<LineChartLegendProps> = ({
+const ChartLegends: FC<ChartLegendsProps> = ({
   legends,
-  isLastActiveLegend,
-  onLegendHover,
-  onLegendLeave,
-  onLegendClick
+  onLegendHover = noop,
+  onLegendLeave = noop,
+  onLegendClick = noop,
+  className,
 }) => {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  const updateArrows = useCallback(() => {
+  const isLastActiveLegend = legends.filter(({ isDisabled }) => !isDisabled).length === 1;
+
+  const updateArrows = () => {
     const el = viewportRef.current;
     if (!el) return;
     const { scrollLeft, scrollWidth, clientWidth } = el;
     setCanScrollLeft(scrollLeft > 1);
     setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
-  }, []);
+  };
 
   const scrollByDir = (dir: 'left' | 'right') => {
     const el = viewportRef.current;
@@ -45,11 +53,40 @@ const LineChartLegend: FC<LineChartLegendProps> = ({
     updateArrows();
     window.addEventListener('resize', updateArrows);
     return () => window.removeEventListener('resize', updateArrows);
-  }, [legends.length, updateArrows]);
+  }, [legends.length]);
+
+  const renderLegendItem = (item: ChartLegendItem) => (
+    <Button
+      key={item.id}
+      className={cn(
+        'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
+        {
+          'line-through opacity-30': item.isDisabled,
+          'cursor-not-allowed': isLastActiveLegend && !item.isDisabled
+        }
+      )}
+      onPointerEnter={(e) => {
+        // legend hovering should not be available on devices with touch screen
+        if (e.pointerType !== 'mouse') return;
+        onLegendHover(item.id);
+      }}
+      onPointerLeave={(e) => {
+        if (e.pointerType !== 'mouse') return;
+        onLegendLeave(item.id);
+      }}
+      onClick={() => onLegendClick(item.id)}
+    >
+      <span
+        className='inline-block h-3 w-3 rounded-full'
+        style={{ backgroundColor: item.color }}
+      />
+      {item.name}
+    </Button>
+  );
 
   return (
-    <>
-      <div className='mx-5 block md:mx-0 lg:hidden'>
+    <div className={cn('flex flex-col gap-2', className)}>
+      <div className={cn('mx-5 block md:mx-0 lg:hidden')}>
         <div
           className={cn(
             'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit overflow-hidden rounded-lg',
@@ -67,7 +104,6 @@ const LineChartLegend: FC<LineChartLegendProps> = ({
             <Button
               className='bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-sm'
               onClick={() => {
-                onLegendLeave();
                 scrollByDir('left');
               }}
             >
@@ -81,40 +117,18 @@ const LineChartLegend: FC<LineChartLegendProps> = ({
             ref={viewportRef}
             onScroll={() => {
               updateArrows();
-              onLegendLeave();
             }}
             className='hide-scrollbar mx-0.5 flex h-full max-w-[99%] items-center gap-4 overflow-x-auto scroll-smooth rounded-lg p-1.5'
           >
             <Each
               data={legends}
-              render={({ id, name, color, isDisabled }) => (
-                <Button
-                  key={id}
-                  className={cn(
-                    'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
-                    {
-                      'line-through opacity-30': isDisabled,
-                      'cursor-not-allowed': isLastActiveLegend && !isDisabled
-                    }
-                  )}
-                  onMouseEnter={() => onLegendHover(id)}
-                  onMouseLeave={() => onLegendLeave(id)}
-                  onClick={() => onLegendClick(id)}
-                >
-                  <span
-                    className='inline-block h-3 w-3 rounded-full'
-                    style={{ backgroundColor: color }}
-                  />
-                  {name}
-                </Button>
-              )}
+              render={renderLegendItem}
             />
           </div>
           <View.Condition if={canScrollRight}>
             <Button
               className='bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-sm'
               onClick={() => {
-                onLegendLeave();
                 scrollByDir('right');
               }}
             >
@@ -130,32 +144,12 @@ const LineChartLegend: FC<LineChartLegendProps> = ({
         <div className='mx-auto hidden max-w-[902px] flex-wrap justify-center gap-5 px-[15px] py-2 lg:flex'>
           <Each
             data={legends}
-            render={({ id, name, color, isDisabled }) => (
-              <Button
-                key={id}
-                className={cn(
-                  'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
-                  {
-                    'line-through opacity-30': isDisabled,
-                    'cursor-not-allowed': isLastActiveLegend && !isDisabled
-                  }
-                )}
-                onMouseEnter={() => onLegendHover(id)}
-                onMouseLeave={() => onLegendLeave(id)}
-                onClick={() => onLegendClick(id)}
-              >
-                <span
-                  className='inline-block h-3 w-3 rounded-full'
-                  style={{ backgroundColor: color }}
-                />
-                {name}
-              </Button>
-            )}
+            render={renderLegendItem}
           />
         </div>
       </View.Condition>
-    </>
+    </div>
   );
 };
 
-export default LineChartLegend;
+export default ChartLegends;

@@ -481,9 +481,9 @@ export const filterAndSortMarkets = (
     const getOrder = (el: OptionType) => {
       const type = el.marketType?.toLowerCase();
 
-      if (type === 'v3') return 0;
+      if (type === "v3") return 0;
 
-      if (type === 'v2') return 1;
+      if (type === "v2") return 1;
 
       if (el.id.toLowerCase() === NOT_MARKET.toLowerCase()) return 2;
 
@@ -502,9 +502,23 @@ export const filterAndSortMarkets = (
     return sorted.filter((el) =>
       Array.isArray(el.chain)
         ? el.chain.some((c) => selectedChainIds.includes(c))
-        : false
+        : false,
     );
   }
 
   return sorted;
+};
+
+export const throttle = <T extends (...args: Parameters<T>) => void>(
+  fn: T,
+  delay: number
+): ((...args: Parameters<T>) => void) => {
+  let lastCall = 0;
+
+  return (...args: Parameters<T>) => {
+    const now = Date.now();
+    if (now - lastCall < delay) return;
+    lastCall = now;
+    fn(...args);
+  };
 };
