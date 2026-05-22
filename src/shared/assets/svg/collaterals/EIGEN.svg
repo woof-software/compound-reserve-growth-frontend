@@ -1,18 +1,1 @@
-<svg width="1000" height="1000" viewBox="0 0 1000 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
-<mask id="mask0_385_47" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="1000">
-<path d="M1000 0H0V1000H1000V0Z" fill="white"/>
-</mask>
-<g mask="url(#mask0_385_47)">
-<path d="M1000 500C1000 223.858 776.142 0 500 0V0C223.858 0 0 223.858 0 500V500C0 776.142 223.858 1000 500 1000V1000C776.142 1000 1000 776.142 1000 500V500Z" fill="white"/>
-<path d="M539 275V200H464V275H539Z" fill="#1A0C6D"/>
-<path d="M386 500V200H236V500H386Z" fill="#1A0C6D"/>
-<path d="M386 800V500H236V800H386Z" fill="#1A0C6D"/>
-<path d="M686 500V350H611V500H686Z" fill="#1A0C6D"/>
-<path d="M611 800V650H536V800H611Z" fill="#1A0C6D"/>
-<path d="M686 800V650H611V800H686Z" fill="#1A0C6D"/>
-<path d="M461 800V650H386V800H461Z" fill="#1A0C6D"/>
-<path d="M761 350V200H686V350H761Z" fill="#1A0C6D"/>
-<path d="M611 500V200H536V500H611Z" fill="#1A0C6D"/>
-<path d="M536 800V500H461V800H536Z" fill="#1A0C6D"/>
-</g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" fill="none" viewBox="0 0 1000 1000"><mask id="a" width="1000" height="1000" x="0" y="0" maskUnits="userSpaceOnUse" style="mask-type:luminance"><path fill="#fff" d="M1000 0H0v1000h1000z"/></mask><g mask="url(#a)"><path fill="#fff" d="M1000 500C1000 223.858 776.142 0 500 0S0 223.858 0 500s223.858 500 500 500 500-223.858 500-500"/><path fill="#1a0c6d" d="M539 275v-75h-75v75zM386 500V200H236v300zm0 300V500H236v300zm300-300V350h-75v150zm-75 300V650h-75v150zm75 0V650h-75v150zm-225 0V650h-75v150zm300-450V200h-75v150z"/><path fill="#1a0c6d" d="M611 500V200h-75v300zm-75 300V500h-75v300z"/></g></svg>
