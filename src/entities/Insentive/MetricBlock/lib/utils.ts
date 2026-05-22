@@ -1,5 +1,12 @@
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 
+type GroupedData = {
+  rewardsSupply: number;
+  rewardsBorrow: number;
+  income: number;
+  compoundPrice: number;
+};
+
 export const getTotalMetricValues = (
   data: CombinedIncentivesData[],
   activeTab: string
@@ -53,7 +60,7 @@ export const getTotalMetricValues = (
     }
 
     return acc;
-  }, new Map<string, { rewardsSupply: number; rewardsBorrow: number; income: number; compoundPrice: number }>());
+  }, new Map<string, GroupedData>());
 
   return Array.from(groupedByNetworkAndDate.values()).reduce(
     (acc, curr) => {
