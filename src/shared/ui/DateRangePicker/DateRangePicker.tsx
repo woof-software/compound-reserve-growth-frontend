@@ -6,11 +6,12 @@ import { handleDateInput, inputDateToTimestamp, timestampToInputDate } from '@/s
 import { noop } from '@/shared/lib/utils/utils';
 import { MEDIA_QUERY_DESKTOP } from '@/shared/lib/viewport/viewport';
 import Button from '@/shared/ui/Button/Button';
-import { Dropdown } from '@/shared/ui/Dropdown/Dropdown';
+import { Dropdown } from '@/shared/ui/DropdownRef/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
 import Portal from '@/shared/ui/Portal/Portal';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
+
 import Calendar from './Calendar';
 
 const CALENDAR_DESKTOP_WIDTH = 640;
@@ -20,6 +21,16 @@ const CALENDAR_DESKTOP_OFFSET_Y = 8;
 export type DateRangeValue = {
   startDate: number | null;
   endDate: number | null;
+};
+
+// Validates a complete YYYY-MM-DD string, including calendar validity (e.g. month 22 is invalid).
+// Partial / empty inputs are considered valid (not yet complete).
+const isValidDateString = (str: string): boolean => {
+  if (!str || str.length < 10) return true;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(str)) return false;
+  const [y, m, d] = str.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
 };
 
 interface DateInputProps {
@@ -37,22 +48,24 @@ interface DateInputProps {
   onClick: (e: React.MouseEvent<HTMLInputElement>) => void;
   error?: string;
   errorClassName?: string;
+  hasError?: boolean;
 }
 
 const DateInput: FC<DateInputProps> = ({
-  inputRef,
-  defaultValue,
-  disabled,
-  className,
-  label,
-  showLabel,
-  onCalendarToggle,
-  onChange,
-  onBlur,
-  onClick,
-  error,
-  errorClassName,
-}) => (
+   inputRef,
+   defaultValue,
+   disabled,
+   className,
+   label,
+   showLabel,
+   onCalendarToggle,
+   onChange,
+   onBlur,
+   onClick,
+   error,
+   errorClassName,
+   hasError = false,
+ }) => (
   <div className='flex flex-col gap-0'>
     <View.Condition if={showLabel && !!label}>
       <div className='flex h-6 items-center rounded-lg px-3 py-1'>
@@ -63,8 +76,8 @@ const DateInput: FC<DateInputProps> = ({
     </View.Condition>
     <div
       className={cn('relative rounded-lg outline', {
-        'outline-red-11': !!error,
-        'outline-secondary-19': !error,
+        'outline-red-11': !!error || hasError,
+        'outline-secondary-19': !error && !hasError,
       })}
     >
       <input
@@ -120,18 +133,18 @@ export interface DateRangePickerPopoverProps extends DateRangePickerProps {
 }
 
 const DateRangePicker: FC<DateRangePickerProps> = ({
-  value,
-  onChange = noop,
-  min = null,
-  max = null,
-  disabled = false,
-  className,
-  inputClassName,
-  showLabels = false,
-  clearLabel = 'Clear filters',
-  onClose: onCloseContainer,
-  inlineCalendar = false,
-}) => {
+   value,
+   onChange = noop,
+   min = null,
+   max = null,
+   disabled = false,
+   className,
+   inputClassName,
+   showLabels = true,
+   clearLabel = 'Clear filters',
+   onClose: onCloseContainer,
+   inlineCalendar = false,
+ }) => {
   const { isOpen: isCalendarOpen, onCloseModal: onCloseCalendar, onToggleModal: onToggleCalendar } = useModal();
 
   const anchorRef = useRef<HTMLDivElement>(null);
@@ -139,13 +152,33 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
   const startInputRef = useRef<HTMLInputElement>(null);
   const endInputRef = useRef<HTMLInputElement>(null);
 
-  const [calendarTransform, setCalendarTransform] = useState({
-    top: 0,
-    left: 0,
-  });
+  const [calendarTransform, setCalendarTransform] = useState({ top: 0, left: 0 });
 
-  const dateRangeError =
-    value.startDate !== null && value.endDate !== null && value.endDate < value.startDate ? 'No results found' : '';
+  // Raw strings typed by the user — needed to validate before a timestamp is produced
+  const [startRaw, setStartRaw] = useState<string>(() => timestampToInputDate(value.startDate));
+  const [endRaw, setEndRaw] = useState<string>(() => timestampToInputDate(value.endDate));
+
+  // --- Validation ---
+  const startComplete = startRaw.length === 10;
+  const endComplete = endRaw.length === 10;
+
+  const startInvalid = startComplete && !isValidDateString(startRaw);
+  const endInvalid = endComplete && !isValidDateString(endRaw);
+  const rangeInvalid =
+    startComplete &&
+    endComplete &&
+    !startInvalid &&
+    !endInvalid &&
+    value.startDate !== null &&
+    value.endDate !== null &&
+    value.endDate < value.startDate;
+
+  // Start field: own format error takes priority; range error only highlights the outline (message lives on end)
+  const startError = startInvalid ? 'Invalid date' : '';
+  const startHasRangeError = !startInvalid && rangeInvalid;
+
+  // End field: own format error takes priority; otherwise show the range message
+  const endError = endInvalid ? 'Invalid date' : rangeInvalid ? 'Start date must precede end' : '';
 
   const hasRange = value.startDate !== null || value.endDate !== null;
 
@@ -182,7 +215,9 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
 
   const onStartChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      const next = inputDateToTimestamp(e.currentTarget.value);
+      const raw = e.currentTarget.value;
+      setStartRaw(raw);
+      const next = inputDateToTimestamp(raw);
       if (next !== null) updateRange(next, value.endDate);
     },
     [updateRange, value.endDate],
@@ -190,7 +225,9 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
 
   const onEndChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      const next = inputDateToTimestamp(e.currentTarget.value);
+      const raw = e.currentTarget.value;
+      setEndRaw(raw);
+      const next = inputDateToTimestamp(raw);
       if (next !== null) updateRange(value.startDate, next);
     },
     [updateRange, value.startDate],
@@ -242,6 +279,17 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
       ),
     [disabled, inputClassName],
   );
+
+  // Sync raw state when value is changed externally (e.g. calendar selection, clear)
+  useEffect(() => {
+    if (document.activeElement === startInputRef.current) return;
+    setStartRaw(timestampToInputDate(value.startDate));
+  }, [value.startDate]);
+
+  useEffect(() => {
+    if (document.activeElement === endInputRef.current) return;
+    setEndRaw(timestampToInputDate(value.endDate));
+  }, [value.endDate]);
 
   useEffect(() => {
     if (!isCalendarOpen) return;
@@ -325,7 +373,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
       <div
         ref={anchorRef}
         className={cn(
-          'bg-primary-15 relative mx-auto flex w-full max-w-[359px] flex-col items-stretch gap-3 rounded-lg p-4 shadow-[inset_0_0_0_0.25px_var(--secondary-39),0px_8px_16px_rgba(13,19,26,0.1),0px_16px_32px_rgba(13,19,26,0.05)] lg:mx-0 lg:w-[168px] lg:max-w-none lg:gap-2 lg:p-2',
+          'relative mx-auto flex w-full max-w-[359px] flex-col items-stretch gap-3 rounded-lg p-4 lg:mx-0 lg:w-[168px] lg:max-w-none lg:gap-2 lg:p-2',
           className,
           { 'z-[50]': isCalendarOpen },
         )}
@@ -341,6 +389,8 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
           label='Start'
           onChange={onStartChange}
           onBlur={onStartBlur}
+          error={startError}
+          hasError={startHasRangeError}
           {...sharedInputProps}
         />
         <DateInput
@@ -349,7 +399,7 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
           label='End'
           onChange={onEndChange}
           onBlur={onEndBlur}
-          error={dateRangeError}
+          error={endError}
           {...sharedInputProps}
         />
         {hasRange && (
@@ -396,13 +446,12 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
 };
 
 const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
-  placeholder = 'Date range',
-  triggerClassName,
-  popoverContentClassName,
-  ...pickerProps
+ placeholder = 'Date range',
+ triggerClassName,
+ ...pickerProps
 }) => {
   const { value, disabled = false } = pickerProps;
-  const { isOpen, onOpenModal, onCloseModal } = useModal();
+  const { isOpen, onOpenModal, onCloseModal, onToggleModal } = useModal();
 
   const hasSelection = value.startDate !== null || value.endDate !== null;
 
@@ -426,49 +475,50 @@ const DateRangePickerPopover: FC<DateRangePickerPopoverProps> = ({
     return () => mql.removeEventListener('change', onCloseModal);
   }, [isOpen, onCloseModal]);
 
-  return (
-    <div>
-      <Dropdown
-        open={isOpen}
-        isDisabled={disabled}
-        onOpen={onOpenModal}
-        onClose={onCloseModal}
-        triggerContent={
-          <div
-            className={cn(
-              'bg-custom-trigger flex h-[32px] items-center gap-1.5 rounded-lg p-1.5 pr-3 text-[11px] font-medium',
-              { 'opacity-60': disabled },
-              triggerClassName,
-            )}
-          >
-            <div className='p-0.5'>
-              <Icon
-                name={hasSelection ? 'calendar-check' : 'calendar-uncheck'}
-                className='h-4 w-4'
-                color={hasSelection ? 'secondary-10' : 'color-gray-11'}
-                isRound={false}
-              />
-            </div>
-            <span
-              className={cn(
-                'text-[11px] leading-[16px] font-medium',
-                hasSelection ? 'text-secondary-10' : 'text-gray-11',
-              )}
-            >
-              {rangeLabel}
-            </span>
-          </div>
-        }
-        contentClassName={cn(
-          'bg-transparent border-none p-0 shadow-none max-h-none overflow-visible z-[50]',
-          'fixed left-1/2 bottom-2 top-auto w-[calc(100vw-16px)] max-w-[359px] -translate-x-1/2',
-          'lg:absolute lg:left-auto lg:right-0 lg:bottom-auto lg:top-10 lg:w-auto lg:max-w-none lg:translate-x-0',
-          popoverContentClassName,
+  const trigger = (
+    <Button
+      className='cursor-pointer'
+      onClick={onToggleModal}
+    >
+      <div
+        className={cn(
+          'bg-custom-trigger flex h-[32px] items-center gap-1.5 rounded-lg p-1.5 pr-3 text-[11px] font-medium',
+          { 'opacity-60': disabled },
+          triggerClassName
         )}
       >
-        <DateRangePicker {...pickerProps} onClose={onCloseModal} />
-      </Dropdown>
-    </div>
+        <div className='p-0.5'>
+          <Icon
+            name={hasSelection ? 'calendar-check' : 'calendar-uncheck'}
+            className='h-4 w-4'
+            color={hasSelection ? 'secondary-10' : 'color-gray-11'}
+            isRound={false}
+          />
+        </div>
+        <span
+          className={cn(
+            'text-[11px] leading-[16px] font-medium',
+            hasSelection ? 'text-secondary-10' : 'text-gray-11'
+          )}
+        >
+          {rangeLabel}
+        </span>
+      </div>
+    </Button>
+  );
+
+  return (
+    <Dropdown
+      isOpen={isOpen}
+      setIsOpen={onOpenModal}
+      onClose={onCloseModal}
+      trigger={trigger}
+    >
+      <DateRangePicker
+        {...pickerProps}
+        onClose={onCloseModal}
+      />
+    </Dropdown>
   );
 };
 
