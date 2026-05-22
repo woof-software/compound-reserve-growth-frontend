@@ -199,9 +199,9 @@ export const sliceAddress = (
   return address && `${address.slice(0, before)}...${address.slice(-after)}`;
 };
 
-export const formatGrowth = (growth: number) => {
+export const formatGrowth = (growth: number, decimals = 1) => {
   if (growth === 0) return '-';
-  return `${growth > 0 ? '+' : ''}${growth?.toFixed(1)}%`;
+  return `${growth > 0 ? '+' : ''}${growth.toFixed(decimals)}%`;
 };
 
 // TotalTresuaryValue and CompoundCumulativeRevenue helpers
