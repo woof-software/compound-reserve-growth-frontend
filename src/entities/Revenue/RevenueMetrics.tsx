@@ -60,7 +60,6 @@ const RevenueMetrics = ({
         const key = isPlaceholder ? index : (yearOrIndex as string);
         const year = isPlaceholder ? '' : (yearOrIndex as string);
         const yearData = yearlyTotals[year];
-        const growth = yearData?.growth;
 
         return (
           <Card
@@ -78,12 +77,12 @@ const RevenueMetrics = ({
             <div className='flex flex-col gap-8'>
               <ValueMetricField
                 value={Format.price(yearData?.total ?? 0, 'compact')}
-                tooltip={Format.price(yearData?.total ?? 0, 'standard')}
                 label='Total Revenue'
               />
               <ValueMetricField
-                value={growth != null ? formatGrowth(growth) : '-'}
-                tooltip={growth != null ? formatGrowth(growth, 2) : undefined}
+                value={
+                  yearData?.growth != null ? formatGrowth(yearData.growth) : '-'
+                }
                 label='YoY Growth'
               />
             </div>

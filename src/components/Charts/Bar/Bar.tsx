@@ -1,8 +1,8 @@
-import { Format } from '@/shared/lib/utils/format';
-import React, { FC, useEffect, useMemo, useRef } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
+import { Format } from '@/shared/lib/utils/format';
 import Button from '@/shared/ui/Button/Button';
 import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
@@ -22,7 +22,7 @@ interface CryptoChartProps {
 const BarChart: FC<CryptoChartProps> = ({ data, onClear, customOptions }) => {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
 
-  const chartOptions = useMemo(() => {
+  const chartOptions = () => {
     const baseOptions: Highcharts.Options = {
       chart: {
         type: 'column',
@@ -173,8 +173,7 @@ const BarChart: FC<CryptoChartProps> = ({ data, onClear, customOptions }) => {
     return customOptions
       ? Highcharts.merge(baseOptions, customOptions)
       : baseOptions;
-
-  }, [data, customOptions]);
+  };
 
   useEffect(() => {
     const chart = chartRef.current?.chart;
@@ -187,7 +186,7 @@ const BarChart: FC<CryptoChartProps> = ({ data, onClear, customOptions }) => {
         <HighchartsReact
           ref={chartRef}
           highcharts={Highcharts}
-          options={chartOptions}
+          options={chartOptions()}
         />
       </View.Condition>
       <View.Condition if={Boolean(data.length <= 0)}>

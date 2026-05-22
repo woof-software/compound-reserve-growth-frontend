@@ -98,7 +98,6 @@ const RunwayMetrics = () => {
       >
         <ValueMetricField
           value={Format.price(metrics.total, 'compact')}
-          tooltip={Format.price(metrics.total, 'standard')}
           label='Total Annualised Expenses'
         />
       </Card>
@@ -114,7 +113,6 @@ const RunwayMetrics = () => {
       >
         <ValueMetricField
           value={Format.price(metrics.provider, 'compact')}
-          tooltip={Format.price(metrics.provider, 'standard')}
           label='Service Provider Expenses'
         />
       </Card>
@@ -130,7 +128,6 @@ const RunwayMetrics = () => {
       >
         <ValueMetricField
           value={Format.price(metrics.initiative, 'compact')}
-          tooltip={Format.price(metrics.initiative, 'standard')}
           label='DAO Initiatives Expenses'
         />
       </Card>

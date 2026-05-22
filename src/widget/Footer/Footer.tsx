@@ -19,8 +19,6 @@ const Footer: FC = () => {
             <Link
               to='https://www.tally.xyz/gov/compound'
               className='group hover:text-primary-11 transition-colors'
-              target='_blank'
-              rel='noreferrer'
             >
               <Text
                 size='13'
@@ -33,8 +31,6 @@ const Footer: FC = () => {
             <Link
               to='https://t.me/dmitriywoof'
               className='group hover:text-primary-11 transition-colors'
-              target='_blank'
-              rel='noreferrer'
             >
               <Text
                 size='13'

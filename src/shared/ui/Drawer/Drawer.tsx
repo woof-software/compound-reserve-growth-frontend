@@ -1,79 +1,219 @@
-import { PropsWithChildren, useEffect, useRef } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import {
+  memo,
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
-import { noop } from '@/shared/lib/utils/utils';
+import {
+  AnimationProvider,
+  useAnimationLibs
+} from '@/shared/ui/AnimationProvider/AnimationProvider';
 
 interface DrawerProps extends PropsWithChildren {
   className?: string;
+
+  lazy?: boolean;
+
   isOpen?: boolean;
+
   onClose?: () => void;
+
+  desktopMediaQuery?: string;
 }
 
-interface DragInfo {
-  offset: { x: number; y: number };
-  velocity: { x: number; y: number };
-}
+const DrawerContent = memo(
+  ({ className, children, onClose, isOpen = false }: DrawerProps) => {
+    const { Spring, Gesture } = useAnimationLibs();
 
-const CLOSE_THRESHOLD = 0;
-const VELOCITY_THRESHOLD = 500;
+    const DURATION_OPEN = 250;
+    const DURATION_CLOSE = 150;
 
-const EASE_OPEN = [0.33, 1, 0.68, 1] as const;
-const EASE_CLOSE = [0.32, 0, 0.67, 0] as const;
+    const EASE_OPEN = Spring.easings.easeOutCubic;
+    const EASE_CLOSE = Spring.easings.easeInCubic;
 
-const Drawer = (props: DrawerProps) => {
-  const { className, children, onClose = noop, isOpen = false } = props;
+    const [{ y }, api] = Spring.useSpring(() => ({ y: 0 }));
 
-  const panelRef = useRef<HTMLDivElement>(null);
+    const panelRef = useRef<HTMLDivElement | null>(null);
+    const panelHeightRef = useRef(0);
 
-  const handleDragEnd =
-    (_: MouseEvent | TouchEvent | PointerEvent, info: DragInfo  ) => {
-      const panelHeight = panelRef.current?.getBoundingClientRect().height ?? 1;
-      const shouldClose =
-        info.offset.y > panelHeight * CLOSE_THRESHOLD ||
-        (info.velocity.y > VELOCITY_THRESHOLD && info.offset.y > 0);
+    const [mounted, setMounted] = useState(isOpen);
+    const [measured, setMeasured] = useState(false);
+    const closingRef = useRef(false);
 
-      if (shouldClose) {
-        onClose();
+    const measurePanel = useCallback(() => {
+      const el = panelRef.current;
+      if (!el) return;
+
+      const h = Math.max(1, el.getBoundingClientRect().height);
+      panelHeightRef.current = h;
+      setMeasured(true);
+    }, []);
+
+    const animateOpen = useCallback(() => {
+      closingRef.current = false;
+      const h = panelHeightRef.current || 1;
+
+      api.start({
+        from: { y: h },
+        to: { y: 0 },
+        config: { duration: DURATION_OPEN, easing: EASE_OPEN }
+      });
+    }, [EASE_OPEN, api]);
+
+    const animateClose = useCallback(
+      (notify = false) => {
+        if (closingRef.current) return;
+
+        closingRef.current = true;
+
+        const h = panelHeightRef.current || 1;
+
+        api.start({
+          y: h,
+          config: { duration: DURATION_CLOSE, easing: EASE_CLOSE },
+          onResolve: () => {
+            setMounted(false);
+
+            document.body.classList.remove('disable-scroll-vertical');
+
+            if (notify) onClose?.();
+            closingRef.current = false;
+          }
+        });
+      },
+      [EASE_CLOSE, api, onClose]
+    );
+
+    useEffect(() => {
+      if (isOpen) {
+        setMounted(true);
+      } else if (mounted) {
+        animateClose(false);
       }
-    };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
-  useEffect(() => {
-    document.body.classList.toggle('disable-scroll-vertical', isOpen);
-    return () => document.body.classList.remove('disable-scroll-vertical');
-  }, [isOpen]);
+    useEffect(() => {
+      const handleResize = () => {
+        if (window.innerWidth >= 1024) {
+          document.body.classList.remove('disable-scroll-vertical');
+          animateClose(true);
+        }
+      };
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <div
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }, [animateClose]);
+
+    useEffect(() => {
+      if (!mounted) return;
+
+      setMeasured(false);
+
+      const raf = requestAnimationFrame(() => {
+        measurePanel();
+
+        const raf2 = requestAnimationFrame(() => {
+          animateOpen();
+
+          document.body.classList.add('disable-scroll-vertical');
+        });
+
+        return () => cancelAnimationFrame(raf2);
+      });
+
+      return () => cancelAnimationFrame(raf);
+    }, [mounted, measurePanel, animateOpen]);
+
+    const bind = Gesture.useDrag(
+      ({
+        last,
+        velocity: [, vy],
+        direction: [, dy],
+        movement: [, my],
+        cancel
+      }) => {
+        if (my < -70) cancel();
+
+        const h = panelHeightRef.current || 1;
+
+        if (last) {
+          const shouldClose = my > h * 0.4 || (vy > 0.5 && dy > 0);
+
+          if (shouldClose) {
+            animateClose(true);
+          } else {
+            api.start({
+              to: { y: 0 },
+              config: { duration: DURATION_OPEN, easing: EASE_OPEN }
+            });
+          }
+        } else {
+          const next = Math.min(Math.max(my, 0), h);
+
+          api.start({ y: next, immediate: true });
+        }
+      },
+      {
+        from: () => [0, y.get()],
+        filterTaps: true,
+        bounds: { top: 0 },
+        rubberband: true,
+        axis: 'y',
+        threshold: 12,
+        eventOptions: { passive: false }
+      }
+    );
+
+    if (!mounted) return null;
+
+    return (
+      <div
+        className={cn(
+          'fixed inset-0 z-10 flex items-end overflow-hidden lg:hidden',
+          className
+        )}
+      >
+        <Spring.a.div
+          className='bg-secondary-30 pointer-events-auto fixed inset-0 backdrop-blur-lg'
+          onClick={() => animateClose(true)}
+        />
+        <Spring.a.div
+          {...bind()}
+          ref={panelRef}
           className={cn(
-            'fixed inset-0 z-10 flex items-end overflow-hidden lg:hidden',
-            className
+            'bg-card-content pointer-events-auto fixed right-0 bottom-0 left-0 z-50 w-full touch-none rounded-t-3xl px-5 pt-10 pb-5 will-change-transform',
+            isOpen ? 'animate-drawer-in' : 'animate-drawer-out'
           )}
+          style={{
+            transform: y.to((py) => `translateY(${py}px)`),
+            visibility: measured ? 'visible' : 'hidden'
+          }}
         >
-          <div
-            className='bg-secondary-30 fixed inset-0 backdrop-blur-lg'
-            onClick={onClose}
-          />
-          <motion.div
-            ref={panelRef}
-            drag='y'
-            dragConstraints={{top: 0}}
-            dragElastic={{ top: 0, bottom: 0.2 }}
-            onDragEnd={handleDragEnd}
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%', transition: { duration: 0.15, ease: EASE_CLOSE } }}
-            transition={{ duration: 0.25, ease: EASE_OPEN }}
-            className='bg-card-content fixed right-0 bottom-0 left-0 z-50 w-full touch-none rounded-t-3xl px-5 pt-10 pb-5 will-change-transform'
-          >
-            {children}
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
-  );
+          {children}
+        </Spring.a.div>
+      </div>
+    );
+  }
+);
+
+const DrawerAsync = (props: DrawerProps) => {
+  const { isLoaded } = useAnimationLibs();
+
+  if (!isLoaded) return null;
+
+  return <DrawerContent {...props} />;
 };
 
+const Drawer = (props: DrawerProps) => (
+  <AnimationProvider>
+    <DrawerAsync {...props} />
+  </AnimationProvider>
+);
+
 export default Drawer;
+

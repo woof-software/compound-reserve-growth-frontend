@@ -30,7 +30,7 @@ This project is built on a modern stack to ensure high performance and reliabili
 • **Data Fetching:** TanStack Query (React Query)  
 • **UI Components:** Radix UI  
 • **Data Visualization:** Highcharts  
-• **Code Quality:** ESLint, Husky
+• **Code Quality:** ESLint, Prettier, Stylelint, Husky
 
 ## 🚀 Getting Started
 
@@ -86,6 +86,7 @@ You can run these scripts with either `npm run <script-name>`.
 • `build` — Builds the project for production.  
 • `lint:ts` — Lints TypeScript/TSX files with ESLint.  
 • `lint:ts:fix` — Automatically fixes linting errors in TypeScript/TSX files.  
+• `prettier` — Formats the code with Prettier.
 
 ## 🤝 Contributing
 

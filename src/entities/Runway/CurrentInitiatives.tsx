@@ -5,6 +5,7 @@ Calculation logic for the "Current Initiatives" block:
 3. Pie Chart Data: The total values (`item.value`) are grouped and summed by the initiative's discipline to show the total expense per discipline.
 4. Values Used: The full contract values (`item.value` and `item.amount`) are used, not the annualised equivalents.
 */
+import { Format } from '@/shared/lib/utils/format';
 import React, { useMemo } from 'react';
 
 import PieChart from '@/components/Charts/Pie/Pie';
@@ -17,7 +18,6 @@ import {
   SortAdapter,
   useSorting
 } from '@/shared/hooks/useSorting';
-import { Format } from '@/shared/lib/utils/format';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
@@ -179,7 +179,7 @@ const CurrentInitiativesBlock = () => {
           footerData={processedData.footerData}
         />
         <PieChart
-          className='w-full shrink-0 lg:max-h-[400px] lg:w-[336.5px]'
+          className='max-w-full lg:max-h-[400px] lg:max-w-[336.5px]'
           data={processedData.pieData}
         />
       </div>
