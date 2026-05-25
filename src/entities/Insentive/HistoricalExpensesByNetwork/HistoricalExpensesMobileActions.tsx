@@ -97,7 +97,7 @@ export const HistoricalExpensesMobileActions = (
               ariaLabel='Toggle all series visibility'
               className={{
                 container:
-                  'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
+                  'flex items-center gap-1.5 bg-transparent p-0 shadow-none!',
                 icon: 'h-6.5 w-6.5',
                 iconContainer: 'h-6.5 w-6.5'
               }}

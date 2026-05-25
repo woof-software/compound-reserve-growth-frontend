@@ -862,7 +862,7 @@ const Filters = memo(
                     ariaLabel='Toggle all series visibility'
                     className={{
                       container:
-                        'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
+                        'flex items-center gap-1.5 bg-transparent p-0 shadow-none!',
                       icon: 'h-[26px] w-[26px]',
                       iconContainer: 'h-[26px] w-[26px]'
                     }}
