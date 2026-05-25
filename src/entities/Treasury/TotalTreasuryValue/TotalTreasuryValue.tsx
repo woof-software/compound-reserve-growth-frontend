@@ -1,3 +1,4 @@
+import View from '@/shared/ui/View/View';
 import React, { useMemo, useState } from 'react';
 import { useQueryState } from 'nuqs';
 
@@ -217,6 +218,8 @@ const TotalTreasuryValue = ({
     color: `${color}`
   }));
 
+  const areAllSeriesHidden = legends.every(({ isDisabled }) => isDisabled);
+
   const csvData = filterForRange({
     data: chartSeries[0]?.data ?? [],
     getDate: (item) => new Date(item.x),
@@ -320,7 +323,7 @@ const TotalTreasuryValue = ({
                   ariaLabel='Toggle events'
                   className={{
                     container:
-                      'flex items-center gap-1.5 bg-transparent p-0 !shadow-none h-[44px]',
+                      'flex items-center gap-1.5 bg-transparent p-0 shadow-none! h-[44px]',
                     icon: 'h-[26px] w-[26px]',
                     iconContainer: 'h-[26px] w-[26px]'
                   }}
@@ -330,6 +333,31 @@ const TotalTreasuryValue = ({
                     Hide Events
                   </Text>
                 </ChartIconToggle>
+                {(isLegendEnabled && aggregatedSeries.length > 1) &&
+                  <ChartIconToggle
+                    className={{
+                      container:
+                        'flex items-center gap-1.5 bg-transparent p-0 shadow-none! h-[44px]',
+                      icon: 'h-[26px] w-[26px]',
+                      iconContainer: 'h-[26px] w-[26px]'
+                    }}
+                    active={areAllSeriesHidden}
+                    onClick={() => {
+                      if (areAllSeriesHidden) {
+                        onSelectAllLegends();
+                      } else {
+                        onDeselectAllLegends();
+                      }
+                    }}
+                    onIcon='eye'
+                    offIcon='eye-closed'
+                    ariaLabel='Toggle all series visibility'
+                  >
+                    <Text size='14' weight='500'>
+                      Hide Events
+                    </Text>
+                  </ChartIconToggle>
+                }
               </>
             }
           >
