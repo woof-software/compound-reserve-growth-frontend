@@ -29,19 +29,21 @@ export const Tooltip = ({
       onOpenChange={onOpenChange}
     >
       <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent>
-        <View.Condition if={typeof content === 'string'}>
-          <Text
-            size='12'
-            className='text-primary-14 p-1 text-[11px] leading-4 font-normal'
-          >
+      <View.Condition if={Boolean(content)}>
+        <TooltipContent>
+          <View.Condition if={typeof content === 'string'}>
+            <Text
+              size='12'
+              className='text-primary-14 p-1 text-[11px] leading-4 font-normal'
+            >
+              {content}
+            </Text>
+          </View.Condition>
+          <View.Condition if={typeof content !== 'string'}>
             {content}
-          </Text>
-        </View.Condition>
-        <View.Condition if={typeof content !== 'string'}>
-          {content}
-        </View.Condition>
-      </TooltipContent>
+          </View.Condition>
+        </TooltipContent>
+      </View.Condition>
     </BaseTooltip>
   );
 };

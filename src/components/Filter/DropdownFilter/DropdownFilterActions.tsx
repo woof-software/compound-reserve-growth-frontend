@@ -37,7 +37,7 @@ export const DropdownFilterActions = (props: DropdownFilterActionsProps) => {
           Select All
         </Button>
       )
-    )
+    );
   }
 
   return (
@@ -54,7 +54,6 @@ export const DropdownFilterActions = (props: DropdownFilterActionsProps) => {
       >
         Select All
       </Button>
-
       {isAnySelect && (
         <Button
           className='bg-secondary-12 w-[100%] text-primary-14 hover:bg-secondary-40 mt-0.5 h-[44px] lg:h-[30px] rounded-lg text-[11px] font-medium dark:hover:text-white'
