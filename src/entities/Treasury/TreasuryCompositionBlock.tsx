@@ -1,7 +1,6 @@
-import { Format } from '@/shared/lib/utils/format';
 import React, { memo, useMemo, useState } from 'react';
 
-import PieChart from '@/components/Charts/Pie/Pie';
+import PieChart from "@/components/Charts/Pie/Pie";
 import GroupDrawer from '@/components/GroupDrawer/GroupDrawer';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
@@ -13,6 +12,7 @@ import {
   SortAdapter,
   useSorting
 } from '@/shared/hooks/useSorting';
+import { Format } from '@/shared/lib/utils/format';
 import {
   capitalizeFirstLetter,
   groupByKey,
