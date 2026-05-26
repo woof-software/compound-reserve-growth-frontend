@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { CSVLink } from 'react-csv';
 
 import Line from '@/components/Charts/Line/Line';
