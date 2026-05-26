@@ -1,8 +1,7 @@
-import React, { memo, useMemo } from 'react';
 import { parseAsBoolean, useQueryState } from 'nuqs';
-
-import PieChart from '@/components/Charts/Pie/Pie';
 import { GroupFilter } from '@/components/Filter/GroupFilter';
+import { memo, useMemo } from 'react';
+import PieChart from "@/components/Charts/Pie/Pie";
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import { NOT_MARKET } from '@/shared/consts/consts';
