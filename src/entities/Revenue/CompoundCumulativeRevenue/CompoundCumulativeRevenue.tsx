@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQueryState } from 'nuqs';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
@@ -12,7 +12,8 @@ import {
   customChartOptions,
   customTooltipFormatter,
 } from '@/entities/Revenue/CompoundCumulativeRevenue/customChartOptions';
-import { useCumulativeChartSeries } from '@/entities/Revenue/CompoundCumulativeRevenue/useCumulativeChartSeries';
+import { lineChartSeriesToUtcDayCumulative } from '@/entities/Revenue/CompoundCumulativeRevenue/useCumulativeChartSeries';
+import { type RevenueProps } from '@/pages/AccountingPage/AccountingPage';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useOptions } from '@/shared/hooks/filters/useOptions';
 import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange';
@@ -20,7 +21,6 @@ import { useEventsApi } from '@/shared/hooks/useEventsApi';
 import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { useProcessor } from '@/shared/hooks/useProcessor';
-import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { getEndOfDayTimestamp } from '@/shared/lib/date/dateUtils';
 import { filterForRange } from '@/shared/lib/utils/chart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
@@ -36,9 +36,14 @@ import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
 
+type MetaMarket = {
+  chains: Set<string>;
+  marketType: string;
+};
+
 const toOptionDto = (o: OptionType) => ({ label: o.label, value: o.id });
 
-const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenuePageProps) => {
+const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueProps) => {
   const { data: events } = useEventsApi();
 
   const [isShowEvents, setIsShowEvents] = useState<boolean>(true);
@@ -91,7 +96,7 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
   );
 
   const marketOptionsEnriched = useMemo(() => {
-    const metaByMarket = new Map<string, { chains: Set<string>; marketType: string }>();
+    const metaByMarket = new Map<string, MetaMarket>();
 
     byChain.forEach((item) => {
       const m = item.source.market ?? NOT_MARKET;
@@ -227,7 +232,10 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
     }));
   }, [result]);
 
-  const cumulativeChartSeries = useCumulativeChartSeries(dailyChartSeries);
+  const cumulativeChartSeries = useMemo(
+    () => lineChartSeriesToUtcDayCumulative(dailyChartSeries),
+    [dailyChartSeries]
+  );
 
   const csvData = filterForRange({
     data: cumulativeChartSeries[0]?.data ?? [],

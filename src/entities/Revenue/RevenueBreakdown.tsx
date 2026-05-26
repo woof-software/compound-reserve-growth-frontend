@@ -7,10 +7,10 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import RevenueBreakdown, {
   FormattedRevenueData
 } from '@/components/RevenuePageTable/RevenueBreakdown';
+import {type RevenueProps } from '@/pages/AccountingPage/AccountingPage';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
-import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
   SortAccessor,
   SortAdapter,
@@ -48,7 +48,7 @@ const RevenueBreakDownBlock = ({
   revenueData: rawData,
   isLoading,
   isError
-}: RevenuePageProps) => {
+}: RevenueProps) => {
   const initialState: SelectedFiltersState = {
     chain: [],
     deployment: [],

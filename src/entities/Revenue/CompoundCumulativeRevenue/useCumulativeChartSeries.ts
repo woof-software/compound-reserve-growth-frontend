@@ -1,5 +1,3 @@
-import { useMemo } from 'react';
-
 import type { LineChartSeries } from '@/components/Charts/Line/Line';
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -56,6 +54,3 @@ export function lineChartSeriesToUtcDayCumulative(dailySeries: LineChartSeries[]
     };
   });
 }
-
-export const useCumulativeChartSeries = (dailySeries: LineChartSeries[]) =>
-  useMemo(() => lineChartSeriesToUtcDayCumulative(dailySeries), [dailySeries]);
