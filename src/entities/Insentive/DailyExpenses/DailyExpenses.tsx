@@ -18,7 +18,6 @@ import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSele
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import View from '@/shared/ui/View/View';
 
 interface DailyExpensesProps {
   isLoading?: boolean;
@@ -112,20 +111,16 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
         activeViewTab={activeViewTab}
         setActiveViewTab={setActiveViewTab}
       />
-      <View.Condition
-        if={Boolean(!isLoading && !isError && normalizedTableData.length)}
-      >
+      {(!isLoading && !isError && normalizedTableData.length) && (
         <DailyExpensesTable
           activeViewTab={activeViewTab}
           sortType={sortType}
           tableData={normalizedTableData}
         />
-      </View.Condition>
-      <View.Condition
-        if={Boolean(!isLoading && !isError && !normalizedTableData.length)}
-      >
+      )}
+      {(!isLoading && !isError && !normalizedTableData.length) && (
         <NoDataPlaceholder onButtonClick={clearAllFilters} />
-      </View.Condition>
+      )}
     </Card>
   );
 };

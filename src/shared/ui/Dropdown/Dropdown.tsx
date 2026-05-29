@@ -12,7 +12,6 @@ import {
 import { useClickOutside } from '@/shared/hooks/useClickOutside';
 import { cn } from '@/shared/lib/classNames/classNames';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
 import ArrowDown from '@/shared/assets/svg/arrow-down.svg';
 import CheckStroke from '@/shared/assets/svg/check-stroke.svg';
@@ -95,14 +94,14 @@ const useDropdown = (type: 'single' | 'multiple') => {
 };
 
 const Dropdown: FC<DropdownProps> = ({
-  open,
-  isDisabled,
-  onOpen,
-  onClose,
-  triggerContent,
-  children,
-  contentClassName
-}) => {
+   open,
+   isDisabled,
+   onOpen,
+   onClose,
+   triggerContent,
+   children,
+   contentClassName
+ }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const onTriggerClick = () => {
@@ -146,7 +145,7 @@ const Dropdown: FC<DropdownProps> = ({
         >
           {triggerContent}
         </div>
-        <View.Condition if={open}>
+        {open && (
           <div
             className={cn(
               'hide-scrollbar shadow-10 border-secondary-18 bg-primary-15 hide-scrollbar absolute top-10 right-0 z-10 grid max-h-[234px] min-w-[168px] gap-0.5 overflow-y-auto rounded-lg border border-solid p-2',
@@ -157,17 +156,17 @@ const Dropdown: FC<DropdownProps> = ({
           >
             {children}
           </div>
-        </View.Condition>
+        )}
       </div>
     </div>
   );
 };
 
 const DropdownItem: FC<DropdownItemProps> = ({
-  asset,
-  isSelected = false,
-  onSelect
-}) => {
+   asset,
+   isSelected = false,
+   onSelect
+ }) => {
   return (
     <div
       className={cn(
@@ -187,21 +186,21 @@ const DropdownItem: FC<DropdownItemProps> = ({
       >
         {asset}
       </Text>
-      <View.Condition if={isSelected}>
+      {isSelected && (
         <CheckStroke
           width={16}
           height={16}
         />
-      </View.Condition>
+      )}
     </div>
   );
 };
 
 const TriggerContent: FC<TriggerContentProps> = ({
-  title,
-  isOpen,
-  className
-}) => {
+                                                   title,
+                                                   isOpen,
+                                                   className
+                                                 }) => {
   return (
     <div
       className={cn(

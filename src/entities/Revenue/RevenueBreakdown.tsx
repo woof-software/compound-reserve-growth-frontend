@@ -35,7 +35,6 @@ import Icon from '@/shared/ui/Icon/Icon';
 import SingleDropdown from '@/shared/ui/SingleDropdown/SingleDropdown';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
 interface SelectedFiltersState {
   chain: OptionType[];
@@ -526,19 +525,19 @@ const RevenueBreakDownBlock = ({
           filename={`Revenue Breakdown ${selectedYear?.[0] || yearOptions[0]}.csv`}
         />
       </div>
-      <View.Condition if={hasData}>
+      {hasData && (
         <RevenueBreakdown
           data={tableData}
           columns={dynamicColumns}
           sortType={sortType}
         />
-      </View.Condition>
-      <View.Condition if={!hasData}>
+      )}
+      {!hasData && (
         <NoDataPlaceholder
           onButtonClick={handleResetFilters}
           text={noDataMessage}
         />
-      </View.Condition>
+      )}
       <SortDrawer
         isOpen={isSortOpen}
         sortType={sortType}

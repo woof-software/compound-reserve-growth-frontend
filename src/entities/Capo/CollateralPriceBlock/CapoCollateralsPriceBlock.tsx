@@ -10,7 +10,6 @@ import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
 import { CapoTableItem } from '@/shared/types/Capo/types';
 import Card from '@/shared/ui/Card/Card';
-import View from '@/shared/ui/View/View';
 
 export const CARD_CLASS_NAMES = {
   loading: 'min-h-[565px]',
@@ -102,19 +101,19 @@ const CapoCollateralsPriceBlock = ({
         onClearAll={onClearAll}
         csvData={processedData}
       />
-      <View.Condition if={processedData.length}>
+      {processedData.length && (
         <CollateralsPriceTable
           sortType={sortType}
           tableData={processedData}
         />
-      </View.Condition>
-      <View.Condition if={!processedData.length}>
+      )}
+      {!processedData.length && (
         <NoDataPlaceholder
           text={!isFiltersApplied ? 'No data found' : undefined}
           hideButton={!isFiltersApplied}
           onButtonClick={onClearAll}
         />
-      </View.Condition>
+      )}
     </Card>
   );
 };

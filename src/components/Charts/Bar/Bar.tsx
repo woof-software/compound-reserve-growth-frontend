@@ -1,11 +1,10 @@
-import { Format } from '@/shared/lib/utils/format';
 import React, { FC, useEffect, useMemo, useRef } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
+import { Format } from '@/shared/lib/utils/format';
 import Button from '@/shared/ui/Button/Button';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
 interface ChartData {
   name: string;
@@ -183,14 +182,14 @@ const BarChart: FC<CryptoChartProps> = ({ data, onClear, customOptions }) => {
 
   return (
     <>
-      <View.Condition if={Boolean(data.length > 0)}>
+      {data.length > 0 && (
         <HighchartsReact
           ref={chartRef}
           highcharts={Highcharts}
           options={chartOptions}
         />
-      </View.Condition>
-      <View.Condition if={Boolean(data.length <= 0)}>
+      )}
+      {data.length <= 0 && (
         <div className='flex min-w-auto flex-col items-center justify-center gap-3.5 sm:min-w-[400px]'>
           <Text
             size='11'
@@ -206,7 +205,7 @@ const BarChart: FC<CryptoChartProps> = ({ data, onClear, customOptions }) => {
             Reset Filters
           </Button>
         </div>
-      </View.Condition>
+      )}
     </>
   );
 };

@@ -45,7 +45,6 @@ import Icon from '@/shared/ui/Icon/Icon';
 import SingleDropdown from '@/shared/ui/SingleDropdown/SingleDropdown';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
 interface SelectedOptionsState {
   chain: OptionType[];
@@ -852,7 +851,7 @@ const Filters = memo(
                   </div>
                 </CSVLink>
               </div>
-              <View.Condition if={isShowEyeIcon}>
+              {isShowEyeIcon && (
                 <div className='px-3 py-2'>
                   <ChartIconToggle
                     active={areAllSeriesHidden}
@@ -875,7 +874,7 @@ const Filters = memo(
                     </Text>
                   </ChartIconToggle>
                 </div>
-              </View.Condition>
+              )}
             </div>
           </Drawer>
         </div>
