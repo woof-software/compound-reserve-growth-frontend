@@ -149,14 +149,18 @@ export const useCSVExport = ({
 
       const sortedDates = Array.from(allDates).sort();
 
+      const seriesIndexed = new Map<string, Map<number, number>>();
+      chartSeries.forEach((series) => {
+        seriesIndexed.set(series.name, new Map(series.data.map(p => [p.x, p.y])));
+      });
+
       return sortedDates.map((timestamp) => {
         const csvRow: Record<string, string | number> = {
           Date: new Date(timestamp).toISOString().split('T')[0]
         };
 
         chartSeries.forEach((series) => {
-          const point = series.data.find((p) => p.x === timestamp);
-          csvRow[series.name] = point ? point.y : '';
+          csvRow[series.name] = seriesIndexed.get(series.name)?.get(timestamp) ?? '';
         });
 
         return csvRow;
