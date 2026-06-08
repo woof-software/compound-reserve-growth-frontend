@@ -87,11 +87,16 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
     setSelectedChainKeys,
   );
 
+  const selectedChainOptionsSet = useMemo(
+    () => new Set(selectedChainOptions.map(o => o.value)),
+    [selectedChainOptions]
+  );
+
   const byChain = useMemo(
     () =>
       !selectedChainOptions.length
         ? rawData
-        : rawData.filter((d) => selectedChainOptions.some((o) => o.value === d.source.network)),
+        : rawData.filter((d) => selectedChainOptionsSet.has(d.source.network)),
     [rawData, selectedChainOptions],
   );
 
@@ -129,11 +134,16 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
     setSelectedMarketKeys,
   );
 
+  const selectedMarketOptionsSet = useMemo(
+    () => new Set(selectedMarketOptions.map(o => o.value)),
+    [selectedMarketOptions]
+  );
+
   const byChainAndMarket = useMemo(
     () =>
       !selectedMarketOptions.length
         ? byChain
-        : byChain.filter((d) => selectedMarketOptions.some((o) => o.value === (d.source.market ?? NOT_MARKET))),
+        : byChain.filter((d) => selectedMarketOptionsSet.has(d.source.market ?? NOT_MARKET)),
     [byChain, selectedMarketOptions],
   );
 
@@ -151,11 +161,16 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
     setSelectedAssetTypeKeys,
   );
 
+  const selectedAssetTypeOptionsSet = useMemo(
+    () => new Set(selectedAssetTypeOptions.map(o => o.value)),
+    [selectedAssetTypeOptions]
+  );
+
   const byChainMarketAndAsset = useMemo(
     () =>
       !selectedAssetTypeOptions.length
         ? byChainAndMarket
-        : byChainAndMarket.filter((d) => selectedAssetTypeOptions.some((o) => o.value === d.source.asset.type)),
+        : byChainAndMarket.filter((d) => selectedAssetTypeOptionsSet.has(d.source.asset.type)),
     [byChainAndMarket, selectedAssetTypeOptions],
   );
 
@@ -172,6 +187,11 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
     reserveSymbolOptions,
     selectedSymbolKeys,
     setSelectedSymbolKeys,
+  );
+
+  const selectedSymbolOptionsSet = useMemo(
+    () => new Set(selectedSymbolOptions.map(o => o.value)),
+    [selectedSymbolOptions]
   );
 
   const chartGroupBy = useMemo(() => {
@@ -191,11 +211,10 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
   const { result } = useProcessor({
     array: rawData,
     filters: [
-      (v) => !selectedChainOptions.length || selectedChainOptions.some((o) => o.value === v.source.network),
-      (v) =>
-        !selectedMarketOptions.length || selectedMarketOptions.some((o) => o.value === (v.source.market ?? NOT_MARKET)),
-      (v) => !selectedAssetTypeOptions.length || selectedAssetTypeOptions.some((o) => o.value === v.source.asset.type),
-      (v) => !selectedSymbolOptions.length || selectedSymbolOptions.some((o) => o.value === v.source.asset.symbol),
+      (v) => !selectedChainOptions.length || selectedChainOptionsSet.has(v.source.network),
+      (v) => !selectedMarketOptions.length || selectedMarketOptionsSet.has(v.source.market ?? NOT_MARKET),
+      (v) => !selectedAssetTypeOptions.length || selectedAssetTypeOptionsSet.has(v.source.asset.type),
+      (v) => !selectedSymbolOptions.length || selectedSymbolOptionsSet.has(v.source.asset.symbol),
       (v) => startDate === null || v.date * 1000 >= startDate,
       (v) => rangeEndMs === null || v.date * 1000 <= rangeEndMs,
     ],
