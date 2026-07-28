@@ -75,7 +75,6 @@ export default defineConfig([
     },
 
     rules: {
-      'prettier/prettier': ['warn', { endOfLine: 'auto' }],
       'kalimahAppsTailwind/sort': 'warn',
       'kalimahAppsTailwind/multiline': [
         'warn',
@@ -120,12 +119,12 @@ export default defineConfig([
       ],
       'react/jsx-key': 'error',
       '@typescript-eslint/no-namespace': 'off',
-      'react/jsx-max-props-per-line': [
-        'error',
-        {
-          maximum: 3
-        }
-      ],
+      // 'react/jsx-max-props-per-line': [
+      //   'error',
+      //   {
+      //     maximum: 3
+      //   }
+      // ],
       '@typescript-eslint/no-explicit-any': 'off',
       'no-duplicate-imports': 'off',
       'react-hooks/rules-of-hooks': 'off',

@@ -1,313 +1,259 @@
-import React, {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useState
-} from 'react';
-import { CSVLink } from 'react-csv';
+import { useMemo, useState } from 'react';
+import { useQueryState } from 'nuqs';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
-import LineChart from '@/components/Charts/Line/Line';
-import Filter from '@/components/Filter/Filter';
+import { ChartActions } from '@/components/Charts/ChartActions';
+import LineChart, { LineChartSeries } from '@/components/Charts/Line/Line';
+import { DateRangePickerFilter } from '@/components/Filter/DateRangePickerFilter/DateRangePickerFilter';
+import { DropdownFilter } from '@/components/Filter/DropdownFilter/DropdownFilter';
+import { Filters } from '@/components/Filter/Filters';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import {
   customChartOptions,
-  customTooltipFormatter
+  customTooltipFormatter,
 } from '@/entities/Revenue/CompoundCumulativeRevenue/customChartOptions';
-import { useBarSize } from '@/shared/hooks/useBarSize';
-import { useChartDataProcessor } from '@/shared/hooks/useChartDataProcessor';
-import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
+import { lineChartSeriesToUtcDayCumulative } from '@/entities/Revenue/CompoundCumulativeRevenue/useCumulativeChartSeries';
+import { type RevenueProps } from '@/pages/AccountingPage/AccountingPage';
+import { NOT_MARKET } from '@/shared/consts/consts';
+import { useOptions } from '@/shared/hooks/filters/useOptions';
+import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange';
 import { useEventsApi } from '@/shared/hooks/useEventsApi';
-import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
-import { useModal } from '@/shared/hooks/useModal';
-import { RevenuePageProps } from '@/shared/hooks/useRevenue';
-import { getMaxBarSizeForRange } from '@/shared/lib/date/dateUtils';
+import { useProcessor } from '@/shared/hooks/useProcessor';
+import { getEndOfDayTimestamp } from '@/shared/lib/date/dateUtils';
 import { filterForRange } from '@/shared/lib/utils/chart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import {
-  ChartDataItem,
-  extractFilterOptions,
-  filterAndSortMarkets
+  capitalizeFirstLetter,
+  filterAndSortMarkets,
+  parseAsTimestampMs,
+  parseStingsArray,
 } from '@/shared/lib/utils/utils';
-import { BAR_SIZE, BAR_SIZE_OPTIONS, OptionType } from '@/shared/types/types';
-import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
-import Button from '@/shared/ui/Button/Button';
+import { OptionType } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
-import { DateRangePickerPopover } from '@/shared/ui/DateRangePicker/DateRangePicker';
-import { DateRangeValue } from '@/shared/ui/DateRangePicker/DateRangePicker';
-import Drawer from '@/shared/ui/Drawer/Drawer';
-import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
-interface FiltersProps {
-  chainOptions: OptionType[];
+type MetaMarket = {
+  chains: Set<string>;
+  marketType: string;
+};
 
-  deploymentOptionsFilter: OptionType[];
+const toOptionDto = (o: OptionType) => ({ label: o.label, value: o.id });
 
-  assetTypeOptions: OptionType[];
+const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueProps) => {
+  const { data: events } = useEventsApi();
 
-  symbolOptions: OptionType[];
+  const [isShowEvents, setIsShowEvents] = useState<boolean>(true);
 
-  barSize: BAR_SIZE;
+  const [selectedChainKeys, setSelectedChainKeys] = useQueryState('ccr-chain', parseStingsArray([]));
+  const [selectedMarketKeys, setSelectedMarketKeys] = useQueryState('ccr-market', parseStingsArray([]));
+  const [selectedAssetTypesKeys, setSelectedAssetTypeKeys] = useQueryState('ccr-asset-type', parseStingsArray([]));
+  const [selectedSymbolKeys, setSelectedSymbolKeys] = useQueryState('ccr-symbol', parseStingsArray([]));
+  const [startDate, setStartDate] = useQueryState('ccr-start', parseAsTimestampMs);
+  const [endDate, setEndDate] = useQueryState('ccr-end', parseAsTimestampMs);
 
-  disabledBarSizes: BAR_SIZE[];
-
-  isLoading: boolean;
-
-  showEvents: boolean;
-
-  isShowCalendarIcon: boolean;
-
-  csvFilename: string;
-
-  csvData: Record<string, string | number>[];
-
-  dateRange: DateRangeValue;
-
-  minDate: number | null;
-
-  maxDate: number | null;
-
-  selectedOptions: {
-    chain: OptionType[];
-
-    assetType: OptionType[];
-
-    deployment: OptionType[];
-
-    symbol: OptionType[];
+  const clearAllFilters = () => {
+    setSelectedChainKeys([]);
+    setSelectedMarketKeys([]);
+    setSelectedAssetTypeKeys([]);
+    setSelectedSymbolKeys([]);
+    setStartDate(null);
+    setEndDate(null);
   };
 
-  isShowEyeIcon: boolean;
+  const rangeEndMs = useMemo(() => (endDate === null ? null : getEndOfDayTimestamp(endDate)), [endDate]);
 
-  areAllSeriesHidden: boolean;
-
-  onSelectChain: (chain: OptionType[]) => void;
-
-  onSelectAssetType: (assetType: OptionType[]) => void;
-
-  onSelectMarket: (deployment: OptionType[]) => void;
-
-  onSelectSymbol: (symbol: OptionType[]) => void;
-
-  onBarSizeChange: (value: string) => void;
-
-  onDateRangeChange: Dispatch<SetStateAction<DateRangeValue>>;
-
-  onClearAll: () => void;
-
-  onShowEvents: (value: boolean) => void;
-
-  onSelectAll: () => void;
-
-  onDeselectAll: () => void;
-}
-
-const BAR_SIZE_ORDER = {
-  [BAR_SIZE.D]: 0,
-  [BAR_SIZE.W]: 1,
-  [BAR_SIZE.M]: 2
-} as const;
-
-const CompoundCumulativeRevenue = ({
-  revenueData,
-  isLoading,
-  isError
-}: RevenuePageProps) => {
-  const [selectedOptions, setSelectedOptions] = useReducer(
-    (prev, next) => ({
-      ...prev,
-      ...next
-    }),
-    {
-      chain: [] as OptionType[],
-      assetType: [] as OptionType[],
-      deployment: [] as OptionType[],
-      symbol: [] as OptionType[]
-    }
-  );
-
-  useFiltersSync(selectedOptions, setSelectedOptions, 'ccr', [
-    'chain',
-    'assetType',
-    'deployment',
-    'symbol'
-  ]);
-
-  const {
-    dateRange,
-    setDateRange,
-    normalizedDateRange,
-    dateBounds,
-    resetDateRange,
-    mobileFilterOption: dateRangeMobileOption
-  } = useDateRangeFilter();
-
-  const { barSize, onBarSizeChange } = useBarSize({
-    initialBarSize: BAR_SIZE.D
+  const { barSize, onBarSizeChange, disabledBarSizes } = useBarSizeWithDateRange({
+    startDate,
+    endDate,
   });
 
-  const rawData: ChartDataItem[] = useMemo(() => {
-    return [...revenueData].sort((a, b) => a.date - b.date);
-  }, [revenueData]);
+  const rawData = useMemo(() => [...revenueData].sort((a, b) => a.date - b.date), [revenueData]);
 
-  const maxSelectableBarSize = useMemo<BAR_SIZE>(() => {
-    const { start, end } = normalizedDateRange;
-    if (start === null || end === null) return BAR_SIZE.M;
-    return getMaxBarSizeForRange(start, end);
-  }, [normalizedDateRange]);
-
-  const disabledBarSizes = useMemo<BAR_SIZE[]>(
+  const chainOptions = useMemo(
     () =>
-      BAR_SIZE_OPTIONS.filter(
-        (size) => BAR_SIZE_ORDER[size] > BAR_SIZE_ORDER[maxSelectableBarSize]
-      ),
-    [maxSelectableBarSize]
+      [...new Set(rawData.map((d) => d.source.network))]
+        .sort()
+        .map((value) => ({ label: capitalizeFirstLetter(value), value })),
+    [rawData],
   );
 
-  useEffect(() => {
-    const { start, end } = normalizedDateRange;
-    if (start === null || end === null) return;
-
-    const nextBarSize = getMaxBarSizeForRange(start, end);
-    if (BAR_SIZE_ORDER[nextBarSize] < BAR_SIZE_ORDER[barSize]) {
-      onBarSizeChange(nextBarSize);
-    }
-  }, [barSize, normalizedDateRange, onBarSizeChange]);
-
-  const filterOptionsConfig = useMemo(
-    () => ({
-      chain: { path: 'source.network' },
-      deployment: { path: 'source.market' },
-      symbol: { path: 'source.asset.symbol' },
-      assetType: { path: 'source.asset.type' }
-    }),
-    []
+  const { selectedOptions: selectedChainOptions, setSelectedOptions: setSelectedChainOptions } = useOptions(
+    chainOptions,
+    selectedChainKeys,
+    setSelectedChainKeys,
   );
 
-  const { chainOptions, deploymentOptions, symbolOptions, assetTypeOptions } =
-    useMemo(
-      () => extractFilterOptions(rawData, filterOptionsConfig),
-      [rawData, filterOptionsConfig]
-    );
+  const byChain = useMemo(
+    () =>
+      !selectedChainOptions.length
+        ? rawData
+        : rawData.filter((d) => selectedChainOptions.some((o) => o.value === d.source.network)),
+    [rawData, selectedChainOptions],
+  );
 
-  const deploymentOptionsFilter = useMemo(() => {
-    return filterAndSortMarkets(
-      deploymentOptions,
-      selectedOptions.chain.map((o) => o.id)
-    );
-  }, [deploymentOptions, selectedOptions]);
+  const marketOptionsEnriched = useMemo(() => {
+    const metaByMarket = new Map<string, MetaMarket>();
 
-  const groupBy = useMemo(() => {
-    if (selectedOptions.deployment.length > 0) return 'market';
-    if (selectedOptions.chain.length > 0) return 'network';
-    return 'none';
-  }, [selectedOptions]);
+    byChain.forEach((item) => {
+      const m = item.source.market ?? NOT_MARKET;
+      let entry = metaByMarket.get(m);
+      if (!entry) {
+        entry = {
+          chains: new Set(),
+          marketType: item.source.type?.split(' ')[1] ?? '',
+        };
+        metaByMarket.set(m, entry);
+      }
+      entry.chains.add(item.source.network);
+    });
 
-  const { chartSeries } = useChartDataProcessor({
-    rawData,
-    filters: {
-      network: selectedOptions.chain.map((opt) => opt.id),
-      market: selectedOptions.deployment.map((opt) => opt.id),
-      symbol: selectedOptions.symbol.map((opt) => opt.id),
-      assetType: selectedOptions.assetType.map((opt) => opt.id)
+    const base: OptionType[] = Array.from(metaByMarket.entries()).map(([id, meta]) => ({
+      id,
+      label: capitalizeFirstLetter(id),
+      chain: Array.from(meta.chains),
+      marketType: meta.marketType,
+    }));
+
+    return filterAndSortMarkets(base, selectedChainKeys);
+  }, [byChain, selectedChainKeys]);
+
+  const marketOptions = useMemo(() => marketOptionsEnriched.map(toOptionDto), [marketOptionsEnriched]);
+
+  const { selectedOptions: selectedMarketOptions, setSelectedOptions: setSelectedMarketOptions } = useOptions(
+    marketOptions,
+    selectedMarketKeys,
+    setSelectedMarketKeys,
+  );
+
+  const byChainAndMarket = useMemo(
+    () =>
+      !selectedMarketOptions.length
+        ? byChain
+        : byChain.filter((d) => selectedMarketOptions.some((o) => o.value === (d.source.market ?? NOT_MARKET))),
+    [byChain, selectedMarketOptions],
+  );
+
+  const assetTypesOptions = useMemo(
+    () =>
+      [...new Set(byChainAndMarket.map((d) => d.source.asset.type))]
+        .sort()
+        .map((value) => ({ label: capitalizeFirstLetter(value), value })),
+    [byChainAndMarket],
+  );
+
+  const { selectedOptions: selectedAssetTypeOptions, setSelectedOptions: setSelectedAssetTypeOptions } = useOptions(
+    assetTypesOptions,
+    selectedAssetTypesKeys,
+    setSelectedAssetTypeKeys,
+  );
+
+  const byChainMarketAndAsset = useMemo(
+    () =>
+      !selectedAssetTypeOptions.length
+        ? byChainAndMarket
+        : byChainAndMarket.filter((d) => selectedAssetTypeOptions.some((o) => o.value === d.source.asset.type)),
+    [byChainAndMarket, selectedAssetTypeOptions],
+  );
+
+  const reserveSymbolOptions = useMemo(
+    () =>
+      [...new Set(byChainMarketAndAsset.map((d) => d.source.asset.symbol))]
+        .filter(Boolean)
+        .sort()
+        .map((value) => ({ label: capitalizeFirstLetter(value), value })),
+    [byChainMarketAndAsset],
+  );
+
+  const { selectedOptions: selectedSymbolOptions, setSelectedOptions: setSelectedSymbolOptions } = useOptions(
+    reserveSymbolOptions,
+    selectedSymbolKeys,
+    setSelectedSymbolKeys,
+  );
+
+  const chartGroupBy = useMemo(() => {
+    if (selectedMarketOptions.length > 0) return 'market' as const;
+    if (selectedChainOptions.length > 0) return 'network' as const;
+    return 'none' as const;
+  }, [selectedChainOptions.length, selectedMarketOptions.length]);
+
+  const isAnyFiltersSelected =
+    startDate !== null ||
+    endDate !== null ||
+    !!selectedChainOptions.length ||
+    !!selectedMarketOptions.length ||
+    !!selectedAssetTypeOptions.length ||
+    !!selectedSymbolOptions.length;
+
+  const { result } = useProcessor({
+    array: rawData,
+    filters: [
+      (v) => !selectedChainOptions.length || selectedChainOptions.some((o) => o.value === v.source.network),
+      (v) =>
+        !selectedMarketOptions.length || selectedMarketOptions.some((o) => o.value === (v.source.market ?? NOT_MARKET)),
+      (v) => !selectedAssetTypeOptions.length || selectedAssetTypeOptions.some((o) => o.value === v.source.asset.type),
+      (v) => !selectedSymbolOptions.length || selectedSymbolOptions.some((o) => o.value === v.source.asset.symbol),
+      (v) => startDate === null || v.date * 1000 >= startDate,
+      (v) => rangeEndMs === null || v.date * 1000 <= rangeEndMs,
+    ],
+    transformer: () => {
+      const seriesMap: Record<string, Map<number, number>> = {};
+
+      return (v) => {
+        const key =
+          chartGroupBy === 'none'
+            ? 'Daily Revenue'
+            : chartGroupBy === 'market'
+              ? (v.source.market ?? NOT_MARKET)
+              : v.source.network;
+
+        if (!seriesMap[key]) seriesMap[key] = new Map<number, number>();
+
+        const dateKey = v.date * 1000;
+        const current = seriesMap[key].get(dateKey) ?? 0;
+        seriesMap[key].set(dateKey, current + v.value);
+
+        return seriesMap;
+      };
     },
-    filterPaths: {
-      network: 'source.network',
-      market: 'source.market',
-      symbol: 'source.asset.symbol',
-      assetType: 'source.asset.type'
-    },
-    groupBy,
-    groupByKeyPath: groupBy === 'none' ? null : `source.${groupBy}`,
-    defaultSeriesName: 'Daily Revenue',
-    dateRange: normalizedDateRange
   });
 
-  const cumulativeChartSeries = useMemo(() => {
-    if (!chartSeries || chartSeries.length === 0) {
-      return [];
-    }
+  const dailyChartSeries: LineChartSeries[] = useMemo(() => {
+    if (!result) return [];
 
-    return chartSeries.map((series) => {
-      if (!series.data || series.data.length === 0) {
-        return { ...series, data: [] };
-      }
-
-      const dailyTotals = new Map<number, number>();
-      for (const point of series.data) {
-        const date = new Date(point.x);
-        date.setUTCHours(0, 0, 0, 0);
-        const dayStartTimestamp = date.getTime();
-        const currentTotal = dailyTotals.get(dayStartTimestamp) || 0;
-        const valueToAdd = point.y < 0 ? 0 : point.y;
-        dailyTotals.set(dayStartTimestamp, currentTotal + valueToAdd);
-      }
-
-      const sortedDailyPoints = Array.from(dailyTotals.entries())
+    return Object.entries(result).map(([name, dateMap]) => ({
+      name: capitalizeFirstLetter(name),
+      data: Array.from(dateMap.entries())
         .map(([x, y]) => ({ x, y }))
-        .sort((a, b) => a.x - b.x);
+        .sort((a, b) => a.x - b.x),
+    }));
+  }, [result]);
 
-      if (sortedDailyPoints.length === 0) {
-        return { ...series, data: [] };
-      }
-
-      const cumulativeData: { x: number; y: number }[] = [];
-      const minDate = sortedDailyPoints[0].x;
-      const maxDate = sortedDailyPoints[sortedDailyPoints.length - 1].x;
-      const oneDay = 24 * 60 * 60 * 1000;
-
-      let cumulativeSum = 0;
-      let dataIndex = 0;
-
-      for (let d = minDate; d <= maxDate; d += oneDay) {
-        if (
-          dataIndex < sortedDailyPoints.length &&
-          sortedDailyPoints[dataIndex].x === d
-        ) {
-          cumulativeSum += sortedDailyPoints[dataIndex].y;
-          dataIndex++;
-        }
-        cumulativeData.push({ x: d, y: cumulativeSum });
-      }
-
-      return {
-        ...series,
-        name: series.name.replace('Daily', 'Cumulative'),
-        data: cumulativeData
-      };
-    });
-  }, [chartSeries]);
+  const cumulativeChartSeries = useMemo(
+    () => lineChartSeriesToUtcDayCumulative(dailyChartSeries),
+    [dailyChartSeries]
+  );
 
   const csvData = filterForRange({
     data: cumulativeChartSeries[0]?.data ?? [],
     getDate: (item) => new Date(item.x),
     transform: (item) => ({
       Date: new Date(item.x).toISOString().split('T')[0],
-      'Cumulative revenue': item.y
+      'Cumulative revenue': item.y,
     }),
-    range: barSize
+    range: barSize,
   });
 
   const { isLegendEnabled, aggregatedSeries } = useLineChart({
-    groupBy,
     data: cumulativeChartSeries,
-    barSize
+    groupBy: chartGroupBy,
+    barSize,
   });
 
-  const hasAggregatedData = useMemo(
-    () =>
-      aggregatedSeries.some((s) => Array.isArray(s.data) && s.data.length > 0),
-    [aggregatedSeries]
-  );
+  const hasAggregatedData = aggregatedSeries.some((s) => Array.isArray(s.data) && s.data.length > 0);
 
   const {
     legends,
@@ -315,90 +261,25 @@ const CompoundCumulativeRevenue = ({
     activateAll: onSelectAllLegends,
     deactivateAll: onDeselectAllLegends,
     highlight: onLegendHover,
-    unhighlight: onLegendUnhover
+    unhighlight: onLegendUnhover,
   } = useLegends(aggregatedSeries, ({ name, color }) => ({
     id: `${name}`,
     name: `${name}`,
     isDisabled: false,
     isHighlighted: false,
-    color: `${color}`
+    color: `${color}`,
   }));
 
   const isSeriesHidden = legends.every((l) => l.isDisabled);
 
-  const [isShowEvents, setIsShowEvents] = useState<boolean>(true);
+  const hasData = cumulativeChartSeries.length > 0 && cumulativeChartSeries.some((s) => s.data.length > 0);
 
-  const { data: events } = useEventsApi();
-
-  const hasData = useMemo(() => {
-    return (
-      cumulativeChartSeries.length > 0 &&
-      cumulativeChartSeries.some((s) => s.data.length > 0)
-    );
-  }, [cumulativeChartSeries]);
-
-  const noDataMessage =
-    selectedOptions.chain.length > 0 ||
-    selectedOptions.deployment.length > 0 ||
-    selectedOptions.symbol.length > 0 ||
-    selectedOptions.assetType.length > 0 ||
-    dateRange.startDate !== null ||
-    dateRange.endDate !== null
-      ? 'No data for selected filters'
-      : 'No data available';
+  const noDataMessage = isAnyFiltersSelected ? 'No data for selected filters' : 'No data available';
 
   const getGroupByForChart = () => {
-    if (groupBy === 'none') {
-      return 'none';
-    }
-    return groupBy === 'market' ? 'Market' : 'Chain';
+    if (chartGroupBy === 'none') return 'none';
+    return chartGroupBy === 'market' ? 'Market' : 'Chain';
   };
-
-  const onSelectChain = useCallback(
-    (chain: OptionType[]) => {
-      const selectedChainIds = chain.map((o) => o.id);
-
-      const filteredDeployment = selectedOptions.deployment.filter((el) =>
-        selectedChainIds.length === 0
-          ? true
-          : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
-      );
-
-      setSelectedOptions({
-        chain,
-        deployment: filteredDeployment
-      });
-    },
-    [selectedOptions.deployment]
-  );
-
-  const onSelectAssetType = useCallback((assetTypes: OptionType[]) => {
-    setSelectedOptions({
-      assetType: assetTypes
-    });
-  }, []);
-
-  const onSelectMarket = useCallback((deployments: OptionType[]) => {
-    setSelectedOptions({
-      deployment: deployments
-    });
-  }, []);
-
-  const onSelectSymbol = useCallback((symbols: OptionType[]) => {
-    setSelectedOptions({
-      symbol: symbols
-    });
-  }, []);
-
-  const onClearSelectedOptions = useCallback(() => {
-    setSelectedOptions({
-      chain: [],
-      assetType: [],
-      deployment: [],
-      symbol: []
-    });
-    resetDateRange();
-  }, [resetDateRange]);
 
   return (
     <Card
@@ -408,45 +289,116 @@ const CompoundCumulativeRevenue = ({
       isError={isError}
       className={{
         loading: 'min-h-[inherit]',
-        container: 'border-background min-h-[550px] border',
-        content: 'flex flex-col gap-3 p-0 pb-5 md:px-5 lg:px-10 lg:pb-10'
+        container: 'min-h-[571px] rounded-lg',
+        content: 'flex flex-col gap-3 pt-0 pb-0 px-5 lg:px-10 lg:pb-10',
       }}
     >
-      <Filters
-        barSize={barSize}
-        disabledBarSizes={disabledBarSizes}
-        csvData={csvData}
-        areAllSeriesHidden={isSeriesHidden}
-        isShowEyeIcon={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
-        showEvents={isShowEvents}
-        csvFilename={getCsvFileName('compound_cumulative_revenue')}
-        chainOptions={chainOptions}
-        dateRange={dateRange}
-        minDate={dateBounds.min}
-        maxDate={dateBounds.max}
-        selectedOptions={selectedOptions}
-        isShowCalendarIcon={!!events?.length}
-        deploymentOptionsFilter={deploymentOptionsFilter}
-        assetTypeOptions={assetTypeOptions}
-        symbolOptions={symbolOptions}
-        isLoading={isLoading}
-        onSelectChain={onSelectChain}
-        onSelectAssetType={onSelectAssetType}
-        onSelectMarket={onSelectMarket}
-        onSelectSymbol={onSelectSymbol}
-        onBarSizeChange={onBarSizeChange}
-        onDateRangeChange={setDateRange}
-        onClearAll={onClearSelectedOptions}
-        onShowEvents={setIsShowEvents}
-        onSelectAll={onSelectAllLegends}
-        onDeselectAll={onDeselectAllLegends}
-        dateRangeMobileOption={dateRangeMobileOption}
-      />
+      <div className={'flex sm:flex-row sm:items-center flex-col-reverse gap-2 py-3 justify-end'}>
+        <div className={'w-full sm:w-auto'}>
+          <TabsGroup
+            className={{
+              container: 'w-full sm:w-auto',
+              list: 'w-full sm:w-auto',
+            }}
+            tabs={['D', 'W', 'M']}
+            value={barSize}
+            onTabChange={onBarSizeChange}
+            disabled={isLoading}
+            disabledTabs={disabledBarSizes}
+          />
+        </div>
+        <div className={'flex w-full sm:w-auto justify-end gap-2'}>
+          <Filters onClearAll={clearAllFilters} isShowClear={isAnyFiltersSelected}>
+            <DateRangePickerFilter
+              triggerLabel='Date Range'
+              value={{ startDate, endDate }}
+              onChange={({ startDate, endDate }) => {
+                setStartDate(startDate);
+                setEndDate(endDate);
+              }}
+            />
+            <DropdownFilter
+              triggerLabel='Chain'
+              options={chainOptions}
+              selectedOptions={selectedChainOptions}
+              getKey={(v) => v.value}
+              getLabel={(v) => v.label}
+              setValue={setSelectedChainOptions}
+            />
+            <DropdownFilter
+              triggerLabel='Market'
+              options={marketOptions}
+              selectedOptions={selectedMarketOptions}
+              getKey={(v) => v.value}
+              getLabel={(v) => v.label}
+              setValue={setSelectedMarketOptions}
+            />
+            <DropdownFilter
+              triggerLabel='Asset Type'
+              options={assetTypesOptions}
+              selectedOptions={selectedAssetTypeOptions}
+              getKey={(v) => v.value}
+              getLabel={(v) => v.label}
+              setValue={setSelectedAssetTypeOptions}
+            />
+            <DropdownFilter
+              triggerLabel='Reserve Symbol'
+              options={reserveSymbolOptions}
+              selectedOptions={selectedSymbolOptions}
+              getKey={(v) => v.value}
+              getLabel={(v) => v.label}
+              setValue={setSelectedSymbolOptions}
+            />
+          </Filters>
+          <ChartActions
+            mobileChildren={
+              <>
+                <CSVDownloadButton data={csvData} filename={getCsvFileName('compound_cumulative_revenue')} />
+                {isLegendEnabled && aggregatedSeries.length > 1 ? (
+                  <ChartIconToggle
+                    active={isSeriesHidden}
+                    onIcon='eye'
+                    offIcon='eye-closed'
+                    ariaLabel='Toggle all series visibility'
+                    className={{
+                      container: 'flex items-center gap-1.5 bg-transparent p-0 !shadow-none h-[44px]',
+                      icon: 'h-[26px] w-[26px]',
+                      iconContainer: 'h-[26px] w-[26px]',
+                    }}
+                    onClick={() => (isSeriesHidden ? onSelectAllLegends() : onDeselectAllLegends())}
+                  >
+                    <Text size='14' weight='500'>
+                      {isSeriesHidden ? 'Select All' : 'Unselect All'}
+                    </Text>
+                  </ChartIconToggle>
+                ) : null}
+                {events?.length ? (
+                  <ChartIconToggle
+                    active={!isShowEvents}
+                    onIcon='calendar-check'
+                    offIcon='calendar-uncheck'
+                    ariaLabel='Toggle events'
+                    className={{
+                      container: 'flex items-center gap-1.5 bg-transparent p-0 !shadow-none h-[44px]',
+                      icon: 'h-[26px] w-[26px]',
+                      iconContainer: 'h-[26px] w-[26px]',
+                    }}
+                    onClick={() => setIsShowEvents((prev) => !prev)}
+                  >
+                    <Text size='14' weight='500'>
+                      Hide Events
+                    </Text>
+                  </ChartIconToggle>
+                ) : null}
+              </>
+            }
+          >
+            <CSVDownloadButton data={csvData} filename={getCsvFileName('compound_cumulative_revenue')} />
+          </ChartActions>
+        </div>
+      </div>
       {!isLoading && !isError && (!hasData || !hasAggregatedData) ? (
-        <NoDataPlaceholder
-          onButtonClick={onClearSelectedOptions}
-          text={noDataMessage}
-        />
+        <NoDataPlaceholder onButtonClick={clearAllFilters} text={noDataMessage} />
       ) : (
         <LineChart
           className='max-h-fit'
@@ -457,7 +409,7 @@ const CompoundCumulativeRevenue = ({
           showEvents={isShowEvents}
           customOptions={customChartOptions}
           customTooltipFormatter={customTooltipFormatter}
-          resetZoomKey={`${barSize}-${dateRange.startDate}-${dateRange.endDate}`}
+          resetZoomKey={`${barSize}-${startDate}-${endDate}`}
           legends={legends}
           onSelectAllLegends={onSelectAllLegends}
           onDeselectAllLegends={onDeselectAllLegends}
@@ -468,374 +420,6 @@ const CompoundCumulativeRevenue = ({
         />
       )}
     </Card>
-  );
-};
-
-const Filters = ({
-  barSize,
-  disabledBarSizes,
-  csvData,
-  csvFilename,
-  chainOptions,
-  dateRange,
-  minDate,
-  maxDate,
-  selectedOptions,
-  deploymentOptionsFilter,
-  isShowEyeIcon,
-  areAllSeriesHidden,
-  assetTypeOptions,
-  symbolOptions,
-  showEvents,
-  isShowCalendarIcon,
-  isLoading,
-  dateRangeMobileOption,
-  onSelectChain,
-  onSelectAssetType,
-  onSelectMarket,
-  onSelectSymbol,
-  onBarSizeChange,
-  onDateRangeChange,
-  onClearAll,
-  onShowEvents,
-  onSelectAll,
-  onDeselectAll
-}: FiltersProps & {
-  dateRangeMobileOption: ReturnType<
-    typeof useDateRangeFilter
-  >['mobileFilterOption'];
-}) => {
-  const { isOpen, onOpenModal, onCloseModal } = useModal();
-
-  const {
-    isOpen: isMoreOpen,
-    onOpenModal: onMoreOpen,
-    onCloseModal: onMoreClose
-  } = useModal();
-
-  const filterOptions = useMemo(() => {
-    const chainFilterOptions = {
-      id: 'chain',
-      placeholder: 'Chain',
-      total: selectedOptions.chain.length,
-      selectedOptions: selectedOptions.chain,
-      options: chainOptions || [],
-      onChange: onSelectChain
-    };
-
-    const marketFilterOptions = {
-      id: 'market',
-      placeholder: 'Market',
-      total: selectedOptions.deployment.length,
-      selectedOptions: selectedOptions.deployment,
-      options: deploymentOptionsFilter || [],
-      onChange: onSelectMarket
-    };
-
-    const assetTypeFilterOptions = {
-      id: 'assetType',
-      placeholder: 'Asset Type',
-      total: selectedOptions.assetType.length,
-      selectedOptions: selectedOptions.assetType,
-      options:
-        assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
-      onChange: onSelectAssetType
-    };
-
-    const symbolFilterOptions = {
-      id: 'reserveSymbol',
-      placeholder: 'Reserve Symbols',
-      total: selectedOptions.symbol.length,
-      selectedOptions: selectedOptions.symbol,
-      options:
-        symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
-      onChange: onSelectSymbol
-    };
-
-    return [
-      dateRangeMobileOption,
-      chainFilterOptions,
-      marketFilterOptions,
-      assetTypeFilterOptions,
-      symbolFilterOptions
-    ];
-  }, [
-    assetTypeOptions,
-    chainOptions,
-    dateRangeMobileOption,
-    deploymentOptionsFilter,
-    onSelectAssetType,
-    onSelectChain,
-    onSelectMarket,
-    onSelectSymbol,
-    selectedOptions,
-    symbolOptions
-  ]);
-
-  const onCalendarClick = () => {
-    onShowEvents(!showEvents);
-    onMoreClose();
-  };
-
-  const onEyeClick = () => {
-    if (areAllSeriesHidden) {
-      onSelectAll();
-    } else {
-      onDeselectAll();
-    }
-    onMoreClose();
-  };
-
-  return (
-    <>
-      <div className='hidden lg:block'>
-        <div className='hidden items-center justify-end gap-2 px-0 py-3 lg:flex'>
-          <TabsGroup
-            tabs={BAR_SIZE_OPTIONS}
-            value={barSize}
-            onTabChange={onBarSizeChange}
-            disabled={isLoading}
-            disabledTabs={disabledBarSizes}
-          />
-          <DateRangePickerPopover
-            value={dateRange}
-            min={minDate}
-            max={maxDate}
-            onChange={onDateRangeChange}
-            disabled={isLoading}
-            showLabels
-            inputClassName='w-full'
-          />
-          <div className='flex gap-2'>
-            <MultiSelect
-              options={chainOptions || []}
-              value={selectedOptions.chain}
-              onChange={onSelectChain}
-              placeholder='Chain'
-              disabled={isLoading}
-            />
-            <MultiSelect
-              options={deploymentOptionsFilter || []}
-              value={selectedOptions.deployment}
-              onChange={onSelectMarket}
-              placeholder='Market'
-              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-            />
-            <MultiSelect
-              options={
-                assetTypeOptions?.sort((a, b) =>
-                  a.label.localeCompare(b.label)
-                ) || []
-              }
-              value={selectedOptions.assetType}
-              onChange={onSelectAssetType}
-              placeholder='Asset Type'
-              disabled={isLoading}
-            />
-            <MultiSelect
-              options={
-                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-                []
-              }
-              value={selectedOptions.symbol}
-              onChange={onSelectSymbol}
-              placeholder='Reserve Symbols'
-              disabled={isLoading}
-            />
-          </div>
-          <CSVDownloadButton
-            data={csvData}
-            filename={csvFilename}
-          />
-        </div>
-        <div className='flex flex-col items-end justify-end gap-2 px-0 py-3 lg:hidden'>
-          <div className='z-[1] flex items-center gap-2'>
-            <DateRangePickerPopover
-              value={dateRange}
-              min={minDate}
-              max={maxDate}
-              onChange={onDateRangeChange}
-              disabled={isLoading}
-              showLabels
-              inputClassName='w-full'
-            />
-            <MultiSelect
-              options={chainOptions || []}
-              value={selectedOptions.chain}
-              onChange={onSelectChain}
-              placeholder='Chain'
-              disabled={isLoading}
-            />
-            <MultiSelect
-              options={deploymentOptionsFilter || []}
-              value={selectedOptions.deployment}
-              onChange={onSelectMarket}
-              placeholder='Market'
-              disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-            />
-            <MultiSelect
-              options={
-                assetTypeOptions?.sort((a, b) =>
-                  a.label.localeCompare(b.label)
-                ) || []
-              }
-              value={selectedOptions.assetType}
-              onChange={onSelectAssetType}
-              placeholder='Asset Type'
-              disabled={isLoading}
-            />
-            <MultiSelect
-              options={
-                symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-                []
-              }
-              value={selectedOptions.symbol}
-              onChange={onSelectSymbol}
-              placeholder='Reserve Symbols'
-              disabled={isLoading}
-            />
-          </div>
-          <div className='flex items-center gap-2'>
-            <TabsGroup
-              tabs={BAR_SIZE_OPTIONS}
-              value={barSize}
-              onTabChange={onBarSizeChange}
-              disabled={isLoading}
-              disabledTabs={disabledBarSizes}
-            />
-            <CSVDownloadButton
-              data={csvData}
-              filename={csvFilename}
-            />
-          </div>
-        </div>
-      </div>
-      <div className='block lg:hidden'>
-        <div className='flex flex-wrap justify-end gap-2 px-5 py-3 md:px-0'>
-          <div className='flex w-full flex-row items-center justify-end gap-2 sm:w-auto'>
-            <TabsGroup
-              className={{
-                container: 'w-full sm:w-auto',
-                list: 'w-full sm:w-auto'
-              }}
-              tabs={BAR_SIZE_OPTIONS}
-              value={barSize}
-              onTabChange={onBarSizeChange}
-              disabled={isLoading}
-              disabledTabs={disabledBarSizes}
-            />
-            <Button
-              onClick={onOpenModal}
-              className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
-            >
-              <Icon
-                name='filters'
-                className='h-[14px] w-[14px] fill-none'
-              />
-              Filters
-            </Button>
-            <Button
-              onClick={onMoreOpen}
-              className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
-            >
-              <Icon
-                name='3-dots'
-                className='h-6 w-6 fill-none'
-              />
-            </Button>
-          </div>
-          <Filter
-            isOpen={isOpen}
-            filterOptions={filterOptions}
-            onClose={onCloseModal}
-            onClearAll={onClearAll}
-          />
-          <Drawer
-            isOpen={isMoreOpen}
-            onClose={onMoreClose}
-          >
-            <Text
-              size='17'
-              weight='700'
-              align='center'
-              className='mb-5'
-            >
-              Actions
-            </Text>
-            <div className='flex flex-col gap-1.5'>
-              <div className='px-3 py-2'>
-                <CSVLink
-                  data={csvData}
-                  filename={csvFilename}
-                  onClick={onMoreClose}
-                >
-                  <div className='flex items-center gap-1.5'>
-                    <Icon
-                      name='download'
-                      className='h-[26px] w-[26px]'
-                    />
-                    <Text
-                      size='14'
-                      weight='500'
-                    >
-                      CSV with the entire historical data
-                    </Text>
-                  </div>
-                </CSVLink>
-              </div>
-              <View.Condition if={isShowEyeIcon}>
-                <div className='px-3 py-2'>
-                  <ChartIconToggle
-                    active={areAllSeriesHidden}
-                    onIcon='eye'
-                    offIcon='eye-closed'
-                    ariaLabel='Toggle all series visibility'
-                    className={{
-                      container:
-                        'flex items-center gap-1.5 bg-transparent p-0 shadow-none!',
-                      icon: 'h-[26px] w-[26px]',
-                      iconContainer: 'h-[26px] w-[26px]'
-                    }}
-                    onClick={onEyeClick}
-                  >
-                    <Text
-                      size='14'
-                      weight='500'
-                    >
-                      {areAllSeriesHidden ? 'Select All' : 'Unselect All'}
-                    </Text>
-                  </ChartIconToggle>
-                </div>
-              </View.Condition>
-              <View.Condition if={isShowCalendarIcon}>
-                <div className='px-3 py-2'>
-                  <ChartIconToggle
-                    active={!showEvents}
-                    onIcon='calendar-check'
-                    offIcon='calendar-uncheck'
-                    ariaLabel='Toggle events'
-                    className={{
-                      container:
-                        'flex items-center gap-1.5 bg-transparent p-0 shadow-none!',
-                      icon: 'h-[26px] w-[26px]',
-                      iconContainer: 'h-[26px] w-[26px]'
-                    }}
-                    onClick={onCalendarClick}
-                  >
-                    <Text
-                      size='14'
-                      weight='500'
-                    >
-                      Hide Events
-                    </Text>
-                  </ChartIconToggle>
-                </div>
-              </View.Condition>
-            </div>
-          </Drawer>
-        </div>
-      </div>
-    </>
   );
 };
 

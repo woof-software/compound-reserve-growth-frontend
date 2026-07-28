@@ -12,8 +12,8 @@ import RevenueOverviewUSD, {
   toDateHeaderMap,
   ToDateTab
 } from '@/components/RevenuePageTable/RevenueOverviewUSD';
+import {type RevenueProps } from '@/pages/AccountingPage/AccountingPage';
 import { useModal } from '@/shared/hooks/useModal';
-import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
 import { Format } from '@/shared/lib/utils/format';
 import {
@@ -117,7 +117,7 @@ const RevenueOverview = ({
   revenueData: rawData,
   isLoading,
   isError
-}: RevenuePageProps) => {
+}: RevenueProps) => {
   const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
     useSorting<RevenueTableRowData>('asc', null);
 

@@ -37,7 +37,7 @@ export const DropdownFilterActions = (props: DropdownFilterActionsProps) => {
           Select All
         </Button>
       )
-    )
+    );
   }
 
   return (

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { RevenuePageProps } from '@/shared/hooks/useRevenue';
+import {type RevenueProps } from '@/pages/AccountingPage/AccountingPage';
 import { Format } from '@/shared/lib/utils/format';
 import { formatGrowth } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
@@ -10,7 +10,7 @@ const RevenueMetrics = ({
   revenueData,
   isLoading,
   isError
-}: RevenuePageProps) => {
+}: RevenueProps) => {
   const yearlyTotals = useMemo(() => {
     if (!revenueData || revenueData.length === 0) {
       return {};

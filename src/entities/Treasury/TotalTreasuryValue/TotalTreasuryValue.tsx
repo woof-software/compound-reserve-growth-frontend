@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQueryState } from 'nuqs';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
@@ -31,8 +31,8 @@ import Text from '@/shared/ui/Text/Text';
 
 interface TotalTreasuryValueProps {
   data: TokenData[];
-  isLoading: boolean;
-  isError: boolean;
+  isLoading?: boolean;
+  isError?: boolean;
   onCopyLink?: (id: string) => void;
 }
 

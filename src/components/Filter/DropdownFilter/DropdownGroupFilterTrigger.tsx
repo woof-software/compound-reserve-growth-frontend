@@ -6,7 +6,7 @@ import Text from '@/shared/ui/Text/Text';
 import ArrowDown from '@/shared/assets/svg/arrow-down.svg';
 
 export interface DropdownGroupFilterTriggerProps {
-  onClick: () => void;
+  onClick?: () => void;
   label?: string;
   isOpen?: boolean
 }

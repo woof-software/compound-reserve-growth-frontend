@@ -1,31 +1,28 @@
-import React, { useCallback, useMemo, useReducer } from 'react';
-import { CSVLink } from 'react-csv';
+import React, { useMemo } from 'react';
+import { useQueryState } from 'nuqs';
 
-import Filter from '@/components/Filter/Filter';
+import { ChartActions } from '@/components/Charts/ChartActions';
+import { DropdownFilter } from '@/components/Filter/DropdownFilter/DropdownFilter';
+import { Filters } from '@/components/Filter/Filters';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import TreasuryHoldingsTable, {
   TreasuryBalanceByNetworkType
 } from '@/components/TreasuryPageTable/TreasuryHoldingsTable';
 import { treasuryBalanceByNetworkColumns } from '@/entities/Treasury/TreasuryBalanceByNetwork/TreasuryBalanceByNetwork';
 import { NOT_MARKET } from '@/shared/consts/consts';
-import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
+import { useOptions } from '@/shared/hooks/filters/useOptions';
 import { useModal } from '@/shared/hooks/useModal';
 import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
+import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import {
-  capitalizeFirstLetter,
-  extractFilterOptions,
-  filterAndSortMarkets
+  capitalizeFirstLetter, parseStingsArray
 } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
-import { OptionType } from '@/shared/types/types';
-import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
-import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
-import Text from '@/shared/ui/Text/Text';
 import View from '@/shared/ui/View/View';
 
 interface TreasuryHoldingsBlockProps {
@@ -53,79 +50,91 @@ const mapTableData = (data: TokenData[]) => {
   });
 };
 
-export const treasuryHoldingsColumns = [
-  {
-    accessorKey: 'symbol',
-    header: 'Symbol'
-  },
-  {
-    accessorKey: 'chain',
-    header: 'Chain'
-  },
-  {
-    accessorKey: 'market',
-    header: 'Market'
-  },
-  {
-    accessorKey: 'qty',
-    header: 'qty'
-  },
-  {
-    accessorKey: 'value',
-    header: 'Value'
-  },
-  {
-    accessorKey: 'price',
-    header: 'Price'
-  },
-  {
-    accessorKey: 'source',
-    header: 'Source'
-  }
-];
-
 const TreasuryHoldingsBlock = ({
   isLoading,
   isError,
   data
 }: TreasuryHoldingsBlockProps) => {
   const {
-    isOpen: isFilterOpen,
-    onOpenModal: onFilterOpen,
-    onCloseModal: onFilterClose
-  } = useModal();
-
-  const {
     isOpen: isSortOpen,
     onOpenModal: onSortOpen,
     onCloseModal: onSortClose
   } = useModal();
 
+  const [selectedChainKeys, setSelectedChainKeys] = useQueryState('tnb-chain', parseStingsArray([]));
+  const [selectedMarketKeys, setSelectedMarketKeys] = useQueryState('tnb-market', parseStingsArray([]));
+  const [selectedAssetTypesKeys, setSelectedAssetTypeKeys] = useQueryState('tnb-asset-type', parseStingsArray([]));
+  const [selectedSymbolKeys, setSelectedSymbolKeys] = useQueryState('tnb-symbol', parseStingsArray([]));
+
+  const clearAllFilters = () => {
+    setSelectedChainKeys([]);
+    setSelectedMarketKeys([]);
+    setSelectedAssetTypeKeys([]);
+    setSelectedSymbolKeys([]);
+  };
+
+  const chainOptions = useMemo(() => (
+    [...new Set(data.map(d => d.source.network))]
+      .sort()
+      .map(value => ({ label: capitalizeFirstLetter(value), value }))
+  ), [data]);
+
   const {
-    isOpen: isMoreOpen,
-    onOpenModal: onMoreOpen,
-    onCloseModal: onMoreClose
-  } = useModal();
+    selectedOptions: selectedChainOptions,
+    setSelectedOptions: setSelectedChainOptions,
+  } = useOptions(chainOptions, selectedChainKeys, setSelectedChainKeys);
 
-  const [selectedOptions, setSelectedOptions] = useReducer(
-    (prev, next) => ({
-      ...prev,
-      ...next
-    }),
-    {
-      chain: [] as OptionType[],
-      assetType: [] as OptionType[],
-      deployment: [] as OptionType[],
-      symbol: [] as OptionType[]
-    }
-  );
+  const byChain = useMemo(() => (
+    !selectedChainOptions.length
+      ? data
+      : data.filter(d => selectedChainOptions.some(o => o.value === d.source.network))
+  ), [data, selectedChainOptions]);
 
-  useFiltersSync(selectedOptions, setSelectedOptions, 'thb', [
-    'chain',
-    'assetType',
-    'deployment',
-    'symbol'
-  ]);
+  const marketOptions = useMemo(() => (
+    [...new Set(byChain.map(d => d.source.market ?? NOT_MARKET))]
+      .sort()
+      .map(value => ({ label: capitalizeFirstLetter(value), value }))
+  ), [byChain]);
+
+  const {
+    selectedOptions: selectedMarketOptions,
+    setSelectedOptions: setSelectedMarketOptions,
+  } = useOptions(marketOptions, selectedMarketKeys, setSelectedMarketKeys);
+
+  const byChainAndMarket = useMemo(() => (
+    !selectedMarketOptions.length
+      ? byChain
+      : byChain.filter(d => selectedMarketOptions.some(o => o.value === (d.source.market ?? NOT_MARKET)))
+  ), [byChain, selectedMarketOptions]);
+
+  const assetTypesOptions = useMemo(() => (
+    [...new Set(byChainAndMarket.map(d => d.source.asset.type))]
+      .sort()
+      .map(value => ({ label: capitalizeFirstLetter(value), value }))
+  ), [byChainAndMarket]);
+
+  const {
+    selectedOptions: selectedAssetTypeOptions,
+    setSelectedOptions: setSelectedAssetTypeOptions,
+  } = useOptions(assetTypesOptions, selectedAssetTypesKeys, setSelectedAssetTypeKeys);
+
+  const byChainMarketAndAsset = useMemo(() => (
+    !selectedAssetTypeOptions.length
+      ? byChainAndMarket
+      : byChainAndMarket.filter(d => selectedAssetTypeOptions.some(o => o.value === d.source.asset.type))
+  ), [byChainAndMarket, selectedAssetTypeOptions]);
+
+  const reserveSymbolOptions = useMemo(() => (
+    [...new Set(byChainMarketAndAsset.map(d => d.source.asset.symbol))]
+      .filter(Boolean)
+      .sort()
+      .map(value => ({ label: capitalizeFirstLetter(value), value }))
+  ), [byChainMarketAndAsset]);
+
+  const {
+    selectedOptions: selectedSymbolOptions,
+    setSelectedOptions: setSelectedSymbolOptions,
+  } = useOptions(reserveSymbolOptions, selectedSymbolKeys, setSelectedSymbolKeys);
 
   const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
     useSorting<TreasuryBalanceByNetworkType>('asc', null);
@@ -135,64 +144,45 @@ const TreasuryHoldingsBlock = ({
     key: sortKey
   };
 
-  const filterOptionsConfig = useMemo(
-    () => ({
-      chain: { path: 'source.network' },
-      assetType: { path: 'source.asset.type' },
-      deployment: { path: 'source.market' },
-      symbol: { path: 'source.asset.symbol' }
-    }),
-    []
-  );
-
-  const { chainOptions, assetTypeOptions, deploymentOptions, symbolOptions } =
-    useMemo(
-      () => extractFilterOptions(data, filterOptionsConfig),
-      [data, filterOptionsConfig]
-    );
-
-  const deploymentOptionsFilter = useMemo(() => {
-    return filterAndSortMarkets(
-      deploymentOptions,
-      selectedOptions.chain.map((o) => o.id)
-    );
-  }, [deploymentOptions, selectedOptions]);
+  const isAnyFiltersSelected =
+    !!selectedChainOptions.length ||
+    !!selectedMarketOptions.length ||
+    !!selectedAssetTypeOptions.length ||
+    !!selectedSymbolOptions.length;
 
   const tableData = useMemo<TreasuryBalanceByNetworkType[]>(() => {
     const filtered = data.filter((item) => {
       if (
-        selectedOptions.chain.length > 0 &&
-        !selectedOptions.chain.some(
-          (o: OptionType) => o.id === item.source.network
+        selectedChainOptions.length > 0 &&
+        !selectedChainOptions.some(
+          (o) => o.value === item.source.network
         )
       ) {
         return false;
       }
 
       if (
-        selectedOptions.assetType.length > 0 &&
-        !selectedOptions.assetType.some(
-          (o: OptionType) => o.id === item.source.asset.type
+        selectedAssetTypeOptions.length > 0 &&
+        !selectedAssetTypeOptions.some(
+          (o) => o.value === item.source.asset.type
         )
       ) {
         return false;
       }
-
-      const market = item.source.market ?? NOT_MARKET;
-
+      
       if (
-        selectedOptions.deployment.length > 0 &&
-        !selectedOptions.deployment.some((o: OptionType) =>
-          o.id === NOT_MARKET ? market === NOT_MARKET : o.id === market
+        selectedMarketOptions.length > 0 &&
+        !selectedMarketOptions.some((o) =>
+          o.value === (item.source.market ?? NOT_MARKET)
         )
       ) {
         return false;
       }
 
       if (
-        selectedOptions.symbol.length > 0 &&
-        !selectedOptions.symbol.some(
-          (o: OptionType) => o.id === item.source.asset.symbol
+        selectedSymbolOptions.length > 0 &&
+        !selectedSymbolOptions.some(
+          (o) => o.value === item.source.asset.symbol
         )
       ) {
         return false;
@@ -202,109 +192,7 @@ const TreasuryHoldingsBlock = ({
     });
 
     return mapTableData(filtered).sort((a, b) => b.value - a.value);
-  }, [data, selectedOptions]);
-
-  const onSelectChain = useCallback(
-    (chain: OptionType[]) => {
-      const selectedChainIds = chain.map((o) => o.id);
-
-      const filteredDeployment = selectedOptions.deployment.filter((el) =>
-        selectedChainIds.length === 0
-          ? true
-          : (el.chain?.some((c) => selectedChainIds.includes(c)) ?? false)
-      );
-      setSelectedOptions({ chain, deployment: filteredDeployment });
-    },
-    [selectedOptions.deployment]
-  );
-
-  const onSelectAssetType = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      assetType: selectedOptions
-    });
-  }, []);
-
-  const onSelectMarket = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      deployment: selectedOptions
-    });
-  }, []);
-
-  const onSelectSymbol = useCallback((selectedOptions: OptionType[]) => {
-    setSelectedOptions({
-      symbol: selectedOptions
-    });
-  }, []);
-
-  const onClearSelectedOptions = useCallback(() => {
-    setSelectedOptions({
-      chain: [],
-      assetType: [],
-      deployment: [],
-      symbol: []
-    });
-  }, []);
-
-  const onClearAll = useCallback(() => {
-    onClearSelectedOptions();
-  }, [onClearSelectedOptions]);
-
-  const filterOptions = useMemo(() => {
-    const chainFilterOptions = {
-      id: 'chain',
-      placeholder: 'Chain',
-      total: selectedOptions.chain.length,
-      selectedOptions: selectedOptions.chain,
-      options: chainOptions || [],
-      onChange: onSelectChain
-    };
-
-    const marketFilterOptions = {
-      id: 'market',
-      placeholder: 'Market',
-      total: selectedOptions.deployment.length,
-      selectedOptions: selectedOptions.deployment,
-      options: deploymentOptionsFilter || [],
-      onChange: onSelectMarket
-    };
-
-    const assetTypeFilterOptions = {
-      id: 'assetType',
-      placeholder: 'Asset Type',
-      total: selectedOptions.assetType.length,
-      selectedOptions: selectedOptions.assetType,
-      options:
-        assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
-      onChange: onSelectAssetType
-    };
-
-    const symbolFilterOptions = {
-      id: 'reserveSymbol',
-      placeholder: 'Reserve Symbols',
-      total: selectedOptions.symbol.length,
-      selectedOptions: selectedOptions.symbol,
-      options:
-        symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || [],
-      onChange: onSelectSymbol
-    };
-
-    return [
-      chainFilterOptions,
-      marketFilterOptions,
-      assetTypeFilterOptions,
-      symbolFilterOptions
-    ];
-  }, [
-    assetTypeOptions,
-    chainOptions,
-    deploymentOptionsFilter,
-    onSelectAssetType,
-    onSelectChain,
-    onSelectMarket,
-    onSelectSymbol,
-    selectedOptions,
-    symbolOptions
-  ]);
+  }, [data, selectedChainOptions, selectedAssetTypeOptions, selectedMarketOptions, selectedSymbolOptions]);
 
   return (
     <Card
@@ -320,126 +208,76 @@ const TreasuryHoldingsBlock = ({
         header: 'rounded-t-lg'
       }}
     >
-      <div className='hidden items-center justify-end gap-2 px-10 py-3 lg:flex lg:px-0'>
-        <MultiSelect
-          options={chainOptions || []}
-          value={selectedOptions.chain}
-          onChange={onSelectChain}
-          placeholder='Chain'
-          disabled={isLoading}
-        />
-        <MultiSelect
-          options={deploymentOptionsFilter || []}
-          value={selectedOptions.deployment}
-          onChange={onSelectMarket}
-          placeholder='Market'
-          disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-        />
-        <MultiSelect
-          options={
-            assetTypeOptions?.sort((a, b) => a.label.localeCompare(b.label)) ||
-            []
-          }
-          value={selectedOptions.assetType}
-          onChange={onSelectAssetType}
-          placeholder='Asset Type'
-          disabled={isLoading}
-        />
-        <MultiSelect
-          options={
-            symbolOptions?.sort((a, b) => a.label.localeCompare(b.label)) || []
-          }
-          value={selectedOptions.symbol}
-          onChange={onSelectSymbol}
-          placeholder='Reserve Symbols'
-          disabled={isLoading}
-        />
-        <CSVDownloadButton
-          data={tableData}
-          filename='Full Treasury Holdings'
-        />
-      </div>
-      <div className='block lg:hidden'>
-        <div className='flex flex-row items-center justify-end gap-2 px-5 py-3'>
-          <Button
-            onClick={onFilterOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
-          >
-            <Icon
-              name='filters'
-              className='h-[14px] w-[14px] fill-none'
-            />
-            Filters
-          </Button>
+      <div className={'flex items-center gap-2 py-3 px-5 lg:px-0 justify-end flex-wrap'}>
+        <Filters
+          onClearAll={clearAllFilters}
+          isShowClear={isAnyFiltersSelected}
+        >
+          <DropdownFilter
+            triggerLabel={'Chain'}
+            options={chainOptions}
+            selectedOptions={selectedChainOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedChainOptions}
+          />
+          <DropdownFilter
+            triggerLabel={'Market'}
+            options={marketOptions}
+            selectedOptions={selectedMarketOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedMarketOptions}
+          />
+          <DropdownFilter
+            triggerLabel={'Asset Type'}
+            options={assetTypesOptions}
+            selectedOptions={selectedAssetTypeOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedAssetTypeOptions}
+          />
+          <DropdownFilter
+            triggerLabel={'Reserve Symbol'}
+            options={reserveSymbolOptions}
+            selectedOptions={selectedSymbolOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedSymbolOptions}
+          />
+        </Filters>
           <Button
             onClick={onSortOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8'
-          >
+            className="lg:hidden cursor-pointer items-center justify-center transition bg-secondary-27 text-gray-11 shadow-13 flex h-9 grow sm:max-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8">
             <Icon
               name='sort-icon'
               className='h-[14px] w-[14px]'
             />
             Sort
           </Button>
-          <Button
-            onClick={onMoreOpen}
-            className='bg-secondary-27 shadow-13 flex h-9 min-w-9 rounded-lg sm:w-auto md:h-8 md:min-w-8 lg:hidden'
-          >
-            <Icon
-              name='3-dots'
-              className='h-6 w-6 fill-none'
-            />
-          </Button>
-        </div>
-        <SortDrawer
-          isOpen={isSortOpen}
-          sortType={sortType}
-          columns={treasuryBalanceByNetworkColumns}
-          onClose={onSortClose}
-          onKeySelect={onKeySelect}
-          onTypeSelect={onTypeSelect}
-        />
-        <Filter
-          isOpen={isFilterOpen}
-          filterOptions={filterOptions}
-          onClose={onFilterClose}
-          onClearAll={onClearAll}
-        />
-        <Drawer
-          isOpen={isMoreOpen}
-          onClose={onMoreClose}
-        >
-          <Text
-            size='17'
-            weight='700'
-            align='center'
-            className='mb-5'
-          >
-            Actions
-          </Text>
-          <div className='flex flex-col gap-1.5'>
-            <div className='px-3 py-2'>
-              <CSVLink
+          <SortDrawer
+            isOpen={isSortOpen}
+            sortType={sortType}
+            columns={treasuryBalanceByNetworkColumns}
+            onClose={onSortClose}
+            onKeySelect={onKeySelect}
+            onTypeSelect={onTypeSelect}
+          />
+        <ChartActions
+          mobileChildren={
+            <>
+              <CSVDownloadButton
                 data={tableData}
-                filename='Full Treasury Holdings'
-                onClick={onMoreClose}
-              >
-                <div className='flex items-center gap-1.5'>
-                  <Icon
-                    name='download'
-                    className='h-[26px] w-[26px]'
-                  />
-                  <Text
-                    size='14'
-                    weight='500'
-                  >
-                    CSV with the entire historical data
-                  </Text>
-                </div>
-              </CSVLink>
-            </div>
-          </div>
-        </Drawer>
+                filename={getCsvFileName('total_treasury_value')}
+              />
+            </>
+          }
+        >
+          <CSVDownloadButton
+            data={tableData}
+            filename={getCsvFileName('total_treasury_value')}
+          />
+        </ChartActions>
       </div>
       <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <TreasuryHoldingsTable
@@ -448,7 +286,7 @@ const TreasuryHoldingsBlock = ({
         />
       </View.Condition>
       <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
-        <NoDataPlaceholder onButtonClick={onClearAll} />
+        <NoDataPlaceholder onButtonClick={clearAllFilters} />
       </View.Condition>
     </Card>
   );
