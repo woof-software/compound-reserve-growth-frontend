@@ -125,10 +125,11 @@ const collateralTableColumns: ExtendedColumnDef<CapoTableItem>[] = [
       return (
         <HoverCard
           content={
-            <div className='flex w-50 flex-col items-start gap-2'>
+            <div className='flex w-50 flex-col items-start gap-1.5'>
               <Text
-                size={'14'}
-                className={'mb-2 w-full truncate'}
+                size={'12'}
+                lineHeight={'16'}
+                className={'w-full truncate'}
               >
                 {row.original.oracleName}
               </Text>
@@ -197,6 +198,7 @@ const CollateralsPriceTable = ({
     const key = sortType.key as keyof CapoTableItem;
     return [...tableData].sort((a, b) => {
       const aVal = a[key];
+
       const bVal = b[key];
 
       if (typeof aVal === 'number' && typeof bVal === 'number') {

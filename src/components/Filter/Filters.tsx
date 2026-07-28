@@ -1,4 +1,4 @@
-import React, { createContext, Dispatch, SetStateAction, useContext, useState } from 'react';
+import React, { createContext, Dispatch, SetStateAction, useContext, useMemo, useState } from 'react';
 
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import { noop } from '@/shared/lib/utils/utils';
@@ -8,8 +8,8 @@ import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 
 export interface FiltersProps {
-  isShowClear: boolean;
-  children: React.ReactNode;
+  isShowClear?: boolean;
+  children?: React.ReactNode;
   onClearAll?: () => void;
 }
 
@@ -22,7 +22,7 @@ const FilterContext = createContext<FilterContextValue | null>(null);
 
 export const useFilterContext = () => {
   const ctx = useContext(FilterContext);
-  if (!ctx) throw new Error('useExpandedFilter must be used within Filters');
+  if (!ctx) throw new Error('useFilterContext must be used within Filters');
   return ctx;
 };
 
@@ -34,11 +34,15 @@ export const Filters = (props: FiltersProps) => {
 
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
 
+  const contextValue = useMemo(
+    () => ({ expandedFilter, setExpandedFilter }), [expandedFilter, setExpandedFilter]
+  )
+
   if (isMobile) {
     return (
-      <FilterContext.Provider value={{ expandedFilter, setExpandedFilter }}>
+      <FilterContext.Provider value={contextValue}>
         <Button
-          className='bg-secondary-27 text-gray-11 shadow-13 grow md:max-w-[130px] flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
+          className='bg-secondary-27 text-gray-11 shadow-13 grow sm:max-w-[130px] flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
           onClick={() => setIsDrawer(true)}
         >
           <Icon
@@ -80,7 +84,7 @@ export const Filters = (props: FiltersProps) => {
   }
 
   return (
-    <FilterContext.Provider value={{ expandedFilter, setExpandedFilter }}>
+    <FilterContext.Provider value={contextValue}>
       {children}
     </FilterContext.Provider>
   );

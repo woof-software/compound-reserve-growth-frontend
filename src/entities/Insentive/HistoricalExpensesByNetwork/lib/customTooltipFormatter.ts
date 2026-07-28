@@ -1,21 +1,23 @@
-import Highcharts from 'highcharts';
+import Highcharts, { Point } from 'highcharts';
 
 import { Format } from '@/shared/lib/utils/format';
 
 export const customTooltipFormatter =
-  (view: string) => (context: { x: number; points: any[] }) => {
+  (view: string) => (context: Point) => {
     const header = `<div class="font-medium mb-3 text-[11px] font-haas">
       ${Highcharts.dateFormat('%B %e, %Y', context.x)}
     </div>`;
 
-    const pointsSortedDesc = [...context.points].sort(
-      (a, b) => (b.y ?? 0) - (a.y ?? 0)
-    );
+    const { points = [] } = context;
 
-    const total =
-      context.points?.reduce((sum, point) => sum + (point.y ?? 0), 0) ?? 0;
+    if (points?.length) {
+      const pointsSortedDesc = points.sort(
+        (a, b) => (b.y ?? 0) - (a.y ?? 0)
+      );
 
-    const body = `<div class='flex flex-col gap-3'>
+      const total = points?.reduce((sum, point) => sum + (point.y ?? 0), 0) ?? 0;
+
+      const body = `<div class='flex flex-col gap-3'>
       ${
         pointsSortedDesc
           .map(
@@ -26,7 +28,7 @@ export const customTooltipFormatter =
                 <span class="text-[11px] font-haas">${point.series.name}</span>
               </div>
               <span class="font-normal text-[11px] font-haas">
-                 ${view === 'COMP' ? Format.token(point.y, 'standard', 'COMP') : Format.price(point.y, 'standard')}
+                 ${view === 'COMP' ? Format.token(point.y ?? 0, 'standard', 'COMP') : Format.price(point.y ?? 0, 'standard')}
               </span>
             </div>`
           )
@@ -40,7 +42,10 @@ export const customTooltipFormatter =
       </div>
     </div>`;
 
-    return header + body;
+      return header + body;
+    }
+
+    return '';
   };
 
 export const customChartOptions = (view: string) => ({

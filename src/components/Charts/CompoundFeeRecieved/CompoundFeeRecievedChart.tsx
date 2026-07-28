@@ -5,7 +5,6 @@ import React, {
   useEffect,
   useMemo,
   useRef,
-  useState
 } from 'react';
 import Highcharts, { Options, Point } from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -16,8 +15,6 @@ import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { AggregatedPoint } from '@/shared/hooks/useCompoundChartBars';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { noop } from '@/shared/lib/utils/utils';
-import Button from '@/shared/ui/Button/Button';
-import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import View from '@/shared/ui/View/View';
 

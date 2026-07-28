@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { noop } from '@/shared/lib/utils/utils';
