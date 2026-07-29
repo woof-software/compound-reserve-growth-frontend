@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { DropdownGroupFilterTrigger } from '@/components/Filter/DropdownFilter/DropdownGroupFilterTrigger';
 import { OptionsList } from '@/components/Filter/OptionsList';
@@ -71,7 +71,7 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
     return (
       <>
         <Button
-          className='bg-secondary-27 text-gray-11 shadow-13 grow md:max-w-[130px] flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
+          className='bg-secondary-27 text-gray-11 shadow-13 grow sm:max-w-[130px] flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
           onClick={() => setIsOpen(true)}
         >
           <Icon name='group-grid' className='h-[14px] w-[14px] fill-none' />

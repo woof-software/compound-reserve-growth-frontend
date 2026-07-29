@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { RevenuePageProps } from '@/shared/hooks/useRevenue';
+import {type RevenueProps } from '@/pages/AccountingPage/AccountingPage';
 import { Format } from '@/shared/lib/utils/format';
 import { formatGrowth } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
@@ -10,7 +10,7 @@ const RevenueMetrics = ({
   revenueData,
   isLoading,
   isError
-}: RevenuePageProps) => {
+}: RevenueProps) => {
   const yearlyTotals = useMemo(() => {
     if (!revenueData || revenueData.length === 0) {
       return {};
@@ -60,6 +60,7 @@ const RevenueMetrics = ({
         const key = isPlaceholder ? index : (yearOrIndex as string);
         const year = isPlaceholder ? '' : (yearOrIndex as string);
         const yearData = yearlyTotals[year];
+        const growth = yearData?.growth;
 
         return (
           <Card
@@ -77,12 +78,12 @@ const RevenueMetrics = ({
             <div className='flex flex-col gap-8'>
               <ValueMetricField
                 value={Format.price(yearData?.total ?? 0, 'compact')}
+                tooltip={Format.price(yearData?.total ?? 0, 'standard')}
                 label='Total Revenue'
               />
               <ValueMetricField
-                value={
-                  yearData?.growth != null ? formatGrowth(yearData.growth) : '-'
-                }
+                value={growth != null ? formatGrowth(growth) : '-'}
+                tooltip={growth != null ? formatGrowth(growth, 2) : undefined}
                 label='YoY Growth'
               />
             </div>
