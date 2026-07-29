@@ -8,8 +8,11 @@ import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import { Tooltip } from '@/shared/ui/Tooltip/Tooltip';
 
+type CSVRow = Record<string, string | number>;
+type Data = CSVRow[] | Array<Array<string | number>>;
+
 interface CSVDownloadButtonProps {
-  data: Array<Record<string, string | number | boolean | null | undefined>>;
+  data: string | Data | (() => string | Data);
   filename?: string;
   className?: string;
   tooltipContent?: string;
@@ -24,7 +27,6 @@ const CSVDownloadButton: FC<CSVDownloadButtonProps> = ({
   filename = 'export.csv',
   className
 }) => {
-
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
   
   if (isMobile) {
@@ -33,7 +35,7 @@ const CSVDownloadButton: FC<CSVDownloadButtonProps> = ({
         <CSVLink
           data={data}
           filename={filename}
-          className={'flex items-center gap-1.5 h-[44px] w-full'}
+          className={'flex items-center gap-1.5 h-11 w-full'}
         >
           <Icon
             name='download'

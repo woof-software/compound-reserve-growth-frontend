@@ -237,16 +237,6 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
     [dailyChartSeries]
   );
 
-  const csvData = filterForRange({
-    data: cumulativeChartSeries[0]?.data ?? [],
-    getDate: (item) => new Date(item.x),
-    transform: (item) => ({
-      Date: new Date(item.x).toISOString().split('T')[0],
-      'Cumulative revenue': item.y,
-    }),
-    range: barSize,
-  });
-
   const { isLegendEnabled, aggregatedSeries } = useLineChart({
     data: cumulativeChartSeries,
     groupBy: chartGroupBy,
@@ -353,7 +343,15 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
           <ChartActions
             mobileChildren={
               <>
-                <CSVDownloadButton data={csvData} filename={getCsvFileName('compound_cumulative_revenue')} />
+                <CSVDownloadButton data={filterForRange({
+                  data: cumulativeChartSeries[0]?.data ?? [],
+                  getDate: (item) => new Date(item.x),
+                  transform: (item) => ({
+                    Date: new Date(item.x).toISOString().split('T')[0],
+                    'Cumulative revenue': item.y,
+                  }),
+                  range: barSize,
+                })} filename={getCsvFileName('compound_cumulative_revenue')} />
                 {isLegendEnabled && aggregatedSeries.length > 1 ? (
                   <ChartIconToggle
                     active={isSeriesHidden}
@@ -393,7 +391,15 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
               </>
             }
           >
-            <CSVDownloadButton data={csvData} filename={getCsvFileName('compound_cumulative_revenue')} />
+            <CSVDownloadButton data={filterForRange({
+              data: cumulativeChartSeries[0]?.data ?? [],
+              getDate: (item) => new Date(item.x),
+              transform: (item) => ({
+                Date: new Date(item.x).toISOString().split('T')[0],
+                'Cumulative revenue': item.y,
+              }),
+              range: barSize,
+            })} filename={getCsvFileName('compound_cumulative_revenue')} />
           </ChartActions>
         </div>
       </div>

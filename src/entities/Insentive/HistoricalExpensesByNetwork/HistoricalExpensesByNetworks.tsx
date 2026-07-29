@@ -100,7 +100,6 @@ const HistoricalExpensesByNetworks = (
 
   const isSeriesHidden = legends.every((l) => l.isDisabled);
 
-  const csvData = getSummarizedCsvData(aggregatedSeries);
 
   const onEyeClick = () => {
     if (isSeriesHidden) {
@@ -171,7 +170,7 @@ const HistoricalExpensesByNetworks = (
             mobileChildren={
               <>
                 <CSVDownloadButton
-                  data={csvData}
+                  data={getSummarizedCsvData(aggregatedSeries)}
                   filename={getCsvFileName('historical_expenses_by_networks', {
                     view: activeCurrencyTab,
                     mode: activeModeTab,
@@ -202,7 +201,7 @@ const HistoricalExpensesByNetworks = (
             }
           >
             <CSVDownloadButton
-              data={csvData}
+              data={getSummarizedCsvData(aggregatedSeries)}
               tooltipContent={
                 'CSV with the entire historical data can be downloaded'
               }
@@ -265,7 +264,7 @@ const HistoricalExpensesByNetworks = (
             mobileChildren={
               <>
                 <CSVDownloadButton
-                  data={csvData}
+                  data={getSummarizedCsvData(aggregatedSeries)}
                   filename={getCsvFileName('historical_expenses_by_networks', {
                     view: activeCurrencyTab,
                     mode: activeModeTab,

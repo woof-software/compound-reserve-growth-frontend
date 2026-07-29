@@ -9,8 +9,8 @@ import {
 } from '@/entities/Insentive/FeesGeneratedIncentives/lib/customTooltipFormatter';
 import { getGeneratedIncentivesChartSeries } from '@/entities/Insentive/FeesGeneratedIncentives/lib/getGeneratedIncentivesChartSeries';
 import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
-import { useBarSizeConstraints } from '@/shared/hooks/useBarSizeConstraints';
 import { useBarSize } from '@/shared/hooks/useBarSize';
+import { useBarSizeConstraints } from '@/shared/hooks/useBarSizeConstraints';
 import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
 import {
   useFiltersSync,
@@ -117,7 +117,6 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
     [aggregatedSeries]
   );
 
-  const csvData = getSummarizedCsvData(aggregatedSeries);
 
   const handleClearAllFilters = () => {
     clearAllFilters();
@@ -146,7 +145,7 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
         onBarSizeChange={onBarSizeChange}
         filterOptions={mobileFilterOptionsWithDateRange}
         onClearAll={handleClearAllFilters}
-        csvData={csvData}
+        csvData={getSummarizedCsvData(aggregatedSeries)}
         isRevenueOnly={isRevenueOnly}
         setIsRevenueOnly={setIsRevenueOnly}
       />
@@ -190,7 +189,7 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
             className={{ title: '!text-[11px]' }}
           />
           <CSVDownloadButton
-            data={csvData}
+            data={getSummarizedCsvData(aggregatedSeries)}
             filename={getCsvFileName('fees_generated_vs_incentives')}
             tooltipContent='CSV with the entire historical data can be downloaded'
           />
