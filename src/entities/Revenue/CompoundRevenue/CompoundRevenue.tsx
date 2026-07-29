@@ -1,4 +1,3 @@
-import { getMaxBarSizeForRange } from '@/shared/lib/date/dateUtils';
 import React, {
   Dispatch,
   SetStateAction,
@@ -12,13 +11,14 @@ import { CSVLink } from 'react-csv';
 import CompoundRevenueChart from '@/components/Charts/CompoundRevenue/CompoundRevenueChart';
 import Filter from '@/components/Filter/Filter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
+import {type RevenueProps } from '@/pages/AccountingPage/AccountingPage';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useBarSize } from '@/shared/hooks/useBarSize';
 import { useCompoundChartBars } from '@/shared/hooks/useCompoundChartBars';
 import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
 import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
-import { type RevenuePageProps } from '@/shared/hooks/useRevenue';
+import { getMaxBarSizeForRange } from '@/shared/lib/date/dateUtils';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
 import {
@@ -31,8 +31,7 @@ import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSele
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
-import { DateRangePickerPopover } from '@/shared/ui/DateRangePicker/DateRangePicker';
-import { DateRangeValue } from '@/shared/ui/DateRangePicker/DateRangePicker';
+import { DateRangePickerPopover , DateRangeValue } from '@/shared/ui/DateRangePicker/DateRangePicker';
 import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
@@ -200,7 +199,7 @@ const CompoundRevenueBlock = ({
   revenueData: data,
   isLoading,
   isError
-}: RevenuePageProps) => {
+}: RevenueProps) => {
   const [selectedOptions, setSelectedOptions] = useReducer(
     (prev, next) => ({
       ...prev,

@@ -1,5 +1,5 @@
-import { createParser, parseAsArrayOf, parseAsString } from 'nuqs';
 import { ChangeEvent, MouseEvent as ReactMouseEvent } from 'react';
+import { createParser, parseAsArrayOf, parseAsString } from 'nuqs';
 
 import { NOT_MARKET, THIRTY_DAYS } from '@/shared/consts/consts';
 import { TokenData } from '@/shared/types/Treasury/types';
@@ -518,6 +518,6 @@ export const parseAsTimestampMs = createParser<number>({
   serialize: (value) => String(value),
 });
 
-export const parseStingsArray = (defaultValue = []) => {
+export const parseStingsArray = (defaultValue: string[] = []) => {
   return parseAsArrayOf(parseAsString).withDefault(defaultValue);
 };
