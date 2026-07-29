@@ -1,27 +1,31 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
+import { useQueryState } from 'nuqs';
 
+import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
+import { ChartActions } from '@/components/Charts/ChartActions';
 import Line from '@/components/Charts/Line/Line';
+import { DateRangePickerFilter } from '@/components/Filter/DateRangePickerFilter/DateRangePickerFilter';
+import { Filters } from '@/components/Filter/Filters';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import { HistoricalExpensesMobileActions } from '@/entities/Insentive/HistoricalExpensesByNetwork/HistoricalExpensesMobileActions';
 import {
   customChartOptions,
   customTooltipFormatter
 } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/customTooltipFormatter';
-import { useHistoricalExpensesChartSeries } from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/useHistoricalExpensesChartSeries';
-import { useBarSizeConstraints } from '@/shared/hooks/useBarSizeConstraints';
-import { useBarSize } from '@/shared/hooks/useBarSize';
-import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
-import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
+import {
+  useHistoricalExpensesChartSeries
+} from '@/entities/Insentive/HistoricalExpensesByNetwork/lib/useHistoricalExpensesChartSeries';
+import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange';
 import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
+import { parseAsTimestampMs } from '@/shared/lib/utils/utils';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
-import { BAR_SIZE, BAR_SIZE_OPTIONS } from '@/shared/types/types';
+import { BAR_SIZE_OPTIONS } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
-import { DateRangePickerPopover } from '@/shared/ui/DateRangePicker/DateRangePicker';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
+import Text from '@/shared/ui/Text/Text';
 
 interface HistoricalExpensesByNetworksProps {
   isLoading: boolean;
@@ -34,47 +38,36 @@ const HistoricalExpensesByNetworks = (
   props: HistoricalExpensesByNetworksProps
 ) => {
   const { data, isError, isLoading } = props;
-  const [activeModeTab, setActiveModeTab] = useState<
-    'Lend' | 'Borrow' | 'Total'
-  >('Total');
-  const [activeViewTab, setActiveViewTab] = useState<'COMP' | 'USD'>('COMP');
 
-  const { barSize, onBarSizeChange } = useBarSize({
-    initialBarSize: BAR_SIZE.D
-  });
+  const [activeModeTab, setActiveModeTab] = useQueryState('hebn-mode', { defaultValue: 'Total' });
+  const [activeCurrencyTab, setActiveCurrencyTab] = useQueryState('hebn-currency', { defaultValue: 'COMP' });
+  const [startDate, setStartDate] = useQueryState('hebn-start', parseAsTimestampMs);
+  const [endDate, setEndDate] = useQueryState('hebn-end', parseAsTimestampMs);
 
-  const {
-    dateRange,
-    setDateRange,
-    normalizedDateRange,
-    dateBounds,
-    resetDateRange
-  } = useDateRangeFilter();
+  const { barSize, onBarSizeChange, disabledBarSizes } = useBarSizeWithDateRange({ startDate, endDate });
 
-  const { disabledBarSizes } = useBarSizeConstraints(
-    normalizedDateRange,
-    barSize,
-    onBarSizeChange
-  );
+  const clearAllFilters = () => {
+    setStartDate(null);
+    setEndDate(null);
+  };
 
   const groupBy = 'Network';
 
   const dateFilteredData = useMemo(() => {
-    const { start, end } = normalizedDateRange;
-    if (start === null && end === null) return data;
+    if (startDate === null && endDate === null) return data;
 
     return data.filter((item) => {
       const itemTime = item.date * 1000;
-      if (start !== null && itemTime < start) return false;
-      if (end !== null && itemTime > end) return false;
+      if (startDate !== null && itemTime < startDate) return false;
+      if (endDate !== null && itemTime > endDate) return false;
       return true;
     });
-  }, [data, normalizedDateRange]);
+  }, [data, startDate, endDate]);
 
   const { chartSeries, hasData } = useHistoricalExpensesChartSeries({
     rawData: dateFilteredData,
     mode: activeModeTab,
-    view: activeViewTab
+    view: activeCurrencyTab
   });
 
   const { aggregatedSeries, isLegendEnabled } = useLineChart({
@@ -107,27 +100,6 @@ const HistoricalExpensesByNetworks = (
 
   const isSeriesHidden = legends.every((l) => l.isDisabled);
 
-  useFilterSyncSingle(
-    'historicalExpByNetworkMode',
-    activeModeTab,
-    setActiveModeTab
-  );
-
-  useFilterSyncSingle(
-    'historicalExpByNetworkView',
-    activeViewTab,
-    setActiveViewTab
-  );
-
-  useFilterSyncSingle('historicalExpByNetworkPeriod', barSize, onBarSizeChange);
-
-  const handleClearAllFilters = () => {
-    setActiveModeTab('Total');
-    setActiveViewTab('COMP');
-    onBarSizeChange(BAR_SIZE.D);
-    resetDateRange();
-  };
-
   const csvData = getSummarizedCsvData(aggregatedSeries);
 
   const onEyeClick = () => {
@@ -150,117 +122,185 @@ const HistoricalExpensesByNetworks = (
         content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-5 lg:px-10 lg:pb-10'
       }}
     >
-      <div className='flex flex-col justify-end gap-2 px-5 py-3 sm:flex-row md:px-0'>
-        <div className='hidden flex-wrap items-center justify-end gap-2 sm:flex'>
-          <DateRangePickerPopover
-            value={dateRange}
-            min={dateBounds.min}
-            max={dateBounds.max}
-            onChange={setDateRange}
-            disabled={isLoading}
-            showLabels
-            inputClassName='w-full'
+      <div className={'gap-2 px-5 md:px-0 py-3 items-center justify-end hidden sm:flex'}>
+        <Filters
+          isShowClear={!!(startDate || endDate)}
+          onClearAll={clearAllFilters}
+        >
+          <DateRangePickerFilter
+            triggerLabel='Date Range'
+            value={{ startDate, endDate }}
+            onChange={({ startDate, endDate }) => {
+              setStartDate(startDate);
+              setEndDate(endDate);
+            }}
           />
+        </Filters>
+        <TabsGroup
+          className={{
+            container: 'w-full sm:w-auto',
+            list: 'w-auto'
+          }}
+          tabs={['COMP', 'USD']}
+          value={activeCurrencyTab}
+          onTabChange={setActiveCurrencyTab}
+        />
+        <TabsGroup
+          className={{
+            container: 'w-full sm:w-auto',
+            list: 'w-full sm:w-auto'
+          }}
+          tabs={['Lend', 'Borrow', 'Total']}
+          value={activeModeTab}
+          onTabChange={setActiveModeTab}
+          disabled={isLoading}
+        />
+        <div className={'flex w-full items-center gap-2 sm:w-auto'}>
+          <TabsGroup
+            className={{
+              container: 'w-full',
+              list: 'w-full'
+            }}
+            tabs={BAR_SIZE_OPTIONS}
+            value={barSize}
+            onTabChange={onBarSizeChange}
+            disabled={isLoading}
+            disabledTabs={disabledBarSizes}
+          />
+          <ChartActions
+            mobileChildren={
+              <>
+                <CSVDownloadButton
+                  data={csvData}
+                  filename={getCsvFileName('historical_expenses_by_networks', {
+                    view: activeCurrencyTab,
+                    mode: activeModeTab,
+                    timeFrame: barSize
+                  })}
+                />
+                <ChartIconToggle
+                  active={isSeriesHidden}
+                  onIcon='eye'
+                  offIcon='eye-closed'
+                  ariaLabel='Toggle all series visibility'
+                  className={{
+                    container:
+                      'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
+                    icon: 'h-6.5 w-6.5',
+                    iconContainer: 'h-6.5 w-6.5'
+                  }}
+                  onClick={onEyeClick}
+                >
+                  <Text
+                    size='14'
+                    weight='500'
+                  >
+                    {isSeriesHidden ? 'Select All' : 'Unselect All'}
+                  </Text>
+                </ChartIconToggle>
+              </>
+            }
+          >
+            <CSVDownloadButton
+              data={csvData}
+              tooltipContent={
+                'CSV with the entire historical data can be downloaded'
+              }
+              filename={getCsvFileName('historical_expenses_by_networks', {
+                view: activeCurrencyTab,
+                mode: activeModeTab,
+                timeFrame: barSize
+              })}
+            />
+          </ChartActions>
+        </div>
+      </div>
+      {/*mobile layout*/}
+      <div className={'sm:hidden flex flex-col gap-2 px-5 py-3'}>
+        <Filters
+          isShowClear={!!(startDate || endDate)}
+          onClearAll={clearAllFilters}
+        >
+          <DateRangePickerFilter
+            triggerLabel='Date Range'
+            value={{ startDate, endDate }}
+            onChange={({ startDate, endDate }) => {
+              setStartDate(startDate);
+              setEndDate(endDate);
+            }}
+          />
+        </Filters>
+        <TabsGroup
+          className={{
+            container: 'w-full sm:w-auto',
+            list: 'w-full sm:w-auto'
+          }}
+          tabs={['Lend', 'Borrow', 'Total']}
+          value={activeModeTab}
+          onTabChange={setActiveModeTab}
+          disabled={isLoading}
+        />
+        <div className={'flex gap-2'}>
           <TabsGroup
             className={{
               container: 'w-full sm:w-auto',
               list: 'w-auto'
             }}
             tabs={['COMP', 'USD']}
-            value={activeViewTab}
-            onTabChange={setActiveViewTab}
+            value={activeCurrencyTab}
+            onTabChange={setActiveCurrencyTab}
           />
           <TabsGroup
             className={{
-              container: 'w-full sm:w-auto',
-              list: 'w-full sm:w-auto'
+              container: 'w-full',
+              list: 'w-full'
             }}
-            tabs={['Lend', 'Borrow', 'Total']}
-            value={activeModeTab}
-            onTabChange={setActiveModeTab}
+            tabs={BAR_SIZE_OPTIONS}
+            value={barSize}
+            onTabChange={onBarSizeChange}
             disabled={isLoading}
+            disabledTabs={disabledBarSizes}
           />
-          <div className={'flex w-full items-center gap-2 sm:w-auto'}>
-            <TabsGroup
-              className={{
-                container: 'w-full',
-                list: 'w-full'
-              }}
-              tabs={BAR_SIZE_OPTIONS}
-              value={barSize}
-              onTabChange={onBarSizeChange}
-              disabled={isLoading}
-              disabledTabs={disabledBarSizes}
-            />
-            <HistoricalExpensesMobileActions
-              csvData={csvData}
-              activeModeTab={activeModeTab}
-              activeViewTab={activeViewTab}
-              barSize={barSize}
-              areAllSeriesHidden={isSeriesHidden}
-              onEyeClick={onEyeClick}
-            />
-            {/*TODO: fix download button style applying*/}
-            <span className={'mt-1 hidden lg:block'}>
-              <CSVDownloadButton
-                data={csvData}
-                tooltipContent={
-                  'CSV with the entire historical data can be downloaded'
-                }
-                filename={getCsvFileName('historical_expenses_by_networks', {
-                  view: activeViewTab,
-                  mode: activeModeTab,
-                  timeFrame: barSize
-                })}
-              />
-            </span>
-          </div>
-        </div>
-        <div className='flex flex-wrap items-center justify-end gap-2 sm:hidden'>
-          <TabsGroup
-            className={{
-              container: 'w-full sm:w-auto',
-              list: 'w-full sm:w-auto'
-            }}
-            tabs={['Lend', 'Borrow', 'Total']}
-            value={activeModeTab}
-            onTabChange={setActiveModeTab}
-            disabled={isLoading}
-          />
-          <div className={'flex w-full items-center gap-2 sm:w-auto'}>
-            <TabsGroup
-              className={{
-                container: 'w-full sm:w-auto',
-                list: 'w-auto'
-              }}
-              tabs={['COMP', 'USD']}
-              value={activeViewTab}
-              onTabChange={setActiveViewTab}
-            />
-            <TabsGroup
-              className={{
-                container: 'w-full',
-                list: 'w-full'
-              }}
-              tabs={BAR_SIZE_OPTIONS}
-              value={barSize}
-              onTabChange={onBarSizeChange}
-              disabled={isLoading}
-              disabledTabs={disabledBarSizes}
-            />
-            <HistoricalExpensesMobileActions
-              csvData={csvData}
-              activeModeTab={activeModeTab}
-              activeViewTab={activeViewTab}
-              barSize={barSize}
-              areAllSeriesHidden={isSeriesHidden}
-              onEyeClick={onEyeClick}
-            />
-          </div>
+          <ChartActions
+            mobileChildren={
+              <>
+                <CSVDownloadButton
+                  data={csvData}
+                  filename={getCsvFileName('historical_expenses_by_networks', {
+                    view: activeCurrencyTab,
+                    mode: activeModeTab,
+                    timeFrame: barSize
+                  })}
+                />
+                <ChartIconToggle
+                  active={isSeriesHidden}
+                  onIcon='eye'
+                  offIcon='eye-closed'
+                  ariaLabel='Toggle all series visibility'
+                  className={{
+                    container:
+                      'flex items-center gap-1.5 bg-transparent p-0 !shadow-none',
+                    icon: 'h-6.5 w-6.5',
+                    iconContainer: 'h-6.5 w-6.5'
+                  }}
+                  onClick={onEyeClick}
+                >
+                  <Text
+                    size='14'
+                    weight='500'
+                  >
+                    {isSeriesHidden ? 'Select All' : 'Unselect All'}
+                  </Text>
+                </ChartIconToggle>
+              </>
+            }
+          >
+            <></>
+          </ChartActions>
         </div>
       </div>
       {!isLoading && !isError && (!hasData || !hasAggregatedData) ? (
-        <NoDataPlaceholder onButtonClick={handleClearAllFilters} />
+        <NoDataPlaceholder onButtonClick={clearAllFilters} />
       ) : (
         <Line
           key={groupBy}
@@ -274,10 +314,9 @@ const HistoricalExpensesByNetworks = (
           onLegendLeave={onLegendUnhover}
           onLegendHover={onLegendHover}
           onLegendClick={onLegendToggle}
-          customOptions={customChartOptions(activeViewTab)}
-          resetZoomKey={`${barSize}-${dateRange.startDate}-${dateRange.endDate}`}
-          // @ts-expect-error TODO: fix customTooltip types
-          customTooltipFormatter={customTooltipFormatter(activeViewTab)}
+          customOptions={customChartOptions(activeCurrencyTab)}
+          resetZoomKey={`${barSize}-${startDate}-${endDate}`}
+          customTooltipFormatter={customTooltipFormatter(activeCurrencyTab)}
         />
       )}
     </Card>

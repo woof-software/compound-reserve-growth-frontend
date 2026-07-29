@@ -9,8 +9,7 @@
   font-family: 'Haas Grot Text R';
   font-style: normal;
   font-weight: 400;
-  src: url('./shared/fonts/NeueHaasGrotDispRound-55Roman.woff2')
-  format('opentype');
+  src: url('./shared/fonts/NeueHaasGrotDispRound-55Roman.woff2') format('woff2');
   font-display: swap;
 }
 
@@ -18,8 +17,7 @@
   font-family: 'Haas Grot Text R';
   font-style: normal;
   font-weight: 500 600;
-  src: url('./shared/fonts/NeueHaasGrotDispRound-65Medium.woff2')
-  format('opentype');
+  src: url('./shared/fonts/NeueHaasGrotDispRound-65Medium.woff2') format('woff2');
   font-display: swap;
 }
 
@@ -27,8 +25,7 @@
   font-family: 'Haas Grot Text R';
   font-style: normal;
   font-weight: 700;
-  src: url('./shared/fonts/NeueHaasGrotDispRound-75Bold.woff2')
-  format('opentype');
+  src: url('./shared/fonts/NeueHaasGrotDispRound-75Bold.woff2') format('woff2');
   font-display: swap;
 }
 
