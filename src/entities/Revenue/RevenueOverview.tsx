@@ -12,8 +12,8 @@ import RevenueOverviewUSD, {
   toDateHeaderMap,
   ToDateTab
 } from '@/components/RevenuePageTable/RevenueOverviewUSD';
+import {type RevenueProps } from '@/pages/AccountingPage/AccountingPage';
 import { useModal } from '@/shared/hooks/useModal';
-import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
 import { Format } from '@/shared/lib/utils/format';
 import {
@@ -117,7 +117,7 @@ const RevenueOverview = ({
   revenueData: rawData,
   isLoading,
   isError
-}: RevenuePageProps) => {
+}: RevenueProps) => {
   const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
     useSorting<RevenueTableRowData>('asc', null);
 
@@ -343,7 +343,7 @@ const RevenueOverview = ({
             sortType={sortType}
           />
           <PieChart
-            className='max-h-[400px] w-full max-w-full lg:max-w-[336.5px]'
+            className='w-full shrink-0 lg:max-h-[400px] lg:w-[336.5px]'
             data={processedData.pieData}
           />
         </div>

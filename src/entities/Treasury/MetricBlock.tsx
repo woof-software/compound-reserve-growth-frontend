@@ -122,6 +122,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             }}
             label='Total Treasury Value'
             value={Format.price(totalValue, 'compact')}
+            tooltip={Format.price(totalValue, 'standard')}
             badge={Format.price(totalLastValue, 'compact')}
             badgeType={totalLastValue > 0 ? 'positive' : 'negative'}
             icon={
@@ -148,6 +149,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           <ValueMetricField
             label='Total COMP Value'
             value={Format.price(compTotalValue, 'compact')}
+            tooltip={Format.price(compTotalValue, 'standard')}
             badge={Format.price(compLastValue, 'compact')}
             badgeType={compLastValue > 0 ? 'positive' : 'negative'}
             icon={
@@ -173,6 +175,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
           <ValueMetricField
             label='Total Non-Comp Value'
             value={Format.price(nonCompTotalValue, 'compact')}
+            tooltip={Format.price(nonCompTotalValue, 'standard')}
             badge={Format.price(nonCompLastValue, 'compact')}
             badgeType={nonCompLastValue > 0 ? 'positive' : 'negative'}
             icon={
@@ -205,6 +208,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             iconText='Stablecoin Holdings'
             label='Total Stablecoin Holdings'
             value={Format.price(stablecoinTotalValue, 'compact')}
+            tooltip={Format.price(stablecoinTotalValue, 'standard')}
             badge={Format.price(stablecoinLastValue, 'compact')}
             badgeType={stablecoinLastValue > 0 ? 'positive' : 'negative'}
             icon={
@@ -236,6 +240,7 @@ const MetricBlock = memo(({ data, isLoading }: MetricBlockProps) => {
             iconText='ETH Correlated Holdings'
             label='Total ETH Correlated Holdings'
             value={Format.price(ethCorrelatedHoldingTotalValue, 'compact')}
+            tooltip={Format.price(ethCorrelatedHoldingTotalValue, 'standard')}
             badge={Format.price(ethCorrelatedHoldingLastValue, 'compact')}
             badgeType={
               ethCorrelatedHoldingLastValue > 0 ? 'positive' : 'negative'

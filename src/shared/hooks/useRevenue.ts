@@ -61,12 +61,6 @@ export type CompoundCumulativeRevenueParams = {
   order?: SortDirectionType;
 };
 
-export type RevenuePageProps = {
-  revenueData: RevenueItem[];
-  isLoading: boolean;
-  isError: boolean;
-};
-
 type UseCompCumulativeRevenueOptions = {
   params?: CompoundCumulativeRevenueParams;
   options?: Omit<UseQueryOptions<RevenueItem[]>, 'queryKey' | 'queryFn'>;

@@ -37,16 +37,14 @@ export const DropdownFilter = <T,>(props: DropdownFilterProps<T>) => {
   const [searchValue, setSearchValue] = useState('');
 
   const selectAllOptions = () => {
-   return  setValue(options);
+   return setValue(options);
   };
 
   const clearSelectedOptions = () => {
     return setValue([]);
   };
 
-  const isAllSelected =
-    options.length > 0 &&
-    options.every((o) => selectedOptions.some((s) => getKey(s) === getKey(o)));
+  const isAllSelected = options.length === selectedOptions.length;
 
   const toggle = () => setIsDropdown((prev) => !prev);
 
