@@ -1,19 +1,19 @@
-import { Format } from '@/shared/lib/utils/format';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import CompoundFeeRevenueByChainTable, {
   Interval,
   ProcessedRevenueData
 } from '@/components/RevenuePageTable/CompoundFeeRevenueByChainTable';
+import {type RevenueProps } from '@/pages/AccountingPage/AccountingPage';
 import { useFilterSyncSingle } from '@/shared/hooks/useFiltersSync';
 import { useModal } from '@/shared/hooks/useModal';
-import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import {
   SortAccessor,
   SortAdapter,
   useSorting
 } from '@/shared/hooks/useSorting';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { Format } from '@/shared/lib/utils/format';
 import {
   capitalizeFirstLetter,
   ChartDataItem,
@@ -251,7 +251,7 @@ const CompoundFeeRevenueByChain = ({
   revenueData,
   isLoading,
   isError
-}: RevenuePageProps) => {
+}: RevenueProps) => {
   const intervalDropdown = useDropdown('single');
   const periodDropdown = useDropdown('single');
 

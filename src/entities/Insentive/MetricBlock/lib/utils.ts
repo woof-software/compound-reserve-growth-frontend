@@ -1,5 +1,12 @@
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 
+type GroupedData = {
+  rewardsSupply: number;
+  rewardsBorrow: number;
+  income: number;
+  compoundPrice: number;
+};
+
 export const getTotalMetricValues = (
   data: CombinedIncentivesData[],
   activeTab: string
@@ -7,18 +14,17 @@ export const getTotalMetricValues = (
   let filteredData: CombinedIncentivesData[] = [];
 
   if (activeTab === 'Day') {
-    const now = Date.now() / 1000;
-    const twentyFourHoursAgo = now - 36 * 60 * 60;
-
-    const latestMap = new Map();
+    let latestDate: number | null = null;
 
     for (const item of data) {
-      if (item.date < twentyFourHoursAgo || item.date > now) continue;
-
-      latestMap.set(item.source.id, item);
+      if (latestDate === null || item.date > latestDate) {
+        latestDate = item.date;
+      }
     }
 
-    filteredData = Array.from(latestMap.values());
+    if (latestDate !== null) {
+      filteredData = data.filter((item) => item.date === latestDate);
+    }
   } else if (activeTab === 'Year') {
     const now = new Date();
     now.setHours(23, 59, 59);
@@ -33,7 +39,30 @@ export const getTotalMetricValues = (
     });
   }
 
-  return filteredData.reduce(
+  const groupedByNetworkAndDate = filteredData.reduce((acc, item) => {
+    const key = `${item.source.network}_${item.date}`;
+
+    if (!acc.has(key)) {
+      acc.set(key, {
+        rewardsSupply: 0,
+        rewardsBorrow: 0,
+        income: 0,
+        compoundPrice: item.compoundPrice
+      });
+    }
+
+    const entry = acc.get(key)!;
+    entry.rewardsSupply += item.rewardsSupply;
+    entry.rewardsBorrow += item.rewardsBorrow;
+
+    if (item.income > 0) {
+      entry.income += item.income;
+    }
+
+    return acc;
+  }, new Map<string, GroupedData>());
+
+  return Array.from(groupedByNetworkAndDate.values()).reduce(
     (acc, curr) => {
       const { income, rewardsBorrow, rewardsSupply, compoundPrice } = curr;
 

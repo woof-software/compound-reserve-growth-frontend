@@ -7,6 +7,7 @@ import { DateRangePickerFilter } from '@/components/Filter/DateRangePickerFilter
 import { DropdownFilter } from '@/components/Filter/DropdownFilter/DropdownFilter';
 import { Filters } from '@/components/Filter/Filters';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
+import {type RevenueProps } from '@/pages/AccountingPage/AccountingPage';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useOptions, type Option } from '@/shared/hooks/filters/useOptions';
 import { useBarSize } from '@/shared/hooks/useBarSize';

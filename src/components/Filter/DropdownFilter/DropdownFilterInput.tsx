@@ -1,8 +1,8 @@
-import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
-import { noop } from '@/shared/lib/utils/utils'
 import { Dispatch, SetStateAction } from 'react';
 
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import { cn } from '@/shared/lib/classNames/classNames';
+import { noop } from '@/shared/lib/utils/utils'
 import Text from '@/shared/ui/Text/Text';
 
 export interface DropdownFilterInputProps {
