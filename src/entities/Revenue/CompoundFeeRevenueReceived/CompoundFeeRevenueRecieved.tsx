@@ -13,6 +13,7 @@ import {
   customChartOptions,
   customTooltipFormatter,
 } from '@/entities/Revenue/CompoundFeeRevenueReceived/customChartOptions';
+import {type RevenueProps } from '@/pages/AccountingPage/AccountingPage';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useOptions } from '@/shared/hooks/filters/useOptions';
 import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange';

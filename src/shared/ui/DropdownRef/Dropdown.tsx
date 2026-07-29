@@ -1,5 +1,6 @@
 import { Dispatch, ReactNode, SetStateAction, useEffect, useRef } from 'react';
 
+import { useClickOutside } from '@/shared/hooks/useClickOutside';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { noop } from '@/shared/lib/utils/utils';
 
@@ -12,34 +13,49 @@ export interface DropdownProps {
 }
 
 export const Dropdown = (props: DropdownProps) => {
-  const { children, trigger, isOpen, setIsOpen, onClose = noop } = props;
+  const {
+    children,
+    trigger,
+    isOpen,
+    setIsOpen,
+    onClose = noop
+  } = props;
+
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (!(e.target instanceof Node)) return;
+    if (!isOpen) return;
 
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target) ) {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
         setIsOpen(false);
-        onClose?.();
+        onClose();
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  useClickOutside(wrapperRef, () => {
+    setIsOpen(false);
+    onClose();
+  });
 
   return (
     <div ref={wrapperRef} className={'relative'}>
       {trigger}
-      <div className={cn(
-        'absolute z-10 right-0 mt-2 w-48 rounded-lg shadow-lg dark:bg-primary-15 border-[0.25px] border-border max-w-[168px]',
-        isOpen
-          ? 'animate-dropdown-bounce pointer-events-auto'
-          : 'hidden'
-      )}>
-        {children}
-      </div>
+      {isOpen && (
+        <div
+          className={cn(
+            'absolute z-10 right-0 mt-2 w-48 rounded-lg shadow-lg dark:bg-primary-15 border-[0.25px] border-border max-w-[168px] animate-dropdown-bounce'
+          )}
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+        >
+          {children}
+        </div>
+      )}
     </div>
   );
 };

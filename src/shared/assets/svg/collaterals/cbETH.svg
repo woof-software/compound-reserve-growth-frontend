@@ -1,10 +1,1 @@
-<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="1" y="1" width="38" height="38" rx="19" fill="white"/>
-<path d="M20 6L11.5474 20.2775L20 16.352V6Z" fill="#0052FF"/>
-<path d="M20 25.3221L11.5474 20.2596L20 16.352V25.3221Z" fill="#6697FF"/>
-<path d="M19.9993 26.9786L11.5474 21.9145L19.9993 34V26.9786Z" fill="#0052FF"/>
-<path d="M20 6L28.4524 20.2775L20 16.352V6Z" fill="#6697FF"/>
-<path d="M20 25.3221L28.4524 20.2775L20 16.352V25.3221Z" fill="#CCDCFF"/>
-<path d="M20 26.9786L28.4524 22.0061L20 34V26.9786Z" fill="#6697FF"/>
-<rect x="1" y="1" width="38" height="38" rx="19" stroke="#0052FF" stroke-width="2"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" viewBox="0 0 40 40"><rect width="38" height="38" x="1" y="1" fill="#fff" rx="19"/><path fill="#0052ff" d="m20 6-8.453 14.278L20 16.352z"/><path fill="#6697ff" d="m20 25.322-8.453-5.062L20 16.352z"/><path fill="#0052ff" d="m20 26.979-8.453-5.064L20 34z"/><path fill="#6697ff" d="m20 6 8.452 14.278L20 16.352z"/><path fill="#ccdcff" d="m20 25.322 8.452-5.044L20 16.352z"/><path fill="#6697ff" d="m20 26.979 8.452-4.973L20 34z"/><rect width="38" height="38" x="1" y="1" stroke="#0052ff" stroke-width="2" rx="19"/></svg>

@@ -11,6 +11,12 @@ import { RevenueItem, useRevenue } from '@/shared/hooks/useRevenue';
 import { useScrollToHash } from '@/shared/hooks/useScrollToHash';
 import Text from '@/shared/ui/Text/Text';
 
+export interface RevenueProps {
+  revenueData: RevenueItem[];
+  isLoading: boolean;
+  isError: boolean;
+}
+
 const AccountingPage = () => {
   const { data: revenueData, isPending: isLoading, isError } = useRevenue();
 
