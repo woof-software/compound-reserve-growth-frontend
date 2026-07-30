@@ -196,14 +196,14 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
           <ChartActions
             mobileChildren={
               <CSVDownloadButton
-                data={getSummarizedCsvData()}
+                data={getSummarizedCsvData(aggregatedSeries)}
                 filename={getCsvFileName('fees_generated_vs_incentives')}
                 tooltipContent='CSV with the entire historical data can be downloaded'
               />
             }
           >
             <CSVDownloadButton
-              data={getSummarizedCsvData()}
+              data={getSummarizedCsvData(aggregatedSeries)}
               filename={getCsvFileName('fees_generated_vs_incentives')}
               tooltipContent='CSV with the entire historical data can be downloaded'
             />
