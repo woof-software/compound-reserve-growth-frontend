@@ -1,22 +1,26 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
+import { parseAsStringLiteral, useQueryState } from 'nuqs';
 
+import { ChartActions } from '@/components/Charts/ChartActions';
+import { DropdownFilter } from '@/components/Filter/DropdownFilter/DropdownFilter';
+import { Filters } from '@/components/Filter/Filters';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import { DailyExpensesMobileFilters } from '@/entities/Insentive/DailyExpenses/DailyExpensesMobileFilters';
 import DailyExpensesTable from '@/entities/Insentive/DailyExpenses/DailyExpensesTable';
 import { getCsvData } from '@/entities/Insentive/DailyExpenses/lib/getCsvData';
 import { normalizeTableData } from '@/entities/Insentive/DailyExpenses/lib/normalizeTableData';
 import { NormalizedTableData } from '@/entities/Insentive/DailyExpenses/lib/types';
-import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
-import {
-  useFiltersSync,
-  useFilterSyncSingle
-} from '@/shared/hooks/useFiltersSync';
-import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
+import { NOT_MARKET } from '@/shared/consts/consts';
+import { useOptions } from '@/shared/hooks/filters/useOptions';
+import { useModal } from '@/shared/hooks/useModal';
+import { SortAccessor, SortAdapter, useSorting } from '@/shared/hooks/useSorting';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
+import { capitalizeFirstLetter, parseStingsArray } from '@/shared/lib/utils/utils';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
-import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
+import Icon from '@/shared/ui/Icon/Icon';
+import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import View from '@/shared/ui/View/View';
 
@@ -26,40 +30,105 @@ interface DailyExpensesProps {
   data: CombinedIncentivesData[];
 }
 
+const currencyValues = ['COMP', 'USD'] as const;
+
+const sortColumns: SortAccessor<NormalizedTableData>[] = [
+  { accessorKey: 'network', header: 'Network' },
+  { accessorKey: 'market', header: 'Market' },
+  { accessorKey: 'lendIncentive', header: 'Lend Incentive' },
+  { accessorKey: 'borrowIncentive', header: 'Borrow Incentive' },
+  { accessorKey: 'total', header: 'Total' }
+];
+
 const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
-  const [activeViewTab, setActiveViewTab] = useState<'COMP' | 'USD'>('COMP');
+  const [activeCurrencyTab, setActiveCurrencyTab] = useQueryState(
+    'de-currency',
+    parseAsStringLiteral(currencyValues).withDefault('COMP')
+  );
+  const [selectedChainKeys, setSelectedChainKeys] = useQueryState('de-chain', parseStingsArray([]));
+  const [selectedMarketKeys, setSelectedMarketKeys] = useQueryState('de-market', parseStingsArray([]));
+  
+  const clearAllFilters = () => {
+    setSelectedChainKeys([]);
+    setSelectedMarketKeys([]);
+  };
 
   const {
-    chainOptions,
-    deploymentOptionsFilter,
-    selectedOptions,
-    onSelectChain,
-    onSelectMarket,
-    setSelectedOptions,
-    filteredData,
-    clearAllFilters,
-    mobileFilterOptions
-  } = useChainMarketFilters(data, { filterByLatestDate: true });
+    isOpen: isSortOpen,
+    onOpenModal: onSortOpen,
+    onCloseModal: onSortClose
+  } = useModal();
 
-  const normalizedTableData = normalizeTableData(filteredData, activeViewTab);
-  const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
-    useSorting<NormalizedTableData>('desc', 'total');
+  const chainOptions = useMemo(() => {
+    const uniqueNetworks = [...new Set(data.map(d => d.source.network))];
+    const filteredNetworks = uniqueNetworks.filter(network => network !== 'mainnet');
+    const optionNetworks = filteredNetworks.map(network => ({ label: capitalizeFirstLetter(network), value: network }));
+
+    return [
+      { label: 'Mainnet', value: 'mainnet' },
+      ...optionNetworks
+    ];
+  }, [data]);
+  
+  const {
+    selectedOptions: selectedChainOptions,
+    setSelectedOptions: setSelectedChainOptions,
+  } = useOptions(chainOptions, selectedChainKeys, setSelectedChainKeys);
+
+  const byChain = useMemo(() => (
+    !selectedChainOptions.length
+      ? data
+      : data.filter(d => selectedChainOptions.some(o => o.value === d.source.network))
+  ), [data, selectedChainOptions]);
+
+  const marketOptions = useMemo(() => (
+    [...new Set(byChain.map(d => d.source.market ?? NOT_MARKET))]
+      .sort()
+      .map(value => ({ label: capitalizeFirstLetter(value), value }))
+  ), [byChain]);
+
+  const {
+    selectedOptions: selectedMarketOptions,
+    setSelectedOptions: setSelectedMarketOptions,
+  } = useOptions(marketOptions, selectedMarketKeys, setSelectedMarketKeys);
+
+  const filteredData = useMemo(() => {
+    if (!data?.length) return [];
+    let result = data;
+
+    const latestDate = result.reduce(
+      (max, item) => (item.date > max ? item.date : max),
+      result[0].date
+    );
+    result = result.filter((item) => item.date === latestDate);
+
+    if (selectedChainKeys.length > 0) {
+      result = result.filter((item) =>
+        selectedChainKeys.includes(item.source.network)
+      );
+    }
+
+    if (selectedMarketKeys.length > 0) {
+      result = result.filter((item) =>
+        selectedMarketKeys.includes(item.source.market ?? NOT_MARKET)
+      );
+    }
+
+    return result;
+  }, [data, selectedChainKeys, selectedMarketKeys]);
+
+  const isAnyFiltersSelected = !!selectedChainOptions.length || !!selectedMarketOptions.length;
+
+  const normalizedTableData = normalizeTableData(filteredData, activeCurrencyTab);
+  
+  const { sortDirection, sortKey, onKeySelect, onTypeSelect } = useSorting<NormalizedTableData>('desc', 'total');
+  
   const csvData = getCsvData(normalizedTableData);
 
   const sortType: SortAdapter<NormalizedTableData> = {
     type: sortDirection,
     key: sortKey
   };
-
-  useFiltersSync(selectedOptions, setSelectedOptions, 'icscb', [
-    'chain',
-    'deployment'
-  ]);
-  useFilterSyncSingle(
-    'incentivesDailyExpenses',
-    activeViewTab,
-    setActiveViewTab
-  );
 
   return (
     <Card
@@ -75,48 +144,135 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
         header: 'rounded-t-lg'
       }}
     >
-      <div className='hidden items-center justify-end gap-2 px-10 py-3 lg:flex lg:px-0'>
+      <div className='hidden items-center justify-end gap-2 px-5 lg:px-0 py-3 sm:flex'>
         <TabsGroup
           tabs={['COMP', 'USD']}
-          value={activeViewTab}
-          onTabChange={setActiveViewTab}
+          value={activeCurrencyTab}
+          onTabChange={setActiveCurrencyTab}
         />
-        <MultiSelect
-          options={chainOptions}
-          value={selectedOptions.chain}
-          onChange={onSelectChain}
-          placeholder='Chain'
-          disabled={isLoading}
+        <Filters isShowClear={isAnyFiltersSelected} onClearAll={clearAllFilters}>
+          <DropdownFilter
+            triggerLabel={'Chain'}
+            options={chainOptions}
+            selectedOptions={selectedChainOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedChainOptions}
+          />
+          <DropdownFilter
+            triggerLabel={'Market'}
+            options={marketOptions}
+            selectedOptions={selectedMarketOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedMarketOptions}
+          />
+        </Filters>
+        <Button
+          onClick={onSortOpen}
+          className='bg-secondary-27 text-gray-11 shadow-13 grow sm:max-w-[130px] flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
+        >
+          <Icon
+            name='sort-icon'
+            className='h-[14px] w-[14px]'
+          />
+          Sort
+        </Button>
+        <SortDrawer
+          isOpen={isSortOpen}
+          sortType={sortType}
+          columns={sortColumns}
+          onClose={onSortClose}
+          onKeySelect={onKeySelect}
+          onTypeSelect={onTypeSelect}
         />
-        <MultiSelect
-          options={deploymentOptionsFilter}
-          value={selectedOptions.deployment}
-          onChange={onSelectMarket}
-          placeholder='Market'
-          disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-        />
-        <CSVDownloadButton
-          data={csvData}
-          filename={getCsvFileName('incentives_daily_expenses', {
-            view: activeViewTab
-          })}
-        />
+        <ChartActions
+          mobileChildren={
+            <CSVDownloadButton
+              data={csvData}
+              filename={getCsvFileName('incentives_daily_expenses', {
+                view: activeCurrencyTab
+              })}
+            />
+          }
+        >
+          <CSVDownloadButton
+            data={csvData}
+            filename={getCsvFileName('incentives_daily_expenses', {
+              view: activeCurrencyTab
+            })}
+          />
+        </ChartActions>
       </div>
-      <DailyExpensesMobileFilters
-        filterOptions={mobileFilterOptions}
-        sortType={sortType}
-        onKeySelect={onKeySelect}
-        onTypeSelect={onTypeSelect}
-        onClearAll={clearAllFilters}
-        csvData={csvData}
-        activeViewTab={activeViewTab}
-        setActiveViewTab={setActiveViewTab}
-      />
+      {/*mobile styles*/}
+      <div className='sm:hidden flex flex-col items-center justify-end gap-2 px-5 py-3 sm:flex-row'>
+        <div className='flex w-full items-center gap-2 sm:w-auto'>
+          <Filters isShowClear={isAnyFiltersSelected} onClearAll={clearAllFilters}>
+            <DropdownFilter
+              triggerLabel={'Chain'}
+              options={chainOptions}
+              selectedOptions={selectedChainOptions}
+              getKey={(v) => v.value}
+              getLabel={(v) => v.label}
+              setValue={setSelectedChainOptions}
+            />
+            <DropdownFilter
+              triggerLabel={'Market'}
+              options={marketOptions}
+              selectedOptions={selectedMarketOptions}
+              getKey={(v) => v.value}
+              getLabel={(v) => v.label}
+              setValue={setSelectedMarketOptions}
+            />
+          </Filters>
+          <Button
+            onClick={onSortOpen}
+            className='bg-secondary-27 text-gray-11 shadow-13 grow sm:max-w-[130px] flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
+          >
+            <Icon
+              name='sort-icon'
+              className='h-[14px] w-[14px]'
+            />
+            Sort
+          </Button>
+          <SortDrawer
+            isOpen={isSortOpen}
+            sortType={sortType}
+            columns={sortColumns}
+            onClose={onSortClose}
+            onKeySelect={onKeySelect}
+            onTypeSelect={onTypeSelect}
+          />
+        </div>
+        <div className='flex w-full items-center gap-2 sm:w-auto'>
+          <TabsGroup
+            className={{
+              container: 'block w-full sm:hidden sm:w-auto',
+              list: 'w-full sm:w-auto'
+            }}
+            tabs={['COMP', 'USD']}
+            value={activeCurrencyTab}
+            onTabChange={setActiveCurrencyTab}
+          />
+          <ChartActions
+            mobileChildren={
+              <CSVDownloadButton
+                data={csvData}
+                filename={getCsvFileName('incentives_daily_expenses', {
+                  view: activeCurrencyTab
+                })}
+              />
+            }
+          >
+            <></>
+          </ChartActions>
+        </div>
+      </div>
       <View.Condition
         if={Boolean(!isLoading && !isError && normalizedTableData.length)}
       >
         <DailyExpensesTable
-          activeViewTab={activeViewTab}
+          activeViewTab={activeCurrencyTab}
           sortType={sortType}
           tableData={normalizedTableData}
         />
