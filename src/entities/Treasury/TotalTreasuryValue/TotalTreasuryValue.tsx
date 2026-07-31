@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQueryState } from 'nuqs';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
@@ -31,8 +31,8 @@ import Text from '@/shared/ui/Text/Text';
 
 interface TotalTreasuryValueProps {
   data: TokenData[];
-  isLoading: boolean;
-  isError: boolean;
+  isLoading?: boolean;
+  isError?: boolean;
   onCopyLink?: (id: string) => void;
 }
 
@@ -217,6 +217,8 @@ const TotalTreasuryValue = ({
     color: `${color}`
   }));
 
+  const areAllSeriesHidden = legends.every(({ isDisabled }) => isDisabled);
+
   const csvData = filterForRange({
     data: chartSeries[0]?.data ?? [],
     getDate: (item) => new Date(item.x),
@@ -236,10 +238,10 @@ const TotalTreasuryValue = ({
       className={{
         loading: 'min-h-[inherit]',
         container: 'min-h-[571px] rounded-lg',
-        content: 'flex flex-col gap-3 pt-0 pb-0 px-5 lg:px-10 lg:pb-10'
+        content: 'p-10 flex flex-col gap-3 px-0 pt-0 pb-5 md:px-5 lg:px-10 lg:pb-10'
       }}
     >
-      <div className={'flex sm:flex-row sm:items-center flex-col-reverse gap-2 py-3 justify-end'}>
+      <div className={'flex sm:flex-row sm:items-center flex-col-reverse gap-2 py-3 justify-end px-5 md:px-0 lg:px-0'}>
         <div className={'w-full sm:w-auto'}>
           <TabsGroup
             className={{
@@ -320,7 +322,7 @@ const TotalTreasuryValue = ({
                   ariaLabel='Toggle events'
                   className={{
                     container:
-                      'flex items-center gap-1.5 bg-transparent p-0 !shadow-none h-[44px]',
+                      'flex items-center gap-1.5 bg-transparent p-0 shadow-none! h-[44px]',
                     icon: 'h-[26px] w-[26px]',
                     iconContainer: 'h-[26px] w-[26px]'
                   }}
@@ -330,6 +332,31 @@ const TotalTreasuryValue = ({
                     Hide Events
                   </Text>
                 </ChartIconToggle>
+                {(isLegendEnabled && aggregatedSeries.length > 1) &&
+                  <ChartIconToggle
+                    className={{
+                      container:
+                        'flex items-center gap-1.5 bg-transparent p-0 shadow-none! h-[44px]',
+                      icon: 'h-[26px] w-[26px]',
+                      iconContainer: 'h-[26px] w-[26px]'
+                    }}
+                    active={areAllSeriesHidden}
+                    onClick={() => {
+                      if (areAllSeriesHidden) {
+                        onSelectAllLegends();
+                      } else {
+                        onDeselectAllLegends();
+                      }
+                    }}
+                    onIcon='eye'
+                    offIcon='eye-closed'
+                    ariaLabel='Toggle all series visibility'
+                  >
+                    <Text size='14' weight='500'>
+                      Hide Events
+                    </Text>
+                  </ChartIconToggle>
+                }
               </>
             }
           >

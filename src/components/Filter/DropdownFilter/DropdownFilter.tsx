@@ -37,16 +37,14 @@ export const DropdownFilter = <T,>(props: DropdownFilterProps<T>) => {
   const [searchValue, setSearchValue] = useState('');
 
   const selectAllOptions = () => {
-   return  setValue(options);
+   return setValue(options);
   };
 
   const clearSelectedOptions = () => {
     return setValue([]);
   };
 
-  const isAllSelected =
-    options.length > 0 &&
-    options.every((o) => selectedOptions.some((s) => getKey(s) === getKey(o)));
+  const isAllSelected = options.length === selectedOptions.length;
 
   const toggle = () => setIsDropdown((prev) => !prev);
 
@@ -78,7 +76,10 @@ export const DropdownFilter = <T,>(props: DropdownFilterProps<T>) => {
       <>
         <div className={'flex items-center justify-between'}>
           <Button
-            onClick={() => setExpandedFilter(null)}
+            onClick={() => {
+              setExpandedFilter(null);
+              setSearchValue('');
+            }}
             className='absolute top-[40px] h-[24px] w-[24px]'
           >
             <Icon name='arrow-line' className='h-6 w-6' />

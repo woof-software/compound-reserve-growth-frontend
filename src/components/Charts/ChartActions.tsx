@@ -30,7 +30,6 @@ export const ChartActions = (props: ChartActionsProps) => {
             className='h-6 w-6 fill-none'
           />
         </Button>
-
         <Drawer
           onClose={() => setIsDrawer(false)}
           isOpen={isDrawer}

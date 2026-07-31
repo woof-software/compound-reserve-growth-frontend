@@ -1,22 +1,20 @@
-import { Format } from '@/shared/lib/utils/format';
 import React, {
   RefObject,
   useCallback,
   useEffect,
   useMemo,
   useRef,
-  useState
 } from 'react';
 import Highcharts, { Options, Point } from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
+import ChartLegends from '@/components/Charts/ChartLegends';
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
 import { AggregatedPoint } from '@/shared/hooks/useCompoundChartBars';
 import { cn } from '@/shared/lib/classNames/classNames';
+import { Format } from '@/shared/lib/utils/format';
 import { noop } from '@/shared/lib/utils/utils';
-import Button from '@/shared/ui/Button/Button';
-import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import View from '@/shared/ui/View/View';
 
@@ -68,15 +66,9 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
 
   const programmaticChange = useRef(false);
 
-  const viewportRef = useRef<HTMLDivElement>(null);
-
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-
-  const [canScrollRight, setCanScrollRight] = useState(false);
-
   const currentSeriesNames = useMemo(
     () => seriesData.map((s) => s.name!).filter(Boolean) as string[],
-    [seriesData]
+    [seriesData],
   );
 
   const currentHiddenSet = useMemo(() => {
@@ -87,27 +79,22 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
   const isLastActiveLegend =
     currentHiddenSet.size === Math.max(0, currentSeriesNames.length - 1);
 
-  const updateArrows = useCallback(() => {
-    const el = viewportRef.current;
+  const legends = useMemo(
+    () =>
+      seriesData.map((s) => ({
+        id: s.name!,
+        name: s.name!,
+        color: (s as any).color,
+        isDisabled: currentHiddenSet.has(s.name!)
+      })),
+    [seriesData, currentHiddenSet]
+  );
 
-    if (!el) return;
-
-    const { scrollLeft, scrollWidth, clientWidth } = el;
-
-    setCanScrollLeft(scrollLeft > 1);
-
-    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
-  }, []);
-
-  const scrollByDir = (dir: 'left' | 'right') => {
-    const el = viewportRef.current;
-
-    if (!el) return;
-
-    const step = Math.max(el.clientWidth * 0.6, 120);
-
-    el.scrollBy({ left: dir === 'left' ? -step : step, behavior: 'smooth' });
-  };
+  const aggregatedRangeKey = useMemo(() => {
+    if (!aggregatedData.length) return '';
+    const d = aggregatedData;
+    return `${d.length}:${d[0].x}:${d[d.length - 1].x}`;
+  }, [aggregatedData]);
 
   useEffect(() => {
     const chart = chartRef.current?.chart;
@@ -122,7 +109,7 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
       programmaticChange.current = true;
       chart.xAxis[0].setExtremes(min, max, true);
     }
-  }, [barCount, aggregatedData]);
+  }, [barCount, aggregatedRangeKey]);
 
   const highlightSeries = useCallback((name: string) => {
     const chart = chartRef.current?.chart;
@@ -352,16 +339,6 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
   ]);
 
   useEffect(() => {
-    updateArrows();
-
-    const onResize = () => updateArrows();
-
-    window.addEventListener('resize', onResize);
-
-    return () => window.removeEventListener('resize', onResize);
-  }, [seriesData.length, updateArrows]);
-
-  useEffect(() => {
     const chart = chartRef.current?.chart;
     if (!chart) return;
 
@@ -377,14 +354,17 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
   }, [hiddenItems]);
 
   useEffect(() => {
-    if (onHiddenItems) {
-      const current = new Set(currentSeriesNames);
+    if (!onHiddenItems) return;
+    const current = new Set(currentSeriesNames);
 
-      const filtered = hiddenItems.filter((name) => current.has(name));
+    const filtered = hiddenItems.filter((name) => current.has(name));
 
-      onHiddenItems(filtered);
+    if (filtered.length === hiddenItems.length && filtered.every((item, i) => item === hiddenItems[i])) {
+      return;
     }
-  }, [currentSeriesNames]);
+
+    onHiddenItems(filtered);
+  }, [currentSeriesNames, hiddenItems]);
 
   useEffect(() => {
     if (resetHiddenKey !== undefined) {
@@ -405,11 +385,11 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
         className
       )}
     >
-      <div className='relative min-h-[400px] flex-grow'>
-        <div className='absolute top-1/2 left-1/2 z-[2] -translate-x-1/2 -translate-y-1/2 opacity-40'>
+      <div className='relative min-h-100 grow'>
+        <div className='absolute top-1/2 left-1/2 z-2 -translate-x-1/2 -translate-y-1/2 opacity-40'>
           <Icon
             name='logo-gray'
-            className='h-[27px] w-[121px]'
+            className='h-6.75 w-30.25'
             color='primary-11'
             isRound={false}
           />
@@ -441,125 +421,12 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
         </div>
       </div>
       <View.Condition if={Boolean(seriesData.length > 1)}>
-        <div className='mx-5 block md:mx-0 lg:hidden'>
-          <div
-            className={cn(
-              'bg-secondary-35 shadow-13 relative mx-auto h-[38px] max-w-fit overflow-hidden rounded-lg',
-              'before:pointer-events-none before:absolute before:top-[1px] before:left-[1px] before:z-[2] before:h-full before:w-20 before:rounded-[39px] before:opacity-0',
-              'after:pointer-events-none after:absolute after:top-[1px] after:right-[1px] after:h-full after:w-20 after:rounded-r-[39px] after:opacity-0',
-              {
-                'before:max-h-[36px] before:rotate-180 before:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] before:opacity-100 dark:before:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
-                  canScrollLeft,
-                'after:max-h-[36px] after:bg-[linear-gradient(270deg,#f8f8f8_55.97%,rgba(112,113,129,0)_99.41%)] after:opacity-100 dark:after:bg-[linear-gradient(90deg,rgba(122,138,153,0)_19.83%,#17212b_63.36%)]':
-                  canScrollRight
-              }
-            )}
-          >
-            <View.Condition if={canScrollLeft}>
-              <Button
-                className={cn(
-                  'bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-lg'
-                )}
-                onClick={() => {
-                  clearHighlight();
-                  scrollByDir('left');
-                }}
-              >
-                <Icon
-                  name='arrow-triangle'
-                  className='h-[6px] w-[6px]'
-                />
-              </Button>
-            </View.Condition>
-            <div
-              ref={viewportRef}
-              onScroll={() => {
-                updateArrows();
-                clearHighlight();
-              }}
-              className={cn(
-                'hide-scrollbar mx-0.5 flex h-full max-w-[99%] items-center gap-4 overflow-x-auto scroll-smooth p-1.5'
-              )}
-            >
-              <Each
-                data={seriesData}
-                render={(s) => (
-                  <Button
-                    key={s.name}
-                    className={cn(
-                      'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
-                      {
-                        'line-through opacity-30': currentHiddenSet.has(
-                          s.name!
-                        ),
-                        'cursor-not-allowed':
-                          isLastActiveLegend && !currentHiddenSet.has(s.name!)
-                      }
-                    )}
-                    onMouseEnter={() => highlightSeries(s.name!)}
-                    onFocus={() => highlightSeries(s.name!)}
-                    onMouseLeave={clearHighlight}
-                    onBlur={clearHighlight}
-                    onClick={() => onSelectLegend(s.name!)}
-                  >
-                    <span
-                      className='inline-block h-3 w-3 rounded-full'
-                      style={{ backgroundColor: (s as any).color }}
-                    />
-                    {s.name}
-                  </Button>
-                )}
-              />
-            </div>
-            <View.Condition if={canScrollRight}>
-              <Button
-                className={cn(
-                  'bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-lg'
-                )}
-                onClick={() => {
-                  clearHighlight();
-                  scrollByDir('right');
-                }}
-              >
-                <Icon
-                  name='arrow-triangle'
-                  className='h-[6px] w-[6px] rotate-180'
-                />
-              </Button>
-            </View.Condition>
-          </div>
-        </div>
-        <View.Condition if={Boolean(seriesData.length > 1)}>
-          <div className='mx-auto hidden max-w-[902px] flex-wrap justify-center gap-5 px-[15px] py-2 lg:flex'>
-            <Each
-              data={seriesData}
-              render={(s) => (
-                <Button
-                  key={s.name}
-                  className={cn(
-                    'text-primary-14 flex shrink-0 gap-1.5 text-[11px] leading-none font-normal',
-                    {
-                      'line-through opacity-30': currentHiddenSet.has(s.name!),
-                      'cursor-not-allowed':
-                        isLastActiveLegend && !currentHiddenSet.has(s.name!)
-                    }
-                  )}
-                  onMouseEnter={() => highlightSeries(s.name!)}
-                  onFocus={() => highlightSeries(s.name!)}
-                  onMouseLeave={clearHighlight}
-                  onBlur={clearHighlight}
-                  onClick={() => onSelectLegend(s.name!)}
-                >
-                  <span
-                    className='inline-block h-3 w-3 rounded-full'
-                    style={{ backgroundColor: (s as any).color }}
-                  />
-                  {s.name}
-                </Button>
-              )}
-            />
-          </div>
-        </View.Condition>
+        <ChartLegends
+          legends={legends}
+          onLegendHover={highlightSeries}
+          onLegendLeave={clearHighlight}
+          onLegendClick={onSelectLegend}
+        />
       </View.Condition>
     </div>
   );
