@@ -19,7 +19,7 @@ import { useOptions } from '@/shared/hooks/filters/useOptions';
 import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange';
 import { type StackedChartData, useCompoundChartBars } from '@/shared/hooks/useCompoundChartBars';
 import { useProcessor } from '@/shared/hooks/useProcessor';
-import { RevenueItem, RevenuePageProps } from '@/shared/hooks/useRevenue';
+import { RevenueItem } from '@/shared/hooks/useRevenue';
 import { getEndOfDayTimestamp } from '@/shared/lib/date/dateUtils';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
@@ -37,14 +37,8 @@ import Text from '@/shared/ui/Text/Text';
 
 const toOptionDto = (o: OptionType) => ({ label: o.label, value: o.id });
 
-const groupByChartLabel: Record<string, string> = {
-  none: 'None',
-  assetType: 'Asset Type',
-  chain: 'Chain',
-  deployment: 'Market',
-};
-
-const CompoundFeeRevenueRecieved = ({ revenueData: rawData, isLoading, isError }: RevenuePageProps) => {
+const CompoundFeeRevenueRecieved = (props: RevenueProps) => {
+  const { revenueData: rawData, isLoading, isError } = props;
   const [resetHiddenKey, setResetHiddenKey] = useState(0);
 
   const [selectedGroupKey, setSelectedGroupKey] = useQueryState('cfrr-group', { defaultValue: 'chain' });
@@ -239,21 +233,24 @@ const CompoundFeeRevenueRecieved = ({ revenueData: rawData, isLoading, isError }
         const date = new Date(itemTime).toISOString().split('T')[0];
 
         let seriesKey: string;
-        if (selectedGroupKey === 'none') {
-          seriesKey = 'Total';
-        } else if (selectedGroupKey === 'assetType') {
-          seriesKey = item.source.asset.type;
-        } else if (selectedGroupKey === 'chain') {
-          seriesKey = item.source.network;
-        } else {
-          seriesKey = item.source.market ?? NOT_MARKET;
+
+        switch (selectedGroupKey) {
+          case 'none':
+            seriesKey = 'Total';
+            break;
+          case 'assetType':
+            seriesKey = item.source.asset.type;
+            break;
+          case 'chain':
+            seriesKey = item.source.network;
+            break;
+          default:
+            seriesKey = item.source.market ?? NOT_MARKET;
+            break;
         }
 
-        if (!groupedByDate[date]) {
-          groupedByDate[date] = { date };
-        }
-        const row = groupedByDate[date];
-        row[seriesKey] = (Number(row[seriesKey]) || 0) + item.value;
+        if (!groupedByDate[date]) groupedByDate[date] = { date };
+        groupedByDate[date][seriesKey] = (Number(groupedByDate[date][seriesKey]) || 0) + item.value;
 
         return groupedByDate;
       };
@@ -282,15 +279,13 @@ const CompoundFeeRevenueRecieved = ({ revenueData: rawData, isLoading, isError }
     data: chartData,
   });
 
-  const hasAggregatedData = aggregatedSeries.some((s) => Array.isArray(s.data) && s.data.length > 0);
+  const hasAggregatedData = aggregatedSeries.some(({ data }) => data?.length);
 
   const csvData = getSummarizedCsvData(aggregatedSeries);
 
   const hasData = chartData.length > 0;
 
   const noDataMessage = isAnyFiltersSelected ? 'No data for selected filters' : 'No data available';
-
-  const groupByForChart = groupByChartLabel[selectedGroupKey] ?? 'Chain';
 
   const feeReceivedChartActions = (
     <ChartActions
@@ -414,7 +409,7 @@ const CompoundFeeRevenueRecieved = ({ revenueData: rawData, isLoading, isError }
           resetHiddenKey={resetHiddenKey}
           hiddenItems={hiddenItems}
           areAllSeriesHidden={areAllSeriesHidden}
-          groupBy={groupByForChart}
+          groupBy={selectedGroupKey}
           barSize={barSize}
           seriesData={seriesData}
           aggregatedData={aggregatedData}

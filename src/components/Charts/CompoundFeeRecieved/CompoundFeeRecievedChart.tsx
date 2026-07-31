@@ -71,16 +71,6 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
     [seriesData],
   );
 
-  const seriesNamesSignature = useMemo(
-    () =>
-      seriesData
-        .map((s) => String(s.name ?? ''))
-        .filter(Boolean)
-        .sort()
-        .join('|'),
-    [seriesData],
-  );
-
   const currentHiddenSet = useMemo(() => {
     const allowed = new Set(currentSeriesNames);
     return new Set(hiddenItems.filter((n) => allowed.has(n)));
@@ -365,17 +355,16 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
 
   useEffect(() => {
     if (!onHiddenItems) return;
+    const current = new Set(currentSeriesNames);
 
-    const current = new Set(
-      seriesData.map((s) => String(s.name ?? '')).filter(Boolean),
-    );
     const filtered = hiddenItems.filter((name) => current.has(name));
-    const nextKey = [...filtered].sort().join('\0');
-    const prevKey = [...hiddenItems].sort().join('\0');
-    if (nextKey === prevKey) return;
+
+    if (filtered.length === hiddenItems.length && filtered.every((item, i) => item === hiddenItems[i])) {
+      return;
+    }
 
     onHiddenItems(filtered);
-  }, [seriesNamesSignature, hiddenItems, onHiddenItems]);
+  }, [currentSeriesNames, hiddenItems]);
 
   useEffect(() => {
     if (resetHiddenKey !== undefined) {
@@ -396,11 +385,11 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
         className
       )}
     >
-      <div className='relative min-h-[400px] flex-grow'>
-        <div className='absolute top-1/2 left-1/2 z-[2] -translate-x-1/2 -translate-y-1/2 opacity-40'>
+      <div className='relative min-h-100 grow'>
+        <div className='absolute top-1/2 left-1/2 z-2 -translate-x-1/2 -translate-y-1/2 opacity-40'>
           <Icon
             name='logo-gray'
-            className='h-[27px] w-[121px]'
+            className='h-6.75 w-30.25'
             color='primary-11'
             isRound={false}
           />
