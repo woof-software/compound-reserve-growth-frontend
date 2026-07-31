@@ -170,7 +170,7 @@ const RevenueOverview = (props: RevenueProps) => {
         ({ accessorKey, header }): ExtendedColumnDef<RevenueTableRowData> => ({
           accessorKey,
           header,
-          cell: ({ getValue }) => Format.price(getValue() as number, 'standard'),
+          cell: ({ getValue }) => Format.price(getValue<number>(), 'standard'),
         }),
       ),
     ],
