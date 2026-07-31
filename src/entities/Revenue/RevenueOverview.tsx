@@ -102,58 +102,55 @@ const RevenueOverview = (props: RevenueProps) => {
     [primaryTabs, normalizedDateType],
   );
 
-  const { tableData, pieData, totals } = useMemo(
-    () => {
-      if (!rawData.length) {
-        return { tableData: [], pieData: [], totals: null };
-      }
+  const { tableData, pieData, totals } = useMemo(() => {
+    if (!rawData.length) {
+      return { tableData: [], pieData: [], totals: null };
+    }
 
-      const totals = Object.fromEntries(primaryTabs.map((p) => [p, 0])) as PeriodMap;
-      const tableDataMap = new Map<string, RevenueTableRowData>();
+    const totals = Object.fromEntries(primaryTabs.map((p) => [p, 0])) as PeriodMap;
+    const sumsByNetwork = new Map<string, PeriodMap>();
 
-      for (const network of new Set(rawData.map((item) => item.source.network))) {
-        const row: RevenueTableRowData = { chain: network };
-        primaryTabs.forEach((p) => {
-          row[p] = 0;
-        });
-        tableDataMap.set(network, row);
-      }
+    for (const network of new Set(rawData.map((item) => item.source.network))) {
+      sumsByNetwork.set(network, Object.fromEntries(primaryTabs.map((p) => [p, 0])) as PeriodMap);
+    }
 
-      for (const item of rawData) {
-        const row = tableDataMap.get(item.source.network);
-        if (!row) continue;
+    for (const item of rawData) {
+      const sums = sumsByNetwork.get(item.source.network);
+      if (!sums) continue;
 
-        for (const p of primaryTabs) {
-          if (item.date >= periodStartTimestamps[p]) {
-            (row[p] as number) += item.value;
-          }
+      for (const p of primaryTabs) {
+        if (item.date >= periodStartTimestamps[p]) {
+          sums[p] += item.value;
         }
       }
+    }
 
-      for (const row of tableDataMap.values()) {
-        primaryTabs.forEach((p) => {
-          totals[p] += row[p] as number;
-        });
-      }
+    for (const sums of sumsByNetwork.values()) {
+      primaryTabs.forEach((p) => {
+        totals[p] += sums[p];
+      });
+    }
 
-      const tableData = [...tableDataMap.values()];
-      const positivePieData = tableData
-        .map((row) => ({ name: row.chain, value: (row[normalizedPeriod] as number) || 0 }))
-        .filter(({ value }) => value > 0);
+    const tableData: RevenueTableRowData[] = [...sumsByNetwork.entries()].map(([chain, sums]) => ({
+      chain,
+      ...sums,
+    }));
 
-      const totalPieValue = positivePieData.reduce((sum, { value }) => sum + value, 0);
+    const positivePieData = [...sumsByNetwork.entries()]
+      .map(([name, sums]) => ({ name, value: sums[normalizedPeriod] || 0 }))
+      .filter(({ value }) => value > 0);
 
-      const pieData = positivePieData.map(({ name, value }) => ({
-        name: capitalizeFirstLetter(name),
-        value: Format.price(value, 'compact'),
-        percent: Number((totalPieValue > 0 ? (value / totalPieValue) * 100 : 0).toFixed(1)),
-        color: networkColorMap[name.toLowerCase()] || '#808080',
-      }));
+    const totalPieValue = positivePieData.reduce((sum, { value }) => sum + value, 0);
 
-      return { tableData, pieData, totals };
-    },
-    [rawData, primaryTabs, periodStartTimestamps, normalizedPeriod],
-  );
+    const pieData = positivePieData.map(({ name, value }) => ({
+      name: capitalizeFirstLetter(name),
+      value: Format.price(value, 'compact'),
+      percent: Number((totalPieValue > 0 ? (value / totalPieValue) * 100 : 0).toFixed(1)),
+      color: networkColorMap[name.toLowerCase()] || '#808080',
+    }));
+
+    return { tableData, pieData, totals };
+  }, [rawData, primaryTabs, periodStartTimestamps, normalizedPeriod]);
 
   const periodColumnDefs = useMemo(
     () =>
