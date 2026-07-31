@@ -8,6 +8,7 @@ import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder'
 import CollateralsPriceTable from '@/entities/Capo/CollateralPriceBlock/CollateralsPriceTable';
 import { useOptions } from '@/shared/hooks/filters/useOptions';
 import { useModal } from '@/shared/hooks/useModal';
+import { useProcessor } from '@/shared/hooks/useProcessor';
 import { SortAccessor, SortAdapter, useSorting } from '@/shared/hooks/useSorting';
 import { capitalizeFirstLetter, parseStingsArray } from '@/shared/lib/utils/utils';
 import { CapoTableItem } from '@/shared/types/Capo/types';
@@ -77,32 +78,33 @@ const CapoCollateralsPriceBlock = ({
   const { selectedOptions: selectedCollateralOptions, setSelectedOptions: setSelectedCollateralOptions } =
     useOptions(collateralOptions, selectedCollateralKeys, setSelectedCollateralKeys);
 
-  const filteredData = useMemo(() => {
-    let result = tableData;
+  const { result } = useProcessor({
+    array: tableData,
+    filters: [
+      (v) => !selectedChainOptions.length || selectedChainOptions.some((o) => o.value === v.network),
+      (v) => !selectedCollateralOptions.length || selectedCollateralOptions.some((o) => o.value === v.collateral),
+    ],
+    transformer: () => {
+      const processed: CapoTableItem[] = [];
 
-    if (selectedChainKeys.length) {
-      result = result.filter((item) => selectedChainKeys.includes(item.network));
-    }
+      return (item: CapoTableItem) => {
+        processed.push({
+          ...item,
+          network: capitalizeFirstLetter(item.network),
+          priceBuffer: Number(item.priceRestriction) - Number(item.collateralPrice),
+        });
 
-    if (selectedCollateralKeys.length) {
-      result = result.filter((item) => selectedCollateralKeys.includes(item.collateral));
-    }
+        return processed;
+      };
+    },
+  });
 
-    return result;
-  }, [tableData, selectedChainKeys, selectedCollateralKeys]);
+  const processedData = result ?? [];
 
   const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
     useSorting<CapoTableItem>('desc', 'priceBuffer');
 
   const sortType: SortAdapter<CapoTableItem> = { type: sortDirection, key: sortKey };
-
-  const processedData = useMemo(() => (
-    filteredData.map((item) => ({
-      ...item,
-      network: capitalizeFirstLetter(item.network),
-      priceBuffer: Number(item.priceRestriction) - Number(item.collateralPrice)
-    }))
-  ), [filteredData]);
 
   const isAnyFilterSelected = !!selectedChainOptions.length || !!selectedCollateralOptions.length;
 
@@ -135,9 +137,9 @@ const CapoCollateralsPriceBlock = ({
         </Filters>
         <Button
           onClick={onSortOpen}
-          className='bg-secondary-27 text-gray-11 shadow-13 grow sm:max-w-[130px] flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
+          className='bg-secondary-27 text-gray-11 shadow-13 grow sm:max-w-32.5 flex h-9 min-w-32.5 gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
         >
-          <Icon name='sort-icon' className='h-[14px] w-[14px]' />
+          <Icon name='sort-icon' className='h-3.5 w-3.5' />
           Sort
         </Button>
         <SortDrawer
@@ -156,10 +158,10 @@ const CapoCollateralsPriceBlock = ({
           <CSVDownloadButton data={processedData} filename='collaterals_price_against_price_restriction' />
         </ChartActions>
       </div>
-      <View.Condition if={Boolean(!isLoading && !isError && processedData.length)}>
+      <View.Condition if={(!isLoading && !isError && processedData.length)}>
         <CollateralsPriceTable sortType={sortType} tableData={processedData} />
       </View.Condition>
-      <View.Condition if={Boolean(!isLoading && !isError && !processedData.length)}>
+      <View.Condition if={(!isLoading && !isError && !processedData.length)}>
         <NoDataPlaceholder
           text={!isAnyFilterSelected ? 'No data found' : undefined}
           hideButton={!isAnyFilterSelected}
