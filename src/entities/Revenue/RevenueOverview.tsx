@@ -1,27 +1,22 @@
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { parseAsString, useQueryState } from 'nuqs';
 
 import PieChart from '@/components/Charts/Pie/Pie';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import RevenueOverviewUSD, {
   DATE_TYPE_TABS,
-  ROLLING_TABS,
-  TO_DATE_TABS,
+  DateType,
+  Period,
+  PeriodMap,
+  RevenueTableRowData, ROLLING_TABS, TO_DATE_TABS,
+  toDateHeaderMap,
+  ToDateTab
 } from '@/components/RevenuePageTable/RevenueOverviewUSD';
-import {
-  buildRevenueOverviewData,
-  getPeriodHeader,
-  getPeriodStartTimestamps,
-  isDateType,
-  isPeriod,
-  resolveOverviewState,
-  TABS_CLASS,
-} from '@/entities/Revenue/revenueOverviewData';
+import { RevenueProps } from '@/pages/AccountingPage/AccountingPage';
 import { useModal } from '@/shared/hooks/useModal';
-import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { useSorting } from '@/shared/hooks/useSorting';
 import { Format } from '@/shared/lib/utils/format';
-import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
+import { capitalizeFirstLetter, networkColorMap } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
@@ -29,8 +24,6 @@ import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 import Text from '@/shared/ui/Text/Text';
-
-import type { RevenueTableRowData } from '@/components/RevenuePageTable/RevenueOverviewUSD';
 
 const NO_DATA_AVAILABLE = 'No data available';
 
@@ -47,7 +40,46 @@ const CHAIN_COLUMN: ExtendedColumnDef<RevenueTableRowData> = {
   ),
 };
 
-const RevenueOverview = ({ revenueData: rawData, isLoading, isError }: RevenuePageProps) => {
+const ALL_PERIODS: readonly string[] = [...ROLLING_TABS, ...TO_DATE_TABS];
+
+function getStartDateForPeriod(period: string, dateType: DateType): Date {
+  const now = new Date();
+
+  if (dateType === 'Rolling') {
+    now.setDate(now.getDate() - parseInt(period.replace('D', ''), 10));
+    return now;
+  }
+
+  switch (period) {
+    case 'WTD': {
+      const dayOfWeek = now.getDay();
+      now.setDate(now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
+      break;
+    }
+    case 'MTD':
+      now.setDate(1);
+      break;
+    case 'YTD':
+      now.setMonth(0, 1);
+      break;
+    default:
+      break;
+  }
+
+  now.setHours(0, 0, 0, 0);
+  return now;
+}
+
+function isDateType(value: string): value is DateType {
+  return (DATE_TYPE_TABS as readonly string[]).includes(value);
+}
+
+function isPeriod(value: string): value is Period {
+  return ALL_PERIODS.includes(value);
+}
+
+const RevenueOverview = (props: RevenueProps) => {
+  const { revenueData: rawData, isLoading, isError } = props;
   const { sortKey, sortDirection, onKeySelect, onTypeSelect } = useSorting<RevenueTableRowData>('asc', null);
 
   const [dateType, setDateType] = useQueryState('rov-date-type', parseAsString.withDefault('Rolling'));
@@ -55,15 +87,71 @@ const RevenueOverview = ({ revenueData: rawData, isLoading, isError }: RevenuePa
 
   const { isOpen: isSortOpen, onOpenModal: onSortOpen, onCloseModal: onSortClose } = useModal();
 
-  const { normalizedDateType, primaryTabs, normalizedPeriod } = resolveOverviewState(dateType, period);
+  const normalizedDateType = isDateType(dateType) ? dateType : 'Rolling';
+
+  const primaryTabs = normalizedDateType === 'Rolling' ? ROLLING_TABS : TO_DATE_TABS;
+
+  const normalizedPeriod = isPeriod(period) && (primaryTabs as readonly string[]).includes(period)
+        ? period
+        : primaryTabs[0];
 
   const periodStartTimestamps = useMemo(
-    () => getPeriodStartTimestamps(primaryTabs, normalizedDateType),
+    () => Object.fromEntries(
+      primaryTabs.map((p) => [p, Math.floor(getStartDateForPeriod(p, normalizedDateType).getTime() / 1000)]),
+    ),
     [primaryTabs, normalizedDateType],
   );
 
   const { tableData, pieData, totals } = useMemo(
-    () => buildRevenueOverviewData(rawData, primaryTabs, periodStartTimestamps, normalizedPeriod),
+    () => {
+      if (!rawData.length) {
+        return { tableData: [], pieData: [], totals: null };
+      }
+
+      const totals = Object.fromEntries(primaryTabs.map((p) => [p, 0])) as PeriodMap;
+      const tableDataMap = new Map<string, RevenueTableRowData>();
+
+      for (const network of new Set(rawData.map((item) => item.source.network))) {
+        const row: RevenueTableRowData = { chain: network };
+        primaryTabs.forEach((p) => {
+          row[p] = 0;
+        });
+        tableDataMap.set(network, row);
+      }
+
+      for (const item of rawData) {
+        const row = tableDataMap.get(item.source.network);
+        if (!row) continue;
+
+        for (const p of primaryTabs) {
+          if (item.date >= periodStartTimestamps[p]) {
+            (row[p] as number) += item.value;
+          }
+        }
+      }
+
+      for (const row of tableDataMap.values()) {
+        primaryTabs.forEach((p) => {
+          totals[p] += row[p] as number;
+        });
+      }
+
+      const tableData = [...tableDataMap.values()];
+      const positivePieData = tableData
+        .map((row) => ({ name: row.chain, value: (row[normalizedPeriod] as number) || 0 }))
+        .filter(({ value }) => value > 0);
+
+      const totalPieValue = positivePieData.reduce((sum, { value }) => sum + value, 0);
+
+      const pieData = positivePieData.map(({ name, value }) => ({
+        name: capitalizeFirstLetter(name),
+        value: Format.price(value, 'compact'),
+        percent: Number((totalPieValue > 0 ? (value / totalPieValue) * 100 : 0).toFixed(1)),
+        color: networkColorMap[name.toLowerCase()] || '#808080',
+      }));
+
+      return { tableData, pieData, totals };
+    },
     [rawData, primaryTabs, periodStartTimestamps, normalizedPeriod],
   );
 
@@ -71,7 +159,9 @@ const RevenueOverview = ({ revenueData: rawData, isLoading, isError }: RevenuePa
     () =>
       primaryTabs.map((p) => ({
         accessorKey: p,
-        header: getPeriodHeader(p, normalizedDateType),
+        header: normalizedDateType === 'Rolling'
+          ? `Rolling ${p.toLowerCase()}`
+          : toDateHeaderMap[p as ToDateTab] || p
       })),
     [primaryTabs, normalizedDateType],
   );
@@ -95,9 +185,9 @@ const RevenueOverview = ({ revenueData: rawData, isLoading, isError }: RevenuePa
 
     return (
       <tr>
-        <td className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>Total</td>
+        <td className='text-primary-14 px-1.25 py-3.25 text-left text-[13px] font-medium'>Total</td>
         {primaryTabs.map((p) => (
-          <td key={p} className='text-primary-14 px-[5px] py-[13px] text-left text-[13px] font-medium'>
+          <td key={p} className='text-primary-14 px-[5px] py-3.25 text-left text-[13px] font-medium'>
             {Format.price(totals[p] || 0, 'standard')}
           </td>
         ))}
@@ -144,7 +234,10 @@ const RevenueOverview = ({ revenueData: rawData, isLoading, isError }: RevenuePa
         <div className='w-full sm:w-auto'>
           <TabsGroup
             key={normalizedDateType}
-            className={TABS_CLASS}
+            className={{
+              container: 'w-full sm:w-auto',
+              list: 'w-full sm:w-auto',
+            }}
             tabs={[...primaryTabs]}
             value={normalizedPeriod}
             onTabChange={handlePeriodChange}
@@ -153,7 +246,10 @@ const RevenueOverview = ({ revenueData: rawData, isLoading, isError }: RevenuePa
         </div>
         <div className='flex w-full justify-end gap-2 sm:w-auto'>
           <TabsGroup
-            className={TABS_CLASS}
+            className={{
+              container: 'w-full sm:w-auto',
+              list: 'w-full sm:w-auto',
+            }}
             tabs={[...DATE_TYPE_TABS]}
             value={normalizedDateType}
             onTabChange={handleDateTypeChange}
@@ -161,9 +257,9 @@ const RevenueOverview = ({ revenueData: rawData, isLoading, isError }: RevenuePa
           />
           <Button
             onClick={onSortOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
+            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 min-w-32.5 gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
           >
-            <Icon name='sort-icon' className='h-[14px] w-[14px]' />
+            <Icon name='sort-icon' className='h-3.5 w-3.5' />
             Sort
           </Button>
         </div>
@@ -181,7 +277,7 @@ const RevenueOverview = ({ revenueData: rawData, isLoading, isError }: RevenuePa
             totalFooterData={totals}
             sortType={{ type: sortDirection, key: sortKey }}
           />
-          <PieChart className='max-h-[400px] w-full max-w-full lg:max-w-[336.5px]' data={pieData} />
+          <PieChart className='max-h-100 w-full max-w-full lg:max-w-[336.5px]' data={pieData} />
         </div>
       )}
       <SortDrawer
