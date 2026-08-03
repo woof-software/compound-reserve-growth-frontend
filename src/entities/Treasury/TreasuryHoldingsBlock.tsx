@@ -23,7 +23,6 @@ import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
-import View from '@/shared/ui/View/View';
 
 interface TreasuryHoldingsBlockProps {
   isLoading?: boolean;
@@ -51,10 +50,10 @@ const mapTableData = (data: TokenData[]) => {
 };
 
 const TreasuryHoldingsBlock = ({
-  isLoading,
-  isError,
-  data
-}: TreasuryHoldingsBlockProps) => {
+                                 isLoading,
+                                 isError,
+                                 data
+                               }: TreasuryHoldingsBlockProps) => {
   const {
     isOpen: isSortOpen,
     onOpenModal: onSortOpen,
@@ -81,7 +80,7 @@ const TreasuryHoldingsBlock = ({
 
   const {
     selectedOptions: selectedChainOptions,
-    setSelectedOptions: setSelectedChainOptions,
+    setSelectedOptions: setSelectedChainOptions
   } = useOptions(chainOptions, selectedChainKeys, setSelectedChainKeys);
 
   const byChain = useMemo(() => (
@@ -98,7 +97,7 @@ const TreasuryHoldingsBlock = ({
 
   const {
     selectedOptions: selectedMarketOptions,
-    setSelectedOptions: setSelectedMarketOptions,
+    setSelectedOptions: setSelectedMarketOptions
   } = useOptions(marketOptions, selectedMarketKeys, setSelectedMarketKeys);
 
   const byChainAndMarket = useMemo(() => (
@@ -115,7 +114,7 @@ const TreasuryHoldingsBlock = ({
 
   const {
     selectedOptions: selectedAssetTypeOptions,
-    setSelectedOptions: setSelectedAssetTypeOptions,
+    setSelectedOptions: setSelectedAssetTypeOptions
   } = useOptions(assetTypesOptions, selectedAssetTypesKeys, setSelectedAssetTypeKeys);
 
   const byChainMarketAndAsset = useMemo(() => (
@@ -133,7 +132,7 @@ const TreasuryHoldingsBlock = ({
 
   const {
     selectedOptions: selectedSymbolOptions,
-    setSelectedOptions: setSelectedSymbolOptions,
+    setSelectedOptions: setSelectedSymbolOptions
   } = useOptions(reserveSymbolOptions, selectedSymbolKeys, setSelectedSymbolKeys);
 
   const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
@@ -169,7 +168,7 @@ const TreasuryHoldingsBlock = ({
       ) {
         return false;
       }
-      
+
       if (
         selectedMarketOptions.length > 0 &&
         !selectedMarketOptions.some((o) =>
@@ -246,23 +245,23 @@ const TreasuryHoldingsBlock = ({
             setValue={setSelectedSymbolOptions}
           />
         </Filters>
-          <Button
-            onClick={onSortOpen}
-            className="lg:hidden cursor-pointer items-center justify-center transition bg-secondary-27 text-gray-11 shadow-13 flex h-9 grow sm:max-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8">
-            <Icon
-              name='sort-icon'
-              className='h-[14px] w-[14px]'
-            />
-            Sort
-          </Button>
-          <SortDrawer
-            isOpen={isSortOpen}
-            sortType={sortType}
-            columns={treasuryBalanceByNetworkColumns}
-            onClose={onSortClose}
-            onKeySelect={onKeySelect}
-            onTypeSelect={onTypeSelect}
+        <Button
+          onClick={onSortOpen}
+          className='lg:hidden cursor-pointer items-center justify-center transition bg-secondary-27 text-gray-11 shadow-13 flex h-9 grow sm:max-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8'>
+          <Icon
+            name='sort-icon'
+            className='h-[14px] w-[14px]'
           />
+          Sort
+        </Button>
+        <SortDrawer
+          isOpen={isSortOpen}
+          sortType={sortType}
+          columns={treasuryBalanceByNetworkColumns}
+          onClose={onSortClose}
+          onKeySelect={onKeySelect}
+          onTypeSelect={onTypeSelect}
+        />
         <ChartActions
           mobileChildren={
             <>
@@ -279,15 +278,15 @@ const TreasuryHoldingsBlock = ({
           />
         </ChartActions>
       </div>
-      <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
+      {(!isLoading && !isError && tableData.length) && (
         <TreasuryHoldingsTable
           sortType={sortType}
           tableData={tableData}
         />
-      </View.Condition>
-      <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
+      )}
+      {(!isLoading && !isError && !tableData.length) && (
         <NoDataPlaceholder onButtonClick={clearAllFilters} />
-      </View.Condition>
+      )}
     </Card>
   );
 };

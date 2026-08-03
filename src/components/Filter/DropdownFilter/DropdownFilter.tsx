@@ -76,7 +76,10 @@ export const DropdownFilter = <T,>(props: DropdownFilterProps<T>) => {
       <>
         <div className={'flex items-center justify-between'}>
           <Button
-            onClick={() => setExpandedFilter(null)}
+            onClick={() => {
+              setExpandedFilter(null);
+              setSearchValue('');
+            }}
             className='absolute top-[40px] h-[24px] w-[24px]'
           >
             <Icon name='arrow-line' className='h-6 w-6' />
@@ -96,7 +99,7 @@ export const DropdownFilter = <T,>(props: DropdownFilterProps<T>) => {
           setSearchValue={setSearchValue}
           isError={isSearchResult}
         />
-        <div className='hide-scrollbar mt-8 max-h-80 overflow-y-auto'>
+        <div className='mt-8 max-h-80 overflow-y-auto'>
           <OptionsList
             options={filteredOptions}
             getLabel={getLabel}
