@@ -7,7 +7,6 @@ import { OnlyStringKeys } from '@/shared/lib/utils/types';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
 export type FormattedRevenueData = {
   chain: string;
@@ -166,15 +165,13 @@ const RevenueBreakdown = ({
                         {header}
                       </Text>
                       <div className='flex items-center gap-2'>
-                        <View.Condition
-                          if={Boolean(header.toLowerCase() === 'chain')}
-                        >
+                        {header.toLowerCase() === 'chain' && (
                           <Icon
                             name={display.toLowerCase() || 'not-found-icon'}
                             className='h-4 w-4'
                             folder='network'
                           />
-                        </View.Condition>
+                        )}
                         <Text
                           size='13'
                           lineHeight='21'

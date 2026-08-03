@@ -6,7 +6,6 @@ import {
   TooltipTrigger
 } from '@/shared/ui/BaseTooltip/BaseTooltip';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
 interface TooltipProps {
   children: ReactNode;
@@ -29,21 +28,19 @@ export const Tooltip = ({
       onOpenChange={onOpenChange}
     >
       <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <View.Condition if={Boolean(content)}>
-        <TooltipContent>
-          <View.Condition if={typeof content === 'string'}>
-            <Text
-              size='12'
-              className='text-primary-14 p-1 text-[11px] leading-4 font-normal'
-            >
-              {content}
-            </Text>
-          </View.Condition>
-          <View.Condition if={typeof content !== 'string'}>
-            {content}
-          </View.Condition>
-        </TooltipContent>
-      </View.Condition>
+        {content && (
+          <TooltipContent>
+            {typeof content === 'string' && (
+              <Text
+                size='12'
+                className='text-primary-14 p-1 text-[11px] leading-4 font-normal'
+              >
+                {content}
+              </Text>
+            )}
+            {typeof content !== 'string' && content}
+          </TooltipContent>
+        )}
     </BaseTooltip>
   );
 };

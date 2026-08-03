@@ -1,7 +1,7 @@
 import { parseAsBoolean, useQueryState } from 'nuqs';
 import { GroupFilter } from '@/components/Filter/GroupFilter';
 import { memo, useMemo } from 'react';
-import PieChart from "@/components/Charts/Pie/Pie";
+import PieChart from '@/components/Charts/Pie/Pie';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import TreasuryComposition from '@/components/TreasuryPageTable/TreasuryComposition';
 import { NOT_MARKET } from '@/shared/consts/consts';
@@ -23,7 +23,6 @@ import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Switch from '@/shared/ui/Switch/Switch';
-import View from '@/shared/ui/View/View';
 
 export interface TreasuryCompositionType {
   id: number;
@@ -43,9 +42,9 @@ export interface TreasuryCompositionBlockProps {
 }
 
 const groupByOptions = [
-  {label: 'Asset Type', value: 'assetType'},
-  {label: 'Chain', value: 'chain'},
-  {label: 'Market', value: 'deployment'}
+  { label: 'Asset Type', value: 'assetType' },
+  { label: 'Chain', value: 'chain' },
+  { label: 'Market', value: 'deployment' }
 ];
 
 const mapChartData = (
@@ -94,14 +93,14 @@ const TreasuryCompositionBlock = memo(
     const [selectedGroupKey, setSelectedGroupKey] = useQueryState('tc-group', { defaultValue: 'assetType' });
 
     const selectedGroupOption = useMemo(() => {
-      const selectedElement = groupByOptions.find(({value}) => value === selectedGroupKey);
+      const selectedElement = groupByOptions.find(({ value }) => value === selectedGroupKey);
 
       if (!selectedElement) throw new Error('Selected group option not found');
 
       return selectedElement;
     }, [groupByOptions, selectedGroupKey]);
 
-    const [includeComp, setIncludeComp] = useQueryState('tc-includeComp',  parseAsBoolean.withDefault(true));
+    const [includeComp, setIncludeComp] = useQueryState('tc-includeComp', parseAsBoolean.withDefault(true));
 
     const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
       useSorting<TreasuryCompositionType>('asc', null);
@@ -260,7 +259,7 @@ const TreasuryCompositionBlock = memo(
               getKey={(v) => v.value}
               getLabel={(v) => v.label}
               value={selectedGroupOption}
-              setValue={({value}) => setSelectedGroupKey(value)}
+              setValue={({ value }) => setSelectedGroupKey(value)}
             />
             <Button
               onClick={onSortOpen}
@@ -275,21 +274,23 @@ const TreasuryCompositionBlock = memo(
           </div>
         </div>
         <div className='flex flex-col justify-between gap-8 md:flex-row'>
-          <View.Condition if={!hasData}>
+          {!hasData && (
             <NoDataPlaceholder onButtonClick={onClearAll} />
-          </View.Condition>
-          <View.Condition if={hasData}>
-            <PieChart
-              className='max-w-full md:max-w-1/2 lg:max-w-[450px]'
-              data={chartData}
-            />
-            <TreasuryComposition
-              sortType={sortType}
-              tableData={tableData}
-              totalBalance={totalBalance}
-              activeFilter={selectedGroupOption.label as 'Chain' | 'Asset Type' | 'Market'}
-            />
-          </View.Condition>
+          )}
+          {hasData && (
+            <>
+              <PieChart
+                className='max-w-full md:max-w-1/2 lg:max-w-[450px]'
+                data={chartData}
+              />
+              <TreasuryComposition
+                sortType={sortType}
+                tableData={tableData}
+                totalBalance={totalBalance}
+                activeFilter={selectedGroupOption.label as 'Chain' | 'Asset Type' | 'Market'}
+              />
+            </>
+          )}
         </div>
         <SortDrawer
           isOpen={isSortOpen}

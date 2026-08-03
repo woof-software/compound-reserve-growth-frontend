@@ -96,7 +96,7 @@ const CompoundFeeRevenueByChain = ({ revenueData, isLoading, isError }: RevenueP
     filters: [],
     transformer: () => {
       const buckets: Record<string, Record<string, Record<string, number>>> = {};
-      
+
       return (item: ChartDataItem) => {
         const period = getPeriodLabel(item, interval);
         const chain = capitalizeFirstLetter(item.source.network);
