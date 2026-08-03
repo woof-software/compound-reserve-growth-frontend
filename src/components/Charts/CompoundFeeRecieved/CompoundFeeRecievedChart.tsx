@@ -67,7 +67,7 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
 
   const currentSeriesNames = useMemo(
     () => seriesData.map((s) => s.name!).filter(Boolean) as string[],
-    [seriesData]
+    [seriesData],
   );
 
   const currentHiddenSet = useMemo(() => {
@@ -89,6 +89,12 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
     [seriesData, currentHiddenSet]
   );
 
+  const aggregatedRangeKey = useMemo(() => {
+    if (!aggregatedData.length) return '';
+    const d = aggregatedData;
+    return `${d.length}:${d[0].x}:${d[d.length - 1].x}`;
+  }, [aggregatedData]);
+
   useEffect(() => {
     const chart = chartRef.current?.chart;
     if (!chart || !barCount || aggregatedData.length === 0) return;
@@ -102,7 +108,7 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
       programmaticChange.current = true;
       chart.xAxis[0].setExtremes(min, max, true);
     }
-  }, [barCount, aggregatedData]);
+  }, [barCount, aggregatedRangeKey]);
 
   const highlightSeries = useCallback((name: string) => {
     const chart = chartRef.current?.chart;
@@ -347,14 +353,17 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
   }, [hiddenItems]);
 
   useEffect(() => {
-    if (onHiddenItems) {
-      const current = new Set(currentSeriesNames);
+    if (!onHiddenItems) return;
+    const current = new Set(currentSeriesNames);
 
-      const filtered = hiddenItems.filter((name) => current.has(name));
+    const filtered = hiddenItems.filter((name) => current.has(name));
 
-      onHiddenItems(filtered);
+    if (filtered.length === hiddenItems.length && filtered.every((item, i) => item === hiddenItems[i])) {
+      return;
     }
-  }, [currentSeriesNames]);
+
+    onHiddenItems(filtered);
+  }, [currentSeriesNames, hiddenItems]);
 
   useEffect(() => {
     if (resetHiddenKey !== undefined) {
@@ -375,11 +384,11 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
         className
       )}
     >
-      <div className='relative min-h-[400px] flex-grow'>
-        <div className='absolute top-1/2 left-1/2 z-[2] -translate-x-1/2 -translate-y-1/2 opacity-40'>
+      <div className='relative min-h-100 grow'>
+        <div className='absolute top-1/2 left-1/2 z-2 -translate-x-1/2 -translate-y-1/2 opacity-40'>
           <Icon
             name='logo-gray'
-            className='h-[27px] w-[121px]'
+            className='h-6.75 w-30.25'
             color='primary-11'
             isRound={false}
           />
