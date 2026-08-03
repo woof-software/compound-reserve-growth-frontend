@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useQueryState } from 'nuqs';
 
 import { ChartActions } from '@/components/Charts/ChartActions';
@@ -7,26 +7,27 @@ import { Filters } from '@/components/Filter/Filters';
 import { GroupFilter } from '@/components/Filter/GroupFilter';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import RevenueBreakdown, { FormattedRevenueData } from '@/components/RevenuePageTable/RevenueBreakdown';
-import {
-  aggregateBreakdownItem,
-  buildBreakdownColumns,
-  createBreakdownTableContext,
-} from '@/entities/Revenue/buildRevenueBreakdownTable';
+import { RevenueProps } from '@/pages/AccountingPage/AccountingPage';
 import { NOT_MARKET } from '@/shared/consts/consts';
 import { useOptions } from '@/shared/hooks/filters/useOptions';
 import { useModal } from '@/shared/hooks/useModal';
 import { useProcessor } from '@/shared/hooks/useProcessor';
-import { RevenuePageProps } from '@/shared/hooks/useRevenue';
 import { SortAccessor, SortAdapter, useSorting } from '@/shared/hooks/useSorting';
+import { Format } from '@/shared/lib/utils/format';
 import { capitalizeFirstLetter, parseStingsArray } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
+import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import View from '@/shared/ui/View/View';
 
-const RevenueBreakDownBlock = ({ revenueData: rawData, isLoading, isError }: RevenuePageProps) => {
+const QUARTERS = [1, 2, 3, 4]
+
+const RevenueBreakDownBlock = (props: RevenueProps) => {
+  const { revenueData: rawData, isLoading, isError } = props;
+
   const { sortDirection, sortKey, onKeySelect, onTypeSelect } = useSorting<FormattedRevenueData>('asc', null);
 
   const sortType: SortAdapter<FormattedRevenueData> = {
@@ -181,13 +182,14 @@ const RevenueBreakDownBlock = ({ revenueData: rawData, isLoading, isError }: Rev
   const yearToDisplay = selectedYearOption.value;
 
   const tableContext = useMemo(
-    () =>
-      createBreakdownTableContext(
+    () => {
+      return {
         yearToDisplay,
-        selectedMarketOptions.length > 0,
-        selectedSourceOptions.length > 0,
-        selectedSymbolOptions.length > 0,
-      ),
+        showMarketColumn: selectedMarketOptions.length > 0,
+        showSourceColumn: selectedSourceOptions.length > 0,
+        showReserveAssetColumn: selectedSymbolOptions.length > 0,
+      };
+    },
     [yearToDisplay, selectedMarketOptions.length, selectedSourceOptions.length, selectedSymbolOptions.length],
   );
 
@@ -205,13 +207,72 @@ const RevenueBreakDownBlock = ({ revenueData: rawData, isLoading, isError }: Rev
       const grouped: Record<string, FormattedRevenueData> = {};
 
       return (item) => {
-        aggregateBreakdownItem(item, grouped, tableContext);
+        const marketValue = item.source.market || NOT_MARKET;
+        const keyParts = [item.source.network];
+
+        if (tableContext.showMarketColumn) keyParts.push(marketValue);
+        if (tableContext.showSourceColumn) keyParts.push(item.source.type);
+        if (tableContext.showReserveAssetColumn) keyParts.push(item.source.asset.symbol);
+
+        const groupKey = keyParts.join('-');
+        const { yearToDisplay } = tableContext;
+
+        if (!grouped[groupKey]) {
+          const row: FormattedRevenueData = {
+            chain: capitalizeFirstLetter(item.source.network),
+            market: marketValue,
+            source: item.source.type,
+            reserveAsset: item.source.asset.symbol,
+          };
+
+          QUARTERS.forEach((quarter) => {
+            row[`q${quarter}_${yearToDisplay}`] = 0;
+          });
+
+          grouped[groupKey] = row;
+        }
+
+        const date = new Date(item.date * 1000);
+        const quarter = Math.floor(date.getMonth() / 3) + 1;
+        const quarterKey = `q${quarter}_${yearToDisplay}`;
+        (grouped[groupKey][quarterKey] as number) += item.value;
         return grouped;
       };
     },
   });
 
-  const dynamicColumns = useMemo(() => buildBreakdownColumns(tableContext), [tableContext]);
+  const dynamicColumns = useMemo(() => {
+    if (!tableContext.yearToDisplay) {
+      return [];
+    }
+
+    const { yearToDisplay } = tableContext;
+    const columns: ExtendedColumnDef<FormattedRevenueData>[] = [
+      { accessorKey: 'chain', header: 'Chain' }
+    ];
+
+    if (tableContext.showMarketColumn) {
+      columns.push({ accessorKey: 'market', header: 'Market' });
+    }
+
+    if (tableContext.showSourceColumn) {
+      columns.push({ accessorKey: 'source', header: 'Source' });
+    }
+
+    if (tableContext.showReserveAssetColumn) {
+      columns.push({ accessorKey: 'reserveAsset', header: 'Reserve Asset' });
+    }
+
+    QUARTERS.forEach((quarter) => {
+      columns.push({
+        accessorKey: `q${quarter}_${yearToDisplay}`,
+        header: `Q${quarter} ${yearToDisplay}`,
+        cell: ({ getValue }) => Format.price(Number(getValue()), 'standard')
+      });
+    });
+
+    return columns;
+  }, [tableContext]);
 
   const tableData = useMemo(() => Object.values(groupedData ?? {}), [groupedData]);
 
