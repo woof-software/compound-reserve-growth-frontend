@@ -38,9 +38,9 @@ export function OptionsList<T>(props: OptionsListProps<T>) {
             isMobile && isSelected(option) && 'text-secondary-10',
           )}
         >
-          <button className={'w-full flex justify-between items-center cursor-pointer'}>
+          <button className='w-full flex cursor-pointer items-center justify-between text-left'>
             {getLabel(option)}
-            {isSelected(option) && <Icon name='check-stroke' className='h-4 w-4'/>}
+            {isSelected(option) && <Icon name='check-stroke' className='h-4 w-4' />}
           </button>
         </li>
       ))}
