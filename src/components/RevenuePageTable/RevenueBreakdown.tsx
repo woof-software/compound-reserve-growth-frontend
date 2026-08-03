@@ -50,23 +50,6 @@ const RevenueBreakdown = ({
     return columnTotals;
   }, [data, columns]);
 
-  const displayColumns = useMemo(() => {
-    return columns.map((col) => {
-      const key = 'accessorKey' in col ? String(col.accessorKey) : col.id;
-
-      if (key && key.startsWith('q')) {
-        return {
-          ...col,
-
-          cell: ({ getValue }: { getValue: () => unknown }) =>
-            Format.price(getValue() as number, 'standard')
-        };
-      }
-
-      return col;
-    });
-  }, [columns]);
-
   const footerRow = (
     <tr key='footer-total-row'>
       {columns.map((col, index) => {
@@ -284,7 +267,7 @@ const RevenueBreakdown = ({
         <DataTable
           data={data}
           enableSorting
-          columns={displayColumns}
+          columns={columns}
           pageSize={10}
           className='flex min-h-[518px] flex-col justify-between'
           headerCellClassName='py-[13px] px-[5px]'
