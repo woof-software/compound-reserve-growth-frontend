@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { parseAsString, useQueryState } from 'nuqs';
 
 import { GroupFilter } from '@/components/Filter/GroupFilter';
+import { GroupFilters } from '@/components/Filter/GroupFilters';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import CompoundFeeRevenueByChainTable, {
   Interval,
@@ -181,29 +182,27 @@ const CompoundFeeRevenueByChain = ({ revenueData, isLoading, isError }: RevenueP
       }}
     >
       <div className='flex flex-col-reverse justify-end gap-2 py-3 sm:flex-row sm:items-center'>
-        <GroupFilter
-          triggerLabel='Interval'
-          hideMobileTrigger
-          options={INTERVAL_FILTER_OPTIONS}
-          value={{ label: interval, value: interval }}
-          getKey={(o) => o.value}
-          getLabel={(o) => o.label}
-          setValue={({ value }) => {
-            setIntervalParam(value);
-            setPeriodParam(null);
-          }}
-        />
-        <GroupFilter
-          triggerLabel={PERIOD_FILTER_LABEL[interval]}
-          hideMobileTrigger
-          options={sortedPeriods.map((value) => ({ label: value, value }))}
-          value={{ label: selectedPeriod ?? '', value: selectedPeriod ?? '' }}
-          getKey={(o) => o.value}
-          getLabel={(o) => o.label}
-          setValue={({ value }) => setPeriodParam(value)}
-        />
-      </div>
-      <div className='flex w-full items-center justify-end gap-2 lg:hidden'>
+        <GroupFilters>
+          <GroupFilter
+            triggerLabel='Interval'
+            options={INTERVAL_FILTER_OPTIONS}
+            value={{ label: interval, value: interval }}
+            getKey={(o) => o.value}
+            getLabel={(o) => o.label}
+            setValue={({ value }) => {
+              setIntervalParam(value);
+              setPeriodParam(null);
+            }}
+          />
+          <GroupFilter
+            triggerLabel={PERIOD_FILTER_LABEL[interval]}
+            options={sortedPeriods.map((value) => ({ label: value, value }))}
+            value={{ label: selectedPeriod ?? '', value: selectedPeriod ?? '' }}
+            getKey={(o) => o.value}
+            getLabel={(o) => o.label}
+            setValue={({ value }) => setPeriodParam(value)}
+          />
+        </GroupFilters>
         <Button
           onClick={onSortOpen}
           className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'

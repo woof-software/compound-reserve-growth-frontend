@@ -99,7 +99,7 @@ export const DropdownFilter = <T,>(props: DropdownFilterProps<T>) => {
           setSearchValue={setSearchValue}
           isError={isSearchResult}
         />
-        <div className='hide-scrollbar mt-8 max-h-80 overflow-y-auto'>
+        <div className='mt-8 max-h-80 overflow-y-auto'>
           <OptionsList
             options={filteredOptions}
             getLabel={getLabel}
