@@ -1,4 +1,4 @@
-import React, {
+import {
   RefObject,
   useCallback,
   useEffect,
@@ -90,12 +90,6 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
     [seriesData, currentHiddenSet]
   );
 
-  const aggregatedRangeKey = useMemo(() => {
-    if (!aggregatedData.length) return '';
-    const d = aggregatedData;
-    return `${d.length}:${d[0].x}:${d[d.length - 1].x}`;
-  }, [aggregatedData]);
-
   useEffect(() => {
     const chart = chartRef.current?.chart;
     if (!chart || !barCount || aggregatedData.length === 0) return;
@@ -109,7 +103,7 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
       programmaticChange.current = true;
       chart.xAxis[0].setExtremes(min, max, true);
     }
-  }, [barCount, aggregatedRangeKey]);
+  }, [barCount, aggregatedData]);
 
   const highlightSeries = useCallback((name: string) => {
     const chart = chartRef.current?.chart;
@@ -354,17 +348,14 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
   }, [hiddenItems]);
 
   useEffect(() => {
-    if (!onHiddenItems) return;
-    const current = new Set(currentSeriesNames);
+    if (onHiddenItems) {
+      const current = new Set(currentSeriesNames);
 
-    const filtered = hiddenItems.filter((name) => current.has(name));
+      const filtered = hiddenItems.filter((name) => current.has(name));
 
-    if (filtered.length === hiddenItems.length && filtered.every((item, i) => item === hiddenItems[i])) {
-      return;
+      onHiddenItems(filtered);
     }
-
-    onHiddenItems(filtered);
-  }, [currentSeriesNames, hiddenItems]);
+  }, [currentSeriesNames]);
 
   useEffect(() => {
     if (resetHiddenKey !== undefined) {
@@ -385,11 +376,11 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
         className
       )}
     >
-      <div className='relative min-h-100 grow'>
-        <div className='absolute top-1/2 left-1/2 z-2 -translate-x-1/2 -translate-y-1/2 opacity-40'>
+      <div className='relative min-h-[400px] flex-grow'>
+        <div className='absolute top-1/2 left-1/2 z-[2] -translate-x-1/2 -translate-y-1/2 opacity-40'>
           <Icon
             name='logo-gray'
-            className='h-6.75 w-30.25'
+            className='h-[27px] w-[121px]'
             color='primary-11'
             isRound={false}
           />
