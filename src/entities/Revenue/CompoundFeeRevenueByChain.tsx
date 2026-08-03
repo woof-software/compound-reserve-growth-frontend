@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { parseAsString, useQueryState } from 'nuqs';
 
 import { GroupFilter } from '@/components/Filter/GroupFilter';
@@ -7,57 +7,66 @@ import CompoundFeeRevenueByChainTable, {
   Interval,
   ProcessedRevenueData,
 } from '@/components/RevenuePageTable/CompoundFeeRevenueByChainTable';
+import { RevenueProps } from '@/pages/AccountingPage/AccountingPage';
 import { useModal } from '@/shared/hooks/useModal';
-import { RevenuePageProps } from '@/shared/hooks/useRevenue';
+import { useProcessor } from '@/shared/hooks/useProcessor';
 import { SortAccessor, useSorting } from '@/shared/hooks/useSorting';
 import { Format } from '@/shared/lib/utils/format';
 import { capitalizeFirstLetter, ChartDataItem, longMonthNames, shortMonthNames } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
-import Drawer from '@/shared/ui/Drawer/Drawer';
-import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
-import { Radio } from '@/shared/ui/RadioButton/RadioButton';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Text from '@/shared/ui/Text/Text';
 
 const INTERVAL_OPTIONS: Interval[] = ['Quarterly', 'Monthly', 'Weekly'];
+const INTERVAL_FILTER_OPTIONS = INTERVAL_OPTIONS.map((value) => ({ label: value, value }));
 const NO_DATA_AVAILABLE = 'No data available';
 const QUARTER_COLUMNS = ['Q1', 'Q2', 'Q3', 'Q4'];
 const MONTH_COLUMNS_JAN_JUN = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN'];
 const MONTH_COLUMNS_JUL_DEC = ['JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-const INTERVAL_FILTER_OPTIONS = INTERVAL_OPTIONS.map((value) => ({ label: value, value }));
 
-const VIEW_KEY_BY_INTERVAL: Record<Interval, 'quarterly' | 'monthly' | 'weekly'> = {
-  Quarterly: 'quarterly',
-  Monthly: 'monthly',
-  Weekly: 'weekly',
+const PERIOD_FILTER_LABEL: Record<Interval, string> = {
+  Quarterly: 'Year',
+  Monthly: 'Period',
+  Weekly: 'Month',
 };
 
-type FilterOption = { label: string; value: string };
-
-type PeriodView = {
-  tableData: ProcessedRevenueData[];
-  totals: Record<string, number>;
-  columns: ExtendedColumnDef<ProcessedRevenueData>[];
+const isInterval = (value: string | null): value is Interval => {
+  return !!value && INTERVAL_OPTIONS.includes(value as Interval);
 };
 
-type PrecomputedViews = {
-  quarterly: Record<string, PeriodView>;
-  monthly: Record<string, PeriodView>;
-  weekly: Record<string, PeriodView>;
+const getPeriodLabel = (item: ChartDataItem, interval: Interval): string => {
+  const date = new Date(item.date * 1000);
+  const year = date.getFullYear();
+  const month = date.getMonth();
+
+  if (interval === 'Quarterly') return String(year);
+  if (interval === 'Monthly') return `${year} ${month < 6 ? 'Jan-Jun' : 'Jul-Dec'}`;
+  return `${longMonthNames[month]} ${year}`;
 };
 
-type GroupDrawerFilter = {
-  label: string;
-  options: readonly string[];
-  selectedValue: string;
-  onSelect: (value: string) => void;
+const getColumnLabel = (item: ChartDataItem, interval: Interval): string => {
+  const date = new Date(item.date * 1000);
+
+  if (interval === 'Quarterly') return `Q${Math.floor(date.getMonth() / 3) + 1}`;
+  if (interval === 'Monthly') return shortMonthNames[date.getMonth()];
+  return `Week ${Math.ceil(date.getDate() / 7)}`;
 };
 
-// period → chain → column → amount
-type RevenueStore = Record<string, Record<string, Record<string, number>>>;
+const sortPeriodOptions = (options: string[], interval: Interval): string[] => {
+  if (interval === 'Quarterly') return options.sort((a, b) => Number(b) - Number(a));
+
+  if (interval === 'Monthly') {
+    return options.sort((a, b) => {
+      const yearDiff = Number(b.slice(0, 4)) - Number(a.slice(0, 4));
+      return yearDiff !== 0 ? yearDiff : a.includes('Jan-Jun') ? -1 : 1;
+    });
+  }
+
+  return options.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+};
 
 const CHAIN_COLUMN: ExtendedColumnDef<ProcessedRevenueData> = {
   accessorKey: 'chain',
@@ -65,283 +74,97 @@ const CHAIN_COLUMN: ExtendedColumnDef<ProcessedRevenueData> = {
   cell: ({ row }) => (
     <div className='flex items-center gap-3'>
       <Icon name={(row.original.chain || 'not-found-icon').toLowerCase()} className='h-6 w-6' folder='network' />
-      <Text size='13' weight='500'>
+      <Text
+        size='13'
+        weight='500'
+      >
         {capitalizeFirstLetter(row.original.chain)}
       </Text>
     </div>
   ),
 };
 
-const isInterval = (value: string): value is Interval => INTERVAL_OPTIONS.includes(value as Interval);
+const CompoundFeeRevenueByChain = ({ revenueData, isLoading, isError }: RevenueProps) => {
+  const [intervalParam, setIntervalParam] = useQueryState('compFeeRevenueInterval', parseAsString);
+  const [periodParam, setPeriodParam] = useQueryState('compFeeRevenuePeriod', parseAsString);
 
-const precomputeViews = (rawData: ChartDataItem[]): PrecomputedViews | null => {
-  if (!rawData.length) return null;
+  const interval: Interval = isInterval(intervalParam) ? intervalParam : 'Quarterly';
 
-  const revenue = { quarterly: {} as RevenueStore, monthly: {} as RevenueStore, weekly: {} as RevenueStore };
-  const chains = new Set<string>();
-  const periods = { quarterly: new Set<string>(), monthly: new Set<string>(), weekly: new Set<string>() };
+  const { result: periods } = useProcessor({
+    array: revenueData,
+    filters: [],
+    transformer: () => {
+      const buckets: Record<string, Record<string, Record<string, number>>> = {};
+      
+      return (item: ChartDataItem) => {
+        const period = getPeriodLabel(item, interval);
+        const chain = capitalizeFirstLetter(item.source.network);
+        const column = getColumnLabel(item, interval);
+        buckets[period] ??= {};
+        buckets[period][chain] ??= {};
+        buckets[period][chain][column] = (buckets[period][chain][column] ?? 0) + item.value;
+        return buckets;
+      };
+  }});
 
-  for (const item of rawData) {
-    const chain = capitalizeFirstLetter(item.source.network);
-    chains.add(chain);
+  const periodsData = periods ?? {};
 
-    const date = new Date(item.date * 1000);
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const day = date.getDate();
-    const amount = item.value;
+  const sortedPeriods = useMemo(
+    () => sortPeriodOptions(Object.keys(periodsData), interval),
+    [periodsData, interval]
+  );
 
-    const yearLabel = String(year);
-    const halfYearLabel = `${year} ${month < 6 ? 'Jan-Jun' : 'Jul-Dec'}`;
-    const monthLabel = `${longMonthNames[month]} ${year}`;
+  const selectedPeriod = periodParam && sortedPeriods.includes(periodParam)
+    ? periodParam
+    : sortedPeriods[0];
 
-    periods.quarterly.add(yearLabel);
-    periods.monthly.add(halfYearLabel);
-    periods.weekly.add(monthLabel);
+  const chainValuesByColumn = periodsData[selectedPeriod] ?? {};
 
-    const add = (store: RevenueStore, period: string, column: string) => {
-      if (!store[period]) store[period] = {};
-      if (!store[period][chain]) store[period][chain] = {};
-      store[period][chain][column] = (store[period][chain][column] ?? 0) + amount;
-    };
+  const columnKeys = useMemo(() => {
+    if (interval === 'Quarterly') return QUARTER_COLUMNS;
+    if (interval === 'Monthly') return selectedPeriod?.includes('Jan-Jun') ? MONTH_COLUMNS_JAN_JUN : MONTH_COLUMNS_JUL_DEC;
 
-    add(revenue.quarterly, yearLabel, `Q${Math.floor(month / 3) + 1}`);
-    add(revenue.monthly, halfYearLabel, shortMonthNames[month]);
-    add(revenue.weekly, monthLabel, `Week ${Math.ceil(day / 7)}`);
-  }
+    const weeks = new Set<string>();
+    Object.values(chainValuesByColumn).forEach((cols) => Object.keys(cols).forEach((c) => weeks.add(c)));
+    return [...weeks].sort((a, b) => Number(a.replace('Week ', '')) - Number(b.replace('Week ', '')));
+  }, [interval, selectedPeriod, chainValuesByColumn]);
 
-  const sortedChains = [...chains].sort();
-  const result: PrecomputedViews = { quarterly: {}, monthly: {}, weekly: {} };
-
-  const buildTable = (periodData: Record<string, Record<string, number>>, columns: string[]): PeriodView => {
+  const { tableData, totals } = useMemo(() => {
     const totals: Record<string, number> = {};
-    columns.forEach((column) => {
-      totals[column] = 0;
-    });
+    columnKeys.forEach((c) => { totals[c] = 0; });
 
-    const tableData: ProcessedRevenueData[] = [];
+    const rows: ProcessedRevenueData[] = [];
 
-    for (const chain of sortedChains) {
-      const chainValues = periodData[chain] ?? {};
+    for (const chain of Object.keys(chainValuesByColumn).sort()) {
+      const values = chainValuesByColumn[chain];
       const row: ProcessedRevenueData = { chain };
-      let rowHasValues = false;
+      let hasValues = false;
 
-      for (const column of columns) {
-        const cellValue = chainValues[column] ?? 0;
-        row[column] = cellValue;
-        totals[column] += cellValue;
-        if (cellValue !== 0) rowHasValues = true;
+      for (const column of columnKeys) {
+        const value = values[column] ?? 0;
+        row[column] = value;
+        totals[column] += value;
+        if (value !== 0) hasValues = true;
       }
 
-      if (rowHasValues) tableData.push(row);
+      if (hasValues) rows.push(row);
     }
 
-    return {
-      tableData,
-      totals,
-      columns: columns.map((column) => ({
-        accessorKey: column,
-        header: column,
-        cell: ({ getValue }) => Format.price(getValue() as number, 'standard'),
-      })),
-    };
-  };
+    return { tableData: rows, totals };
+  }, [chainValuesByColumn, columnKeys]);
 
-  for (const period of periods.quarterly) {
-    result.quarterly[period] = buildTable(revenue.quarterly[period], QUARTER_COLUMNS);
-  }
-
-  for (const period of periods.monthly) {
-    const columns = period.includes('Jan-Jun') ? MONTH_COLUMNS_JAN_JUN : MONTH_COLUMNS_JUL_DEC;
-    result.monthly[period] = buildTable(revenue.monthly[period], columns);
-  }
-
-  for (const period of periods.weekly) {
-    const periodData = revenue.weekly[period];
-    if (!periodData) continue;
-
-    const weekColumns = new Set<string>();
-    for (const chainValues of Object.values(periodData)) {
-      Object.keys(chainValues).forEach((column) => weekColumns.add(column));
-    }
-
-    const columns = [...weekColumns].sort((a, b) => Number(a.replace('Week ', '')) - Number(b.replace('Week ', '')));
-
-    result.weekly[period] = buildTable(periodData, columns);
-  }
-
-  return result;
-};
-
-const getPeriodFilter = (views: PrecomputedViews | null, interval: Interval) => {
-  if (!views) return { label: 'Year', options: [] as string[] };
-
-  if (interval === 'Quarterly') {
-    return { label: 'Year', options: Object.keys(views.quarterly).sort((a, b) => Number(b) - Number(a)) };
-  }
-
-  if (interval === 'Monthly') {
-    return {
-      label: 'Period',
-      options: Object.keys(views.monthly).sort((a, b) => {
-        const yearA = a.slice(0, 4);
-        const yearB = b.slice(0, 4);
-        if (yearA !== yearB) return Number(yearB) - Number(yearA);
-        return a.includes('Jan-Jun') ? -1 : 1;
-      }),
-    };
-  }
-
-  return {
-    label: 'Month',
-    options: Object.keys(views.weekly).sort((a, b) => new Date(b).getTime() - new Date(a).getTime()),
-  };
-};
-
-const GroupDrawer = ({
-  isOpen,
-  onClose,
-  filters,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  filters: GroupDrawerFilter[];
-}) => {
-  const [activeLabel, setActiveLabel] = useState<string | null>(null);
-  const active = filters.find((f) => f.label === activeLabel);
-
-  const closeAll = () => {
-    onClose();
-    setActiveLabel(null);
-  };
-
-  const pick = (value: string) => {
-    active?.onSelect(value);
-    closeAll();
-  };
-
-  return (
-    <Drawer isOpen={isOpen} onClose={closeAll}>
-      {!active ? (
-        <>
-          <Text size='17' weight='700' lineHeight='140' align='center' className='mb-5 w-full'>
-            Group
-          </Text>
-          <div className='grid gap-3'>
-            {filters.map((filter) => (
-              <button
-                key={filter.label}
-                type='button'
-                className='flex h-[42px] cursor-pointer items-center gap-1.5 px-3 py-2.5'
-                onClick={() => setActiveLabel(filter.label)}
-              >
-                <Icon name='plus' className='h-2.5 w-2.5' color='primary-14' />
-                <Text size='14' weight='500' className='text-primary-14 text-sm font-medium'>
-                  {filter.label}
-                </Text>
-              </button>
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          <div className='mb-8 flex items-center'>
-            <Button onClick={() => setActiveLabel(null)}>
-              <Icon name='arrow-line' className='h-6 w-6' />
-            </Button>
-            <Text size='17' weight='700' lineHeight='140' align='center' className='w-[calc(100%-24px)]'>
-              {active.label}
-            </Text>
-          </div>
-          <div className='hide-scrollbar mt-8 max-h-[450px] overflow-y-auto'>
-            <Radio.Group
-              className='gap-1.5'
-              direction='vertical'
-              value={active.selectedValue}
-              onChange={(v) => pick(String(v))}
-            >
-              <Each
-                data={[...active.options]}
-                render={(option) => (
-                  <Radio.Item
-                    key={option}
-                    className={active.selectedValue === option ? 'bg-secondary-38 rounded-lg p-3' : 'p-3'}
-                    value={option}
-                    label={
-                      <Radio.Label
-                        className={active.selectedValue === option ? 'text-secondary-28' : undefined}
-                        label={option}
-                      />
-                    }
-                  />
-                )}
-              />
-            </Radio.Group>
-          </div>
-        </>
-      )}
-    </Drawer>
-  );
-};
-
-const CompoundFeeRevenueByChain = ({ revenueData, isLoading, isError }: RevenuePageProps) => {
-  const [interval, setInterval] = useQueryState('compFeeRevenueInterval', parseAsString);
-  const [period, setPeriod] = useQueryState('compFeeRevenuePeriod', parseAsString);
+  const columns = useMemo(() => [
+    CHAIN_COLUMN,
+    ...columnKeys.map((column):ExtendedColumnDef<ProcessedRevenueData> => ({
+      accessorKey: column,
+      header: column,
+      cell: ({ getValue }) => Format.price(getValue() as number, 'standard'),
+    })),
+  ], [columnKeys]);
 
   const { sortDirection, sortKey, onKeySelect, onTypeSelect } = useSorting<ProcessedRevenueData>('asc', null);
   const sortType = { type: sortDirection, key: sortKey };
-
   const { isOpen: isSortOpen, onOpenModal: onSortOpen, onCloseModal: onSortClose } = useModal();
-  const { isOpen: isGroupOpen, onOpenModal: onGroupOpen, onCloseModal: onGroupClose } = useModal();
-
-  const precomputedViews = useMemo(() => precomputeViews(revenueData || []), [revenueData]);
-
-  const selectedInterval: Interval = interval && isInterval(interval) ? interval : INTERVAL_OPTIONS[0];
-  const periodOptions = getPeriodFilter(precomputedViews, selectedInterval);
-  const selectedPeriod = period && periodOptions.options.includes(period) ? period : (periodOptions.options[0] ?? '');
-
-  const view = precomputedViews?.[VIEW_KEY_BY_INTERVAL[selectedInterval]]?.[selectedPeriod];
-  const tableData = view?.tableData ?? [];
-  const totals = view?.totals ?? {};
-  const tableColumns = view ? [CHAIN_COLUMN, ...view.columns] : [CHAIN_COLUMN];
-  const sortColumns: SortAccessor<ProcessedRevenueData>[] = view
-    ? tableColumns.map((col) => ({
-        accessorKey: String(col.accessorKey),
-        header: typeof col.header === 'string' ? col.header : '',
-      }))
-    : [{ accessorKey: 'chain', header: 'Chain' }];
-
-  const periodFilterOptions = periodOptions.options.map((value) => ({ label: value, value }));
-  const selectedIntervalOption =
-    INTERVAL_FILTER_OPTIONS.find((option) => option.value === selectedInterval) ?? INTERVAL_FILTER_OPTIONS[0];
-  const selectedPeriodOption = periodFilterOptions.find((option) => option.value === selectedPeriod) ??
-    periodFilterOptions[0] ?? { label: '', value: '' };
-
-  const handleIntervalSelect = (option: FilterOption) => {
-    if (!isInterval(option.value)) return;
-    void setInterval(option.value === INTERVAL_OPTIONS[0] ? null : option.value);
-    void setPeriod(null);
-  };
-
-  const handlePeriodSelect = (option: FilterOption) => {
-    const defaultPeriod = periodOptions.options[0];
-    void setPeriod(option.value && option.value !== defaultPeriod ? option.value : null);
-  };
-
-  const mobileGroupFilters: GroupDrawerFilter[] = [
-    {
-      label: 'Interval',
-      options: INTERVAL_OPTIONS,
-      selectedValue: selectedInterval,
-      onSelect: (value) => handleIntervalSelect({ label: value, value }),
-    },
-    {
-      label: periodOptions.label,
-      options: periodOptions.options,
-      selectedValue: selectedPeriod,
-      onSelect: (value) => handlePeriodSelect({ label: value, value }),
-    },
-  ];
 
   const hasData = tableData.length > 0;
 
@@ -362,57 +185,52 @@ const CompoundFeeRevenueByChain = ({ revenueData, isLoading, isError }: RevenueP
           triggerLabel='Interval'
           hideMobileTrigger
           options={INTERVAL_FILTER_OPTIONS}
-          value={selectedIntervalOption}
-          getKey={(option) => option.value}
-          getLabel={(option) => option.label}
-          setValue={handleIntervalSelect}
+          value={{ label: interval, value: interval }}
+          getKey={(o) => o.value}
+          getLabel={(o) => o.label}
+          setValue={({ value }) => {
+            setIntervalParam(value);
+            setPeriodParam(null);
+          }}
         />
         <GroupFilter
-          triggerLabel={periodOptions.label}
+          triggerLabel={PERIOD_FILTER_LABEL[interval]}
           hideMobileTrigger
-          options={periodFilterOptions}
-          value={selectedPeriodOption}
-          getKey={(option) => option.value}
-          getLabel={(option) => option.label}
-          setValue={handlePeriodSelect}
+          options={sortedPeriods.map((value) => ({ label: value, value }))}
+          value={{ label: selectedPeriod ?? '', value: selectedPeriod ?? '' }}
+          getKey={(o) => o.value}
+          getLabel={(o) => o.label}
+          setValue={({ value }) => setPeriodParam(value)}
         />
-        <div className='flex w-full items-center justify-end gap-2 lg:hidden'>
-          <Button
-            onClick={onGroupOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
-          >
-            <Icon name='group-grid' className='h-[14px] w-[14px] fill-none' />
-            Group
-          </Button>
-          <Button
-            onClick={onSortOpen}
-            className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
-          >
-            <Icon name='sort-icon' className='h-[14px] w-[14px]' />
-            Sort
-          </Button>
-        </div>
       </div>
-      {!isLoading && !isError && !hasData ? (
+      <div className='flex w-full items-center justify-end gap-2 lg:hidden'>
+        <Button
+          onClick={onSortOpen}
+          className='bg-secondary-27 text-gray-11 shadow-13 flex h-9 w-full min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold sm:w-auto md:h-8 lg:hidden'
+        >
+          <Icon name='sort-icon' className='h-[14px] w-[14px]' />
+          Sort
+        </Button>
+      </div>
+      {!hasData ? (
         <NoDataPlaceholder text={NO_DATA_AVAILABLE} isHideButton />
       ) : (
         <CompoundFeeRevenueByChainTable
           sortType={sortType}
           data={tableData}
-          columns={tableColumns}
+          columns={columns}
           totals={totals}
-          selectedInterval={selectedInterval}
+          selectedInterval={interval}
         />
       )}
       <SortDrawer
         isOpen={isSortOpen}
         sortType={sortType}
-        columns={sortColumns}
+        columns={columns as SortAccessor<ProcessedRevenueData>[]}
         onClose={onSortClose}
         onKeySelect={onKeySelect}
         onTypeSelect={onTypeSelect}
       />
-      <GroupDrawer isOpen={isGroupOpen} onClose={onGroupClose} filters={mobileGroupFilters} />
     </Card>
   );
 };

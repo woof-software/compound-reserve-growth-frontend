@@ -74,14 +74,30 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
           className='bg-secondary-27 text-gray-11 shadow-13 grow sm:max-w-[130px] flex h-9 min-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
           onClick={() => setIsOpen(true)}
         >
-          <Icon name='group-grid' className='h-[14px] w-[14px] fill-none' />
+          <Icon
+            name='group-grid'
+            className='h-[14px] w-[14px] fill-none'
+          />
           Group
         </Button>
-        <Drawer onClose={onDrawerClose} isOpen={isOpen}>
-          <Text size='17' weight='700' lineHeight='140' align='center' className='mb-5 w-full'>
+        <Drawer
+          onClose={onDrawerClose}
+          isOpen={isOpen}
+        >
+          <Text
+            size='17'
+            weight='700'
+            lineHeight='140'
+            align='center'
+            className='mb-5 w-full'
+          >
             Group
           </Text>
-          <Radio.Group direction='vertical' className='gap-1.5' value={getKey(radioValue)}>
+          <Radio.Group
+            direction='vertical'
+            className='gap-1.5'
+            value={getKey(radioValue)}
+          >
             {options.map((option) => (
               <Radio.Item
                 key={getKey(option)}
@@ -91,7 +107,7 @@ export function GroupFilter<T>(props: GroupFiltersProps<T>) {
                 })}
                 label={
                   <Radio.Label
-                    className={cn({ 'text-secondary-28': radioValue === getKey(option) })}
+                    className={cn({ 'text-secondary-28': radioValue === getKey(option)})}
                     label={getLabel(option)}
                   />
                 }
