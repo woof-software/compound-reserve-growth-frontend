@@ -1,15 +1,22 @@
-import React, { useCallback } from 'react';
+import { useMemo } from 'react';
+import { useQueryState } from 'nuqs';
 
+import { ChartActions } from '@/components/Charts/ChartActions';
+import { DropdownFilter } from '@/components/Filter/DropdownFilter/DropdownFilter';
+import { Filters } from '@/components/Filter/Filters';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import CollateralsPriceTable from '@/entities/Capo/CollateralPriceBlock/CollateralsPriceTable';
-import { DesktopFilters } from '@/entities/Capo/CollateralPriceBlock/filters/CollateralDesktopFilters';
-import { MobileFilters } from '@/entities/Capo/CollateralPriceBlock/filters/CollateralMobileFilters';
-import { useCollateralsFilters } from '@/entities/Capo/CollateralPriceBlock/filters/useCollateralsFilters';
-import { useCollateralsData } from '@/entities/Capo/CollateralPriceBlock/lib/useCollateralsData';
-import { useFiltersSync } from '@/shared/hooks/useFiltersSync';
-import { SortAdapter, useSorting } from '@/shared/hooks/useSorting';
+import { useOptions } from '@/shared/hooks/filters/useOptions';
+import { useModal } from '@/shared/hooks/useModal';
+import { useProcessor } from '@/shared/hooks/useProcessor';
+import { SortAccessor, SortAdapter, useSorting } from '@/shared/hooks/useSorting';
+import { capitalizeFirstLetter, parseStingsArray } from '@/shared/lib/utils/utils';
 import { CapoTableItem } from '@/shared/types/Capo/types';
+import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
+import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
+import Icon from '@/shared/ui/Icon/Icon';
+import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import View from '@/shared/ui/View/View';
 
 export const CARD_CLASS_NAMES = {
@@ -25,56 +32,81 @@ export interface CollateralsPriceBlockProps {
   tableData: CapoTableItem[];
 }
 
+export const SORT_COLUMNS: SortAccessor<CapoTableItem>[] = [
+  { accessorKey: 'network', header: 'Network' },
+  { accessorKey: 'collateral', header: 'Collateral' },
+  { accessorKey: 'collateralPrice', header: 'Collateral Price' },
+  { accessorKey: 'priceRestriction', header: 'Price Restriction' },
+  { accessorKey: 'priceBuffer', header: 'Price Buffer' },
+  { accessorKey: 'priceFeed', header: 'Price Feed' }
+];
+
 const CapoCollateralsPriceBlock = ({
-  isLoading = false,
-  isError = false,
-  tableData
-}: CollateralsPriceBlockProps) => {
-  const {
-    selectedOptions,
-    setSelectedOptions,
-    filterOptions,
-    chainOptions,
-    collateralOptions,
-    onSelectChain,
-    onSelectCollateral,
-    onClearSelectedOptions,
-    applyFilters
-  } = useCollateralsFilters(tableData);
+   isLoading = false,
+   isError = false,
+   tableData
+  }: CollateralsPriceBlockProps) => {
+  const [selectedChainKeys, setSelectedChainKeys] = useQueryState('cpapr-chain', parseStingsArray([]));
+  const [selectedCollateralKeys, setSelectedCollateralKeys] = useQueryState('cpapr-collateral', parseStingsArray([]));
 
-  useFiltersSync(selectedOptions, setSelectedOptions, 'ccpb', [
-    'chain',
-    'collateral'
-  ]);
-
-  const {
-    sortDirection,
-    sortKey,
-    onKeySelect,
-    onTypeSelect,
-    onClearSort,
-    applySorting
-  } = useSorting<CapoTableItem>('desc', 'priceBuffer');
-
-  const sortType: SortAdapter<CapoTableItem> = {
-    type: sortDirection,
-    key: sortKey
+  const clearAllFilters = () => {
+    setSelectedChainKeys([]);
+    setSelectedCollateralKeys([]);
   };
 
-  const processedData = useCollateralsData({
-    tableData,
-    applyFilters,
-    applySorting
+  const { isOpen: isSortOpen, onOpenModal: onSortOpen, onCloseModal: onSortClose } = useModal();
+
+  const chainOptions = useMemo(() => (
+    [...new Set(tableData.map((item) => item.network))]
+      .map((network) => ({ label: capitalizeFirstLetter(network), value: network }))
+  ), [tableData]);
+
+  const { selectedOptions: selectedChainOptions, setSelectedOptions: setSelectedChainOptions } =
+    useOptions(chainOptions, selectedChainKeys, setSelectedChainKeys);
+
+  const byChain = useMemo(() => (
+    !selectedChainOptions.length
+      ? tableData
+      : tableData.filter((item) => selectedChainOptions.some((o) => o.value === item.network))
+  ), [tableData, selectedChainOptions]);
+
+  const collateralOptions = useMemo(() => (
+    [...new Set(byChain.map((item) => item.collateral))]
+      .map((collateral) => ({ label: collateral, value: collateral }))
+  ), [byChain]);
+
+  const { selectedOptions: selectedCollateralOptions, setSelectedOptions: setSelectedCollateralOptions } =
+    useOptions(collateralOptions, selectedCollateralKeys, setSelectedCollateralKeys);
+
+  const { result } = useProcessor({
+    array: tableData,
+    filters: [
+      (v) => !selectedChainOptions.length || selectedChainOptions.some((o) => o.value === v.network),
+      (v) => !selectedCollateralOptions.length || selectedCollateralOptions.some((o) => o.value === v.collateral),
+    ],
+    transformer: () => {
+      const processed: CapoTableItem[] = [];
+
+      return (item: CapoTableItem) => {
+        processed.push({
+          ...item,
+          network: capitalizeFirstLetter(item.network),
+          priceBuffer: Number(item.priceRestriction) - Number(item.collateralPrice),
+        });
+
+        return processed;
+      };
+    },
   });
 
-  const onClearAll = useCallback(() => {
-    onClearSelectedOptions();
-    onClearSort();
-  }, [onClearSelectedOptions, onClearSort]);
+  const processedData = result ?? [];
 
-  const isFiltersApplied = !!(
-    selectedOptions.chain.length || selectedOptions.collateral.length
-  );
+  const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
+    useSorting<CapoTableItem>('desc', 'priceBuffer');
+
+  const sortType: SortAdapter<CapoTableItem> = { type: sortDirection, key: sortKey };
+
+  const isAnyFilterSelected = !!selectedChainOptions.length || !!selectedCollateralOptions.length;
 
   return (
     <Card
@@ -84,35 +116,56 @@ const CapoCollateralsPriceBlock = ({
       id='collaterals-price-against-price-restriction'
       className={CARD_CLASS_NAMES}
     >
-      <DesktopFilters
-        chainOptions={chainOptions || []}
-        collateralOptions={collateralOptions || []}
-        selectedChain={selectedOptions.chain}
-        selectedCollateral={selectedOptions.collateral}
-        onSelectChain={onSelectChain}
-        onSelectCollateral={onSelectCollateral}
-        csvData={processedData}
-        isLoading={isLoading}
-      />
-      <MobileFilters
-        filterOptions={filterOptions}
-        sortType={sortType}
-        onKeySelect={onKeySelect}
-        onTypeSelect={onTypeSelect}
-        onClearAll={onClearAll}
-        csvData={processedData}
-      />
-      <View.Condition if={processedData.length}>
-        <CollateralsPriceTable
+      <div className={'flex items-center justify-end gap-2 py-3 px-5 md:px-5 lg:px-0'}>
+        <Filters isShowClear={isAnyFilterSelected} onClearAll={clearAllFilters}>
+          <DropdownFilter
+            triggerLabel='Chain'
+            options={chainOptions}
+            selectedOptions={selectedChainOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedChainOptions}
+          />
+          <DropdownFilter
+            triggerLabel='Collateral'
+            options={collateralOptions}
+            selectedOptions={selectedCollateralOptions}
+            getKey={(v) => v.value}
+            getLabel={(v) => v.label}
+            setValue={setSelectedCollateralOptions}
+          />
+        </Filters>
+        <Button
+          onClick={onSortOpen}
+          className='bg-secondary-27 text-gray-11 shadow-13 grow sm:max-w-32.5 flex h-9 min-w-32.5 gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8 lg:hidden'
+        >
+          <Icon name='sort-icon' className='h-3.5 w-3.5' />
+          Sort
+        </Button>
+        <SortDrawer
+          isOpen={isSortOpen}
           sortType={sortType}
-          tableData={processedData}
+          columns={SORT_COLUMNS}
+          onClose={onSortClose}
+          onKeySelect={onKeySelect}
+          onTypeSelect={onTypeSelect}
         />
+        <ChartActions
+          mobileChildren={
+            <CSVDownloadButton data={processedData} filename='collaterals_price_against_price_restriction' />
+          }
+        >
+          <CSVDownloadButton data={processedData} filename='collaterals_price_against_price_restriction' />
+        </ChartActions>
+      </div>
+      <View.Condition if={(!isLoading && !isError && processedData.length)}>
+        <CollateralsPriceTable sortType={sortType} tableData={processedData} />
       </View.Condition>
-      <View.Condition if={!processedData.length}>
+      <View.Condition if={(!isLoading && !isError && !processedData.length)}>
         <NoDataPlaceholder
-          text={!isFiltersApplied ? 'No data found' : undefined}
-          hideButton={!isFiltersApplied}
-          onButtonClick={onClearAll}
+          text={!isAnyFilterSelected ? 'No data found' : undefined}
+          hideButton={!isAnyFilterSelected}
+          onButtonClick={clearAllFilters}
         />
       </View.Condition>
     </Card>

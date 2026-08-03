@@ -1,4 +1,4 @@
-export interface CapoTableItem {
+export type CapoTableItem = {
   network: string;
   collateral: string;
   collateralPrice: string;
