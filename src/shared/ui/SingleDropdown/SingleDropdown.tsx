@@ -9,7 +9,6 @@ import {
 } from '@/shared/ui/Dropdown/Dropdown';
 import Each from '@/shared/ui/Each/Each';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
 import ArrowDown from '@/shared/assets/svg/arrow-down.svg';
 import CheckStroke from '@/shared/assets/svg/check-stroke.svg';
@@ -152,12 +151,12 @@ export const SingleDrawer: FC<SingleDrawerProps> = ({
                 >
                   {el}
                 </Text>
-                <View.Condition if={selectedValue === el}>
+                {selectedValue === el && (
                   <CheckStroke
                     width={16}
                     height={16}
                   />
-                </View.Condition>
+                )}
               </div>
             )}
           />

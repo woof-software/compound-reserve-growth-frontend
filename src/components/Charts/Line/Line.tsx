@@ -1,4 +1,3 @@
-import ChartLegends from "@/components/Charts/ChartLegends";
 import React, {
   FC,
   RefObject,
@@ -16,13 +15,13 @@ import Highcharts, {
 import HighchartsReact from 'highcharts-react-official';
 
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
+import ChartLegends from '@/components/Charts/ChartLegends';
 import { CompoundEvent } from '@/shared/hooks/useEventsApi';
 import { Legend } from '@/shared/hooks/useLegends';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { Format } from '@/shared/lib/utils/format';
 import { noop } from '@/shared/lib/utils/utils';
 import Icon from '@/shared/ui/Icon/Icon';
-import View from '@/shared/ui/View/View';
 
 import 'highcharts/modules/stock';
 import 'highcharts/modules/mouse-wheel-zoom';
@@ -313,7 +312,7 @@ const LineChart: FC<LineChartProps> = ({
         dateTimeLabelFormats: {
           day: '%b %d',
           week: '%b %d',
-          month: "%b '%y",
+          month: '%b \'%y',
           year: '%Y'
         },
         lineColor: '#7A8A99',
@@ -445,9 +444,7 @@ const LineChart: FC<LineChartProps> = ({
       </div>
       <div className='absolute right-0 block'>
         <div className='hidden items-center gap-2 lg:flex'>
-          <View.Condition
-            if={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
-          >
+          {isLegendEnabled && aggregatedSeries.length > 1 && (
             <ChartIconToggle
               active={areAllSeriesHidden}
               onClick={() => {
@@ -461,8 +458,8 @@ const LineChart: FC<LineChartProps> = ({
               offIcon='eye-closed'
               ariaLabel='Toggle all series visibility'
             />
-          </View.Condition>
-          <View.Condition if={Boolean(events?.length > 0)}>
+          )}
+          {events?.length > 0 && (
             <ChartIconToggle
               active={!showEvents}
               onClick={() => onShowEvents(!showEvents)}
@@ -470,17 +467,17 @@ const LineChart: FC<LineChartProps> = ({
               offIcon='calendar-uncheck'
               ariaLabel='Toggle events'
             />
-          </View.Condition>
+          )}
         </div>
       </div>
-      <View.Condition if={isLegendEnabled && aggregatedSeries.length > 1}>
+      {isLegendEnabled && aggregatedSeries.length > 1 && (
         <ChartLegends
           legends={legends}
           onLegendHover={onLegendHover}
           onLegendLeave={onLegendLeave}
           onLegendClick={onLegendClick}
         />
-      </View.Condition>
+      )}
     </div>
   );
 };

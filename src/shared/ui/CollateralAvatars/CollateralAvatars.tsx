@@ -7,7 +7,6 @@ import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 
 import Text from '../Text/Text';
-import View from '../View/View';
 
 interface OevOnCollateralProps {
   collaterals: string[];
@@ -50,7 +49,7 @@ const CollateralAvatars: FC<OevOnCollateralProps> = ({ collaterals = [] }) => {
           );
         }}
       />
-      <View.Condition if={Boolean(extraCount)}>
+      {extraCount && (
         <Text
           size='13'
           lineHeight='160'
@@ -58,7 +57,7 @@ const CollateralAvatars: FC<OevOnCollateralProps> = ({ collaterals = [] }) => {
         >
           +{extraCount}
         </Text>
-      </View.Condition>
+      )}
     </div>
   );
 };

@@ -7,7 +7,6 @@ import { OnlyStringKeys } from '@/shared/lib/utils/types';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
 export type FormattedRevenueData = {
   chain: string;
@@ -50,23 +49,6 @@ const RevenueBreakdown = ({
 
     return columnTotals;
   }, [data, columns]);
-
-  const displayColumns = useMemo(() => {
-    return columns.map((col) => {
-      const key = 'accessorKey' in col ? String(col.accessorKey) : col.id;
-
-      if (key && key.startsWith('q')) {
-        return {
-          ...col,
-
-          cell: ({ getValue }: { getValue: () => unknown }) =>
-            Format.price(getValue() as number, 'standard')
-        };
-      }
-
-      return col;
-    });
-  }, [columns]);
 
   const footerRow = (
     <tr key='footer-total-row'>
@@ -183,15 +165,13 @@ const RevenueBreakdown = ({
                         {header}
                       </Text>
                       <div className='flex items-center gap-2'>
-                        <View.Condition
-                          if={Boolean(header.toLowerCase() === 'chain')}
-                        >
+                        {header.toLowerCase() === 'chain' && (
                           <Icon
                             name={display.toLowerCase() || 'not-found-icon'}
                             className='h-4 w-4'
                             folder='network'
                           />
-                        </View.Condition>
+                        )}
                         <Text
                           size='13'
                           lineHeight='21'
@@ -287,7 +267,7 @@ const RevenueBreakdown = ({
         <DataTable
           data={data}
           enableSorting
-          columns={displayColumns}
+          columns={columns}
           pageSize={10}
           className='flex min-h-[518px] flex-col justify-between'
           headerCellClassName='py-[13px] px-[5px]'

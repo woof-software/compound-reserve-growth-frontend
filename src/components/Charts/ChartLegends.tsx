@@ -1,11 +1,11 @@
-import { noop } from '@/shared/lib/utils/utils';
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from 'react';
+import debounce from 'debounce';
+
 import { cn } from '@/shared/lib/classNames/classNames';
+import { noop } from '@/shared/lib/utils/utils';
 import Button from '@/shared/ui/Button/Button';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
-import View from '@/shared/ui/View/View';
-import debounce from 'debounce';
 
 export type ChartLegendItem = {
   id: string;
@@ -101,7 +101,7 @@ const ChartLegends: FC<ChartLegendsProps> = ({
             }
           )}
         >
-          <View.Condition if={canScrollLeft}>
+          {canScrollLeft && (
             <Button
               className='bg-secondary-36 absolute top-1/2 left-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-sm'
               onClick={() => {
@@ -113,7 +113,7 @@ const ChartLegends: FC<ChartLegendsProps> = ({
                 className='h-[6px] w-[6px]'
               />
             </Button>
-          </View.Condition>
+          )}
           <div
             ref={viewportRef}
             onScroll={() => {
@@ -126,7 +126,7 @@ const ChartLegends: FC<ChartLegendsProps> = ({
               render={renderLegendItem}
             />
           </div>
-          <View.Condition if={canScrollRight}>
+          {canScrollRight && (
             <Button
               className='bg-secondary-36 absolute top-1/2 right-1.5 z-[2] grid h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-sm'
               onClick={() => {
@@ -138,17 +138,17 @@ const ChartLegends: FC<ChartLegendsProps> = ({
                 className='h-[6px] w-[6px] rotate-180'
               />
             </Button>
-          </View.Condition>
+          )}
         </div>
       </div>
-      <View.Condition if={legends.length > 1}>
+      {legends.length > 1 && (
         <div className='mx-auto hidden max-w-[902px] flex-wrap justify-center gap-5 px-[15px] py-2 lg:flex'>
           <Each
             data={legends}
             render={renderLegendItem}
           />
         </div>
-      </View.Condition>
+      )}
     </div>
   );
 };

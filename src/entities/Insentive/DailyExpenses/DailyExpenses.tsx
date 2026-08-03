@@ -21,7 +21,6 @@ import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import View from '@/shared/ui/View/View';
 
 interface DailyExpensesProps {
   isLoading?: boolean;
@@ -286,20 +285,16 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
           </ChartActions>
         </div>
       </div>
-      <View.Condition
-        if={Boolean(!isLoading && !isError && normalizedTableData.length)}
-      >
+      {(!isLoading && !isError && normalizedTableData.length) && (
         <DailyExpensesTable
           activeViewTab={activeCurrencyTab}
           sortType={sortType}
           tableData={normalizedTableData}
         />
-      </View.Condition>
-      <View.Condition
-        if={Boolean(!isLoading && !isError && !normalizedTableData.length)}
-      >
+      )}
+      {(!isLoading && !isError && !normalizedTableData.length) && (
         <NoDataPlaceholder onButtonClick={clearAllFilters} />
-      </View.Condition>
+      )}
     </Card>
   );
 };
