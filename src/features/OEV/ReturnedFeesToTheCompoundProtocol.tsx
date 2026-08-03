@@ -27,6 +27,7 @@ import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 interface ReturnedFeesToTheCompoundProtocolProps {
   isLoading?: boolean;
@@ -324,15 +325,15 @@ const ReturnedFeesToTheCompoundProtocol = ({
           </div>
         </Drawer>
       </div>
-      {(!isLoading && !isError && tableData.length) && (
+      <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <ReturnedFeesToTheCompoundProtocolTable
           sortType={sortType}
           tableData={tableData}
         />
-      )}
-      {(!isLoading && !isError && !tableData.length) && (
+      </View.Condition>
+      <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
         <NoDataPlaceholder onButtonClick={onClearAll} />
-      )}
+      </View.Condition>
     </Card>
   );
 };

@@ -1,11 +1,12 @@
-import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
-import Highcharts from 'highcharts';
-import HighchartsReact from 'highcharts-react-official';
+import React, { FC, useCallback, useMemo, useRef, useState } from "react";
+import Highcharts from "highcharts";
+import HighchartsReact from "highcharts-react-official";
 
-import ChartLegends from '@/components/Charts/ChartLegends';
-import { cn } from '@/shared/lib/classNames/classNames';
-import { colorPicker } from '@/shared/lib/utils/utils';
-import Text from '@/shared/ui/Text/Text';
+import ChartLegends from "@/components/Charts/ChartLegends";
+import { cn } from "@/shared/lib/classNames/classNames";
+import { colorPicker } from "@/shared/lib/utils/utils";
+import Text from "@/shared/ui/Text/Text";
+import View from "@/shared/ui/View/View";
 
 interface PieDataItem {
   name: string;
@@ -53,7 +54,7 @@ const PieChart: FC<PieChartProps> = ({
       const pt = findPointByName(name);
       if (!pt) return;
       pt.series.points.forEach((p) =>
-        p.setState(p === pt ? 'hover' : 'inactive'),
+        p.setState(p === pt ? "hover" : "inactive"),
       );
       hc?.tooltip?.refresh(pt);
     },
@@ -63,7 +64,7 @@ const PieChart: FC<PieChartProps> = ({
   const clearHighlight = useCallback(() => {
     const s = hc?.series?.[0];
     if (!s) return;
-    s.points.forEach((p) => p.setState(''));
+    s.points.forEach((p) => p.setState(""));
     hc?.tooltip?.hide(0);
   }, [hc]);
 
@@ -148,31 +149,31 @@ const PieChart: FC<PieChartProps> = ({
       plotBackgroundColor: undefined,
       plotBorderWidth: undefined,
       plotShadow: false,
-      type: 'pie',
+      type: "pie",
     },
     credits: {
       enabled: false,
     },
     title: {
-      text: '',
+      text: "",
     },
     tooltip: {
       useHTML: true,
       padding: 16,
       borderRadius: 8,
-      backgroundColor: '#FFFFFF',
+      backgroundColor: "#FFFFFF",
       shadow: {
-        color: '#0000000A',
+        color: "#0000000A",
         offsetX: 6,
         offsetY: 0,
         opacity: 1,
         width: 12,
       },
       style: {
-        fontFamily: 'Haas Grot Text R, sans-serif',
-        fontSize: '11px',
-        lineHeight: '16px',
-        letterSpacing: '0',
+        fontFamily: "Haas Grot Text R, sans-serif",
+        fontSize: "11px",
+        lineHeight: "16px",
+        letterSpacing: "0",
       },
       headerFormat: `
       <div style="
@@ -199,9 +200,9 @@ const PieChart: FC<PieChartProps> = ({
         states: { inactive: { opacity: 0.25 } },
       },
       pie: {
-        innerSize: '70%',
+        innerSize: "70%",
         allowPointSelect: false,
-        cursor: 'default',
+        cursor: "default",
         enableMouseTracking: true,
         borderWidth: 0,
         borderRadius: 0,
@@ -231,7 +232,7 @@ const PieChart: FC<PieChartProps> = ({
     legend: { enabled: false },
     series: [
       {
-        type: 'pie',
+        type: "pie",
         borderWidth: 0,
         data: chartData,
       },
@@ -239,7 +240,7 @@ const PieChart: FC<PieChartProps> = ({
   };
 
   return (
-    <div className={cn('highcharts-container relative', className)}>
+    <div className={cn("highcharts-container relative", className)}>
       {areAllSeriesHidden && (
         <Text
           size="11"
@@ -261,16 +262,18 @@ const PieChart: FC<PieChartProps> = ({
         highcharts={Highcharts}
         options={options}
         callback={(chart: any) => setHc(chart)}
-        containerProps={{ style: { width: '100%', maxHeight: '350px' } }}
+        containerProps={{ style: { width: "100%", maxHeight: "350px" } }}
       />
-      {(!areAllSeriesHidden && !shouldShowNoDataMessage) && (
+      <View.Condition
+        if={Boolean(!areAllSeriesHidden && !shouldShowNoDataMessage)}
+      >
         <ChartLegends
           legends={legends}
           onLegendClick={onLegendItemClick}
           onLegendHover={highlightPoint}
           onLegendLeave={clearHighlight}
         />
-      )}
+      </View.Condition>
     </div>
   );
 };
