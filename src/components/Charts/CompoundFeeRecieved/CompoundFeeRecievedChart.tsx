@@ -8,9 +8,9 @@ import {
 import Highcharts, { Options, Point } from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
+import ChartLegends from '@/components/Charts/ChartLegends';
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
-import ChartLegends from '@/components/Charts/ChartLegends';
 import { AggregatedPoint } from '@/shared/hooks/useCompoundChartBars';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { Format } from '@/shared/lib/utils/format';
@@ -68,7 +68,7 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
 
   const currentSeriesNames = useMemo(
     () => seriesData.map((s) => s.name!).filter(Boolean) as string[],
-    [seriesData]
+    [seriesData],
   );
 
   const currentHiddenSet = useMemo(() => {
@@ -206,7 +206,7 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
       break;
     case 'M':
     default:
-      xAxisLabelFormat = '{value:%b \'%y}';
+      xAxisLabelFormat = "{value:%b '%y}";
       break;
   }
 

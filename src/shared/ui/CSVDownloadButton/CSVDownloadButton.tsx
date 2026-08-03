@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React from 'react';
 import { CSVLink } from 'react-csv';
 
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
@@ -8,8 +8,8 @@ import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import { Tooltip } from '@/shared/ui/Tooltip/Tooltip';
 
-interface CSVDownloadButtonProps {
-  data: Array<Record<string, string | number | boolean | null | undefined>>;
+interface CSVDownloadButtonProps<T extends object> {
+  data: T[];
   filename?: string;
   className?: string;
   tooltipContent?: string;
@@ -18,12 +18,13 @@ interface CSVDownloadButtonProps {
   children?: React.ReactNode;
 }
 
-const CSVDownloadButton: FC<CSVDownloadButtonProps> = ({
-  data,
-  tooltipContent,
-  filename = 'export.csv',
-  className
-}) => {
+const CSVDownloadButton =  <T extends object>(props: CSVDownloadButtonProps<T>) => {
+  const {
+    data,
+    tooltipContent,
+    filename = 'export.csv',
+    className
+  } = props;
 
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
   
