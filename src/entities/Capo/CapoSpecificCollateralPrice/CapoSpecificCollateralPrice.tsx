@@ -1,3 +1,4 @@
+import { useProcessor } from '@/shared/hooks/useProcessor';
 import { useEffect, useMemo } from 'react';
 import { useQueryState } from 'nuqs';
 
@@ -79,27 +80,27 @@ export const CapoSpecificCollateralPrice = ({
     return collateralOptions[0];
   }, [collateralOptions, selectedCollateralKey]);
 
-  const filteredData = useMemo(() => {
-    let result = rawData;
+  const { result: filteredData } = useProcessor({
+    array: rawData,
+    filters: [
+      (v) => v.network === selectedChainKey,
+      (v) => v.collateral === selectedCollateralKey,
+    ],
+    transformer: () => {
+      const filtered: CapoNormalizedChartData[] = [];
 
-    if (selectedChainKey) {
-      result = result.filter((item) => selectedChainKey.includes(item.network));
-    }
-
-    if (selectedCollateralKey) {
-      result = result.filter((item) => selectedCollateralKey.includes(item.collateral));
-    }
-
-    return result;
-  }, [rawData, selectedChainKey, selectedCollateralKey]);
+      return (v: CapoNormalizedChartData) => {
+        filtered.push(v);
+        return filtered;
+      };
+    },
+  });
 
   const groupBy = `${selectedChainKey}-${selectedCollateralKey}`;
 
   const { chartSeries, hasData } = useCollateralChartData({ rawData: filteredData });
 
   const { aggregatedSeries } = useLineChart({ groupBy, data: chartSeries, barSize });
-
-  const csvData = getCsvData(chartSeries, barSize);
 
   return (
     <Card
@@ -148,13 +149,13 @@ export const CapoSpecificCollateralPrice = ({
         <ChartActions
           mobileChildren={
             <CSVDownloadButton
-              data={csvData}
+              data={getCsvData(chartSeries, barSize)}
               filename={getCsvFileName('capo_specific_collateral_price')}
             />
           }
         >
           <CSVDownloadButton
-            data={csvData}
+            data={getCsvData(chartSeries, barSize)}
             filename={getCsvFileName('capo_specific_collateral_price')}
           />
         </ChartActions>
