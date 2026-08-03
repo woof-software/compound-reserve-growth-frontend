@@ -1,30 +1,28 @@
-import { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
+import { parseAsBoolean, useQueryState } from 'nuqs';
 
+import { ChartActions } from '@/components/Charts/ChartActions';
 import Line from '@/components/Charts/Line/Line';
+import { DateRangePickerFilter } from '@/components/Filter/DateRangePickerFilter/DateRangePickerFilter';
+import { DropdownFilter } from '@/components/Filter/DropdownFilter/DropdownFilter';
+import { Filters } from '@/components/Filter/Filters';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
-import { FeesGeneratedIncentivesMobileFilters } from '@/entities/Insentive/FeesGeneratedIncentives/FeesGeneratedIncentivesMobileFilters';
 import {
   customChartOptions,
   customTooltipFormatter
 } from '@/entities/Insentive/FeesGeneratedIncentives/lib/customTooltipFormatter';
 import { getGeneratedIncentivesChartSeries } from '@/entities/Insentive/FeesGeneratedIncentives/lib/getGeneratedIncentivesChartSeries';
-import { useChainMarketFilters } from '@/entities/Insentive/useChainMarketFilters';
-import { useBarSizeConstraints } from '@/shared/hooks/useBarSizeConstraints';
-import { useBarSize } from '@/shared/hooks/useBarSize';
-import { useDateRangeFilter } from '@/shared/hooks/useDataRangeFilter';
-import {
-  useFiltersSync,
-  useFilterSyncSingle
-} from '@/shared/hooks/useFiltersSync';
+import { NOT_MARKET } from '@/shared/consts/consts';
+import { useOptions } from '@/shared/hooks/filters/useOptions';
+import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
+import { capitalizeFirstLetter, parseAsTimestampMs, parseStingsArray } from '@/shared/lib/utils/utils';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
-import { BAR_SIZE, BAR_SIZE_OPTIONS } from '@/shared/types/types';
-import { MultiSelect } from '@/shared/ui/AnimationProvider/MultiSelect/MultiSelect';
+import { BAR_SIZE_OPTIONS } from '@/shared/types/types';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
-import { DateRangePickerPopover } from '@/shared/ui/DateRangePicker/DateRangePicker';
 import Switch from '@/shared/ui/Switch/Switch';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
 
@@ -36,67 +34,81 @@ interface FeesGeneratedIncentivesProps {
 
 const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
   const { data, isLoading, isError } = props;
-  const [isRevenueOnly, setIsRevenueOnly] = useState(false);
+
+  const [selectedChainKeys, setSelectedChainKeys] = useQueryState('rvi-chain', parseStingsArray([]));
+  const [selectedMarketKeys, setSelectedMarketKeys] = useQueryState('rvi-market', parseStingsArray([]));
+  const [isRevenueOnly, setIsRevenueOnly ] = useQueryState('rvi-isRevenueOnly',  parseAsBoolean.withDefault(false));
+  const [startDate, setStartDate] = useQueryState('rvi-start', parseAsTimestampMs);
+  const [endDate, setEndDate] = useQueryState('rvi-end', parseAsTimestampMs);
+
+  const chainOptions = useMemo(() => {
+    const uniqueNetworks = [...new Set(data.map(d => d.source.network))];
+    const filteredNetworks = uniqueNetworks.filter(network => network !== 'mainnet');
+    const optionNetworks = filteredNetworks.map(network => ({ label: capitalizeFirstLetter(network), value: network }));
+
+    return [
+      { label: 'Mainnet', value: 'mainnet' },
+      ...optionNetworks
+    ];
+  }, [data]);
+
+
+  const {
+    selectedOptions: selectedChainOptions,
+    setSelectedOptions: setSelectedChainOptions,
+  } = useOptions(chainOptions, selectedChainKeys, setSelectedChainKeys);
+
+  const byChain = useMemo(() => (
+    !selectedChainOptions.length
+      ? data
+      : data.filter(d => selectedChainOptions.some(o => o.value === d.source.network))
+  ), [data, selectedChainOptions]);
+
+  const marketOptions = useMemo(() => (
+    [...new Set(byChain.map(d => d.source.market ?? NOT_MARKET))]
+      .sort()
+      .map(value => ({ label: capitalizeFirstLetter(value), value }))
+  ), [byChain]);
+
+  const {
+    selectedOptions: selectedMarketOptions,
+    setSelectedOptions: setSelectedMarketOptions,
+  } = useOptions(marketOptions, selectedMarketKeys, setSelectedMarketKeys);
+
+  const filteredData = useMemo(() => (
+    !selectedMarketOptions.length
+      ? byChain
+      : byChain.filter(d => selectedMarketOptions.some(o => o.value === (d.source.market ?? NOT_MARKET)))
+  ), [byChain, selectedMarketOptions]);
+
+  const clearAllFilters = () => {
+    setSelectedChainKeys([]);
+    setSelectedMarketKeys([]);
+    setIsRevenueOnly(false);
+    setStartDate(null);
+    setEndDate(null);
+  };
+
+  const isAnyFiltersSelected =
+    startDate !== null ||
+    endDate !== null ||
+    !!selectedChainOptions.length ||
+    !!selectedMarketOptions.length;
+
+  const { barSize, onBarSizeChange, disabledBarSizes } = useBarSizeWithDateRange({ startDate, endDate });
+
   const groupBy = 'None';
 
-  const { barSize, onBarSizeChange } = useBarSize({
-    initialBarSize: BAR_SIZE.D
-  });
-
-  const {
-    dateRange,
-    setDateRange,
-    normalizedDateRange,
-    dateBounds,
-    resetDateRange,
-    mobileFilterOption: dateRangeMobileOption
-  } = useDateRangeFilter();
-
-  const { disabledBarSizes } = useBarSizeConstraints(
-    normalizedDateRange,
-    barSize,
-    onBarSizeChange
-  );
-
-  const {
-    chainOptions,
-    deploymentOptionsFilter,
-    selectedOptions,
-    setSelectedOptions,
-    onSelectChain,
-    onSelectMarket,
-    filteredData,
-    clearAllFilters,
-    mobileFilterOptions
-  } = useChainMarketFilters(data, { filterByLatestDate: false });
-
-  useFiltersSync(selectedOptions, setSelectedOptions, 'fgvsi', [
-    'chain',
-    'deployment'
-  ]);
-
-  useFilterSyncSingle(
-    'FeesGeneratedIncentivesPeriod',
-    barSize,
-    onBarSizeChange
-  );
-  useFilterSyncSingle(
-    'FeesGeneratedRevenueOnly',
-    isRevenueOnly,
-    setIsRevenueOnly
-  );
-
   const dateFilteredData = useMemo(() => {
-    const { start, end } = normalizedDateRange;
-    if (start === null && end === null) return filteredData;
+    if (startDate === null && endDate === null) return filteredData;
 
     return filteredData.filter((item) => {
       const itemTime = item.date * 1000;
-      if (start !== null && itemTime < start) return false;
-      if (end !== null && itemTime > end) return false;
+      if (startDate !== null && itemTime < startDate) return false;
+      if (endDate !== null && itemTime > endDate) return false;
       return true;
     });
-  }, [filteredData, normalizedDateRange]);
+  }, [filteredData, startDate, endDate]);
 
   const chartSeries = getGeneratedIncentivesChartSeries(dateFilteredData);
 
@@ -119,16 +131,6 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
 
   const csvData = getSummarizedCsvData(aggregatedSeries);
 
-  const handleClearAllFilters = () => {
-    clearAllFilters();
-    resetDateRange();
-  };
-
-  const mobileFilterOptionsWithDateRange = () => [
-    dateRangeMobileOption,
-    ...mobileFilterOptions()
-  ];
-
   return (
     <Card
       isLoading={isLoading}
@@ -141,47 +143,50 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
         content: 'flex flex-col gap-3 px-0 pt-0 pb-5 md:px-5 lg:px-10 lg:pb-10'
       }}
     >
-      <FeesGeneratedIncentivesMobileFilters
-        barSize={barSize}
-        onBarSizeChange={onBarSizeChange}
-        filterOptions={mobileFilterOptionsWithDateRange}
-        onClearAll={handleClearAllFilters}
-        csvData={csvData}
-        isRevenueOnly={isRevenueOnly}
-        setIsRevenueOnly={setIsRevenueOnly}
-      />
-      <div className='hidden lg:block'>
-        <div className='flex items-center justify-end gap-2 px-0 py-3'>
+      <div className='flex flex-col-reverse items-center justify-end gap-2 py-3 px-5 sm:flex-row lg:px-0'>
+        <div className='w-full sm:w-auto'>
           <TabsGroup
+            className={{
+              container: 'w-full sm:w-auto',
+              list: 'w-full sm:w-auto'
+            }}
             tabs={BAR_SIZE_OPTIONS}
             value={barSize}
             onTabChange={onBarSizeChange}
             disabled={isLoading}
             disabledTabs={disabledBarSizes}
           />
-          <DateRangePickerPopover
-            value={dateRange}
-            min={dateBounds.min}
-            max={dateBounds.max}
-            onChange={setDateRange}
-            disabled={isLoading}
-            showLabels
-            inputClassName='w-full'
-          />
-          <MultiSelect
-            options={chainOptions || []}
-            value={selectedOptions.chain}
-            onChange={onSelectChain}
-            placeholder='Chain'
-            disabled={isLoading}
-          />
-          <MultiSelect
-            options={deploymentOptionsFilter}
-            value={selectedOptions.deployment}
-            onChange={onSelectMarket}
-            placeholder='Market'
-            disabled={isLoading || !Boolean(deploymentOptionsFilter.length)}
-          />
+        </div>
+        <div className='flex w-full items-center justify-end gap-2 sm:w-auto'>
+          <Filters
+            onClearAll={clearAllFilters}
+            isShowClear={isAnyFiltersSelected}
+          >
+            <DateRangePickerFilter
+              triggerLabel='Date Range'
+              value={{startDate, endDate}}
+              onChange={({startDate, endDate}) => {
+                setStartDate(startDate);
+                setEndDate(endDate);
+              }}
+            />
+            <DropdownFilter
+              triggerLabel={'Chain'}
+              options={chainOptions}
+              selectedOptions={selectedChainOptions}
+              getKey={(v) => v.value}
+              getLabel={(v) => v.label}
+              setValue={setSelectedChainOptions}
+            />
+            <DropdownFilter
+              triggerLabel={'Market'}
+              options={marketOptions}
+              selectedOptions={selectedMarketOptions}
+              getKey={(v) => v.value}
+              getLabel={(v) => v.label}
+              setValue={setSelectedMarketOptions}
+            />
+          </Filters>
           <Switch
             label='Revenue Only'
             positionLabel='left'
@@ -189,15 +194,25 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
             onCheckedChange={setIsRevenueOnly}
             className={{ title: '!text-[11px]' }}
           />
-          <CSVDownloadButton
-            data={csvData}
-            filename={getCsvFileName('fees_generated_vs_incentives')}
-            tooltipContent='CSV with the entire historical data can be downloaded'
-          />
+          <ChartActions
+            mobileChildren={
+              <CSVDownloadButton
+                data={csvData}
+                filename={getCsvFileName('fees_generated_vs_incentives')}
+                tooltipContent='CSV with the entire historical data can be downloaded'
+              />
+            }
+          >
+            <CSVDownloadButton
+              data={csvData}
+              filename={getCsvFileName('fees_generated_vs_incentives')}
+              tooltipContent='CSV with the entire historical data can be downloaded'
+            />
+          </ChartActions>
         </div>
       </div>
       {chartSeries.length === 0 || !hasAggregatedData ? (
-        <NoDataPlaceholder onButtonClick={handleClearAllFilters} />
+        <NoDataPlaceholder onButtonClick={clearAllFilters} />
       ) : (
         <Line
           className='max-h-fit'
@@ -207,7 +222,7 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
           aggregatedSeries={aggregatedSeries}
           customOptions={customChartOptions}
           customTooltipFormatter={customTooltipFormatter}
-          resetZoomKey={`${barSize}-${dateRange.startDate}-${dateRange.endDate}`}
+          resetZoomKey={`${barSize}-${startDate}-${endDate}`}
         />
       )}
     </Card>
