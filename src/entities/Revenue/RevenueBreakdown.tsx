@@ -21,9 +21,8 @@ import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
-import View from '@/shared/ui/View/View';
 
-const QUARTERS = [1, 2, 3, 4]
+const QUARTERS = [1, 2, 3, 4];
 
 const RevenueBreakDownBlock = (props: RevenueProps) => {
   const { revenueData: rawData, isLoading, isError } = props;
@@ -401,12 +400,18 @@ const RevenueBreakDownBlock = (props: RevenueProps) => {
           </div>
         </div>
       </div>
-      <View.Condition if={hasData}>
-        <RevenueBreakdown data={tableData} columns={dynamicColumns} sortType={sortType} />
-      </View.Condition>
-      <View.Condition if={!hasData}>
-        <NoDataPlaceholder onButtonClick={clearAllFilters} text={noDataMessage} />
-      </View.Condition>
+      {hasData ? (
+        <RevenueBreakdown
+          data={tableData}
+          columns={dynamicColumns}
+          sortType={sortType}
+        />
+      ) : (
+        <NoDataPlaceholder
+          onButtonClick={clearAllFilters}
+          text={noDataMessage}
+        />
+      )}
       <SortDrawer
         isOpen={isSortOpen}
         sortType={sortType}

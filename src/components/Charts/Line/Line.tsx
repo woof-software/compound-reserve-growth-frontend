@@ -22,7 +22,6 @@ import { cn } from '@/shared/lib/classNames/classNames';
 import { Format } from '@/shared/lib/utils/format';
 import { noop } from '@/shared/lib/utils/utils';
 import Icon from '@/shared/ui/Icon/Icon';
-import View from '@/shared/ui/View/View';
 
 import 'highcharts/modules/stock';
 import 'highcharts/modules/mouse-wheel-zoom';
@@ -443,11 +442,9 @@ const LineChart: FC<LineChartProps> = ({
           }}
         />
       </div>
-      <div className='absolute right-0 block'>
-        <div className='hidden items-center gap-2 lg:flex'>
-          <View.Condition
-            if={Boolean(isLegendEnabled && aggregatedSeries.length > 1)}
-          >
+      <div className="absolute right-0 block">
+        <div className="hidden items-center gap-2 lg:flex">
+          {isLegendEnabled && aggregatedSeries.length > 1 && (
             <ChartIconToggle
               active={areAllSeriesHidden}
               onClick={() => {
@@ -457,30 +454,30 @@ const LineChart: FC<LineChartProps> = ({
                   onDeselectAllLegends();
                 }
               }}
-              onIcon='eye'
-              offIcon='eye-closed'
-              ariaLabel='Toggle all series visibility'
+              onIcon="eye"
+              offIcon="eye-closed"
+              ariaLabel="Toggle all series visibility"
             />
-          </View.Condition>
-          <View.Condition if={Boolean(events?.length > 0)}>
+          )}
+          {events?.length > 0 && (
             <ChartIconToggle
               active={!showEvents}
               onClick={() => onShowEvents(!showEvents)}
-              onIcon='calendar-check'
-              offIcon='calendar-uncheck'
-              ariaLabel='Toggle events'
+              onIcon="calendar-check"
+              offIcon="calendar-uncheck"
+              ariaLabel="Toggle events"
             />
-          </View.Condition>
+          )}
         </div>
       </div>
-      <View.Condition if={isLegendEnabled && aggregatedSeries.length > 1}>
+      {isLegendEnabled && aggregatedSeries.length > 1 && (
         <ChartLegends
           legends={legends}
           onLegendHover={onLegendHover}
           onLegendLeave={onLegendLeave}
           onLegendClick={onLegendClick}
         />
-      </View.Condition>
+      )}
     </div>
   );
 };

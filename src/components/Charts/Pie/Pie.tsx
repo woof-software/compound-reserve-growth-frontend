@@ -6,7 +6,6 @@ import ChartLegends from "@/components/Charts/ChartLegends";
 import { cn } from "@/shared/lib/classNames/classNames";
 import { colorPicker } from "@/shared/lib/utils/utils";
 import Text from "@/shared/ui/Text/Text";
-import View from "@/shared/ui/View/View";
 
 interface PieDataItem {
   name: string;
@@ -264,16 +263,14 @@ const PieChart: FC<PieChartProps> = ({
         callback={(chart: any) => setHc(chart)}
         containerProps={{ style: { width: "100%", maxHeight: "350px" } }}
       />
-      <View.Condition
-        if={Boolean(!areAllSeriesHidden && !shouldShowNoDataMessage)}
-      >
+      {!areAllSeriesHidden && !shouldShowNoDataMessage && (
         <ChartLegends
           legends={legends}
           onLegendClick={onLegendItemClick}
           onLegendHover={highlightPoint}
           onLegendLeave={clearHighlight}
         />
-      </View.Condition>
+      )}
     </div>
   );
 };

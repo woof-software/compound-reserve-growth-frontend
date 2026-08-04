@@ -6,7 +6,6 @@ import { cn } from '@/shared/lib/classNames/classNames';
 
 import Icon from '../Icon/Icon';
 import Text from '../Text/Text';
-import View from '../View/View';
 
 interface CardProps {
   title?: string;
@@ -65,7 +64,7 @@ const Card: FC<CardProps> = ({
         className?.container
       )}
     >
-      <View.Condition if={Boolean(showPlaceholder)}>
+      {showPlaceholder && (
         <div
           className={cn(
             'flex h-full items-center justify-center',
@@ -73,55 +72,56 @@ const Card: FC<CardProps> = ({
           )}
         >
           <Text
-            size='11'
-            weight='500'
-            lineHeight='16'
+            size="11"
+            weight="500"
+            lineHeight="16"
             className={cn('text-primary-14', isError && 'text-red-500')}
           >
             {isError ? 'error loading data' : 'Loading...'}
           </Text>
         </div>
-      </View.Condition>
-      <View.Condition if={!isLoading && !isError}>
-        <View.Condition if={Boolean(title)}>
-          <div
-            className={cn(
-              'bg-card-header flex h-[56px] items-center gap-3 px-5 md:px-10 md:py-4',
-              className?.header
-            )}
-          >
-            <Text
-              tag='h3'
-              size='13'
-              weight='500'
-              lineHeight='27'
-              className={cn(className?.title)}
+      )}
+      {!isLoading && !isError && (
+        <>
+          {title && (
+            <div
+              className={cn(
+                'bg-card-header flex h-[56px] items-center gap-3 px-5 md:px-10 md:py-4',
+                className?.header
+              )}
             >
-              {title}
-            </Text>
-            <div className='flex h-6 w-6 cursor-pointer items-center justify-center'>
-              <View.Condition if={Boolean(id)}>
-                <View.Condition if={isCopied}>
-                  <Icon
-                    name='сheck-сopy-icon'
-                    className='text-green-500'
-                  />
-                </View.Condition>
-                <View.Condition if={!isCopied}>
-                  <Icon
-                    name='link'
-                    color='primary-14'
-                    onClick={() => onCopyLink?.(blockId)}
-                  />
-                </View.Condition>
-              </View.Condition>
+              <Text
+                tag="h3"
+                size="13"
+                weight="500"
+                lineHeight="27"
+                className={cn(className?.title)}
+              >
+                {title}
+              </Text>
+              <div className="flex h-6 w-6 cursor-pointer items-center justify-center">
+                {id && (
+                  isCopied ? (
+                    <Icon
+                      name="сheck-сopy-icon"
+                      className="text-green-500"
+                    />
+                  ) : (
+                    <Icon
+                      name="link"
+                      color="primary-14"
+                      onClick={() => onCopyLink?.(blockId)}
+                    />
+                  )
+                )}
+              </div>
             </div>
+          )}
+          <div className={cn('bg-card-content p-10', className?.content)}>
+            {children}
           </div>
-        </View.Condition>
-        <div className={cn('bg-card-content p-10', className?.content)}>
-          {children}
-        </div>
-      </View.Condition>
+        </>
+      )}
     </div>
   );
 };

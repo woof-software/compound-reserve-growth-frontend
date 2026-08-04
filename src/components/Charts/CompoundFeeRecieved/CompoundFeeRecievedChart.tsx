@@ -60,7 +60,7 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
   className,
   customTooltipFormatter,
   customOptions
-}) => {
+  }) => {
   const { theme } = useTheme();
 
   const programmaticChange = useRef(false);
