@@ -6,7 +6,6 @@ import { Dropdown } from '@/shared/ui/Dropdown/Dropdown';
 import Each from '@/shared/ui/Each/Each';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
 type Option = {
   id: string;
@@ -90,17 +89,17 @@ const SingleSelectTrigger = ({
         className
       )}
     >
-      <View.Condition if={Boolean(value?.label)}>
-        <div className='bg-secondary-46 flex items-center justify-center rounded-sm px-[10px] py-[2.5px]'>
+      {value?.label && (
+        <div className="bg-secondary-46 flex items-center justify-center rounded-sm px-[10px] py-[2.5px]">
           <Text
-            size='11'
-            weight='500'
-            className='text-primary-18 leading-none tabular-nums'
+            size="11"
+            weight="500"
+            className="text-primary-18 leading-none tabular-nums"
           >
-            {value?.label}
+            {value.label}
           </Text>
         </div>
-      </View.Condition>
+      )}
       <Text
         size='11'
         weight='500'
@@ -210,80 +209,85 @@ const SingleSelect = ({
           onKeyDown={onKeyDown}
           onClick={(e) => e.stopPropagation()}
         >
-          <View.Condition if={options.length > 5}>
-            <div
-              className={cn(
-                'outline-secondary-19 m-2 flex h-10 justify-center rounded-lg py-2.5 pr-5 pl-3 outline',
-                {
-                  'outline-red-11':
-                    !Boolean(filteredOptions.length) &&
-                    Boolean(searchValue.length)
-                }
-              )}
-            >
-              <input
-                ref={inputRef}
-                className='placeholder:text-secondary-21 h-[19px] w-full placeholder:text-[12px] placeholder:font-medium focus-visible:outline-none'
-                placeholder='Search'
-                value={searchValue}
-                onChange={onChangeSearch}
-              />
-            </div>
-            <View.Condition if={Boolean(!filteredOptions.length)}>
-              <div className='p-2 pt-0'>
-                <Text
-                  size='11'
-                  weight='400'
-                  lineHeight='100'
-                  className='text-red-11'
-                >
-                  No results found
-                </Text>
+          {options.length > 5 && (
+            <>
+              <div
+                className={cn(
+                  'outline-secondary-19 m-2 flex h-10 justify-center rounded-lg py-2.5 pr-5 pl-3 outline',
+                  {
+                    'outline-red-11':
+                      !filteredOptions.length && searchValue.length > 0
+                  }
+                )}
+              >
+                <input
+                  ref={inputRef}
+                  className="placeholder:text-secondary-21 h-[19px] w-full placeholder:text-[12px] placeholder:font-medium focus-visible:outline-none"
+                  placeholder="Search"
+                  value={searchValue}
+                  onChange={onChangeSearch}
+                />
               </div>
-            </View.Condition>
-          </View.Condition>
-          <View.Condition if={Boolean(filteredOptions.length)}>
-            <div
-              aria-hidden='true'
-              className='bg-secondary-29 h-px w-full origin-top scale-y-[.5] transform-gpu'
-            />
-            <div className='my-2 mr-[3px] ml-2 grid max-h-[131px] gap-y-1 overflow-auto'>
-              <Each
-                data={filteredOptions}
-                render={(option, index) => {
-                  const isSelected = value?.id === option.id;
-                  const isHighlighted = index === highlightedIndex;
-
-                  return (
-                    <CustomDropdownItem
-                      key={option.id}
-                      label={option.label}
-                      marketType={option.marketType}
-                      isSelected={isSelected}
-                      isHighlighted={isHighlighted}
-                      onSelect={() => onSelect(option)}
-                      itemRef={(el) => {
-                        itemRefs.current[index] = el!;
-                      }}
-                    />
-                  );
-                }}
+              {!filteredOptions.length && (
+                <div className="p-2 pt-0">
+                  <Text
+                    size="11"
+                    weight="400"
+                    lineHeight="100"
+                    className="text-red-11"
+                  >
+                    No results found
+                  </Text>
+                </div>
+              )}
+            </>
+          )}
+          {filteredOptions.length > 0 && (
+            <>
+              <div
+                aria-hidden="true"
+                className="bg-secondary-29 h-px w-full origin-top scale-y-[.5] transform-gpu"
               />
-            </div>
-          </View.Condition>
+              <div className="my-2 mr-[3px] ml-2 grid max-h-[131px] gap-y-1 overflow-auto">
+                <Each
+                  data={filteredOptions}
+                  render={(option, index) => {
+                    const isSelected = value?.id === option.id;
+                    const isHighlighted = index === highlightedIndex;
+
+                    return (
+                      <CustomDropdownItem
+                        key={option.id}
+                        label={option.label}
+                        marketType={option.marketType}
+                        isSelected={isSelected}
+                        isHighlighted={isHighlighted}
+                        onSelect={() => onSelect(option)}
+                        itemRef={(el) => {
+                          itemRefs.current[index] = el!;
+                        }}
+                      />
+                    );
+                  }}
+                />
+              </div>
+            </>
+          )}
         </div>
-        <View.Condition if={hasSelection && isClearable}>
-          <div
-            aria-hidden='true'
-            className='bg-secondary-29 h-px w-full origin-top scale-y-[.5] transform-gpu'
-          />
-          <Button
-            className='bg-secondary-12 text-primary-14 hover:bg-secondary-40 m-2 h-[30px] rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white'
-            onClick={onClearSelection}
-          >
-            Clear selection
-          </Button>
-        </View.Condition>
+        {hasSelection && isClearable && (
+          <>
+            <div
+              aria-hidden="true"
+              className="bg-secondary-29 h-px w-full origin-top scale-y-[.5] transform-gpu"
+            />
+            <Button
+              className="bg-secondary-12 text-primary-14 hover:bg-secondary-40 m-2 h-[30px] rounded-lg px-3 py-2 text-[11px] font-medium dark:hover:text-white"
+              onClick={onClearSelection}
+            >
+              Clear selection
+            </Button>
+          </>
+        )}
       </Dropdown>
     </div>
   );

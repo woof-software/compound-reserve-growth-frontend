@@ -5,7 +5,6 @@ import * as SwitchPrimitive from '@radix-ui/react-switch';
 import { cn } from '@/shared/lib/classNames/classNames';
 
 import Text from '../Text/Text';
-import View from '../View/View';
 
 interface SwitchProps
   extends Omit<ComponentProps<typeof SwitchPrimitive.Root>, 'className'> {
@@ -29,16 +28,16 @@ function Switch({ className, label, positionLabel, ...props }: SwitchProps) {
     <div
       className={cn('flex shrink-0 items-center gap-3', className?.container)}
     >
-      <View.Condition if={Boolean(label && positionLabel === 'left')}>
+      {label && positionLabel === 'left' && (
         <Text
-          size='14'
-          weight='500'
-          lineHeight='140'
+          size="14"
+          weight="500"
+          lineHeight="140"
           className={cn('text-primary-14', className?.title)}
         >
           {label}
         </Text>
-      </View.Condition>
+      )}
       <SwitchPrimitive.Root
         data-slot='switch'
         className={cn(
@@ -55,16 +54,16 @@ function Switch({ className, label, positionLabel, ...props }: SwitchProps) {
           )}
         />
       </SwitchPrimitive.Root>
-      <View.Condition if={Boolean(label && positionLabel === 'right')}>
+      {label && positionLabel === 'right' && (
         <Text
-          size='14'
-          weight='500'
-          lineHeight='140'
+          size="14"
+          weight="500"
+          lineHeight="140"
           className={cn('text-primary-14', className?.title)}
         >
           {label}
         </Text>
-      </View.Condition>
+      )}
     </div>
   );
 }

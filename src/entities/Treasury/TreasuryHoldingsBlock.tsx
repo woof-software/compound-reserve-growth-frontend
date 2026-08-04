@@ -23,7 +23,6 @@ import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
-import View from '@/shared/ui/View/View';
 
 interface TreasuryHoldingsBlockProps {
   isLoading?: boolean;
@@ -279,15 +278,16 @@ const TreasuryHoldingsBlock = ({
           />
         </ChartActions>
       </div>
-      <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
-        <TreasuryHoldingsTable
-          sortType={sortType}
-          tableData={tableData}
-        />
-      </View.Condition>
-      <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
-        <NoDataPlaceholder onButtonClick={clearAllFilters} />
-      </View.Condition>
+      {!isLoading && !isError && (
+        tableData.length ? (
+          <TreasuryHoldingsTable
+            sortType={sortType}
+            tableData={tableData}
+          />
+        ) : (
+          <NoDataPlaceholder onButtonClick={clearAllFilters} />
+        )
+      )}
     </Card>
   );
 };
