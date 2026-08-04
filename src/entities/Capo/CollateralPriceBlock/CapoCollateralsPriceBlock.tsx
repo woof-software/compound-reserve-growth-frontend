@@ -64,10 +64,15 @@ const CapoCollateralsPriceBlock = ({
   const { selectedOptions: selectedChainOptions, setSelectedOptions: setSelectedChainOptions } =
     useOptions(chainOptions, selectedChainKeys, setSelectedChainKeys);
 
+  const selectedChainOptionsSet = useMemo(
+    () => new Set(selectedChainOptions.map(o => o.value)),
+    [selectedChainOptions]
+  );
+
   const byChain = useMemo(() => (
     !selectedChainOptions.length
       ? tableData
-      : tableData.filter((item) => selectedChainOptions.some((o) => o.value === item.network))
+      : tableData.filter((item) => selectedChainOptionsSet.has(item.network))
   ), [tableData, selectedChainOptions]);
 
   const collateralOptions = useMemo(() => (
@@ -78,11 +83,16 @@ const CapoCollateralsPriceBlock = ({
   const { selectedOptions: selectedCollateralOptions, setSelectedOptions: setSelectedCollateralOptions } =
     useOptions(collateralOptions, selectedCollateralKeys, setSelectedCollateralKeys);
 
+  const selectedCollateralOptionsSet = useMemo(
+    () => new Set(selectedCollateralOptions.map(o => o.value)),
+    [selectedCollateralOptions]
+  );
+
   const { result } = useProcessor({
     array: tableData,
     filters: [
-      (v) => !selectedChainOptions.length || selectedChainOptions.some((o) => o.value === v.network),
-      (v) => !selectedCollateralOptions.length || selectedCollateralOptions.some((o) => o.value === v.collateral),
+      (v) => !selectedChainOptions.length || selectedChainOptionsSet.has(v.network),
+      (v) => !selectedCollateralOptions.length || selectedCollateralOptionsSet.has(v.collateral),
     ],
     transformer: () => {
       const processed: CapoTableItem[] = [];
