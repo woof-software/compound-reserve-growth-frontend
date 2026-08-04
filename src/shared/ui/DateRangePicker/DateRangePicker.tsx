@@ -10,6 +10,7 @@ import { Dropdown } from '@/shared/ui/DropdownRef/Dropdown';
 import Icon from '@/shared/ui/Icon/Icon';
 import Portal from '@/shared/ui/Portal/Portal';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 import Calendar from './Calendar';
 
@@ -66,13 +67,13 @@ const DateInput: FC<DateInputProps> = ({
    hasError = false,
  }) => (
   <div className='flex flex-col gap-0'>
-    {showLabel && !!label && (
+    <View.Condition if={showLabel && !!label}>
       <div className='flex h-6 items-center rounded-lg px-3 py-1'>
         <Text size='11' weight='500' lineHeight='16' className='text-secondary-41 dark:text-secondary-33'>
           {label}
         </Text>
       </div>
-    )}
+    </View.Condition>
     <div
       className={cn('relative rounded-lg outline', {
         'outline-red-11': !!error || hasError,
@@ -103,11 +104,11 @@ const DateInput: FC<DateInputProps> = ({
         data-calendar-toggle='true'
       />
     </div>
-    {!!error && (
+    <View.Condition if={!!error}>
       <Text size='11' weight='500' lineHeight='16' className={cn('text-red-11 mt-1', errorClassName)}>
         {error}
       </Text>
-    )}
+    </View.Condition>
   </div>
 );
 
@@ -417,9 +418,17 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
           </>
         )}
       </div>
-      {isCalendarOpen && (
+      <View.Condition if={isCalendarOpen}>
         <Portal>
-          <div className='hidden lg:block'>
+          <View.TabletMobile>
+            <div
+              className='shadow-15 fixed bottom-2 left-1/2 z-[60] w-[359px] max-w-[calc(100vw-16px)] -translate-x-1/2'
+              onPointerDown={stopPropagation}
+            >
+              <Calendar variant='mobile' {...sharedCalendarProps} />
+            </div>
+          </View.TabletMobile>
+          <View.Desktop>
             <div
               className='shadow-15 absolute top-0 left-0 z-[60]'
               style={{
@@ -429,9 +438,9 @@ const DateRangePicker: FC<DateRangePickerProps> = ({
             >
               <Calendar variant='desktop' {...sharedCalendarProps} />
             </div>
-          </div>
+          </View.Desktop>
         </Portal>
-      )}
+      </View.Condition>
     </>
   );
 };

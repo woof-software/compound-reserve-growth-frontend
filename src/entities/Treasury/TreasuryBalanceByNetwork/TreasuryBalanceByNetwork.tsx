@@ -17,12 +17,13 @@ import {
   SortAdapter,
   useSorting
 } from '@/shared/hooks/useSorting';
-import { capitalizeFirstLetter, colorPicker, parseStingsArray } from '@/shared/lib/utils/utils';
+import { capitalizeFirstLetter, colorPicker,  parseStingsArray } from '@/shared/lib/utils/utils';
 import { TokenData } from '@/shared/types/Treasury/types';
 import Button from '@/shared/ui/Button/Button';
 import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
+import View from '@/shared/ui/View/View';
 
 interface TreasuryBalanceByNetworkBlockProps {
   isLoading?: boolean;
@@ -82,10 +83,10 @@ export const treasuryBalanceByNetworkColumns: SortAccessor<TreasuryBalanceByNetw
   ];
 
 const TreasuryBalanceByNetworkBlock = ({
-                                         isLoading,
-                                         isError,
-                                         data
-                                       }: TreasuryBalanceByNetworkBlockProps) => {
+  isLoading,
+  isError,
+  data
+}: TreasuryBalanceByNetworkBlockProps) => {
   const {
     isOpen: isSortOpen,
     onOpenModal: onSortOpen,
@@ -113,7 +114,7 @@ const TreasuryBalanceByNetworkBlock = ({
 
   const {
     selectedOptions: selectedChainOptions,
-    setSelectedOptions: setSelectedChainOptions
+    setSelectedOptions: setSelectedChainOptions,
   } = useOptions(chainOptions, selectedChainKeys, setSelectedChainKeys);
 
   const byChain = useMemo(() => (
@@ -130,7 +131,7 @@ const TreasuryBalanceByNetworkBlock = ({
 
   const {
     selectedOptions: selectedMarketOptions,
-    setSelectedOptions: setSelectedMarketOptions
+    setSelectedOptions: setSelectedMarketOptions,
   } = useOptions(marketOptions, selectedMarketKeys, setSelectedMarketKeys);
 
   const byChainAndMarket = useMemo(() => (
@@ -147,7 +148,7 @@ const TreasuryBalanceByNetworkBlock = ({
 
   const {
     selectedOptions: selectedAssetTypeOptions,
-    setSelectedOptions: setSelectedAssetTypeOptions
+    setSelectedOptions: setSelectedAssetTypeOptions,
   } = useOptions(assetTypesOptions, selectedAssetTypesKeys, setSelectedAssetTypeKeys);
 
   const byChainMarketAndAsset = useMemo(() => (
@@ -165,7 +166,7 @@ const TreasuryBalanceByNetworkBlock = ({
 
   const {
     selectedOptions: selectedSymbolOptions,
-    setSelectedOptions: setSelectedSymbolOptions
+    setSelectedOptions: setSelectedSymbolOptions,
   } = useOptions(reserveSymbolOptions, selectedSymbolKeys, setSelectedSymbolKeys);
 
   const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
@@ -293,7 +294,7 @@ const TreasuryBalanceByNetworkBlock = ({
         </Filters>
         <Button
           onClick={onSortOpen}
-          className='cursor-pointer lg:hidden items-center justify-center transition bg-secondary-27 text-gray-11 shadow-13 flex h-9 grow sm:max-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8'
+          className="cursor-pointer lg:hidden items-center justify-center transition bg-secondary-27 text-gray-11 shadow-13 flex h-9 grow sm:max-w-[130px] gap-1.5 rounded-lg p-2.5 text-[11px] leading-4 font-semibold md:h-8"
         >
           <Icon
             name='sort-icon'
@@ -310,7 +311,7 @@ const TreasuryBalanceByNetworkBlock = ({
           onTypeSelect={onTypeSelect}
         />
       </div>
-      {(!isLoading && !isError && tableData.length) && (
+      <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
         <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
           <BarChart
             customOptions={customChartOptions}
@@ -322,10 +323,10 @@ const TreasuryBalanceByNetworkBlock = ({
             tableData={tableData}
           />
         </div>
-      )}
-      {(!isLoading && !isError && !tableData.length) && (
+      </View.Condition>
+      <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
         <NoDataPlaceholder onButtonClick={clearAllFilters} />
-      )}
+      </View.Condition>
     </Card>
   );
 };

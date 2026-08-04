@@ -4,6 +4,7 @@ import { cn } from '@/shared/lib/classNames/classNames';
 import { Tooltip } from '@/shared/ui/Tooltip/Tooltip';
 
 import Text from '../Text/Text';
+import View from '../View/View';
 
 interface ValueMetricFieldProps {
   value: string;
@@ -41,12 +42,12 @@ const ValueMetricField = ({
 
   return (
     <div className={cn('flex flex-col gap-3.5', className?.container)}>
-      {(icon || iconText) && (
+      <View.Condition if={Boolean(icon || iconText)}>
         <div className='flex items-center gap-2.5'>
-          {icon && (
+          <View.Condition if={Boolean(icon)}>
             <div className={cn(className?.icon)}>{icon}</div>
-          )}
-          {iconText && (
+          </View.Condition>
+          <View.Condition if={Boolean(iconText)}>
             <Text
               size='16'
               weight='500'
@@ -55,9 +56,9 @@ const ValueMetricField = ({
             >
               {iconText}
             </Text>
-          )}
+          </View.Condition>
         </div>
-      )}
+      </View.Condition>
       <div className={cn('flex flex-col gap-5 lg:gap-2', className?.content)}>
         <div className='flex flex-col flex-wrap items-start gap-2.5 md:flex-row md:items-center md:gap-3.5'>
           {tooltip ? (
@@ -81,7 +82,7 @@ const ValueMetricField = ({
               {value}
             </Text>
           )}
-          {badge && (
+          <View.Condition if={Boolean(badge)}>
             <Tooltip content='Change over last 30 days'>
               <div
                 className={cn(
@@ -93,7 +94,7 @@ const ValueMetricField = ({
                 {badge}
               </div>
             </Tooltip>
-          )}
+          </View.Condition>
         </div>
         <Text
           size='11'

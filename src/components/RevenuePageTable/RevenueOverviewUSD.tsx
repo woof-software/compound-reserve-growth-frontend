@@ -9,6 +9,7 @@ import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
+import View from '@/shared/ui/View/View';
 
 export type RevenueTableRowData = {
   chain: string;
@@ -116,13 +117,13 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                         {column.header as string}
                       </Text>
                       <div className='flex items-center gap-2'>
-                        {key === 'chain' && (
+                        <View.Condition if={Boolean(key === 'chain')}>
                           <Icon
                             name={(cellValue as string) || 'not-found-icon'}
                             className='h-4 w-4'
                             folder='network'
                           />
-                        )}
+                        </View.Condition>
                         <Text
                           size='13'
                           lineHeight='21'
@@ -138,7 +139,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                 })}
               </div>
             ))}
-            {totalFooterData && (
+            <View.Condition if={Boolean(totalFooterData)}>
               <div
                 className={cn(
                   'grid grid-cols-3 gap-x-10 gap-y-3 p-5 md:gap-x-[63px] md:px-10',
@@ -185,7 +186,7 @@ const RevenueOverviewUSD: FC<RevenueOverviewUSDProps> = ({
                   )
                 )}
               </div>
-            )}
+            </View.Condition>
           </>
         )}
       </MobileDataTable>
