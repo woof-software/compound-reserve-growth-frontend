@@ -170,7 +170,7 @@ const HistoricalExpensesByNetworks = (
             mobileChildren={
               <>
                 <CSVDownloadButton
-                  data={getSummarizedCsvData(aggregatedSeries)}
+                  data={() => getSummarizedCsvData(aggregatedSeries)}
                   filename={getCsvFileName('historical_expenses_by_networks', {
                     view: activeCurrencyTab,
                     mode: activeModeTab,
@@ -201,7 +201,7 @@ const HistoricalExpensesByNetworks = (
             }
           >
             <CSVDownloadButton
-              data={getSummarizedCsvData(aggregatedSeries)}
+              data={() => getSummarizedCsvData(aggregatedSeries)}
               tooltipContent={
                 'CSV with the entire historical data can be downloaded'
               }
@@ -264,7 +264,7 @@ const HistoricalExpensesByNetworks = (
             mobileChildren={
               <>
                 <CSVDownloadButton
-                  data={getSummarizedCsvData(aggregatedSeries)}
+                  data={() => getSummarizedCsvData(aggregatedSeries)}
                   filename={getCsvFileName('historical_expenses_by_networks', {
                     view: activeCurrencyTab,
                     mode: activeModeTab,

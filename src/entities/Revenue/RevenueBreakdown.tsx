@@ -396,12 +396,12 @@ const RevenueBreakDownBlock = (props: RevenueProps) => {
           <div className='shrink-0 sm:flex-none'>
             <ChartActions mobileChildren={
               <CSVDownloadButton
-                data={tableData}
+                data={() => tableData}
                 filename={csvFilename}
               />
             }>
               <CSVDownloadButton
-                data={tableData}
+                data={() => tableData}
                 filename={csvFilename}
               />
             </ChartActions>

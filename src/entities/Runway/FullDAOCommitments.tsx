@@ -223,7 +223,7 @@ const FullDAOCommitmentsBlock = () => {
         </div>
         <div className='hidden lg:block'>
           <CSVDownloadButton
-            data={processedData}
+            data={() => processedData}
             filename='Full DAO Commitments'
           />
         </div>

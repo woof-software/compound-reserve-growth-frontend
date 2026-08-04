@@ -362,7 +362,7 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
           <ChartActions
             mobileChildren={
               <>
-                <CSVDownloadButton data={filterForRange({
+                <CSVDownloadButton data={() => filterForRange({
                   data: cumulativeChartSeries[0]?.data ?? [],
                   getDate: (item) => new Date(item.x),
                   transform: (item) => ({
@@ -410,7 +410,7 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
               </>
             }
           >
-            <CSVDownloadButton data={filterForRange({
+            <CSVDownloadButton data={() => filterForRange({
               data: cumulativeChartSeries[0]?.data ?? [],
               getDate: (item) => new Date(item.x),
               transform: (item) => ({

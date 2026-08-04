@@ -250,13 +250,13 @@ const CompoundRevenueBlock = (props: RevenueProps) => {
         <ChartActions
           mobileChildren={
           <CSVDownloadButton
-            data={getSummarizedCsvData(aggregatedSeries)}
+            data={() => getSummarizedCsvData(aggregatedSeries)}
             filename={getCsvFileName('compound_revenue')}
           />
         }
         >
           <CSVDownloadButton
-            data={getSummarizedCsvData(aggregatedSeries)}
+            data={() => getSummarizedCsvData(aggregatedSeries)}
             filename={getCsvFileName('compound_revenue')}
           />
         </ChartActions>

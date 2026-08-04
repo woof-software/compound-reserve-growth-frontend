@@ -310,7 +310,7 @@ const CompoundFeeRevenueRecieved = (props: RevenueProps) => {
       mobileChildren={
         <>
           <CSVDownloadButton
-            data={getSummarizedCsvData(aggregatedSeries)}
+            data={() => getSummarizedCsvData(aggregatedSeries)}
             filename={getCsvFileName('compound-fee-revenue-received')}
           />
           {seriesData.length > 1 ? (
@@ -335,7 +335,7 @@ const CompoundFeeRevenueRecieved = (props: RevenueProps) => {
       }
     >
       <CSVDownloadButton
-        data={getSummarizedCsvData(aggregatedSeries)}
+        data={() => getSummarizedCsvData(aggregatedSeries)}
         filename={getCsvFileName('compound-fee-revenue-received')}
       />
     </ChartActions>

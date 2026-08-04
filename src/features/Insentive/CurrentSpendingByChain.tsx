@@ -163,7 +163,7 @@ const CurrentSpendingByChainBlock = (props: CurrentSpendingByChainProps) => {
           <ChartActions
             mobileChildren={
               <CSVDownloadButton
-                data={tableData.map((item) => ({
+                data={() => tableData.map((item) => ({
                   network: item.network,
                   valueComp: item.valueComp,
                   valueUsd: item.valueUsd
@@ -173,7 +173,7 @@ const CurrentSpendingByChainBlock = (props: CurrentSpendingByChainProps) => {
             }
           >
             <CSVDownloadButton
-              data={tableData.map((item) => ({
+              data={() => tableData.map((item) => ({
                 network: item.network,
                 valueComp: item.valueComp,
                 valueUsd: item.valueUsd

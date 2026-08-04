@@ -322,7 +322,7 @@ const TotalTreasuryValue = ({
             mobileChildren={
               <>
                 <CSVDownloadButton
-                  data={filterForRange({
+                  data={() => filterForRange({
                     data: chartSeries[0]?.data ?? [],
                     getDate: (item) => new Date(item.x),
                     transform: (item) => ({
@@ -379,7 +379,7 @@ const TotalTreasuryValue = ({
             }
           >
             <CSVDownloadButton
-              data={filterForRange({
+              data={() => filterForRange({
                 data: chartSeries[0]?.data ?? [],
                 getDate: (item) => new Date(item.x),
                 transform: (item) => ({

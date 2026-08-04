@@ -185,7 +185,7 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
         <ChartActions
           mobileChildren={
             <CSVDownloadButton
-              data={normalizedTableData.map((item) => ({
+              data={() => normalizedTableData.map((item) => ({
                 network: item.network,
                 market: item.market,
                 lendIncentive: item.lendIncentive,
@@ -200,7 +200,7 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
           }
         >
           <CSVDownloadButton
-            data={normalizedTableData.map((item) => ({
+            data={() => normalizedTableData.map((item) => ({
               network: item.network,
               market: item.market,
               lendIncentive: item.lendIncentive,
@@ -267,7 +267,7 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
           <ChartActions
             mobileChildren={
               <CSVDownloadButton
-                data={normalizedTableData.map((item) => ({
+                data={() => normalizedTableData.map((item) => ({
                   network: item.network,
                   market: item.market,
                   lendIncentive: item.lendIncentive,

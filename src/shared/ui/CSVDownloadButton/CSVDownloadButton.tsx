@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { ComponentProps,FC, useState } from 'react';
 import { CSVLink } from 'react-csv';
 
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
@@ -16,25 +16,43 @@ interface CSVDownloadButtonProps {
   filename?: string;
   className?: string;
   tooltipContent?: string;
-  onClick?: () => void;
   renderAsLink?: boolean;
   children?: React.ReactNode;
 }
 
-const CSVDownloadButton: FC<CSVDownloadButtonProps> = ({
-  data,
-  tooltipContent,
-  filename = 'export.csv',
-  className
-}) => {
+
+const CSVDownloadButton: FC<CSVDownloadButtonProps> = (props: CSVDownloadButtonProps) => {
+  const {
+    data,
+    tooltipContent,
+    filename = 'export.csv',
+    className,
+  } = props;
+
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
-  
+
+  const [resolvedData, setResolvedData] = useState<string | Data>(
+    typeof data === 'function' ? [] : data
+  );
+
+  const handleClick: ComponentProps<typeof CSVLink>['onClick'] = (_event, done) => {
+    if (typeof data === 'function') {
+      setResolvedData(data());
+    } else {
+      setResolvedData(data);
+    }
+
+    done(true);
+  };
+
   if (isMobile) {
     return (
       <Button className={'w-full'}>
         <CSVLink
-          data={data}
+          data={resolvedData}
           filename={filename}
+          asyncOnClick
+          onClick={handleClick}
           className={'flex items-center gap-1.5 h-11 w-full'}
         >
           <Icon
@@ -48,7 +66,7 @@ const CSVDownloadButton: FC<CSVDownloadButtonProps> = ({
       </Button>
     );
   }
-  
+
   return (
     <Tooltip
       content={tooltipContent || 'Current data can be downloaded in CSV'}
@@ -60,8 +78,10 @@ const CSVDownloadButton: FC<CSVDownloadButtonProps> = ({
         )}
       >
         <CSVLink
-          data={data}
+          data={resolvedData}
           filename={filename}
+          asyncOnClick
+          onClick={handleClick}
         >
           <Icon
             name='download'

@@ -149,13 +149,13 @@ export const CapoSpecificCollateralPrice = ({
         <ChartActions
           mobileChildren={
             <CSVDownloadButton
-              data={getCsvData(chartSeries, barSize)}
+              data={() => getCsvData(chartSeries, barSize)}
               filename={getCsvFileName('capo_specific_collateral_price')}
             />
           }
         >
           <CSVDownloadButton
-            data={getCsvData(chartSeries, barSize)}
+            data={() => getCsvData(chartSeries, barSize)}
             filename={getCsvFileName('capo_specific_collateral_price')}
           />
         </ChartActions>
