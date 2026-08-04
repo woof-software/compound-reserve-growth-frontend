@@ -281,8 +281,6 @@ const CompoundFeeRevenueRecieved = (props: RevenueProps) => {
 
   const hasAggregatedData = aggregatedSeries.some(({ data }) => data?.length);
 
-  const csvData = getSummarizedCsvData(aggregatedSeries);
-
   const hasData = chartData.length > 0;
 
   const noDataMessage = isAnyFiltersSelected ? 'No data for selected filters' : 'No data available';
@@ -291,7 +289,10 @@ const CompoundFeeRevenueRecieved = (props: RevenueProps) => {
     <ChartActions
       mobileChildren={
         <>
-          <CSVDownloadButton data={csvData} filename={getCsvFileName('compound-fee-revenue-received')} />
+          <CSVDownloadButton
+            data={getSummarizedCsvData(aggregatedSeries)}
+            filename={getCsvFileName('compound-fee-revenue-received')}
+          />
           {seriesData.length > 1 ? (
             <ChartIconToggle
               active={areAllSeriesHidden}
@@ -313,7 +314,10 @@ const CompoundFeeRevenueRecieved = (props: RevenueProps) => {
         </>
       }
     >
-      <CSVDownloadButton data={csvData} filename={getCsvFileName('compound-fee-revenue-received')} />
+      <CSVDownloadButton
+        data={getSummarizedCsvData(aggregatedSeries)}
+        filename={getCsvFileName('compound-fee-revenue-received')}
+      />
     </ChartActions>
   );
 

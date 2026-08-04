@@ -11,7 +11,7 @@ interface CollateralLimitationDataItem {
   'Collateral price limitation': number;
 }
 
-interface CsvDataItem {
+type CsvDataItem = {
   Date: string;
   'Collateral Price': number;
   'Collateral price limitation': number;

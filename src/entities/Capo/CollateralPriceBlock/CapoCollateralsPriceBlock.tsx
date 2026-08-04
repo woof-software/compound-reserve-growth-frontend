@@ -152,10 +152,16 @@ const CapoCollateralsPriceBlock = ({
         />
         <ChartActions
           mobileChildren={
-            <CSVDownloadButton data={processedData} filename='collaterals_price_against_price_restriction' />
+            <CSVDownloadButton
+              data={processedData}
+              filename='collaterals_price_against_price_restriction'
+            />
           }
         >
-          <CSVDownloadButton data={processedData} filename='collaterals_price_against_price_restriction' />
+          <CSVDownloadButton
+            data={processedData}
+            filename='collaterals_price_against_price_restriction'
+          />
         </ChartActions>
       </div>
       <View.Condition if={(!isLoading && !isError && processedData.length)}>

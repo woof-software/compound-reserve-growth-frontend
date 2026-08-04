@@ -8,8 +8,8 @@ import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import { Tooltip } from '@/shared/ui/Tooltip/Tooltip';
 
-type CSVRow = Record<string, string | number>;
-type Data = CSVRow[] | Array<Array<string | number>>;
+type CSVRow = Record<string, string | number | null | undefined>;
+type Data = CSVRow[] | Array<Array<string | number | null | undefined>>;
 
 interface CSVDownloadButtonProps {
   data: string | Data | (() => string | Data);
