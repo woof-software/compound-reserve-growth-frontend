@@ -23,7 +23,6 @@ import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
-import View from '@/shared/ui/View/View';
 
 interface TreasuryHoldingsBlockProps {
   isLoading?: boolean;
@@ -50,11 +49,9 @@ const mapTableData = (data: TokenData[]) => {
   });
 };
 
-const TreasuryHoldingsBlock = ({
-  isLoading,
-  isError,
-  data
-}: TreasuryHoldingsBlockProps) => {
+const TreasuryHoldingsBlock = (props: TreasuryHoldingsBlockProps) => {
+  const { isLoading, isError, data } = props;
+
   const {
     isOpen: isSortOpen,
     onOpenModal: onSortOpen,
@@ -84,10 +81,15 @@ const TreasuryHoldingsBlock = ({
     setSelectedOptions: setSelectedChainOptions,
   } = useOptions(chainOptions, selectedChainKeys, setSelectedChainKeys);
 
+  const selectedChainOptionsSet = useMemo(
+    () => new Set(selectedChainOptions.map(o => o.value)),
+    [selectedChainOptions]
+  );
+
   const byChain = useMemo(() => (
     !selectedChainOptions.length
       ? data
-      : data.filter(d => selectedChainOptions.some(o => o.value === d.source.network))
+      : data.filter(d => selectedChainOptionsSet.has(d.source.network))
   ), [data, selectedChainOptions]);
 
   const marketOptions = useMemo(() => (
@@ -101,10 +103,15 @@ const TreasuryHoldingsBlock = ({
     setSelectedOptions: setSelectedMarketOptions,
   } = useOptions(marketOptions, selectedMarketKeys, setSelectedMarketKeys);
 
+  const selectedMarketOptionsSet = useMemo(
+    () => new Set(selectedMarketOptions.map(o => o.value)),
+    [selectedMarketOptions]
+  );
+
   const byChainAndMarket = useMemo(() => (
     !selectedMarketOptions.length
       ? byChain
-      : byChain.filter(d => selectedMarketOptions.some(o => o.value === (d.source.market ?? NOT_MARKET)))
+      : byChain.filter(d => selectedMarketOptionsSet.has(d.source.market ?? NOT_MARKET))
   ), [byChain, selectedMarketOptions]);
 
   const assetTypesOptions = useMemo(() => (
@@ -118,10 +125,15 @@ const TreasuryHoldingsBlock = ({
     setSelectedOptions: setSelectedAssetTypeOptions,
   } = useOptions(assetTypesOptions, selectedAssetTypesKeys, setSelectedAssetTypeKeys);
 
+  const selectedAssetTypeOptionsSet = useMemo(
+    () => new Set(selectedAssetTypeOptions.map(o => o.value)),
+    [selectedAssetTypeOptions]
+  );
+
   const byChainMarketAndAsset = useMemo(() => (
     !selectedAssetTypeOptions.length
       ? byChainAndMarket
-      : byChainAndMarket.filter(d => selectedAssetTypeOptions.some(o => o.value === d.source.asset.type))
+      : byChainAndMarket.filter(d => selectedAssetTypeOptionsSet.has(d.source.asset.type))
   ), [byChainAndMarket, selectedAssetTypeOptions]);
 
   const reserveSymbolOptions = useMemo(() => (
@@ -135,6 +147,11 @@ const TreasuryHoldingsBlock = ({
     selectedOptions: selectedSymbolOptions,
     setSelectedOptions: setSelectedSymbolOptions,
   } = useOptions(reserveSymbolOptions, selectedSymbolKeys, setSelectedSymbolKeys);
+
+  const selectedSymbolOptionsSet = useMemo(
+    () => new Set(selectedSymbolOptions.map(o => o.value)),
+    [selectedSymbolOptions]
+  );
 
   const { sortKey, sortDirection, onKeySelect, onTypeSelect } =
     useSorting<TreasuryBalanceByNetworkType>('asc', null);
@@ -154,36 +171,28 @@ const TreasuryHoldingsBlock = ({
     const filtered = data.filter((item) => {
       if (
         selectedChainOptions.length > 0 &&
-        !selectedChainOptions.some(
-          (o) => o.value === item.source.network
-        )
+        !selectedChainOptionsSet.has(item.source.network)
       ) {
         return false;
       }
 
       if (
         selectedAssetTypeOptions.length > 0 &&
-        !selectedAssetTypeOptions.some(
-          (o) => o.value === item.source.asset.type
-        )
+        !selectedAssetTypeOptionsSet.has(item.source.asset.type)
       ) {
         return false;
       }
-      
+
       if (
         selectedMarketOptions.length > 0 &&
-        !selectedMarketOptions.some((o) =>
-          o.value === (item.source.market ?? NOT_MARKET)
-        )
+        !selectedMarketOptionsSet.has(item.source.market ?? NOT_MARKET)
       ) {
         return false;
       }
 
       if (
         selectedSymbolOptions.length > 0 &&
-        !selectedSymbolOptions.some(
-          (o) => o.value === item.source.asset.symbol
-        )
+        !selectedSymbolOptionsSet.has(item.source.asset.symbol)
       ) {
         return false;
       }
@@ -279,15 +288,16 @@ const TreasuryHoldingsBlock = ({
           />
         </ChartActions>
       </div>
-      <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
-        <TreasuryHoldingsTable
-          sortType={sortType}
-          tableData={tableData}
-        />
-      </View.Condition>
-      <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
-        <NoDataPlaceholder onButtonClick={clearAllFilters} />
-      </View.Condition>
+      {!isLoading && !isError && (
+        tableData.length ? (
+          <TreasuryHoldingsTable
+            sortType={sortType}
+            tableData={tableData}
+          />
+        ) : (
+          <NoDataPlaceholder onButtonClick={clearAllFilters} />
+        )
+      )}
     </Card>
   );
 };

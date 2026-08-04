@@ -67,7 +67,7 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
       ...optionNetworks
     ];
   }, [data]);
-  
+
   const {
     selectedOptions: selectedChainOptions,
     setSelectedOptions: setSelectedChainOptions,

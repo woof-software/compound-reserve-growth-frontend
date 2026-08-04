@@ -58,10 +58,15 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
     setSelectedOptions: setSelectedChainOptions,
   } = useOptions(chainOptions, selectedChainKeys, setSelectedChainKeys);
 
+  const selectedChainOptionsSet = useMemo(
+    () => new Set(selectedChainOptions.map(o => o.value)),
+    [selectedChainOptions]
+  );
+
   const byChain = useMemo(() => (
     !selectedChainOptions.length
       ? data
-      : data.filter(d => selectedChainOptions.some(o => o.value === d.source.network))
+      : data.filter(d => selectedChainOptionsSet.has(d.source.network))
   ), [data, selectedChainOptions]);
 
   const marketOptions = useMemo(() => (
@@ -75,10 +80,15 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
     setSelectedOptions: setSelectedMarketOptions,
   } = useOptions(marketOptions, selectedMarketKeys, setSelectedMarketKeys);
 
+  const selectedMarketOptionsSet = useMemo(
+    () => new Set(selectedMarketOptions.map(o => o.value)),
+    [selectedMarketOptions]
+  );
+
   const filteredData = useMemo(() => (
     !selectedMarketOptions.length
       ? byChain
-      : byChain.filter(d => selectedMarketOptions.some(o => o.value === (d.source.market ?? NOT_MARKET)))
+      : byChain.filter(d => selectedMarketOptionsSet.has(d.source.market ?? NOT_MARKET))
   ), [byChain, selectedMarketOptions]);
 
   const clearAllFilters = () => {

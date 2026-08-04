@@ -8,15 +8,14 @@ import {
 import Highcharts, { Options, Point } from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-import ChartLegends from '@/components/Charts/ChartLegends';
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
+import ChartLegends from '@/components/Charts/ChartLegends';
 import { AggregatedPoint } from '@/shared/hooks/useCompoundChartBars';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { Format } from '@/shared/lib/utils/format';
 import { noop } from '@/shared/lib/utils/utils';
 import Icon from '@/shared/ui/Icon/Icon';
-import View from '@/shared/ui/View/View';
 
 import 'highcharts/modules/stock';
 import 'highcharts/modules/mouse-wheel-zoom';
@@ -61,7 +60,7 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
   className,
   customTooltipFormatter,
   customOptions
-}) => {
+  }) => {
   const { theme } = useTheme();
 
   const programmaticChange = useRef(false);
@@ -90,6 +89,12 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
     [seriesData, currentHiddenSet]
   );
 
+  const aggregatedRangeKey = useMemo(() => {
+    if (!aggregatedData.length) return '';
+    const d = aggregatedData;
+    return `${d.length}:${d[0].x}:${d[d.length - 1].x}`;
+  }, [aggregatedData]);
+
   useEffect(() => {
     const chart = chartRef.current?.chart;
     if (!chart || !barCount || aggregatedData.length === 0) return;
@@ -103,7 +108,7 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
       programmaticChange.current = true;
       chart.xAxis[0].setExtremes(min, max, true);
     }
-  }, [barCount, aggregatedData]);
+  }, [barCount, aggregatedRangeKey]);
 
   const highlightSeries = useCallback((name: string) => {
     const chart = chartRef.current?.chart;
@@ -206,7 +211,7 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
       break;
     case 'M':
     default:
-      xAxisLabelFormat = "{value:%b '%y}";
+      xAxisLabelFormat = '{value:%b \'%y}';
       break;
   }
 
@@ -348,14 +353,17 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
   }, [hiddenItems]);
 
   useEffect(() => {
-    if (onHiddenItems) {
-      const current = new Set(currentSeriesNames);
+    if (!onHiddenItems) return;
+    const current = new Set(currentSeriesNames);
 
-      const filtered = hiddenItems.filter((name) => current.has(name));
+    const filtered = hiddenItems.filter((name) => current.has(name));
 
-      onHiddenItems(filtered);
+    if (filtered.length === hiddenItems.length && filtered.every((item, i) => item === hiddenItems[i])) {
+      return;
     }
-  }, [currentSeriesNames]);
+
+    onHiddenItems(filtered);
+  }, [currentSeriesNames, hiddenItems]);
 
   useEffect(() => {
     if (resetHiddenKey !== undefined) {
@@ -376,11 +384,11 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
         className
       )}
     >
-      <div className='relative min-h-[400px] flex-grow'>
-        <div className='absolute top-1/2 left-1/2 z-[2] -translate-x-1/2 -translate-y-1/2 opacity-40'>
+      <div className='relative min-h-100 grow'>
+        <div className='absolute top-1/2 left-1/2 z-2 -translate-x-1/2 -translate-y-1/2 opacity-40'>
           <Icon
             name='logo-gray'
-            className='h-[27px] w-[121px]'
+            className='h-6.75 w-30.25'
             color='primary-11'
             isRound={false}
           />
@@ -400,7 +408,7 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
       </div>
       <div className='absolute right-0 hidden lg:block'>
         <div className='flex items-center gap-2'>
-          <View.Condition if={Boolean(seriesData.length > 1)}>
+          {seriesData.length > 1 && (
             <ChartIconToggle
               active={areAllSeriesHidden}
               onClick={areAllSeriesHidden ? onSelectAll : onDeselectAll}
@@ -408,17 +416,17 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
               offIcon='eye-closed'
               ariaLabel='Toggle all series visibility'
             />
-          </View.Condition>
+          )}
         </div>
       </div>
-      <View.Condition if={Boolean(seriesData.length > 1)}>
+      {seriesData.length > 1 && (
         <ChartLegends
           legends={legends}
           onLegendHover={highlightSeries}
           onLegendLeave={clearHighlight}
           onLegendClick={onSelectLegend}
         />
-      </View.Condition>
+      )}
     </div>
   );
 };

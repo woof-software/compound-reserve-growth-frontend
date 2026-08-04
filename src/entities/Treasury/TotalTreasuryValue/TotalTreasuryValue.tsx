@@ -83,10 +83,15 @@ const TotalTreasuryValue = ({
     setSelectedOptions: setSelectedChainOptions,
   } = useOptions(chainOptions, selectedChainKeys, setSelectedChainKeys);
 
+  const selectedChainOptionsSet = useMemo(
+    () => new Set(selectedChainOptions.map(o => o.value)),
+    [selectedChainOptions]
+  );
+
   const byChain = useMemo(() => (
     !selectedChainOptions.length
       ? treasuryApiResponse
-      : treasuryApiResponse.filter(d => selectedChainOptions.some(o => o.value === d.source.network))
+      : treasuryApiResponse.filter(d => selectedChainOptionsSet.has(d.source.network))
   ), [treasuryApiResponse, selectedChainOptions]);
 
   const marketOptions = useMemo(() => (
@@ -100,10 +105,15 @@ const TotalTreasuryValue = ({
     setSelectedOptions: setSelectedMarketOptions,
   } = useOptions(marketOptions, selectedMarketKeys, setSelectedMarketKeys);
 
+  const selectedMarketOptionsSet = useMemo(
+    () => new Set(selectedMarketOptions.map(o => o.value)),
+    [selectedMarketOptions]
+  );
+
   const byChainAndMarket = useMemo(() => (
     !selectedMarketOptions.length
       ? byChain
-      : byChain.filter(d => selectedMarketOptions.some(o => o.value === (d.source.market ?? NOT_MARKET)))
+      : byChain.filter(d => selectedMarketOptionsSet.has(d.source.market ?? NOT_MARKET))
   ), [byChain, selectedMarketOptions]);
 
   const assetTypesOptions = useMemo(() => (
@@ -117,10 +127,15 @@ const TotalTreasuryValue = ({
     setSelectedOptions: setSelectedAssetTypeOptions,
   } = useOptions(assetTypesOptions, selectedAssetTypesKeys, setSelectedAssetTypeKeys);
 
+  const selectedAssetTypeOptionsSet = useMemo(
+    () => new Set(selectedAssetTypeOptions.map(o => o.value)),
+    [selectedAssetTypeOptions]
+  );
+
   const byChainMarketAndAsset = useMemo(() => (
     !selectedAssetTypeOptions.length
       ? byChainAndMarket
-      : byChainAndMarket.filter(d => selectedAssetTypeOptions.some(o => o.value === d.source.asset.type))
+      : byChainAndMarket.filter(d => selectedAssetTypeOptionsSet.has(d.source.asset.type))
   ), [byChainAndMarket, selectedAssetTypeOptions]);
 
   const reserveSymbolOptions = useMemo(() => (
@@ -134,6 +149,11 @@ const TotalTreasuryValue = ({
     selectedOptions: selectedSymbolOptions,
     setSelectedOptions: setSelectedSymbolOptions,
   } = useOptions(reserveSymbolOptions, selectedSymbolKeys, setSelectedSymbolKeys);
+
+  const selectedSymbolOptionsSet = useMemo(
+    () => new Set(selectedSymbolOptions.map(o => o.value)),
+    [selectedSymbolOptions]
+  );
 
   const selectedGroupOption = useMemo(() => {
     const selectedElement = groupByOptions.find(({value}) => value === selectedGroupKey);
@@ -155,10 +175,10 @@ const TotalTreasuryValue = ({
     array: treasuryApiResponse,
     filters: [
       (v) => v.value > 0,
-      (v) => !selectedChainOptions.length || selectedChainOptions.some(o => o.value === v.source.network),
-      (v) => !selectedMarketOptions.length || selectedMarketOptions.some(o => o.value === (v.source.market ?? NOT_MARKET)),
-      (v) => !selectedAssetTypeOptions.length || selectedAssetTypeOptions.some(o => o.value === v.source.asset.type),
-      (v) => !selectedSymbolOptions.length || selectedSymbolOptions.some(o => o.value === v.source.asset.symbol),
+      (v) => !selectedChainOptions.length || selectedChainOptionsSet.has(v.source.network),
+      (v) => !selectedMarketOptions.length || selectedMarketOptionsSet.has(v.source.market ?? NOT_MARKET),
+      (v) => !selectedAssetTypeOptions.length || selectedAssetTypeOptionsSet.has(v.source.asset.type),
+      (v) => !selectedSymbolOptions.length || selectedSymbolOptionsSet.has(v.source.asset.symbol),
       (v) => startDate === null || v.date * 1000 >= startDate,
       (v) => endDate === null || v.date * 1000 <= endDate,
     ],

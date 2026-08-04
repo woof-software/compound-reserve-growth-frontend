@@ -28,7 +28,6 @@ import Drawer from '@/shared/ui/Drawer/Drawer';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
 interface CapturedFeesByNetworkAndMarketProps {
   isLoading?: boolean;
@@ -388,21 +387,22 @@ const CapturedFeesByNetworkAndMarket = ({
           </div>
         </Drawer>
       </div>
-      <View.Condition if={Boolean(!isLoading && !isError && tableData.length)}>
-        <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
-          <BarChart
-            data={chartData}
-            onClear={onClearFilters}
-          />
-          <CapturedFeesByNetworkAndMarketTable
-            sortType={sortType}
-            tableData={tableData}
-          />
-        </div>
-      </View.Condition>
-      <View.Condition if={Boolean(!isLoading && !isError && !tableData.length)}>
-        <NoDataPlaceholder onButtonClick={onClearAll} />
-      </View.Condition>
+      {!isLoading && !isError && (
+        tableData.length ? (
+          <div className="flex flex-col justify-between gap-0 md:gap-10 lg:flex-row">
+            <BarChart
+              data={chartData}
+              onClear={onClearFilters}
+            />
+            <CapturedFeesByNetworkAndMarketTable
+              sortType={sortType}
+              tableData={tableData}
+            />
+          </div>
+        ) : (
+          <NoDataPlaceholder onButtonClick={onClearAll} />
+        )
+      )}
     </Card>
   );
 };

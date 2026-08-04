@@ -9,7 +9,6 @@ import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import DataTable, { ExtendedColumnDef } from '@/shared/ui/DataTable/DataTable';
 import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
-import View from '@/shared/ui/View/View';
 
 export type ProcessedRevenueData = { chain: string } & OnlyStringKeys<{
   [key: Exclude<string, 'chain'>]: string | number;
@@ -128,15 +127,13 @@ const CompoundFeeRevenueByChainTable = ({
                         {capitalizeFirstLetter(key)}
                       </Text>
                       <div className='flex items-center gap-2'>
-                        <View.Condition if={Boolean(key === 'chain')}>
+                        {key === 'chain' && (
                           <Icon
-                            name={
-                              value.toString().toLowerCase() || 'not-found-icon'
-                            }
-                            className='h-4 w-4'
-                            folder='network'
+                            name={value.toString().toLowerCase() || 'not-found-icon'}
+                            className="h-4 w-4"
+                            folder="network"
                           />
-                        </View.Condition>
+                        )}
                         <Text
                           size='13'
                           lineHeight='21'

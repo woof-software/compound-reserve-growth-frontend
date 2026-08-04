@@ -23,7 +23,6 @@ import Card from '@/shared/ui/Card/Card';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Switch from '@/shared/ui/Switch/Switch';
-import View from '@/shared/ui/View/View';
 
 export interface TreasuryCompositionType {
   id: number;
@@ -275,21 +274,22 @@ const TreasuryCompositionBlock = memo(
           </div>
         </div>
         <div className='flex flex-col justify-between gap-8 md:flex-row'>
-          <View.Condition if={!hasData}>
+          {hasData ? (
+            <>
+              <PieChart
+                className="max-w-full md:max-w-1/2 lg:max-w-[450px]"
+                data={chartData}
+              />
+              <TreasuryComposition
+                sortType={sortType}
+                tableData={tableData}
+                totalBalance={totalBalance}
+                activeFilter={selectedGroupOption.label as 'Chain' | 'Asset Type' | 'Market'}
+              />
+            </>
+          ) : (
             <NoDataPlaceholder onButtonClick={onClearAll} />
-          </View.Condition>
-          <View.Condition if={hasData}>
-            <PieChart
-              className='max-w-full md:max-w-1/2 lg:max-w-[450px]'
-              data={chartData}
-            />
-            <TreasuryComposition
-              sortType={sortType}
-              tableData={tableData}
-              totalBalance={totalBalance}
-              activeFilter={selectedGroupOption.label as 'Chain' | 'Asset Type' | 'Market'}
-            />
-          </View.Condition>
+          )}
         </div>
         <SortDrawer
           isOpen={isSortOpen}

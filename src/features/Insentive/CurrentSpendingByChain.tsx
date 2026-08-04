@@ -26,7 +26,6 @@ import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
-import View from '@/shared/ui/View/View';
 
 export interface CurrentSpendingByChainProps {
   data: CombinedIncentivesData[];
@@ -184,8 +183,8 @@ const CurrentSpendingByChainBlock = (props: CurrentSpendingByChainProps) => {
           </ChartActions>
         </div>
       </div>
-      <View.Condition if={Boolean(!isLoading && !isError)}>
-        <div className='flex flex-col justify-between gap-0 md:gap-10 lg:flex-row'>
+      {!isLoading && !isError && (
+        <div className="flex flex-col justify-between gap-0 md:gap-10 lg:flex-row">
           <BarChart
             customOptions={customChartOptions}
             data={chartData}
@@ -196,7 +195,7 @@ const CurrentSpendingByChainBlock = (props: CurrentSpendingByChainProps) => {
             tableData={tableData}
           />
         </div>
-      </View.Condition>
+      )}
     </Card>
   );
 };
