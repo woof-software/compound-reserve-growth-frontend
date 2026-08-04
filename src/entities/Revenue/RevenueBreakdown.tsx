@@ -80,11 +80,16 @@ const RevenueBreakDownBlock = (props: RevenueProps) => {
     setSelectedChainKeys,
   );
 
+  const selectedChainOptionsSet = useMemo(
+    () => new Set(selectedChainOptions.map(o => o.value)),
+    [selectedChainOptions]
+  );
+
   const byChain = useMemo(
     () =>
       !selectedChainOptions.length
         ? rawData
-        : rawData.filter((item) => selectedChainOptions.some((o) => o.value === item.source.network)),
+        : rawData.filter((item) => selectedChainOptionsSet.has(item.source.network)),
     [rawData, selectedChainOptions],
   );
 
@@ -103,11 +108,16 @@ const RevenueBreakDownBlock = (props: RevenueProps) => {
     setSelectedMarketKeys,
   );
 
+  const selectedMarketOptionsSet = useMemo(
+    () => new Set(selectedMarketOptions.map(o => o.value)),
+    [selectedMarketOptions]
+  );
+
   const byChainAndMarket = useMemo(
     () =>
       !selectedMarketOptions.length
         ? byChain
-        : byChain.filter((item) => selectedMarketOptions.some((o) => o.value === (item.source.market ?? NOT_MARKET))),
+        : byChain.filter((item) => selectedMarketOptionsSet.has(item.source.market ?? NOT_MARKET)),
     [byChain, selectedMarketOptions],
   );
 
@@ -129,11 +139,16 @@ const RevenueBreakDownBlock = (props: RevenueProps) => {
     setSelectedSourceKeys,
   );
 
+  const selectedSourceOptionsSet = useMemo(
+    () => new Set(selectedSourceOptions.map(o => o.value)),
+    [selectedSourceOptions]
+  );
+
   const byChainMarketAndSource = useMemo(
     () =>
       !selectedSourceOptions.length
         ? byChainAndMarket
-        : byChainAndMarket.filter((item) => selectedSourceOptions.some((o) => o.value === item.source.type)),
+        : byChainAndMarket.filter((item) => selectedSourceOptionsSet.has(item.source.type)),
     [byChainAndMarket, selectedSourceOptions],
   );
 
@@ -153,6 +168,11 @@ const RevenueBreakDownBlock = (props: RevenueProps) => {
     symbolOptions,
     selectedSymbolKeys,
     setSelectedSymbolKeys,
+  );
+
+  const selectedSymbolOptionsSet = useMemo(
+    () => new Set(selectedSymbolOptions.map(o => o.value)),
+    [selectedSymbolOptions]
   );
 
   useEffect(() => {
@@ -196,11 +216,11 @@ const RevenueBreakDownBlock = (props: RevenueProps) => {
   const { result: groupedData } = useProcessor({
     array: rawData ?? [],
     filters: [
-      (v) => !selectedChainOptions.length || selectedChainOptions.some((o) => o.value === v.source.network),
+      (v) => !selectedChainOptions.length || selectedChainOptionsSet.has(v.source.network),
       (v) =>
-        !selectedMarketOptions.length || selectedMarketOptions.some((o) => o.value === (v.source.market ?? NOT_MARKET)),
-      (v) => !selectedSourceOptions.length || selectedSourceOptions.some((o) => o.value === v.source.type),
-      (v) => !selectedSymbolOptions.length || selectedSymbolOptions.some((o) => o.value === v.source.asset.symbol),
+        !selectedMarketOptions.length || selectedMarketOptionsSet.has(v.source.market ?? NOT_MARKET),
+      (v) => !selectedSourceOptions.length || selectedSourceOptionsSet.has(v.source.type),
+      (v) => !selectedSymbolOptions.length || selectedSymbolOptionsSet.has(v.source.asset.symbol),
       (v) => !yearToDisplay || new Date(v.date * 1000).getFullYear().toString() === yearToDisplay,
     ],
     transformer: () => {

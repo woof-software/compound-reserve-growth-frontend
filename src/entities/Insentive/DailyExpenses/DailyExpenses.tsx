@@ -69,16 +69,21 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
       ...optionNetworks
     ];
   }, [data]);
-  
+
   const {
     selectedOptions: selectedChainOptions,
     setSelectedOptions: setSelectedChainOptions,
   } = useOptions(chainOptions, selectedChainKeys, setSelectedChainKeys);
 
+  const selectedChainOptionsSet = useMemo(
+    () => new Set(selectedChainOptions.map(o => o.value)),
+    [selectedChainOptions]
+  );
+
   const byChain = useMemo(() => (
     !selectedChainOptions.length
       ? data
-      : data.filter(d => selectedChainOptions.some(o => o.value === d.source.network))
+      : data.filter(d => selectedChainOptionsSet.has(d.source.network))
   ), [data, selectedChainOptions]);
 
   const marketOptions = useMemo(() => (
@@ -92,6 +97,11 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
     setSelectedOptions: setSelectedMarketOptions,
   } = useOptions(marketOptions, selectedMarketKeys, setSelectedMarketKeys);
 
+  const selectedMarketOptionsSet = useMemo(
+    () => new Set(selectedMarketOptions.map(o => o.value)),
+    [selectedMarketOptions]
+  );
+
   const filteredData = useMemo(() => {
     if (!data?.length) return [];
     let result = data;
@@ -102,20 +112,20 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
     );
     result = result.filter((item) => item.date === latestDate);
 
-    if (selectedChainKeys.length > 0) {
+    if (selectedChainOptions.length > 0) {
       result = result.filter((item) =>
-        selectedChainKeys.includes(item.source.network)
+        selectedChainOptionsSet.has(item.source.network)
       );
     }
 
-    if (selectedMarketKeys.length > 0) {
+    if (selectedMarketOptions.length > 0) {
       result = result.filter((item) =>
-        selectedMarketKeys.includes(item.source.market ?? NOT_MARKET)
+        selectedMarketOptionsSet.has(item.source.market ?? NOT_MARKET)
       );
     }
 
     return result;
-  }, [data, selectedChainKeys, selectedMarketKeys]);
+  }, [data, selectedChainOptions, selectedMarketOptions]);
 
   const isAnyFiltersSelected = !!selectedChainOptions.length || !!selectedMarketOptions.length;
 

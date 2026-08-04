@@ -52,10 +52,15 @@ const CompoundRevenueBlock = (props: RevenueProps) => {
     setSelectedOptions: setSelectedChainOptions,
   } = useOptions(chainOptions, selectedChainKeys, setSelectedChainKeys);
 
+  const selectedChainOptionsSet = useMemo(
+    () => new Set(selectedChainOptions.map(o => o.value)),
+    [selectedChainOptions]
+  );
+
   const byChain = useMemo(() => (
     !selectedChainOptions.length
       ? revenueData
-      : revenueData.filter(d => selectedChainOptions.some(o => o.value === d.source.network))
+      : revenueData.filter(d => selectedChainOptionsSet.has(d.source.network))
   ), [revenueData, selectedChainOptions]);
 
   const marketOptions = useMemo(() => (
@@ -69,10 +74,15 @@ const CompoundRevenueBlock = (props: RevenueProps) => {
     setSelectedOptions: setSelectedMarketOptions,
   } = useOptions(marketOptions, selectedMarketKeys, setSelectedMarketKeys);
 
+  const selectedMarketOptionsSet = useMemo(
+    () => new Set(selectedMarketOptions.map(o => o.value)),
+    [selectedMarketOptions]
+  );
+
   const byChainAndMarket = useMemo(() => (
     !selectedMarketOptions.length
       ? byChain
-      : byChain.filter(d => selectedMarketOptions.some(o => o.value === (d.source.market ?? NOT_MARKET)))
+      : byChain.filter(d => selectedMarketOptionsSet.has(d.source.market ?? NOT_MARKET))
   ), [byChain, selectedMarketOptions]);
 
   const sourceOptions = useMemo(() => (
@@ -86,10 +96,15 @@ const CompoundRevenueBlock = (props: RevenueProps) => {
     setSelectedOptions: setSelectedSourceOptions,
   } = useOptions(sourceOptions, selectedAssetTypesKeys, setSelectedAssetTypeKeys);
 
+  const selectedSourceOptionsSet = useMemo(
+    () => new Set(selectedSourceOptions.map(o => o.value)),
+    [selectedSourceOptions]
+  );
+
   const byChainMarketAndSource = useMemo(() => (
     !selectedSourceOptions.length
       ? byChainAndMarket
-      : byChainAndMarket.filter(d => selectedSourceOptions.some(o => o.value === d.source.type))
+      : byChainAndMarket.filter(d => selectedSourceOptionsSet.has(d.source.type))
   ), [byChainAndMarket, selectedSourceOptions]);
 
   const symbolOptions = useMemo(() => (
@@ -104,14 +119,19 @@ const CompoundRevenueBlock = (props: RevenueProps) => {
     setSelectedOptions: setSelectedSymbolOptions,
   } = useOptions(symbolOptions, selectedSymbolKeys, setSelectedSymbolKeys);
 
+  const selectedSymbolOptionsSet = useMemo(
+    () => new Set(selectedSymbolOptions.map(o => o.value)),
+    [selectedSymbolOptions]
+  );
+
   const { result } = useProcessor({
     array: revenueData,
     filters: [
       (v) => v.value > 0,
-      (v) => !selectedChainOptions.length || selectedChainOptions.some(o => o.value === v.source.network),
-      (v) => !selectedMarketOptions.length || selectedMarketOptions.some(o => o.value === (v.source.market ?? NOT_MARKET)),
-      (v) => !selectedSourceOptions.length || selectedSourceOptions.some(o => o.value === v.source.type),
-      (v) => !selectedSymbolOptions.length || selectedSymbolOptions.some(o => o.value === v.source.asset.symbol),
+      (v) => !selectedChainOptions.length || selectedChainOptionsSet.has(v.source.network),
+      (v) => !selectedMarketOptions.length || selectedMarketOptionsSet.has(v.source.market ?? NOT_MARKET),
+      (v) => !selectedSourceOptions.length || selectedSourceOptionsSet.has(v.source.type),
+      (v) => !selectedSymbolOptions.length || selectedSymbolOptionsSet.has(v.source.asset.symbol),
       (v) => startDate === null || v.date * 1000 >= startDate,
       (v) => endDate === null || v.date * 1000 <= endDate,
     ],
