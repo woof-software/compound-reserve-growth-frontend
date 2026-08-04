@@ -11,6 +11,8 @@ import React, {
 
 import { cn } from '@/shared/lib/classNames/classNames';
 
+import View from '../View/View';
+
 type Value = string;
 
 type Direction = 'horizontal' | 'vertical';
@@ -189,7 +191,7 @@ function RadioItem({
         />
       </span>
       <span className='flex min-w-0 flex-col'>
-        {label && label}
+        <View.Condition if={Boolean(label)}>{label}</View.Condition>
       </span>
     </label>
   );

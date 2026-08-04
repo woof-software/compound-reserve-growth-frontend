@@ -8,14 +8,15 @@ import {
 import Highcharts, { Options, Point } from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
+import ChartLegends from '@/components/Charts/ChartLegends';
 import { useTheme } from '@/app/providers/ThemeProvider/theme-provider';
 import ChartIconToggle from '@/components/ChartIconToggle/ChartIconToggle';
-import ChartLegends from '@/components/Charts/ChartLegends';
 import { AggregatedPoint } from '@/shared/hooks/useCompoundChartBars';
 import { cn } from '@/shared/lib/classNames/classNames';
 import { Format } from '@/shared/lib/utils/format';
 import { noop } from '@/shared/lib/utils/utils';
 import Icon from '@/shared/ui/Icon/Icon';
+import View from '@/shared/ui/View/View';
 
 import 'highcharts/modules/stock';
 import 'highcharts/modules/mouse-wheel-zoom';
@@ -205,7 +206,7 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
       break;
     case 'M':
     default:
-      xAxisLabelFormat = '{value:%b \'%y}';
+      xAxisLabelFormat = "{value:%b '%y}";
       break;
   }
 
@@ -399,7 +400,7 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
       </div>
       <div className='absolute right-0 hidden lg:block'>
         <div className='flex items-center gap-2'>
-          {seriesData.length > 1 && (
+          <View.Condition if={Boolean(seriesData.length > 1)}>
             <ChartIconToggle
               active={areAllSeriesHidden}
               onClick={areAllSeriesHidden ? onSelectAll : onDeselectAll}
@@ -407,17 +408,17 @@ const CompoundFeeRecievedChart: React.FC<CompoundFeeRecievedProps> = ({
               offIcon='eye-closed'
               ariaLabel='Toggle all series visibility'
             />
-          )}
+          </View.Condition>
         </div>
       </div>
-      {seriesData.length > 1 && (
+      <View.Condition if={Boolean(seriesData.length > 1)}>
         <ChartLegends
           legends={legends}
           onLegendHover={highlightSeries}
           onLegendLeave={clearHighlight}
           onLegendClick={onSelectLegend}
         />
-      )}
+      </View.Condition>
     </div>
   );
 };

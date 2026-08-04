@@ -17,6 +17,7 @@ import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
+import View from '@/shared/ui/View/View';
 
 export const CARD_CLASS_NAMES = {
   loading: 'min-h-[565px]',
@@ -157,16 +158,16 @@ const CapoCollateralsPriceBlock = ({
           <CSVDownloadButton data={processedData} filename='collaterals_price_against_price_restriction' />
         </ChartActions>
       </div>
-      {(!isLoading && !isError && processedData.length) &&
+      <View.Condition if={(!isLoading && !isError && processedData.length)}>
         <CollateralsPriceTable sortType={sortType} tableData={processedData} />
-      }
-      {(!isLoading && !isError && !processedData.length) && (
+      </View.Condition>
+      <View.Condition if={(!isLoading && !isError && !processedData.length)}>
         <NoDataPlaceholder
           text={!isAnyFilterSelected ? 'No data found' : undefined}
           hideButton={!isAnyFilterSelected}
           onButtonClick={clearAllFilters}
         />
-      )}
+      </View.Condition>
     </Card>
   );
 };
