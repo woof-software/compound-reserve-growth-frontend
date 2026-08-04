@@ -50,11 +50,9 @@ const mapTableData = (data: TokenData[]) => {
   });
 };
 
-const TreasuryHoldingsBlock = ({
-   isLoading,
-   isError,
-   data
- }: TreasuryHoldingsBlockProps) => {
+const TreasuryHoldingsBlock = (props: TreasuryHoldingsBlockProps) => {
+  const { isLoading, isError, data } = props;
+
   const {
     isOpen: isSortOpen,
     onOpenModal: onSortOpen,
