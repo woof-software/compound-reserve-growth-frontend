@@ -373,7 +373,7 @@ const TotalTreasuryValue = ({
                     ariaLabel='Toggle all series visibility'
                   >
                     <Text size='14' weight='500'>
-                      Hide Events
+                      {areAllSeriesHidden ? 'Select All' : 'Unselect All'}
                     </Text>
                   </ChartIconToggle>
                 }
