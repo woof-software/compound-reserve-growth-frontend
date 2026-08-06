@@ -1,4 +1,4 @@
-import { ComponentProps,FC, useState } from 'react';
+import { ComponentProps, ReactNode,useState } from 'react';
 import { CSVLink } from 'react-csv';
 
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
@@ -9,19 +9,17 @@ import Text from '@/shared/ui/Text/Text';
 import { Tooltip } from '@/shared/ui/Tooltip/Tooltip';
 
 type CSVRow = Record<string, string | number | null | undefined>;
-type Data = CSVRow[] | Array<Array<string | number | null | undefined>>;
 
 interface CSVDownloadButtonProps {
-  data: string | Data | (() => string | Data);
+  data: string | CSVRow[] | (() => string) | (() => CSVRow[]);
   filename?: string;
   className?: string;
   tooltipContent?: string;
   renderAsLink?: boolean;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
-
-const CSVDownloadButton: FC<CSVDownloadButtonProps> = (props: CSVDownloadButtonProps) => {
+const CSVDownloadButton = (props: CSVDownloadButtonProps) => {
   const {
     data,
     tooltipContent,
@@ -31,7 +29,7 @@ const CSVDownloadButton: FC<CSVDownloadButtonProps> = (props: CSVDownloadButtonP
 
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
 
-  const [resolvedData, setResolvedData] = useState<string | Data>(
+  const [resolvedData, setResolvedData] = useState<string | CSVRow[]>(
     typeof data === 'function' ? [] : data
   );
 

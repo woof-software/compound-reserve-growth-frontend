@@ -276,14 +276,14 @@ const TreasuryHoldingsBlock = (props: TreasuryHoldingsBlockProps) => {
           mobileChildren={
             <>
               <CSVDownloadButton
-                data={() => tableData}
+                data={tableData}
                 filename={getCsvFileName('total_treasury_value')}
               />
             </>
           }
         >
           <CSVDownloadButton
-            data={() => tableData}
+            data={tableData}
             filename={getCsvFileName('total_treasury_value')}
           />
         </ChartActions>
