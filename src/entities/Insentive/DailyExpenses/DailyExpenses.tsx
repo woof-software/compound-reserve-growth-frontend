@@ -295,15 +295,16 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
           </ChartActions>
         </div>
       </div>
-      {(!isLoading && !isError && normalizedTableData.length) && (
-        <DailyExpensesTable
-          activeViewTab={activeCurrencyTab}
-          sortType={sortType}
-          tableData={normalizedTableData}
-        />
-      )}
-      {(!isLoading && !isError && !normalizedTableData.length) && (
-        <NoDataPlaceholder onButtonClick={clearAllFilters} />
+      {!isLoading && !isError && (
+        normalizedTableData.length ? (
+          <DailyExpensesTable
+            activeViewTab={activeCurrencyTab}
+            sortType={sortType}
+            tableData={normalizedTableData}
+          />
+        ) : (
+          <NoDataPlaceholder onButtonClick={clearAllFilters} />
+        )
       )}
     </Card>
   );
