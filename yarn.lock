@@ -3318,11 +3318,6 @@ punycode@^2.1.0:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.3.1.tgz#027422e2faec0b25e1549c3e1bd8309b9133b6e5"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
-react-csv@^2.2.2:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/react-csv/-/react-csv-2.2.2.tgz#5bbf0d72a846412221a14880f294da9d6def9bfb"
-  integrity sha512-RG5hOcZKZFigIGE8LxIEV/OgS1vigFQT4EkaHeKgyuCbUAu9Nbd/1RYq++bJcJJ9VOqO/n9TZRADsXNDR4VEpw==
-
 react-dom@^19.1.0:
   version "19.2.6"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-19.2.6.tgz#44a81b0bcca22da814c00847d09d01c8615529b7"
