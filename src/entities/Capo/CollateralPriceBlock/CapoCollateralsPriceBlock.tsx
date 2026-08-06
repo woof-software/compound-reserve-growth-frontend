@@ -18,7 +18,7 @@ import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 
-export const CARD_CLASS_NAMES = {
+const CARD_CLASS_NAMES = {
   loading: 'min-h-[565px]',
   container: 'overflow-visible rounded-lg',
   content: 'rounded-b-lg px-0 pt-0 pb-0 lg:px-10 lg:pb-10',
@@ -31,7 +31,7 @@ export interface CollateralsPriceBlockProps {
   tableData: CapoTableItem[];
 }
 
-export const SORT_COLUMNS: SortAccessor<CapoTableItem>[] = [
+const SORT_COLUMNS: SortAccessor<CapoTableItem>[] = [
   { accessorKey: 'network', header: 'Network' },
   { accessorKey: 'collateral', header: 'Collateral' },
   { accessorKey: 'collateralPrice', header: 'Collateral Price' },

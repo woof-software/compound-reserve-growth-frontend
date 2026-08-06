@@ -1,17 +1,17 @@
-import { JSX } from 'react';
+import { ReactNode } from 'react';
 
-import CapoPage from '@/pages/CapoPage/CapoPage';
-import IncentivePage from '@/pages/InsentivePage/IncentivePage';
 // TODO: OEV Page has to be hidden until it is finalized
 // import OEVPage from '@/pages/OEVPage/OEVPage';
 import AccountingPage from '@/pages/AccountingPage/AccountingPage';
+import CapoPage from '@/pages/CapoPage/CapoPage';
+import IncentivePage from '@/pages/InsentivePage/IncentivePage';
 import RunwayPage from '@/pages/RunwayPage/RunwayPage';
 import SpendingsPage from '@/pages/SpendingsPage/SpendingsPage';
 import TreasuryPage from '@/pages/TreasuryPage/TreasuryPage';
 
 export interface RouteConfig {
   path: string;
-  element: JSX.Element;
+  element: ReactNode;
 }
 
 export enum commonRoutes {

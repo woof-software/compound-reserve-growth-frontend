@@ -20,7 +20,7 @@ const useCurrentYear = () => {
   return useMemo(() => new Date().getFullYear(), []);
 };
 
-export const annualisedExpensesColumns: SortAccessor<AnnualisedExpensesRecord>[] =
+const annualisedExpensesColumns: SortAccessor<AnnualisedExpensesRecord>[] =
   [
     {
       accessorKey: 'discipline',

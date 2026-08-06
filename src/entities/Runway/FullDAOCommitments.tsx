@@ -20,7 +20,7 @@ import Icon from '@/shared/ui/Icon/Icon';
 import SortDrawer from '@/shared/ui/SortDrawer/SortDrawer';
 import Text from '@/shared/ui/Text/Text';
 
-export const fullDAOCommitmentsColumns: SortAccessor<FullDAOCommitmentRow>[] = [
+const fullDAOCommitmentsColumns: SortAccessor<FullDAOCommitmentRow>[] = [
   {
     accessorKey: 'recipient',
     header: 'Recipient'

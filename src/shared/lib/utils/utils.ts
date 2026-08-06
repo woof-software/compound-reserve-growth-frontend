@@ -1,16 +1,8 @@
-import { ChangeEvent, MouseEvent as ReactMouseEvent } from 'react';
 import { createParser, parseAsArrayOf, parseAsString } from 'nuqs';
 
 import { NOT_MARKET, THIRTY_DAYS } from '@/shared/consts/consts';
 import { TokenData } from '@/shared/types/Treasury/types';
 import type { OptionType } from '@/shared/types/types';
-
-export const preventEventBubbling = (
-  e: ReactMouseEvent<HTMLElement> | ChangeEvent<HTMLInputElement>
-): void => {
-  e.preventDefault();
-  e.stopPropagation();
-};
 
 export const shortMonthNames = [
   'JAN',
@@ -176,20 +168,6 @@ export const explorers: { [key: string]: string } = {
 };
 
 export const defaultExplorer = 'https://etherscan.io/address/';
-
-export const units = [
-  { value: 1e33, symbol: 'D' },
-  { value: 1e30, symbol: 'N' },
-  { value: 1e27, symbol: 'Oc' },
-  { value: 1e24, symbol: 'Sp' },
-  { value: 1e21, symbol: 'Sx' },
-  { value: 1e18, symbol: 'Qi' },
-  { value: 1e15, symbol: 'Q' },
-  { value: 1e12, symbol: 'T' },
-  { value: 1e9, symbol: 'B' },
-  { value: 1e6, symbol: 'M' },
-  { value: 1e3, symbol: 'K' }
-];
 
 export const sliceAddress = (
   address?: string,
@@ -370,45 +348,6 @@ export const formatUSD = (num: number, format?: 'compact'): string => {
   }).format(num);
 };
 
-export const formatCurrencyValue = (value: unknown): string => {
-  const num = Number(value);
-
-  if (
-    value === null ||
-    typeof value === 'undefined' ||
-    isNaN(num) ||
-    num === 0
-  ) {
-    return '-';
-  }
-
-  const isNegative = num < 0;
-  const absValue = Math.abs(num);
-
-  const formattedNumber = new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 0
-  }).format(absValue);
-
-  return isNegative ? `-$${formattedNumber}` : `$${formattedNumber}`;
-};
-
-export const groupOptionsDto = (options: string[]) => {
-  return options.map((option) => ({
-    header: option,
-    accessorKey: option
-  }));
-};
-
-export const formatValue = (value: number) => {
-  if (Math.abs(value) >= 1_000_000) {
-    return (value / 1_000_000).toFixed(1) + 'M';
-  }
-  if (Math.abs(value) >= 1_000) {
-    return (value / 1_000).toFixed(1) + 'K';
-  }
-  return value.toFixed(0);
-};
-
 export const removeDuplicates = <T>(array: T[], key: keyof T): T[] => {
   const uniqueValues = new Set();
 
@@ -421,30 +360,6 @@ export const removeDuplicates = <T>(array: T[], key: keyof T): T[] => {
 
     return true;
   });
-};
-
-export const startOfUTCDay = (t: number) => {
-  const d = new Date(t);
-
-  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-};
-
-export const startOfUTCWeekMon = (t: number) => {
-  const d = new Date(t);
-
-  const weekday = d.getUTCDay();
-
-  const shift = (weekday + 6) % 7;
-
-  const dayStart = startOfUTCDay(t);
-
-  return dayStart - shift * 24 * 60 * 60 * 1000;
-};
-
-export const startOfUTCMonth = (t: number) => {
-  const d = new Date(t);
-
-  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
 };
 
 /**
