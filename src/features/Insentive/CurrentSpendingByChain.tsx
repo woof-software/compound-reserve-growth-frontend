@@ -163,21 +163,25 @@ const CurrentSpendingByChainBlock = (props: CurrentSpendingByChainProps) => {
           <ChartActions
             mobileChildren={
               <CSVDownloadButton
-                data={() => tableData.map((item) => ({
-                  network: item.network,
-                  valueComp: item.valueComp,
-                  valueUsd: item.valueUsd
-                }))}
+                data={() => (
+                  tableData.map((item) => ({
+                    network: item.network,
+                    valueComp: item.valueComp,
+                    valueUsd: item.valueUsd
+                  }))
+                )}
                 filename={getCsvFileName('Incentive_Current_Spending_By_Chain')}
               />
             }
           >
             <CSVDownloadButton
-              data={() => tableData.map((item) => ({
-                network: item.network,
-                valueComp: item.valueComp,
-                valueUsd: item.valueUsd
-              }))}
+              data={() => (
+                tableData.map((item) => ({
+                  network: item.network,
+                  valueComp: item.valueComp,
+                  valueUsd: item.valueUsd
+                }))
+              )}
               filename={getCsvFileName('Incentive_Current_Spending_By_Chain')}
             />
           </ChartActions>

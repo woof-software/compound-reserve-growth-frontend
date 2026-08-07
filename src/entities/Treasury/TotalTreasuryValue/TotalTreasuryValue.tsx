@@ -322,15 +322,17 @@ const TotalTreasuryValue = ({
             mobileChildren={
               <>
                 <CSVDownloadButton
-                  data={() => filterForRange({
-                    data: chartSeries[0]?.data ?? [],
-                    getDate: (item) => new Date(item.x),
-                    transform: (item) => ({
-                      Date: new Date(item.x).toISOString().split('T')[0],
-                      'Total treasury': item.y
-                    }),
-                    range: barSize
-                  })}
+                  data={() => (
+                    filterForRange({
+                      data: chartSeries[0]?.data ?? [],
+                      getDate: (item) => new Date(item.x),
+                      transform: (item) => ({
+                        Date: new Date(item.x).toISOString().split('T')[0],
+                        'Total treasury': item.y
+                      }),
+                      range: barSize
+                    })
+                  )}
                   filename={getCsvFileName('total_treasury_value')}
                 />
                 <ChartIconToggle
@@ -379,15 +381,17 @@ const TotalTreasuryValue = ({
             }
           >
             <CSVDownloadButton
-              data={() => filterForRange({
-                data: chartSeries[0]?.data ?? [],
-                getDate: (item) => new Date(item.x),
-                transform: (item) => ({
-                  Date: new Date(item.x).toISOString().split('T')[0],
-                  'Total treasury': item.y
-                }),
-                range: barSize
-              })}
+              data={() => (
+                filterForRange({
+                  data: chartSeries[0]?.data ?? [],
+                  getDate: (item) => new Date(item.x),
+                  transform: (item) => ({
+                    Date: new Date(item.x).toISOString().split('T')[0],
+                    'Total treasury': item.y
+                  }),
+                  range: barSize
+                })
+              )}
               filename={getCsvFileName('total_treasury_value')}
             />
           </ChartActions>

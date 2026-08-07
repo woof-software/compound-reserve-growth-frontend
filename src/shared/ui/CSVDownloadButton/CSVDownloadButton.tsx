@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import { cn } from '@/shared/lib/classNames/classNames';
@@ -7,61 +7,98 @@ import Icon from '@/shared/ui/Icon/Icon';
 import Text from '@/shared/ui/Text/Text';
 import { Tooltip } from '@/shared/ui/Tooltip/Tooltip';
 
-type CSVRow = Record<string, string | number | null | undefined>;
-type CSVData = CSVRow[] | (() => CSVRow[]) | (() => Promise<CSVRow[]>);
-
-interface CSVDownloadButtonProps {
-  data: CSVData;
+export type CSVDownloadButtonProps = {
+  data: object[] | (() => object[]);
   filename?: string;
   className?: string;
   tooltipContent?: string;
 }
 
-const CSVDownloadButton = (props: CSVDownloadButtonProps) => {
-  const { data, tooltipContent, filename = 'export.csv', className } = props;
+export default function CSVDownloadButton(props: CSVDownloadButtonProps) {
+  const {
+    data,
+    tooltipContent,
+    filename = 'export.csv',
+    className,
+  } = props;
 
   const isMobile = useMediaQuery('(max-width: 63.938rem)');
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleClick = useCallback(async () => {
-    setIsLoading(true);
+  const handleClick = () => {
     try {
-      const rows = typeof data === 'function' ? await data() : data;
+      if (isProcessing) return;
 
-      const escapeCell = (value: string | number | null | undefined): string => {
-        const str = value == null ? '' : String(value);
-        return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
-      };
+      setIsProcessing(true);
+      
+      const records = typeof data === 'function' ? data() : data;
 
-      const csv = rows.length
-        ? (() => {
-          const headers = Object.keys(rows[0]);
-          const lines = [headers, ...rows.map((row) => headers.map((key) => row[key]))];
-          return lines.map((line) => line.map(escapeCell).join(',')).join('\n');
-        })()
-        : '';
+      const rawCsv = (() => {
+        const uniqueHeaders = new Set<string>();
+        
+        for (const row of records) {
+          for (const header in row) {
+            uniqueHeaders.add(header);
+          }
+        }
 
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
+        return [
+          [...uniqueHeaders],
+          ...(
+            records.map((o) => {
+              const values: string[] = [];
+
+              for (const header of uniqueHeaders) {
+                values.push((() => {
+                  const value = Reflect.get(o, header);
+
+                  switch (typeof value) {
+                    case 'string':
+                    case 'bigint':
+                    case 'number': {
+                      return (`${value}`).replace(/(?:\r\n|\r|\n)/g, ' ').trim();
+                    }
+                    default: {
+                      return '';
+                    }
+                  }
+                })());
+              }
+
+              return values;
+            })
+          ),
+        ].join('\n');
+      })();
+      
       const link = document.createElement('a');
+
+      const blob = new Blob([rawCsv], { type: 'text/csv;charset=utf-8;' });
+
+      const url = URL.createObjectURL(blob);
+
       link.href = url;
       link.download = filename;
+      
       document.body.appendChild(link);
+      
       link.click();
+      
       document.body.removeChild(link);
+      
       URL.revokeObjectURL(url);
     } finally {
-      setIsLoading(false);
+      setIsProcessing(false);
     }
-  }, [data, filename]);
+  };
 
   if (isMobile) {
     return (
       <Button
         className={'w-full justify-start'}
+        disabled={isProcessing}
         onClick={handleClick}
-        disabled={isLoading}
       >
         <Icon
           name='download'
@@ -83,7 +120,7 @@ const CSVDownloadButton = (props: CSVDownloadButtonProps) => {
           'bg-primary-20 shadow-16 dark:shadow-13 flex h-8 w-8 items-center justify-center rounded-lg p-1 transition-opacity duration-200 hover:opacity-80',
           className
         )}
-        disabled={isLoading}
+        disabled={isProcessing}
         onClick={handleClick}
       >
         <Icon
@@ -93,6 +130,4 @@ const CSVDownloadButton = (props: CSVDownloadButtonProps) => {
       </Button>
     </Tooltip>
   );
-};
-
-export default CSVDownloadButton;
+}

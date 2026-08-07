@@ -195,32 +195,32 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
         <ChartActions
           mobileChildren={
             <CSVDownloadButton
-              data={() => normalizedTableData.map((item) => ({
+              data={() => (
+                normalizedTableData.map((item) => ({
+                  network: item.network,
+                  market: item.market,
+                  lendIncentive: item.lendIncentive,
+                  borrowIncentive: item.borrowIncentive,
+                  total: item.total,
+                  source: item.source.address
+                }))
+              )}
+              filename={getCsvFileName('incentives_daily_expenses', { view: activeCurrencyTab })}
+            />
+          }
+        >
+          <CSVDownloadButton
+            data={() => (
+              normalizedTableData.map((item) => ({
                 network: item.network,
                 market: item.market,
                 lendIncentive: item.lendIncentive,
                 borrowIncentive: item.borrowIncentive,
                 total: item.total,
                 source: item.source.address
-              }))}
-              filename={getCsvFileName('incentives_daily_expenses', {
-                view: activeCurrencyTab
-              })}
-            />
-          }
-        >
-          <CSVDownloadButton
-            data={() => normalizedTableData.map((item) => ({
-              network: item.network,
-              market: item.market,
-              lendIncentive: item.lendIncentive,
-              borrowIncentive: item.borrowIncentive,
-              total: item.total,
-              source: item.source.address
-            }))}
-            filename={getCsvFileName('incentives_daily_expenses', {
-              view: activeCurrencyTab
-            })}
+              }))
+            )}
+            filename={getCsvFileName('incentives_daily_expenses', { view: activeCurrencyTab })}
           />
         </ChartActions>
       </div>
@@ -277,17 +277,17 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
           <ChartActions
             mobileChildren={
               <CSVDownloadButton
-                data={() => normalizedTableData.map((item) => ({
-                  network: item.network,
-                  market: item.market,
-                  lendIncentive: item.lendIncentive,
-                  borrowIncentive: item.borrowIncentive,
-                  total: item.total,
-                  source: item.source.address
-                }))}
-                filename={getCsvFileName('incentives_daily_expenses', {
-                  view: activeCurrencyTab
-                })}
+                data={() => (
+                  normalizedTableData.map((item) => ({
+                    network: item.network,
+                    market: item.market,
+                    lendIncentive: item.lendIncentive,
+                    borrowIncentive: item.borrowIncentive,
+                    total: item.total,
+                    source: item.source.address
+                  }))
+                )}
+                filename={getCsvFileName('incentives_daily_expenses', { view: activeCurrencyTab })}
               />
             }
           >

@@ -171,11 +171,16 @@ const HistoricalExpensesByNetworks = (
               <>
                 <CSVDownloadButton
                   data={() => getSummarizedCsvData(aggregatedSeries)}
-                  filename={getCsvFileName('historical_expenses_by_networks', {
-                    view: activeCurrencyTab,
-                    mode: activeModeTab,
-                    timeFrame: barSize
-                  })}
+                  filename={
+                    getCsvFileName(
+                      'historical_expenses_by_networks',
+                      {
+                        view: activeCurrencyTab,
+                        mode: activeModeTab,
+                        timeFrame: barSize
+                      },
+                    )
+                  }
                 />
                 <ChartIconToggle
                   active={isSeriesHidden}
@@ -205,11 +210,16 @@ const HistoricalExpensesByNetworks = (
               tooltipContent={
                 'CSV with the entire historical data can be downloaded'
               }
-              filename={getCsvFileName('historical_expenses_by_networks', {
-                view: activeCurrencyTab,
-                mode: activeModeTab,
-                timeFrame: barSize
-              })}
+              filename={
+                getCsvFileName(
+                  'historical_expenses_by_networks',
+                  {
+                    view: activeCurrencyTab,
+                    mode: activeModeTab,
+                    timeFrame: barSize
+                  },
+                )
+              }
             />
           </ChartActions>
         </div>
@@ -265,11 +275,16 @@ const HistoricalExpensesByNetworks = (
               <>
                 <CSVDownloadButton
                   data={() => getSummarizedCsvData(aggregatedSeries)}
-                  filename={getCsvFileName('historical_expenses_by_networks', {
-                    view: activeCurrencyTab,
-                    mode: activeModeTab,
-                    timeFrame: barSize
-                  })}
+                  filename={
+                    getCsvFileName(
+                      'historical_expenses_by_networks',
+                      {
+                        view: activeCurrencyTab,
+                        mode: activeModeTab,
+                        timeFrame: barSize
+                      },
+                    )
+                  }
                 />
                 <ChartIconToggle
                   active={isSeriesHidden}
