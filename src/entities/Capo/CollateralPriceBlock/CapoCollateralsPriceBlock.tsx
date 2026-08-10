@@ -93,22 +93,20 @@ const CapoCollateralsPriceBlock = ({
       (v) => !selectedChainOptions.length || selectedChainOptionsSet.has(v.network),
       (v) => !selectedCollateralOptions.length || selectedCollateralOptionsSet.has(v.collateral),
     ],
-    transformer: () => {
-      const processed: CapoTableItem[] = [];
-
-      return (item: CapoTableItem) => {
-        processed.push({
-          ...item,
-          network: capitalizeFirstLetter(item.network),
-          priceBuffer: Number(item.priceRestriction) - Number(item.collateralPrice),
-        });
-
-        return processed;
-      };
-    },
+    reducer: {
+      accumulator: [] as CapoTableItem[],
+      reduce: (acc, item) => {
+        return [
+          ...acc,
+          {
+            ...item,
+            network: capitalizeFirstLetter(item.network),
+            priceBuffer: Number(item.priceRestriction) - Number(item.collateralPrice),
+          },
+        ];
+      }
+    }
   });
-
-  const processedData = result ?? [];
 
   const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
     useSorting<CapoTableItem>('desc', 'priceBuffer');
@@ -117,6 +115,18 @@ const CapoCollateralsPriceBlock = ({
 
   const isAnyFilterSelected = !!selectedChainOptions.length || !!selectedCollateralOptions.length;
 
+  const getCsvData = () => {
+    return result.map((o) => ({
+      'Network': o.network,
+      'Collateral': o.collateral,
+      'Price Restriction': o.priceRestriction,
+      'Collateral Price': o.collateralPrice,
+      'Price Buffer': o.priceBuffer,
+      'Price Feed': o.priceFeed,
+      'Oracle Name': o.oracleName,
+    }));
+  };
+  
   return (
     <Card
       isError={isError}
@@ -162,22 +172,22 @@ const CapoCollateralsPriceBlock = ({
         <ChartActions
           mobileChildren={
             <CSVDownloadButton
-              data={processedData}
+              data={getCsvData}
               filename='collaterals_price_against_price_restriction'
             />
           }
         >
           <CSVDownloadButton
-            data={processedData}
+            data={getCsvData}
             filename='collaterals_price_against_price_restriction'
           />
         </ChartActions>
       </div>
       {!isLoading && !isError && (
-        processedData.length ? (
+        result.length ? (
           <CollateralsPriceTable
             sortType={sortType}
-            tableData={processedData}
+            tableData={result}
           />
         ) : (
           <NoDataPlaceholder

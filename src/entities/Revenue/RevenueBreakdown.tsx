@@ -222,10 +222,9 @@ const RevenueBreakDownBlock = (props: RevenueProps) => {
       (v) => !selectedSymbolOptions.length || selectedSymbolOptionsSet.has(v.source.asset.symbol),
       (v) => !yearToDisplay || new Date(v.date * 1000).getFullYear().toString() === yearToDisplay,
     ],
-    transformer: () => {
-      const grouped: Record<string, FormattedRevenueData> = {};
-
-      return (item) => {
+    reducer: {
+      accumulator: {} as Record<string, FormattedRevenueData>,
+      reduce: (grouped, item) => {
         const marketValue = item.source.market || NOT_MARKET;
         const keyParts = [item.source.network];
 
@@ -256,8 +255,8 @@ const RevenueBreakDownBlock = (props: RevenueProps) => {
         const quarterKey = `q${quarter}_${yearToDisplay}`;
         (grouped[groupKey][quarterKey] as number) += item.value;
         return grouped;
-      };
-    },
+      }
+    }
   });
 
   const dynamicColumns = useMemo(() => {

@@ -18,7 +18,7 @@ import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange'
 import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
-import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
+import { convertSeriesToCsv } from '@/shared/lib/utils/convertSeriesToCsv';
 import { parseAsTimestampMs } from '@/shared/lib/utils/utils';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import { BAR_SIZE_OPTIONS } from '@/shared/types/types';
@@ -170,7 +170,7 @@ const HistoricalExpensesByNetworks = (
             mobileChildren={
               <>
                 <CSVDownloadButton
-                  data={() => getSummarizedCsvData(aggregatedSeries)}
+                  data={() => convertSeriesToCsv(aggregatedSeries)}
                   filename={
                     getCsvFileName(
                       'historical_expenses_by_networks',
@@ -206,7 +206,7 @@ const HistoricalExpensesByNetworks = (
             }
           >
             <CSVDownloadButton
-              data={() => getSummarizedCsvData(aggregatedSeries)}
+              data={() => convertSeriesToCsv(aggregatedSeries)}
               tooltipContent={
                 'CSV with the entire historical data can be downloaded'
               }
@@ -274,7 +274,7 @@ const HistoricalExpensesByNetworks = (
             mobileChildren={
               <>
                 <CSVDownloadButton
-                  data={() => getSummarizedCsvData(aggregatedSeries)}
+                  data={() => convertSeriesToCsv(aggregatedSeries)}
                   filename={
                     getCsvFileName(
                       'historical_expenses_by_networks',
