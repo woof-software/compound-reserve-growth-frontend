@@ -182,31 +182,39 @@ const TotalTreasuryValue = ({
       (v) => startDate === null || v.date * 1000 >= startDate,
       (v) => endDate === null || v.date * 1000 <= endDate,
     ],
-    transformer: () => {
-      const seriesMap: Record<string, Map<number, number>> = {};
+    reducer: () => ({
+      accumulator: new Map as Map<string, Map<number, number>>,
+      reduce: (acc, item) => {
+        const key = (() => {
+          switch (selectedGroupKey) {
+            case 'chain': return item.source.network;
+            case 'assetType': return item.source.asset.type;
+            case 'deployment': return item.source.market ?? NOT_MARKET;
+            default: return 'Treasury Value';
+          }
+        })();
 
-      return (v) => {
-        const key = {
-            chain: v.source.network,
-            assetType: v.source.asset.type,
-            deployment: v.source.market ?? NOT_MARKET,
-          }[selectedGroupKey] ?? 'Treasury Value';
+        const valuePerDate = acc.get(key) ?? (
+          (() => {
+            const empty = new Map<number, number>;
 
-        if (!seriesMap[key]) seriesMap[key] = new Map<number, number>();
+            acc.set(key, empty);
 
-        const dateKey = v.date * 1000;
-        const current = seriesMap[key].get(dateKey) ?? 0;
-        seriesMap[key].set(dateKey, current + v.value);
+            return empty;
+          })()
+        );
 
-        return seriesMap;
-      };
-    }
+        const dateKey = item.date * 1000;
+
+        valuePerDate.set(dateKey, valuePerDate.get(dateKey) ?? 0 + item.value);
+
+        return acc;
+      }
+    }),
   });
 
   const chartSeries: LineChartSeries[] = useMemo(() => {
-    if (!result) return [];
-
-    return Object.entries(result).map(([name, dateMap]) => ({
+    return [...result].map(([name, dateMap]) => ({
       name: capitalizeFirstLetter(name),
       data: Array.from(dateMap.entries())
         .map(([x, y]) => ({x, y}))
@@ -238,16 +246,24 @@ const TotalTreasuryValue = ({
   }));
 
   const areAllSeriesHidden = legends.every(({ isDisabled }) => isDisabled);
+  
+  const getCsvData = () => {
+    const finalMap = new Map<number, number>;
 
-  const csvData = filterForRange({
-    data: chartSeries[0]?.data ?? [],
-    getDate: (item) => new Date(item.x),
-    transform: (item) => ({
-      Date: new Date(item.x).toISOString().split('T')[0],
-      'Total treasury': item.y
-    }),
-    range: barSize
-  });
+    for (const { data: byDate = [] } of aggregatedSeries) {
+      for (const [ date, amount ] of byDate) {
+        const current = finalMap.get(date) ?? 0;
+
+        finalMap.set(date, current + amount);
+      }
+    }
+
+    return [...finalMap]
+      .map(([date, amount]) => ({
+        Date: new Date(date).toISOString().split('T')[0],
+        'Total treasury': amount,
+      }));
+  };
 
   return (
     <Card
@@ -332,7 +348,7 @@ const TotalTreasuryValue = ({
             mobileChildren={
               <>
                 <CSVDownloadButton
-                  data={csvData}
+                  data={getCsvData}
                   filename={getCsvFileName('total_treasury_value')}
                 />
                 <ChartIconToggle
@@ -381,7 +397,7 @@ const TotalTreasuryValue = ({
             }
           >
             <CSVDownloadButton
-              data={csvData}
+              data={getCsvData}
               filename={getCsvFileName('total_treasury_value')}
             />
           </ChartActions>

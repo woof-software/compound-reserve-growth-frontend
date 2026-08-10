@@ -94,19 +94,21 @@ const CompoundFeeRevenueByChain = ({ revenueData, isLoading, isError }: RevenueP
   const { result: periods } = useProcessor({
     array: revenueData,
     filters: [],
-    transformer: () => {
-      const buckets: Record<string, Record<string, Record<string, number>>> = {};
-      
-      return (item: ChartDataItem) => {
+    reducer: {
+      accumulator: {} as Record<string, Record<string, Record<string, number>>>,
+      reduce: (acc, item) => {
         const period = getPeriodLabel(item, interval);
         const chain = capitalizeFirstLetter(item.source.network);
         const column = getColumnLabel(item, interval);
-        buckets[period] ??= {};
-        buckets[period][chain] ??= {};
-        buckets[period][chain][column] = (buckets[period][chain][column] ?? 0) + item.value;
-        return buckets;
-      };
-  }});
+
+        acc[period] ??= {};
+        acc[period][chain] ??= {};
+        acc[period][chain][column] = (acc[period][chain][column] ?? 0) + item.value;
+
+        return acc;
+      },
+    },
+  });
 
   const periodsData = periods ?? {};
 

@@ -19,10 +19,9 @@ import { useOptions } from '@/shared/hooks/filters/useOptions';
 import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange';
 import { type StackedChartData, useCompoundChartBars } from '@/shared/hooks/useCompoundChartBars';
 import { useProcessor } from '@/shared/hooks/useProcessor';
-import { RevenueItem } from '@/shared/hooks/useRevenue';
 import { getEndOfDayTimestamp } from '@/shared/lib/date/dateUtils';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
-import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
+import { convertSeriesToCsv } from '@/shared/lib/utils/convertSeriesToCsv';
 import {
   capitalizeFirstLetter,
   filterAndSortMarkets,
@@ -245,42 +244,41 @@ const CompoundFeeRevenueRecieved = (props: RevenueProps) => {
       (v) => startDate === null || v.date * 1000 >= startDate,
       (v) => rangeEndMs === null || v.date * 1000 <= rangeEndMs,
     ],
-    transformer: () => {
-      const groupedByDate: Record<string, StackedChartData> = {};
+    reducer: {
+      accumulator: new Map as Map<string, StackedChartData>,
+      reduce: (acc, item) => {
+        const seriesKey = (() => {
+          switch (selectedGroupKey) {
+            case 'none': return 'Total';
+            case 'assetType': return item.source.asset.type;
+            case 'chain': return item.source.network;
+            default: return item.source.market ?? NOT_MARKET;
+          }
+        })();
 
-      return (item: RevenueItem) => {
-        const itemTime = item.date * 1000;
-        const date = new Date(itemTime).toISOString().split('T')[0];
+        const date = new Date(item.date * 1000).toISOString().split('T')[0];
 
-        let seriesKey: string;
+        const valuePerDate = acc.get(date) ?? (
+          (() => {
+            const empty = {
+              date: date,
+              [seriesKey]: 0,
+            } satisfies StackedChartData;
 
-        switch (selectedGroupKey) {
-          case 'none':
-            seriesKey = 'Total';
-            break;
-          case 'assetType':
-            seriesKey = item.source.asset.type;
-            break;
-          case 'chain':
-            seriesKey = item.source.network;
-            break;
-          default:
-            seriesKey = item.source.market ?? NOT_MARKET;
-            break;
-        }
+            acc.set(date, empty);
 
-        if (!groupedByDate[date]) groupedByDate[date] = { date };
-        groupedByDate[date][seriesKey] = (Number(groupedByDate[date][seriesKey]) || 0) + item.value;
+            return empty;
+          })()
+        );
 
-        return groupedByDate;
-      };
+        valuePerDate[seriesKey] = (Number(valuePerDate[seriesKey]) || 0) + item.value;
+
+        return acc;
+      }
     },
   });
 
-  const chartData = useMemo(() => {
-    if (!result) return [];
-    return Object.values(result).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [result]);
+  const chartData = useMemo(() => [...result.values()], [result]);
 
   const {
     chartRef,
@@ -301,8 +299,6 @@ const CompoundFeeRevenueRecieved = (props: RevenueProps) => {
 
   const hasAggregatedData = aggregatedSeries.some(({ data }) => data?.length);
 
-  const csvData = getSummarizedCsvData(aggregatedSeries);
-
   const hasData = chartData.length > 0;
 
   const noDataMessage = isAnyFiltersSelected ? 'No data for selected filters' : 'No data available';
@@ -311,7 +307,10 @@ const CompoundFeeRevenueRecieved = (props: RevenueProps) => {
     <ChartActions
       mobileChildren={
         <>
-          <CSVDownloadButton data={csvData} filename={getCsvFileName('compound-fee-revenue-received')} />
+          <CSVDownloadButton
+            data={() => convertSeriesToCsv(aggregatedSeries)}
+            filename={getCsvFileName('compound-fee-revenue-received')}
+          />
           {seriesData.length > 1 ? (
             <ChartIconToggle
               active={areAllSeriesHidden}
@@ -333,7 +332,10 @@ const CompoundFeeRevenueRecieved = (props: RevenueProps) => {
         </>
       }
     >
-      <CSVDownloadButton data={csvData} filename={getCsvFileName('compound-fee-revenue-received')} />
+      <CSVDownloadButton
+        data={() => convertSeriesToCsv(aggregatedSeries)}
+        filename={getCsvFileName('compound-fee-revenue-received')}
+      />
     </ChartActions>
   );
 

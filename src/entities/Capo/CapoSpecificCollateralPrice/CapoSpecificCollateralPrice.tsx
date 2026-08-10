@@ -1,4 +1,3 @@
-import { useProcessor } from '@/shared/hooks/useProcessor';
 import { useEffect, useMemo } from 'react';
 import { useQueryState } from 'nuqs';
 
@@ -8,11 +7,12 @@ import { DropdownFilterSingle } from '@/components/Filter/DropdownFilter/Dropdow
 import { Filters } from '@/components/Filter/Filters';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import { customFormatter, customOptions } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/chartConfig';
-import { getCsvData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/getCsvData';
 import { useCollateralChartData } from '@/entities/Capo/CapoSpecificCollateralPrice/lib/useCollateralChartData';
 import { CapoEventBusEventsContext } from '@/entities/Capo/lib/CapoEventBusContext';
 import { useBarSize } from '@/shared/hooks/useBarSize';
 import { useLineChart } from '@/shared/hooks/useLineChart';
+import { useProcessor } from '@/shared/hooks/useProcessor';
+import { filterForRange } from '@/shared/lib/utils/chart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import { capitalizeFirstLetter } from '@/shared/lib/utils/utils';
 import { CapoNormalizedChartData } from '@/shared/types/Capo/types';
@@ -86,13 +86,11 @@ export const CapoSpecificCollateralPrice = ({
       (v) => v.network === selectedChainKey,
       (v) => v.collateral === selectedCollateralKey,
     ],
-    transformer: () => {
-      const filtered: CapoNormalizedChartData[] = [];
-
-      return (v: CapoNormalizedChartData) => {
-        filtered.push(v);
-        return filtered;
-      };
+    reducer: {
+      accumulator: [] as CapoNormalizedChartData[],
+      reduce: (acc, v) => {
+        return [...acc, v];
+      },
     },
   });
 
@@ -101,6 +99,20 @@ export const CapoSpecificCollateralPrice = ({
   const { chartSeries, hasData } = useCollateralChartData({ rawData: filteredData });
 
   const { aggregatedSeries } = useLineChart({ groupBy, data: chartSeries, barSize });
+  
+  const getCsvData = () => {
+    return filterForRange({
+      data: filteredData,
+      getDate: (item) => new Date(item.dateOfAggregation * 1000),
+      transform: (item) => ({
+        //TODO: replace date rendering with something better
+        Date: new Date(item.dateOfAggregation * 1000).toISOString().split('T')[0],
+        'Collateral Price': item.price,
+        'Collateral price limitation': item.capValue,
+      }),
+      range: barSize,
+    });
+  };
 
   return (
     <Card
@@ -149,13 +161,13 @@ export const CapoSpecificCollateralPrice = ({
         <ChartActions
           mobileChildren={
             <CSVDownloadButton
-              data={getCsvData(chartSeries, barSize)}
+              data={getCsvData}
               filename={getCsvFileName('capo_specific_collateral_price')}
             />
           }
         >
           <CSVDownloadButton
-            data={getCsvData(chartSeries, barSize)}
+            data={getCsvData}
             filename={getCsvFileName('capo_specific_collateral_price')}
           />
         </ChartActions>

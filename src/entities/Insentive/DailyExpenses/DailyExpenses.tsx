@@ -6,7 +6,6 @@ import { DropdownFilter } from '@/components/Filter/DropdownFilter/DropdownFilte
 import { Filters } from '@/components/Filter/Filters';
 import NoDataPlaceholder from '@/components/NoDataPlaceholder/NoDataPlaceholder';
 import DailyExpensesTable from '@/entities/Insentive/DailyExpenses/DailyExpensesTable';
-import { getCsvData } from '@/entities/Insentive/DailyExpenses/lib/getCsvData';
 import { normalizeTableData } from '@/entities/Insentive/DailyExpenses/lib/normalizeTableData';
 import { NormalizedTableData } from '@/entities/Insentive/DailyExpenses/lib/types';
 import { NOT_MARKET } from '@/shared/consts/consts';
@@ -131,8 +130,6 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
   const normalizedTableData = normalizeTableData(filteredData, activeCurrencyTab);
   
   const { sortDirection, sortKey, onKeySelect, onTypeSelect } = useSorting<NormalizedTableData>('desc', 'total');
-  
-  const csvData = getCsvData(normalizedTableData);
 
   const sortType: SortAdapter<NormalizedTableData> = {
     type: sortDirection,
@@ -198,18 +195,32 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
         <ChartActions
           mobileChildren={
             <CSVDownloadButton
-              data={csvData}
-              filename={getCsvFileName('incentives_daily_expenses', {
-                view: activeCurrencyTab
-              })}
+              data={() => (
+                normalizedTableData.map((item) => ({
+                  network: item.network,
+                  market: item.market,
+                  lendIncentive: item.lendIncentive,
+                  borrowIncentive: item.borrowIncentive,
+                  total: item.total,
+                  source: item.source.address
+                }))
+              )}
+              filename={getCsvFileName('incentives_daily_expenses', { view: activeCurrencyTab })}
             />
           }
         >
           <CSVDownloadButton
-            data={csvData}
-            filename={getCsvFileName('incentives_daily_expenses', {
-              view: activeCurrencyTab
-            })}
+            data={() => (
+              normalizedTableData.map((item) => ({
+                network: item.network,
+                market: item.market,
+                lendIncentive: item.lendIncentive,
+                borrowIncentive: item.borrowIncentive,
+                total: item.total,
+                source: item.source.address
+              }))
+            )}
+            filename={getCsvFileName('incentives_daily_expenses', { view: activeCurrencyTab })}
           />
         </ChartActions>
       </div>
@@ -266,10 +277,17 @@ const DailyExpenses = ({ isLoading, isError, data }: DailyExpensesProps) => {
           <ChartActions
             mobileChildren={
               <CSVDownloadButton
-                data={csvData}
-                filename={getCsvFileName('incentives_daily_expenses', {
-                  view: activeCurrencyTab
-                })}
+                data={() => (
+                  normalizedTableData.map((item) => ({
+                    network: item.network,
+                    market: item.market,
+                    lendIncentive: item.lendIncentive,
+                    borrowIncentive: item.borrowIncentive,
+                    total: item.total,
+                    source: item.source.address
+                  }))
+                )}
+                filename={getCsvFileName('incentives_daily_expenses', { view: activeCurrencyTab })}
               />
             }
           >

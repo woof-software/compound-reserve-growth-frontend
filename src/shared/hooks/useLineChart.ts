@@ -29,7 +29,7 @@ const useLineChart = ({
   barSize,
   isAggregate = false
 }: LineChartProps) => {
-  const aggregatedSeries = useMemo<Highcharts.SeriesAreaOptions[]>(() => {
+  const aggregatedSeries = useMemo(() => {
     const allSeriesNames = data.map((series) => series.name);
 
     return data.map((series) => {
@@ -56,7 +56,7 @@ const useLineChart = ({
       return {
         data: seriesData,
         id: series.name,
-        type: 'area',
+        type: 'area' as const,
         name: capitalizeFirstLetter(series.name),
         color: getStableColorForSeries(series.name, allSeriesNames)
       };

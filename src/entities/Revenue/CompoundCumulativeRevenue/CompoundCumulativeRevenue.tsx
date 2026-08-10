@@ -20,9 +20,8 @@ import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange'
 import { useEventsApi } from '@/shared/hooks/useEventsApi';
 import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
-import { useProcessor } from '@/shared/hooks/useProcessor';
+import { useProcessor} from '@/shared/hooks/useProcessor';
 import { getEndOfDayTimestamp } from '@/shared/lib/date/dateUtils';
-import { filterForRange } from '@/shared/lib/utils/chart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
 import {
   capitalizeFirstLetter,
@@ -70,7 +69,7 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
     startDate,
     endDate,
   });
-
+  
   const rawData = useMemo(() => [...revenueData].sort((a, b) => a.date - b.date), [revenueData]);
 
   const chainOptions = useMemo(
@@ -218,32 +217,40 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
       (v) => startDate === null || v.date * 1000 >= startDate,
       (v) => rangeEndMs === null || v.date * 1000 <= rangeEndMs,
     ],
-    transformer: () => {
-      const seriesMap: Record<string, Map<number, number>> = {};
+    reducer: {
+      accumulator: new Map as Map<string, Map<number, number>>,
+      reduce: (acc, item) => {
+        const key = (() => {
+          switch (chartGroupBy) {
+            case 'none': return 'Daily Revenue';
+            case 'market': return item.source.market ?? NOT_MARKET;
+            case 'network': return item.source.network;
+          }
+        })();
 
-      return (v) => {
-        const key =
-          chartGroupBy === 'none'
-            ? 'Daily Revenue'
-            : chartGroupBy === 'market'
-              ? (v.source.market ?? NOT_MARKET)
-              : v.source.network;
+        const valuePerDate = acc.get(key) ?? (
+          (() => {
+            const empty = new Map<number, number>;
 
-        if (!seriesMap[key]) seriesMap[key] = new Map<number, number>();
+            acc.set(key, empty);
 
-        const dateKey = v.date * 1000;
-        const current = seriesMap[key].get(dateKey) ?? 0;
-        seriesMap[key].set(dateKey, current + v.value);
+            return empty;
+          })()
+        );
 
-        return seriesMap;
-      };
+        const dateKey = item.date * 1000;
+
+        const currentValue = valuePerDate.get(dateKey) ?? 0;
+
+        valuePerDate.set(dateKey, currentValue + item.value);
+
+        return acc;
+      }
     },
   });
 
   const dailyChartSeries: LineChartSeries[] = useMemo(() => {
-    if (!result) return [];
-
-    return Object.entries(result).map(([name, dateMap]) => ({
+    return [...result].map(([name, dateMap]) => ({
       name: capitalizeFirstLetter(name),
       data: Array.from(dateMap.entries())
         .map(([x, y]) => ({ x, y }))
@@ -255,16 +262,6 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
     () => lineChartSeriesToUtcDayCumulative(dailyChartSeries),
     [dailyChartSeries]
   );
-
-  const csvData = filterForRange({
-    data: cumulativeChartSeries[0]?.data ?? [],
-    getDate: (item) => new Date(item.x),
-    transform: (item) => ({
-      Date: new Date(item.x).toISOString().split('T')[0],
-      'Cumulative revenue': item.y,
-    }),
-    range: barSize,
-  });
 
   const { isLegendEnabled, aggregatedSeries } = useLineChart({
     data: cumulativeChartSeries,
@@ -298,6 +295,24 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
   const getGroupByForChart = () => {
     if (chartGroupBy === 'none') return 'none';
     return chartGroupBy === 'market' ? 'Market' : 'Chain';
+  };
+
+  const getCsvData = () => {
+    const finalMap = new Map<number, number>;
+
+    for (const { data: byDate = [] } of aggregatedSeries) {
+      for (const [ date, amount ] of byDate) {
+        const current = finalMap.get(date) ?? 0;
+
+        finalMap.set(date, current + amount);
+      }
+    }
+
+    return [...finalMap]
+      .map(([date, amount]) => ({
+        Date: new Date(date).toISOString().split('T')[0],
+        'Cumulative revenue': amount,
+      }));
   };
 
   return (
@@ -372,7 +387,10 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
           <ChartActions
             mobileChildren={
               <>
-                <CSVDownloadButton data={csvData} filename={getCsvFileName('compound_cumulative_revenue')} />
+                <CSVDownloadButton
+                  data={getCsvData}
+                  filename={getCsvFileName('compound_cumulative_revenue')}
+                />
                 {isLegendEnabled && aggregatedSeries.length > 1 ? (
                   <ChartIconToggle
                     active={isSeriesHidden}
@@ -412,7 +430,10 @@ const CompoundCumulativeRevenue = ({ revenueData, isLoading, isError }: RevenueP
               </>
             }
           >
-            <CSVDownloadButton data={csvData} filename={getCsvFileName('compound_cumulative_revenue')} />
+            <CSVDownloadButton
+              data={getCsvData}
+              filename={getCsvFileName('compound_cumulative_revenue')}
+            />
           </ChartActions>
         </div>
       </div>

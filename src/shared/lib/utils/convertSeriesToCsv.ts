@@ -1,6 +1,7 @@
+import { capitalizeFirstLetter } from "@/shared/lib/utils/utils";
 import { SeriesAreaOptions, SeriesColumnOptions } from 'highcharts';
 
-export function getSummarizedCsvData(
+export function convertSeriesToCsv(
   aggregatedSeries: Array<SeriesAreaOptions | SeriesColumnOptions>
 ): Record<string, string>[] {
   const dateMap = new Map<string, Record<string, string>>();
@@ -25,7 +26,7 @@ export function getSummarizedCsvData(
 
       const entry = dateMap.get(date)!;
 
-      entry[chain] = `${value}`;
+      entry[capitalizeFirstLetter(chain)] = `${value}`;
     });
   });
 

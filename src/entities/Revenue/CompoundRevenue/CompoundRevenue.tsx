@@ -14,8 +14,8 @@ import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange'
 import { type StackedChartData, useCompoundChartBars } from '@/shared/hooks/useCompoundChartBars';
 import { useProcessor } from '@/shared/hooks/useProcessor';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
-import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
-import { capitalizeFirstLetter, ChartDataItem, parseAsTimestampMs, parseStingsArray } from '@/shared/lib/utils/utils';
+import { convertSeriesToCsv } from '@/shared/lib/utils/convertSeriesToCsv';
+import { capitalizeFirstLetter, parseAsTimestampMs, parseStingsArray } from '@/shared/lib/utils/utils';
 import Card from '@/shared/ui/Card/Card';
 import CSVDownloadButton from '@/shared/ui/CSVDownloadButton/CSVDownloadButton';
 import TabsGroup from '@/shared/ui/TabsGroup/TabsGroup';
@@ -135,15 +135,16 @@ const CompoundRevenueBlock = (props: RevenueProps) => {
       (v) => startDate === null || v.date * 1000 >= startDate,
       (v) => endDate === null || v.date * 1000 <= endDate,
     ],
-    transformer: () => {
-      const dailyTotals = new Map<number, number>();
-
-      return (v: ChartDataItem) => {
-        const dateKey = v.date * 1000;
-        dailyTotals.set(dateKey, (dailyTotals.get(dateKey) ?? 0) + v.value);
-        return dailyTotals;
-      };
-    },
+    reducer: () => ({
+      accumulator: new Map<number, number>,
+      reduce: (acc, item) => {
+        const dateKey = item.date * 1000;
+        
+        acc.set(dateKey, (acc.get(dateKey) ?? 0) + item.value);
+        
+        return acc;
+      }
+    }),
   });
 
   const stackedChartData = useMemo(() => {
@@ -250,13 +251,13 @@ const CompoundRevenueBlock = (props: RevenueProps) => {
         <ChartActions
           mobileChildren={
           <CSVDownloadButton
-            data={getSummarizedCsvData(aggregatedSeries)}
+            data={() => convertSeriesToCsv(aggregatedSeries)}
             filename={getCsvFileName('compound_revenue')}
           />
         }
         >
           <CSVDownloadButton
-            data={getSummarizedCsvData(aggregatedSeries)}
+            data={() => convertSeriesToCsv(aggregatedSeries)}
             filename={getCsvFileName('compound_revenue')}
           />
         </ChartActions>

@@ -1,5 +1,4 @@
-import React, { useMemo } from 'react';
-import { CSVLink } from 'react-csv';
+import { useMemo } from 'react';
 
 import FullDAOCommitments, {
   FullDAOCommitmentRow
@@ -254,24 +253,10 @@ const FullDAOCommitmentsBlock = () => {
         </Text>
         <div className='flex flex-col gap-1.5'>
           <div className='px-3 py-2'>
-            <CSVLink
+            <CSVDownloadButton
               data={processedData}
               filename='Full DAO Commitments'
-              onClick={onMoreClose}
-            >
-              <div className='flex items-center gap-1.5'>
-                <Icon
-                  name='download'
-                  className='h-[26px] w-[26px]'
-                />
-                <Text
-                  size='14'
-                  weight='500'
-                >
-                  CSV with the entire historical data
-                </Text>
-              </div>
-            </CSVLink>
+            />
           </div>
         </div>
       </Drawer>

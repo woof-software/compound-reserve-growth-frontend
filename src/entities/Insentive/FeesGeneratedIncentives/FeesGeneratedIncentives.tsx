@@ -17,7 +17,7 @@ import { useOptions } from '@/shared/hooks/filters/useOptions';
 import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
-import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
+import { convertSeriesToCsv } from '@/shared/lib/utils/convertSeriesToCsv';
 import { capitalizeFirstLetter, parseAsTimestampMs, parseStingsArray } from '@/shared/lib/utils/utils';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import { BAR_SIZE_OPTIONS } from '@/shared/types/types';
@@ -139,7 +139,6 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
     [aggregatedSeries]
   );
 
-  const csvData = getSummarizedCsvData(aggregatedSeries);
 
   return (
     <Card
@@ -207,14 +206,14 @@ const FeesGeneratedIncentives = (props: FeesGeneratedIncentivesProps) => {
           <ChartActions
             mobileChildren={
               <CSVDownloadButton
-                data={csvData}
+                data={() => convertSeriesToCsv(aggregatedSeries)}
                 filename={getCsvFileName('fees_generated_vs_incentives')}
                 tooltipContent='CSV with the entire historical data can be downloaded'
               />
             }
           >
             <CSVDownloadButton
-              data={csvData}
+              data={() => convertSeriesToCsv(aggregatedSeries)}
               filename={getCsvFileName('fees_generated_vs_incentives')}
               tooltipContent='CSV with the entire historical data can be downloaded'
             />

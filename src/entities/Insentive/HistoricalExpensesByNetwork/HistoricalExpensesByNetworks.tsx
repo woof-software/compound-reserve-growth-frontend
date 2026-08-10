@@ -18,7 +18,7 @@ import { useBarSizeWithDateRange } from '@/shared/hooks/useBarSizeWithDateRange'
 import { useLegends } from '@/shared/hooks/useLegends';
 import { useLineChart } from '@/shared/hooks/useLineChart';
 import { getCsvFileName } from '@/shared/lib/utils/getCsvFileName';
-import { getSummarizedCsvData } from '@/shared/lib/utils/getSummarizedCsvData';
+import { convertSeriesToCsv } from '@/shared/lib/utils/convertSeriesToCsv';
 import { parseAsTimestampMs } from '@/shared/lib/utils/utils';
 import { CombinedIncentivesData } from '@/shared/types/Incentive/types';
 import { BAR_SIZE_OPTIONS } from '@/shared/types/types';
@@ -100,7 +100,6 @@ const HistoricalExpensesByNetworks = (
 
   const isSeriesHidden = legends.every((l) => l.isDisabled);
 
-  const csvData = getSummarizedCsvData(aggregatedSeries);
 
   const onEyeClick = () => {
     if (isSeriesHidden) {
@@ -171,12 +170,17 @@ const HistoricalExpensesByNetworks = (
             mobileChildren={
               <>
                 <CSVDownloadButton
-                  data={csvData}
-                  filename={getCsvFileName('historical_expenses_by_networks', {
-                    view: activeCurrencyTab,
-                    mode: activeModeTab,
-                    timeFrame: barSize
-                  })}
+                  data={() => convertSeriesToCsv(aggregatedSeries)}
+                  filename={
+                    getCsvFileName(
+                      'historical_expenses_by_networks',
+                      {
+                        view: activeCurrencyTab,
+                        mode: activeModeTab,
+                        timeFrame: barSize
+                      },
+                    )
+                  }
                 />
                 <ChartIconToggle
                   active={isSeriesHidden}
@@ -202,15 +206,20 @@ const HistoricalExpensesByNetworks = (
             }
           >
             <CSVDownloadButton
-              data={csvData}
+              data={() => convertSeriesToCsv(aggregatedSeries)}
               tooltipContent={
                 'CSV with the entire historical data can be downloaded'
               }
-              filename={getCsvFileName('historical_expenses_by_networks', {
-                view: activeCurrencyTab,
-                mode: activeModeTab,
-                timeFrame: barSize
-              })}
+              filename={
+                getCsvFileName(
+                  'historical_expenses_by_networks',
+                  {
+                    view: activeCurrencyTab,
+                    mode: activeModeTab,
+                    timeFrame: barSize
+                  },
+                )
+              }
             />
           </ChartActions>
         </div>
@@ -265,12 +274,17 @@ const HistoricalExpensesByNetworks = (
             mobileChildren={
               <>
                 <CSVDownloadButton
-                  data={csvData}
-                  filename={getCsvFileName('historical_expenses_by_networks', {
-                    view: activeCurrencyTab,
-                    mode: activeModeTab,
-                    timeFrame: barSize
-                  })}
+                  data={() => convertSeriesToCsv(aggregatedSeries)}
+                  filename={
+                    getCsvFileName(
+                      'historical_expenses_by_networks',
+                      {
+                        view: activeCurrencyTab,
+                        mode: activeModeTab,
+                        timeFrame: barSize
+                      },
+                    )
+                  }
                 />
                 <ChartIconToggle
                   active={isSeriesHidden}

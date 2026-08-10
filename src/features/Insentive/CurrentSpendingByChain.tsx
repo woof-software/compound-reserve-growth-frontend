@@ -10,7 +10,6 @@ import CurrentSpendingByChainTable, {
 } from '@/entities/Insentive/CurrentSpendingByChainTable/CurrentSpendingByChainTable';
 import { customChartOptions } from '@/features/Insentive/lib/customChartOptions';
 import { getChartData } from '@/features/Insentive/lib/getChartData';
-import { getCsvData } from '@/features/Insentive/lib/getCsvData';
 import { tableDataNormalizer } from '@/features/Insentive/lib/tableDataNormalizer';
 import { useOptions } from '@/shared/hooks/filters/useOptions';
 import { useModal } from '@/shared/hooks/useModal';
@@ -93,7 +92,6 @@ const CurrentSpendingByChainBlock = (props: CurrentSpendingByChainProps) => {
 
   const chartData = getChartData(filteredData, activeTab);
   const tableData = tableDataNormalizer(filteredData, activeTab);
-  const csvData = getCsvData(tableData);
 
   const { sortDirection, sortKey, onKeySelect, onTypeSelect } =
     useSorting<SpendingByChainTableColumns>('desc', 'valueUsd');
@@ -165,13 +163,25 @@ const CurrentSpendingByChainBlock = (props: CurrentSpendingByChainProps) => {
           <ChartActions
             mobileChildren={
               <CSVDownloadButton
-                data={csvData}
+                data={() => (
+                  tableData.map((item) => ({
+                    network: item.network,
+                    valueComp: item.valueComp,
+                    valueUsd: item.valueUsd
+                  }))
+                )}
                 filename={getCsvFileName('Incentive_Current_Spending_By_Chain')}
               />
             }
           >
             <CSVDownloadButton
-              data={csvData}
+              data={() => (
+                tableData.map((item) => ({
+                  network: item.network,
+                  valueComp: item.valueComp,
+                  valueUsd: item.valueUsd
+                }))
+              )}
               filename={getCsvFileName('Incentive_Current_Spending_By_Chain')}
             />
           </ChartActions>
