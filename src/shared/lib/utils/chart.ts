@@ -24,17 +24,28 @@ export type FilterForRangeArgs<T, R> = {
  * @param args.getDate - A function that extracts the date from each data item.
  * @param args.transform - A transformation function to apply to each filtered item.
  *
- * @return An array of transformed and filtered items according to the range and transformation logic.
+ * @return An array sorted in ascending order by date, contains transformed and filtered items 
+ * according to the range and transformation logic.
  */
 export function filterForRange<T, R>(args: FilterForRangeArgs<T, R>): R[] {
   const { data, range, getDate, transform } = args;
+  
+  // Must be sorted as ASK by date to follow final condition
+  const _data = data.toSorted((a, b) => {
+    const dateA = getDate(a);
+    const dateB = getDate(b);
+    
+    if (dateA === dateB) return 0;
+    
+    return dateA < dateB ? -1 : 1;
+  });
 
   const result: R[] = [];
 
   let latestPoint: T | null = null;
   let lastValidPoint: T | null = null;
 
-  for (const item of data) {
+  for (const item of _data) {
     let _item: T | null = null;
 
     const date = getDate(item);
