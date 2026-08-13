@@ -31,7 +31,7 @@ export type RunawayInitiativeRecord = {
   value: number;
 };
 
-export const currentInitiativesColumns: SortAccessor<RunawayInitiativeRecord>[] =
+const currentInitiativesColumns: SortAccessor<RunawayInitiativeRecord>[] =
   [
     {
       accessorKey: 'initiative',

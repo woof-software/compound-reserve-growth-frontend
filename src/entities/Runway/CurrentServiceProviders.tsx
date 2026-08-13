@@ -32,7 +32,7 @@ export type RunawayServiceProviderRecord = {
   value: number;
 };
 
-export const currentServiceProvidersColumns: SortAccessor<RunawayServiceProviderRecord>[] =
+const currentServiceProvidersColumns: SortAccessor<RunawayServiceProviderRecord>[] =
   [
     {
       accessorKey: 'provider',

@@ -7,8 +7,3 @@ export const createApiResponseSchema = <T extends z.ZodTypeAny>(
     data: dataSchema,
     statusCode: z.number()
   });
-
-export const baseApiResponseSchema = z.object({
-  data: z.unknown(),
-  statusCode: z.number()
-});

@@ -1,9 +1,9 @@
 /** Date utilities that operate in UTC to avoid timezone shifts. */
 import { BAR_SIZE } from '@/shared/types/types';
 
-export const DAY_IN_MS = 24 * 60 * 60 * 1000;
-export const MIN_YEAR = 1970;
-export const MAX_YEAR = 2100;
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+const MIN_YEAR = 1970;
+const MAX_YEAR = 2100;
 
 const INPUT_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 

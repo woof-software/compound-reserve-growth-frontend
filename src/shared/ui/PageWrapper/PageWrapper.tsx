@@ -2,7 +2,7 @@ import { FC, HTMLAttributes, ReactNode } from 'react';
 
 import { cn } from '@/shared/lib/classNames/classNames';
 
-export interface PageWrapperProps extends HTMLAttributes<HTMLDivElement> {
+interface PageWrapperProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
   maxWidth?: number;
 }
